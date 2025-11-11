@@ -1,0 +1,72 @@
+services:
+  # ====== Database Service(PostgreSQL) ====== #
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./env/.env.dev
+  
+  # ===== Cache & Message Broker Service (Redis) ===== #
+  redis:
+    image: redis:6-alpine
+
+  # ===== Admin Backend API Service ===== #
+  admin_site:
+    build:
+      context: ./services/admin_site
+      dockerfile: dockerfiles/dev/Dockerfile
+    command: >
+      sh -c "pip install -e /usr/src/shared_libs/core/ &&
+             python manage.py runserver 0.0.0.0:8010"
+    volumes:
+      - ./services/admin_site/:/usr/src/app/
+      - ./shared_libs/core/:/usr/src/shared_libs/core/
+    ports:
+      - "8010:8010"
+    env_file:
+      - ./env/.env.dev
+    depends_on:
+      - db
+      - redis
+
+  # ===== Customer Backend API Service ===== #
+  customer_site:
+    build:
+      context: ./services/customer_site
+      dockerfile: dockerfiles/dev/Dockerfile
+    command: >
+      sh -c "pip install -e /usr/src/shared_libs/core/ &&
+             python manage.py runserver 0.0.0.0:9010"
+    volumes:
+      - ./services/customer_site/:/usr/src/app/
+      - ./shared_libs/core/:/usr/src/shared_libs/core/
+    ports:
+      - "9010:9010"
+    env_file:
+      - ./env/.env.dev
+    depends_on:
+      - db
+      - redis
+
+  # ===== Celery Service ===== #
+  celery_worker:
+    build:
+      context: ./services/admin_site
+      dockerfile: dockerfiles/dev/Dockerfile
+    command: >
+      sh -c "pip install -e /usr/src/shared_libs/core/ &&
+             celery -A admin_site worker -l info"
+    volumes:
+      - ./services/admin_site/:/usr/src/app/
+      - ./shared_libs/core/:/usr/src/shared_libs/core/
+    env_file:
+      - ./env/.env.dev
+    depends_on:
+      - redis
+      - db
+
+volumes:
+  postgres_data:

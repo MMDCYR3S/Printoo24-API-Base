@@ -1,0 +1,29 @@
+
+# Django & DRF
+Django
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+django-environ
+django-extensions
+django-filter
+markdown
+
+# Database & Cache
+psycopg2-binary
+redis
+django-redis
+
+# Celery
+celery
+django-celery-beat
+django-celery-results  # Use this for storing results
+
+# Workflow Management
+django-fsm
+
+# API Documentation
+drf-spectacular
+
+# Production Server
+gunicorn
