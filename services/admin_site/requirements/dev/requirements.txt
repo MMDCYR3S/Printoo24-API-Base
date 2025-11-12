@@ -1,5 +1,8 @@
 
 # Django & DRF
+python-slugify
+django-mptt
+Pillow
 Django
 djangorestframework
 djangorestframework-simplejwt
