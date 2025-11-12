@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import Permission
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin 
 from django.utils.translation import gettext_lazy as _
 
@@ -67,6 +68,94 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return f"{self.username}"
+    
+    class Meta:
+        verbose_name = _('کاربر')
+        verbose_name_plural = _('کاربران')
+
+# ========= Role Model ========= #
+class Role(models.Model):
+    """ مدلاسیون نقش کاربر """
+    name = models.CharField(_('نام'), max_length=150)
+    description = models.TextField(_('توضیحات'), blank=True, null=True)
+    permission = models.ManyToManyField(Permission, verbose_name=_('مجوز ها'), related_name='roles')
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('نقش')
+        verbose_name_plural = _('نقش ها')
+
+    def __str__(self):
+        return self.name
+
+
+# ======== User Role Model ======== #
+class UserRole(models.Model):
+    """User Role Model"""
+    user = models.ForeignKey(User, related_name='user_role', on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, related_name='role_user', on_delete=models.CASCADE)
+        
+    created_at = models.DateTimeField(_('تاریخ عضویت'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('نقش کاربر')
+        verbose_name_plural = _('نقش های کاربر')
+        
+    def __str__(self):
+        return f"{self.user.username} - {self.role.name}"
+
+# ====== Wallet Model ====== #
+class Wallet(models.Model):
+    """ مدل کیف پول """
+    user = models.OneToOneField("core.User", verbose_name=_("کاربر"), on_delete=models.CASCADE)
+    decimal = models.DecimalField(_("مقدار"), max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+    
+    def __str__(self):
+        return self.user.username
+    
+# ====== Wallet Transaction Model ====== #
+class WalletTransaction(models.Model):
+    """
+    مدل تراکنش های کیف پول
+    """
+    TRANSACTION_TYPE = [
+        ("1", _("افزایش")),
+        ("2", _("کاهش")),
+        ("3", _("تایید")),
+        ("4", _("رد")),
+        ("5", _("برگشت")),
+        ("6", _("پرداخت")),
+        ("7", _("دریافت")),
+        ("8", _("تایید پرداخت")),
+        ("9", _("رد پرداخت")),
+    ]
+    
+    user = models.ForeignKey("core.User", related_name="wallet_transactions", on_delete=models.CASCADE)
+    type = models.CharField(_("نوع"), max_length=150, choices=TRANSACTION_TYPE)
+    amount = models.DecimalField(_("مقدار"), max_digits=12, decimal_places=2, default=0)
+    amount_after = models.DecimalField(_("مقدار بعد از عملیات"), max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+
+# ========= Customer Profile Model ========= #
+class CustomerProfile(models.Model):
+    """ مدل مربوط به پروفایل مشتری """
+    user = models.OneToOneField("core.User", related_name='customer_profile', on_delete=models.CASCADE)
+    first_name = models.CharField(_('نام'), max_length=150)
+    last_name = models.CharField(_('نام خانوادگی'), max_length=150)
+    address = models.TextField(_('آدرس'), blank=True, null=True)
+    phone_number = models.CharField(_('شماره تماس'), max_length=150)
+    company = models.CharField(_('نام شرکت'), max_length=150, blank=True, null=True)
+    bio = models.TextField(_('بیوگرافی'), blank=True, null=True)
+    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+    
+    def __str__(self):
+        return self.first_name + " " + self.last_name
     
     class Meta:
         verbose_name = _('کاربر')
