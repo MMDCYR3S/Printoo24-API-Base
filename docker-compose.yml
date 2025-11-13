@@ -52,7 +52,7 @@ services:
       - redis
 
   # ===== Celery Service ===== #
-  celery_worker:
+  celery_worker_admin:
     build:
       context: ./services/admin_site
       dockerfile: dockerfiles/dev/Dockerfile
@@ -61,6 +61,23 @@ services:
              celery -A admin_site worker -l info"
     volumes:
       - ./services/admin_site/:/usr/src/app/
+      - ./shared_libs/core/:/usr/src/shared_libs/core/
+    env_file:
+      - ./env/.env.dev
+    depends_on:
+      - redis
+      - db
+
+      # ===== Celery Service ===== #
+  celery_worker_customer:
+    build:
+      context: ./services/customer_site
+      dockerfile: dockerfiles/dev/Dockerfile
+    command: >
+      sh -c "pip install -e /usr/src/shared_libs/core/ &&
+             celery -A customer_site.celery worker -l info"
+    volumes:
+      - ./services/customer_site/:/usr/src/app/
       - ./shared_libs/core/:/usr/src/shared_libs/core/
     env_file:
       - ./env/.env.dev

@@ -21,3 +21,8 @@ class UserRepository(IRepository[User]):
             return self.model.objects.get(email=email)
         except self.model.DoesNotExist:
             return None
+        
+    def save(self, user: User) -> User:
+        """ ذخیره کاربر """
+        user.save()
+        return user

@@ -19,6 +19,7 @@ django-redis
 
 # Celery
 celery
+django-celery
 django-celery-beat
 django-celery-results  # Use this for storing results
 

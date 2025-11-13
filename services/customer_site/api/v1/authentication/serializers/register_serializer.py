@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.validators import ValidationError
+from rest_framework.serializers import ValidationError
 
 from django.contrib.auth import get_user_model
 
@@ -16,7 +16,7 @@ class RegisterSerializer(serializers.Serializer):
     
     def validate_username(self, value):
         """ اعتبارسنجی نام کاربری """
-        if value < 3:
+        if len(value) < 3:
             raise ValidationError("نام کاربری باید بیشتر از 3 کاراکتر باشد")
         if User.objects.filter(username=value).exists():
             raise ValidationError("این نام کاربری قبلا استفاده شده است.")
@@ -28,9 +28,9 @@ class RegisterSerializer(serializers.Serializer):
             raise ValidationError("این ایمیل قبلا استفاده شده است.")
         return value.lower()
     
-    def validate_password(self, data):
+    def validate(self, data):
         """ اعتبارسنجی رمز عبور """
-        if data["password"] != data["password_confirm"]:
+        if data["password"] != data["password2"]:
             raise ValidationError("رمز عبور با تکرار آن مطابقت ندارد.")
         if len(data["password"]) < 8:
             raise ValidationError("رمز عبور باید حداقل 8 کاراکتر داشته باشد.")

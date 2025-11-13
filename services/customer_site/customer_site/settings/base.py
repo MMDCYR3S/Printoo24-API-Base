@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "django_filters",
-    "celery",
+    # "celery",
     "redis",
     "django_redis",
     "django_celery_beat",
@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "core",
     
     # ==== Project apps ==== #
+    "apps.authentication",
 ]
 
 MIDDLEWARE = [
