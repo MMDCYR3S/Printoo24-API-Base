@@ -29,6 +29,12 @@ class UserService:
         )
         return user
     
+    def get_by_id(self, id: int) -> User | None:
+        """
+        دریافت کاربر توسط شناسه او
+        """
+        return self._repository.get_by_id(id)
+    
     def get_by_email(self, email: str) -> User | None:
         """ 
         دریافت کاربر توسط ایمیل او
@@ -43,4 +49,12 @@ class UserService:
             user.is_verified = True
             user.is_active = True
             self._repository.save(user)
+        return user
+    
+    def set_password(self, user: User, new_password: str):
+        """
+        تغییر رمز عبور کاربر
+        """
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
         return user

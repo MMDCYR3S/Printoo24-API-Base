@@ -74,8 +74,6 @@ class VerificationService:
         cache_service = CacheService()
         cache_key = self._get_cache_key(email)
         cache_code = cache_service.get(cache_key)
-        print(f"Code from cache (type: {type(cache_code)}): {cache_code}")
-        print(f"Code from user (type: {type(code)}): {code}")
         if not cache_code or cache_code != str(code):
             raise ValidationError("کد ارسال شده صحیح نیست.")
         
