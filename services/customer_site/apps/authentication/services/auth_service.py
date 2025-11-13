@@ -1,17 +1,21 @@
 from typing import Dict, Any
 
 from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.contrib.auth import authenticate
+from django.core.exceptions import ValidationError
 
 from core.models import User, Role, UserRole
 from core.common.users.user_services import UserService
+from .verify_service import VerificationService
+from .token_serivce import TokenService
 
 # ======= Registration Service ======= #
-class RegistrationService:
+class AuthService:
     """ کلاس برای ایجاد اکانت مشتری جدید """
-    def __init__(self, user_service: UserService):
+    def __init__(self, user_service: UserService, verify_service: VerificationService):
         """ تعیین سرویس کاربر """
         self._user_service = user_service
+        self._verify_service = verify_service
         
     @transaction.atomic
     def register_user(self, validated_data: Dict[str, Any]) -> User:
@@ -34,4 +38,23 @@ class RegistrationService:
         except Exception as e:
             raise ValidationError(e)
         
+        self._verify_service.send_verification_code(user.email)
+        
         return user
+
+    def login_user(self, username: str, password: str) -> User:
+        """
+        ورود کاربر با استفاده از نام کاربری و رمز عبور
+        """
+        # ====== اعتبار سنجی کاربر ====== #
+        user = authenticate(username=username, password=password)
+        if not user:
+            raise ValidationError("کاربر نامعتبر")
+        
+        # ====== ایجاد توکن برای کاربر پس از ورود ====== #
+        tokens = TokenService.create_token_for_user(user)
+        
+        return {
+            "user" : user,
+            "tokens" : tokens,
+        }

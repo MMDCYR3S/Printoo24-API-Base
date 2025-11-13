@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 
-from .serializers import RegisterSerializer
-from .services import RegistrationService
+from ..serializers import RegisterSerializer
+from apps.authentication.services import AuthService, VerificationService
 from core.common.users.user_services import UserService
 from core.common.users.user_repo import UserRepository
 
@@ -25,10 +25,11 @@ class RegisterAPIView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # ====== ایجاد کاربر ====== #
+        # ====== ایجاد کاربر و ارسال ایمیل تایید ====== #
         user_repo = UserRepository()
         user_service = UserService(repository=user_repo)
-        registration_service = RegistrationService(user_service=user_service)
+        verify_service = VerificationService(user_service=user_service)
+        registration_service = AuthService(user_service=user_service, verify_service=verify_service)
         
         # ====== ثبت نام کاربر با استفاده از سریالایزر و ریپازیتوری مورد نظر ====== #
         registered_user = registration_service.register_user(serializer.validated_data)

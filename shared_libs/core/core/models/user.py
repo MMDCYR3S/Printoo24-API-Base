@@ -158,5 +158,5 @@ class CustomerProfile(models.Model):
         return self.first_name + " " + self.last_name
     
     class Meta:
-        verbose_name = _('کاربر')
-        verbose_name_plural = _('کاربران')
+        verbose_name = _('مشتری')
+        verbose_name_plural = _('مشتریان')
