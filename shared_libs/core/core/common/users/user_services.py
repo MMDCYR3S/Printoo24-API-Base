@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from .user_repo import UserRepository
-from shared_libs.core.core.models import User
+from ...models import User
 
 # ======== User Services ======== #
 class UserService:
