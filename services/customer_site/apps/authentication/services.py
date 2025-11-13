@@ -4,7 +4,7 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from core.models import User, Role, UserRole
-from common.users.user_services import UserService
+from core.common.users.user_services import UserService
 
 # ======= Registration Service ======= #
 class RegistrationService:

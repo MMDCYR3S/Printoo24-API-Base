@@ -1,5 +1,5 @@
-from shared_libs.core.common.repositories import IRepository
-from shared_libs.core.core.models import User
+from ..repositories import IRepository
+from ...models import User
 
 # ====== User Repository ====== #
 class UserRepository(IRepository[User]):

@@ -5,8 +5,8 @@ from rest_framework.permissions import AllowAny
 
 from .serializers import RegisterSerializer
 from .services import RegistrationService
-from shared_libs.core.common.users.user_services import UserService
-from shared_libs.core.common.users.user_repo import UserRepository
+from core.common.users.user_services import UserService
+from core.common.users.user_repo import UserRepository
 
 # ======= Register API View ======= #
 class RegisterAPIView(APIView):
