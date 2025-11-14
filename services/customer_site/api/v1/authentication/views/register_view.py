@@ -2,13 +2,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from drf_spectacular.utils import extend_schema
 
 from ..serializers import RegisterSerializer
-from apps.authentication.services import AuthService, VerificationService
+from apps.accounts.services import AuthService, VerificationService
 from core.common.users.user_services import UserService
 from core.common.users.user_repo import UserRepository
 
 # ======= Register API View ======= #
+@extend_schema(tags=['Accounts'])
 class RegisterAPIView(APIView):
     """
     ویوی ثبت نام کاربر

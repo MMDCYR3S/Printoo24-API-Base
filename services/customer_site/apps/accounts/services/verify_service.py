@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 
-from ...authentication.tasks import send_verification_email_task
+from ...accounts.tasks import send_verification_email_task
 from core.common.cache.cache_service import CacheService
 from core.common.users.user_services import UserService
 
