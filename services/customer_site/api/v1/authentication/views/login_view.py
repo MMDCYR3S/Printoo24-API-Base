@@ -3,13 +3,15 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import ValidationError
+from drf_spectacular.utils import extend_schema
 
 from ..serializers import LoginSerializer
-from apps.authentication.services import AuthService, VerificationService
+from apps.accounts.services import AuthService, VerificationService
 from core.common.users.user_services import UserService
 from core.common.users.user_repo import UserRepository
 
 # ====== Login API View ====== #
+@extend_schema(tags=['Accounts'])
 class LoginAPIView(GenericAPIView):
     """
     ورود کاربر به واسطه نام کاربری و رمز عبور

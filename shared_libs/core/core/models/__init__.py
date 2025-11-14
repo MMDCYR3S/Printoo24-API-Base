@@ -11,6 +11,9 @@ from .product import (
     Quantity,
     ProductAttachment,
     Attachment,   
+    ProductOption,
+    Option,
+    OptionValue,
 )
 from .order import Order, OrderItem, OrderItemDesignFile, OrderStatus
 from .cart import Cart, CartItem

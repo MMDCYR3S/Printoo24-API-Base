@@ -3,13 +3,15 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import ValidationError
+from drf_spectacular.utils import extend_schema
 
 from ..serializers import EmailVerificationSerializer
-from apps.authentication.services import VerificationService,  TokenService
+from apps.accounts.services import VerificationService,  TokenService
 from core.common.users.user_services import UserService
 from core.common.users.user_repo import UserRepository
 
 # ========= Verify Email View ========= #
+@extend_schema(tags=['Accounts'])
 class VerifyEmailApiView(GenericAPIView):
     """
     ارسال کد تأیید و اعتبارسنجی آن توسط سیستم

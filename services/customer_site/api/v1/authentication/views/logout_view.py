@@ -2,12 +2,13 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ValidationError
+from drf_spectacular.utils import extend_schema
 
 from ..serializers import LogoutSerializer
-from apps.authentication.services import TokenService
+from apps.accounts.services import TokenService
 
 # ========= Logout View ========= #
+@extend_schema(tags=['Accounts'])
 class LogoutAPIView(GenericAPIView):
     """
     پردازش درخواست خروج کاربر.

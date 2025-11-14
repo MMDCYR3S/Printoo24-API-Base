@@ -3,13 +3,15 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.core.exceptions import ValidationError
+from drf_spectacular.utils import extend_schema
 
 from ..serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
-from apps.authentication.services.password_reset_service import PasswordResetService
+from apps.accounts.services.password_reset_service import PasswordResetService
 from core.common.users.user_repo import UserRepository
 from core.common.users.user_services import UserService
 
 # ========= Password Reset Request View ========= #
+@extend_schema(tags=['Accounts'])
 class PasswordResetRequestAPIView(GenericAPIView):
     """
     ویوی ای که با استفاده از ایمیل یک درخواست بازنشانی رمز عبور برای کاربر ارسال می‌کند
@@ -38,6 +40,7 @@ class PasswordResetRequestAPIView(GenericAPIView):
         )
 
 # ========= Password Reset Confirm View ========= #
+@extend_schema(tags=['Accounts'])
 class PasswordResetConfirmAPIView(GenericAPIView):
     """
     ویوی وارد کردن رمز عبور جدید توسط کاربر
