@@ -39,3 +39,143 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="amingholami06@gmail.com")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="oojt ugkq exew ofbs")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
+
+# ====== Logging Settings ====== #
+# ====== Logging Settings ====== #
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        # ====== Accounts Handlers ====== #
+        'accounts_auth_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/accounts/auth_service.log',
+            'maxBytes': 1024 * 1024 * 15,  # 15 MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'accounts_password_reset_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/accounts/password_reset_service.log',
+            'maxBytes': 1024 * 1024 * 15,  # 15 MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'accounts_token_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/accounts/token_service.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'accounts_verification_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/accounts/verification_service.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'accounts_security_file': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/accounts/security.log',
+            'maxBytes': 1024 * 1024 * 20,  # 20 MB
+            'backupCount': 15,
+            'formatter': 'verbose',
+        },
+        
+        # ====== Shop Handlers ====== #
+        'shop_product_list_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/shop/product_list_service.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'shop_product_detail_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/shop/product_detail_service.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'shop_price_calculator_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/shop/price_calculator.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        
+        # ====== Console Handler ====== #
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        # ====== Accounts Loggers ====== #
+        'accounts.services.auth': {
+            'handlers': ['accounts_auth_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'accounts.services.password_reset': {
+            'handlers': ['accounts_password_reset_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'accounts.services.token': {
+            'handlers': ['accounts_token_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'accounts.services.verification': {
+            'handlers': ['accounts_verification_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        
+        # ====== Security Logger (مشترک برای همه سرویس‌های accounts) ====== #
+        'accounts.services.security': {
+            'handlers': ['accounts_security_file', 'console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        
+        # ====== Shop Loggers ====== #
+        'shop.services.product_list': {
+            'handlers': ['shop_product_list_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'shop.services.product_detail': {
+            'handlers': ['shop_product_detail_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'shop.services.price_calculator': {
+            'handlers': ['shop_price_calculator_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}

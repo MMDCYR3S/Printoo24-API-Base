@@ -1,6 +1,8 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework import status
+from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
+
 
 from ..serializers import PriceCalculationInputSerializer
 from apps.shop.services import ProductPriceCalculator
@@ -31,19 +33,11 @@ class CalculatePriceView(GenericAPIView):
         height = validated_data.get('height')
         
         # ===== ایجاد سرویس برای محاسبه قیمت ===== #
-        calculator = ProductPriceCalculator()
+        calculator = ProductPriceCalculator(product=product ,quantity=quantity, material=material, options=options, size=size)
         
         # ===== تلاش برای محاسبه ===== #
         try:
-            final_price = calculator.calculate(
-                product=product,
-                quantity=quantity,
-                material=material,
-                size=size,
-                options=options,
-                width=width,
-                height=height
-            )
+            final_price = calculator.calculate()
             return Response({'final_price': final_price}, status=status.HTTP_200_OK)
         except ValueError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

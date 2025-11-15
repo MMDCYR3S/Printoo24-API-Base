@@ -9,6 +9,7 @@ from ..serializers import PasswordResetRequestSerializer, PasswordResetConfirmSe
 from apps.accounts.services.password_reset_service import PasswordResetService
 from core.common.users.user_repo import UserRepository
 from core.common.users.user_services import UserService
+from core.common.cache.cache_service import CacheService
 
 # ========= Password Reset Request View ========= #
 @extend_schema(tags=['Accounts'])
@@ -29,7 +30,8 @@ class PasswordResetRequestAPIView(GenericAPIView):
         # ===== ایجاد سرویس های مرتبط ===== #
         user_repo = UserRepository()
         user_service = UserService(user_repo)
-        reset_service = PasswordResetService(user_service)
+        cache_service = CacheService()
+        reset_service = PasswordResetService(user_service, cache_service)
         
         # ===== بازنشانی رمز عبور ===== #
         reset_service.send_reset_link(serializer.validated_data['email'])
@@ -55,7 +57,8 @@ class PasswordResetConfirmAPIView(GenericAPIView):
         # ===== ایجاد سرویس های مرتبط ===== #
         user_repo = UserRepository()
         user_service = UserService(user_repo)
-        reset_service = PasswordResetService(user_service)
+        cache_service = CacheService()
+        reset_service = PasswordResetService(user_service, cache_service)
         
         try:
             # ===== باز کردن صفحه بازنشانی پسورد ===== #

@@ -17,7 +17,7 @@ def product_code_generator(category_slug, year):
     return code
 
 # ======== Product Category Model ======== #
-class ProductCategory(models.Model):
+class ProductCategory(MPTTModel):
     """
     مدل دسته بندی محصولات
     """
@@ -60,6 +60,7 @@ class Product(models.Model):
     )
     slug = models.SlugField(_('اسلاگ'), unique=True, blank=True, null=True)
     price = models.PositiveIntegerField(_('قیمت'), default=0)
+    accepts_custom_dimensions = models.BooleanField(_('پذیرش اندازه های سطح'), default=False)
     # ====== قیمت گذاری براساس واحد سطح ====== #
     price_per_square_unit = models.DecimalField(
         _("قیمت بر واحد سطح (مثلا سانتی‌متر مربع)"), 
@@ -108,8 +109,8 @@ class Size(models.Model):
     """ مدل سایز با طول و عرض """
     user = models.ForeignKey("core.User", related_name='size_user', on_delete=models.CASCADE)
     name = models.CharField(_("نام"), max_length=150)
-    width = models.PositiveIntegerField(_("عرض"), default=0)
-    height = models.PositiveIntegerField(_("طول"), default=0)
+    width = models.FloatField(_("عرض"), default=0.0)
+    height = models.FloatField(_("طول"), default=0.0)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
@@ -208,7 +209,7 @@ class ProductQuantity(models.Model):
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
     def __str__(self):
-        return str(self.value)
+        return f"{self.product.name} - {self.price}: {self.quantity}"
     
     class Meta:
         verbose_name = _('تعداد')
@@ -218,7 +219,9 @@ class ProductQuantity(models.Model):
 class ProductImage(models.Model):
     """ مدل عکس محصول """
     user = models.ForeignKey("core.User", related_name='user_product_image', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, related_name='product_image', on_delete=models.CASCADE)
     image = models.ImageField(_('تصویر'), upload_to='products/')
+    order = models.IntegerField(_('ترتیب'), default=0)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
@@ -296,7 +299,7 @@ class OptionValue(models.Model):
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
     def __str__(self):
-        return self.value
+        return self.option.name + ': ' + self.value
     
     class Meta:
         verbose_name = _('مقدار ویژگی')
