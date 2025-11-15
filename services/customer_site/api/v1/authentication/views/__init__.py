@@ -6,3 +6,4 @@ from .password_reset_view import (
     PasswordResetConfirmAPIView, 
     PasswordResetRequestAPIView
 )
+from .refresh_token_view import RefreshTokenView

@@ -1,11 +1,14 @@
-# customer_site/shop/services.py
-
+import logging
 from typing import Dict, Any, List, Optional
 from collections import defaultdict
 from django.db.models import QuerySet
 
 from core.common.product import ProductService
 from core.models import Product, ProductOption
+
+# ====== Logger Configuration ====== #
+logger = logging.getLogger('shop.services.product_list')
+
 
 # ======= Shop Product List Service ======= #
 class ShopProductListService:
@@ -15,10 +18,27 @@ class ShopProductListService:
     """
     def __init__(self, product_service: ProductService):
         self._product_service = product_service
+        logger.debug("ShopProductListService initialized")
 
     def get_base_queryset(self) -> QuerySet[Product]:
         """
         کوئری‌ست پایه و بهینه‌سازی شده برای لیست محصولات را برمی‌گرداند.
         این کوئری‌ست سپس در لایه View برای فیلترینگ استفاده خواهد شد.
         """
-        return self._product_service.get_all_active_products()
+        logger.info("Fetching base queryset for product list")
+        
+        try:
+            queryset = self._product_service.get_all_active_products()
+            product_count = queryset.count()
+            
+            logger.info(f"Base queryset retrieved successfully - Total active products: {product_count}")
+            logger.debug(f"Queryset details: {queryset.query}")
+            
+            return queryset
+            
+        except Exception as e:
+            logger.error(
+                f"Error fetching base queryset for product list: {str(e)}",
+                exc_info=True
+            )
+            raise

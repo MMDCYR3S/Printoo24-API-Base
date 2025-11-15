@@ -4,8 +4,9 @@ from rest_framework import status
 from drf_spectacular.utils import extend_schema
 
 from apps.shop.services import ShopProductDetailService
-from ..serializers import ProductListSerializer, ProductDetailSerializer
+from ..serializers import ProductDetailSerializer
 from core.models import Product
+from core.common.product.product_services import ProductService
 
 # ====== Product Detail View ====== #
 @extend_schema(
@@ -27,7 +28,8 @@ class ProductDetailView(RetrieveAPIView):
         slug = self.kwargs.get(self.lookup_field)
         
         # ===== ایجاد سرویس برای دریافت اطلاعات پایه ===== #
-        service = ShopProductDetailService()
+        product_detail = ProductService()
+        service = ShopProductDetailService(product_detail)
         product_data_dict = service.get_product_detail_for_display(slug=slug)
 
         # ===== بررسی وجود محصول ===== #

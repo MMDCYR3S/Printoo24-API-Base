@@ -4,6 +4,7 @@ from drf_spectacular.utils import extend_schema
 from apps.shop.filters import ProductFilter
 from ..serializers import ProductListSerializer 
 from apps.shop.services import ShopProductListService
+from core.common.product import ProductService
 
 # ======= Product List View ======= #
 @extend_schema(
@@ -23,7 +24,8 @@ class ProductListView(ListAPIView):
         از سرویس لیست محصولات برای گرفتن کوئری‌ست پایه استفاده می‌کند.
         """
         # ====== دریافت سرویس لیست ====== #
-        service = ShopProductListService()
+        product_service = ProductService()
+        service = ShopProductListService(product_service)
         queryset = service.get_base_queryset()
         
         # ===== ایجاد فیلترینگ پیش فرض برای جلوگیری از تکرار داده ها ===== #

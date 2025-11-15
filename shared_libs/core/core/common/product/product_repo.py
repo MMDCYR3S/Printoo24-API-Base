@@ -7,7 +7,9 @@ from core.models import (
     ProductQuantity, 
     ProductSize, 
     ProductMaterial, 
-    ProductOption
+    ProductOption,
+    ProductImage,
+    ProductAttachment
 )
 
 # ====== Product Repository ====== #
@@ -39,20 +41,29 @@ class ProductRepository(IRepository[Product]):
                 'category'
             ).prefetch_related(
                 # ===== دریافت و مرتب سازی تیراژها ===== #
-                Prefetch('productquantity_set', queryset=ProductQuantity.objects.order_by('quantity')),
+                Prefetch('product_quantity', queryset=ProductQuantity.objects.order_by('quantity')),
                 
                 # ===== دریافت و مرتب سازی سایزها ===== #
-                Prefetch('productsize_set', queryset=ProductSize.objects.select_related('size').order_by('size__name')),
+                Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__name')),
                 
                 # ===== دریافت و مرتب سازی حنس ها ===== #
-                Prefetch('productmaterial_set', queryset=ProductMaterial.objects.select_related('material').order_by('material__name')),
+                Prefetch('product_material', queryset=ProductMaterial.objects.select_related('material').order_by('material__name')),
                 
                 # ===== دریافت و مرتب سازی گزینه ها ===== #
                 Prefetch(
-                    'productoption_set', 
+                    'product_option_product', 
                     queryset=ProductOption.objects.select_related(
                         'option_value__option'
                     ).order_by('option_value__option__name', 'option_value__value')
+                ),
+                
+                Prefetch(
+                    'product_image',
+                    queryset=ProductImage.objects.order_by('product', 'id')
+                ),
+                Prefetch(
+                    'product_attachment_product',
+                    queryset=ProductAttachment.objects.order_by('product', 'id')
                 )
             ).get(slug=slug, is_active=True)
         except self.model.DoesNotExist:

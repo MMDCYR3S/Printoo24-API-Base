@@ -9,7 +9,9 @@ from core.models import (
     Material, 
     ProductOption, 
     OptionValue, 
-    Option
+    Option,
+    ProductImage,
+    ProductAttachment,
 )
 
 # ====== Category Serializer ====== #
@@ -64,6 +66,44 @@ class OptionDetailSerializer(serializers.ModelSerializer):
         model = ProductOption
         fields = ['id', 'option_value', 'price_impact']
 
+# ======= Product Image Serializer ======= #
+class ProductImageSerializer(serializers.ModelSerializer):
+    """سریالایزر برای نمایش تصاویر محصول"""
+    image_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image_url', 'order']
+    
+    def get_image_url(self, obj):
+        """دریافت URL کامل تصویر"""
+        request = self.context.get('request')
+        if obj.image and hasattr(obj.image, 'url'):
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+# ======= Product Attachment Serializer ======= #
+class ProductAttachmentSerializer(serializers.ModelSerializer):
+    """سریالایزر برای فایل های هر محصول"""
+    name = serializers.CharField(source='attachment.name')
+    file = serializers.FileField(source='attachment.file')
+    file_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductAttachment
+        fields = ['id', 'name', 'file', 'file_url']
+        
+    def get_file_url(self, obj):
+        """
+        دریافت آدرس فایل
+        """
+        request = self.context.get('request')
+        if obj.attachment.file:
+            return request.build_absolute_uri(obj.attachment.file.url)
+        return None
+
 # ======= Product Detail Serializer ======= #
 class ProductDetailSerializer(serializers.Serializer):
     """
@@ -84,6 +124,8 @@ class ProductDetailSerializer(serializers.Serializer):
     quantities = QuantityDetailSerializer(many=True)
     sizes = SizeDetailSerializer(many=True)
     materials = MaterialDetailSerializer(many=True)
+    images = ProductImageSerializer(many=True)
+    attachments = ProductAttachmentSerializer(many=True)
     # ===== فیلد ویژگی های منحصر به فرد به صورت تابع ===== #
     options = serializers.SerializerMethodField()
     

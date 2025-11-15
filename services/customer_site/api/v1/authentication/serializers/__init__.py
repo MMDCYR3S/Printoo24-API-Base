@@ -6,3 +6,4 @@ from .password_reset_serializer import(
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer
 )
+from .refresh_token_serializer import RefreshTokenSerializer
