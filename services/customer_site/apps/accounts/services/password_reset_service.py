@@ -9,7 +9,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from core.models import User
 from core.common.users.user_services import UserService
-from core.common.cache.cache_service import CacheService
+from core.common.cache.cache_services import CacheService
 
 from ..tasks import send_password_reset_email_task
 

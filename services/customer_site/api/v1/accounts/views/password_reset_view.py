@@ -9,7 +9,7 @@ from ..serializers import PasswordResetRequestSerializer, PasswordResetConfirmSe
 from apps.accounts.services.password_reset_service import PasswordResetService
 from core.common.users.user_repo import UserRepository
 from core.common.users.user_services import UserService
-from core.common.cache.cache_service import CacheService
+from core.common.cache.cache_services import CacheService
 
 # ========= Password Reset Request View ========= #
 @extend_schema(tags=['Accounts'])

@@ -334,3 +334,55 @@ class ProductOption(models.Model):
     class Meta:
         verbose_name = _('ویژگی محصول')
         verbose_name_plural = _('ویژگی های محصولات')
+
+# ======= File Upload Spec Model ======= #
+class FileUploadSpec(models.Model):
+    """
+    تعریف یک نوع یا اسلات آپلود فایل.
+    مانند 'طرح رو'، 'طرح پشت'، 'فایل خط برش'.
+    این مدل از تکرار داده جلوگیری می‌کند.
+    """
+    name = models.CharField(
+        _("نام مشخصات"),
+        max_length=100,
+        unique=True,
+        help_text=_("مثال: طرح رو، طرح پشت، فایل UV")
+    )
+    description = models.TextField(_("توضیحات"), blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("مشخصات آپلود فایل")
+        verbose_name_plural = _("انواع مشخصات آپلود فایل")
+
+# ======== Product File Upload Requirement Model ======== #
+class ProductFileUploadRequirement(models.Model):
+    """
+    این مدل تعیین می‌کند که یک محصول خاص به چه نوع فایل‌هایی نیاز دارد.
+    این همان مدل واسطی است که شما به درستی به آن اشاره کردید.
+    """
+    product = models.ForeignKey(
+        Product,
+        verbose_name=_("محصول"),
+        on_delete=models.CASCADE,
+        related_name="file_upload_requirements"
+    )
+    spec = models.ForeignKey(
+        FileUploadSpec,
+        verbose_name=_("مشخصات"),
+        on_delete=models.PROTECT,
+        related_name="product_requirements"
+    )
+    is_required = models.BooleanField(_("الزامی بودن"), default=True)
+    sort_order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
+
+    def __str__(self):
+        return f"{self.product.name} -> {self.spec.name}"
+
+    class Meta:
+        verbose_name = _("نیازمندی آپلود فایل محصول")
+        verbose_name_plural = _("نیازمندی‌های آپلود فایل محصولات")
+        ordering = ['sort_order']
+        unique_together = ('product', 'spec')
