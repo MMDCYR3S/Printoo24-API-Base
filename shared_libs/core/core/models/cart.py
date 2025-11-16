@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .product import Product
+from .product import Product, ProductFileUploadRequirement
 
 # ===== Cart Model ===== #
 class Cart(models.Model):
@@ -34,3 +34,29 @@ class CartItem(models.Model):
     class Meta:
         verbose_name = _('آیتم سبد خرید')
         verbose_name_plural = _('آیتم های سبد خرید')
+
+# ======== Cart Item Upload Model ======== #
+class CartItemUpload(models.Model):
+    """
+    ذخیره فایل آپلود شده توسط کاربر برای یک آیتم خاص در سبد خرید.
+    """
+    cart_item = models.ForeignKey(
+        CartItem,
+        verbose_name=_("آیتم سبد خرید"),
+        on_delete=models.CASCADE,
+        related_name="uploads"
+    )
+    requirement = models.ForeignKey(
+        ProductFileUploadRequirement,
+        verbose_name=_("نیازمندی مربوطه"),
+        on_delete=models.PROTECT 
+    )
+    file = models.FileField(_("فایل"), upload_to='cart_uploads/%Y/%m/%d/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"File for {self.cart_item}"
+
+    class Meta:
+        verbose_name = _("فایل آپلود شده سبد خرید")
+        verbose_name_plural = _("فایل‌های آپلود شده سبد خرید")

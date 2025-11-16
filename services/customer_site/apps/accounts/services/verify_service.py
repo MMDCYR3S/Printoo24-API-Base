@@ -5,7 +5,7 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 
 from ..tasks import send_verification_email_task
-from core.common.cache.cache_service import CacheService
+from core.common.cache.cache_services import CacheService
 from core.common.users.user_services import UserService
 
 # ====== Logger Configuration ====== #
