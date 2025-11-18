@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any
 
-from shared_libs.core.core.models import Cart, CartItem, Product, User
+from core.models import Cart, CartItem, Product, User
 from .cart_repo import CartRepository, CartItemRepository
 
 # ======= Cart Core Service ======= #
@@ -23,7 +23,7 @@ class CartService:
         
         # ===== در صورت نبود سبد خرید برای کاربر، یکی ساخته می شود ===== #
         if not cart:
-            cart = self.cart_repo.create({"user": user})
+            cart = self._repository.create({"user": user})
             
         return cart
 
@@ -35,13 +35,13 @@ class CartItemService:
     def __init__(self, repository: CartItemRepository):
         self._repository = repository
 
-    def add_item(self, cart: Cart, product: Product, quantity: int, price: float, details: Dict[str, Any]) -> CartItem:
+    def add_item(self, cart: Cart, product: Product, quantity: int, price: float, items: Dict[str, Any]) -> CartItem:
         item_data = {
             "cart": cart,
             "product": product,
             "quantity": quantity,
-            "unit_price": price,
-            "details": details,
+            "price": price,
+            "items": items,
         }
         return self._repository.create(item_data)
 
@@ -51,6 +51,6 @@ class CartItemService:
     def remove_item(self, item: CartItem) -> None:
         self._repository.delete(instance=item)
 
-    def find_item(self, cart: Cart, product: Product, details: Dict) -> Optional[CartItem]:
-        return self._repository.find_item_in_cart(cart=cart, product=product, details=details)
+    def find_item(self, cart: Cart, product: Product, items: Dict) -> Optional[CartItem]:
+        return self._repository.find_item_in_cart(cart=cart, product=product, items=items)
     
