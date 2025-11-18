@@ -38,10 +38,10 @@ class ProductPriceCalculator:
 
         logger.info(
             f"ProductPriceCalculator initialized - Product: {product.slug}, "
-            f"Quantity: {quantity.min_quantity}-{quantity.max_quantity}, "
-            f"Material: {material.name}, "
+            f"Quantity: {quantity}, "
+            f"Material: {material}, "
             f"Options count: {len(options)}, "
-            f"Size: {size.name if size else 'Custom' if custom_dimensions else 'None'}"
+            f"Size: {size if size else 'Custom' if custom_dimensions else 'None'}"
         )
 
         if size and custom_dimensions:
@@ -60,7 +60,7 @@ class ProductPriceCalculator:
         """محاسبه تأثیر قیمت بر اساس سایز استاندارد یا ابعاد دلخواه."""
         if self.size:
             logger.debug(
-                f"Using standard size - Name: {self.size.name}, "
+                f"Using standard size - Name: {self.size}, "
                 f"Price impact: {self.size.price_impact}"
             )
             return self.size.price_impact
@@ -97,7 +97,7 @@ class ProductPriceCalculator:
         
         material_impact = Decimal(str(self.material.price_impact))
         impacts.append(material_impact)
-        logger.debug(f"Material impact ({self.material.name}): {material_impact}")
+        logger.debug(f"Material impact ({self.material}): {material_impact}")
         
         size_impact = self._get_size_impact()
         impacts.append(size_impact)
@@ -106,7 +106,7 @@ class ProductPriceCalculator:
         for option in self.options:
             option_impact = Decimal(str(option.price_impact))
             impacts.append(option_impact)
-            logger.debug(f"Option impact ({option.name}): {option_impact}")
+            logger.debug(f"Option impact ({option}): {option_impact}")
         
         total_impacts = sum(impacts, Decimal('0.0'))
         logger.info(f"Total impacts calculated: {total_impacts}")

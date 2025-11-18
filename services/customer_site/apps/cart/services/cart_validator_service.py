@@ -2,8 +2,14 @@ from typing import Dict, Any
 
 from rest_framework.exceptions import ValidationError
 
-from shared_libs.core.core.models import Product
-from shared_libs.core.core.common.product import ProductRepository
+from core.models import (
+    Product,
+    ProductQuantity,
+    ProductMaterial,
+    ProductSize,
+    ProductOption,
+)
+from core.common.product import ProductRepository
 
 # ======= Cart Data Validator ======= #
 class CartDataValidator:
@@ -29,6 +35,40 @@ class CartDataValidator:
         if not product:
             raise ValidationError("محصول مورد نظر یافت نشد.")
         
-        return product
+        # ===== دریافت ویژگی های محصول ===== #
+        quantity_id = selections.get("quantity_id")
+        material_id = selections.get("material_id")
+        size_id = selections.get("size_id")
+        options_ids = selections.get("options_ids", [])
+        
+        # ===== اعتبارسنجی وجود تیراژ برای محصول ===== #
+        try:
+            quantity_obj = product.product_quantity.get(id=quantity_id)
+            material_obj = product.product_material.get(id=material_id)
+            
+            size_obj = None
+            if size_id:
+                size_obj = product.product_size.get(id=size_id)
+                
+            options_obj = list(product.product_option_product.filter(id__in=options_ids))
+            if len(options_obj) != len(options_ids):
+                raise ValidationError("یک یا چند گزینه انتخاب نشده است یا نامعتبر است.")
+            
+        except (
+            ProductMaterial.DoesNotExist,
+            ProductSize.DoesNotExist,
+            ProductQuantity.DoesNotExist,
+        ) as e:
+            raise ValidationError(f"یکی از ویژگی های انتخاب شده برای محصول نامعتبر است: {str(e)}")
+        
+        # ===== بازگرداندن آبجکت های معتبر ===== #
+        return {
+            "product" : product,
+            "quantity_obj" : quantity_obj,
+            "material_obj" : material_obj,
+            "size_obj" : size_obj,
+            "options_obj" : options_obj,
+            "custom_dimensions" : selections.get('custom_dimensions'),
+        }
     
     

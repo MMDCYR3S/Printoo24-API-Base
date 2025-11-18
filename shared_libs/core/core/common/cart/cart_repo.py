@@ -30,13 +30,13 @@ class CartItemRepository(IRepository[CartItem]):
     def __init__(self):
         super().__init__(CartItem)
 
-    def find_item_in_cart(self, cart: Cart, product: Product, details: Dict) -> Optional[CartItem]:
+    def find_item_in_cart(self, cart: Cart, product: Product, items: Dict) -> Optional[CartItem]:
         """
         یک آیتم خاص با مشخصات یکسان را در سبد خرید پیدا می‌کند.
         این متد برای جلوگیری از افزودن آیتم تکراری و افزایش تعداد آیتم موجود استفاده می‌شود.
         """
         try:
-            return self.model.objects.get(cart=cart, product=product, details=details)
+            return self.model.objects.get(cart=cart, product=product, items=items)
         except self.model.DoesNotExist:
             return None
 
