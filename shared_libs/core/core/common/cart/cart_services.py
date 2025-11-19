@@ -33,7 +33,7 @@ class CartItemService:
     سرویس برای مدیریت عملیات‌های اصلی آیتم‌های سبد خرید.
     """
     def __init__(self, repository: CartItemRepository):
-        self._repository = repository
+        self._repository = repository or CartItemRepository()
 
     def add_item(self, cart: Cart, product: Product, quantity: int, price: float, items: Dict[str, Any]) -> CartItem:
         item_data = {
@@ -54,3 +54,14 @@ class CartItemService:
     def find_item(self, cart: Cart, product: Product, items: Dict) -> Optional[CartItem]:
         return self._repository.find_item_in_cart(cart=cart, product=product, items=items)
     
+    def get_user_cart_items(self, cart: Cart) -> dict:
+        """
+        سبد خرید و آیتم‌های آن را برمی‌گرداند.
+        """
+        return self._repository.get_items_for_cart_with_relations(cart=cart)
+    
+    def get_item_detail(self, item_id: int, user: User) -> CartItem:
+        """
+        جزئیات آیتم را برمی‌گرداند یا ارور می‌دهد.
+        """
+        return self._repository.get_item_detail_with_relations(item_id=item_id, user=user)

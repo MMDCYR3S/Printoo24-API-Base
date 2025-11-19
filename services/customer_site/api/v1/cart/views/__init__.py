@@ -1,2 +1,4 @@
 from .add_to_cart_view import AddToCartView
-from .file_upload_view import TemporaryFileUploadView
+from .temporary_file_upload_view import TemporaryFileUploadView
+from .cart_update_view import CartItemUpdateView
+from .cart_item_view import CartListView, CartItemDetailView
