@@ -1,6 +1,7 @@
 import logging
 from typing import Dict
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
@@ -43,9 +44,12 @@ class TokenService:
         
         try:
             refresh = RefreshToken.for_user(user)
+            # ===== تنظیم زمان انقضای توکن Access بر اساس تنظیمات ===== #
+            access_token = refresh.access_token
+            access_token.set_exp(lifetime=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"])
             
             tokens = {
-                "access": str(refresh.access_token),
+                "access": str(access_token),
                 "refresh": str(refresh)
             }
             

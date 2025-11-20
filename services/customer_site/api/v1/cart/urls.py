@@ -5,6 +5,8 @@ from .views import (
     CartItemUpdateView,
     CartItemDetailView,
     CartListView,
+    CartItemDeleteView,
+    CartClearView
 )
 
 app_name = "cart"
@@ -35,4 +37,10 @@ urlpatterns = [
         CartItemDetailView.as_view(), 
         name='cart-item-detail'
     ),
+    path(
+        "delete/<int:item_id>/",
+        CartItemDeleteView.as_view(),
+        name="cart-item-delete"
+    ),
+    path("clear/", CartClearView.as_view(), name="cart-clear"),
 ]

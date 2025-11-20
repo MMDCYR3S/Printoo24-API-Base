@@ -22,6 +22,6 @@ class CartItemUpdateSerializer(serializers.Serializer):
         """
         چک کردن اینکه همزمان سایز استاندارد و ابعاد دستی ارسال نشود.
         """
-        if data.get('size_id') and (data.get('custom_width') or data.get('custom_height')):
+        if data.get("size_id") and (data.get("custom_width") or data.get("custom_height")):
             raise serializers.ValidationError("نمی‌توان همزمان سایز استاندارد و ابعاد دلخواه را انتخاب کرد.")
         return data

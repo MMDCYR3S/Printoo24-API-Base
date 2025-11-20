@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.core.files.uploadedfile import UploadedFile
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 
 from core.models import (
     User,
@@ -38,27 +38,33 @@ class CartItemUpdateService:
         """
         
         # ===== دریافت سبد خرید کاربر و آیتم مورد نظر ===== #
-        cart_item = get_object_or_404(CartItem, id=cart_item_id, cart__user=self.user)
+        try:
+            cart_item = CartItem.objects.select_related('product').get(id=cart_item_id, cart__user=self.user)
+        except CartItem.DoesNotExist:
+            raise NotFound("آیتم مورد نظر در سبد خرید شما یافت نشد.")
+        
         product = cart_item.product
         
         # ===== یافتن ویژگی های انتخاب شده توسط کاربر در سبد خرید ===== #
-        quantity_obj = get_object_or_404(ProductQuantity, id=data['quantity_id'])
-        material_obj = get_object_or_404(ProductMaterial, id=data['material_id'])
+        quantity_obj = get_object_or_404(ProductQuantity, id=data["quantity_id"])
+        material_obj = get_object_or_404(ProductMaterial, id=data["material_id"])
         
         # ===== اعتبارسنجی تعداد محصول که اگر 0 بود، باید حذف شود ===== #
         size_obj = None
-        if data.get('size_id'):
-            size_obj = get_object_or_404(ProductSize, id=data['size_id'])
+        if data.get("size_id"):
+            size_obj = get_object_or_404(ProductSize, id=data["size_id"])
 
         options_objs = []
-        if data.get('option_ids'):
-            options_objs = list(ProductOption.objects.filter(id__in=data['option_ids']))
-
+        if data.get("option_ids"):
+            options_objs = list(ProductOption.objects.filter(id__in=data["option_ids"]))
+            if len(options_objs) != len(data["option_ids"]):
+                raise ValidationError("یک یا چند آپشن برای این محصول معتبر نیستند.")
+            
         custom_dimensions = None
-        if data.get('custom_width') and data.get('custom_height'):
+        if data.get("custom_width") and data.get("custom_height"):
             custom_dimensions = {
-                'width': data['custom_width'], 
-                'height': data['custom_height']
+                "width": data["custom_width"], 
+                "height": data["custom_height"]
             }
         
         # ===== اعتبارسنجی ویژگی ها ===== #
@@ -87,25 +93,29 @@ class CartItemUpdateService:
         )
         
         price_result = calculator.calculate()
-        final_price = price_result['final_price']
+        final_price = price_result["final_price"]
         
         # ===== بروزرسانی آیتم سبد خرید ===== #
-        cart_item.product_quantity = quantity_obj
-        cart_item.product_material = material_obj
-        cart_item.product_size = size_obj
+        updated_items = {
+            "quantity_id": quantity_obj.id,
+            "material_id": material_obj.id,
+            "size_id": size_obj.id if size_obj else None,
+            "option_ids": [opt.id for opt in options_objs],
+            "custom_width": custom_dimensions.get("width") if custom_dimensions else None,
+            "custom_height": custom_dimensions.get("height") if custom_dimensions else None,
+        }
+        
+        # ===== بررسی تیراژ مربوط به آیتم ===== #
+        if 'quantity' in data:
+            new_quantity = data['quantity']
+            if not isinstance(new_quantity, int) or new_quantity <= 0:
+                raise ValidationError({"quantity": "تعداد باید یک عدد صحیح بزرگتر از صفر باشد."})
+            cart_item.quantity = new_quantity
         
         # ===== بروزرسانی ابعاد دلخواه(در صورت وجود) ===== #
-        if custom_dimensions:
-            cart_item.custom_width = custom_dimensions['width']
-            cart_item.custom_height = custom_dimensions['height']
-        else:
-            cart_item.custom_width = None
-            cart_item.custom_height = None
-            
+        cart_item.items = updated_items
         cart_item.price = final_price
-        cart_item.save()
-        
-        cart_item.product_options.set(options_objs)
+        cart_item.save(update_fields=['items', 'price', 'quantity', 'updated_at'])
         
         return cart_item
         

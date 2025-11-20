@@ -54,7 +54,7 @@ class AddToCartView(GenericAPIView):
         
         except (ValidationError, ValueError) as e:
             # ===== بازگشت خطا ===== #
-            return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': e.detail}, status=status.HTTP_400_BAD_REQUEST)
     
         except Exception as e:
             # ===== بازگشت خطاهای غیر منتظره ===== #

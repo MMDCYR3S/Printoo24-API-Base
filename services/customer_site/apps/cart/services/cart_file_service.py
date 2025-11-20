@@ -19,14 +19,14 @@ class FileFinalizeService:
         """
         product = cart_item.product
         # ===== بررسی اینکه به تعداد فایل های محصول آپلود انجام شده است یا خیر ===== #
-        required_specs = {str(req.file_spec.id): req for req in product.file_upload_requirements.filter(is_required=True)}
+        required_specs = {str(req.spec.id): req for req in product.file_upload_requirements.filter(is_required=True)}
 
         
         # ===== اگر نیازی به آپلود نبود و آپلود انجام شد ===== #
         # ===== نکته: این بخش صرفاً برای صحیح بودن منطق کلی سیستم است. ===== #
         for spec_id, requirement in required_specs.items():
             if spec_id not in temp_file_names:
-                raise ValidationError(f"فایل '{requirement.file_spec.name}' الزامی است.")
+                raise ValidationError(f"فایل '{requirement.spec.name}' الزامی است.")
 
         # ===== بررسی و اعتبارسنجی آپلود فایل ===== #
         for spec_id, temp_filename in temp_file_names.items():
@@ -37,7 +37,7 @@ class FileFinalizeService:
             
             # ===== ذخیره فایل اعتبارسنجی شده ===== #
             try:
-                requirement = product.file_upload_requirements.get(file_spec_id=spec_id)
+                requirement = product.file_upload_requirements.get(spec_id=spec_id)
                 
                 final_upload = CartItemUpload(
                     cart_item=cart_item,
