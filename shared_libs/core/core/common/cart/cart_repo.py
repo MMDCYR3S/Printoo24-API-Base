@@ -45,3 +45,24 @@ class CartItemRepository(IRepository[CartItem]):
         تمام آیتم‌های یک سبد خرید را برمی‌گرداند.
         """
         return self.filter(cart=cart)
+
+    def get_items_for_cart_with_relations(self, cart: Cart):
+        """
+        دریافت تمام آیتم‌های سبد خرید با بارگذاری روابط (برای لیست).
+        """
+        return self.filter(cart=cart)
+
+    def get_item_detail_with_relations(self, item_id: int, user: User) -> Optional[CartItem]:
+        """
+        دریافت جزئیات دقیق یک آیتم خاص با چک کردن مالکیت کاربر.
+        """
+        try:
+            return self.model.objects.select_related(
+                'cart',
+                'product',
+            ).get(
+                id=item_id, 
+                cart__user=user
+            )
+        except self.model.DoesNotExist:
+            return None
