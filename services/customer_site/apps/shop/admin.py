@@ -15,6 +15,8 @@ from core.models import (
     ProductOption,
     Option,
     OptionValue,
+    ProductFileUploadRequirement,
+    FileUploadSpec,
 )
 
 admin.site.register(Product)
@@ -28,6 +30,8 @@ admin.site.register(ProductQuantity)
 admin.site.register(Quantity)
 admin.site.register(ProductAttachment)
 admin.site.register(Attachment)
+admin.site.register(ProductFileUploadRequirement)
+admin.site.register(FileUploadSpec)
 admin.site.register(ProductOption)
 admin.site.register(Option)
 admin.site.register(OptionValue)

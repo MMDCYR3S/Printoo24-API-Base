@@ -66,3 +66,11 @@ class CartItemRepository(IRepository[CartItem]):
             )
         except self.model.DoesNotExist:
             return None
+        
+    def delete_items_by_cart(self, cart: Cart) -> None:
+        """
+        تمام آیتم‌های مرتبط با یک سبد خرید را به صورت دسته‌جمعی (bulk) حذف می‌کند.
+        این روش بسیار بهینه‌تر از حذف تک به تک است.
+        """
+        self.model.objects.filter(cart=cart).delete()
+        

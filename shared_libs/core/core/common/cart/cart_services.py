@@ -65,3 +65,11 @@ class CartItemService:
         جزئیات آیتم را برمی‌گرداند یا ارور می‌دهد.
         """
         return self._repository.get_item_detail_with_relations(item_id=item_id, user=user)
+
+    def delete_item(self, item: CartItem) -> None:
+        """یک آیتم مشخص را از سبد خرید حذف می‌کند."""
+        self._repository.delete(instance=item)
+
+    def delete_all_items_for_cart(self, cart: Cart) -> None:
+        """تمام آیتم‌های یک سبد خرید را حذف می‌کند."""
+        self._repository.delete_items_by_cart(cart=cart)

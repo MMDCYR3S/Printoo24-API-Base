@@ -13,7 +13,7 @@ class CartItemUpdateView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CartItemUpdateSerializer
 
-    def put(self, request, item_id):
+    def patch(self, request, item_id):
         """
         ویرایش سبد خرید با استفاده از سرویس و فیلدهای مورد نیاز
         """
@@ -30,8 +30,7 @@ class CartItemUpdateView(GenericAPIView):
             
             return Response({
                 "message": "مشخصات محصول در سبد خرید با موفقیت ویرایش شد.",
-                "final_price": updated_item.total_price,
-                "unit_price": updated_item.unit_price
+                "price": updated_item.price
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
