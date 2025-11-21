@@ -17,6 +17,6 @@ from .product import (
     FileUploadSpec,
     ProductFileUploadRequirement,
 )
-from .order import Order, OrderItem, OrderItemDesignFile, OrderStatus
+from .order import Order, OrderItem, OrderItemDesignFile, OrderStatus, DesignFile
 from .cart import Cart, CartItem, CartItemUpload
 from .notification import CustomerNotification

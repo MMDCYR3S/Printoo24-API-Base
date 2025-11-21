@@ -69,6 +69,8 @@ INSTALLED_APPS = [
     # ==== Project apps ==== #
     "apps.accounts",
     "apps.shop",
+    "apps.order",
+    "apps.cart",
 ]
 
 MIDDLEWARE = [

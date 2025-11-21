@@ -20,7 +20,7 @@ class Order(models.Model):
     ]
     
     user = models.ForeignKey("core.User", verbose_name=_("مشتری"), on_delete=models.PROTECT)
-    type = models.CharField(_("نوع سفارش"), max_length=150)
+    type = models.CharField(_("نوع سفارش"), max_length=150, choices=ORDER_TYPE, default="2")
     order_status = models.ForeignKey(
         OrderStatus,
         verbose_name=_("وضعیت سفارش"),
@@ -51,9 +51,6 @@ class DesignFile(models.Model):
     file = models.FileField(_('فایل'), upload_to='orders/designs/')
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
-    
-    def __str__(self):
-        return self.name
 
     class Meta:
         verbose_name = _('فایل طراحی')
@@ -69,7 +66,7 @@ class OrderItemDesignFile(models.Model):
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
     def __str__(self):
-        return self.file.name
+        return f"{self.user} - {self.order_item.id}"
     
     class Meta:
         verbose_name = _('فایل آیتم سفارش')
