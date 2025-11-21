@@ -1,4 +1,14 @@
-from .user import User, Role, UserRole, Wallet, WalletTransaction, CustomerProfile
+from .user import (
+    User,
+    UserRole,
+    Role,
+    Wallet,
+    WalletTransaction,
+    Address,
+    City,
+    Province,
+    CustomerProfile,
+)
 from .product import (
     Product,
     ProductCategory,

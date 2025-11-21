@@ -10,7 +10,7 @@ from ..exceptions import (
     OrderCreationError,
     InsufficientFundsError
 )
-from core.models import User, OrderStatus
+from core.models import User, OrderStatus, Address, City, Province
 from core.common.wallet import WalletService
 from core.common.cart import CartRepository, CartItemRepository
 from core.common.order import (
@@ -38,7 +38,7 @@ class CreateOrderFromCartService:
         self._order_item_design_file_repo = OrderItemDesignFileRepository()
         self._wallet_service = WalletService()
         
-    def execute(self, user: User):
+    def execute(self, user: User, address: Address | None):
         """
         نقطه ورود اصلی برای اجرای فرآیند ایجاد سفارش.
         """
@@ -64,6 +64,7 @@ class CreateOrderFromCartService:
                 order = self._order_repo.create_order(
                     user=user,
                     order_status=initial_status,
+                    address=address if address else None,
                     total_price=total_price,
                     order_type="1"
                 )

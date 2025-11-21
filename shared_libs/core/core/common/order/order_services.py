@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any, List
 
-from core.models import User, Order, OrderItem, OrderItemDesignFile, DesignFile, OrderStatus
+from core.models import User, Order, OrderItem, OrderItemDesignFile, OrderStatus, Address
 from .order_repo import (
     OrderRepository,
     OrderItemRepository,
@@ -16,13 +16,14 @@ class OrderService:
     def __init__(self, repository: OrderRepository):
         self._repository = repository or OrderRepository()
 
-    def create_order(self, user: User, order_status: OrderStatus, total_price: float, order_type: str):
+    def create_order(self, user: User, order_status: OrderStatus, address:Address, total_price: float, order_type: str):
         """
         منطق ایجاد سفارش
         """
         order_data = {
             "user": user,
             "order_status": order_status,
+            "address": address,
             "total_price": total_price,
             "type": order_type
         }

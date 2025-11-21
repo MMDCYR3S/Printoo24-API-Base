@@ -1,7 +1,7 @@
 from typing import List, Any, Generic, Dict, Optional, TypeVar
 
 from core.common.repositories import IRepository
-from core.models import Order, OrderItem, OrderItemDesignFile, DesignFile, OrderStatus
+from core.models import Order, OrderItem, OrderItemDesignFile, DesignFile, OrderStatus, Address
 
 # ======= Order Repository ======= #
 class OrderRepository(IRepository[Order]):
@@ -24,13 +24,14 @@ class OrderRepository(IRepository[Order]):
         """
         return self.filter(user=user)
     
-    def create_order(self, user: Any, order_status: OrderStatus, total_price: float, order_type: str):
+    def create_order(self, user: Any, order_status: OrderStatus, address: Address, total_price: float, order_type: str):
         """
         ساخت یک سفارش بدون آیتم های آن
         """
         order_data = {
             "user": user,
             "order_status": order_status,
+            "address": address,
             "total_price": total_price,
             "type": order_type
         }

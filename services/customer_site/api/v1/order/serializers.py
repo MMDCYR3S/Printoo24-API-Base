@@ -5,7 +5,8 @@ from core.models import (
     OrderItem, 
     Product, 
     DesignFile,
-    OrderItemDesignFile
+    OrderItemDesignFile,
+    Address,
 )
 
 # ===== Product Serializer ===== # 
@@ -66,6 +67,12 @@ class OrderSerializer(serializers.ModelSerializer):
     type = serializers.CharField(source='get_type_display', read_only=True)
     # ===== نمایش آیتم‌های سفارش ===== #
     items = OrderItemSerializer(many=True, read_only=True, source='order_item_order')
+    address_id = serializers.PrimaryKeyRelatedField(
+        queryset=Address.objects.all(),
+        source="address",
+        required=False,
+        allow_null=True
+    )
     
     class Meta:
         model = Order
@@ -76,5 +83,11 @@ class OrderSerializer(serializers.ModelSerializer):
             'type',
             'total_price',
             'created_at',
-            'items'
+            'items',
+            'address_id'
         ]
+        
+    def validate_address(self, value):
+        """
+        اعتبارسنجی آدرس
+        """

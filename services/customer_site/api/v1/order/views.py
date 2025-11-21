@@ -11,6 +11,7 @@ from apps.order.exceptions import (
     OrderCreationError
 )
 from .serializers import OrderSerializer
+from core.models import Address
 
 # ===== Create Order View ===== #
 @extend_schema(tags=["Order"])
@@ -30,11 +31,15 @@ class CreateOrderView(GenericAPIView):
         """
         ایجاد سفارش پس از اعتبارسنجی
         """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        validated_data = serializer.validated_data
         try:
             # ===== ایجاد سرویس ثبت سفارش ===== #
             service = CreateOrderFromCartService()
             # ===== اجرای سرویس ===== #
-            order = service.execute(user=request.user)
+            order = service.execute(user=request.user, address=validated_data.get('address_id'))
             serializer = self.get_serializer(order)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
