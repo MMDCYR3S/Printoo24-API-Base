@@ -21,6 +21,14 @@ class CartRepository(IRepository[Cart]):
             return self.model.objects.get(user=user)
         except Cart.DoesNotExist:
             return None
+        
+    def get_or_create_cart(self, user: User) -> Cart:
+        """
+        اگر یک کاربر یک سبد خرید داشته باشد، آن را باز می‌کند.
+        اگر نه، یک سبد خرید جدید را ساخته و باز می‌کند.
+        """
+        cart, _ = self.model.objects.get_or_create(user=user)
+        return cart
 
 # ===== Cart Item Repository ===== #
 class CartItemRepository(IRepository[CartItem]):
@@ -40,11 +48,11 @@ class CartItemRepository(IRepository[CartItem]):
         except self.model.DoesNotExist:
             return None
 
-    def get_items_for_cart(self, cart: Cart):
+    def get_items_by_cart(self, cart: Cart):
         """
         تمام آیتم‌های یک سبد خرید را برمی‌گرداند.
         """
-        return self.filter(cart=cart)
+        return list(self.model.objects.filter(cart=cart).prefetch_related('uploads', 'product'))
 
     def get_items_for_cart_with_relations(self, cart: Cart):
         """
