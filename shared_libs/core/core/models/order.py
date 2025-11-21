@@ -19,13 +19,25 @@ class Order(models.Model):
         ("2", _("سفارش اختصاصی"))
     ]
     
-    user = models.ForeignKey("core.User", verbose_name=_("مشتری"), on_delete=models.PROTECT)
+    user = models.ForeignKey(
+        "core.User",
+        verbose_name=_("مشتری"),
+        on_delete=models.PROTECT
+    )
     type = models.CharField(_("نوع سفارش"), max_length=150, choices=ORDER_TYPE, default="2")
     order_status = models.ForeignKey(
         OrderStatus,
         verbose_name=_("وضعیت سفارش"),
         on_delete=models.PROTECT,
         related_name="order_status_order"
+    )
+    address = models.ForeignKey(
+        "core.Address",
+        verbose_name=_("آدرس"),
+        on_delete=models.PROTECT,
+        related_name="address_order",
+        blank=True,
+        null=True
     )
     total_price = models.DecimalField(_("قیمت کل"), max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
