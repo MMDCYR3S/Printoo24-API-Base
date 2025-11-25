@@ -1,4 +1,6 @@
-from typing import List, Any, Generic, Dict, Optional, TypeVar
+from typing import List, Any, Dict, Optional
+
+from django.db.models import Prefetch
 
 from core.common.repositories import IRepository
 from core.models import Order, OrderItem, OrderItemDesignFile, DesignFile, OrderStatus, Address
@@ -23,6 +25,12 @@ class OrderRepository(IRepository[Order]):
         دریافت سفارشات یک کاربر
         """
         return self.filter(user=user)
+    
+    def get_user_orders_summary(self, user_id: int) -> List[Order]:
+        """فقط سفارشات را به همراه وضعیت، کل مبلغ و زمان نمایش می‌دهد؛ بدون آیتم‌ها"""
+        return self.model.objects.filter(user_id=user_id) \
+            .select_related('order_status') \
+            .order_by('-created_at')
     
     def create_order(self, user: Any, order_status: OrderStatus, address: Address, total_price: float, order_type: str):
         """
@@ -58,6 +66,13 @@ class OrderItemRepository(IRepository[OrderItem]):
         }
         
         return self.create(order_item_data)
+    
+    def get_order_detail_by_id(self, user_id: int, order_id: int, items: Dict[str, Any]) -> Optional[Order]:
+        """دریافت جزئیات کامل یک سفارش خاص برای کاربر"""
+        return self.model.objects.filter(user_id=user_id, id=order_id) \
+            .select_related('order_status', 'address') \
+            .prefetch_related(items) \
+            .first()
 
 # ========= Order Item Design File Repository ======== #
 class OrderItemDesignFileRepository(IRepository[OrderItemDesignFile]):

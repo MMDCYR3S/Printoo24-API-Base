@@ -58,3 +58,9 @@ class UserService:
         user.set_password(new_password)
         user.save(update_fields=["password"])
         return user
+    
+    def update(self, instance: User, data: Dict[str, Any]) -> User:
+        """
+        ویرایش اطلاعات کاربر
+        """
+        self._repository.update(instance, data)
