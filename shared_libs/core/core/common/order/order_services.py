@@ -1,4 +1,5 @@
 from typing import Optional, Dict, Any, List
+from django.db.models import Prefetch
 
 from core.models import User, Order, OrderItem, OrderItemDesignFile, OrderStatus, Address
 from .order_repo import (
@@ -40,8 +41,14 @@ class OrderService:
         """
         دریافت سفارشات یک کاربر
         """
-        
         return self._repository.get_order_by_user(user)
+
+    def get_user_orders_summary(self, user_id: int) -> List[Order]:
+        """
+        دریافت سفارشات کاربر به همراه تمام جزئیات (آیتم‌ها، محصول، وضعیت، آدرس و فایل‌های طراحی)
+        به صورت بهینه شده (Eager Loading).
+        """
+        return self._repository.get_user_orders_summary(user_id)
 
 # ====== Order Item Service ====== #
 class OrderItemService:    
@@ -65,6 +72,22 @@ class OrderItemService:
         }
         return self._repository.create_order_item(order_item_data)
     
+    def get_user_order_item_details(self, user_id: int, order_id: int) -> Optional[OrderItem]:
+        """
+        دریافت جزئیات آیتم سفارش کاربر
+        """
+        # ===== دریافت فایل های طراحی هر آیتم سفارش ===== #
+        design_files_prefetch = Prefetch(
+            'order_item_design_file_order_item',
+            queryset=OrderItemDesignFile.objects.select_related('file')
+        )
+        # ===== دریافت جزئیات آیتم سفارش + فایل های آن ===== #
+        items_prefetch = Prefetch(
+            'order_item_order',
+            queryset=OrderItem.objects.select_related('product').prefetch_related(design_files_prefetch)
+        )
+        return self._repository.get_order_detail_by_id(user_id, order_id, items_prefetch)
+    
 # ======== Order Item Design File Service ======== #
 class OrderItemDesignFileService:
     """
@@ -84,3 +107,5 @@ class OrderItemDesignFileService:
             "file": file_path
         }
         return self._repository.add_design_file_to_order(design_data)
+
+

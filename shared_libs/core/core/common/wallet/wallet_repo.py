@@ -22,6 +22,17 @@ class WalletRepository(IRepository[Wallet]):
         except ObjectDoesNotExist:
             return None
         
+    
+    def get_for_update(self, user_id: int) -> Wallet:
+        """
+        دریافت کیف پول با قفل کردن رکورد دیتابیس
+        برای جلوگیری از Race Condition هنگام واریز/برداشت
+        """
+        try:
+            return self.model.objects.select_for_update().get(user_id=user_id)
+        except self.model.DoesNotExist:
+            return self.model.objects.create(user_id=user_id)
+        
 # ======== Wallet Transaction Repository ======== #
 class WalletTransactionRepository(IRepository[WalletTransaction]):
     """
@@ -39,3 +50,7 @@ class WalletTransactionRepository(IRepository[WalletTransaction]):
             "amount_after": amount_after
         }
         return self.create(data)
+
+    def get_history_by_user(self, user_id: int) -> List[WalletTransaction]:
+        """دریافت تاریخچه تراکنش‌ها به ترتیب نزولی"""
+        return self.model.objects.filter(user_id=user_id).order_by('-created_at')
