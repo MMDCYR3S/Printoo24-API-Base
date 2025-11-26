@@ -97,6 +97,78 @@ LOGGING = {
             'backupCount': 15,
             'formatter': 'verbose',
         },
+        # ===== هندلر جدید برای افزودن به سبد خرید ===== #
+        'cart_add_to_cart_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/cart/add_to_cart_service.log',
+            'maxBytes': 1024 * 1024 * 15,  # 15 MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر جدید برای سرویس فایل (در پوشه cart) ===== #
+        'cart_file_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/cart/file_service.log', 
+            'maxBytes': 1024 * 1024 * 10,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر برای لیست سبد خرید ===== #
+        'cart_list_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/cart/list_service.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر برای سرویس حذف سبد خرید ===== #
+        'cart_delete_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/cart/delete_service.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر برای سرویس فایل‌های موقت (Cart) ===== #
+        'cart_temp_file_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/cart/temp_file_service.log',
+            'maxBytes': 1024 * 1024 * 10,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر برای جزئیات آیتم سبد خرید ===== #
+        'cart_detail_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/cart/detail_service.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر جدید برای اعتبارسنجی سبد خرید ===== #
+        'cart_validator_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/cart/validator.log', # ذخیره در پوشه cart
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر جدید برای سرویس بروزرسانی سبد خرید ===== #
+        'cart_update_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/cart/update_service.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
         
         # ====== Shop Handlers ====== #
         'shop_product_list_file': {
@@ -176,6 +248,57 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        # ===== لاگر جدید برای سرویس افزودن به سبد خرید ===== #
+        'cart.services.add_to_cart': {
+            'handlers': ['cart_add_to_cart_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر جدید برای سرویس مدیریت فایل سبد خرید ===== #
+        'cart.services.cart_file': {
+            'handlers': ['cart_file_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس لیست سبد خرید ===== #
+        'cart.services.list': {
+            'handlers': ['cart_list_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس جزئیات آیتم ===== #
+        'cart.services.detail': {
+            'handlers': ['cart_detail_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس حذف/پاکسازی سبد خرید ===== #
+        'cart.services.delete': {
+            'handlers': ['cart_delete_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+        # ===== لاگر سرویس فایل موقت ===== #
+        'cart.services.temp_file': {
+            'handlers': ['cart_temp_file_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        
+        # ===== لاگر جدید سرویس اعتبارسنجی ===== #
+        'cart.services.cart_validator': {
+            'handlers': ['cart_validator_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس بروزرسانی ===== #
+        'cart.services.update': {
+            'handlers': ['cart_update_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        
         'shop.services.product_detail': {
             'handlers': ['shop_product_detail_file', 'console'],
             'level': 'DEBUG',

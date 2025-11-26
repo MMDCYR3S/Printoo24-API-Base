@@ -1,8 +1,7 @@
-from django.shortcuts import get_object_or_404
-from django.db.models import Prefetch
+import logging
 from django.core.exceptions import ObjectDoesNotExist
 
-from core.models import CartItem, User, Cart
+from core.models import User, CartItem
 from core.common.cart import (
     CartRepository,
     CartItemRepository,
@@ -10,18 +9,26 @@ from core.common.cart import (
     CartItemService
 )
 
+# ===== تعریف لاگرهای اختصاصی با پیشوند cart ===== #
+logger_list = logging.getLogger('cart.services.list')
+logger_detail = logging.getLogger('cart.services.detail')
+
 # ===== Cart List Service ===== #
 class CartListService:
     """
-    سرویس نمایش لیست آیتم‌های سبد خرید کاربر.
+    سرویس مدیریت نمایش لیست آیتم‌های سبد خرید کاربر.
+    
+    این سرویس وظیفه دارد سبد خرید کاربر را بازیابی کرده (یا بسازد)
+    و تمام آیتم‌های موجود در آن را برای نمایش در فرانت‌اند آماده کند.
     """
+    
     def __init__(self, 
                  cart_repo: CartRepository = None, 
                  item_repo: CartItemRepository = None,
                  cart_service: CartService = None,
                  cart_item_service: CartItemService = None,
         ):
-        # ===== تزریق وابستگی ها ===== #
+        # ===== تزریق وابستگی‌ها ===== #
         self._cart_repo = cart_repo or CartRepository()
         self._item_repo = item_repo or CartItemRepository()
         self._cart_service = cart_service or CartService(self._cart_repo)
@@ -29,34 +36,75 @@ class CartListService:
         
     def get_user_cart_items(self, user: User) -> dict:
         """
-        سبد خرید و آیتم‌های آن را برمی‌گرداند.
+        دریافت سبد خرید و لیست آیتم‌های آن.
+
+        Args:
+            user (User): کاربر درخواست دهنده.
+
+        Returns:
+            dict: دیکشنری شامل آبجکت سبد خرید و لیست کوئری‌ست آیتم‌ها.
         """
-        # ===== دریافت  یا ایجاد سبد خرید ===== #
-        cart = self._cart_service.get_or_create_cart_for_user(user)
-        # ===== دریافت آیتم‌های سسبد خرید ===== #
-        items = self._cart_item_service.get_user_cart_items(cart)
+        logger_list.info(f"Fetching cart list for User ID: {user.id}")
         
-        return {
-            "cart": cart,
-            "items": items
-        }
+        try:
+            # ===== دریافت یا ایجاد سبد خرید ===== #
+            cart = self._cart_service.get_or_create_cart_for_user(user)
+            logger_list.debug(f"Cart retrieved/created for User ID: {user.id}, Cart ID: {cart.id}")
+            
+            # ===== دریافت آیتم‌های سبد خرید ===== #
+            items = self._cart_item_service.get_user_cart_items(cart)
+            logger_list.info(f"Retrieved {items.count()} items for Cart ID: {cart.id}")
+            
+            return {
+                "cart": cart,
+                "items": items
+            }
+        except Exception as e:
+            logger_list.exception(f"Error fetching cart list for User ID: {user.id}")
+            raise e
 
 # ======= Cart Item Detail Service ======= #
 class CartItemDetailService:
     """
-    سرویس نمایش جزئیات یک آیتم خاص.
+    سرویس مدیریت نمایش جزئیات یک آیتم خاص در سبد خرید.
+    
+    این سرویس برای زمانی استفاده می‌شود که کاربر می‌خواهد جزئیات یک محصول خاص
+    در سبد خرید خود (مثل فایل‌های آپلود شده یا ویژگی‌های انتخابی) را مشاهده یا ویرایش کند.
     """
+    
     def __init__(self):
-        self._item_repo = CartItemRepository(),
-        self._cart_item_service = CartItemService(repository=CartItemRepository())
+        # ===== تزریق وابستگی‌ها ===== #
+        self._item_repo = CartItemRepository()
+        self._cart_item_service = CartItemService(repository=self._item_repo)
         
     def get_item_detail(self, item_id: int, user: User) -> CartItem:
         """
-        جزئیات آیتم را برمی‌گرداند یا ارور می‌دهد.
-        """
-        item = self._cart_item_service.get_item_detail(item_id=item_id, user=user)
+        دریافت جزئیات یک آیتم مشخص با بررسی مالکیت.
 
-        if not item:
-            raise ObjectDoesNotExist("آیتم مورد نظر یافت نشد یا متعلق به شما نیست.")
+        Args:
+            item_id (int): شناسه آیتم سبد خرید.
+            user (User): کاربر درخواست دهنده (جهت احراز مالکیت).
+
+        Returns:
+            CartItem: آبجکت آیتم پیدا شده.
+
+        Raises:
+            ObjectDoesNotExist: اگر آیتم پیدا نشود یا متعلق به کاربر نباشد.
+        """
+        logger_detail.info(f"Fetching details for CartItem ID: {item_id}, User ID: {user.id}")
+        
+        try:
+            item = self._cart_item_service.get_item_detail(item_id=item_id, user=user)
+
+            if not item:
+                logger_detail.warning(f"CartItem {item_id} not found or access denied for User ID: {user.id}")
+                raise ObjectDoesNotExist("آیتم مورد نظر یافت نشد یا متعلق به شما نیست.")
             
-        return item
+            logger_detail.debug(f"CartItem {item_id} details retrieved successfully.")
+            return item
+            
+        except ObjectDoesNotExist as e:
+            raise e
+        except Exception as e:
+            logger_detail.exception(f"Unexpected error retrieving CartItem {item_id} for User ID: {user.id}")
+            raise e
