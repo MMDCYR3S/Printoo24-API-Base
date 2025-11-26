@@ -24,18 +24,16 @@ class AddressSerializer(serializers.ModelSerializer):
     city_id = serializers.PrimaryKeyRelatedField(
         queryset=City.objects.all(), source='city', write_only=True
     )
+    address = serializers.CharField()
 
     class Meta:
         model = Address
         fields = [
             'id', 
-            'receiver_name', 
-            'receiver_phone', 
             'province_id',
             'province_detail',
             'city_id',
             'city_detail',
-            'detailed_address', 
-            'postal_code', 
-            'is_default'
+            'address', 
+            'postal_code'
         ]

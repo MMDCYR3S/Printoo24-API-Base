@@ -8,7 +8,7 @@ class AddressRepository(IRepository[Address]):
 
     def get_user_addresses(self, user_id: int):
         """دریافت تمام آدرس‌های کاربر (پیش‌فرض اول نمایش داده شود)"""
-        return self.model.objects.filter(user_id=user_id).select_related('province', 'city').order_by('-is_default', '-created_at')
+        return self.model.objects.filter(user_id=user_id).select_related('province', 'city').order_by('-created_at')
 
     def get_address_by_id(self, user_id: int, address_id: int):
         """دریافت یک آدرس خاص با چک کردن مالکیت کاربر"""

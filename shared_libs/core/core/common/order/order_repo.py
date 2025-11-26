@@ -44,6 +44,13 @@ class OrderRepository(IRepository[Order]):
             "type": order_type
         }
         return self.create(order_data)
+    
+    def get_order_detail_by_id(self, user_id: int, order_id: int, items: Dict[str, Any]) -> Optional[Order]:
+        """دریافت جزئیات کامل یک سفارش خاص برای کاربر"""
+        return self.model.objects.filter(user_id=user_id, id=order_id) \
+            .select_related('order_status', 'address') \
+            .prefetch_related(items) \
+            .first()
 
 # ======= Order Item Repository ======= #
 class OrderItemRepository(IRepository[OrderItem]):
@@ -66,13 +73,7 @@ class OrderItemRepository(IRepository[OrderItem]):
         }
         
         return self.create(order_item_data)
-    
-    def get_order_detail_by_id(self, user_id: int, order_id: int, items: Dict[str, Any]) -> Optional[Order]:
-        """دریافت جزئیات کامل یک سفارش خاص برای کاربر"""
-        return self.model.objects.filter(user_id=user_id, id=order_id) \
-            .select_related('order_status', 'address') \
-            .prefetch_related(items) \
-            .first()
+
 
 # ========= Order Item Design File Repository ======== #
 class OrderItemDesignFileRepository(IRepository[OrderItemDesignFile]):

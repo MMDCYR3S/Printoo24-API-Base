@@ -53,7 +53,7 @@ class CustomerProfileAPIView(APIView):
         except DjangoValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({'detail': 'خطایی در دریافت اطلاعات رخ داد.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'detail': f'خطایی در دریافت اطلاعات رخ داد.{str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def put(self, request):
         """
@@ -83,7 +83,7 @@ class CustomerProfileAPIView(APIView):
                     'phone_number': profile.phone_number,
                     'company': profile.company,
                     'bio': profile.bio,
-                    'msg': _('پروفایل با موفقیت بروزرسانی شد.')
+                    'msg': 'پروفایل با موفقیت بروزرسانی شد.'
                 }
                 return Response(response_data, status=status.HTTP_200_OK)
             

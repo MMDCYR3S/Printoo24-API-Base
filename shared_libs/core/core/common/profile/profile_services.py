@@ -17,11 +17,11 @@ class CustomerProfileService:
         """
         return self._repository.get_by_user_id(user_id)
     
-    def update(self, user_id: int, data: Dict[str, Any]) -> Optional[CustomerProfile]:
+    def update(self, instance: CustomerProfile, data: Dict[str, Any]) -> Optional[CustomerProfile]:
         """
         ویرایش پروفایل کاربر
         این قسمت شامل ویرایش اطلاعات خود پروفایل و
         همچنین ویرایش استان و شهر انتخابی کاربر است.
         """
-        return self._repository.update(user_id, data)
+        return self._repository.update(instance, data)
     
