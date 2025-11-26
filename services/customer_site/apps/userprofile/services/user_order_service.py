@@ -5,6 +5,7 @@ from core.common.order import (
     OrderItemRepository,
     OrderItemService,
 )
+from django.core.exceptions import ValidationError
 from core.models import Order
 
 # ===== User Order List Service ===== #
@@ -26,10 +27,10 @@ class UserOrderDetailService:
     سرویس برای نمایش جزئیات سابقه هر سفارش کاربر
     """
     def __init__(self):
-        self._repo = OrderItemRepository()
-        self._servcie = OrderItemService(repository=OrderItemRepository())
+        self._repo = OrderRepository()
+        self._servcie = OrderService(repository=OrderRepository())
 
-    def get_order_detail(self, user_id: int, order_id: int) -> Optional:
+    def get_order_detail(self, user_id: int, order_id: int) -> Optional[Order]:
         """دریافت جزئیات کامل یک سفارش"""
         order = self._servcie.get_user_order_item_details(user_id, order_id)
         if not order:

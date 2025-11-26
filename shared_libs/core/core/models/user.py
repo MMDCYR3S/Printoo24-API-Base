@@ -168,15 +168,15 @@ class Province(models.Model):
     name = models.CharField(_('نام'), max_length=150)
     slug = models.SlugField(_('نامک'), unique=True, null=True, blank=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
-    updated_at = models.DateTimeField()
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.name}"
     
     def save(self, *args, **kwargs):
         """ ذخیره نام به صورت خودکار """
         self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return self.name
 
 # ===== City Model ===== #
 class City(models.Model):
@@ -185,7 +185,10 @@ class City(models.Model):
     slug = models.SlugField(_('نامک'), unique=True, null=True, blank=True)
     province = models.ForeignKey(Province, related_name='cities', on_delete=models.CASCADE)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
-    updated_at = models.DateTimeField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name}"
 
     def save(self, *args, **kwargs):
         """ ذخیره کد به صورت خودکار  """
@@ -196,8 +199,8 @@ class City(models.Model):
 class Address(models.Model):
     """ مدل آدرس """
     user = models.ForeignKey("core.User", related_name='addresses', on_delete=models.CASCADE)
+    province = models.ForeignKey(Province, verbose_name=_("استان"), on_delete=models.CASCADE)
     city = models.ForeignKey(City, verbose_name=_("شهر"), on_delete=models.CASCADE)
-    province = models.ForeignKey(Province, verbose_name=_("شهر"), on_delete=models.CASCADE)
     postal_code = models.CharField(_('کد پستی'), max_length=10)
     address = models.TextField(_('آدرس'))
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)

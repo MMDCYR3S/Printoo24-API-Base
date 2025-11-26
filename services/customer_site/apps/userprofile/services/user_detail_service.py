@@ -1,89 +1,79 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from django.db import transaction
-
-from core.common.profile import CustomerProfileService, CustomerProfileRepository    
+from core.models import User, CustomerProfile
 from core.common.users.user_repo import UserRepository
 from core.common.users.user_services import UserService
-from core.models import User, CustomerProfile
+from core.common.profile import CustomerProfileService, CustomerProfileRepository
 
-# ===== Profile Detail Service ===== #
 class ProfileDetailService:
     """
     سرویسی برای منطق پروفایل کاربر
     """
     
     def __init__(self):
-        """ تعیین ریپازیتوری و تزریق وابستگی """
-        self._user_repo = UserRepository()
         self._user_service = UserService(repository=UserRepository())
-        self._profile_repo = CustomerProfileRepository()
-        self._profile_serivce = CustomerProfileService(repository=CustomerProfileRepository())
+        # اصلاح نام متغیر برای خوانایی بهتر
+        self._profile_service = CustomerProfileService(repository=CustomerProfileRepository())
         
-    # ===== متد دیدن جزئیات و اطلاعات کاربر ===== #
-    def get_profile_detail(self, user_id: int) -> Optional[CustomerProfile]:
-        """
-        دریافت جزئیات و اطلاعات کاربر
-        اگر کاربر وجود نداشته باشد، None برگرداند
-        """
-        # ===== اعتبارسنجی اطلاعات کاربر ===== #
+    def get_profile_detail(self, user_id: int) -> Dict[str, Any]:
+        """ دریافت جزئیات """
         user = self._user_service.get_by_id(user_id)
         if not user:
             raise ValueError("کاربر وجود ندارد")
         
-        profile = self._profile_serivce.get_by_user_id(user_id)
-        if not profile:
-            raise ValueError("پروفایل کاربر وجود ندارد")
+        profile = self._profile_service.get_by_user_id(user_id)
         
-        # ===== دریافت اطلاعات کاربر به همراه اطلاعات پروفایل ===== #
-        user_profile = {
+        return {
             "user": user,
             "profile": profile
         }
-        
-        return user_profile
-    
-    # ===== متد ویرایش پروفایل کاربر ===== #
-    def update_profile(self, user_id: int, data: Dict[str, Any]) -> Optional[User]:
-        """
-        ویرایش پروفایل کاربر
-        """
 
-        # ===== دریافت و اعتبارسنجی اطلاعات کاربر ===== #
+    def update_profile(self, user_id: int, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        ویرایش پروفایل با حل مشکل NoneType
+        """
+        # 1. دریافت آبجکت‌ها
         user = self._user_service.get_by_id(user_id)
         if not user:
-            raise ValueError("کاربر وجود ندارد")
+            raise ValueError("کاربر یافت نشد")
 
-        # ===== دریافت و اعتبارسنجی اطلاعات پروفایل ===== #
-        profile = self._profile_serivce.get_by_user_id(user)
+        profile = self._profile_service.get_by_user_id(user_id)
         if not profile:
-            raise ValueError("پروفایل کاربر وجود ندارد")
+            raise ValueError("پروفایل کاربر یافت نشد")
         
-        # ===== ویرایش پروفایل کاربر- حالت اتومیک ===== #
         try:
             with transaction.atomic():
-                # ===== ویرایش اطلاعات کاربر ===== #
-                updated_user = self._user_service.update(user_id, data)
-                
-                # ===== اعتبارسنجی اطلاعات کاربر ===== #
+                # 2. بررسی تکراری بودن (Validations)
                 username = data.get("username")
                 email = data.get("email")
-                if User.objects.filter(username=username).exists():
-                    raise ValueError("نام کاربری قبلاً ثبت شده است")
-                if User.objects.filter(email=email).exists():
-                    raise ValueError("ایمیل قبلاً ثبت شده است")
-                
-                # ===== ویرایش اطلاعات پروفایل ===== #
-                updated_profile = self._profile_serivce.update(user_id, data)
-
-                # ===== اعتبارسنجی اطلاعات پروفایل ===== #
                 phone_number = data.get("phone_number")
-                if CustomerProfile.objects.filter(phone_number=phone_number).exists():
-                    raise ValueError("شماره تلفن قبلاً ثبت شده است")
+
+                if username and User.objects.filter(username=username).exclude(pk=user_id).exists():
+                    raise ValueError("نام کاربری قبلاً توسط شخص دیگری ثبت شده است")
                 
+                if email and User.objects.filter(email=email).exclude(pk=user_id).exists():
+                    raise ValueError("ایمیل قبلاً توسط شخص دیگری ثبت شده است")
+                
+                if phone_number and CustomerProfile.objects.filter(phone_number=phone_number).exclude(pk=profile.pk).exists():
+                    raise ValueError("شماره تلفن قبلاً ثبت شده است")
+
+                # 3. اعمال آپدیت‌ها
+                # نکته مهم: ما دیگر نتیجه را در متغیر نمی‌ریزیم تا اگر سرویس None برگرداند، به مشکل نخوریم
+                self._user_service.update(user, data)
+                self._profile_service.update(profile, data)
+
+                # 4. رفرش کردن داده‌ها از دیتابیس برای اطمینان از صحت اطلاعات
+                # این کار باعث می‌شود تغییرات اعمال شده حتما روی آبجکت‌ها بنشیند
+                user.refresh_from_db()
+                profile.refresh_from_db()
+
+        except ValueError as e:
+            raise e
         except Exception as e:
-            raise ValueError(f"خطایی در ویرایش پروفایل کاربر: {str(e)}")
+            raise ValueError(f"خطای سیستمی در ویرایش پروفایل: {str(e)}")
         
+        # 5. بازگرداندن آبجکت‌های اصلی که رفرش شده‌اند
         return {
-            "user" : updated_user,
-            "profile": updated_profile
+            "user": user,
+            "profile": profile
         }

@@ -40,7 +40,7 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="amingholami06@gmail.com")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="oojt ugkq exew ofbs")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=EMAIL_HOST_USER)
 
-# ====== Logging Settings ====== #
+
 # ====== Logging Settings ====== #
 LOGGING = {
     'version': 1,
@@ -123,6 +123,15 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'verbose',
         },
+        # ===== هندلر جدید برای ایجاد سفارش ===== #
+        'shop_order_creation_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/order/order_creation_service.log',
+            'maxBytes': 1024 * 1024 * 20,  # 20 MB (increased size due to importance)
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
         
         # ====== Console Handler ====== #
         'console': {
@@ -154,7 +163,7 @@ LOGGING = {
             'propagate': False,
         },
         
-        # ====== Security Logger (مشترک برای همه سرویس‌های accounts) ====== #
+        # ====== Security Logger ====== #
         'accounts.services.security': {
             'handlers': ['accounts_security_file', 'console'],
             'level': 'WARNING',
@@ -174,6 +183,12 @@ LOGGING = {
         },
         'shop.services.price_calculator': {
             'handlers': ['shop_price_calculator_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر جدید برای سرویس ایجاد سفارش ===== #
+        'shop.services.order_creation': {
+            'handlers': ['shop_order_creation_file', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },
