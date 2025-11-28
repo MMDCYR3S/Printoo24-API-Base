@@ -204,7 +204,42 @@ LOGGING = {
             'backupCount': 10,
             'formatter': 'verbose',
         },
-        
+        # ===== هندلر برای سرویس آدرس ===== #
+        'userprofile_address_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/userprofile/address_service.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر برای سرویس پروفایل ===== #
+        'userprofile_profile_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/userprofile/profile_service.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر برای سفارشات پروفایل کاربر ===== #
+        'userprofile_orders_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/userprofile/orders.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر برای کیف پول پروفایل کاربر ===== #
+        'userprofile_wallet_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/userprofile/wallet.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
         # ====== Console Handler ====== #
         'console': {
             'level': 'INFO',
@@ -241,13 +276,6 @@ LOGGING = {
             'level': 'WARNING',
             'propagate': False,
         },
-        
-        # ====== Shop Loggers ====== #
-        'shop.services.product_list': {
-            'handlers': ['shop_product_list_file', 'console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
         # ===== لاگر جدید برای سرویس افزودن به سبد خرید ===== #
         'cart.services.add_to_cart': {
             'handlers': ['cart_add_to_cart_file', 'console'],
@@ -278,14 +306,12 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-
         # ===== لاگر سرویس فایل موقت ===== #
         'cart.services.temp_file': {
             'handlers': ['cart_temp_file_service_file', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },
-        
         # ===== لاگر جدید سرویس اعتبارسنجی ===== #
         'cart.services.cart_validator': {
             'handlers': ['cart_validator_file', 'console'],
@@ -298,7 +324,12 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        
+        # ====== Shop Loggers ====== #
+        'shop.services.product_list': {
+            'handlers': ['shop_product_list_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         'shop.services.product_detail': {
             'handlers': ['shop_product_detail_file', 'console'],
             'level': 'DEBUG',
@@ -312,6 +343,30 @@ LOGGING = {
         # ===== لاگر جدید برای سرویس ایجاد سفارش ===== #
         'shop.services.order_creation': {
             'handlers': ['shop_order_creation_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس آدرس ===== #
+        'userprofile.services.address': {
+            'handlers': ['userprofile_address_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس پروفایل ===== #
+        'userprofile.services.profile': {
+            'handlers': ['userprofile_profile_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس سفارشات پروفایل ===== #
+        'userprofile.services.orders': {
+            'handlers': ['userprofile_orders_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس کیف پول پروفایل ===== #
+        'userprofile.services.wallet': {
+            'handlers': ['userprofile_wallet_file', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },
