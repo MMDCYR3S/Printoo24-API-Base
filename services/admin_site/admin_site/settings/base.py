@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     
     # ==== Shared apps ==== #
-    "core.apps.CoreConfig",
+    "core",
     
     # ==== Project apps ==== #
 ]

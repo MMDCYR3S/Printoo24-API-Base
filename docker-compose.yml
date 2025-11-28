@@ -1,5 +1,7 @@
+version: '3.8'
+
 services:
-  # ====== Database Service(PostgreSQL) ====== #
+  # ====== Database ======
   db:
     image: postgres:17-alpine
     volumes:
@@ -8,77 +10,77 @@ services:
       - "5432:5432"
     env_file:
       - ./env/.env.dev
-  
-  # ===== Cache & Message Broker Service (Redis) ===== #
+
+  # ====== Redis ======
   redis:
     image: redis:6-alpine
 
-  # ===== Admin Backend API Service ===== #
+  # ====== Admin Backend ======
   admin_site:
     build:
-      context: ./services/admin_site
-      dockerfile: dockerfiles/dev/Dockerfile
-    command: >
-      sh -c "pip install -e /usr/src/shared_libs/core/ &&
-             python manage.py runserver 0.0.0.0:8010"
+      context: .
+      dockerfile: services/admin_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_admin_site
+    command: python manage.py runserver 0.0.0.0:8010
     volumes:
-      - ./services/admin_site/:/usr/src/app/
-      - ./shared_libs/core/:/usr/src/shared_libs/core/
+      - ./services/admin_site:/app/src
+      # ===== برای ایجاد تغییرات به صورت آنی در پروژه ادمین ===== #
+      - ./shared_libs:/app/shared_libs
     ports:
-      - "8010:8010"
+        - "8010:8010"
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
     env_file:
       - ./env/.env.dev
     depends_on:
       - db
       - redis
-
-  # ===== Customer Backend API Service ===== #
+  # ====== Customer Backend ======
   customer_site:
     build:
-      context: ./services/customer_site
-      dockerfile: dockerfiles/dev/Dockerfile
-    command: >
-      sh -c "pip install -e /usr/src/shared_libs/core/ &&
-             python manage.py runserver 0.0.0.0:9010"
+      context: .
+      dockerfile: services/customer_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_customer_site
+    command: python manage.py runserver 0.0.0.0:9010
     volumes:
-      - ./services/customer_site/:/usr/src/app/
-      - ./shared_libs/core/:/usr/src/shared_libs/core/
+      - ./services/customer_site:/app/src
+      - ./shared_libs:/app/shared_libs
     ports:
       - "9010:9010"
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
     env_file:
       - ./env/.env.dev
     depends_on:
       - db
       - redis
 
-  # ===== Celery Service ===== #
-  celery_worker_admin:
-    build:
-      context: ./services/admin_site
-      dockerfile: dockerfiles/dev/Dockerfile
-    command: >
-      sh -c "pip install -e /usr/src/shared_libs/core/ &&
-             celery -A admin_site worker -l info"
-    volumes:
-      - ./services/admin_site/:/usr/src/app/
-      - ./shared_libs/core/:/usr/src/shared_libs/core/
-    env_file:
-      - ./env/.env.dev
-    depends_on:
-      - redis
-      - db
-
-      # ===== Celery Service ===== #
+  # ====== Celery Workers(Customer Site) ======
   celery_worker_customer:
     build:
-      context: ./services/customer_site
-      dockerfile: dockerfiles/dev/Dockerfile
-    command: >
-      sh -c "pip install -e /usr/src/shared_libs/core/ &&
-             celery -A customer_site.celery worker -l info"
+      context: .
+      dockerfile: services/customer_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_celery_customer
+    command: celery -A customer_site.celery worker -l info
     volumes:
-      - ./services/customer_site/:/usr/src/app/
-      - ./shared_libs/core/:/usr/src/shared_libs/core/
+      - ./services/customer_site:/app/src
+      - ./shared_libs:/app/shared_libs
+    env_file:
+      - ./env/.env.dev
+    depends_on:
+      - redis
+      - db
+
+    # ====== Celery Workers(Admin Site) ======
+  celery_worker_admin:
+    build:
+      context: .
+      dockerfile: services/admin_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_celery_admin
+    command: celery -A admin_site.celery worker -l info
+    volumes:
+      - ./services/admin_site:/app/src
+      - ./shared_libs:/app/shared_libs
     env_file:
       - ./env/.env.dev
     depends_on:

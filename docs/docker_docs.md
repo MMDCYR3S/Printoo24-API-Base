@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مستند فنی Docker Compose و Dockerfile</title>
+    <title>مستند فنی بازآرایی زیرساخت Monorepo و Docker</title>
     <style>
         /* Modern Dark Theme for Tech Docs */
         :root {
-            --bg-color: #1a1b26; /* Dark background */
-            --fg-color: #c0caf5; /* Light foreground text */
-            --card-bg: #24283b; /* Slightly lighter background for cards/code */
-            --border-color: #414868;
-            --accent-color: #7aa2f7; /* Blue for headers and links */
-            --highlight-bg: #bb9af7; /* Purple for highlights */
-            --highlight-fg: #1a1b26;
-            --green: #9ece6a;
-            --yellow: #e0af68;
-            --red: #f7768e;
+            --bg-color: #0f172a; /* Slate 900 */
+            --fg-color: #e2e8f0; /* Slate 200 */
+            --card-bg: #1e293b; /* Slate 800 */
+            --border-color: #334155; /* Slate 700 */
+            --accent-color: #38bdf8; /* Sky 400 */
+            --highlight-bg: #818cf8; /* Indigo 400 */
+            --code-bg: #020617; /* Slate 950 */
+            --green: #4ade80;
+            --yellow: #facc15;
+            --red: #f87171;
+            --purple: #c084fc;
         }
         @font-face {
             font-family: 'Vazirmatn';
@@ -34,198 +35,226 @@
             font-size: 16px;
         }
         .container {
-            max-width: 900px;
+            max-width: 950px;
             margin: 2rem auto;
             padding: 1rem 2rem;
-            background-color: var(--bg-color);
         }
-        h1, h2, h3 {
-            color: var(--accent-color);
-            font-weight: 600;
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.5rem;
         }
         h1 {
-            font-size: 2.5rem;
-            text-align: center;
-            border-bottom: none;
-            margin-bottom: 0;
+            font-size: 2.2rem;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
         }
         .subtitle {
-            text-align: center;
-            color: #a9b1d6;
-            margin-top: 0.5rem;
+            color: #94a3b8;
             font-size: 1.1rem;
         }
+        section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
         h2 {
-            font-size: 2rem;
-            margin-top: 3rem;
+            font-size: 1.6rem;
+            color: var(--fg-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         h3 {
-            font-size: 1.5rem;
-            color: var(--green);
-            border-bottom-style: dashed;
-            margin-top: 2rem;
-        }
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-            transition: color 0.2s ease-in-out;
-        }
-        a:hover {
-            color: var(--highlight-bg);
-        }
-        strong, .highlight {
-            color: var(--yellow);
-            font-weight: 600;
-        }
-        .key-concept {
-            background-color: rgba(187, 154, 247, 0.1);
-            color: var(--highlight-bg);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.95em;
+            font-size: 1.25rem;
+            color: var(--purple);
+            margin-top: 1.5rem;
         }
         pre {
-            background-color: var(--card-bg);
+            background-color: var(--code-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 1rem;
             overflow-x: auto;
-            font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+            font-family: 'Fira Code', 'Consolas', monospace;
             font-size: 0.9rem;
-            line-height: 1.6;
+            direction: ltr;
+            text-align: left;
         }
         code {
             font-family: inherit;
+            color: var(--accent-color);
+        }
+        .highlight-text {
+            color: var(--yellow);
+            font-weight: bold;
         }
         ul {
-            list-style-type: none;
-            padding-right: 20px;
+            list-style: none;
+            padding: 0;
         }
         li {
             position: relative;
-            padding-right: 25px;
+            padding-right: 1.5rem;
             margin-bottom: 0.75rem;
         }
         li::before {
-            content: '✓';
+            content: "▹";
             position: absolute;
             right: 0;
+            color: var(--accent-color);
+        }
+        .architecture-diagram {
+            font-family: monospace;
+            white-space: pre;
             color: var(--green);
+            line-height: 1.2;
+            direction: ltr;
+            text-align: left;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
             font-weight: bold;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-color);
+            margin-left: 0.5rem;
+        }
+        .alert {
+            background-color: rgba(245, 158, 11, 0.1);
+            border-right: 4px solid var(--yellow);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+        .success {
+            background-color: rgba(74, 222, 128, 0.1);
+            border-right: 4px solid var(--green);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
         }
         footer {
             text-align: center;
+            color: #64748b;
             margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            color: #a9b1d6;
-        }
-        .note {
-            background-color: rgba(122, 162, 247, 0.1);
-            border-right: 4px solid var(--accent-color);
-            padding: 1rem 1.5rem;
-            margin: 2rem 0;
-            border-radius: 4px;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border-color);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>مستند فنی معماری Docker</h1>
-            <p class="subtitle">تحلیل فایل‌های <code>docker-compose.yml</code> و <code>Dockerfile</code> برای محیط توسعه</p>
+            <h1>مستند فنی بازآرایی معماری Micro-Modular</h1>
+            <p class="subtitle">استانداردسازی ساختار Monorepo، استراتژی Docker Context و مدیریت وابستگی‌های اشتراکی</p>
         </header>
         <main>
-            <section id="introduction">
-                <h2>۱. مقدمه و هدف</h2>
+            <section id="structure">
+                <h2>۱. بازآرایی ساختار پروژه (Monorepo Restructuring)</h2>
                 <p>
-                    این مستند به تشریح کامل فایل <code>docker-compose.yml</code> و <code>Dockerfile</code> مشترک پروژه می‌پردازد. هدف اصلی این ساختار، تعریف، راه‌اندازی و مدیریت یکپارچه و ایزوله تمام سرویس‌های مورد نیاز برای محیط توسعه محلی (Local Development) است. با این روش، یک محیط قابل تکرار (Reproducible) و سازگار (Consistent) برای تمام اعضای تیم فراهم می‌شود.
+                    به منظور دستیابی به معماری تمیز (Clean Architecture) و جلوگیری از پیچیدگی‌های غیرضروری، ساختار پوشه‌بندی پروژه از حالت تودرتو (Nested) به حالت تخت (Flat) و استاندارد پایتون تغییر یافت. این تغییر برای تبدیل <code>shared_libs</code> به یک پکیج قابل نصب حیاتی بود.
                 </p>
-                <div class="note">
-                    <strong>نحوه راه‌اندازی:</strong> برای اجرای تمام سرویس‌ها، کافیست دستور زیر را در ریشه پروژه اجرا کنید:
-                    <pre><code>docker-compose up --build</code></pre>
-                    فلگ <code>--build</code> ایمیج‌ها را بر اساس آخرین تغییرات کد، دوباره می‌سازد.
+                <h3>ساختار درختی جدید</h3>
+                <pre class="architecture-diagram">
+Repo Root/
+├── docker-compose.yml
+├── shared_libs/                <span style="color: #94a3b8;"># <--- Root of Shared Package</span>
+│   ├── setup.py                <span style="color: #94a3b8;"># <--- Correct placement for setuptools</span>
+│   └── core/                   <span style="color: #94a3b8;"># <--- Actual Python Package</span>
+│       ├── __init__.py         <span style="color: #94a3b8;"># <--- Essential for package discovery</span>
+│       ├── models/
+│       ├── domain/
+│       └── apps.py
+└── services/
+    ├── customer_site/
+    └── admin_site/
+                </pre>
+                <div class="alert">
+                    <strong>تغییر مهم:</strong> فایل <code>setup.py</code> اکنون مستقیماً در ریشه <code>shared_libs</code> قرار دارد و پکیج <code>core</code> را شناسایی می‌کند. این ساختار امکان نصب پکیج را به صورت استاندارد (Standard Distribution) فراهم می‌کند.
                 </div>
             </section>
-            <section id="services">
-                <h2>۲. تحلیل سرویس‌های Docker Compose</h2>
-                <p>فایل <code>docker-compose.yml</code> وظیفه ارکستراسیون (هماهنگی) کانتینرهای مختلف پروژه را بر عهده دارد. در ادامه، هر سرویس به تفکیک بررسی می‌شود.</p>
-                <h3>سرویس `db` (پایگاه داده PostgreSQL)</h3>
-                <p>این سرویس، پایگاه داده اصلی پروژه را راه‌اندازی می‌کند.</p>
-                <ul>
-                    <li><strong>ایمیج:</strong> استفاده از <code>postgres:17-alpine</code>، یک نسخه سبک و به‌روز.</li>
-                    <li><strong>پایداری داده‌ها (Data Persistence):</strong> با استفاده از <code>volumes</code>، دیتای پایگاه داده روی سیستم میزبان ذخیره می‌شود. این کار از پاک شدن اطلاعات با هر بار ری‌استارت کانتینر جلوگیری می‌کند. این یک <strong class="highlight">مفهوم کلیدی</strong> در کار با دیتابیس‌ها در داکر است.</li>
-                    <li><strong>دسترسی از بیرون:</strong> پورت <code>5432</code> کانتینر به پورت <code>5432</code> میزبان متصل شده تا بتوان با ابزارهایی مثل DBeaver به آن وصل شد.</li>
-                    <li><strong>مدیریت متغیرها:</strong> اطلاعات حساس مانند نام کاربری و رمز عبور از طریق <code>env_file</code> خوانده می‌شوند تا در کد هاردکد نشوند.</li>
-                </ul>
-                <h3>سرویس `redis` (کش و صف پیام)</h3>
-                <p>این سرویس یک دیتابیس in-memory از نوع Redis را اجرا می‌کند که دو نقش حیاتی دارد:</p>
-                <ul>
-                    <li><strong>کش (Caching):</strong> برای ذخیره موقت داده‌های پرتکرار و افزایش سرعت پاسخ‌دهی API.</li>
-                    <li><strong>صف پیام (Message Broker):</strong> به عنوان واسط بین اپلیکیشن‌های ما و پردازشگرهای پس‌زمینه (Celery) عمل می‌کند. تسک‌های سنگین به این صف ارسال می‌شوند.</li>
-                </ul>
-                <h3>سرویس‌های `admin_site` و `customer_site` (اپلیکیشن‌های اصلی)</h3>
-                <p>این دو سرویس، هسته اصلی APIهای پروژه هستند که ساختاری مشابه دارند. مهم‌ترین ویژگی‌های آن‌ها در Docker Compose عبارتند از:</p>
-                <ul>
-                    <li>
-                        <strong>توسعه سریع با Volumes:</strong> دو مسیر کلیدی به داخل کانتینر mount می‌شوند:
-                        <ol>
-                            <li>کد خود سرویس (مثلاً <code>./services/admin_site/</code>)</li>
-                            <li>کد کتابخانه مشترک (<code>./shared_libs/core/</code>)</li>
-                        </ol>
-                        این کار قابلیت <span class="key-concept">Live Reloading</span> را فعال می‌کند؛ یعنی هر تغییری در کد بلافاصله و بدون نیاز به build مجدد در کانتینر اعمال می‌شود.
-                    </li>
-                    <li>
-                        <strong>نصب کتابخانه مشترک به صورت Editable:</strong>
-                        <p>دستور <code>pip install -e /usr/src/shared_libs/core/</code> که در <code>command</code> هر سرویس آمده، کتابخانه مشترک را به صورت "قابل ویرایش" نصب می‌کند. این یعنی تغییرات در `shared_libs` فوراً در هر دو سرویس `admin_site` و `customer_site` منعکس می‌شود.</p>
-                    </li>
-                     <li>
-                        <strong>ترتیب اجرا:</strong> با استفاده از <code>depends_on</code>، تضمین می‌شود که این سرویس‌ها تنها پس از آمادگی کامل <code>db</code> و <code>redis</code> شروع به کار کنند.
-                    </li>
-                </ul>
-                <pre dir="ltr"><code># بخشی از سرویس admin_site در docker-compose.yml
-command: >
-  sh -c "pip install -e /usr/src/shared_libs/core/ &&
-         python manage.py runserver 0.0.0.0:8010"
-volumes:
-  - ./services/admin_site/:/usr/src/app/
-  - ./shared_libs/core/:/usr/src/shared_libs/core/
-depends_on:
-  - db
-  - redis</code></pre>
-                <h3>سرویس‌های `celery_worker` (پردازشگرهای پس‌زمینه)</h3>
-                <p>این سرویس‌ها وظیفه اجرای تسک‌های سنگین (مانند ارسال ایمیل) را در پس‌زمینه بر عهده دارند تا API اصلی سریع و پاسخگو بماند.</p>
-                <ul>
-                    <li>این سرویس‌ها از همان <code>Dockerfile</code> و <code>build context</code> اپلیکیشن اصلی استفاده می‌کنند تا از هرگونه عدم تطابق وابستگی‌ها جلوگیری شود.</li>
-                    <li>تنها تفاوت آن‌ها در <code>command</code> است که به جای `runserver`، دستور اجرای Celery worker اجرا می‌شود.</li>
-                </ul>
+            <section id="docker-strategy">
+                <h2>۲. تغییر استراتژی Docker Build Context</h2>
+                <p>
+                    یکی از چالش‌های اصلی در معماری میکروسرویس/ماژولار، دسترسی سرویس‌ها به کدهای مشترک (Shared Libraries) در زمان بیلد داکر بود. پیش از این، کانتکست بیلد محدود به پوشه هر سرویس بود که دسترسی به <code>shared_libs</code> را غیرممکن می‌کرد.
+                </p>
+                <h3>راهکار: Root Level Context</h3>
+                <p>
+                    ما <code>Build Context</code> را برای تمام سرویس‌ها به ریشه پروژه (<code>.</code>) تغییر دادیم. این کار به Dockerfile اجازه می‌دهد تا به تمام فایل‌های پروژه دسترسی داشته باشد.
+                </p>
+                <div class="code-block-title">تغییر در docker-compose.yml</div>
+                <pre><code>services:
+  customer_site:
+    build:
+      context: .  <span style="color: #64748b;"># <--- کانتکست بیلد اکنون ریشه پروژه است</span>
+      dockerfile: services/customer_site/dockerfiles/dev/Dockerfile
+    # ...</code></pre>
             </section>
             <section id="dockerfile">
-                <h2>۳. تحلیل Dockerfile مشترک</h2>
-                <p>تمام سرویس‌های پایتونی (APIها و Workerها) از یک `Dockerfile` پایه مشترک برای ساخت ایمیج خود استفاده می‌کنند. این فایل با رعایت بهترین شیوه‌ها طراحی شده است.</p>
-                <pre dir="ltr"><code>FROM python:3.11-slim
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-WORKDIR /usr/src/app
-# ۱. کپی و نصب نیازمندی‌ها
-COPY ./requirements/dev/requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
-# ۲. کپی کردن باقی کد برنامه
-COPY . .
-</code></pre>
-                <div class="note">
-                    <strong class="highlight">نکته کلیدی: بهینه‌سازی لایه‌های کش داکر</strong>
-                    <p>
-                        ترتیب دستورات در این `Dockerfile` بسیار مهم است. ابتدا <strong>فقط فایل `requirements.txt`</strong> کپی و نصب می‌شود و سپس باقی کدها کپی می‌شوند. از آنجایی که وابستگی‌ها به ندرت تغییر می‌کنند ولی کد برنامه مدام در حال تغییر است، داکر لایه سنگین `pip install` را کش می‌کند. در نتیجه، هنگام build مجدد، فقط لایه آخر (کپی کد) اجرا شده و فرآیند build <strong>بسیار سریع‌تر</strong> خواهد بود.
-                    </p>
+                <h2>۳. بازنویسی Dockerfile (رویکرد Multi-Layer)</h2>
+                <p>
+                    فایل <code>Dockerfile</code> جدید به گونه‌ای طراحی شده که هم برای محیط توسعه و هم پروداکشن بهینه باشد. عملیات نصب پکیج مشترک از زمان اجرا (Runtime) به زمان ساخت (Build Time) منتقل شد.
+                </p>
+                <h3>مراحل کلیدی در Dockerfile</h3>
+                <ul>
+                    <li><strong>کانتکست ایزوله:</strong> کد سرویس در <code>/app/src</code> و کد مشترک در <code>/app/shared_libs</code> قرار می‌گیرد.</li>
+                    <li><strong>نصب وابستگی‌ها:</strong> پکیج <code>core</code> کپی شده و نصب می‌شود.</li>
+                    <li><strong>قابلیت حمل:</strong> چون کد مشترک داخل ایمیج <code>COPY</code> می‌شود، ایمیج نهایی مستقل از فایل‌های هاست است (Production Ready).</li>
+                </ul>
+                <pre><code>FROM python:3.11-slim
+WORKDIR /app
+
+# 1. Copy & Install Shared Libs (Core Domain)
+COPY ./shared_libs /app/shared_libs
+RUN pip install --upgrade pip && \
+    pip install -e /app/shared_libs
+
+# 2. Install Service Dependencies
+COPY ./services/customer_site/requirements/dev/requirements.txt /app/requirements.txt
+RUN pip install -r /app/requirements.txt
+
+# 3. Copy Service Code
+COPY ./services/customer_site /app/src
+WORKDIR /app/src
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:9010"]</code></pre>
+            </section>
+            <section id="dev-environment">
+                <h2>۴. پیکربندی محیط توسعه (Hot-Reload & PYTHONPATH)</h2>
+                <p>
+                    برای تضمین تجربه توسعه روان (DX)، دو تکنیک مهم پیاده‌سازی شد تا تغییرات کد بلافاصله اعمال شوند و پایتون مسیرهای جدید را بشناسد.
+                </p>
+                <h3>الف) تکنیک PYTHONPATH Injection</h3>
+                <p>
+                    به جای تکیه بر نصب مجدد پکیج در هر بار اجرای کانتینر، مسیر لایبرری مشترک مستقیماً به <code>PYTHONPATH</code> تزریق شد. این سریع‌ترین و مطمئن‌ترین روش برای محیط توسعه است.
+                </p>
+                <h3>ب) مدیریت Volumeها</h3>
+                <p>
+                    برای اعمال آنی تغییرات (Hot Reloading)، دو مسیر حیاتی به کانتینر Mount شدند.
+                </p>
+                <pre><code>  customer_site:
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH  <span style="color: #64748b;"># <--- تضمین شناسایی پکیج Core</span>
+    volumes:
+      - ./services/customer_site:/app/src        <span style="color: #64748b;"># <--- سینک کد سرویس</span>
+      - ./shared_libs:/app/shared_libs           <span style="color: #64748b;"># <--- سینک کد مشترک (Core)</span></code></pre>
+                <div class="success">
+                    <strong>نتیجه نهایی:</strong> توسعه‌دهنده می‌تواند کدهای <code>core</code> یا <code>customer_site</code> را در سیستم خود تغییر دهد و سرور جنگو به صورت خودکار ریستارت شده و تغییرات را اعمال می‌کند، بدون نیاز به بیلد مجدد.
                 </div>
             </section>
         </main>
         <footer>
-            <p>مستند فنی تولید شده در تاریخ ۱۴۰۴/۰۸/۲۴</p>
+            <p>تهیه شده توسط تیم فنی ShivaTek | نسخه بازآرایی شده</p>
         </footer>
     </div>
 </body>

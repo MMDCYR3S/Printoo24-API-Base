@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from shared_libs.core.core.models import (
+from shared_libs.core.models import (
     User,
     CustomerProfile,
     Wallet,

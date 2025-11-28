@@ -1,22 +1,32 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-# Set labels for maintainer information
+# ===== نام گذاری داکر فایل ===== #
 LABEL maintainer="amingholami06@gmail.com"
-
-# Prevent python from writing pyc files and buffer output
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
+# ===== مسیر پوشه ===== #
+WORKDIR /app
 
-# Install system dependencies if any (e.g., for psycopg2)
-# RUN apt-get update && apt-get install -y ...
+# ===== نصب پیش نیاز اصلی داکر ===== #
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies
-# Copy only the requirements file first to leverage Docker cache
-COPY ./requirements/dev/requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# ===== نصب و کپی اپلیکیشن مشترک ===== #
+COPY ./shared_libs /app/shared_libs
 
-# Copy the rest of the application code
-COPY . .
+# ===== نصب و کپی اپلیکیشن مشتری سایت ===== #
+COPY ./services/admin_site/requirements/dev/requirements.txt /app/requirements.txt
+RUN pip install -r /app/requirements.txt
+
+# ===== کپی سورس کد اپلیکیشن مشتری سایت ===== #
+COPY ./services/admin_site /app/src
+
+WORKDIR /app/src
+
+# ===== پورت پیش فرض ===== #
+EXPOSE 9010
+
+# ===== دستور اجرای پیش فرض ===== #
+CMD ["python", "manage.py", "runserver", "0.0.0.0:9010"]
