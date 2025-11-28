@@ -1,14 +1,17 @@
-# ======= ایجاد لایه ریپازیتوری برای قوانین انتزاعی تکراری سیستم ======= #
 from typing import List, Any, Generic, Dict, Optional, TypeVar
 
 from django.db import models
+from django.db.models import QuerySet
 from django.core.exceptions import ObjectDoesNotExist
 
 T = TypeVar('T', bound=models.Model)
 
-# ======== I Repository ======== #
-class IRepository(Generic[T]):
-    """ ایجاد لایه انتزاعی برای قوانین سیستم و پایه و اساس آن """
+# ======== IRepository ======== #
+class BaseRepository(Generic[T]):
+    """ 
+    کلاس والد برای تمام ریپازیتوری‌ها.
+    شامل عملیات CRUD استاندارد.
+    """
     def __init__(self, model: type[T]):
         self.model = model
     
@@ -26,13 +29,12 @@ class IRepository(Generic[T]):
         except ObjectDoesNotExist:
             return None
     
-    def get_all(self) -> List[T]:
-        """ دریافت همه آبجکت های موجود """
-        return list(self.model.objects.all())
+    def get_all(self) -> QuerySet[T]:
+        return self.model.objects.all()
     
-    def filter(self, **kwargs) -> List[T]:
+    def filter(self, **kwargs) -> QuerySet[T]:
         """ دریافت آبجکت های با شرایط مختلف براساس فیلترینگ """
-        return list(self.model.objects.filter(**kwargs))
+        return self.model.objects.filter(**kwargs)
     
     def exists(self, **kwargs) -> bool:
         """ صحت از وجود یک آبجکت در یک مدلاسیون """
@@ -45,7 +47,8 @@ class IRepository(Generic[T]):
     def update(self, instance: T, data: Dict[str, Any]) -> T:
         """ ویرایش یک آبجکت براساس فیلدهای مورد نیاز """
         for key, value in data.items():
-            setattr(instance, key, value)
+            if hasattr(instance, key):
+                setattr(instance, key, value)
         instance.save()
         return instance
     

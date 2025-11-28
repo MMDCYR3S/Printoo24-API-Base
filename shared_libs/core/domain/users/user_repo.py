@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from ..repositories import IRepository
+from ...utils.base_repository import IRepository
 from ...models import User
 
 # ====== User Repository ====== #

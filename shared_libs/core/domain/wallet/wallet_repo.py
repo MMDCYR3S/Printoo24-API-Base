@@ -2,7 +2,7 @@ from typing import List, Optional, Any
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from ..repositories import IRepository
+from ...utils.base_repository import IRepository
 from core.models import User, Wallet, WalletTransaction
 
 # ======== Wallet Repository ======== #

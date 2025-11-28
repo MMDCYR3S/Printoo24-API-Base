@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Any
 
 from ...models import CustomerProfile
-from ..repositories import IRepository
+from ...utils.base_repository import IRepository
 
 class CustomerProfileRepository(IRepository[CustomerProfile]):
     """

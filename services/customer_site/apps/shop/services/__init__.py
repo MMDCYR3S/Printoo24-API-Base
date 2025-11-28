@@ -1,3 +1,3 @@
 from .product_detail_service import ShopProductDetailService
 from .product_list_service import ShopProductListService
-from .product_price_cal_service import ProductPriceCalculator
+from ......shared_libs.core.domain.product.calculators import ProductPriceCalculator

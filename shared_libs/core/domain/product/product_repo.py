@@ -1,7 +1,7 @@
 from typing import List, Optional
 from django.db.models import Prefetch, QuerySet
 
-from ..repositories import IRepository
+from ...utils.base_repository import IRepository
 from core.models import (
     Product, 
     ProductQuantity, 

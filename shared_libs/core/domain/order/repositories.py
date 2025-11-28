@@ -1,12 +1,12 @@
 from typing import List, Any, Dict, Optional
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, QuerySet
 
-from core.common.repositories import IRepository
-from core.models import Order, OrderItem, OrderItemDesignFile, DesignFile, OrderStatus, Address
+from core.utils import BaseRepository
+from core.models import Order, OrderItem, OrderItemDesignFile, DesignFile, OrderStatus, Address, User
 
 # ======= Order Repository ======= #
-class OrderRepository(IRepository[Order]):
+class OrderRepository(BaseRepository[Order]):
     """
     مخزن انتزاعی برای سفارشات
     """
@@ -20,19 +20,19 @@ class OrderRepository(IRepository[Order]):
         """
         return self.get_by_id(order_id)
     
-    def get_order_by_user(self, user: Any) -> List[Order]:
+    def get_order_by_user(self, user: User) -> List[Order]:
         """
         دریافت سفارشات یک کاربر
         """
         return self.filter(user=user)
     
-    def get_user_orders_summary(self, user_id: int) -> List[Order]:
+    def get_user_orders_summary(self, user: User) -> QuerySet[Order]:
         """فقط سفارشات را به همراه وضعیت، کل مبلغ و زمان نمایش می‌دهد؛ بدون آیتم‌ها"""
-        return self.model.objects.filter(user_id=user_id) \
-            .select_related('order_status') \
+        return self.model.objects.filter(user=user)\
+            .select_related('order_status')\
             .order_by('-created_at')
     
-    def create_order(self, user: Any, order_status: OrderStatus, address: Address, total_price: float, order_type: str):
+    def create_order(self, user: User, order_status: OrderStatus, address: Address, total_price: float, order_type: str):
         """
         ساخت یک سفارش بدون آیتم های آن
         """
@@ -45,38 +45,35 @@ class OrderRepository(IRepository[Order]):
         }
         return self.create(order_data)
     
-    def get_order_detail_by_id(self, user_id: int, order_id: int, items: Dict[str, Any]) -> Optional[Order]:
+    def get_order_with_items(self, user_id: int, order_id: int) -> Optional[Order]:
         """دریافت جزئیات کامل یک سفارش خاص برای کاربر"""
-        return self.model.objects.filter(user_id=user_id, id=order_id) \
-            .select_related('order_status', 'address') \
-            .prefetch_related(items) \
+        
+        # ===== دریافت فایل های طراحی هر آیتم سفارش ===== #
+        design_files_prefetch = Prefetch(
+            'order_item_design_file_order_item',
+            queryset=OrderItemDesignFile.objects.select_related('file')
+        )
+        # ===== دریافت جزئیات آیتم سفارش + فایل های آن ===== #
+        items_prefetch = Prefetch(
+            'order_item_order',
+            queryset=OrderItem.objects.select_related('product').prefetch_related(design_files_prefetch)
+        )
+        
+        return self.model.objects.filter(id=order_id, user_id=user_id)\
+            .select_related('order_status', 'address')\
+            .prefetch_related(items_prefetch)\
             .first()
 
 # ======= Order Item Repository ======= #
-class OrderItemRepository(IRepository[OrderItem]):
+class OrderItemRepository(BaseRepository[OrderItem]):
     """
     مخزن انتزاعی برای آیتم های سفارشات
     """
     def __init__(self):
         super().__init__(OrderItem)
-    
-    def create_order_item(self, order: Order, product: Any, price: float, quantity: int, items: Dict[str, Any]):
-        """
-        ساخت یک آیتم سفارش برای سفارش مورد نظر
-        """
-        order_item_data = {
-            "order": order,
-            "product": product,
-            "price": price,
-            "quantity": quantity,
-            "items": items
-        }
-        
-        return self.create(order_item_data)
-
 
 # ========= Order Item Design File Repository ======== #
-class OrderItemDesignFileRepository(IRepository[OrderItemDesignFile]):
+class OrderItemDesignFileRepository(BaseRepository[OrderItemDesignFile]):
     """
     مخزن انتزاعی برای فایل های طراحی سفارشات
     """
@@ -96,7 +93,7 @@ class OrderItemDesignFileRepository(IRepository[OrderItemDesignFile]):
         return self.create(data)
 
 # ======== Design File Repository ======== #
-class DesignFileRepository(IRepository[DesignFile]):
+class DesignFileRepository(BaseRepository[DesignFile]):
     """
     مخزن انتزاعی برای فایل‌های طراحی
     """
