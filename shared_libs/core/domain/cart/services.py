@@ -95,31 +95,6 @@ class CartDomainService:
             )
 
         return cart_item
-        
-    # ===== افزودن آیتم به سبد خرید ===== #
-    def add_item_to_cart(self, user: User, product: Product, quantity: int, items_data: Dict) -> CartItem:
-        """
-        این متد «هوشمند» است. چک می‌کند آیتم تکراری نباشد.
-        """
-        if quantity <= 0:
-            raise InvalidQuantityException("تعداد باید بیشتر از صفر باشد.")
-
-        cart = self._cart_repo.get_or_create_cart(user)
-        
-        # ===== بررسی وجود آیتم مشابه در سبد خرید ===== #
-        existing_item = self._item_repo.find_item_in_cart(cart, product, items_data)
-        if existing_item:
-            return self.update_item_quantity(existing_item, existing_item.quantity + quantity)
-
-        unit_price = product.base_price
-        
-        return self._item_repo.create({
-            "cart": cart,
-            "product": product,
-            "quantity": quantity,
-            "price": unit_price,
-            "items": items_data
-        })
     
     # ===== به‌روزرسانی تعداد آیتم در سبد خرید ===== #
     def update_item_quantity(self, item: CartItem, new_quantity: int) -> CartItem:

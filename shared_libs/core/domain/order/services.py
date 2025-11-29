@@ -112,46 +112,46 @@ class OrderDomainService:
         """
         return self._repository.get_order_detail_by_id(user_id, order_id)
 
-# ====== Order Item Service ====== #
-class OrderItemService:    
-    """
-    سرویس برای منطق آیتم های سفارش
-    """
+# # ====== Order Item Service ====== #
+# class OrderItemService:    
+#     """
+#     سرویس برای منطق آیتم های سفارش
+#     """
 
-    def __init__(self, repository: OrderItemRepository):
-        self._repository = repository or OrderItemRepository()
+#     def __init__(self, repository: OrderItemRepository):
+#         self._repository = repository or OrderItemRepository()
         
-    def create_order_item(self, order: Order, product: Any, price: float, quantity: int, items: Dict[str, Any]):
-        """
-        ایجاد آیتم سفارش
-        """
-        order_item_data = {
-            "order": order,
-            "product": product,
-            "price": price,
-            "quantity": quantity,
-            "items": items
-        }
-        return self._repository.create_order_item(order_item_data)
+#     def create_order_item(self, order: Order, product: Any, price: float, quantity: int, items: Dict[str, Any]):
+#         """
+#         ایجاد آیتم سفارش
+#         """
+#         order_item_data = {
+#             "order": order,
+#             "product": product,
+#             "price": price,
+#             "quantity": quantity,
+#             "items": items
+#         }
+#         return self._repository.create_order_item(order_item_data)
     
-# ======== Order Item Design File Service ======== #
-class OrderItemDesignFileService:
-    """
-    سرویس برای منطق فایل های طراحی
-    """
+# # ======== Order Item Design File Service ======== #
+# class OrderItemDesignFileService:
+#     """
+#     سرویس برای منطق فایل های طراحی
+#     """
     
-    def __init__(self, repository: OrderItemDesignFileRepository):
-        self._repository = repository or OrderItemDesignFileRepository()
+#     def __init__(self, repository: OrderItemDesignFileRepository):
+#         self._repository = repository or OrderItemDesignFileRepository()
         
-    def add_file_to_order_item(self,user: User, order_item: OrderItem, file_path: str) -> OrderItemDesignFile:
-        """
-        ایجاد یک فایل طراحی برای یک آیتم سفارش
-        """
-        design_data = {
-            "user": user,
-            "order_item": order_item,
-            "file": file_path
-        }
-        return self._repository.add_design_file_to_order(design_data)
+#     def add_file_to_order_item(self,user: User, order_item: OrderItem, file_path: str) -> OrderItemDesignFile:
+#         """
+#         ایجاد یک فایل طراحی برای یک آیتم سفارش
+#         """
+#         design_data = {
+#             "user": user,
+#             "order_item": order_item,
+#             "file": file_path
+#         }
+#         return self._repository.add_design_file_to_order(design_data)
 
 

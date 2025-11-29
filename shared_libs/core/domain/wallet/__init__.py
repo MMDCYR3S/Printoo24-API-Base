@@ -1,2 +1,2 @@
-from .wallet_repo import WalletRepository, WalletTransactionRepository
-from .wallet_services import WalletService
+from .repositories import WalletRepository, WalletTransactionRepository
+from .services import WalletService

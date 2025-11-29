@@ -1,2 +1,2 @@
-from .user_repo import UserRepository
-from .user_services import UserService
+from .repositories import UserRepository
+from .services import UserDomainService

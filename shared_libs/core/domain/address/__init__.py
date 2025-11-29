@@ -1,1 +1,1 @@
-from .address_repo import AddressRepository
+from .repositories import AddressRepository

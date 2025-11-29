@@ -1,2 +1,2 @@
 from .repositories import CartRepository, CartItemRepository
-from .services import CartService, CartItemService
+from .services import CartDomainService

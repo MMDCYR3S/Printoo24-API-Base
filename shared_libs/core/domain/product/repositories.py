@@ -1,7 +1,8 @@
 from typing import List, Optional
 from django.db.models import Prefetch, QuerySet
 
-from ...utils.base_repository import IRepository
+from ...utils.base_repository import BaseRepository
+from .exceptions import ProductNotFoundException
 from core.models import (
     Product, 
     ProductQuantity, 
@@ -13,7 +14,7 @@ from core.models import (
 )
 
 # ====== Product Repository ====== #
-class ProductRepository(IRepository[Product]):
+class ProductRepository(BaseRepository[Product]):
     """
     ریپازیتوری مربوط به قوانین و کوئری‌های مدل Product.
     این لایه مسئولیت تمام تعاملات با دیتابیس برای محصولات را بر عهده دارد.
@@ -67,4 +68,4 @@ class ProductRepository(IRepository[Product]):
                 )
             ).get(slug=slug, is_active=True)
         except self.model.DoesNotExist:
-            return None
+            raise ProductNotFoundException(f"محصولی با اسلاگ '{slug}' یافت نشد.")

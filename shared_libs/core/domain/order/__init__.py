@@ -5,7 +5,7 @@ from .repositories import (
     DesignFileRepository
 )
 from .services import (
-    OrderService, 
-    OrderItemService, 
-    OrderItemDesignFileService
+    OrderDomainService, 
+    # OrderItemService, 
+    # OrderItemDesignFileService
 )
