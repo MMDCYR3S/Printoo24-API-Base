@@ -14,15 +14,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ===== نصب و کپی اپلیکیشن مشترک ===== #
-COPY ./shared_libs /app/shared_libs
+COPY ./backend/shared_libs /app/shared_libs
 
 # ===== نصب و کپی اپلیکیشن مشتری سایت ===== #
-COPY ./services/customer_site/requirements/dev/requirements.txt /app/requirements.txt
+COPY ./backend/services/customer_site/requirements/dev/requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
 # ===== کپی سورس کد اپلیکیشن مشتری سایت ===== #
-COPY ./services/customer_site /app/src
-
+COPY ./backend/services/customer_site /app/src
 WORKDIR /app/src
 
 # ===== پورت پیش فرض ===== #

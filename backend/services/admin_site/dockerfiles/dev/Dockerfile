@@ -14,19 +14,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ===== نصب و کپی اپلیکیشن مشترک ===== #
-COPY ./shared_libs /app/shared_libs
+COPY ./backend/shared_libs /app/shared_libs
 
-# ===== نصب و کپی اپلیکیشن مشتری سایت ===== #
-COPY ./services/admin_site/requirements/dev/requirements.txt /app/requirements.txt
+# ===== نصب و کپی اپلیکیشن ادمین سایت ===== #
+COPY ./backend/services/admin_site/requirements/dev/requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
-# ===== کپی سورس کد اپلیکیشن مشتری سایت ===== #
-COPY ./services/admin_site /app/src
-
+# ===== کپی سورس کد اپلیکیشن ادمین سایت ===== #
+COPY ./backend/services/admin_site /app/src
 WORKDIR /app/src
 
 # ===== پورت پیش فرض ===== #
-EXPOSE 9010
+EXPOSE 8010
 
 # ===== دستور اجرای پیش فرض ===== #
-CMD ["python", "manage.py", "runserver", "0.0.0.0:9010"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8010"]

@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # ====== Database ======
+  # ====== Database ====== #
   db:
     image: postgres:17-alpine
     volumes:
@@ -11,21 +11,21 @@ services:
     env_file:
       - ./env/.env.dev
 
-  # ====== Redis ======
+  # ====== Redis ====== #
   redis:
     image: redis:6-alpine
 
-  # ====== Admin Backend ======
+  # ====== Admin Backend ====== #
   admin_site:
     build:
       context: .
-      dockerfile: services/admin_site/dockerfiles/dev/Dockerfile
+      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
     container_name: printoo_admin_site
     command: python manage.py runserver 0.0.0.0:8010
     volumes:
-      - ./services/admin_site:/app/src
+      - ./backend/services/admin_site:/app/src
       # ===== برای ایجاد تغییرات به صورت آنی در پروژه ادمین ===== #
-      - ./shared_libs:/app/shared_libs
+      - ./backend/shared_libs:/app/shared_libs
     ports:
         - "8010:8010"
     environment:
@@ -35,16 +35,16 @@ services:
     depends_on:
       - db
       - redis
-  # ====== Customer Backend ======
+  # ====== Customer Backend ====== #
   customer_site:
     build:
       context: .
-      dockerfile: services/customer_site/dockerfiles/dev/Dockerfile
+      dockerfile: backend/services/customer_site/dockerfiles/dev/Dockerfile
     container_name: printoo_customer_site
     command: python manage.py runserver 0.0.0.0:9010
     volumes:
-      - ./services/customer_site:/app/src
-      - ./shared_libs:/app/shared_libs
+      - ./backend/services/customer_site:/app/src
+      - ./backend/shared_libs:/app/shared_libs
     ports:
       - "9010:9010"
     environment:
@@ -55,32 +55,32 @@ services:
       - db
       - redis
 
-  # ====== Celery Workers(Customer Site) ======
+  # ====== Celery Workers(Customer Site) ====== #
   celery_worker_customer:
     build:
       context: .
-      dockerfile: services/customer_site/dockerfiles/dev/Dockerfile
+      dockerfile: backend/services/customer_site/dockerfiles/dev/Dockerfile
     container_name: printoo_celery_customer
     command: celery -A customer_site.celery worker -l info
     volumes:
-      - ./services/customer_site:/app/src
-      - ./shared_libs:/app/shared_libs
+      - ./backend/services/customer_site:/app/src
+      - ./backend/shared_libs:/app/shared_libs
     env_file:
       - ./env/.env.dev
     depends_on:
       - redis
       - db
 
-    # ====== Celery Workers(Admin Site) ======
+  # ====== Celery Workers(Admin Site) ====== #
   celery_worker_admin:
     build:
       context: .
-      dockerfile: services/admin_site/dockerfiles/dev/Dockerfile
+      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
     container_name: printoo_celery_admin
     command: celery -A admin_site.celery worker -l info
     volumes:
-      - ./services/admin_site:/app/src
-      - ./shared_libs:/app/shared_libs
+      - ./backend/services/admin_site:/app/src
+      - ./backend/shared_libs:/app/shared_libs
     env_file:
       - ./env/.env.dev
     depends_on:
