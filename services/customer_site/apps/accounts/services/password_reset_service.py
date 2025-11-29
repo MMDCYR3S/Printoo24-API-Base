@@ -8,8 +8,8 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from core.models import User
-from core.common.users.user_services import UserService
-from core.common.cache.cache_services import CacheService
+from core.domain.users.services import UserDomainService
+from core.domain.cache.cache_services import CacheService
 
 from ..tasks import send_password_reset_email_task
 
@@ -31,10 +31,10 @@ class PasswordResetService:
     """
     
     # ===== متغیرهای کش ===== #
-    PASSWORD_RESET_KEY_TIMEOUT_IN_SECONDS = timedelta(minutes=5).total_seconds()
+    PASSWORD_RESET_KEY_TIMEOUT_IN_SECONDS = timedelta(minutes=2).total_seconds()
     PASSWORD_RESET_KEY = "password_reset"
     
-    def __init__(self, user_service: UserService, cache_service: CacheService):
+    def __init__(self):
         """
         مقداردهی اولیه سرویس بازنشانی رمز عبور
         
@@ -42,8 +42,8 @@ class PasswordResetService:
             user_service: سرویس مدیریت کاربران
             cache_service: سرویس مدیریت کش
         """
-        self._user_service = user_service
-        self._cache_service = cache_service
+        self._user_service = UserDomainService()
+        self._cache_service = CacheService()
         self._token_generator = PasswordResetTokenGenerator()
         logger.debug("PasswordResetService initialized")
         
@@ -90,8 +90,7 @@ class PasswordResetService:
                 security_logger.warning(
                     f"Password reset attempt for non-existent email: {email}"
                 )
-                # پیام عمومی برای جلوگیری از User Enumeration
-                raise ValidationError("درخواست شما ثبت شد. در صورت وجود حساب کاربری، لینک بازنشانی ارسال خواهد شد.")
+                return
             
             logger.debug(f"User found for password reset - User ID: {user.id}, Email: {email}")
             
@@ -208,21 +207,6 @@ class PasswordResetService:
             if user is None:
                 logger.warning(f"User not found for password reset - UID: {uidb64}")
                 raise ValidationError("لینک بازنشانی نامعتبر یا منقضی شده است.")
-            
-            # ===== بررسی کش ===== #
-            cache_key = self._get_cache_key(user.email)
-            
-            if not self._cache_service.get(cache_key):
-                logger.warning(
-                    f"Expired password reset link accessed - "
-                    f"User ID: {user.id}, Email: {user.email}, Cache expired"
-                )
-                security_logger.warning(
-                    f"Expired password reset attempt - User: {user.username} ({user.email})"
-                )
-                raise ValidationError("لینک بازنشانی رمز عبور منقضی شده است.")
-            
-            logger.debug(f"Cache validation passed for user: {user.email}")
                 
             # ===== بررسی توکن ===== #
             if not self._token_generator.check_token(user, token):
@@ -237,10 +221,6 @@ class PasswordResetService:
             
             logger.debug(f"Token validated successfully for user: {user.email}")
             
-            # ===== پاک کردن کش و تغییر رمز عبور ===== #
-            logger.debug(f"Deleting cache and updating password - User ID: {user.id}")
-            self._cache_service.delete(cache_key)
-            
             updated_user = self._user_service.set_password(user, new_password)
             
             logger.info(
@@ -254,7 +234,6 @@ class PasswordResetService:
             return updated_user
             
         except ValidationError:
-            # خطاهای ValidationError را مستقیماً پرتاب می‌کنیم
             raise
             
         except Exception as e:

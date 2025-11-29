@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.views import extend_schema
 
-from apps.userprofile.services import UserOrderListService, UserOrderDetailService
+from apps.userprofile.services import UserOrderListService
 from ..serializers import OrderSummarySerializer, OrderDetailSerializer
 
 # ===== User Order List APIView ===== #
@@ -35,7 +35,7 @@ class UserOrderDetailAPIView(APIView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._service = UserOrderDetailService()
+        self._service = UserOrderListService()
 
     def get(self, request, order_id):
         try:

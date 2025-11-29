@@ -35,14 +35,14 @@ class UserAddressListCreateAPIView(GenericAPIView):
                 validated_data = serializer.validated_data
                 
                 # ===== دریافت داده ها ===== #
-                clean_data = {
-                    'address': validated_data.get('address', validated_data.get('address')),
-                    'postal_code': validated_data.get('postal_code'),
+                service_data = {
                     'province_id': validated_data['province'].id,
                     'city_id': validated_data['city'].id,
+                    'address': validated_data['address'],
+                    'postal_code': validated_data['postal_code']
                 }
                 # ===== اضافه کردن آدرس جدید با اسفتاده از داده های اعتبارسنجی شده ===== #
-                new_address = self.service.add_address(request.user.id, clean_data)
+                new_address = self.service.add_address(request.user.id, service_data)
                 
                 return Response(AddressSerializer(new_address).data, status=status.HTTP_201_CREATED)
             

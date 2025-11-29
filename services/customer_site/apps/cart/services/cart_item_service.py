@@ -2,12 +2,8 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 
 from core.models import User, CartItem
-from core.common.cart import (
-    CartRepository,
-    CartItemRepository,
-    CartService,
-    CartItemService
-)
+from core.domain.cart.services import CartDomainService
+from core.domain.cart.repositories import CartItemRepository
 
 # ===== تعریف لاگرهای اختصاصی با پیشوند cart ===== #
 logger_list = logging.getLogger('cart.services.list')
@@ -22,17 +18,10 @@ class CartListService:
     و تمام آیتم‌های موجود در آن را برای نمایش در فرانت‌اند آماده کند.
     """
     
-    def __init__(self, 
-                 cart_repo: CartRepository = None, 
-                 item_repo: CartItemRepository = None,
-                 cart_service: CartService = None,
-                 cart_item_service: CartItemService = None,
+    def __init__(self
         ):
         # ===== تزریق وابستگی‌ها ===== #
-        self._cart_repo = cart_repo or CartRepository()
-        self._item_repo = item_repo or CartItemRepository()
-        self._cart_service = cart_service or CartService(self._cart_repo)
-        self._cart_item_service = cart_item_service or CartItemService(self._item_repo)
+        self._domain_service = CartDomainService()
         
     def get_user_cart_items(self, user: User) -> dict:
         """
@@ -48,16 +37,23 @@ class CartListService:
         
         try:
             # ===== دریافت یا ایجاد سبد خرید ===== #
-            cart = self._cart_service.get_or_create_cart_for_user(user)
+            cart = self._domain_service.get_or_create_cart_for_user(user)
             logger_list.debug(f"Cart retrieved/created for User ID: {user.id}, Cart ID: {cart.id}")
             
             # ===== دریافت آیتم‌های سبد خرید ===== #
-            items = self._cart_item_service.get_user_cart_items(cart)
+            items = self._domain_service.get_item_details(cart)
             logger_list.info(f"Retrieved {items.count()} items for Cart ID: {cart.id}")
+            
+            # ===== محاسبه مجموع قیمت کل سبد خرید ===== #
+            total_price = sum(item.price for item in items)
             
             return {
                 "cart": cart,
-                "items": items
+                "items": items,
+                "summary": {
+                    "total_price": total_price,
+                    "item_count": items.count()
+                }
             }
         except Exception as e:
             logger_list.exception(f"Error fetching cart list for User ID: {user.id}")
@@ -75,7 +71,6 @@ class CartItemDetailService:
     def __init__(self):
         # ===== تزریق وابستگی‌ها ===== #
         self._item_repo = CartItemRepository()
-        self._cart_item_service = CartItemService(repository=self._item_repo)
         
     def get_item_detail(self, item_id: int, user: User) -> CartItem:
         """
@@ -94,7 +89,7 @@ class CartItemDetailService:
         logger_detail.info(f"Fetching details for CartItem ID: {item_id}, User ID: {user.id}")
         
         try:
-            item = self._cart_item_service.get_item_detail(item_id=item_id, user=user)
+            item = self._item_repo.get_item_details(item_id=item_id, user=user)
 
             if not item:
                 logger_detail.warning(f"CartItem {item_id} not found or access denied for User ID: {user.id}")

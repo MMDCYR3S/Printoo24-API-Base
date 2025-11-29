@@ -4,9 +4,9 @@ from typing import List, Optional
 from django.core.exceptions import ValidationError
 
 from core.models import Order
-from core.common.order import (
+from core.domain.order import (
     OrderRepository,
-    OrderService,
+    OrderDomainService,
 )
 
 # ===== تعریف لاگر اختصاصی با پیشوند userprofile ===== #
@@ -24,7 +24,7 @@ class UserOrderListService:
     def __init__(self):
         # ===== تزریق وابستگی‌ها ===== #
         self._repo = OrderRepository()
-        self._service = OrderService(repository=self._repo)
+        self._service = OrderDomainService()
 
     def get_user_orders(self, user_id: int) -> List:
         """
@@ -46,17 +46,6 @@ class UserOrderListService:
         except Exception as e:
             logger.exception(f"Error fetching order list for User ID: {user_id}")
             raise e
-
-# ===== User Order Detail Service ===== #
-class UserOrderDetailService:
-    """
-    سرویس مدیریت نمایش جزئیات دقیق یک سفارش خاص.
-    """
-    
-    def __init__(self):
-        # ===== تزریق وابستگی‌ها ===== #
-        self._repo = OrderRepository()
-        self._service = OrderService(repository=self._repo)
 
     def get_order_detail(self, user_id: int, order_id: int) -> Optional[Order]:
         """
@@ -89,3 +78,4 @@ class UserOrderDetailService:
         except Exception as e:
             logger.exception(f"Unexpected error retrieving order {order_id} for User ID: {user_id}")
             raise e
+    

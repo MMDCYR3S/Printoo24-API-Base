@@ -1,13 +1,10 @@
 import logging
+
 from rest_framework.exceptions import NotFound
 
 from core.models import User
-from core.common.cart import (
-    CartService,
-    CartItemService,
-    CartItemRepository,
-    CartRepository
-)
+from core.domain.cart.services import CartDomainService
+from core.domain.cart.exceptions import ItemNotFoundException
 
 # ===== تعریف لاگر اختصاصی برای سرویس‌های حذف ===== #
 logger = logging.getLogger('cart.services.delete')
@@ -24,7 +21,7 @@ class CartItemDeleteService:
     def __init__(self, user: User):
         self.user = user
         # ===== تزریق وابستگی‌ها ===== #
-        self._cart_item_service = CartItemService(repository=CartItemRepository())
+        self._domain_service = CartDomainService()
         
     def delete(self, item_id: int) -> None:
         """
@@ -40,22 +37,11 @@ class CartItemDeleteService:
 
         try:
             # ===== دریافت جزئیات آیتم با بررسی مالکیت کاربر ===== #
-            item_to_delete = self._cart_item_service.get_item_detail(item_id=item_id, user=self.user)
-            
-            if not item_to_delete:
-                 # نکته: معمولا get_item_detail اگر پیدا نکند None برمیگرداند، اما اگر Raise کرد در except مدیریت میشود
-                 raise ValueError("Item not found")
-
-            # ===== حذف آیتم ===== #
-            self._cart_item_service.delete_item(item_to_delete)
-            logger.info(f"CartItem ID: {item_id} deleted successfully.")
-            
-        except ValueError:
-            logger.warning(f"Delete failed. CartItem {item_id} not found for User ID: {self.user.id}")
-            raise NotFound("آیتم مورد نظر در سبد خرید شما یافت نشد.")
-        except Exception as e:
-            logger.exception(f"Unexpected error deleting CartItem {item_id}")
-            raise e
+            self._domain_service.remove_item(self.user, item_id)
+            logger.info("Item deleted successfully")
+        except ItemNotFoundException:
+            logger.warning(f"Item {item_id} not found")
+            raise NotFound("آیتم یافت نشد.")
         
 # ====== Cart Clear Service ====== #
 class CartClearService:
@@ -68,8 +54,7 @@ class CartClearService:
     def __init__(self, user: User):
         self.user = user
         # ===== تزریق وابستگی‌ها ===== #
-        self.cart_service = CartService(repository=CartRepository())
-        self._cart_item_service = CartItemService(repository=CartItemRepository())
+        self._domain_service = CartDomainService()
         
     def clear(self) -> None:
         """
@@ -77,18 +62,10 @@ class CartClearService:
         """
         logger.info(f"Request to clear entire cart for User ID: {self.user.id}")
         
+    def clear(self) -> None:
         try:
-            # ===== دریافت سبد خرید کاربر ===== #
-            cart = self.cart_service._repository.get_cart_by_user(user=self.user)
-            
-            if cart:
-                count = cart.items.count() # فرض بر وجود ریلیشن items
-                # ===== حذف تمام آیتم‌ها ===== #
-                self._cart_item_service.delete_all_items_for_cart(cart=cart)
-                logger.info(f"Cart cleared for User ID: {self.user.id}. {count} items removed.")
-            else:
-                logger.warning(f"No active cart found to clear for User ID: {self.user.id}")
-                
+            logger.info(f"Clearing cart for user {self.user.id}")
+            self._domain_service.clear_cart(self.user)
         except Exception as e:
-            logger.exception(f"Unexpected error clearing cart for User ID: {self.user.id}")
+            logger.error(f"Error clearing cart for user {self.user.id}: {str(e)}")
             raise e

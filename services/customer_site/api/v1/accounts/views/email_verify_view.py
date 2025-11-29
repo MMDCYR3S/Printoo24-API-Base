@@ -7,8 +7,6 @@ from drf_spectacular.utils import extend_schema
 
 from ..serializers import EmailVerificationSerializer
 from apps.accounts.services import VerificationService,  TokenService
-from core.common.users.user_services import UserService
-from core.common.users.user_repo import UserRepository
 
 # ========= Verify Email View ========= #
 @extend_schema(tags=['Accounts'])
@@ -35,9 +33,7 @@ class VerifyEmailApiView(GenericAPIView):
         code = serializer.validated_data.get("code")
         
         # ===== ایجاد کانکشن با ریپازیتوری کاربر و سرویس ===== #
-        user_repo = UserRepository()
-        user_service = UserService(user_repo)
-        verify_service = VerificationService(user_service=user_service)
+        verify_service = VerificationService()
         
         # ==== اعتبارسنجی کد تأیید و ایجاد توکن برای کاربر ===== #
         try:

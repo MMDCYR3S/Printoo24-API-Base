@@ -4,7 +4,8 @@ from decimal import Decimal
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from core.common.wallet import WalletRepository, WalletTransactionRepository
+from core.models import User
+from core.domain.wallet import WalletRepository, WalletTransactionRepository
 
 # ===== تعریف لاگر اختصاصی کیف پول با پیشوند userprofile ===== #
 logger = logging.getLogger('userprofile.services.wallet')
@@ -17,7 +18,8 @@ class WalletService:
     این سرویس وظیفه نمایش موجودی فعلی و تاریخچه تراکنش‌های مالی کاربر را بر عهده دارد.
     """
     
-    def __init__(self):
+    def __init__(self, user: User):
+        self.user = user
         # ===== تزریق وابستگی‌های مخزن کیف پول و تراکنش ===== #
         self._wallet_repo = WalletRepository()
         self._trans_repo = WalletTransactionRepository()
@@ -31,12 +33,11 @@ class WalletService:
         try:
             wallet = self._wallet_repo.get_by_user(user_id)
             
-            # لاگ کردن موجودی برای دیباگ (در محیط پروداکشن ممکن است حساس باشد، پس DEBUG استفاده می‌کنیم)
-            if wallet:
-                logger.debug(f"Wallet found for User ID: {user_id}. Balance: {wallet.decimal}")
-            else:
-                logger.warning(f"No wallet found for User ID: {user_id}")
-                
+            if not wallet:
+                logger.warning(f"No wallet found for User ID: {self.user.id}")
+                return None
+            
+            logger.debug(f"Wallet balance: {wallet.decimal}")
             return wallet
         except Exception as e:
             logger.exception(f"Error fetching wallet for User ID: {user_id}")

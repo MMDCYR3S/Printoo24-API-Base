@@ -1,12 +1,8 @@
-import uuid
-import os
-
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
-from django.core.files.storage import default_storage
 from drf_spectacular.views import extend_schema
 
 from ..serializers import TemporaryFileUploadSerializer

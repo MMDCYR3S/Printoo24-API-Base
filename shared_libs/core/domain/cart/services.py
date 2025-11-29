@@ -12,7 +12,7 @@ from core.models import (
     User,
 )
 from core.domain.product import ProductPriceCalculator
-from shared_libs.core.domain.cart.exceptions import (
+from core.domain.cart.exceptions import (
     InvalidQuantityException,
     ItemNotFoundException,
 )
@@ -43,7 +43,10 @@ class CartDomainService:
     
     # ===== جستجوی آیتم در سبد خرید ===== #
     def find_item(self, cart: Cart, product: Product, items: Dict) -> Optional[CartItem]:
-        return self._repository.find_item_in_cart(cart=cart, product=product, items=items)
+        return self._item_repo.find_item_in_cart(cart=cart, product=product, items=items)
+    
+    def get_item_details(self, cart: Cart) -> Dict:
+        return self._item_repo.get_items_by_cart(cart)
 
     # ===== افزودن آیتم پیچیده به سبد خرید ===== #
     @transaction.atomic
@@ -75,13 +78,26 @@ class CartDomainService:
         # ===== ایجاد یا دریافت سبد خرید ===== #
         cart = self._cart_repo.get_or_create_cart(user)
         
+        # ===== ساخت دیکشنری قابل سریالایز برای ذخیره‌سازی ===== #
+        serializable_specs = {
+            'raw_selections': specs.get('raw_selections', {}),
+            'details': {
+                'quantity_value': specs['quantity_obj'].quantity.value if specs.get('quantity_obj') else None,
+                'material_name': specs['material_obj'].material.name if specs.get('material_obj') else None,
+                'size_name': specs['size_obj'].size.name if specs.get('size_obj') else 'Custom',
+                'option_names': [option.name for option in specs['option_objs']] if specs.get('option_objs') else None,
+                'option_values': [option.option_value.value for option in specs['option_objs']] if specs.get('option_objs') else None
+            },
+            'price_detail': price_result
+        }
+        
         # ===== ایجاد آیتم سبد خرید ===== #
         cart_item = self._item_repo.create({
             "cart": cart,
             "product": product,
             "quantity": quantity,
             "price": final_price,
-            "items": specs
+            "items": serializable_specs
         })
         
         # ===== افزودن فایل‌های آپلود شده به آیتم سبد خرید ===== #
@@ -96,6 +112,52 @@ class CartDomainService:
 
         return cart_item
     
+    # ===== افزودن فایل به یک آیتم =====
+    @transaction.atomic
+    def update_complex_item(self, user: User, item_id: int, 
+                            quantity: int, specs: Dict) -> CartItem:
+        """
+        نسخه دامین برای آپدیت آیتم.
+        """
+        
+        # ===== دریافت آیتم با چک کردن مالکیت ===== #
+        item = self._item_repo.get_item_details(item_id, user)
+        if not item:
+            raise ItemNotFoundException("آیتم یافت نشد.")
+
+        # ===== محاسبه قیمت جدید ===== #
+        calculator = ProductPriceCalculator(
+            product=item.product,
+            quantity=specs['quantity_obj'], 
+            material=specs['material_obj'],
+            options=specs['options_objs'],
+            size=specs['size_obj'],
+            custom_dimensions=specs.get('custom_dimensions')
+        )
+        price_result = calculator.calculate()
+        new_price = Decimal(str(price_result['final_price']))
+        
+        # ===== ساخت دیکشنری قابل سریالایز برای ذخیره‌سازی ===== #
+        serializable_specs = {
+            'raw_selections': specs.get('raw_selections', {}),
+            'details': {
+                'quantity_value': specs['quantity_obj'].quantity.value if specs.get('quantity_obj') else None,
+                'material_name': specs['material_obj'].material.name if specs.get('material_obj') else None,
+                'size_name': specs['size_obj'].size.name if specs.get('size_obj') else 'Custom',
+                'option_names': [option.name for option in specs['option_objs']] if specs.get('option_objs') else None,
+                'option_values': [option.option_value.value for option in specs['option_objs']] if specs.get('option_objs') else None
+            },
+            'price_detail': price_result
+        }
+        
+        # ===== اپدیت قیمت ===== #
+        updated_item = self._item_repo.update(item, {
+            "quantity": quantity,
+            "price": new_price,
+            "items": serializable_specs
+        })
+        return updated_item
+        
     # ===== به‌روزرسانی تعداد آیتم در سبد خرید ===== #
     def update_item_quantity(self, item: CartItem, new_quantity: int) -> CartItem:
         if new_quantity <= 0:
@@ -113,3 +175,10 @@ class CartDomainService:
         if not item:
             raise ItemNotFoundException("آیتم یافت نشد یا متعلق به شما نیست.")
         self._item_repo.delete(item)
+        
+    def clear_cart(self, user: User):
+        """خالی کردن کل سبد خرید"""
+        cart = self._cart_repo.get_cart_by_user(user)
+        if cart:
+            self._item_repo.delete_all_items_by_cart(cart)
+    

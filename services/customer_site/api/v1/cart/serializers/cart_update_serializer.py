@@ -5,8 +5,8 @@ class CartItemUpdateSerializer(serializers.Serializer):
     """
     سریالایزر برای بروزرسانی آیتم سبد خرید با فیلد های مورد نیاز
     """
-    quantity_id = serializers.IntegerField(required=True)
-    material_id = serializers.IntegerField(required=True)
+    quantity_id = serializers.IntegerField(required=False)
+    material_id = serializers.IntegerField(required=False)
     size_id = serializers.IntegerField(required=False, allow_null=True)
 
     option_ids = serializers.ListField(

@@ -8,7 +8,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
     سریالایزر برای بازشناسی رمز عبور توسط ایمیل
     """
     email = serializers.EmailField(label="ایمیل")
-    
+        
 # ====== Password Reset Confirm Serializer ====== #
 class PasswordResetConfirmSerializer(serializers.Serializer):
     """

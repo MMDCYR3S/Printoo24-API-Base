@@ -7,9 +7,6 @@ from drf_spectacular.utils import extend_schema
 
 from ..serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
 from apps.accounts.services.password_reset_service import PasswordResetService
-from core.common.users.user_repo import UserRepository
-from core.common.users.user_services import UserService
-from core.common.cache.cache_services import CacheService
 
 # ========= Password Reset Request View ========= #
 @extend_schema(tags=['Accounts'])
@@ -27,14 +24,14 @@ class PasswordResetRequestAPIView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # ===== ایجاد سرویس های مرتبط ===== #
-        user_repo = UserRepository()
-        user_service = UserService(user_repo)
-        cache_service = CacheService()
-        reset_service = PasswordResetService(user_service, cache_service)
+        # ===== ایجاد سرویس مرتبط ===== #
+        reset_service = PasswordResetService()
         
         # ===== بازنشانی رمز عبور ===== #
-        reset_service.send_reset_link(serializer.validated_data['email'])
+        try:
+            reset_service.send_reset_link(serializer.validated_data['email'])
+        except Exception as e:
+            pass
         
         return Response(
             {"detail": "اگر ایمیل در سیستم موجود باشد، لینک بازنشانی ارسال خواهد شد."},
@@ -54,11 +51,8 @@ class PasswordResetConfirmAPIView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # ===== ایجاد سرویس های مرتبط ===== #
-        user_repo = UserRepository()
-        user_service = UserService(user_repo)
-        cache_service = CacheService()
-        reset_service = PasswordResetService(user_service, cache_service)
+        # ===== ایجاد سرویس مرتبط ===== #
+        reset_service = PasswordResetService()
         
         try:
             # ===== باز کردن صفحه بازنشانی پسورد ===== #

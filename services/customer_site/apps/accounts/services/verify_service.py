@@ -1,3 +1,4 @@
+import hmac
 import logging
 import random
 from datetime import timedelta
@@ -5,8 +6,8 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 
 from ..tasks import send_verification_email_task
-from core.common.cache.cache_services import CacheService
-from core.common.users.user_services import UserService
+from core.domain.cache.cache_services import CacheService
+from core.domain.users.services import UserDomainService
 
 # ====== Logger Configuration ====== #
 logger = logging.getLogger('accounts.services.verification')
@@ -28,14 +29,14 @@ class VerificationService:
     VERIFICATION_CODE_TIMEOUT_IN_SECONDS = timedelta(minutes=5).total_seconds()
     VERIFICATION_CODE_KEY_PREFIX = "verification_code"
     
-    def __init__(self, user_service: UserService):
+    def __init__(self):
         """
         مقداردهی اولیه سرویس احراز هویت.
         
         Args:
             user_service: سرویس مدیریت کاربران
         """
-        self._user_service = user_service
+        self._user_service = UserDomainService()
         logger.debug("VerificationService initialized")
     
     def _generate_code_number(self) -> str:
@@ -61,7 +62,7 @@ class VerificationService:
         Returns:
             str: کلید کش منحصر به فرد
         """
-        cache_key = f"{self.VERIFICATION_CODE_KEY_PREFIX}_{email}"
+        cache_key = f"{self.VERIFICATION_CODE_KEY_PREFIX}_{email.lower().strip()}"
         logger.debug(f"Generated verification cache key for email: {email}")
         return cache_key
     
@@ -132,6 +133,9 @@ class VerificationService:
         logger.info(f"Verification code check requested for email: {email}")
         
         try:
+            if not hmac.compare_digest(cache_code, str(code)):
+                raise ValueError("Invalid verification code")
+                
             # ===== صحت‌سنجی کاربر ===== #
             user = self._user_service.get_by_email(email)
             

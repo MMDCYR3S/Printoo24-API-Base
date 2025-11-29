@@ -6,12 +6,8 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 
 from core.models import User, CartItem
-from core.common.cart import (
-    CartService,
-    CartItemService,
-    CartRepository,
-    CartItemRepository
-)
+from core.domain.cart.services import CartDomainService 
+
 from apps.shop.services import ProductPriceCalculator
 from .cart_file_service import FileFinalizeService
 from .cart_validator_service import CartDataValidator
@@ -38,8 +34,7 @@ class AddToCartService:
     def __init__(self, user: User):
         self.user = user
         # ===== تزریق وابستگی‌های لازم ===== #
-        self.cart_service = CartService(repository=CartRepository())
-        self.cart_item_service = CartItemService(repository=CartItemRepository())
+        self.domain_service = CartDomainService()
         self.validator = CartDataValidator()
         self.file_finalize = FileFinalizeService()
         
@@ -66,77 +61,44 @@ class AddToCartService:
         Raises:
             ValidationError: در صورت عدم اعتبار داده‌ها یا مشکل در پردازش فایل.
         """
-        logger.info(f"Starting AddToCart process for User ID: {self.user.id}, Product Slug: {product_slug}")
+        logger.info(f"Adding product {product_slug} to cart for user {self.user.id}")
         
         try:
             # ===== اعتبارسنجی داده‌های ورودی کاربر و محصول ===== #
-            validated_data = self.validator.validate(product_slug=product_slug, selections=selections)
+            validated_data = self.validator.validate(
+                product_slug=product_slug, 
+                selections=selections
+            )
             product = validated_data["product"]
             logger.debug(f"Validation successful for Product: {product.name}")
             
-            # ===== محاسبه قیمت نهایی ===== #
-            price_calculator = ProductPriceCalculator(
-                product=product,
-                quantity=validated_data["quantity_obj"],
-                material=validated_data["material_obj"],
-                options=validated_data["options_obj"],
-                size=validated_data["size_obj"],
-                custom_dimensions=validated_data["custom_dimensions"]
-            )
-            price_detail = price_calculator.calculate()
-            final_price_per_unit = Decimal(str(price_detail["final_price"]))
-            
-            logger.debug(f"Price calculated: {final_price_per_unit} per unit.")
-            
-            # ===== دریافت سبد خرید یا ایجاد آن برای کاربر ===== #
-            cart = self.cart_service.get_or_create_cart_for_user(user=self.user)
-            
-            # ===== آماده‌سازی جزئیات آیتم برای ذخیره در دیتابیس ===== #
-            item_details = {
-                "selections": selections,
-                "product_name_snapshot": product.name,
-                "price_detail": price_detail,
-            }
-            
-            # ===== جستجو برای آیتم مشابه در سبد خرید ===== #
-            existing_item = self.cart_item_service.find_item(
-                cart=cart,
-                product=product,
-                items=item_details
-            )
-            
-            # ===== بررسی اینکه آیا محصول از قبل وجود دارد و قرار است آپدیت شود یا خیر ===== #
-            if existing_item:
-                logger.info(f"Item exists in cart. Updating quantity for Item ID: {existing_item.id}")
-                new_quantity = existing_item.quantity + quantity
-                cart_item = self.cart_item_service.update_item_quantity(existing_item, new_quantity)
-            else:
-                logger.info("Creating new cart item.")
-                # ===== ایجاد آیتم سبد خرید جدید ===== #
-                cart_item = self.cart_item_service.add_item(
-                    cart=cart,
-                    product=product,
-                    quantity=quantity,
-                    price=final_price_per_unit,
-                    items=item_details
+            # ===== آماده‌سازی مسیرهای نهایی فایل‌های آپلود شده ===== #
+            final_file_paths = {}
+            if temp_file_names:
+                final_file_paths = self.file_finalize.finalize_files(
+                    temp_file_names, 
+                    user_id=self.user.id
                 )
             
-            # ===== پردازش و نهایی‌سازی فایل‌های آپلود شده ===== #
-            if cart_item and temp_file_names:
-                try:
-                    logger.info(f"Processing {len(temp_file_names)} temp files for CartItem ID: {cart_item.id}")
-                    self.file_finalize.finalize_uploads(
-                        cart_item=cart_item,
-                        temp_file_names=temp_file_names
-                    )
-                except ValidationError as e:
-                    logger.error(f"File finalization failed for CartItem ID: {cart_item.id}. Error: {e}")
-                    raise e
-
-            logger.info(f"AddToCart executed successfully. CartItem ID: {cart_item.id}")
+            # ===== افزودن آیتم به سبد خرید ===== #
+            cart_item = self.domain_service.add_complex_item(
+                user=self.user,
+                product=product,
+                quantity=quantity,
+                specs={
+                    'quantity_obj': validated_data['quantity_obj'],
+                    'material_obj': validated_data['material_obj'],
+                    'options_objs': validated_data['options_obj'],
+                    'size_obj': validated_data.get('size_obj'),
+                    'custom_dimensions': validated_data.get('custom_dimensions'),
+                    'raw_selections': selections
+                },
+                uploaded_files_map=final_file_paths
+            )
+            
+            logger.info(f"CartItem created successfully: {cart_item.id}")
             return cart_item
-
+        # ===== مدیریت استثناها و لاگینگ ===== #
         except Exception as e:
-            if not isinstance(e, ValidationError):
-                logger.exception(f"Unexpected error in AddToCart for User ID: {self.user.id}")
+            logger.error(f"Add to cart failed: {e}")
             raise e

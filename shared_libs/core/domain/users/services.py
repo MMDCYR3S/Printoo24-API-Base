@@ -15,6 +15,24 @@ class UserDomainService:
         """ تعیین ریپازیتوری """
         self._repo = UserRepository()
     
+    def check_uniqueness(self, username=None, email=None, exclude_user_id=None):
+        """
+        بررسی یکتایی کاربر
+        :param username: نام کاربری
+        :param email: ایمیل
+        :param exclude_user_id: شناسه کاربری
+        :return: bool
+        """
+        if username and self._repo.get_by_username(username):
+            existing = self._repo.get_by_username(username)
+            if existing.id != exclude_user_id:
+                raise UsernameAlreadyExistsException("نام کاربری از قبل وجود دارد.")
+            
+        if email and self._repo.model.objects.filter(user__email=email).first():
+            existing = self._repo.model.objects.filter(user__email=email).first()
+            if existing.id != exclude_user_id:
+                raise EmailAlreadyExistsException("ایمیل از قبل وجود دارد.")
+    
     # ===== ثبت نام کاربر جدید ===== #
     def register_new_user(self, data: Dict[str, Any]) -> User:
         """

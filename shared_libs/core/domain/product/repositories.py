@@ -10,7 +10,7 @@ from core.models import (
     ProductMaterial, 
     ProductOption,
     ProductImage,
-    ProductAttachment
+    ProductAttachment,
 )
 
 # ====== Product Repository ====== #

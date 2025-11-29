@@ -1,5 +1,12 @@
 from rest_framework import serializers
 
+class SelectionsSerializer(serializers.Serializer):
+    quantity_id = serializers.IntegerField(required=True)
+    material_id = serializers.IntegerField(required=True)
+    size_id = serializers.IntegerField(required=False, allow_null=True)
+    options_ids = serializers.ListField(child=serializers.IntegerField(), required=False)
+    custom_dimensions = serializers.DictField(required=False)
+
 # ======== Add To Cart Serializer ======== #
 class AddToCartSerializer(serializers.Serializer):
     """
@@ -8,9 +15,9 @@ class AddToCartSerializer(serializers.Serializer):
     """
 
     product_slug = serializers.SlugField(required=True)
-    quantity = serializers.IntegerField(required=True, min_value=1)
-    selections = serializers.JSONField(required=True)
-    temp_file_names = serializers.JSONField(required=False, default=dict)
+    quantity = serializers.IntegerField(min_value=1)
+    selections = SelectionsSerializer()
+    temp_file_names = serializers.DictField(child=serializers.CharField(), required=False)
     
     def validate_selections(self, value):
         """

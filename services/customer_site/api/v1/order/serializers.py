@@ -36,12 +36,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     این سریالایزر شامل اطلاعات محصول و فایل‌های طراحی مربوطه است.
     """
     product = ProductSerializer(read_only=True) 
-
-    design_files = DesignFileSerializer(
-        many=True, 
-        read_only=True, 
-        source='order_item_design_file_order_item.file'
-    )
+    design_files = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
@@ -52,6 +47,19 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'price', 
             'items',
             'design_files'
+        ]
+        
+    def get_design_files(self, obj):
+        """
+        دریافت اطلاعات فایل‌های طراحی مرتبط با این آیتم سفارش.
+        """
+        files_links = obj.order_item_design_file_order_item.all()
+        return [
+            {
+                "id": link.file.id,
+                "url": link.file.file.url if link.file.file else None
+            } 
+            for link in files_links
         ]
 
 # ===== Order Serializers ===== #
@@ -74,6 +82,13 @@ class OrderSerializer(serializers.ModelSerializer):
         allow_null=True
     )
     
+    # ===== نمایش آدرس ===== #
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            self.fields['address_id'].queryset = Address.objects.filter(user=request.user)
+    
     class Meta:
         model = Order
         fields = [
@@ -86,8 +101,3 @@ class OrderSerializer(serializers.ModelSerializer):
             'items',
             'address_id'
         ]
-        
-    def validate_address(self, value):
-        """
-        اعتبارسنجی آدرس
-        """

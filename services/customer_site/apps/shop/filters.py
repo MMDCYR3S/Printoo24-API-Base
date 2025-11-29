@@ -13,11 +13,7 @@ class ProductFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
     
     # ===== فیلتر براساس دسته بندی ===== #
-    category = django_filters.ModelChoiceFilter(
-        field_name='category__slug',
-        to_field_name='slug',
-        queryset=ProductCategory.objects.all()
-    )
+    category = django_filters.CharFilter(method='filter_by_category_hierarchy')
     
     # ===== فیلتر براساس سایز ===== #
     sizes = django_filters.ModelMultipleChoiceFilter(
@@ -43,3 +39,24 @@ class ProductFilter(django_filters.FilterSet):
     class Meta:
         model = Product
         fields = ['name', 'category', 'sizes', 'materials', 'options']
+        
+    # ===== متدهای فیلتر سفارشی ===== #
+    def filter_by_category_hierarchy(self, queryset, name, value):
+        """
+        این متد کلید حل مشکل است.
+        اسلاگ دسته را می‌گیرد و تمام محصولات آن دسته + فرزندانش را برمی‌گرداند.
+        """
+        
+        try:
+            # ===== دریافت دسته بندی والد اصلی ===== #
+            category = ProductCategory.objects.get(slug=value)
+            
+            # ===== دریافت تمام دسته بندی های فرزند ===== #
+            descendants = category.get_descendants(include_self=True)
+            
+            # ===== فیلتر محصولات بر اساس دسته بندی والد و فرزندانش ===== #
+            return queryset.filter(category__in=descendants).distinct()
+        
+        except ProductCategory.DoesNotExist:
+            return queryset.none()
+            

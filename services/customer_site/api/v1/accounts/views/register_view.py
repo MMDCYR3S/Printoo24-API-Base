@@ -5,9 +5,7 @@ from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import extend_schema
 
 from ..serializers import RegisterSerializer
-from apps.accounts.services import AuthService, VerificationService
-from core.common.users.user_services import UserService
-from core.common.users.user_repo import UserRepository
+from apps.accounts.services import AuthService
 
 # ======= Register API View ======= #
 @extend_schema(tags=['Accounts'])
@@ -28,13 +26,10 @@ class RegisterAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         
         # ====== ایجاد کاربر و ارسال ایمیل تایید ====== #
-        user_repo = UserRepository()
-        user_service = UserService(repository=user_repo)
-        verify_service = VerificationService(user_service=user_service)
-        registration_service = AuthService(user_service=user_service, verify_service=verify_service)
+        registration_service = AuthService()
         
         # ====== ثبت نام کاربر با استفاده از سریالایزر و ریپازیتوری مورد نظر ====== #
-        registered_user = registration_service.register_user(serializer.validated_data)
+        registered_user = registration_service.register_customer(serializer.validated_data)
         
         return Response({
                 "message" : "ثبت نام با موفقیت انجام شد.", "username" : registered_user.username

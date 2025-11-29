@@ -3,7 +3,7 @@ from typing import Dict, Any, List, Optional
 from collections import defaultdict
 from django.db.models import QuerySet
 
-from core.common.product import ProductService
+from core.domain.product import ProductDomainService
 from core.models import Product, ProductOption
 
 # ====== Logger Configuration ====== #
@@ -16,8 +16,8 @@ class ShopProductListService:
     سرویس لایه کاربردی برای مورد استفاده "نمایش لیست محصولات".
     این سرویس مسئول دریافت کوئری‌ست اولیه و آماده‌سازی آن برای فیلترینگ و نمایش است.
     """
-    def __init__(self, product_service: ProductService):
-        self._product_service = product_service
+    def __init__(self):
+        self._product_service = ProductDomainService()
         logger.debug("ShopProductListService initialized")
 
     def get_base_queryset(self) -> QuerySet[Product]:

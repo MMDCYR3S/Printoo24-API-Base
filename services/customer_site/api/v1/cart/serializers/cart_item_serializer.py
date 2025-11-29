@@ -29,7 +29,7 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
     material_name = serializers.CharField(source='product_material.product.name', read_only=True)
     quantity_name = serializers.CharField(source='product_quantity.product.name', read_only=True)
     size_name = serializers.CharField(source='product_size.product.name', read_only=True, allow_null=True)
-    selected_options = OptionSerializer(source='product_options', many=True, read_only=True)
+    specs = serializers.JSONField(source='items.selections', read_only=True)
     custom_width = serializers.FloatField(source='product_size.custom_width', allow_null=True)
     custom_height = serializers.FloatField(source='product_size.custom_height', allow_null=True)
 
@@ -43,7 +43,7 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
             'size_name',
             'custom_width',
             'custom_height',
-            'selected_options',
+            'specs',
             'price', 
             'created_at'
         ]

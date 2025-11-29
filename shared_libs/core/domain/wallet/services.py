@@ -23,7 +23,7 @@ class WalletDomainService:
         return wallet.decimal
 
     @transaction.atomic
-    def deposit(self, user: User, amount: Decimal, description: str = "شارژ کیف پول"):
+    def deposit(self, user: User, amount: Decimal):
         """
         افزایش موجودی (واریز)
         """

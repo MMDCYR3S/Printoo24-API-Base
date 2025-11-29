@@ -45,7 +45,7 @@ class OrderDomainService:
         total_price = sum(item.price for item in cart.cart_items.all())
         
         # ===== ایجاد سفارش جدید ===== #
-        initial_status = OrderStatus.objects.get(name__in="در انتظار بررسی")
+        initial_status = OrderStatus.objects.get(name="در انتظار بررسی")
         
         order = self._order_repo.create({
             "user": user,
@@ -91,67 +91,23 @@ class OrderDomainService:
         """
         دریافت سفارش با شناسه
         """
-        return self._repository.get_order_by_id(order_id)
+        return self._order_repo.get_order_by_id(order_id)
     
     def get_order_by_user(self, user: User) -> List[Order]:
         """
         دریافت سفارشات یک کاربر
         """
-        return self._repository.get_order_by_user(user)
+        return self._order_repo.get_order_by_user(user)
 
     def get_user_orders_summary(self, user_id: int) -> List[Order]:
         """
         دریافت سفارشات کاربر به همراه تمام جزئیات (آیتم‌ها، محصول، وضعیت، آدرس و فایل‌های طراحی)
         به صورت بهینه شده (Eager Loading).
         """
-        return self._repository.get_user_orders_summary(user_id)
+        return self._order_repo.get_user_orders_summary(user_id)
 
     def get_user_order_item_details(self, user_id: int, order_id: int) -> Optional[Order]:
         """
         دریافت جزئیات آیتم سفارش کاربر
         """
-        return self._repository.get_order_detail_by_id(user_id, order_id)
-
-# # ====== Order Item Service ====== #
-# class OrderItemService:    
-#     """
-#     سرویس برای منطق آیتم های سفارش
-#     """
-
-#     def __init__(self, repository: OrderItemRepository):
-#         self._repository = repository or OrderItemRepository()
-        
-#     def create_order_item(self, order: Order, product: Any, price: float, quantity: int, items: Dict[str, Any]):
-#         """
-#         ایجاد آیتم سفارش
-#         """
-#         order_item_data = {
-#             "order": order,
-#             "product": product,
-#             "price": price,
-#             "quantity": quantity,
-#             "items": items
-#         }
-#         return self._repository.create_order_item(order_item_data)
-    
-# # ======== Order Item Design File Service ======== #
-# class OrderItemDesignFileService:
-#     """
-#     سرویس برای منطق فایل های طراحی
-#     """
-    
-#     def __init__(self, repository: OrderItemDesignFileRepository):
-#         self._repository = repository or OrderItemDesignFileRepository()
-        
-#     def add_file_to_order_item(self,user: User, order_item: OrderItem, file_path: str) -> OrderItemDesignFile:
-#         """
-#         ایجاد یک فایل طراحی برای یک آیتم سفارش
-#         """
-#         design_data = {
-#             "user": user,
-#             "order_item": order_item,
-#             "file": file_path
-#         }
-#         return self._repository.add_design_file_to_order(design_data)
-
-
+        return self._order_repo.get_order_with_items(user_id, order_id)

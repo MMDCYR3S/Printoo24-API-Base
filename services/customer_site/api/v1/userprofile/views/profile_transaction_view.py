@@ -12,11 +12,8 @@ class WalletDetailAPIView(APIView):
     """نمایش موجودی کیف پول کاربر"""
     permission_classes = [IsAuthenticated]
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.service = WalletService()
-
     def get(self, request):
+        self.service = WalletService(user=request.user)
         wallet = self.service.get_wallet_balance(request.user.id)
         serializer = WalletSerializer(wallet)
         return Response(serializer.data)
@@ -27,11 +24,8 @@ class WalletHistoryAPIView(APIView):
     """نمایش لیست تراکنش‌های کاربر"""
     permission_classes = [IsAuthenticated]
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.service = WalletService()
-
     def get(self, request):
+        self.service = WalletService(user=request.user)
         transactions = self.service.get_transaction_history(request.user.id)
         serializer = WalletTransactionSerializer(transactions, many=True)
         return Response(serializer.data)

@@ -6,9 +6,7 @@ from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 
 from ..serializers import LoginSerializer
-from apps.accounts.services import AuthService, VerificationService
-from core.common.users.user_services import UserService
-from core.common.users.user_repo import UserRepository
+from apps.accounts.services import AuthService
 
 # ====== Login API View ====== #
 @extend_schema(tags=['Accounts'])
@@ -33,14 +31,11 @@ class LoginAPIView(GenericAPIView):
         password = validated_data.get('password')
         
         # ===== ایجاد سرویس برای ورود ===== #
-        user_repo = UserRepository()
-        user_service = UserService(user_repo)
-        verification_service = VerificationService(user_service)
-        auth_service = AuthService(user_service, verification_service)
+        auth_service = AuthService()
         
         try:
             # ==== اعتبارسنجی و ورود کاربر با اطلاعات داده شده ==== #
-            login_data = auth_service.login_user(username=username, password=password)
+            login_data = auth_service.login_customer({"username": username, "password": password})
             return Response(login_data["tokens"], status=status.HTTP_200_OK)
         
         except ValidationError as e:

@@ -10,7 +10,7 @@ from core.models import (
     ProductSize,
     ProductOption,
 )
-from core.common.product import ProductRepository
+from core.domain.product import ProductRepository
 
 # ===== تعریف لاگر اختصاصی برای سرویس اعتبارسنجی سبد خرید ===== #
 logger = logging.getLogger('shop.services.cart_validator')

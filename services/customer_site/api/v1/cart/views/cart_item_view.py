@@ -7,10 +7,6 @@ from drf_spectacular.views import extend_schema
 
 from apps.cart.services import CartListService, CartItemDetailService
 from ..serializers import CartListSerializer, CartItemSerializer
-from core.common.cart import (
-    CartItemRepository,
-    CartItemService
-)
 
 # ======== Cart List View ======== #
 @extend_schema(tags=['Cart'])

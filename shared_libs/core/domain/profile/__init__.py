@@ -1,2 +1,2 @@
 from .repositories import CustomerProfileRepository
-from .services import CustomerProfileService
+from .services import CustomerProfileDomainService

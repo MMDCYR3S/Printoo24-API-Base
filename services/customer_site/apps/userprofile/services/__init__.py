@@ -1,4 +1,4 @@
 from .user_detail_service import ProfileDetailService
-from .user_order_service import UserOrderListService, UserOrderDetailService
+from .user_order_service import UserOrderListService
 from .user_address_service import UserAddressService
 from .user_transaction_service import WalletService
