@@ -1,11 +1,11 @@
 # frontend/Dockerfile
 
-FROM node:18-alpine
+FROM node:22-bookworm
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install -y
 
 COPY . .
 
