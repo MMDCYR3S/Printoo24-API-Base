@@ -10,10 +10,14 @@ services:
       - "5432:5432"
     env_file:
       - ./env/.env.dev
+    networks:
+      - data_network
 
   # ====== Redis ====== #
   redis:
     image: redis:6-alpine
+    networks:
+      - data_network
 
   # ====== Admin Backend ====== #
   admin_site:
@@ -35,6 +39,9 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - admin_site_network
+      - data_network
   # ====== Customer Backend ====== #
   customer_site:
     build:
@@ -54,6 +61,9 @@ services:
     depends_on:
       - db
       - redis
+    networks:
+      - customer_site_network
+      - data_network
 
   # ====== Celery Workers(Customer Site) ====== #
   celery_worker_customer:
@@ -72,6 +82,8 @@ services:
     depends_on:
       - redis
       - db
+    networks:
+      - data_network
 
   # ====== Celery Workers(Admin Site) ====== #
   celery_worker_admin:
@@ -90,23 +102,38 @@ services:
     depends_on:
       - redis
       - db
+    networks:
+      - data_network
 
 # ====== Frontend (React) ====== #
   frontend:
     build:
-      context: ./frontend/react-js # اینجا میگیم برو داخل پوشه فرانت بیلد کن
+      context: ./frontend/react-js
       dockerfile: Dockerfile
     container_name: printoo_frontend
-    
-    network_mode: "host"
-
+    ports:
+      - "5173:5173"
+    # network_mode: host
     volumes:
-      - ./frontend/react-js:/app        # اتصال کدها برای هات‌ریلود
+      - ./frontend/react-js:/app
     environment:
-      - CHOKIDAR_USEPOLLING=true        # برای اطمینان از تشخیص تغییرات فایل
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
-      - customer_site                   # فرانت بعد از بالا اومدن بکند اجرا بشه
+      - customer_site
       - admin_site
+    networks:
+      - customer_site_network
 
+# ====== Networks' Settings ====== #
+networks:
+  admin_site_network:
+    driver: bridge
+  customer_site_network:
+    driver: bridge
+  data_network:
+    driver: bridge
+    internal: false
+
+# ====== Database Volume ====== #
 volumes:
   postgres_data:
