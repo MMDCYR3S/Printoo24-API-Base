@@ -111,9 +111,11 @@ services:
       context: ./frontend/react-js
       dockerfile: Dockerfile
     container_name: printoo_frontend
-    ports:
-      - "5173:5173"
-    # network_mode: "host"
+    #ports:
+    #  - "5173:5173"
+    
+    # === نکته مهم: وقتی هاست مود هست، نتورک‌ها رو پاک می‌کنیم ===
+    network_mode: "host"
     volumes:
       - ./frontend/react-js:/app
       - /app/node_modules
@@ -122,10 +124,11 @@ services:
     depends_on:
       - customer_site
       - admin_site
-    networks:
-      - customer_site_network
+    # networks:  <--- این قسمت برای فرانت باید پاک یا کامنت بشه چون host mode هست
+    #   - customer_site_network
 
 # ====== Networks' Settings ====== #
+# === نکته مهم: این بخش باید حتماً فعال باشه (کامنت نباشه) ===
 networks:
   admin_site_network:
     driver: bridge
