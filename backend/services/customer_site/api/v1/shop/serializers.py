@@ -3,15 +3,15 @@ from core.models import (
     Product, 
     ProductCategory, 
     ProductQuantity, 
-    ProductSize, 
-    Size, 
-    ProductMaterial, 
-    Material, 
+    ProductSize,  
+    ProductMaterial,  
     ProductOption, 
     OptionValue, 
-    Option,
     ProductImage,
     ProductAttachment,
+    ProductComment,
+    ProductCommentChoices,
+    ProductRating,
 )
 
 # ====== Category Serializer ====== #
@@ -166,3 +166,59 @@ class ProductDetailSerializer(serializers.Serializer):
             })
         return result
     
+# ===== Input Serializer (برای ثبت نظر) ===== #
+class SubmitReviewSerializer(serializers.Serializer):
+    """
+    سریالایزر دریافت نظر و امتیاز از کاربر.
+    نکته: هر دو فیلد اختیاری هستند چون کاربر می‌تواند فقط امتیاز دهد یا فقط نظر.
+    اما حداقل یکی باید باشد (این لاجیک را در سرویس یا اینجا می‌توان گذاشت).
+    """
+    score = serializers.IntegerField(
+        required=False, 
+        min_value=1, 
+        max_value=5, 
+        help_text="امتیاز بین ۱ تا ۵"
+    )
+    message = serializers.CharField(
+        required=False, 
+        allow_blank=False, 
+        help_text="متن نظر"
+    )
+
+    def validate(self, data):
+        """
+        قانون: کاربر نمی‌تواند درخواست خالی بفرستد.
+        """
+        if 'score' not in data and 'message' not in data:
+            raise serializers.ValidationError("لطفاً حداقل یک امتیاز یا متن نظر وارد کنید.")
+        return data
+
+# ===== Reply Serializer (For Admin Reply) ===== #
+class ReplySerializer(serializers.ModelSerializer):
+    """سریالایزر برای پاسخ‌های ادمین (تو در تو)"""
+    class Meta:
+        model = ProductComment
+        fields = ['id', 'name', 'message', 'created_at']
+
+# ===== Comment List Serializer (For User) ===== #
+class CommentListSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر نمایش نظرات محصول.
+    شامل پاسخ‌ها هم می‌شود.
+    """
+    replies = ReplySerializer(many=True, read_only=True)
+    # تاریخ را فرمت‌دهی شده یا تایم‌استمپ برمی‌گردانیم
+    created_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = ProductComment
+        fields = ['id', 'name', 'message', 'created_at', 'replies']
+
+# ===== Product Feekback Serializers ===== #
+class ProductFeedbackStatsSerializer(serializers.Serializer):
+    """
+    سریالایزر ترکیبی برای آمار کلی + لیست نظرات.
+    """
+    average_rating = serializers.FloatField()
+    total_ratings = serializers.IntegerField()
+    comments = CommentListSerializer(many=True)

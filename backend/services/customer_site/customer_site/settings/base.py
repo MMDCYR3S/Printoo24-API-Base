@@ -71,6 +71,8 @@ INSTALLED_APPS = [
     "apps.shop",
     "apps.order",
     "apps.cart",
+    "apps.userprofile",
+    "apps.notification",
 ]
 
 MIDDLEWARE = [

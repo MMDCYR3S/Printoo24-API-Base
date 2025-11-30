@@ -1,16 +1,18 @@
 from django.urls import path, include
 from .views import (
     CustomerProfileAPIView,
+    UserCommentListView,
     UserOrderListAPIView,
     UserOrderDetailAPIView,
     UserAddressListCreateAPIView,
     UserAddressDetailAPIView,
     WalletDetailAPIView,
-    WalletHistoryAPIView
+    WalletHistoryAPIView,
 )
 
 urlpatterns = [
     path('info/', CustomerProfileAPIView.as_view(), name='user-profile-detail'),
+    path('comments/', UserCommentListView.as_view(), name='profile-comments'),
     # ===== بخش سابقه سفارشات ===== #
     path('orders/', UserOrderListAPIView.as_view(), name='user-order-list'),
     path('orders/<int:order_id>/', UserOrderDetailAPIView.as_view(), name='user-order-detail'),

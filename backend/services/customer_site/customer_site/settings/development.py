@@ -204,6 +204,17 @@ LOGGING = {
             'backupCount': 10,
             'formatter': 'verbose',
         },
+        # ===== هندلر جدید برای بازخورد (Feedback) ===== #
+        'shop_feedback_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            # استفاده از تابع کمکی get_log_file که قبلا ساختیم یا مسیر نسبی (اگر تابع ندارید)
+            'filename': 'logs/shop/feedback_service.log', 
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        
         # ===== هندلر برای سرویس آدرس ===== #
         'userprofile_address_service_file': {
             'level': 'DEBUG',
@@ -237,6 +248,16 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/userprofile/wallet.log',
             'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        
+        # ===== هندلر جدید برای سرویس اعلان ===== #
+        'notification_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/userprofile/notification_service.log', # یا get_log_file(...)
+            'maxBytes': 1024 * 1024 * 5, 
             'backupCount': 5,
             'formatter': 'verbose',
         },
@@ -346,6 +367,13 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        # ===== لاگر سرویس فیدبک ===== #
+        'shop.services.feedback': {
+            'handlers': ['shop_feedback_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        
         # ===== لاگر سرویس آدرس ===== #
         'userprofile.services.address': {
             'handlers': ['userprofile_address_service_file', 'console'],
@@ -367,6 +395,12 @@ LOGGING = {
         # ===== لاگر سرویس کیف پول پروفایل ===== #
         'userprofile.services.wallet': {
             'handlers': ['userprofile_wallet_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس اعلان ===== #
+        'userprofile.services.notification': {
+            'handlers': ['notification_service_file', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },

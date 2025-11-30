@@ -65,6 +65,8 @@ services:
     volumes:
       - ./backend/services/customer_site:/app/src
       - ./backend/shared_libs:/app/shared_libs
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
     env_file:
       - ./env/.env.dev
     depends_on:
@@ -81,6 +83,8 @@ services:
     volumes:
       - ./backend/services/admin_site:/app/src
       - ./backend/shared_libs:/app/shared_libs
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
     env_file:
       - ./env/.env.dev
     depends_on:

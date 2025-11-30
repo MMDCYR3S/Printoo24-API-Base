@@ -1,4 +1,4 @@
-from .profile_detail_serializer import CustomerProfileSerializer
+from .profile_detail_serializer import CustomerProfileSerializer, ProfileCommentSerializer
 from .profile_order_serializer import (
     OrderSummarySerializer,
     OrderDetailSerializer,

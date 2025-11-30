@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 # ===== نام گذاری داکر فایل ===== #
 LABEL maintainer="amingholami06@gmail.com"
@@ -11,6 +11,7 @@ WORKDIR /app
 # ===== نصب پیش نیاز اصلی داکر ===== #
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # ===== نصب و کپی اپلیکیشن مشترک ===== #

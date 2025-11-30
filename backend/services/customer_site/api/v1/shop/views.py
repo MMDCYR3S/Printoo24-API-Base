@@ -1,6 +1,8 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.viewsets import ViewSet
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
 
@@ -8,11 +10,14 @@ from apps.shop.filters import ProductFilter
 from .serializers import (
     ProductListSerializer,
     ProductDetailSerializer,
+    ProductFeedbackStatsSerializer,
+    SubmitReviewSerializer
 )
 from apps.shop.services import (
     ShopProductListService,
     ShopProductDetailService,
     ShopCategoryService,
+    FeedbackService
 )
 from core.models import Product
 
@@ -25,6 +30,7 @@ class ProductListView(ListAPIView):
     """
     API View برای نمایش لیست محصولات همراه با فیلترینگ پیشرفته.
     """
+    permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
     filterset_class = ProductFilter
     
@@ -89,3 +95,60 @@ class CategoryViewSet(ViewSet):
         
         tree_data = service.get_category_tree_structure()
         return Response(tree_data)
+
+# ===== Submit Review API View ===== #
+@extend_schema(tags=["Product-Feedback"])
+class SubmitReviewView(APIView):
+    """
+    ثبت نظر و امتیاز برای یک محصول.
+    کاربر باید لاگین باشد و طبق قوانین دامین (خرید محصول) مجاز باشد.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = SubmitReviewSerializer
+
+    def post(self, request, slug):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        service = FeedbackService()
+        
+        try:
+            result = service.submit_review(
+                user=request.user,
+                product_slug=slug,
+                data=serializer.validated_data
+            )
+            
+            message = "عملیات با موفقیت انجام شد."
+            if 'comment' in result and 'rating' in result:
+                message = "امتیاز و نظر شما ثبت شد."
+            elif 'comment' in result:
+                message = result['comment']
+            elif 'rating' in result:
+                message = result['rating']
+
+            return Response({"detail": message}, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# ===== Product Feedback View Set ===== #
+@extend_schema(tags=["Product-Feedback"])
+class ProductFeedbacksView(APIView):
+    """
+    نمایش لیست نظرات تایید شده و میانگین امتیاز محصول.
+    این API عمومی است (نیاز به لاگین ندارد).
+    """
+    permission_classes = [AllowAny]
+    def get(self, request, slug):
+            service = FeedbackService()
+            
+            try:
+                # ===== دریافت سرویس برای دریافت اطلاعات ===== #
+                feedbacks_data = service.get_product_feedbacks(product_slug=slug)
+                # ===== پاس دادن اطلاعات به 
+                serializer = ProductFeedbackStatsSerializer(feedbacks_data)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+                
+            except Exception as e:
+                return Response({"error": "محصول یافت نشد یا خطایی رخ داد."}, status=status.HTTP_404_NOT_FOUND)

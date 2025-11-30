@@ -1,4 +1,4 @@
-from .profile_detail_view import CustomerProfileAPIView 
+from .profile_detail_view import CustomerProfileAPIView , UserCommentListView
 from .profile_order_view import (
     UserOrderDetailAPIView,
     UserOrderListAPIView
