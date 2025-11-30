@@ -4,6 +4,8 @@ from slugify import slugify
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 from mptt.models import MPTTModel, TreeForeignKey
 
 # ======== Product Code Generator ======== #
@@ -386,3 +388,157 @@ class ProductFileUploadRequirement(models.Model):
         verbose_name_plural = _("نیازمندی‌های آپلود فایل محصولات")
         ordering = ['sort_order']
         unique_together = ('product', 'spec')
+
+# ===== Product Rating Model ===== #
+class ProductRating(models.Model):
+    """
+    مدل امتیازدهی به محصول (Star Rating).
+    این مدل فقط مسئول ذخیره عدد امتیاز است و متن نظر را شامل نمی‌شود.
+    """
+    user = models.ForeignKey(
+        "core.User", 
+        on_delete=models.CASCADE, 
+        related_name="product_ratings",
+        verbose_name=_("کاربر")
+    )
+    product = models.ForeignKey(
+        "core.Product", 
+        on_delete=models.CASCADE, 
+        related_name="ratings",
+        verbose_name=_("محصول")
+    )
+    score = models.PositiveSmallIntegerField(
+        _("امتیاز"),
+        default=5,
+        validators=[
+            MinValueValidator(1, message=_("امتیاز نمی‌تواند کمتر از ۱ باشد.")),
+            MaxValueValidator(5, message=_("امتیاز نمی‌تواند بیشتر از ۵ باشد."))
+        ],
+        help_text=_("امتیاز بین ۱ تا ۵")
+    )
+    created_at = models.DateTimeField(_("تاریخ ثبت"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("تاریخ ویرایش"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("امتیاز محصول")
+        verbose_name_plural = _("امتیازات محصولات")
+        # قانون بیزنس: هر کاربر به هر محصول فقط یک بار امتیاز می‌دهد
+        unique_together = ('user', 'product')
+        indexes = [
+            models.Index(fields=['product', 'score']), # برای کوئری‌های فیلتر و میانگین‌گیری سریع
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.product.name}: {self.score}"
+
+    def clean(self):
+        """
+        اعتبارسنجی سطح مدل (Rich Model Logic).
+        """
+        if not (1 <= self.score <= 5):
+            raise ValidationError(_("امتیاز باید بین ۱ تا ۵ باشد."))
+
+    @property
+    def is_positive(self):
+        """آیا امتیاز مثبت تلقی می‌شود؟ (مثلاً ۴ و ۵)"""
+        return self.score >= 4
+
+class ProductCommentChoices(models.TextChoices):
+    """
+    مشخصات و مقادیر قابلیت‌های نظرات (Comment Choices).
+    """
+    PENDING = 'pending', _('در انتظار بررسی')
+    APPROVED = 'approved', _('تایید شده')
+    REJECTED = 'rejected', _('رد شده')
+
+# ===== Product Comment Model ===== #
+class ProductComment(models.Model):
+    """
+    مدل نظرات و پرسش/پاسخ محصول.
+    قابلیت پاسخ‌دهی تو در تو (Nested Replies) برای ادمین را دارد.
+    """
+
+    user = models.ForeignKey(
+        "core.User", 
+        on_delete=models.CASCADE, 
+        related_name="product_comments",
+        verbose_name=_("کاربر")
+    )
+    product = models.ForeignKey(
+        "core.Product", 
+        on_delete=models.CASCADE, 
+        related_name="comments",
+        verbose_name=_("محصول")
+    )
+    # ===== پاسخ‌دهی تو در تو ===== #
+    parent = models.ForeignKey(
+        'self', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='replies',
+        verbose_name=_("پاسخ به")
+    )
+    
+    # ===== محتوای نظر ===== #
+    name = models.CharField(_("نام نمایش داده شده"), max_length=150)
+    email = models.EmailField(_("ایمیل"))
+    message = models.TextField(_("متن نظر"))
+    
+    # ===== مدیریت وضعیت ===== #
+    status = models.CharField(
+        _("وضعیت"), 
+        max_length=20, 
+        choices=ProductCommentChoices.choices, 
+        default=ProductCommentChoices.PENDING
+    )
+    
+    # ===== اطلاعات اضافی ===== #
+    admin_note = models.TextField(_("یادداشت ادمین"), blank=True, null=True, help_text=_("دلیل رد یا تایید برای داخلی"))
+    created_at = models.DateTimeField(_("تاریخ ثبت"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("تاریخ ویرایش"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("نظر محصول")
+        verbose_name_plural = _("نظرات محصولات")
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} on {self.product.name}"
+
+    def save(self, *args, **kwargs):
+        """
+        پر کردن خودکار نام و ایمیل اگر خالی باشند (Rich Behavior).
+        """
+        if not self.name and self.user:
+            # ===== پیدا کردن نام و نام خانوادگی ===== #
+            try:
+                self.name = f"{self.user.customer_profile.first_name} {self.user.customer_profile.last_name}"
+            except Exception:
+                self.name = self.user.username
+        
+        if not self.email and self.user:
+            self.email = self.user.email
+            
+        super().save(*args, **kwargs)
+
+    @property
+    def is_reply(self):
+        """آیا این یک پاسخ است؟"""
+        return self.parent is not None
+
+    @property
+    def is_public(self):
+        """آیا نظر قابل نمایش است؟"""
+        return self.status == self.STATUS_APPROVED
+
+    def approve(self):
+        """تایید نظر (Domain Action)"""
+        self.status = self.STATUS_APPROVED
+        self.save(update_fields=['status', 'updated_at'])
+
+    def reject(self, reason=""):
+        """رد نظر"""
+        self.status = self.STATUS_REJECTED
+        self.admin_note = reason
+        self.save(update_fields=['status', 'admin_note', 'updated_at'])

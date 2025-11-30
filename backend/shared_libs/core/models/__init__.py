@@ -26,6 +26,9 @@ from .product import (
     OptionValue,
     FileUploadSpec,
     ProductFileUploadRequirement,
+    ProductComment,
+    ProductCommentChoices,
+    ProductRating
 )
 from .order import Order, OrderItem, OrderItemDesignFile, OrderStatus, DesignFile
 from .cart import Cart, CartItem, CartItemUpload

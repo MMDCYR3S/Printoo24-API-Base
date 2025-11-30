@@ -1,9 +1,8 @@
-
 # Django & DRF
 python-slugify
 django-mptt
 Pillow
-Django
+Django>=5.2
 djangorestframework
 djangorestframework-simplejwt
 django-cors-headers
@@ -17,11 +16,10 @@ psycopg2-binary
 redis
 django-redis
 
-# Celery
-celery
-django-celery
-django-celery-beat
-django-celery-results  # Use this for storing results
+# Celery (حتما نسخه‌ها را مشخص کنید تا سراغ قدیمی‌ها نرود)
+celery>=5.3.0
+django-celery-beat>=2.5.0
+django-celery-results>=2.5.0
 
 # Workflow Management
 django-fsm

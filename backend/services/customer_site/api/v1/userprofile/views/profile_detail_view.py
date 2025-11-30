@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -6,8 +7,8 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_spectacular.views import extend_schema
 
-from apps.userprofile.services import ProfileDetailService
-from ..serializers import CustomerProfileSerializer 
+from apps.userprofile.services import ProfileDetailService, UserFeedbackService
+from ..serializers import CustomerProfileSerializer, ProfileCommentSerializer
 
 # ===== Customer Profile API View ===== #
 @extend_schema(tags=["Profile"])
@@ -94,3 +95,15 @@ class CustomerProfileAPIView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
+# ===== User Comment List View ===== #
+@extend_schema(tags=['Profile'])
+class UserCommentListView(ListAPIView):
+    """
+    لیست تاریخچه نظرات کاربر
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProfileCommentSerializer
+
+    def get_queryset(self):
+        service = UserFeedbackService(user=self.request.user)
+        return service.get_my_comments()            
