@@ -11,13 +11,14 @@ from .serializers import (
     ProductListSerializer,
     ProductDetailSerializer,
     ProductFeedbackStatsSerializer,
-    SubmitReviewSerializer
+    SubmitReviewSerializer,
+    CategoryLandingPageSerializer,
 )
 from apps.shop.services import (
     ShopProductListService,
     ShopProductDetailService,
     ShopCategoryService,
-    FeedbackService
+    FeedbackService,
 )
 from core.models import Product
 
@@ -88,13 +89,53 @@ class CategoryViewSet(ViewSet):
     """
     ViewSet برای مدیریت دسته‌بندی‌ها و درختواره دسته‌بندی‌ها.
     """
-    permission_classes = []
+    permission_classes = [AllowAny]
 
     def list(self, request):
         service = ShopCategoryService(request=request)
         
         tree_data = service.get_category_tree_structure()
         return Response(tree_data)
+    
+@extend_schema(tags=["Category"])
+class CategoryBannerViewSet(ViewSet):
+    """
+    نمایش لیست تمام دسته‌بندی‌های اصلی به همراه:
+    1. بنرها (عریض و باکس)
+    2. زیر دسته‌ها
+    3. محصولات منتخب (خلاصه)
+    """
+    permission_classes = [AllowAny]
+
+    def list(self, request):
+        """
+        GET /api/v1/shop/categories-landing/
+        """
+        service = ShopCategoryService(request=request)
+        
+        # فراخوانی متد جدید که لیست برمی‌گرداند
+        data_list = service.get_all_categories_with_products()
+        
+        # نکته مهم: چون خروجی یک لیست است، many=True را اضافه می‌کنیم
+        serializer = CategoryLandingPageSerializer(data_list, many=True, context={'request': request})
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def retrieve(self, request, slug=None):
+        """
+        GET /api/v1/shop/categories-landing/{slug}/
+        اگر بخواهید تکی هم بگیرید، این متد استفاده می‌شود (pk اینجا نقش slug را بازی می‌کند اگر lookup_field تنظیم شود)
+        """
+        service = ShopCategoryService(request=request)
+        data = service.get_category_landing_data(slug=slug)
+        
+        if data is None:
+            return Response({"detail": "دسته‌بندی یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+            
+        serializer = CategoryLandingPageSerializer(data, context={'request': request})
+        return Response(serializer.data)
+
+
 
 # ===== Submit Review API View ===== #
 @extend_schema(tags=["Product-Feedback"])

@@ -30,6 +30,16 @@ class ProductRepository(BaseRepository[Product]):
         """
         return self.model.objects.filter(is_active=True).select_related('category')
 
+    def get_products_by_category_ids(self, category_ids: list) -> QuerySet[Product]:
+        """
+        دریافت محصولات فعال متعلق به لیستی از دسته‌بندی‌ها.
+        فقط فیلدهای ضروری برای نمایش در لیست (کارت محصول) را انتخاب می‌کند.
+        """
+        return self.model.objects.filter(
+            category_id__in=category_ids, 
+            is_active=True
+        ).select_related('category').prefetch_related('product_image').order_by('-created_at')
+
     def get_product_detail_by_slug(self, slug: str) -> Optional[Product]:
         """
         دریافت جزئیات کامل یک محصول با استفاده از اسلاگ.

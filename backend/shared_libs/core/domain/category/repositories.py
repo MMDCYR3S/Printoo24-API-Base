@@ -2,7 +2,7 @@ from typing import Optional
 
 from django.db.models import QuerySet
 
-from core.models import ProductCategory
+from core.models import ProductCategory, Product
 from ...utils.base_repository import BaseRepository
 from .exceptions import ProductCategoryNotFoundException
 
@@ -29,7 +29,7 @@ class ProductCategoryRepository(BaseRepository[ProductCategory]):
             return self.model.objects.get(slug=slug)
         except self.model.DoesNotExist:
             raise ProductCategoryNotFoundException(f"دسته‌بندی با اسلاگ '{slug}' یافت نشد.")
-            
+    
     def get_descendants(self, category: ProductCategory) -> QuerySet[ProductCategory]:
         """
         دریافت تمام زیرمجموعه‌های یک دسته‌بندی (برای فیلترینگ محصولات لازم می‌شود).

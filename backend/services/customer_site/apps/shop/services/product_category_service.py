@@ -1,75 +1,165 @@
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from mptt.utils import get_cached_trees
-
+from django.shortcuts import get_object_or_404
 from rest_framework.reverse import reverse
 from django.urls import NoReverseMatch
 
 from core.domain.category import ProductCategoryDomainService
+from core.domain.product.repositories import ProductRepository
 from core.models import ProductCategory
 
 logger = logging.getLogger('shop.services.category')
 
-# ====== Shop Category Service ======= #
+# ===== Shop Category Service ===== #
 class ShopCategoryService:
     """
-    سرویس اپلیکیشن برای مدیریت نمایش دسته‌بندی‌ها و درختواره.
+    سرویس اپلیکیشن برای مدیریت نمایش دسته‌بندی‌ها (منو و صفحه لندینگ).
     """
     def __init__(self, request=None):
         self.request = request
         self._domain_service = ProductCategoryDomainService()
+        self._product_repo = ProductRepository()
         
-    # ===== = دریافت درختواره دسته‌بندی ====== #
+    # ===== Get Category Tree Structure ===== #
     def get_category_tree_structure(self) -> List[Dict[str, Any]]:
         """
-        تبدیل کوئری‌ست فلت به ساختار درختی تودرتو (Nested Dictionary).
-        این متد برای منوهای بازشونده و سایدبار فیلترینگ عالی است.
+        خروجی: ساختار درختی تو در تو (فقط نام و لینک).
+        مناسب برای هدر سایت یا منوی کناری.
         """
-        logger.info("Building category tree with hyperlinks")
-        
-        # ===== دریافت کوئری‌ست دسته‌بندی‌ها ===== #
         categories = self._domain_service.get_category_tree_queryset()
-        
-        # ===== ساختار درختی ===== #
         root_nodes = get_cached_trees(categories)
-        return [self._serialize_node(node) for node in root_nodes]
-    
-    # ===== تبدیل یک نود به دیکشنری =====
-    def _serialize_node(self, node: ProductCategory) -> Dict[str, Any]:
-        """
-        تبدیل یک نود (و فرزندانش) به دیکشنری
-        """
+
+        return [self._serialize_node_light(node) for node in root_nodes]
+
+    def _serialize_node_light(self, node: ProductCategory) -> Dict[str, Any]:
+        """تبدیل نود به دیکشنری سبک"""
+        children = [self._serialize_node_light(child) for child in node.get_children()]
         
-        children = [self._serialize_node(child) for child in node.get_children()]
-        
-        data = {
+        return {
             "id": node.id,
             "name": node.name,
             "slug": node.slug,
             "has_children": len(children) > 0,
             "links": {
-                "products_url" : self._generate_product_filter_url(node.slug),
+                "products_url": self._generate_product_filter_url(node.slug),
+                "landing_url": self._generate_category_landing_url(node.slug)
             },
             "children": children,
         }
-        return data
+
+    # ===== Get Category Landing Data ===== #
+    def get_category_landing_data(self, slug: str) -> Dict[str, Any]:
+        """
+        خروجی: اطلاعات کامل یک دسته برای نمایش در صفحه اختصاصی.
+        شامل: بنرها، توضیحات و لیست محصولات (خودش + زیرمجموعه‌ها).
+        """
+        logger.info(f"Fetching landing data for category: {slug}")
         
-    def _generate_product_filter_url(self, slug: str) -> str:
-        """
-        تولید لینک فیلتر محصولات با اسلاگ دسته‌بندی
-        """
-        if not self.request:
+        # ===== دریافت دسته‌بندی ===== #
+        category = self._domain_service._repo.get_category_by_slug(slug)
+        if not category:
             return None
+
+        descendants = category.get_descendants(include_self=True)
+        descendant_ids = descendants.values_list('id', flat=True)
+
+        products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)
         
-        try:
-            # ===== تولید لینک با استفاده از reverse ===== #
-            base_url = reverse("api:v1:shop:list", request=self.request)
-            # ===== تبدیل اسلاگ به لینک =====
-            return f"{base_url}?category={slug}"
+        products_limit = products_queryset[:7]
+
+        # 4. ساخت خروجی
+        data = {
+            "category_info": {
+                "id": category.id,
+                "name": category.name,
+                "description": category.description,
+                "slug": category.slug,
+                "banners": {
+                    "wide": self._get_image_url(category.banner_wide),
+                    "box": self._get_image_url(category.banner_box),
+                }
+            },
+            "sub_categories": [
+                {
+                    "name": child.name, 
+                    "slug": child.slug, 
+                    "thumbnail": self._get_image_url(child.banner_box)
+                } 
+                for child in category.get_children() if child.is_active
+            ],
+            "products": products_limit
+        }
+        return data
+    
+    # ===== Get All Categories With Products ===== #
+    def get_all_categories_with_products(self) -> List[Dict[str, Any]]:
+        """
+        دریافت لیست تمام دسته‌بندی‌های اصلی (Root) به همراه بنرها و محصولات زیرمجموعه.
+        مناسب برای صفحه اصلی فروشگاه.
+        """
+        logger.info("Fetching all root categories with products")
+
+        # ===== دریافت کوئری‌ست دسته‌بندی‌ها ===== #
+        root_categories = self._domain_service._repo.get_all_active_categories().filter(parent__isnull=True)
         
-        except NoReverseMatch:
-            logger.error(f"No reverse match found for category slug '{slug}'")
+        result_list = []
+
+        for category in root_categories:
+            # ===== دریافت کوئری‌ست زیر‌دسته‌ها ===== #
+            descendants = category.get_descendants(include_self=True)
+            descendant_ids = descendants.values_list('id', flat=True)
+
+            # ===== دریافت کوئری‌ست محصولات ===== #
+            products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)[:7]
+
+            # ====== ساخت دیکشنری برای هر دسته‌بندی
+            category_data = {
+                "category_info": {
+                    "id": category.id,
+                    "name": category.name,
+                    "slug": category.slug,
+                    "description": category.description,
+                    "banners": {
+                        "wide": self._get_image_url(category.banner_wide),
+                        "box": self._get_image_url(category.banner_box),
+                    }
+                },
+                "sub_categories": [
+                    {
+                        "name": child.name, 
+                        "slug": child.slug, 
+                        "thumbnail": self._get_image_url(child.banner_box)
+                    } 
+                    for child in category.get_children() if child.is_active
+                ],
+                "products": products_queryset
+            }
+            result_list.append(category_data)
             
-        except Exception as e:
-            logger.error(f"Error generating product filter URL for category slug '{slug}': {str(e)}")
+        return result_list
+
+    # ===== Get Image URL ===== #
+    def _get_image_url(self, image_field):
+        if not image_field: return None
+        try:
+            return self.request.build_absolute_uri(image_field.url)
+        except Exception:
+            return image_field.url
+
+    def _generate_product_filter_url(self, slug: str) -> str:
+        """لینک فیلتر محصولات"""
+        if not self.request: return None
+        try:
+            base_url = reverse("api:v1:shop:product-list", request=self.request)
+            return f"{base_url}?category={slug}"
+        except NoReverseMatch:
+            return None
+
+    def _generate_category_landing_url(self, slug: str) -> str:
+        """لینک صفحه لندینگ دسته"""
+        if not self.request: return None
+        try:
+            return reverse("api:v1:shop:category-landing", kwargs={'slug': slug}, request=self.request)
+        except NoReverseMatch:
             return None

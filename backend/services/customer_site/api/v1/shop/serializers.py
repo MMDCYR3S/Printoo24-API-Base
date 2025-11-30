@@ -222,3 +222,43 @@ class ProductFeedbackStatsSerializer(serializers.Serializer):
     average_rating = serializers.FloatField()
     total_ratings = serializers.IntegerField()
     comments = CommentListSerializer(many=True)
+
+class ProductSummarySerializer(serializers.ModelSerializer):
+    """
+    نمایش خلاصه محصول در لیست‌های طولانی (مثل صفحه لندینگ دسته).
+    فقط اطلاعات کلیدی: عکس، نام، قیمت پایه.
+    """
+    image = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'slug', 'price', 'image']
+
+    def get_image(self, obj):
+        first_image = obj.product_image.first()
+        if first_image and first_image.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(first_image.image.url)
+            return first_image.image.url
+        return None
+
+class SubCategoryTinySerializer(serializers.Serializer):
+    name = serializers.CharField()
+    slug = serializers.CharField()
+    thumbnail = serializers.URLField()
+
+class CategoryInfoSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    slug = serializers.CharField()
+    description = serializers.CharField()
+    banners = serializers.DictField() # {wide: url, box: url}
+
+class CategoryLandingPageSerializer(serializers.Serializer):
+    """
+    سریالایزر نهایی برای پاسخ API صفحه لندینگ.
+    """
+    category_info = CategoryInfoSerializer()
+    sub_categories = SubCategoryTinySerializer(many=True)
+    products = ProductSummarySerializer(many=True)

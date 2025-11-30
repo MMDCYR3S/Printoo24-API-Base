@@ -28,6 +28,23 @@ class ProductCategory(MPTTModel):
     name = models.CharField(_("نام"), max_length=150)
     slug = models.SlugField(_("اسلاگ"), unique=True, blank=True, null=True)
     parent = TreeForeignKey("self", related_name="children", on_delete=models.CASCADE, blank=True, null=True)
+    # ===== فیلدهای جدید برای بنر و توضیحات ===== #
+    description = models.TextField(_("توضیحات"), blank=True, null=True, help_text=_("توضیحات برای نمایش در بالای صفحه دسته بندی و سئو"))
+    banner_wide = models.ImageField(
+        _("بنر عریض"), 
+        upload_to='categories/banners/', 
+        blank=True, 
+        null=True,
+        help_text=_("تصویر عریض برای هدر صفحه (مثلاً 1920x400)")
+    )
+    banner_box = models.ImageField(
+        _("بنر مربعی/باکس"), 
+        upload_to='categories/boxes/', 
+        blank=True, 
+        null=True,
+        help_text=_("تصویر برای نمایش در لیست دسته‌بندی‌ها (مثلاً 400x400)")
+    )
+    is_active = models.BooleanField(_("فعال"), default=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
@@ -39,6 +56,22 @@ class ProductCategory(MPTTModel):
     
     def __str__(self):
         return f"{self.name}"
+    
+    # ===== متدهای کمکی (Domain Logic) ===== #
+    def get_banner_wide_url(self):
+        """
+        دریافت آدرس بنر عریض.
+        اگر این دسته بنر نداشت، سعی می‌کند از والدش بگیرد (Inheritance).
+        """
+        if self.banner_wide:
+            return self.banner_wide.url
+        if self.parent:
+            return self.parent.get_banner_wide_url()
+        return None 
+
+    def get_descendants_active(self):
+        """گرفتن زیرمجموعه‌های فعال"""
+        return self.get_descendants().filter(is_active=True)
     
 # ======== Product Model ======== #
 class Product(models.Model):
