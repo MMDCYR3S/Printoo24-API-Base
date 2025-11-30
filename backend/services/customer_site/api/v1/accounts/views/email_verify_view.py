@@ -3,10 +3,11 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import ValidationError
+from rest_framework.throttling import ScopedRateThrottle
 from drf_spectacular.utils import extend_schema
 
 from ..serializers import EmailVerificationSerializer
-from apps.accounts.services import VerificationService,  TokenService
+from apps.accounts.services import VerificationService, AuthService
 
 # ========= Verify Email View ========= #
 @extend_schema(tags=['Accounts'])
@@ -17,6 +18,8 @@ class VerifyEmailApiView(GenericAPIView):
     
     permission_classes = [AllowAny]
     serializer_class = EmailVerificationSerializer
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'accounts_verify'
     
     def post(self, request, *args, **kwargs):
         """
@@ -33,12 +36,13 @@ class VerifyEmailApiView(GenericAPIView):
         code = serializer.validated_data.get("code")
         
         # ===== ایجاد کانکشن با ریپازیتوری کاربر و سرویس ===== #
+        auth_service = AuthService()
         verify_service = VerificationService()
         
         # ==== اعتبارسنجی کد تأیید و ایجاد توکن برای کاربر ===== #
         try:
             verified_user = verify_service.verify_code(email=email, code=code)
-            tokens = TokenService.create_token_for_user(verified_user)
+            tokens = auth_service._generate_tokens(verified_user)
             
             return Response(tokens, status=status.HTTP_200_OK)
         

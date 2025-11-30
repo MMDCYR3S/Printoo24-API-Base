@@ -1,14 +1,15 @@
 import logging
 from typing import Dict, Any
 
+from django.conf import settings
 from django.db import transaction
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.models import User, Role, UserRole
 from core.domain.users.services import UserDomainService
 from .verify_service import VerificationService
-from .token_service import TokenService
 
 # ====== Logger Configuration ====== #
 logger = logging.getLogger('accounts.services.auth')
@@ -25,6 +26,14 @@ class AuthService:
         self._user_domain_service = UserDomainService()
         self._verify_service = VerificationService()
         logger.debug("AuthService initialized")
+    
+    def _generate_tokens(self, user) -> Dict[str, str]:
+        """متد داخلی برای تولید توکن"""
+        refresh = RefreshToken.for_user(user)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
         
     @transaction.atomic
     def register_customer(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -32,6 +41,8 @@ class AuthService:
         ثبت نام مشتری (Customer Registration Flow)
         """
         logger.info(f"Registering new customer: {data.get('email')}")
+        
+        username = data.get('username', 'N/A')
         
         try:
             # ===== ایجاد کاربر ===== #
@@ -47,7 +58,7 @@ class AuthService:
                 f"User registration completed successfully - "
                 f"User ID: {user.id}, Username: {user.username}"
             )
-            tokens = TokenService.create_token_for_user(user)
+            tokens = self._generate_tokens(user)
             
             return {
                 "user": user,
@@ -62,7 +73,7 @@ class AuthService:
             
         except Exception as e:
             logger.error(
-                f"Unexpected error during user registration - Username: {user.username}, Error: {str(e)}",
+                f"Unexpected error during user registration - Username: {username}, Error: {str(e)}",
                 exc_info=True
             )
             raise ValidationError(f"خطای غیرمنتظره در ثبت‌نام: {str(e)}")
@@ -93,7 +104,7 @@ class AuthService:
             
             # ====== ایجاد توکن برای کاربر پس از ورود ====== #
             logger.debug(f"Generating authentication tokens for user: {user.username}")
-            tokens = TokenService.create_token_for_user(user)
+            tokens = self._generate_tokens(user)
             
             logger.info(
                 f"User logged in successfully - "

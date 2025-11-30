@@ -133,9 +133,6 @@ class VerificationService:
         logger.info(f"Verification code check requested for email: {email}")
         
         try:
-            if not hmac.compare_digest(cache_code, str(code)):
-                raise ValueError("Invalid verification code")
-                
             # ===== صحت‌سنجی کاربر ===== #
             user = self._user_service.get_by_email(email)
             
@@ -160,6 +157,7 @@ class VerificationService:
             cache_key = self._get_cache_key(email)
             cache_code = cache_service.get(cache_key)
             
+            # ===== بررسی تاریخ انقضای کد ===== #
             if not cache_code:
                 logger.warning(
                     f"Verification code expired or not found - "
@@ -169,6 +167,14 @@ class VerificationService:
                     f"Expired verification code attempt - User: {user.username} ({email})"
                 )
                 raise ValidationError("کد فعال‌سازی منقضی شده است. لطفاً کد جدید درخواست کنید.")
+            
+                        
+            if not hmac.compare_digest(cache_code, str(code)):
+                logger.warning(
+                    f"Invalid verification code - User: {email}, "
+                    f"Expected: {str(cache_code)[:2]}****, Received: {str(code)[:2]}****"
+                )
+                raise ValidationError("کد وارد شده صحیح نیست.")
             
             if cache_code != str(code):
                 logger.warning(
@@ -185,7 +191,7 @@ class VerificationService:
             
             # ===== فعال‌سازی کاربر و حذف کش ===== #
             logger.info(f"Activating user account - User ID: {user.id}, Email: {email}")
-            verified_user = self._user_service.set_user_as_verified(user)
+            verified_user = self._user_service.verify_user(user)
             
             cache_service.delete(cache_key)
             logger.debug(f"Verification code cache deleted for email: {email}")

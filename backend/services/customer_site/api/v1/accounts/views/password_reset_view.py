@@ -5,8 +5,11 @@ from rest_framework.permissions import AllowAny
 from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 
-from ..serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
-from apps.accounts.services.password_reset_service import PasswordResetService
+from ..serializers import (
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer
+)
+from apps.accounts.services import PasswordResetService
 
 # ========= Password Reset Request View ========= #
 @extend_schema(tags=['Accounts'])

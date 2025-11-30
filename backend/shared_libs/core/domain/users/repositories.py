@@ -23,18 +23,12 @@ class UserRepository(BaseRepository[User]):
     # ===== دریافت براساس نام کاربری ===== #
     def get_by_username(self, username: str) -> Optional[User]:
         """ دریافت کاربر با نام کاربری مشخص """
-        try:
-            return self.model.objects.get(username=username)
-        except self.model.DoesNotExist:
-            raise UsernameNotFoundException(f"کاربری با نام کاربری '{username}' یافت نشد.")
+        return self.model.objects.filter(username=username).first()
     
     # ===== دریافت براساس ایمیل ===== #
     def get_by_email(self, email: str) -> Optional[User]:
         """ دریافت کاربر با ایمیل مشخص """
-        try:
-            return self.model.objects.get(email=email)
-        except self.model.DoesNotExist:
-            raise EmailNotFoundException(f"کاربری با ایمیل '{email}' یافت نشد.")
+        return self.model.objects.filter(email=email).first()
     
     # ===== ایجاد کاربر ===== #
     def create_user(self, data: Dict[str, Any]) -> User:

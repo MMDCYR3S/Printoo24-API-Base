@@ -1,9 +1,6 @@
-from .register_serializer import RegisterSerializer
 from .email_verify_serializer import EmailVerificationSerializer
-from .login_serializer import LoginSerializer
-from .logout_serializer import LogoutSerializer
+from .login_register_serializer import LoginSerializer, RegisterSerializer
 from .password_reset_serializer import(
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer
 )
-from .refresh_token_serializer import RefreshTokenSerializer
