@@ -9,8 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 WORKDIR /app
 
 # ===== نصب پیش نیاز اصلی داکر ===== #
-# تغییر ریپازیتوری به سرورهای ایران برای سرعت و رفع تحریم
-RUN sed -i 's/deb.debian.org/debian.hostiran.ir/g' /etc/apt/sources.list.d/debian.sources && \
+RUN sed -i 's/deb.debian.org/mirror.arvancloud.ir/g' /etc/apt/sources.list.d/debian.sources && \
     apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
