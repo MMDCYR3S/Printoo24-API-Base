@@ -4,144 +4,124 @@ from typing import List, Dict, Optional, Union
 
 from core.models import (
     Product,
-    ProductQuantity,
-    ProductSize,
     ProductMaterial,
-    ProductOption
+    ProductOption,
+    ProductSize,
+    PricingType
 )
 
 # ====== Logger Configuration ====== #
 logger = logging.getLogger('shop.services.price_calculator')
 
-
-# ====== Product Price Calculator ====== #
 class ProductPriceCalculator:
     """
-    سرویسی برای محاسبه قیمت نهایی یک محصول بر اساس ویژگی‌های انتخابی.
-    این کلاس تمام منطق قیمت‌گذاری را کپسوله می‌کند.
+    سرویس پیشرفته محاسبه قیمت چاپ بر اساس متریال، مساحت و خدمات.
+    منطق: (مساحت کل × قیمت متریال) + (هزینه آپشن‌ها) + (هزینه ثابت) + (هزینه طراحی)
     """
     def __init__(
         self,
         product: Product,
-        quantity: ProductQuantity,
-        material: ProductMaterial,
+        product_material: ProductMaterial, # جایگزین Material و QuantityObj قدیمی
+        quantity: int,
         options: List[ProductOption],
-        size: Optional[ProductSize] = None,
-        custom_dimensions: Optional[Dict[str, Union[int, float]]] = None
+        width: float, # عرض به سانتی‌متر
+        height: float, # ارتفاع به سانتی‌متر
+        has_design: bool = True # آیا کاربر فایل دارد؟
     ):
         self.product = product
-        self.quantity = quantity
-        self.material = material
+        self.pm = product_material # آبجکت ProductMaterial (رابط محصول و جنس)
+        self.quantity = Decimal(quantity)
         self.options = options
-        self.size = size
-        self.custom_dimensions = custom_dimensions
+        self.width = Decimal(str(width))
+        self.height = Decimal(str(height))
+        self.has_design = has_design
+        
+        # دسترسی به کانفیگ قیمت‌گذاری (از رابطه OneToOne)
+        self.config = getattr(product, 'pricing_config', None)
 
+        # ===== لاگ اولیه ===== #
         logger.info(
-            f"ProductPriceCalculator initialized - Product: {product.slug}, "
-            f"Quantity: {quantity}, "
-            f"Material: {material}, "
-            f"Options count: {len(options)}, "
-            f"Size: {size if size else 'Custom' if custom_dimensions else 'None'}"
+            f"Init Calculator: Product={product.slug}, Qty={quantity}, "
+            f"Mat={self.pm.material.name}, WxH={width}x{height}, Design={has_design}"
         )
 
-        if size and custom_dimensions:
-            logger.error(
-                f"Validation error - Both size and custom_dimensions provided for product: {product.slug}"
-            )
-            raise ValueError("نمی‌تواند یک محصول با سایز پیش‌فرض و ابعاد دلخواه همزمان داشته باشد.")
-        
-        if product.price_per_square_unit and not (size or custom_dimensions):
-            logger.warning(
-                f"Product {product.slug} has price_per_square_unit={product.price_per_square_unit} "
-                f"but no size or custom_dimensions provided"
-            )
+    def _calculate_total_area_sqm(self) -> Decimal:
+        """محاسبه مساحت کل سفارش به متر مربع"""
+        # تبدیل سانتی‌متر به متر: (w/100) * (h/100)
+        area_per_unit = (self.width / 100) * (self.height / 100)
+        total_area = area_per_unit * self.quantity
+        return total_area
 
-    def _get_size_impact(self) -> Decimal:
-        """محاسبه تأثیر قیمت بر اساس سایز استاندارد یا ابعاد دلخواه."""
-        if self.size:
-            logger.debug(
-                f"Using standard size - Name: {self.size}, "
-                f"Price impact: {self.size.price_impact}"
-            )
-            return self.size.price_impact
+    def calculate(self) -> Dict[str, float]:
+        """اجرای الگوریتم محاسبه قیمت"""
         
-        if self.custom_dimensions and self.product.price_per_square_unit:
-            width = Decimal(str(self.custom_dimensions.get('width', 0)))
-            height = Decimal(str(self.custom_dimensions.get('height', 0)))
-            area = width * height
-            impact = area * self.product.price_per_square_unit
+        if self.quantity <= 0:
+            return {"final_price": 0.0}
+
+        # 1. محاسبه مساحت کل (متر مربع)
+        total_area_sqm = self._calculate_total_area_sqm()
+        logger.debug(f"Total Area (sqm): {total_area_sqm}")
+
+        # 2. محاسبه هزینه کاغذ/متریال (Paper Cost)
+        # قیمت نهایی متریال (شامل هزینه پردازش) از پراپرتی مدل ProductMaterial خوانده می‌شود
+        material_unit_price = self.pm.final_material_price_per_sqm 
+        
+        material_cost = total_area_sqm * material_unit_price 
+        
+        # هزینه اضافه ثابت متریال (اگر باشد)
+        material_cost += (self.pm.extra_price_per_unit * self.quantity)
+        
+        logger.debug(f"Material Cost: {material_cost}")
+
+        # 3. محاسبه هزینه آپشن‌ها (Options Cost)
+        options_cost = Decimal(0)
+        for opt in self.options:
+            impact = opt.price_impact
             
-            logger.debug(
-                f"Custom dimensions calculation - Width: {width}, Height: {height}, "
-                f"Area: {area}, Price per unit: {self.product.price_per_square_unit}, "
-                f"Total impact: {impact}"
-            )
-            return impact
-        
-        logger.debug("No size impact - returning 0.0")
-        return Decimal('0.0')
+            if opt.pricing_type == PricingType.FIXED:
+                # مبلغ ثابت روی کل سفارش (مثل هزینه ارسال خاص یا بسته‌بندی ویژه)
+                options_cost += impact
+                
+            elif opt.pricing_type == PricingType.PER_UNIT:
+                # مبلغ به ازای هر عدد (مثل شماره‌زنی)
+                options_cost += (impact * self.quantity)
+                
+            elif opt.pricing_type == PricingType.PER_SQM:
+                # مبلغ به ازای متر مربع (مثل سلفون، لمینت، یووی)
+                options_cost += (impact * total_area_sqm)
+                
+            elif opt.pricing_type == PricingType.PERCENTAGE:
+                # درصدی از هزینه متریال (بیمه یا مالیات خاص)
+                options_cost += (material_cost * (impact / 100))
 
-    def calculate(self) -> Dict[str, Union[float, str]]:
-        """
-        الگوریتم اصلی محاسبه قیمت نهایی.
-        یک دیکشنری با جزئیات کامل قیمت‌گذاری برمی‌گرداند.
-        """
-        logger.info(f"Starting price calculation for product: {self.product.slug}")
-        
-        # ===== استخراج قیمت پایه از تیراژ ===== #
-        base_price = Decimal(str(self.quantity.price))
-        logger.debug(f"Base price from quantity: {base_price}")
-        
-        # ===== جمع‌آوری قیمت‌ها ===== #
-        impacts = []
-        
-        material_impact = Decimal(str(self.material.price_impact))
-        impacts.append(material_impact)
-        logger.debug(f"Material impact ({self.material}): {material_impact}")
-        
-        size_impact = self._get_size_impact()
-        impacts.append(size_impact)
-        logger.debug(f"Size impact: {size_impact}")
-        
-        for option in self.options:
-            option_impact = Decimal(str(option.price_impact))
-            impacts.append(option_impact)
-            logger.debug(f"Option impact ({option}): {option_impact}")
-        
-        total_impacts = sum(impacts, Decimal('0.0'))
-        logger.info(f"Total impacts calculated: {total_impacts}")
+        logger.debug(f"Options Cost: {options_cost}")
 
-        # ===== محاسبه قیمت خام با قیمت ویژگی‌ها ===== #
-        raw_price = base_price + total_impacts
-        logger.debug(f"Raw price (base + impacts): {raw_price}")
-
-        # ===== ضریب افزایش یا کاهش قیمت ===== #
-        modifier_percent = Decimal(str(self.product.price_modifier_percent))
-        modifier_factor = Decimal('1.0') + (modifier_percent / Decimal('100.0'))
-        logger.debug(
-            f"Price modifier - Percent: {modifier_percent}%, Factor: {modifier_factor}"
-        )
+        # 4. هزینه‌های سربار و طراحی (Config Costs)
+        setup_cost = Decimal(0)
+        design_cost = Decimal(0)
         
-        # ===== محاسبه قیمت نهایی ===== #
-        final_price = raw_price * modifier_factor
-        logger.info(
-            f"Final price calculated: {final_price} "
-            f"(raw: {raw_price} × modifier: {modifier_factor})"
-        )
+        if self.config:
+            # هزینه ثابت اولیه (زینک، کلیشه)
+            setup_cost = self.config.base_setup_price
+            
+            # هزینه طراحی (اگر کاربر فایل نداشته باشد و سرویس فعال باشد)
+            if self.config.design_service_available and not self.has_design:
+                design_cost = self.config.design_fee
 
-        # ===== گرد کردن و تبدیل به float برای JSON ===== #
+        # 5. جمع نهایی
+        raw_price = material_cost + options_cost + setup_cost + design_cost
+        
+        # گرد کردن نهایی (مثلاً به 100 تومان)
+        final_price = raw_price.quantize(Decimal('100'), rounding=ROUND_HALF_UP)
+
         result = {
-            "base_price": float(base_price.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)),
-            "total_impacts": float(total_impacts.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)),
-            "raw_price_before_modifier": float(raw_price.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)),
-            "modifier_percent": float(modifier_percent),
-            "final_price": float(final_price.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
+            "material_cost": float(material_cost),
+            "options_cost": float(options_cost),
+            "setup_cost": float(setup_cost),
+            "design_cost": float(design_cost),
+            "final_price": float(final_price),
+            "area_sqm": float(total_area_sqm) # برای نمایش به کاربر مفید است
         }
         
-        logger.info(
-            f"Price calculation completed for product {self.product.slug} - "
-            f"Final price: {result['final_price']}"
-        )
-        logger.debug(f"Full calculation result: {result}")
-        
+        logger.info(f"Calculation Done: {result['final_price']}")
         return result

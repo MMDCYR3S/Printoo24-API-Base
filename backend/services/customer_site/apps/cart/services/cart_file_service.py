@@ -4,65 +4,56 @@ import logging
 from typing import Dict
 
 from django.conf import settings
-from django.core.files.base import ContentFile
 from rest_framework.exceptions import ValidationError
 
-from core.models import CartItem, CartItemUpload
-
-# ===== تعریف لاگر اختصاصی برای سرویس فایل‌های سبد خرید ===== #
 logger = logging.getLogger('cart.services.cart_file')
 
 class FileFinalizeService:
     """
-    سرویس مدیریت نهایی‌سازی فایل‌های آپلود شده موقت.
-    
-    این سرویس وظیفه دارد فایل‌هایی که کاربر به صورت موقت آپلود کرده است را
-    بررسی کرده، آن‌ها را به مدل‌های نهایی (CartItemUpload) متصل کند
-    و فایل‌های موقت را از سیستم فایل حذف نماید.
-    
-    وظایف اصلی:
-    1. بررسی الزامی بودن فایل‌ها بر اساس محصول.
-    2. انتقال فایل از پوشه temp به پوشه نهایی مدیا.
-    3. ایجاد رکورد در دیتابیس برای فایل‌های نهایی.
-    4. پاکسازی فایل‌های موقت پس از اتمام کار یا بروز خطا.
+    سرویس نهایی‌سازی فایل‌ها: انتقال از Temp به User Directory.
     """
     
     def finalize_files(self, temp_files_map: Dict[str, str], user_id: int) -> Dict[int, str]:
         """
-        فایل‌ها را از temp به cart_uploads منتقل می‌کند و دیکشنری مسیرهای نسبی را برمی‌گرداند.
-        
         Args:
-            temp_files_map: {spec_id_str: temp_filename}
-            
+            temp_files_map: {requirement_id (str): temp_filename (str)}
         Returns:
-            {spec_id_int: relative_path_in_media}
+            {requirement_id (int): relative_path_in_media (str)}
         """
         final_paths = {}
         
-        # ===== پردازش هر فایل موقت ===== #
-        for spec_id_str, temp_name in temp_files_map.items():
+        for req_id_str, temp_name in temp_files_map.items():
             try:
-                spec_id = int(spec_id_str)
-                # ===== دریافت اطلاعات هر عکس ===== #
+                req_id = int(req_id_str)
+                
+                # مسیر فایل موقت
                 temp_path = os.path.join(settings.MEDIA_ROOT, 'uploads', 'temp', temp_name)
                 
                 if not os.path.exists(temp_path):
-                    logger.error(f"Temp file missing: {temp_path}")
-                    raise ValidationError(f"فایل موقت {temp_name} یافت نشد (شاید منقضی شده است).")
+                    logger.error(f"Temp file missing during finalize: {temp_path}")
+                    # اینجا بسته به بیزنس لاجیک می‌توانید خطا دهید یا نادیده بگیرید
+                    # اگر خطا بدهیم، کل پروسه افزودن به سبد خرید رول‌بک می‌شود (چون اتمیک است)
+                    raise ValidationError(f"فایل آپلود شده {temp_name} منقضی یا حذف شده است. لطفاً مجدداً آپلود کنید.")
                 
-                # ===== آماده‌سازی مسیر نهایی ===== #
+                # ساختار پوشه بندی: media/cart_uploads/USER_ID/
                 dest_rel_dir = f"cart_uploads/{user_id}"
                 dest_abs_dir = os.path.join(settings.MEDIA_ROOT, dest_rel_dir)
                 os.makedirs(dest_abs_dir, exist_ok=True)
                 
-                # ===== مسیر نهایی فایل ===== #
+                # انتقال فایل
                 dest_abs_path = os.path.join(dest_abs_dir, temp_name)
-                
                 shutil.move(temp_path, dest_abs_path)
-                logger.debug(f"Moved file {temp_name} to {dest_abs_path}")
-        
-                final_paths[spec_id] = os.path.join(dest_rel_dir, temp_name)
+                
+                # مسیر نسبی برای ذخیره در دیتابیس
+                final_paths[req_id] = os.path.join(dest_rel_dir, temp_name)
+                
+                logger.debug(f"Finalized file for req {req_id}: {final_paths[req_id]}")
+                
             except ValueError:
+                logger.warning(f"Invalid requirement ID format: {req_id_str}")
                 continue
-            
+            except OSError as e:
+                logger.error(f"OS Error moving file {temp_name}: {e}")
+                raise ValidationError("خطا در جابجایی فایل نهایی.")
+
         return final_paths

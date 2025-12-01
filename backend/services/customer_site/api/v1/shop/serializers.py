@@ -12,6 +12,8 @@ from core.models import (
     ProductComment,
     ProductCommentChoices,
     ProductRating,
+    ProductPricingConfig,
+    ProductFileUploadRequirement
 )
 
 # ====== Category Serializer ====== #
@@ -19,6 +21,27 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = ['name', 'slug']
+
+# ======= Pricing Config Serializer (NEW) ======= #
+class ProductPricingConfigSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر برای تنظیمات قیمت و سفارش محصول.
+    فرانت‌اند با این دیتا می‌فهمد که آیا باید اینپوت طول/عرض نشان دهد یا خیر،
+    و یا بازه تیراژ مجاز چقدر است.
+    """
+    class Meta:
+        model = ProductPricingConfig
+        fields = [
+            'allow_custom_quantity',
+            'min_quantity',
+            'max_quantity',
+            'accepts_custom_dimensions',
+            'min_width',
+            'max_width',
+            'base_setup_price',
+            'design_service_available',
+            'design_fee'
+        ]
 
 # ======= Quantity Detail Serializer ======= #
 class QuantityDetailSerializer(serializers.ModelSerializer):
@@ -40,12 +63,16 @@ class SizeDetailSerializer(serializers.ModelSerializer):
 
 # ======= Material Detail Serializer ======= #
 class MaterialDetailSerializer(serializers.ModelSerializer):
-    """سریالایزر برای نمایش جزئیات جنس‌ها"""
+    """
+    نمایش جنس‌های قابل انتخاب برای محصول.
+    نکته: ID این سریالایزر، ID جدول ProductMaterial است که برای محاسبه قیمت لازم است.
+    """
     name = serializers.CharField(source='material.name', read_only=True)
+    description = serializers.CharField(source='material.description', read_only=True)
     
     class Meta:
         model = ProductMaterial
-        fields = ['id', 'name', 'price_impact']
+        fields = ['id', 'name', 'description', 'is_default', 'processing_fee_percentage', 'extra_price_per_unit']
 
 # ======= Option Value Detail Serializer ======= #
 class OptionValueDetailSerializer(serializers.ModelSerializer):
@@ -54,17 +81,24 @@ class OptionValueDetailSerializer(serializers.ModelSerializer):
         model = OptionValue
         fields = ['id', 'value']
 
-# ======= Option Detail Serializer ======= #
+# ======= Option Detail Serializer (UPDATED) ======= #
 class OptionDetailSerializer(serializers.ModelSerializer):
     """
-    سریالایزر برای نمایش یک آپشن قابل انتخاب کامل.
-    شامل مقدار و تأثیر قیمت آن است.
+    نمایش آپشن‌ها به همراه نحوه قیمت‌گذاری آن‌ها.
     """
-    option_value = OptionValueDetailSerializer(read_only=True)
+    option_name = serializers.CharField(source='option.name', read_only=True)
+    value_name = serializers.CharField(source='option_value.value', read_only=True)
     
     class Meta:
         model = ProductOption
-        fields = ['id', 'option_value', 'price_impact']
+        fields = [
+            'id', 
+            'option_name', 
+            'value_name', 
+            'pricing_type', 
+            'price_impact', 
+            'is_required'
+        ]
 
 # ======= Product Image Serializer ======= #
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -118,6 +152,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
+            "id",
             'name',
             'slug',
             'price',
@@ -165,6 +200,18 @@ class ProductDetailSerializer(serializers.Serializer):
                 'items': OptionDetailSerializer(items, many=True).data
             })
         return result
+    
+# ======= File Upload Requirement Serializer (NEW) ======= #
+class FileUploadRequirementSerializer(serializers.ModelSerializer):
+    """
+    مشخص می‌کند کاربر چه فایل‌هایی را باید آپلود کند (مثلاً طرح رو، طرح پشت).
+    """
+    spec_name = serializers.CharField(source='spec.name', read_only=True)
+    spec_description = serializers.CharField(source='spec.description', read_only=True)
+
+    class Meta:
+        model = ProductFileUploadRequirement
+        fields = ['id', 'spec_name', 'spec_description', 'is_required', 'sort_order']
     
 # ===== Input Serializer (برای ثبت نظر) ===== #
 class SubmitReviewSerializer(serializers.Serializer):

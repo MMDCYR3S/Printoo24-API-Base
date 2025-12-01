@@ -28,7 +28,9 @@ from .product import (
     ProductFileUploadRequirement,
     ProductComment,
     ProductCommentChoices,
-    ProductRating
+    ProductRating,
+    PricingType,
+    ProductPricingConfig,
 )
 from .order import Order, OrderItem, OrderItemDesignFile, OrderStatus, DesignFile
 from .cart import Cart, CartItem, CartItemUpload

@@ -17,6 +17,7 @@ from core.models import (
     OptionValue,
     ProductFileUploadRequirement,
     FileUploadSpec,
+    ProductPricingConfig,
 )
 
 admin.site.register(Product)
@@ -35,4 +36,4 @@ admin.site.register(FileUploadSpec)
 admin.site.register(ProductOption)
 admin.site.register(Option)
 admin.site.register(OptionValue)
-
+admin.site.register(ProductPricingConfig)

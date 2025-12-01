@@ -1,10 +1,11 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from shared_libs.core.models import (
+from core.models import (
     User,
     CustomerProfile,
     Wallet,
-    Cart
+    Cart,
+    Role
 )
 
 # ====== Create Wallet When User Created ====== #
@@ -36,3 +37,13 @@ def create_customer_profile(sender, instance, created, **kwargs):
     """
     if created:
         CustomerProfile.objects.create(user=instance)
+
+# ========= Create Customer Role If User is Not Admin ========= #
+@receiver(post_save, sender=User)
+def create_customer_role(sender, instance, created, **kwargs):
+    """
+    اين تابع به صورت خودکار اجرا مي شود زمانی که یک كاربر ساخته مي شود
+    و يك كاربر مي باشد
+    """
+    if created and not instance.is_superuser and not instance.is_staff:
+        Role.objects.create(name="مشتری", description="نقش مشتری")

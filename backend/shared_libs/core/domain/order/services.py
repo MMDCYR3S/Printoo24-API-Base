@@ -1,6 +1,8 @@
 from typing import Optional, Dict, Any, List
+
 from django.db.models import Prefetch
 from django.db import transaction
+from django.core.files.base import ContentFile
 
 from core.models import (
     User,
@@ -15,7 +17,8 @@ from core.domain.cart import CartRepository
 from .repositories import (
     OrderRepository,
     OrderItemRepository,
-    OrderItemDesignFileRepository
+    OrderItemDesignFileRepository,
+    DesignFileRepository
 )
 
 # ====== Order Domain Service ====== #
@@ -29,6 +32,8 @@ class OrderDomainService:
             self._order_repo = OrderRepository()
             self._item_repo = OrderItemRepository()
             self._cart_repo = CartRepository()
+            self._design_file_repo = DesignFileRepository()
+            self._item_design_link_repo = OrderItemDesignFileRepository()
 
     # ==== عملیات نهایی تبدیل سبد خرید به سفارش ===== #
     @transaction.atomic
@@ -43,6 +48,8 @@ class OrderDomainService:
         
         # ===== محاسبه قیمت کل سبد خرید ===== #
         total_price = sum(item.price for item in cart.cart_items.all())
+        cart_items = cart.cart_items.select_related('product').prefetch_related('uploads').all()
+        total_price = sum(item.price for item in cart_items)
         
         # ===== ایجاد سفارش جدید ===== #
         initial_status = OrderStatus.objects.get(name="در انتظار بررسی")
@@ -54,28 +61,29 @@ class OrderDomainService:
             "total_price": total_price,
             "type": order_type
         })
-        
-        # ===== انتقال آیتم‌های سبد خرید به سفارش ===== #
-        cart_items = cart.cart_items.select_related('product').prefetch_related('uploads').all()
+
         
         for c_item in cart_items:
-            order_item = self._item_repo.create({
-                "order": order,
-                "product": c_item.product,
-                "quantity": c_item.quantity,
-                "price": c_item.price,
-                "items": c_item.items
-            })
+            order_item = self._item_repo.create_item_from_cart(order, c_item)
 
             # ===== انتقال فایل‌های طراحی مرتبط با آیتم سبد خرید ===== #
             for upload in c_item.uploads.all():
-                design_file = DesignFile.objects.create(file=upload.file)
-                
-                OrderItemDesignFile.objects.create(
-                    user=user,
-                    order_item=order_item,
-                    file=design_file
-                )
+                if upload.file:
+                    # ===== خواندن فایل ===== #
+                    file_content = ContentFile(upload.file.read())
+                    file_content.name = upload.file.name
+                    
+                    # ===== ایجاد فایل تصویر =====
+                    design_file = self._design_file_repo.create({
+                        "file": file_content
+                    })
+                    
+                    # ===== ایجاد لینک بین فایل وآیتم ===== #
+                    self._item_design_link_repo.create({
+                        "user": user,
+                        "order_item": order_item,
+                        "file": design_file
+                    })
         # ===== حذف سبد خرید پس از تبدیل به سفارش ===== #
         cart.delete()
         return order

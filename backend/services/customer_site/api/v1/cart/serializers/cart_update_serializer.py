@@ -1,27 +1,30 @@
 from rest_framework import serializers
 
-# ======= Cart Item Update Serializer ======= #
 class CartItemUpdateSerializer(serializers.Serializer):
     """
-    سریالایزر برای بروزرسانی آیتم سبد خرید با فیلد های مورد نیاز
+    سریالایزر برای ویرایش آیتم سبد خرید.
     """
-    quantity_id = serializers.IntegerField(required=False)
-    material_id = serializers.IntegerField(required=False)
+    # تغییر: دریافت عدد تیراژ
+    quantity = serializers.IntegerField(required=False, min_value=1)
+    
+    product_material_id = serializers.IntegerField(required=False)
     size_id = serializers.IntegerField(required=False, allow_null=True)
-
+    
+    width = serializers.FloatField(required=False, min_value=0.1)
+    height = serializers.FloatField(required=False, min_value=0.1)
+    
     option_ids = serializers.ListField(
         child=serializers.IntegerField(),
         required=False,
         default=[]
     )
     
-    custom_width = serializers.FloatField(required=False, allow_null=True)
-    custom_height = serializers.FloatField(required=False, allow_null=True)
+    has_design = serializers.BooleanField(required=False)
 
     def validate(self, data):
         """
-        چک کردن اینکه همزمان سایز استاندارد و ابعاد دستی ارسال نشود.
+        جلوگیری از تضاد ابعاد و سایز
         """
-        if data.get("size_id") and (data.get("custom_width") or data.get("custom_height")):
+        if data.get("size_id") and (data.get("width") or data.get("height")):
             raise serializers.ValidationError("نمی‌توان همزمان سایز استاندارد و ابعاد دلخواه را انتخاب کرد.")
         return data

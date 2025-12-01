@@ -95,7 +95,6 @@ class Product(models.Model):
     )
     slug = models.SlugField(_('اسلاگ'), unique=True, blank=True, null=True)
     price = models.PositiveIntegerField(_('قیمت'), default=0)
-    accepts_custom_dimensions = models.BooleanField(_('پذیرش اندازه های سطح'), default=False)
     # ====== قیمت گذاری براساس واحد سطح ====== #
     price_per_square_unit = models.DecimalField(
         _("قیمت بر واحد سطح (مثلا سانتی‌متر مربع)"), 
@@ -104,7 +103,6 @@ class Product(models.Model):
         null=True, blank=True,
         help_text=_("اگر این محصول ابعاد دلخواه دارد، قیمت هر واحد سطح را وارد کنید. در غیر این صورت خالی بگذارید.")
     )
-    # ===== فیلد برای تغییر قیمت محصول ===== #
     price_modifier_percent = models.DecimalField(
         _("درصد تعدیل قیمت"), 
         max_digits=5, 
@@ -138,6 +136,50 @@ class Product(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.code}"
+
+# ======== Product Pricing & Config Logic ======== #
+class ProductPricingConfig(models.Model):
+    """
+    تنظیمات پیشرفته محاسبه قیمت و قوانین سفارش.
+    این مدل جلوی چاق شدن مدل Product را می‌گیرد.
+    """
+    product = models.OneToOneField(
+        Product, 
+        on_delete=models.CASCADE, 
+        related_name='pricing_config',
+        verbose_name=_("محصول مرتبط")
+    )
+    
+    # ===== تنظیمات تیراژ و ابعاد ===== #
+    allow_custom_quantity = models.BooleanField(_("امکان تیراژ دلخواه"), default=False)
+    min_quantity = models.PositiveIntegerField(_("حداقل تیراژ"), default=100)
+    max_quantity = models.PositiveIntegerField(_("حداکثر تیراژ"), default=10000)
+    
+    accepts_custom_dimensions = models.BooleanField(_("پذیرش ابعاد دلخواه"), default=False)
+    min_width = models.FloatField(_("حداقل عرض (cm)"), default=0)
+    max_width = models.FloatField(_("حداکثر عرض (cm)"), default=0)
+    
+    # ===== تنظیمات مالی ===== #
+    base_setup_price = models.DecimalField(
+        _("هزینه ثابت اولیه (Setup)"), 
+        max_digits=12, decimal_places=0, default=0,
+        help_text=_("هزینه زینک، قالب یا تنظیم دستگاه که ربطی به تیراژ ندارد.")
+    )
+    
+    # ===== تنظیمات خدمات طراحی ===== #
+    design_service_available = models.BooleanField(_("ارائه خدمات طراحی"), default=True)
+    design_fee = models.DecimalField(
+        _("هزینه طراحی پایه"),
+        max_digits=12, decimal_places=0, default=0,
+        help_text=_("اگر کاربر فایل نداشت، این مبلغ اضافه می‌شود.")
+    )
+    
+    class Meta:
+        verbose_name = _("تنظیمات قیمت و سفارش")
+        verbose_name_plural = _("تنظیمات قیمت و سفارش")
+
+    def __str__(self):
+        return f"Config for {self.product.name}"
 
 # ======== Size ======== #
 class Size(models.Model):
@@ -183,6 +225,13 @@ class ProductSize(models.Model):
 # ====== Material Model ====== # 
 class Material(models.Model):
     user = models.ForeignKey("core.User", related_name='materials', on_delete=models.CASCADE)
+    price_per_sqm = models.DecimalField(
+        _('قیمت بر متر مربع'),
+        max_digits=12,
+        decimal_places=2,
+        default=0.0
+    )
+    is_active = models.BooleanField(default=True)
     name = models.CharField(_('نام'), max_length=150)
     description = models.TextField(_('توضیحات'), blank=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
@@ -201,13 +250,23 @@ class ProductMaterial(models.Model):
     user = models.ForeignKey("core.User", related_name='product_material', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='product_material', on_delete=models.CASCADE)
     material = models.ForeignKey(Material, related_name='material_product', on_delete=models.CASCADE)
-    price_impact = models.DecimalField(
-        _("تأثیر بر قیمت"), 
-        max_digits=10, 
-        decimal_places=2, 
-        default=0,
-        help_text=_("مبلغی که به قیمت پایه اضافه یا از آن کسر می‌شود (به تومان).")
+    # ===== تنظیمات اختصاصی این متریال برای این محصول ===== #
+    is_default = models.BooleanField(
+        _("پیش‌فرض"), 
+        default=False,
+        help_text=_("آیا این جنس به صورت پیش‌فرض انتخاب شده باشد؟")
     )
+    processing_fee_percentage = models.DecimalField(
+        _("درصد هزینه پردازش/سختی کار"),
+        max_digits=5, decimal_places=2, default=0,
+        help_text=_("درصدی که به قیمت خام متریال اضافه می‌شود (مثلاً 10 درصد بابت برش سخت)")
+    )
+    extra_price_per_unit = models.DecimalField(
+        _("هزینه اضافه ثابت"),
+        max_digits=12, decimal_places=0, default=0,
+        help_text=_("مبلغی که فارغ از متراژ، به ازای استفاده از این جنس اضافه می‌شود.")
+    )
+    description = models.TextField(_('توضیحات فنی'), blank=True, null=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
 
@@ -217,6 +276,22 @@ class ProductMaterial(models.Model):
     class Meta:
         verbose_name = _('واسط محصول و جنس')
         verbose_name_plural = _('واسط های محصول و جنس')
+        unique_together = ('product', 'material')
+        
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            ProductMaterial.objects.filter(product=self.product).update(is_default=False)
+        super().save(*args, **kwargs)
+
+    @property
+    def final_material_price_per_sqm(self):
+        """
+        محاسبه قیمت نهایی این جنس برای این محصول خاص.
+        (قیمت خام + درصد سختی کار)
+        """
+        raw_price = self.material.price_per_sqm
+        markup = raw_price * (self.processing_fee_percentage / 100)
+        return raw_price + markup
 
 # ====== Quantity Model ====== #
 class Quantity(models.Model):
@@ -339,7 +414,14 @@ class OptionValue(models.Model):
     class Meta:
         verbose_name = _('مقدار ویژگی')
         verbose_name_plural = _('مقدار ویژگی ها')
-        
+
+# ======  Pricing Type Model ====== # 
+class PricingType(models.TextChoices):
+    FIXED = 'fixed', 'مبلغ ثابت (IQD)'
+    PER_UNIT = 'per_unit', 'به ازای هر عدد (IQD)'
+    PER_SQM = 'per_sqm', 'به ازای متر مربع (IQD)' 
+    PERCENTAGE = 'percentage', 'درصدی از کل قیمت (%)'
+
 # ====== Product Option Model ====== #
 class ProductOption(models.Model):
     """
@@ -351,8 +433,15 @@ class ProductOption(models.Model):
     """
     user = models.ForeignKey("core.User", related_name='product_option_user', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='product_option_product', on_delete=models.CASCADE)
+    pricing_type = models.CharField(choices=PricingType.choices, default=PricingType.FIXED)
     option = models.ForeignKey(Option, related_name='product_option_option', on_delete=models.CASCADE)
     option_value = models.ForeignKey(OptionValue, related_name='product_option_option_value', on_delete=models.CASCADE)
+    pricing_type = models.CharField(
+        _("نحوه محاسبه"), 
+        max_length=20, 
+        choices=PricingType.choices, 
+        default=PricingType.FIXED
+    )
     price_impact = models.DecimalField(
         _("تأثیر بر قیمت"), 
         max_digits=10, 
@@ -360,6 +449,7 @@ class ProductOption(models.Model):
         default=0,
         help_text=_("مبلغی که به قیمت پایه اضافه یا از آن کسر می‌شود (به تومان).")
     )
+    is_required = models.BooleanField(_("اجباری"), default=False)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
