@@ -4,21 +4,22 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: true,
+    host: true, // این خط برای دسترسی از بیرون کانتینر حیاتی است
     port: 5173,
     watch: {
-      usePolling: true
+      usePolling: true // برای اطمینان از هات‌ریلود در لینوکس
     },
     proxy: {
-      // هر درخواستی که با /api/admin شروع بشه میره به بکند ادمین
+      // === تغییر حیاتی ===
+      // چون network_mode: "host" است، باید به IP لوکال (127.0.0.1) وصل شویم
+      // اسم سرویس‌ها (مثل admin_site) اینجا کار نمی‌کند
       '/api/admin': {
-        target: 'http://admin_site:8010', // دقت کن: از اسم سرویس داکر استفاده کردیم
+        target: 'http://127.0.0.1:8010', 
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/admin/, '') // اگر بکند پیشوند api نداره این خط لازمه
+        rewrite: (path) => path.replace(/^\/api\/admin/, '')
       },
-      // هر درخواستی که با /api/customer شروع بشه میره به بکند مشتری
       '/api/customer': {
-        target: 'http://customer_site:9010',
+        target: 'http://127.0.0.1:9010',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/customer/, '')
       }
