@@ -35,3 +35,4 @@ from .product import (
 from .order import Order, OrderItem, OrderItemDesignFile, OrderStatus, DesignFile
 from .cart import Cart, CartItem, CartItemUpload
 from .notification import CustomerNotification
+from .core import ContactUs, PromotionalModal
