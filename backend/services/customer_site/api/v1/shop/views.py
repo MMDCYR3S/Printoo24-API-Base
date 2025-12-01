@@ -59,6 +59,7 @@ class ProductDetailView(RetrieveAPIView):
     """
     API View برای نمایش جزئیات کامل یک محصول با تمام گزینه‌های قیمت‌گذاری.
     """
+    permission_classes = [AllowAny]
     serializer_class = ProductDetailSerializer
     lookup_field = 'slug'
     queryset = Product.objects.filter(is_active=True)

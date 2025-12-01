@@ -75,12 +75,21 @@ class OrderSerializer(serializers.ModelSerializer):
     type = serializers.CharField(source='get_type_display', read_only=True)
     # ===== نمایش آیتم‌های سفارش ===== #
     items = OrderItemSerializer(many=True, read_only=True, source='order_item_order')
+    # ===== تغییر اصلی: اضافه کردن read_only برای قیمت ===== #
+    total_price = serializers.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        read_only=True
+    )
+    
     address_id = serializers.PrimaryKeyRelatedField(
         queryset=Address.objects.all(),
         source="address",
         required=False,
-        allow_null=True
+        allow_null=True,
+        write_only=True
     )
+    address = serializers.StringRelatedField(read_only=True)
     
     # ===== نمایش آدرس ===== #
     def __init__(self, *args, **kwargs):
@@ -99,5 +108,6 @@ class OrderSerializer(serializers.ModelSerializer):
             'total_price',
             'created_at',
             'items',
-            'address_id'
+            'address_id',
+            'address',
         ]

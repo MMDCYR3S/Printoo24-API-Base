@@ -1,9 +1,18 @@
-from typing import List, Any, Dict, Optional
+from typing import List, Any, Optional
 
 from django.db.models import Prefetch, QuerySet
 
 from core.utils import BaseRepository
-from core.models import Order, OrderItem, OrderItemDesignFile, DesignFile, OrderStatus, Address, User
+from core.models import (
+    Order,
+    OrderItem,
+    OrderItemDesignFile,
+    DesignFile,
+    OrderStatus,
+    Address,
+    User,
+    CartItem
+)
 
 # ======= Order Repository ======= #
 class OrderRepository(BaseRepository[Order]):
@@ -71,6 +80,16 @@ class OrderItemRepository(BaseRepository[OrderItem]):
     """
     def __init__(self):
         super().__init__(OrderItem)
+
+    def create_item_from_cart(self, order: Order, cart_item: CartItem) -> OrderItem:
+        """ساخت آیتم سفارش دقیقاً مشابه آیتم سبد خرید"""
+        return self.create({
+            "order": order,
+            "product": cart_item.product,
+            "quantity": cart_item.quantity,
+            "price": cart_item.price,
+            "items": cart_item.items
+        })
 
 # ========= Order Item Design File Repository ======== #
 class OrderItemDesignFileRepository(BaseRepository[OrderItemDesignFile]):

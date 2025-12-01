@@ -8,69 +8,48 @@ from core.models import CartItem
 from core.domain.cart.services import CartDomainService
 from .cart_validator_service import CartDataValidator
 
-# ===== تعریف لاگر اختصاصی برای سرویس بروزرسانی سبد خرید ===== #
+# ===== تعریف لاگر اختصاصی ===== #
 logger = logging.getLogger('cart.services.update')
 
 class CartItemUpdateService:
-    """
-    سرویس مسئول ویرایش ویژگی‌های محصول در سبد خرید.
-    
-    این سرویس وظیفه دارد:
-    1. آیتم مورد نظر را در سبد خرید کاربر پیدا کند.
-    2. داده‌های جدید (سایز، جنس، تیراژ و...) را اعتبارسنجی کند.
-    3. قیمت جدید را محاسبه نماید.
-    4. اطلاعات آیتم را در دیتابیس بروزرسانی کند.
-    """
-
     def __init__(self, user):
         self.user = user
-        # ===== تزریق وابستگی اعتبارسنج ===== #
         self._domain_service = CartDomainService()
         self.validator = CartDataValidator()
         
     def update(self, cart_item_id: int, raw_data: Dict[str, Any]) -> CartItem:
         """
         اجرای عملیات بروزرسانی آیتم سبد خرید.
-
-        Args:
-            cart_item_id (int): شناسه آیتم سبد خرید.
-            data (dict): دیکشنری داده‌های جدید (شامل quantity_id, material_id, ...).
-
-        Returns:
-            CartItem: آیتم بروزرسانی شده.
-
-        Raises:
-            NotFound: اگر آیتم یافت نشود.
-            ValidationError: اگر داده‌ها نامعتبر باشند.
         """
         logger.info(f"Request to update CartItem ID: {cart_item_id} for User ID: {self.user.id}")
         
-        # ===== دریافت آیتم ===== #
-        current_item = self._domain_service._item_repo.get_by_id(cart_item_id, self.user)
+        # ===== اطمینان از وجود آیتم ===== #
+        current_item = self._domain_service._item_repo.get_item_details(cart_item_id, self.user)
+        
         if not current_item:
-            logger.error(f"CartItem ID: {cart_item_id} not found for User ID: {self.user.id}")
+            logger.error(f"CartItem ID: {cart_item_id} not found/access denied for User ID: {self.user.id}")
             raise NotFound("آیتم سبد خرید یافت نشد.")
         
-        # ===== اعتبارسنجی داده‌های ورودی ===== #
+        # ===== اعتبارسنجی ===== #
         validated_data = self.validator.validate(
             product_slug=current_item.product.slug, 
             selections=raw_data
         )
         
-        # ===== به روز کردن آیتم ===== #
+        # ===== به روز رسانی ===== #
         updated_item = self._domain_service.update_complex_item(
             user=self.user,
             item_id=cart_item_id,
-            quantity=raw_data['quantity'],
+            quantity=validated_data['quantity'],
             specs={
-                'quantity_obj': validated_data['quantity_obj'],
                 'material_obj': validated_data['material_obj'],
-                'options_objs': validated_data['options_obj'],
                 'size_obj': validated_data.get('size_obj'),
+                'option_objs': validated_data['options_obj'],
                 'custom_dimensions': validated_data.get('custom_dimensions'),
+                'has_design': validated_data.get('has_design'),
                 'raw_selections': raw_data
             }
         )
         
+        logger.info(f"CartItem {cart_item_id} updated successfully.")
         return updated_item
-        

@@ -7,35 +7,35 @@ from drf_spectacular.utils import extend_schema
 from ..serializers import CartItemUpdateSerializer
 from apps.cart.services import CartItemUpdateService
 
-# ======= Cart Item Update View ======= #
 @extend_schema(tags=["Cart"])
 class CartItemUpdateView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CartItemUpdateSerializer
 
     def patch(self, request, item_id):
-        """
-        ویرایش سبد خرید با استفاده از سرویس و فیلدهای مورد نیاز
-        """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # ===== ایجاد سرویس بروزرسانی ===== #
+        
         service = CartItemUpdateService(user=request.user)
         
         try:
+            # ارسال داده‌های تمیز شده به سرویس
             updated_item = service.update(
                 cart_item_id=item_id,
-                data=serializer.validated_data
+                raw_data=serializer.validated_data # دیکشنری شامل quantity, width, ...
             )
             
+            # پاسخ موفقیت آمیز
+            # می‌توانیم کل آیتم را برگردانیم یا فقط قیمت جدید را
             return Response({
-                "message": "مشخصات محصول در سبد خرید با موفقیت ویرایش شد.",
-                "price": updated_item.price
+                "message": "سبد خرید بروزرسانی شد.",
+                "item_id": updated_item.id,
+                "new_price": updated_item.price, # قیمت نهایی آپدیت شده
+                "quantity": updated_item.quantity
             }, status=status.HTTP_200_OK)
             
         except Exception as e:
             return Response(
-                {"detail": str(e)}, 
+                {"error": str(e)}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        

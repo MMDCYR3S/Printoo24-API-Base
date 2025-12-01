@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 
 from decimal import Decimal
 from django.db import transaction
@@ -9,6 +9,7 @@ from core.models import (
     CartItemUpload,
     Product,
     ProductFileUploadRequirement,
+    ProductSize,
     User,
 )
 from core.domain.product import ProductPriceCalculator
@@ -23,9 +24,9 @@ class CartDomainService:
     """
     سرویس برای مدیریت عملیات‌های اصلی سبد خرید.
     """
-    def __init__(self, cart_repo: Optional[CartRepository] = None, item_repo: Optional[CartItemRepository] = None):
-        self._cart_repo = cart_repo or CartRepository()
-        self._item_repo = item_repo or CartItemRepository()
+    def __init__(self):
+        self._cart_repo = CartRepository()
+        self._item_repo = CartItemRepository()
 
     # ===== دریافت یا ساخت سبد خرید برای کاربر ===== #
     def get_or_create_cart_for_user(self, user: User) -> Cart:
@@ -47,63 +48,83 @@ class CartDomainService:
     
     def get_item_details(self, cart: Cart) -> Dict:
         return self._item_repo.get_items_by_cart(cart)
+    
+    # ===== متد کمکی برای استخراج ابعاد ===== #
+    def _resolve_dimensions(self, specs: Dict) -> Tuple[float, float]:
+        """
+        تشخیص طول و عرض بر اساس اینکه کاربر سایز استاندارد انتخاب کرده یا ابعاد دلخواه.
+        """
+        size_obj: Optional[ProductSize] = specs.get('size_obj')
+        custom_dims = specs.get('custom_dimensions')
+
+        if size_obj:
+            return size_obj.size.width, size_obj.size.height
+        
+        if custom_dims:
+            return float(custom_dims.get('width', 0)), float(custom_dims.get('height', 0))
+            
+        raise ValueError("ابعاد محصول مشخص نیست (نه سایز استاندارد، نه ابعاد دلخواه).")
 
     # ===== افزودن آیتم پیچیده به سبد خرید ===== #
     @transaction.atomic
     def add_complex_item(self, user: User, product: Product, quantity: int, 
-                         specs: Dict, uploaded_files_map: Dict[int, str]) -> CartItem:
+                          specs: Dict, uploaded_files_map: Dict[int, str]) -> CartItem:
         """
-        افزودن آیتم پیچیده (چاپ) به سبد خرید.
-        
         Args:
-            specs: شامل material, size, options, custom_dimensions
-            uploaded_files_map: دیکشنری {requirement_id: file_path_relative_to_media}
+            specs: شامل material_obj (ProductMaterial), size_obj, option_objs, custom_dimensions, has_design
         """
-        # ===== اعتبارسنجی تعداد ===== #
         if quantity <= 0:
             raise InvalidQuantityException("تعداد باید بیشتر از صفر باشد.")
         
-        # ===== محاسبه قیمت کل آیتم ===== #
+        # 1. استخراج ابعاد برای محاسبه مساحت
+        width, height = self._resolve_dimensions(specs)
+
+        # 2. فراخوانی محاسبه‌گر جدید
         calculator = ProductPriceCalculator(
             product=product,
-            quantity=specs['quantity_obj'], 
-            material=specs['material_obj'],
-            options=specs['options_objs'],
-            size=specs.get('size_obj'),
-            custom_dimensions=specs.get('custom_dimensions')
+            product_material=specs['material_obj'], # آبجکت ProductMaterial
+            quantity=quantity,
+            options=specs.get('option_objs', []),
+            width=width,
+            height=height,
+            has_design=specs.get('has_design', True) # پیش‌فرض true یعنی فایل دارد
         )
+        
         price_result = calculator.calculate()
         final_price = Decimal(str(price_result['final_price']))
-        
-        # ===== ایجاد یا دریافت سبد خرید ===== #
+
+        # 3. آماده‌سازی داده‌های JSON برای ذخیره در دیتابیس
+        # ما باید نام‌ها را ذخیره کنیم تا اگر بعداً قیمت‌ها عوض شد، تاریخچه سفارش تغییر نکند
+        serializable_specs = {
+            'raw_selections': specs.get('raw_selections', {}), # ID های خام ارسالی از فرانت
+            'details': {
+                'width': width,
+                'height': height,
+                'material_name': specs['material_obj'].material.name,
+                'size_name': specs['size_obj'].size.name if specs.get('size_obj') else 'Custom',
+                'options': [
+                    {'name': opt.option.name, 'price_impact': float(opt.price_impact)} 
+                    for opt in specs.get('option_objs', [])
+                ],
+                'has_design': specs.get('has_design', True)
+            },
+            'price_breakdown': price_result # ذخیره جزئیات محاسبات برای شفافیت
+        }
+
         cart = self._cart_repo.get_or_create_cart(user)
         
-        # ===== ساخت دیکشنری قابل سریالایز برای ذخیره‌سازی ===== #
-        serializable_specs = {
-            'raw_selections': specs.get('raw_selections', {}),
-            'details': {
-                'quantity_value': specs['quantity_obj'].quantity.value if specs.get('quantity_obj') else None,
-                'material_name': specs['material_obj'].material.name if specs.get('material_obj') else None,
-                'size_name': specs['size_obj'].size.name if specs.get('size_obj') else 'Custom',
-                'option_names': [option.name for option in specs['option_objs']] if specs.get('option_objs') else None,
-                'option_values': [option.option_value.value for option in specs['option_objs']] if specs.get('option_objs') else None
-            },
-            'price_detail': price_result
-        }
-        
-        # ===== ایجاد آیتم سبد خرید ===== #
+        # 4. ذخیره آیتم
         cart_item = self._item_repo.create({
             "cart": cart,
             "product": product,
             "quantity": quantity,
             "price": final_price,
-            "items": serializable_specs
+            "items": serializable_specs # فیلد JSONField مدل CartItem
         })
-        
-        # ===== افزودن فایل‌های آپلود شده به آیتم سبد خرید ===== #
+
+        # 5. اتصال فایل‌های آپلود شده
         for req_id, file_path in uploaded_files_map.items():
             requirement = ProductFileUploadRequirement.objects.get(id=req_id)
-            
             CartItemUpload.objects.create(
                 cart_item=cart_item,
                 requirement=requirement,
@@ -116,39 +137,52 @@ class CartDomainService:
     @transaction.atomic
     def update_complex_item(self, user: User, item_id: int, 
                             quantity: int, specs: Dict) -> CartItem:
-        """
-        نسخه دامین برای آپدیت آیتم.
-        """
         
-        # ===== دریافت آیتم با چک کردن مالکیت ===== #
         item = self._item_repo.get_item_details(item_id, user)
         if not item:
             raise ItemNotFoundException("آیتم یافت نشد.")
 
-        # ===== محاسبه قیمت جدید ===== #
+        # 1. استخراج ابعاد (ممکن است کاربر سایز را تغییر داده باشد)
+        width, height = self._resolve_dimensions(specs)
+
+        # 2. محاسبه مجدد قیمت
         calculator = ProductPriceCalculator(
             product=item.product,
-            quantity=specs['quantity_obj'], 
-            material=specs['material_obj'],
-            options=specs['options_objs'],
-            size=specs['size_obj'],
-            custom_dimensions=specs.get('custom_dimensions')
+            product_material=specs['material_obj'],
+            quantity=quantity,
+            options=specs.get('option_objs', []),
+            width=width,
+            height=height,
+            has_design=specs.get('has_design', True)
         )
+        
         price_result = calculator.calculate()
         new_price = Decimal(str(price_result['final_price']))
-        
-        # ===== ساخت دیکشنری قابل سریالایز برای ذخیره‌سازی ===== #
+
+        # 3. آپدیت JSON
         serializable_specs = {
             'raw_selections': specs.get('raw_selections', {}),
             'details': {
-                'quantity_value': specs['quantity_obj'].quantity.value if specs.get('quantity_obj') else None,
-                'material_name': specs['material_obj'].material.name if specs.get('material_obj') else None,
+                'width': width,
+                'height': height,
+                'material_name': specs['material_obj'].material.name,
                 'size_name': specs['size_obj'].size.name if specs.get('size_obj') else 'Custom',
-                'option_names': [option.name for option in specs['option_objs']] if specs.get('option_objs') else None,
-                'option_values': [option.option_value.value for option in specs['option_objs']] if specs.get('option_objs') else None
+                'options': [
+                    {'name': opt.option.name, 'price_impact': float(opt.price_impact)} 
+                    for opt in specs.get('option_objs', [])
+                ],
+                'has_design': specs.get('has_design', True)
             },
-            'price_detail': price_result
+            'price_breakdown': price_result
         }
+
+        updated_item = self._item_repo.update(item, {
+            "quantity": quantity,
+            "price": new_price,
+            "items": serializable_specs
+        })
+        
+        return updated_item
         
         # ===== اپدیت قیمت ===== #
         updated_item = self._item_repo.update(item, {

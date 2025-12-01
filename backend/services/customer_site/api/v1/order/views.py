@@ -16,14 +16,6 @@ from core.models import Address
 # ===== Create Order View ===== #
 @extend_schema(tags=["Order"])
 class CreateOrderView(GenericAPIView):
-    """
-    ویوی ایجاد سفارش با توجه به سرویس ایجاد سفارش
-    منطق این قسمت به این صورت هست که ابتدا سفارش از سمت سبد خرید دریافت شده
-    و پردازش می شود. سپس بررسی می شود که آیا موجودی کیف پول کاربر کافی هست یا
-    نه. بعد از این موضوع، سفارش ثبت شده، قیمت از موجودی کیف پول مشتری کسر
-    می شود و یک تراکنش از نوع کسر وجه و پرداخت برای مشتری در نظر گرفته میشه
-    برای اطلاعات بیشتر، به بخش سرویس مراجعه کنید.
-    """
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
 
@@ -31,17 +23,24 @@ class CreateOrderView(GenericAPIView):
         """
         ایجاد سفارش پس از اعتبارسنجی
         """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        validated_data = serializer.validated_data
+        # ===== اجرای سریالایزر و اعتبارسنجی ====== #
+        input_serializer = self.get_serializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+
+        address_instance = input_serializer.validated_data.get('address')
+
         try:
-            # ===== ایجاد سرویس ثبت سفارش ===== #
+            # ===== ساخت سرویس ثبت سفارش ===== #
             service = CreateOrderFromCartService()
-            # ===== اجرای سرویس ===== #
-            order = service.execute(user=request.user, address=validated_data.get('address_id'))
-            serializer = self.get_serializer(order)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            order = service.execute(
+                user=request.user, 
+                address=address_instance
+            )
+            
+            # ===== ایجاد شیء خروجی ===== #
+            output_serializer = self.get_serializer(order)
+            
+            return Response(output_serializer.data, status=status.HTTP_201_CREATED)
         
         except EmptyCartError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -50,4 +49,5 @@ class CreateOrderView(GenericAPIView):
             return Response({"error": str(e)}, status=status.HTTP_402_PAYMENT_REQUIRED)
             
         except OrderCreationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # ===== اگر خیر خطا رخ داده باشد ===== #
+            return Response({"error": "خطایی در ثبت سفارش رخ داد."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
