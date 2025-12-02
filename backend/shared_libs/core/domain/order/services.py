@@ -9,16 +9,14 @@ from core.models import (
     Order,
     OrderItem,
     OrderStatus,
-    OrderItemDesignFile,
-    DesignFile,
+    OrderItemFile,
     Address
 )
 from core.domain.cart import CartRepository
 from .repositories import (
     OrderRepository,
     OrderItemRepository,
-    OrderItemDesignFileRepository,
-    DesignFileRepository
+    OrderItemFileRepository
 )
 
 # ====== Order Domain Service ====== #
@@ -32,27 +30,26 @@ class OrderDomainService:
             self._order_repo = OrderRepository()
             self._item_repo = OrderItemRepository()
             self._cart_repo = CartRepository()
-            self._design_file_repo = DesignFileRepository()
-            self._item_design_link_repo = OrderItemDesignFileRepository()
+            self._file_repo = OrderItemFileRepository()
 
     # ==== عملیات نهایی تبدیل سبد خرید به سفارش ===== #
     @transaction.atomic
     def checkout_cart(self, user: User, address: Address, order_type: str) -> Order:
         """
-        عملیات نهایی تبدیل سبد خرید به سفارش.
+        تبدیل سبد خرید به سفارش نهایی.
         """
-        # ===== دریافت سبد خرید فعال کاربر ===== #
-        cart = self._cart_repo.get_or_create_cart(user)
+        # 1. دریافت سبد خرید
+        cart = self._cart_repo.get_cart_by_user(user)
         if not cart or not cart.cart_items.exists():
-            raise ValueError("سبد خرید خالی است.")
-        
-        # ===== محاسبه قیمت کل سبد خرید ===== #
-        total_price = sum(item.price for item in cart.cart_items.all())
+            raise ValueError("سبد خرید شما خالی است.")
+
         cart_items = cart.cart_items.select_related('product').prefetch_related('uploads').all()
+
+        # ===== محاسبه قیمت کل ===== #
         total_price = sum(item.price for item in cart_items)
-        
-        # ===== ایجاد سفارش جدید ===== #
-        initial_status = OrderStatus.objects.get(name="در انتظار بررسی")
+
+        # ===== ایجاد سفارش ===== #
+        initial_status = OrderStatus.objects.get(name="در انتظار بررسی") # یا نام دقیق در دیتابیس
         
         order = self._order_repo.create({
             "user": user,
@@ -62,30 +59,32 @@ class OrderDomainService:
             "type": order_type
         })
 
-        
+        # ===== ایجاد آیتم‌های سفارش ===== #
         for c_item in cart_items:
-            order_item = self._item_repo.create_item_from_cart(order, c_item)
+            # ===== ایجاد آیتم سفارش ===== #
+            order_item = self._item_repo.create({
+                "order": order,
+                "product": c_item.product,
+                "quantity": c_item.quantity,
+                "price": c_item.price,
+                "items": c_item.items 
+            })
 
-            # ===== انتقال فایل‌های طراحی مرتبط با آیتم سبد خرید ===== #
+            # ===== انتقال فایل‌های طراحی ===== #
             for upload in c_item.uploads.all():
                 if upload.file:
-                    # ===== خواندن فایل ===== #
-                    file_content = ContentFile(upload.file.read())
-                    file_content.name = upload.file.name
+                    new_file_content = ContentFile(upload.file.read())
+                    new_file_content.name = upload.file.name.split('/')[-1] 
                     
-                    # ===== ایجاد فایل تصویر =====
-                    design_file = self._design_file_repo.create({
-                        "file": file_content
-                    })
-                    
-                    # ===== ایجاد لینک بین فایل وآیتم ===== #
-                    self._item_design_link_repo.create({
-                        "user": user,
-                        "order_item": order_item,
-                        "file": design_file
-                    })
-        # ===== حذف سبد خرید پس از تبدیل به سفارش ===== #
-        cart.delete()
+                    OrderItemFile.objects.create(
+                        order_item=order_item,
+                        requirement=upload.requirement,
+                        file=new_file_content
+                    )
+
+        # ===== پاک کردن سبد خرید ===== #
+        cart.cart_items.all().delete()
+
         return order
     
     # ===== دریافت جزئیات سفارش ===== #

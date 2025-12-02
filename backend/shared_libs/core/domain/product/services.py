@@ -40,23 +40,35 @@ class ProductDomainService:
         if not product:
             raise ProductNotFoundException(f"Product with slug '{slug}' not found.")
         
-        # ===== گروه‌بندی گزینه‌های محصول بر اساس نام گزینه ===== #
-        grouped_options = defaultdict(list)
+        # ===== تبدیل ساختار آپشن‌ها به فرمت استاندارد API ===== #
+        structured_options = []
         
         # ===== مرتب‌سازی گزینه‌ها ===== #
-        for prod_opt in product.product_option_product.all():
-            option_name = prod_opt.option_value.option.name
-            value_data = {
-                "id": prod_opt.id,
-                "value_id": prod_opt.option_value.id,
-                "value": prod_opt.option_value.value,
-                "price_impact": prod_opt.price_impact
-            }
-            grouped_options[option_name].append(value_data)
+        for prod_opt in product.options.all():
+            option_data = {
+                    "id": prod_opt.id,                # ID کانفیگ (برای ارسال در سبد خرید)
+                    "name": prod_opt.option.name,     # نام سیستمی (paper_type)
+                    "label": prod_opt.option.label,   # نام نمایشی (جنس کاغذ)
+                    "type": prod_opt.option.input_type, # نوع اینپوت (select, radio, ...)
+                    "is_required": prod_opt.is_required,
+                    "description": prod_opt.option.description,
+                    "has_pricing": prod_opt.has_pricing, # آیا کلا قیمت دارد؟
+                    "choices": []
+                }
+            for choice in prod_opt.choices.all():
+                option_data["choices"].append({
+                    "id": choice.id,        # ID ولیو (برای ارسال در سبد خرید)
+                    "label": choice.label,
+                    "value": choice.value,
+                    "price_impact": choice.price_impact, # جهت نمایش به کاربر (+5000)
+                    "is_default": choice.is_default,
+                    "description": f"هر {choice.quantity_step} عدد" if choice.quantity_step > 1 else ""
+                })
+            structured_options.append(option_data)
         
         # ===== بازگشت اطلاعات محصول ===== #
         return {
             "product": product,
-            "grouped_options": dict(grouped_options)
+            "structured_options": structured_options
         }
             

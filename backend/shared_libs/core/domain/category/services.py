@@ -30,7 +30,7 @@ class ProductCategoryDomainService:
             raise ProductCategoryNotFoundException(f"دسته‌بندی با اسلاگ '{slug}' یافت نشد.")
         
         # ===== بازگرداندن لیست شناسه‌های فرزندان ===== #
-        return list(category.get_descendants(include_self=True).values_list('id', flat=True))
+        return list(self._repo.get_descendants(category).values_list('id', flat=True))
     
     # ===== ایجاد دسته‌بندی جدید ===== #
     @transaction.atomic
@@ -54,7 +54,6 @@ class ProductCategoryDomainService:
         """
         for field, value in data.items():
             setattr(instance, field, value)
-        
         instance.full_clean()
         instance.save()
         return instance

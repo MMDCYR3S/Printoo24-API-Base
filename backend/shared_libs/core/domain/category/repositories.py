@@ -22,7 +22,7 @@ class ProductCategoryRepository(BaseRepository[ProductCategory]):
         نکته کلیدی: MPTT متد get_cached_trees دارد که در پایتون درخت را می‌سازد،
         اما ما اینجا فقط کوئری‌ست خام و مرتب شده را می‌خواهیم.
         """
-        return self.model.objects.all().order_by('tree_id', 'lft')
+        return self.model.objects.filter(is_active=True).order_by('tree_id', 'lft')
 
     def get_category_by_slug(self, slug: str) -> Optional[ProductCategory]:
         try:

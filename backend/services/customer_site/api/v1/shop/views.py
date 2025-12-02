@@ -49,54 +49,67 @@ class ProductListView(ListAPIView):
         
         return filterset.qs.distinct()
 
-
-# ====== Product Detail View ====== #
-@extend_schema(
-    tags=["Product"],
-    description="API برای نمایش لیست محصولات همراه با فیلترینگ پیشرفته.",
-)
+# ======= Product Detail View ======= #
+@extend_schema(tags=["Product"])
 class ProductDetailView(RetrieveAPIView):
     """
-    API View برای نمایش جزئیات کامل یک محصول با تمام گزینه‌های قیمت‌گذاری.
+    صفحه جزئیات محصول (Single Product Page).
+    خروجی شامل تمام آپشن‌ها، قیمت‌ها و قوانین سفارش است.
     """
     permission_classes = [AllowAny]
     serializer_class = ProductDetailSerializer
     lookup_field = 'slug'
-    queryset = Product.objects.filter(is_active=True)
 
     def retrieve(self, request, *args, **kwargs):
-        """
-        این متد را override می‌کنیم تا از سرویس خودمان برای آماده‌سازی داده‌ها استفاده کنیم.
-        """
         slug = self.kwargs.get(self.lookup_field)
         
-        # ===== ایجاد سرویس برای دریافت اطلاعات پایه ===== #
+        # 1. فراخوانی سرویس اپلیکیشن
         service = ShopProductDetailService()
-        product_data_dict = service.get_product_detail_for_display(slug=slug)
-
-        # ===== بررسی وجود محصول ===== #
-        if product_data_dict is None:
-            return Response({"detail": "محصول مورد نظر پیدا نشد."}, status=status.HTTP_404_NOT_FOUND)
-
-        # ===== ساخت سریالایزر به واسطه داده های بازگشتی از سرویس ===== #
-        serializer = self.get_serializer(product_data_dict)
         
-        # ===== دریافت پاسخ نهایی ===== #
-        return Response(serializer.data)
+        try:
+            # دیتا شامل product object و دیکشنری options است
+            data = service.get_product_detail_for_display(slug=slug)
+            
+            if data is None:
+                return Response({"detail": "محصول یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+            
+            # 2. پاس دادن به سریالایزر
+            # نکته: context={'request': request} برای ساخت URL کامل عکس‌ها ضروری است
+            serializer = self.get_serializer(data, context={'request': request})
+            return Response(serializer.data)
+            
+        except Exception as e:
+            # لاگ کردن خطا در پروداکشن ضروری است
+            return Response(
+                {"detail": "خطایی در دریافت اطلاعات محصول رخ داد.", "error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # ======= Category View Set ======= #
-@extend_schema(tags=["Product"])
+@extend_schema(tags=["Category"])
 class CategoryViewSet(ViewSet):
     """
-    ViewSet برای مدیریت دسته‌بندی‌ها و درختواره دسته‌بندی‌ها.
+    مدیریت نمایش دسته‌بندی‌ها (منو درختی و لندینگ پیج).
     """
     permission_classes = [AllowAny]
 
+    @extend_schema(summary="دریافت درخت دسته‌بندی‌ها (منو)")
     def list(self, request):
         service = ShopCategoryService(request=request)
-        
         tree_data = service.get_category_tree_structure()
         return Response(tree_data)
+
+    @extend_schema(summary="دریافت اطلاعات صفحه لندینگ یک دسته")
+    def retrieve(self, request, pk=None): 
+        slug = pk 
+        service = ShopCategoryService(request=request)
+        data = service.get_category_landing_data(slug=slug)
+        
+        if data is None:
+            return Response({"detail": "دسته مورد نظر یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+            
+        serializer = CategoryLandingPageSerializer(data, context={'request': request})
+        return Response(serializer.data)
     
 @extend_schema(tags=["Category"])
 class CategoryBannerViewSet(ViewSet):

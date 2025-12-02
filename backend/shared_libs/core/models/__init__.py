@@ -19,20 +19,22 @@ from .product import (
     Material,
     ProductQuantity,
     Quantity,
+    ProductPricingConfig,
     ProductAttachment,
     Attachment,   
-    ProductOption,
-    Option,
-    OptionValue,
     FileUploadSpec,
     ProductFileUploadRequirement,
     ProductComment,
     ProductCommentChoices,
     ProductRating,
-    PricingType,
-    ProductPricingConfig,
+    Option,
+    OptionValue,
+    ProductOption,
+    OptionPricingStrategy,
+    ProductOptionValue,
+    OptionInputType,
 )
-from .order import Order, OrderItem, OrderItemDesignFile, OrderStatus, DesignFile
+from .order import Order, OrderItem, OrderItemFile, OrderStatus
 from .cart import Cart, CartItem, CartItemUpload
 from .notification import CustomerNotification
 from .core import ContactUs, PromotionalModal

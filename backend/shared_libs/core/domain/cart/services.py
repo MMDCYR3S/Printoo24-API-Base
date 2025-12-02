@@ -11,6 +11,8 @@ from core.models import (
     ProductFileUploadRequirement,
     ProductSize,
     User,
+    ProductMaterial,
+    ProductOptionValue
 )
 from core.domain.product import ProductPriceCalculator
 from core.domain.cart.exceptions import (
@@ -65,84 +67,73 @@ class CartDomainService:
             
         raise ValueError("ابعاد محصول مشخص نیست (نه سایز استاندارد، نه ابعاد دلخواه).")
 
-    # ===== افزودن آیتم پیچیده به سبد خرید ===== #
+    # ===== متد افزودن اصلاح شده (بدون فایل) ===== #
     @transaction.atomic
-    def add_complex_item(self, user: User, product: Product, quantity: int, 
-                          specs: Dict, uploaded_files_map: Dict[int, str]) -> CartItem:
+    def add_complex_item(self, user: User, product: Product, quantity: int, specs: Dict) -> CartItem:
         """
-        Args:
-            specs: شامل material_obj (ProductMaterial), size_obj, option_objs, custom_dimensions, has_design
+        افزودن محصول به سبد خرید.
+        نکته: فایل‌ها در این مرحله دریافت نمی‌شوند.
         """
-        if quantity <= 0:
-            raise InvalidQuantityException("تعداد باید بیشتر از صفر باشد.")
-        
-        # 1. استخراج ابعاد برای محاسبه مساحت
-        width, height = self._resolve_dimensions(specs)
+        # 1. استخراج و بررسی دیتای واقعی
+        try:
+            material = ProductMaterial.objects.get(id=specs['material_obj'].id, product=product)
+            # فرض بر این است که option_objs لیستی از ProductOptionValue هستند که قبلا ولیدیت شده‌اند
+            selected_values = specs.get('option_objs', []) 
+        except Exception:
+            raise ValueError("اطلاعات ارسالی نامعتبر است.")
 
-        # 2. فراخوانی محاسبه‌گر جدید
+        # 2. محاسبه قیمت
         calculator = ProductPriceCalculator(
             product=product,
-            product_material=specs['material_obj'], # آبجکت ProductMaterial
             quantity=quantity,
-            options=specs.get('option_objs', []),
-            width=width,
-            height=height,
-            has_design=specs.get('has_design', True) # پیش‌فرض true یعنی فایل دارد
+            width=specs['width'],
+            height=specs['height'],
+            selected_values=selected_values,
+            product_material=material,
+            has_design=specs.get('has_design', True)
         )
-        
-        price_result = calculator.calculate()
-        final_price = Decimal(str(price_result['final_price']))
+        calc_result = calculator.calculate()
+        final_price = Decimal(str(calc_result['final_price']))
 
-        # 3. آماده‌سازی داده‌های JSON برای ذخیره در دیتابیس
-        # ما باید نام‌ها را ذخیره کنیم تا اگر بعداً قیمت‌ها عوض شد، تاریخچه سفارش تغییر نکند
-        serializable_specs = {
-            'raw_selections': specs.get('raw_selections', {}), # ID های خام ارسالی از فرانت
-            'details': {
-                'width': width,
-                'height': height,
-                'material_name': specs['material_obj'].material.name,
-                'size_name': specs['size_obj'].size.name if specs.get('size_obj') else 'Custom',
-                'options': [
-                    {'name': opt.option.name, 'price_impact': float(opt.price_impact)} 
-                    for opt in specs.get('option_objs', [])
-                ],
-                'has_design': specs.get('has_design', True)
-            },
-            'price_breakdown': price_result # ذخیره جزئیات محاسبات برای شفافیت
+        # 3. ساختار JSON
+        item_details = {
+            'width': specs['width'],
+            'height': specs['height'],
+            'material': {'id': material.id, 'name': material.material.name},
+            'options': [
+                {
+                    'id': val.id,
+                    'option_name': val.product_option.option.label,
+                    'value_label': val.label,
+                    'price_impact': float(val.price_impact)
+                } for val in selected_values
+            ],
+            'has_design': specs.get('has_design', True),
+            'price_breakdown': calc_result['breakdown']
         }
 
-        cart = self._cart_repo.get_or_create_cart(user)
+        # 4. ذخیره در دیتابیس
+        cart = self.get_or_create_cart_for_user(user)
         
-        # 4. ذخیره آیتم
         cart_item = self._item_repo.create({
             "cart": cart,
             "product": product,
             "quantity": quantity,
             "price": final_price,
-            "items": serializable_specs # فیلد JSONField مدل CartItem
+            "items": item_details
         })
 
-        # 5. اتصال فایل‌های آپلود شده
-        for req_id, file_path in uploaded_files_map.items():
-            requirement = ProductFileUploadRequirement.objects.get(id=req_id)
-            CartItemUpload.objects.create(
-                cart_item=cart_item,
-                requirement=requirement,
-                file=file_path
-            )
-
         return cart_item
-    
-    # ===== افزودن فایل به یک آیتم =====
+
+    # ===== متد آپدیت اصلاح شده ===== #
     @transaction.atomic
-    def update_complex_item(self, user: User, item_id: int, 
-                            quantity: int, specs: Dict) -> CartItem:
+    def update_complex_item(self, user: User, item_id: int, quantity: int, specs: Dict) -> CartItem:
         
         item = self._item_repo.get_item_details(item_id, user)
         if not item:
             raise ItemNotFoundException("آیتم یافت نشد.")
 
-        # 1. استخراج ابعاد (ممکن است کاربر سایز را تغییر داده باشد)
+        # 1. استخراج ابعاد جدید
         width, height = self._resolve_dimensions(specs)
 
         # 2. محاسبه مجدد قیمت
@@ -150,7 +141,7 @@ class CartDomainService:
             product=item.product,
             product_material=specs['material_obj'],
             quantity=quantity,
-            options=specs.get('option_objs', []),
+            selected_values=specs.get('option_objs', []), # لیست ProductOptionValue
             width=width,
             height=height,
             has_design=specs.get('has_design', True)
@@ -168,28 +159,26 @@ class CartDomainService:
                 'material_name': specs['material_obj'].material.name,
                 'size_name': specs['size_obj'].size.name if specs.get('size_obj') else 'Custom',
                 'options': [
-                    {'name': opt.option.name, 'price_impact': float(opt.price_impact)} 
-                    for opt in specs.get('option_objs', [])
+                    {
+                        'id': val.id,
+                        'name': val.product_option.option.label, 
+                        'value': val.label,
+                        'price_impact': float(val.price_impact)
+                    } 
+                    for val in specs.get('option_objs', [])
                 ],
                 'has_design': specs.get('has_design', True)
             },
-            'price_breakdown': price_result
+            'price_breakdown': price_result['breakdown'] # ذخیره جزئیات
         }
 
+        # 4. ذخیره تغییرات
         updated_item = self._item_repo.update(item, {
             "quantity": quantity,
             "price": new_price,
             "items": serializable_specs
         })
         
-        return updated_item
-        
-        # ===== اپدیت قیمت ===== #
-        updated_item = self._item_repo.update(item, {
-            "quantity": quantity,
-            "price": new_price,
-            "items": serializable_specs
-        })
         return updated_item
         
     # ===== به‌روزرسانی تعداد آیتم در سبد خرید ===== #

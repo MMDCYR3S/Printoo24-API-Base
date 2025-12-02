@@ -5,29 +5,27 @@ from core.models import (
     ProductQuantity, 
     ProductSize,  
     ProductMaterial,  
-    ProductOption, 
-    OptionValue, 
+    ProductOption,  
+    ProductOptionValue,
     ProductImage,
     ProductAttachment,
     ProductComment,
-    ProductCommentChoices,
-    ProductRating,
     ProductPricingConfig,
     ProductFileUploadRequirement
 )
 
-# ====== Category Serializer ====== #
+# ==========================================
+# 1. BASE SERIALIZERS (Building Blocks)
+# ==========================================
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
-        fields = ['name', 'slug']
+        fields = ['id', 'name', 'slug']
 
-# ======= Pricing Config Serializer (NEW) ======= #
 class ProductPricingConfigSerializer(serializers.ModelSerializer):
     """
-    سریالایزر برای تنظیمات قیمت و سفارش محصول.
-    فرانت‌اند با این دیتا می‌فهمد که آیا باید اینپوت طول/عرض نشان دهد یا خیر،
-    و یا بازه تیراژ مجاز چقدر است.
+    حیاتی برای فرانت‌‌اند: قوانین سفارش (بازه تیراژ، ابعاد دلخواه، هزینه ستاپ).
     """
     class Meta:
         model = ProductPricingConfig
@@ -43,16 +41,16 @@ class ProductPricingConfigSerializer(serializers.ModelSerializer):
             'design_fee'
         ]
 
-# ======= Quantity Detail Serializer ======= #
+# ==========================================
+# 2. LEGACY SUPPORT SERIALIZERS (Size, Material)
+# ==========================================
+
 class QuantityDetailSerializer(serializers.ModelSerializer):
-    """سریالایزر برای نمایش تیراژها و ضریب تخفیف/افزایش آن‌ها"""
     class Meta:
         model = ProductQuantity
         fields = ['id', 'quantity', 'price']
-        
-# ======= Size Detail Serializer ======== #
+
 class SizeDetailSerializer(serializers.ModelSerializer):
-    """سریالایزر برای نمایش جزئیات سایزها"""
     name = serializers.CharField(source='size.name', read_only=True)
     width = serializers.FloatField(source='size.width', read_only=True)
     height = serializers.FloatField(source='size.height', read_only=True)
@@ -61,48 +59,72 @@ class SizeDetailSerializer(serializers.ModelSerializer):
         model = ProductSize
         fields = ['id', 'name', 'width', 'height', 'price_impact']
 
-# ======= Material Detail Serializer ======= #
 class MaterialDetailSerializer(serializers.ModelSerializer):
-    """
-    نمایش جنس‌های قابل انتخاب برای محصول.
-    نکته: ID این سریالایزر، ID جدول ProductMaterial است که برای محاسبه قیمت لازم است.
-    """
     name = serializers.CharField(source='material.name', read_only=True)
     description = serializers.CharField(source='material.description', read_only=True)
     
     class Meta:
         model = ProductMaterial
         fields = ['id', 'name', 'description', 'is_default', 'processing_fee_percentage', 'extra_price_per_unit']
+        
+# ==========================================
+# 3. NEW OPTION SYSTEM SERIALIZERS (Dynamic)
+# ==========================================
 
-# ======= Option Value Detail Serializer ======= #
-class OptionValueDetailSerializer(serializers.ModelSerializer):
-    """سریالایزر برای نمایش مقدار یک آپشن (مثلا 'مات' یا 'براق')"""
+class ProductOptionValueSerializer(serializers.ModelSerializer):
+    """
+    نمایش گزینه‌های قابل انتخاب (Choices) مثل: مات، براق، قرمز.
+    """
+    description = serializers.SerializerMethodField()
+
     class Meta:
-        model = OptionValue
-        fields = ['id', 'value']
+        model = ProductOptionValue
+        fields = [
+            'id', 
+            'label', 
+            'value', 
+            'price_impact',   # مبلغی که به کاربر نمایش میدهیم (+5000)
+            'quantity_step',  # گام شمارش (هر 10 عدد)
+            'is_default',
+            'description'     # متن توضیحی تولید شده
+        ]
 
-# ======= Option Detail Serializer (UPDATED) ======= #
-class OptionDetailSerializer(serializers.ModelSerializer):
+    def get_description(self, obj):
+        """تولید متن راهنما برای کاربر (مثلا: هر 100 عدد)"""
+        if obj.quantity_step > 1:
+            return f"قیمت محاسبه شده به ازای هر {obj.quantity_step} عدد می‌باشد."
+        return ""
+
+class ProductOptionSerializer(serializers.ModelSerializer):
     """
-    نمایش آپشن‌ها به همراه نحوه قیمت‌گذاری آن‌ها.
+    نمایش خود ویژگی (سوال) به همراه لیست گزینه‌ها.
     """
-    option_name = serializers.CharField(source='option.name', read_only=True)
-    value_name = serializers.CharField(source='option_value.value', read_only=True)
+    name = serializers.CharField(source='option.name', read_only=True)
+    label = serializers.CharField(source='option.label', read_only=True)
+    type = serializers.CharField(source='option.input_type', read_only=True)
+    description = serializers.CharField(source='option.description', read_only=True)
     
+    # ===== Nested Choices ===== #
+    choices = ProductOptionValueSerializer(many=True, read_only=True)
+
     class Meta:
         model = ProductOption
         fields = [
             'id', 
-            'option_name', 
-            'value_name', 
-            'pricing_type', 
-            'price_impact', 
-            'is_required'
+            'name', 
+            'label', 
+            'type', 
+            'is_required', 
+            'description', 
+            'has_pricing', 
+            'choices'
         ]
 
-# ======= Product Image Serializer ======= #
+# ==========================================
+# 4. MEDIA & FILES SERIALIZERS
+# ==========================================
+
 class ProductImageSerializer(serializers.ModelSerializer):
-    """سریالایزر برای نمایش تصاویر محصول"""
     image_url = serializers.SerializerMethodField()
     
     class Meta:
@@ -110,13 +132,18 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image_url', 'order']
     
     def get_image_url(self, obj):
-        """دریافت URL کامل تصویر"""
         request = self.context.get('request')
-        if obj.image and hasattr(obj.image, 'url'):
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
+        if obj.image:
+            return request.build_absolute_uri(obj.image.url) if request else obj.image.url
         return None
+
+class FileUploadRequirementSerializer(serializers.ModelSerializer):
+    spec_name = serializers.CharField(source='spec.name', read_only=True)
+    spec_description = serializers.CharField(source='spec.description', read_only=True)
+
+    class Meta:
+        model = ProductFileUploadRequirement
+        fields = ['id', 'spec_name', 'spec_description', 'is_required', 'sort_order']
 
 # ======= Product Attachment Serializer ======= #
 class ProductAttachmentSerializer(serializers.ModelSerializer):
@@ -138,80 +165,67 @@ class ProductAttachmentSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.attachment.file.url)
         return None
 
-# =============================== #
-# ======= Product Serializer ======= #
-# =============================== #
+# ==========================================
+# 5. MAIN PRODUCT SERIALIZERS
+# ==========================================
+
 class ProductListSerializer(serializers.ModelSerializer):
-    """
-    سریالایزر برای نمایش محصولات در لیست.
-    اطلاعات خلاصه‌ای را نمایش می‌دهد.
-    """
     category = CategorySerializer(read_only=True)
-    detail_url = serializers.HyperlinkedIdentityField(view_name='api:v1:shop:detail', lookup_field='slug')
+    # دریافت تصویر اصلی (اولین تصویر)
+    thumbnail = serializers.SerializerMethodField()
+    detail_url = serializers.HyperlinkedIdentityField(
+        view_name='api:v1:shop:detail', 
+        lookup_field='slug'
+    )
 
     class Meta:
         model = Product
-        fields = [
-            "id",
-            'name',
-            'slug',
-            'price',
-            'category',
-            'detail_url',
-        ]
+        fields = ['id', 'name', 'slug', 'price', 'category', 'thumbnail', 'detail_url']
 
-# ===================================== #
-# ======= Product Detail Serializer ======= #
-# ===================================== #
+    def get_thumbnail(self, obj):
+        img = obj.product_image.first()
+        if img:
+            request = self.context.get('request')
+            return request.build_absolute_uri(img.image.url) if request else img.image.url
+        return None
+
 class ProductDetailSerializer(serializers.Serializer):
     """
-    سریالایزر اصلی و جامع برای نمایش تمام جزئیات یک محصول.
-    این سریالایزر یک دیکشنری را به عنوان ورودی می‌گیرد که توسط ShopProductDetailService ساخته شده.
+    سریالایزر جامع محصول.
+    نکته: چون خروجی سرویس یک دیکشنری ترکیبی است، از ModelSerializer استفاده نمی‌کنیم.
     """
-    # ===== فیلد های مصحول ===== #
-    name = serializers.CharField(source='product.name')
-    slug = serializers.SlugField(source='product.slug')
-    description = serializers.CharField(source='product.description')
-    price = serializers.DecimalField(source='product.price', max_digits=10, decimal_places=2)
-    # ===== فیلد قیمت سایز دلخواه ===== #
-    price_per_square_unit = serializers.DecimalField(source='product.price_per_square_unit', max_digits=10, decimal_places=2, allow_null=True)
-    # price_modifier_percent = serializers.IntegerField(source='product.price_modifier_percent')
+    # 1. اطلاعات پایه محصول
+    product_info = serializers.SerializerMethodField()
     
-    # ===== فیلدهای مربوط به سریالایزر ===== #
-    category = CategorySerializer(source='product.category', read_only=True)
-    quantities = QuantityDetailSerializer(source='product.product_quantity', many=True)
-    sizes = SizeDetailSerializer(source='product.product_quantity', many=True)
-    materials = MaterialDetailSerializer(source='product.product_material', many=True)
+    # 2. تنظیمات قیمت (بسیار مهم)
+    pricing_config = serializers.SerializerMethodField()
+    
+    # 3. لیست‌های قدیمی (Legacy)
+    quantities = QuantityDetailSerializer(many=True)
+    sizes = SizeDetailSerializer(many=True)
+    materials = MaterialDetailSerializer(many=True)
+    options = serializers.JSONField() 
+    
+    # 5. فایل‌ها و مدیا
     images = ProductImageSerializer(many=True)
-    attachments = ProductAttachmentSerializer(many=True)
-    # ===== فیلد ویژگی های منحصر به فرد به صورت تابع ===== #
-    options = serializers.SerializerMethodField()
-    
-    def get_options(self, obj):
-        """
-        این متد ساختار گروه‌بندی شده آپشن‌ها را از سرویس دریافت کرده
-        و آن را به فرمت مناسب برای JSON تبدیل می‌کند.
-        """
-        grouped = obj.get('grouped_options', {})
-        result = []
-        for type_name, items in grouped.items():
-            result.append({
-                'title': type_name,
-                'items': OptionDetailSerializer(items, many=True).data
-            })
-        return result
-    
-# ======= File Upload Requirement Serializer (NEW) ======= #
-class FileUploadRequirementSerializer(serializers.ModelSerializer):
-    """
-    مشخص می‌کند کاربر چه فایل‌هایی را باید آپلود کند (مثلاً طرح رو، طرح پشت).
-    """
-    spec_name = serializers.CharField(source='spec.name', read_only=True)
-    spec_description = serializers.CharField(source='spec.description', read_only=True)
+    file_requirements = FileUploadRequirementSerializer(many=True)
 
-    class Meta:
-        model = ProductFileUploadRequirement
-        fields = ['id', 'spec_name', 'spec_description', 'is_required', 'sort_order']
+    def get_product_info(self, obj):
+        product = obj['product']
+        return {
+            "id": product.id,
+            "name": product.name,
+            "slug": product.slug,
+            "description": product.description,
+            "price": product.price,
+            "code": product.code
+        }
+
+    def get_pricing_config(self, obj):
+        product = obj['product']
+        if hasattr(product, 'pricing_config'):
+            return ProductPricingConfigSerializer(product.pricing_config).data
+        return None
     
 # ===== Input Serializer (برای ثبت نظر) ===== #
 class SubmitReviewSerializer(serializers.Serializer):
