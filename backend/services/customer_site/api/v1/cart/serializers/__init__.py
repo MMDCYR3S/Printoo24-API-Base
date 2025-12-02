@@ -1,5 +1,4 @@
-from .add_to_cart_serializer import AddToCartSerializer
-from .temporary_file_upload_serializer import TemporaryFileUploadSerializer
+from .cart_add_update_serializer import AddToCartSerializer, CartItemUpdateSerializer
 from .cart_detail_serializer import CartDetailSerializer, CartItemSerializer
-from .cart_update_serializer import CartItemUpdateSerializer
 from .cart_item_serializer import CartItemDetailSerializer, CartListSerializer
+from .cart_item_upload_serializer import CartItemFileUploadSerializer

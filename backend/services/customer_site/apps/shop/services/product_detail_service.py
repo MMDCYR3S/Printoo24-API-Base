@@ -39,14 +39,21 @@ class ShopProductDetailService:
             product = data['product']
             
             # ===== ایجاد دیکشنری ===== #
-            product_details = {
+            result = {
                 'product': product,
+                
+                # ===== لیست جدید و هوشمند quantitie =====
                 'quantities': list(product.product_quantity.all()),
                 'sizes': list(product.product_size.all()),
                 'materials': list(product.product_material.all()),
-                'options': data['grouped_options'],
+                
+                #===== لیست جدید و هوشمند آپشن‌ها===== #
+                'options': data['structured_options'],
+                
                 'images': list(product.product_image.all()),
-                'attachments': list(product.product_attachment_product.all())
+                
+                #   ===== نیازمندی‌های فایل (File Specs) ===== #
+                'file_requirements': list(product.file_upload_requirements.all())
             }
             
             logger.info(
@@ -54,7 +61,7 @@ class ShopProductDetailService:
                 f"Product ID: {product.id}"
             )
             
-            return product_details
+            return result
             
         except Exception as e:
             logger.error(

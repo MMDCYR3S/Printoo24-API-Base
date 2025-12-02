@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .product import Product
+from .product import Product, ProductFileUploadRequirement
 
 # ===== Order Status Model ===== #
 class OrderStatus(models.Model):
@@ -57,30 +57,26 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.order.pk} - {self.product.name}"
 
-# ====== Design File Model ====== #
-class DesignFile(models.Model):
-    """ مدل برای فایل های طراحی هر آیتم سفارش """
-    file = models.FileField(_('فایل'), upload_to='orders/designs/')
-    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+# ===== Order Item File Model ===== #
+class OrderItemFile(models.Model):
+    """ 
+    فایل‌های نهایی طراحی برای آیتم سفارش.
+    این مدل جایگزین DesignFile و OrderItemDesignFile می‌شود.
+    """
+    order_item = models.ForeignKey(
+        OrderItem, 
+        related_name='files', 
+        on_delete=models.CASCADE,
+        verbose_name=_("آیتم سفارش")
+    )
+    requirement = models.ForeignKey(
+        ProductFileUploadRequirement, 
+        on_delete=models.PROTECT,
+        verbose_name=_("نوع فایل")
+    )
+    file = models.FileField(_('فایل نهایی'), upload_to='orders/designs/%Y/%m/%d/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        verbose_name = _('فایل طراحی')
-        verbose_name_plural = _('فایل های طراحی')
-
-# ====== Order Item Design File Model ====== #
-class OrderItemDesignFile(models.Model):
-    """ کلاس واسط مابین فایل های طراحی و آیتم های سفارش """
-    user = models.ForeignKey("core.User", related_name='order_item_design_file_user', on_delete=models.CASCADE)
-    order_item = models.ForeignKey(OrderItem, related_name='order_item_design_file_order_item', on_delete=models.CASCADE)
-    file = models.ForeignKey(DesignFile, related_name='order_item_design_file_file', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
-    
-    def __str__(self):
-        return f"{self.user} - {self.order_item.id}"
-    
     class Meta:
         verbose_name = _('فایل آیتم سفارش')
-        verbose_name_plural = _('فایل های آیتم های سفارش')
-    
+        verbose_name_plural = _('فایل‌های آیتم سفارش')

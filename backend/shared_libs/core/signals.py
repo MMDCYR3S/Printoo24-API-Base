@@ -46,4 +46,4 @@ def create_customer_role(sender, instance, created, **kwargs):
     و يك كاربر مي باشد
     """
     if created and not instance.is_superuser and not instance.is_staff:
-        Role.objects.create(name="مشتری", description="نقش مشتری")
+        Role.objects.create(name="مشتری", description="نقش مشتری", is_customer=True)

@@ -1,8 +1,7 @@
 from .repositories import (
     OrderRepository, 
     OrderItemRepository, 
-    OrderItemDesignFileRepository,
-    DesignFileRepository
+    OrderItemFileRepository
 )
 from .services import (
     OrderDomainService, 

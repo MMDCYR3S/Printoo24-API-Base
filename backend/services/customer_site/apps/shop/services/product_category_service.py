@@ -6,7 +6,7 @@ from rest_framework.reverse import reverse
 from django.urls import NoReverseMatch
 
 from core.domain.category import ProductCategoryDomainService
-from core.domain.product.repositories import ProductRepository
+from core.domain.product import ProductRepository
 from core.models import ProductCategory
 
 logger = logging.getLogger('shop.services.category')
@@ -29,7 +29,6 @@ class ShopCategoryService:
         """
         categories = self._domain_service.get_category_tree_queryset()
         root_nodes = get_cached_trees(categories)
-
         return [self._serialize_node_light(node) for node in root_nodes]
 
     def _serialize_node_light(self, node: ProductCategory) -> Dict[str, Any]:
@@ -41,6 +40,7 @@ class ShopCategoryService:
             "name": node.name,
             "slug": node.slug,
             "has_children": len(children) > 0,
+            "thumbnail": self._get_image_url(node.banner_box),
             "links": {
                 "products_url": self._generate_product_filter_url(node.slug),
                 "landing_url": self._generate_category_landing_url(node.slug)
@@ -61,35 +61,41 @@ class ShopCategoryService:
         if not category:
             return None
 
-        descendants = category.get_descendants(include_self=True)
-        descendant_ids = descendants.values_list('id', flat=True)
+        # descendants = category.get_descendants(include_self=True)
+        descendant_ids = self._domain_service.get_category_descendants_ids(slug)
 
-        products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)
-        
-        products_limit = products_queryset[:7]
+        products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)[:7]
+        # ===== دریافت محصولات ===== #
+        breadcrumbs = [
+                {"name": ancestor.name, "slug": ancestor.slug} 
+                for ancestor in category.get_ancestors(include_self=False)
+            ]
 
-        # 4. ساخت خروجی
+        # ===== ساخت دیکشنری ===== #
         data = {
-            "category_info": {
-                "id": category.id,
-                "name": category.name,
-                "description": category.description,
-                "slug": category.slug,
-                "banners": {
-                    "wide": self._get_image_url(category.banner_wide),
-                    "box": self._get_image_url(category.banner_box),
-                }
-            },
-            "sub_categories": [
-                {
-                    "name": child.name, 
-                    "slug": child.slug, 
-                    "thumbnail": self._get_image_url(child.banner_box)
-                } 
-                for child in category.get_children() if child.is_active
-            ],
-            "products": products_limit
-        }
+                "category_info": {
+                    "id": category.id,
+                    "name": category.name,
+                    "slug": category.slug,
+                    "description": category.description,
+                    "breadcrumbs": breadcrumbs,
+                    "banners": {
+                        "wide": self._get_image_url(category.banner_wide),
+                        "box": self._get_image_url(category.banner_box),
+                    }
+                },
+                "sub_categories": [
+                    {
+                        "id": child.id,
+                        "name": child.name, 
+                        "slug": child.slug, 
+                        "thumbnail": self._get_image_url(child.banner_box),
+                        "link": self._generate_product_filter_url(child.slug)
+                    } 
+                    for child in category.get_children() if child.is_active
+                ],
+                "products": products_queryset
+            }
         return data
     
     # ===== Get All Categories With Products ===== #

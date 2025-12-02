@@ -9,8 +9,10 @@ from core.models import (
     ProductSize, 
     ProductMaterial, 
     ProductOption,
+    ProductOptionValue,
     ProductImage,
     ProductAttachment,
+    ProductFileUploadRequirement,
 )
 
 # ====== Product Repository ====== #
@@ -49,33 +51,37 @@ class ProductRepository(BaseRepository[Product]):
         """
         try:
             return self.model.objects.select_related(
-                'category'
+                'category',
+                'pricing_config'
             ).prefetch_related(
-                # ===== دریافت و مرتب سازی تیراژها ===== #
-                Prefetch('product_quantity', queryset=ProductQuantity.objects.order_by('quantity')),
+                Prefetch('product_quantity', queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')),
+                Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__width')),
+                Prefetch('product_material', queryset=ProductMaterial.objects.select_related('material').order_by('is_default', 'material__name')),
                 
-                # ===== دریافت و مرتب سازی سایزها ===== #
-                Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__name')),
-                
-                # ===== دریافت و مرتب سازی حنس ها ===== #
-                Prefetch('product_material', queryset=ProductMaterial.objects.select_related('material').order_by('material__name')),
-                
-                # ===== دریافت و مرتب سازی گزینه ها ===== #
+                # ===== اصلاح نام ریلیشن آپشن‌ها ===== #
+                # در مدل ProductOption تعریف کردید: product = ForeignKey(..., related_name='options')
+                # پس اینجا باید بنویسید 'options' نه 'product_option_product'
                 Prefetch(
-                    'product_option_product', 
-                    queryset=ProductOption.objects.select_related(
-                        'option_value__option'
-                    ).order_by('option_value__option__name', 'option_value__value')
+                    'options', 
+                    queryset=ProductOption.objects.select_related('option').prefetch_related(
+                        Prefetch(
+                            'choices', 
+                            queryset=ProductOptionValue.objects.order_by('order')
+                        )
+                    ).order_by('order')
                 ),
                 
+                Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
+                Prefetch('product_attachment_product', queryset=ProductAttachment.objects.order_by('id')),
+                
+                # ===== اصلاح فیلد مرتب‌سازی فایل‌ها ===== #
+                # فیلد created_at وجود ندارد، باید با sort_order مرتب کنید
                 Prefetch(
-                    'product_image',
-                    queryset=ProductImage.objects.order_by('product', 'id')
-                ),
-                Prefetch(
-                    'product_attachment_product',
-                    queryset=ProductAttachment.objects.order_by('product', 'id')
+                    'file_upload_requirements', 
+                    queryset=ProductFileUploadRequirement.objects.select_related('spec').order_by('sort_order') # <--- اصلاح شد
                 )
+
             ).get(slug=slug, is_active=True)
+            
         except self.model.DoesNotExist:
             raise ProductNotFoundException(f"محصولی با اسلاگ '{slug}' یافت نشد.")

@@ -2,7 +2,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.views import extend_schema
+from drf_spectacular.utils import extend_schema
 
 from apps.order.services import CreateOrderFromCartService
 from apps.order.exceptions import (
@@ -11,35 +11,35 @@ from apps.order.exceptions import (
     OrderCreationError
 )
 from .serializers import OrderSerializer
-from core.models import Address
 
-# ===== Create Order View ===== #
 @extend_schema(tags=["Order"])
 class CreateOrderView(GenericAPIView):
+    """
+    POST /api/v1/orders/checkout/
+    Converts the user's cart into a final order.
+    """
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
 
     def post(self, request, *args, **kwargs):
-        """
-        ایجاد سفارش پس از اعتبارسنجی
-        """
-        # ===== اجرای سریالایزر و اعتبارسنجی ====== #
-        input_serializer = self.get_serializer(data=request.data)
-        input_serializer.is_valid(raise_exception=True)
-
-        address_instance = input_serializer.validated_data.get('address')
+        # 1. Validate Input (Address ID is checked here)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # 'address' in validated_data is now the Address instance because of source="address"
+        address_instance = serializer.validated_data.get('address')
 
         try:
-            # ===== ساخت سرویس ثبت سفارش ===== #
+            # 2. Execute Business Logic
             service = CreateOrderFromCartService()
             order = service.execute(
                 user=request.user, 
                 address=address_instance
             )
             
-            # ===== ایجاد شیء خروجی ===== #
-            output_serializer = self.get_serializer(order)
-            
+            # 3. Return Full Response
+            # Pass request context for proper file URL generation
+            output_serializer = self.get_serializer(order, context={'request': request})
             return Response(output_serializer.data, status=status.HTTP_201_CREATED)
         
         except EmptyCartError as e:
@@ -48,6 +48,8 @@ class CreateOrderView(GenericAPIView):
         except InsufficientFundsError as e:
             return Response({"error": str(e)}, status=status.HTTP_402_PAYMENT_REQUIRED)
             
-        except OrderCreationError as e:
-            # ===== اگر خیر خطا رخ داده باشد ===== #
-            return Response({"error": "خطایی در ثبت سفارش رخ داد."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred while placing the order.", "detail": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

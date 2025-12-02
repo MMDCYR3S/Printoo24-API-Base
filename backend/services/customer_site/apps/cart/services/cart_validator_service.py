@@ -8,136 +8,118 @@ from core.models import (
     Product,
     ProductMaterial,
     ProductSize,
-    ProductOption,
-    ProductPricingConfig,
+    ProductOptionValue,
 )
 
-# ===== تعریف لاگر اختصاصی برای سرویس اعتبارسنجی سبد خرید ===== #
 logger = logging.getLogger('shop.services.cart_validator')
 
 class CartDataValidator:
-    """
-    مسئول اعتبارسنجی داده‌های خام ورودی برای افزودن محصول به سبد خرید.
-    
-    تغییرات معماری:
-    - بررسی تیراژ بر اساس بازه (Min/Max) در ProductPricingConfig.
-    - بررسی ابعاد بر اساس محدودیت‌های دستگاه.
-    - بررسی همخوانی متریال با محصول.
-    """
-    
     def validate(self, product_slug: str, selections: Dict[str, Any]) -> Dict[str, Any]:
         """
-        اجرای فرآیند اعتبارسنجی داده‌های محصول و انتخاب‌های کاربر.
+        اعتبارسنجی ورودی کاربر برای افزودن به سبد خرید.
         """
-        logger.info(f"Starting validation for Product Slug: {product_slug}")
-        logger.debug(f"Selections received: {selections}")
+        logger.info(f"Validating selections for {product_slug}")
         
-        # ===== 1. بررسی وجود محصول و کانفیگ قیمت ===== #
+        # 1. دریافت محصول + کانفیگ
         try:
-            # استفاده از select_related برای پرفورمنس (چون کانفیگ 1:1 است)
             product = Product.objects.select_related('pricing_config').get(slug=product_slug, is_active=True)
         except Product.DoesNotExist:
-            logger.warning(f"Product not found or inactive with slug: {product_slug}")
-            raise ValidationError("محصول مورد نظر یافت نشد یا غیرفعال است.")
+            raise NotFound("محصول مورد نظر یافت نشد.")
 
-        # دسترسی به کانفیگ قیمت‌گذاری
-        config = getattr(product, 'pricing_config', None)
-        if not config:
-            logger.error(f"Pricing config missing for product: {product.name}")
-            raise ValidationError("تنظیمات قیمت‌گذاری برای این محصول یافت نشد.")
+        # اگر محصول کانفیگ نداشت (دیتای ناقص دیتابیس)
+        if not hasattr(product, 'pricing_config'):
+            logger.error(f"Product {product.id} has no pricing config!")
+            raise ValidationError("این محصول در حال حاضر قابل سفارش نیست (خطای تنظیمات).")
+            
+        config = product.pricing_config
 
-        # ===== استخراج داده‌های ورودی ===== #
-        # نکته: در معماری جدید، quantity یک عدد است نه ID
+        # 2. استخراج داده‌ها با مقادیر پیش‌فرض ایمن
         quantity = int(selections.get("quantity", 1))
-        # نکته: ID مربوط به ProductMaterial (رابط محصول-جنس) باید ارسال شود
-        product_material_id = selections.get("product_material_id") or selections.get("material_id")
+        material_id = selections.get("material_id")
         size_id = selections.get("size_id")
-        options_ids = selections.get("options_ids", [])
+        selected_value_ids = selections.get("option_value_ids", [])
         
-        # داده‌های مربوط به ابعاد دلخواه و طراحی
-        custom_width = float(selections.get('width', 0))
-        custom_height = float(selections.get('height', 0))
+        # تبدیل ایمن به float (چون ممکن است رشته خالی یا None بیاید)
+        try:
+            custom_width = float(selections.get('width') or 0)
+            custom_height = float(selections.get('height') or 0)
+        except (ValueError, TypeError):
+            custom_width = 0.0
+            custom_height = 0.0
+            
         has_design = selections.get('has_design', True)
 
+        # 3. چک کردن تیراژ
+        if config.allow_custom_quantity:
+            if not (config.min_quantity <= quantity <= config.max_quantity):
+                raise ValidationError(f"تعداد سفارش باید بین {config.min_quantity} و {config.max_quantity} باشد.")
+        elif quantity < config.min_quantity:
+            raise ValidationError(f"حداقل تعداد سفارش برای این محصول {config.min_quantity} عدد است.")
+
+        # 4. چک کردن متریال
+        if not material_id:
+            raise ValidationError("لطفاً جنس کاغذ/متریال را انتخاب کنید.")
+        
         try:
-            # ===== 2. اعتبارسنجی تیراژ (بر اساس Config) ===== #
-            if config.allow_custom_quantity:
-                if not (config.min_quantity <= quantity <= config.max_quantity):
-                    logger.warning(f"Quantity {quantity} out of range for product {product.name}")
-                    raise ValidationError(f"تعداد باید بین {config.min_quantity} و {config.max_quantity} باشد.")
-            else:
-                # اگر تیراژ دلخواه مجاز نیست، باید چک کنیم که آیا پکیج خاصی مد نظر است 
-                # یا صرفاً حداقل را رعایت کرده (بسته به بیزنس شما)
-                if quantity < config.min_quantity:
-                    raise ValidationError(f"حداقل سفارش برای این محصول {config.min_quantity} عدد است.")
+            material_obj = ProductMaterial.objects.get(id=material_id, product=product)
+        except ProductMaterial.DoesNotExist:
+            raise ValidationError("جنس انتخاب شده برای این محصول نامعتبر است.")
 
-            # ===== 3. اعتبارسنجی متریال (ProductMaterial) ===== #
-            if not product_material_id:
-                raise ValidationError("انتخاب جنس کاغذ الزامی است.")
-            
-            # حتماً باید از جدول واسط ProductMaterial چک کنیم تا مطمئن شویم این جنس برای این محصول فعال است
-            material_obj = ProductMaterial.objects.get(id=product_material_id, product=product)
-            
-            # ===== 4. اعتبارسنجی سایز یا ابعاد دلخواه ===== #
-            size_obj = None
-            custom_dimensions = None
+        # 5. چک کردن سایز / ابعاد
+        size_obj = None
+        final_width = 0.0
+        final_height = 0.0
 
-            if size_id:
-                # اگر سایز استاندارد انتخاب شده
-                size_obj = ProductSize.objects.get(id=size_id, product=product)
-            elif config.accepts_custom_dimensions:
-                # اگر ابعاد دلخواه وارد شده، باید محدودیت‌های دستگاه چک شود
-                if custom_width <= 0 or custom_height <= 0:
-                     raise ValidationError("ابعاد وارد شده نامعتبر است.")
-                
-                # چک کردن Min/Max عرض (مثلاً دستگاه تا عرض 300 سانت می‌زند)
-                if config.min_width and custom_width < config.min_width:
-                    raise ValidationError(f"حداقل عرض قابل چاپ {config.min_width} سانتیمتر است.")
-                if config.max_width and custom_width > config.max_width:
-                    raise ValidationError(f"حداکثر عرض قابل چاپ {config.max_width} سانتیمتر است.")
-                
-                custom_dimensions = {'width': custom_width, 'height': custom_height}
-            else:
-                raise ValidationError("باید یک سایز استاندارد انتخاب کنید.")
-
-            # ===== 5. اعتبارسنجی آپشن‌های اضافی ===== #
-            options_obj = []
-            if options_ids:
-                # دریافت تمام آپشن‌های معتبر مرتبط با این محصول
-                options_obj = list(ProductOption.objects.filter(id__in=options_ids, product=product))
-                
-                if len(options_obj) != len(options_ids):
-                    logger.warning(
-                        f"Option mismatch for Product: {product.name}. "
-                        f"Requested: {len(options_ids)}, Found: {len(options_obj)}"
-                    )
-                    raise ValidationError("یک یا چند گزینه انتخاب شده نامعتبر است یا به این محصول تعلق ندارد.")
-
-            # ===== 6. اعتبارسنجی خدمات طراحی ===== #
-            if not has_design and not config.design_service_available:
-                 logger.warning(f"User requested design but service unavailable for product {product.name}")
-                 raise ValidationError("خدمات طراحی برای این محصول ارائه نمی‌شود. لطفاً فایل آپلود کنید.")
+        if size_id:
+            try:
+                size_obj = ProductSize.objects.select_related('size').get(id=size_id, product=product)
+                final_width = size_obj.size.width
+                final_height = size_obj.size.height
+            except ProductSize.DoesNotExist:
+                raise ValidationError("سایز انتخاب شده نامعتبر است.")
+        
+        elif config.accepts_custom_dimensions:
+            # اعتبارسنجی ابعاد دلخواه
+            if custom_width <= 0 or custom_height <= 0:
+                raise ValidationError("لطفاً طول و عرض را به درستی وارد کنید.")
             
-            logger.debug("All product attributes validated successfully.")
+            # چک کردن محدودیت‌های دستگاه
+            if config.min_width and custom_width < config.min_width:
+                raise ValidationError(f"حداقل عرض قابل چاپ {config.min_width} سانتیمتر است.")
+            if config.max_width and custom_width > config.max_width:
+                raise ValidationError(f"حداکثر عرض قابل چاپ {config.max_width} سانتیمتر است.")
+            
+            final_width = custom_width
+            final_height = custom_height
+        
+        else:
+            # نه سایز استاندارد انتخاب شده، نه ابعاد دلخواه مجاز است
+            raise ValidationError("لطفاً یکی از سایزهای استاندارد را انتخاب کنید.")
 
-            # ===== بازگرداندن دیکشنری استاندارد شده ===== #
-            return {
-                "product": product,
-                "quantity": quantity,      # int
-                "material_obj": material_obj, # ProductMaterial Model Instance
-                "size_obj": size_obj,      # ProductSize Model Instance or None
-                "options_obj": options_obj, # List[ProductOption]
-                "custom_dimensions": custom_dimensions, # Dict or None
-                "has_design": has_design,   # bool
-            }
+        # 6. چک کردن آپشن‌های انتخابی
+        selected_values_objs = []
+        if selected_value_ids:
+            # فقط مقادیری که مالِ آپشن‌های همین محصول هستند را می‌گیریم
+            selected_values_objs = list(ProductOptionValue.objects.filter(
+                id__in=selected_value_ids,
+                product_option__product=product
+            ).select_related('product_option', 'product_option__option'))
             
-        except ObjectDoesNotExist as e:
-            # هندل کردن کلی خطاهای مربوط به پیدا نشدن متریال/سایز
-            logger.error(f"Validation attribute error for Product {product_slug}: {str(e)}")
-            raise ValidationError("یکی از ویژگی‌های انتخاب شده (جنس، سایز و...) نامعتبر است.")
-            
-        except Exception as e:
-            if isinstance(e, ValidationError):
-                raise e
-            logger.exception(f"Unexpected validation error for Product {product_slug}")
-            raise ValidationError("خطای سیستمی در اعتبارسنجی محصول.")
+            # اگر تعداد پیدا شده کمتر از درخواستی بود، یعنی برخی ID ها فیک یا مال محصول دیگر بودند
+            if len(selected_values_objs) != len(set(selected_value_ids)):
+                raise ValidationError("برخی از گزینه‌های انتخاب شده نامعتبر هستند.")
+
+        # 7. چک کردن خدمات طراحی
+        if not has_design and not config.design_service_available:
+            raise ValidationError("خدمات طراحی برای این محصول فعال نیست.")
+
+        return {
+            "product": product,
+            "quantity": quantity,
+            "material_obj": material_obj,
+            "size_obj": size_obj,
+            "option_values": selected_values_objs,
+            "width": final_width,
+            "height": final_height,
+            "has_design": has_design
+        }
