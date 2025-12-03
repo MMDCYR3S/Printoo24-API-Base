@@ -18,3 +18,5 @@ from .option_repo import (
     OptionValueRepository
 )
 from .option_service import OptionDomainService
+from .media_repo import ProductMediaRepository
+from .media_service import ProductMediaDomainService

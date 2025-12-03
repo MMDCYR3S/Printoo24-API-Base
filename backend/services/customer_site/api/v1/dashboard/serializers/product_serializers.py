@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from core.models import Product, ProductPricingConfig, ProductMaterial, ProductQuantity
+from core.models import (
+    Product,
+    ProductPricingConfig,
+    ProductImage,
+    Attachment, 
+    ProductAttachment
+)
 
 # =====Product Shell Serializer ===== #
 class ProductShellSerializer(serializers.ModelSerializer):
@@ -77,4 +83,36 @@ class FileRequirementSyncSerializer(serializers.Serializer):
         child=FileRequirementItemSerializer(),
         allow_empty=True
     )
+    
+# ===== Product Image Serializer ===== #
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image', 'order', 'created_at']
+        read_only_fields = ['id', 'order', 'created_at']
+
+# ===== Image Reorder Serializer =====
+class ImageReorderSerializer(serializers.Serializer):
+    image_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        help_text="لیست ID تصاویر به ترتیب دلخواه"
+    )
+
+# ===== Attachment Library Serializer ===== #
+class AttachmentLibrarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attachment
+        fields = ['id', 'name', 'file', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+# ===== Product Attachment Link Serializer ===== #
+class ProductAttachmentLinkSerializer(serializers.Serializer):
+    attachment_id = serializers.IntegerField(help_text="ID فایل از کتابخانه")
+
+class ProductAttachmentListSerializer(serializers.ModelSerializer):
+    file_info = AttachmentLibrarySerializer(source='attachment', read_only=True)
+    
+    class Meta:
+        model = ProductAttachment
+        fields = ['id', 'file_info', 'created_at']
     

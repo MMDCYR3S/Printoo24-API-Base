@@ -6,7 +6,8 @@ from .attribute_product_views import (
     SizeViewSet,
     MaterialViewSet,
     QuantityViewSet,
-    FileUploadSpecViewSet
+    FileUploadSpecViewSet,
+    AttachmentLibraryViewSet
 )
 from .options_view import (
     OptionViewSet

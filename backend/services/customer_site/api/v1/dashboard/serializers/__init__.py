@@ -28,4 +28,9 @@ from .product_serializers import (
     FileRequirementSyncSerializer,
     FileRequirementItemSerializer,
     OptionValuePriceItemSerializer,
+    ProductAttachmentListSerializer,
+    ProductAttachmentLinkSerializer,
+    ImageReorderSerializer,
+    ProductImageSerializer,
+    AttachmentLibrarySerializer
 )

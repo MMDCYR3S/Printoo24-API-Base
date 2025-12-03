@@ -1,18 +1,24 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema
 
+from core.models import (
+    Attachment
+)
 from core.domain.product import (
     SizeDomainService,
     MaterialDomainService,
     QuantityDomainService,
-    FileUploadSpecDomainService
+    FileUploadSpecDomainService,
+    ProductMediaDomainService
 )
 from ..serializers import (
     SizeSerializer,
     MaterialSerializer,
     QuantitySerializer,
-    FileUploadSpecSerializer
+    FileUploadSpecSerializer,
+    AttachmentLibrarySerializer,
 )
 
 # ===== Size ViewSet ===== #
@@ -163,4 +169,33 @@ class FileUploadSpecViewSet(viewsets.ViewSet):
     def destroy(self, request, pk=None):
         self.service.delete_spec(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# ===== Attachment Library ViewSet ===== #
+@extend_schema(tags=['Dashboard-Attachment'])
+class AttachmentLibraryViewSet(viewsets.ModelViewSet):
+    """
+    مدیریت کتابخانه فایل‌های پیوست (مثل قالب‌ها، راهنماها).
+    """
+    queryset = Attachment.objects.all().order_by('-created_at')
+    serializer_class = AttachmentLibrarySerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = ProductMediaDomainService()
+
+    @extend_schema(summary="آپلود فایل جدید در کتابخانه")
+    def create(self, request, *args, **kwargs):
+        file_obj = request.FILES.get('file')
+        name = request.data.get('name')
+        
+        if not file_obj or not name:
+            return Response({'detail': 'فایل و نام الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        instance = self.service.upload_attachment_to_library(
+            user=request.user,
+            file=file_obj,
+            name=name
+        )
+        return Response(AttachmentLibrarySerializer(instance).data, status=status.HTTP_201_CREATED)
     

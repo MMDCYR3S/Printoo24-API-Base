@@ -11,7 +11,8 @@ from .views import (
     QuantityViewSet,
     FileUploadSpecViewSet,
     OptionViewSet,
-    ProductDashboardViewSet
+    ProductDashboardViewSet,
+    AttachmentLibraryViewSet
 )
 
 router = DefaultRouter()
@@ -26,6 +27,7 @@ router.register(r'quantities', QuantityViewSet, basename='quantities')
 router.register(r'file-specs', FileUploadSpecViewSet, basename='file-specs')
 router.register(r'options', OptionViewSet, basename='options')
 router.register(r'products', ProductDashboardViewSet, basename='products')
+router.register(r'attachments', AttachmentLibraryViewSet, basename='attachments')
 
 app_name = "dashboard"
 

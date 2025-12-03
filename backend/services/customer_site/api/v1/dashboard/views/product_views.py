@@ -1,9 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema
 
-from core.domain.product import ProductDomainService
+from core.domain.product import ProductDomainService, ProductMediaDomainService
 from ..serializers import (
     ProductShellSerializer, 
     ProductPricingConfigSerializer,
@@ -11,7 +12,10 @@ from ..serializers import (
     QuantitySyncSerializer,
     OptionAttachWithPriceSerializer,
     OptionPriceUpdateSerializer,
-    FileRequirementSyncSerializer
+    FileRequirementSyncSerializer,
+    ProductAttachmentLinkSerializer,
+    ProductImageSerializer,
+    ImageReorderSerializer
 )
 
 # ===== Product Dashboard View Set ===== #
@@ -26,6 +30,7 @@ class ProductDashboardViewSet(viewsets.ModelViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.service = ProductDomainService()
+        self.media_service = ProductMediaDomainService()
 
     def get_queryset(self):
         return self.service.get_all_active_products()
@@ -131,3 +136,61 @@ class ProductDashboardViewSet(viewsets.ModelViewSet):
             requirements=serializer.validated_data['requirements']
         )
         return Response({'status': 'File requirements updated successfully'})
+
+    @extend_schema(summary="آپلود تصویر محصول", request=ProductImageSerializer)
+    @action(detail=True, methods=['post'], url_path='images', parser_classes=[MultiPartParser, FormParser])
+    def upload_image(self, request, pk=None):
+        file_obj = request.FILES.get('image')
+        if not file_obj:
+            return Response({'detail': 'فایل تصویر الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        instance = self.media_service.upload_product_image(
+            product_id=pk,
+            user=request.user,
+            image_file=file_obj
+        )
+        return Response(ProductImageSerializer(instance).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(summary="تغییر ترتیب تصاویر", request=ImageReorderSerializer)
+    @action(detail=True, methods=['post'], url_path='images/reorder')
+    def reorder_images(self, request, pk=None):
+        serializer = ImageReorderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        self.media_service.reorder_images(
+            product_id=pk,
+            image_ids=serializer.validated_data['image_ids']
+        )
+        return Response({'status': 'Images reordered'})
+
+    @extend_schema(summary="حذف تصویر محصول")
+    @action(detail=True, methods=['delete'], url_path='images/(?P<image_id>\d+)')
+    def delete_image(self, request, pk=None, image_id=None):
+        self.media_service.delete_product_image(product_id=pk, image_id=image_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # ==========================
+    # مدیریت پیوست‌ها (Attachments)
+    # ==========================
+
+    @extend_schema(summary="اتصال فایل از کتابخانه به محصول", request=ProductAttachmentLinkSerializer)
+    @action(detail=True, methods=['post'], url_path='attachments')
+    def attach_file(self, request, pk=None):
+        serializer = ProductAttachmentLinkSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        self.media_service.attach_file_to_product(
+            product_id=pk,
+            attachment_id=serializer.validated_data['attachment_id'],
+            user=request.user
+        )
+        return Response({'status': 'File attached'}, status=status.HTTP_201_CREATED)
+
+    @extend_schema(summary="حذف اتصال فایل از محصول")
+    @action(detail=True, methods=['delete'], url_path='attachments/(?P<attachment_id>\d+)')
+    def detach_file(self, request, pk=None, attachment_id=None):
+        """
+        توجه: attachment_id در اینجا ID فایل در کتابخانه است (نه ID جدول واسط).
+        """
+        self.media_service.detach_file_from_product(product_id=pk, attachment_id=attachment_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
