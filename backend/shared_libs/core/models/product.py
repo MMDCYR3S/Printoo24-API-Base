@@ -95,6 +95,7 @@ class Product(models.Model):
         related_name='products',
     )
     slug = models.SlugField(_('اسلاگ'), unique=True, blank=True, null=True)
+    has_price = models.BooleanField(_('دارای قیمت'), default=True)
     price = models.DecimalField(
         _('قیمت'),
         max_digits=12, 
@@ -618,6 +619,8 @@ class FileUploadSpec(models.Model):
         help_text=_("مثال: طرح رو، طرح پشت، فایل UV")
     )
     description = models.TextField(_("توضیحات"), blank=True, null=True)
+    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True, null=True)
 
     def __str__(self):
         return self.name
@@ -646,6 +649,8 @@ class ProductFileUploadRequirement(models.Model):
     )
     is_required = models.BooleanField(_("الزامی بودن"), default=True)
     sort_order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
+    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True, null=True)
 
     def __str__(self):
         return f"{self.product.name} -> {self.spec.name}"
