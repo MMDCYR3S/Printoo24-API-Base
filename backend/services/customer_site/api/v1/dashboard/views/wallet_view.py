@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 
 from apps.dashboard.services import WalletDashboardService
-from ..serializers import (
+from ..serializers.general_serializers import (
     WalletDetailSerializer, 
     WalletAdjustmentSerializer, 
     WalletTransactionSerializer

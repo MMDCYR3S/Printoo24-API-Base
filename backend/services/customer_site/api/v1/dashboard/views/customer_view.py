@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from apps.dashboard.services import CustomerOrchestratorService
-from ..serializers import CustomerManagementSerializer
+from ..serializers.general_serializers import CustomerManagementSerializer
 
 # ===== Customer ViewSet ===== #
 @extend_schema(

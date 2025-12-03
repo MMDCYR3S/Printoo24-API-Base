@@ -85,3 +85,43 @@ class ProductRepository(BaseRepository[Product]):
             
         except self.model.DoesNotExist:
             raise ProductNotFoundException(f"محصولی با اسلاگ '{slug}' یافت نشد.")
+
+    # =====  (Write Methods) ===== #
+    def create_product(self, data: dict) -> Product:
+        """ ایجاد بدنه اصلی محصول (Shell) """
+        return self.model.objects.create(**data)
+
+    def update_product(self, instance: Product, data: dict) -> Product:
+        """ آپدیت اطلاعات پایه """
+        for key, value in data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+    def get_by_id(self, pk: int) -> Optional[Product]:
+        """ دریافت محصول برای ویرایش (بدون کوئری‌های سنگین) """
+        return self.model.objects.filter(pk=pk).first()
+
+    # ===== (Relations) ===== #
+    
+    def clear_materials(self, product: Product):
+        """ حذف تمام متریال‌های محصول (برای عملیات Sync) """
+        product.product_material.all().delete()
+
+    def clear_quantities(self, product: Product):
+        """ حذف تمام تیراژهای محصول """
+        product.product_quantity.all().delete()
+        
+    def bulk_update_option_values(self, values: list[ProductOptionValue], fields: list[str]):
+        """
+        بروزرسانی گروهی مقادیر آپشن (برای پرفورمنس بالا).
+        """
+        ProductOptionValue.objects.bulk_update(values, fields)
+
+    def get_product_option_values(self, product_option_id: int):
+        """ دریافت تمام مقادیر یک آپشن خاص محصول """
+        return ProductOptionValue.objects.filter(product_option_id=product_option_id)
+    
+    def clear_file_requirements(self, product: Product):
+        """ حذف تمام نیازمندی‌های فایل فعلی """
+        product.file_upload_requirements.all().delete()

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from core.domain.category import ProductCategoryDomainService
-from ..serializers import ProductCategoryDashboardSerializer
+from ..serializers.general_serializers import ProductCategoryDashboardSerializer
 
 # ===== ویو‌ست مدیریت دسته‌بندی‌ها ===== #
 @extend_schema(tags=['Dashboard-Category-Banner'])

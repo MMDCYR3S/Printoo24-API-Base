@@ -7,7 +7,7 @@ from drf_spectacular.utils import extend_schema
 # ===== فراخوانی سرویس و مدل‌ها از Shared Libs ===== #
 from core.domain.general import ContentService
 from core.models import ContactUs, PromotionalModal
-from ..serializers import (
+from ..serializers.general_serializers import (
     ContactUsSerializer,
     PromotionalModalSerializer,
     ReplyMessageSerializer
@@ -140,3 +140,4 @@ class PromotionalModalViewSet(viewsets.ModelViewSet):
             'detail': 'وضعیت تغییر کرد.',
             'is_active': instance.is_active
         })
+    
