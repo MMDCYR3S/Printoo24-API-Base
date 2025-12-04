@@ -10,7 +10,9 @@ from ..serializers import (
     ProductOptionsBulkSerializer,
     ProductMediaSyncSerializer,
     ProductImageSerializer,
-    AttachmentLibrarySerializer
+    AttachmentLibrarySerializer,
+    ProductDetailSerializer,
+    OptionConfigUpdateSerializer,
 )
 
 # ===== Product Dashboard View Set ===== #
@@ -58,6 +60,34 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             options_data=serializer.validated_data['options']
         )
         return Response({'results': results}, status=status.HTTP_200_OK)
+    
+   # ===== UPDATE Option Config (اصلاح شده) ===== #
+    @extend_schema(
+        summary="ویرایش تنظیمات و قیمت‌های یک ویژگی",
+        request=OptionConfigUpdateSerializer,
+        responses={200: {'status': 'updated'}}
+    )
+    @action(detail=True, methods=['post', 'patch'], url_path='update-option-config')
+    def update_option_config(self, request, pk=None):
+        """
+        ویرایش تنظیمات ویژگی.
+        ID ویژگی در بدنه درخواست (JSON) ارسال می‌شود.
+        """
+        serializer = OptionConfigUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        data = serializer.validated_data
+        
+        try:
+            self.app_service.update_option_configuration(
+                product_id=pk,
+                option_id=data['product_option_id'],
+                data=data
+            )
+            return Response({'status': 'Option configuration updated'}, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # ===== Media API ===== #
     @extend_schema(request=ProductMediaSyncSerializer, summary="مدیریت لینک فایل‌ها و ترتیب عکس‌ها")
@@ -128,3 +158,35 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             return Response(result, status=status.HTTP_201_CREATED)
             
         return Response(result, status=status.HTTP_200_OK)
+
+    # ===== GET: Retrieve Product Details ===== #
+    @extend_schema(responses=ProductDetailSerializer)
+    def retrieve(self, request, pk=None):
+        """ دریافت جزئیات کامل محصول """
+        try:
+            # سرویس دامین خروجی دیکشنری {product: ..., structured_options: ...} می‌دهد
+            data = self.app_service.get_product_detail(pk)
+            serializer = ProductDetailSerializer(data)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+
+    # ===== DELETE: Remove Product ===== #
+    def destroy(self, request, pk=None):
+        """ حذف محصول (یا غیرفعال کردن در صورت وابستگی) """
+        self.app_service.delete_product(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # ===== DELETE Option (Detach) ===== #
+    @extend_schema(summary="حذف یک ویژگی از محصول")
+    @action(detail=True, methods=['delete'], url_path='options/(?P<option_id>\d+)')
+    def remove_option(self, request, pk=None, option_id=None):
+        """ 
+        حذف ویژگی از محصول.
+        option_id: شناسه ProductOption (نه ویژگی گلوبال).
+        """
+        try:
+            self.app_service.remove_option_from_product(pk, option_id)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

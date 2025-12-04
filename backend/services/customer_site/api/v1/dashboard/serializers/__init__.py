@@ -26,4 +26,6 @@ from .product_serializers import (
     ProductCoreCreateSerializer,
     ProductImageSerializer,
     AttachmentLibrarySerializer,
+    ProductDetailSerializer,
+    OptionConfigUpdateSerializer,
 )

@@ -22,11 +22,12 @@ class RegisterAPIView(GenericAPIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = 'accounts_register'
+    serializer_class = RegisterSerializer
     
     def post(self, request, *args, **kwargs):
         """ ثبت نام کاربر با استفاده از سرویس و ریپازیتوری مورد نظر """
         # ====== اجرای سریالایزر و اعتبارسنجی ====== #
-        serializer = RegisterSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         # ====== ایجاد کاربر و ارسال ایمیل تایید ====== #

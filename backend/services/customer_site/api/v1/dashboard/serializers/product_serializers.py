@@ -47,7 +47,9 @@ class OptionValueOverrideSerializer(serializers.Serializer):
     global_value_id = serializers.IntegerField(help_text="ID مقدار در بانک ویژگی‌ها")
     price_impact = serializers.DecimalField(max_digits=14, decimal_places=0, required=False, default=0)
     is_default = serializers.BooleanField(required=False, default=False)
-    is_active = serializers.BooleanField(required=False, default=True) 
+    is_active = serializers.BooleanField(required=False, default=True)
+    quantity_step = serializers.IntegerField(required=False, default=1, min_value=1)
+    is_step_ceiling = serializers.BooleanField(required=False, default=False)
 
 # ===== Option Attach With Price Serializer ===== #
 class OptionAttachWithPriceSerializer(serializers.Serializer):
@@ -62,10 +64,17 @@ class OptionAttachWithPriceSerializer(serializers.Serializer):
 
 class OptionValuePriceItemSerializer(serializers.Serializer):
     id = serializers.IntegerField(help_text="ID of ProductOptionValue")
+    # ===== فیلدهای مالی و تنظیمی ===== #
     price_impact = serializers.DecimalField(max_digits=14, decimal_places=0, required=False)
-    is_default = serializers.BooleanField(required=False)
     has_pricing = serializers.BooleanField(required=False)
+    
+    # ===== فیلدهای منطقی و نمایش ===== #
+    is_default = serializers.BooleanField(required=False)
     order = serializers.IntegerField(required=False)
+    
+    # ===== تیراژ و شمارش===== #
+    quantity_step = serializers.IntegerField(required=False, min_value=1)
+    is_step_ceiling = serializers.BooleanField(required=False)
 
 # ===== Option Price Update Serializer =====
 class OptionPriceUpdateSerializer(serializers.Serializer):
@@ -144,4 +153,67 @@ class ProductMediaSyncSerializer(serializers.Serializer):
     attachment_ids_to_link = serializers.ListField(child=serializers.IntegerField(), required=False)
     attachment_ids_to_unlink = serializers.ListField(child=serializers.IntegerField(), required=False)
     image_orders = serializers.ListField(child=serializers.IntegerField(), required=False)
+
+# ===== Product Detail Serializer ===== #
+class ProductDetailSerializer(serializers.Serializer):
+    """
+    سریالایزر نمایش کامل محصول در داشبورد.
+    ترکیبی از Shell, Config, Materials, Options, Images.
+    """
+    shell = ProductShellSerializer(source='product')
+    pricing_config = ProductPricingConfigSerializer(source='product.pricing_config')
+    
+    # لیست‌ها
+    materials = serializers.SerializerMethodField()
+    quantities = serializers.SerializerMethodField()
+    file_requirements = serializers.SerializerMethodField()
+    images = ProductImageSerializer(source='product.product_image', many=True)
+    
+    # آپشن‌ها (از ساختار درختی که سرویس برمی‌گرداند)
+    options = serializers.ListField(source='structured_options')
+
+    def get_materials(self, obj):
+        # obj یک دیکشنری است که کلید 'product' دارد
+        product = obj['product']
+        return [
+            {
+                'id': pm.material.id,
+                'name': pm.material.name,
+                'is_default': pm.is_default
+            }
+            for pm in product.product_material.all()
+        ]
+
+    def get_quantities(self, obj):
+        product = obj['product']
+        return [pq.quantity.value for pq in product.product_quantity.all()]
+
+    def get_file_requirements(self, obj):
+        product = obj['product']
+        return [
+            {
+                'spec_id': req.spec.id,
+                'name': req.spec.name,
+                'is_required': req.is_required
+            }
+            for req in product.file_upload_requirements.all()
+        ]
+
+class OptionConfigUpdateSerializer(serializers.Serializer):
+    """
+    سریالایزر برای ویرایش تنظیمات یک ویژگی متصل شده.
+    """
+    # ===== اضافه شده: دریافت ID در بدنه ===== #
+    product_option_id = serializers.IntegerField(help_text="ID of the Local ProductOption (جدول واسط)")
+    
+    
+    is_required = serializers.BooleanField(required=False)
+    has_pricing = serializers.BooleanField(required=False)
+    
+    # ===== Values ===== #
+    values = serializers.ListField(
+        child=OptionValuePriceItemSerializer(), 
+        required=False,
+        allow_empty=True
+    )
     

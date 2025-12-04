@@ -205,3 +205,27 @@ class ProductDashboardService:
             except Exception as sync_error:
                 logger.error(f"Sync attachment upload failed: {str(sync_error)}")
                 raise sync_error
+
+    def get_product_detail(self, product_id):
+        """ دریافت جزئیات کامل محصول (فرمت درختی) """
+        return self._domain_service.get_product_detail_by_id(product_id) 
+
+    def delete_product(self, product_id: int):
+        self._domain_service.delete_product(product_id)
+
+    def remove_option_from_product(self, product_id: int, product_option_id: int):
+        self._domain_service.detach_option(product_id, product_option_id)
+
+    def update_option_configuration(self, product_id: int, option_id: int, data: dict):
+        logger.info(f"Updating option config {option_id} for product {product_id}")
+        try:
+            result = self._domain_service.update_product_option_config(
+                product_id=product_id, 
+                product_option_id=option_id,
+                data=data
+            )
+            logger.info(f"Option config updated successfully")
+            return result
+        except Exception as e:
+            logger.error(f"Failed to update option config: {str(e)}")
+            raise e
