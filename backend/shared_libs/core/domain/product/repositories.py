@@ -86,6 +86,46 @@ class ProductRepository(BaseRepository[Product]):
         except self.model.DoesNotExist:
             raise ProductNotFoundException(f"محصولی با اسلاگ '{slug}' یافت نشد.")
 
+    def get_product_detail_by_id(self, id: int) -> Optional[Product]:
+        """
+        دریافت جزئیات کامل یک محصول با استفاده از اسلاگ.
+        این متد به شدت برای جلوگیری از مشکل N+1 بهینه‌سازی شده است.
+        - select_related: برای روابط یک-به-یک یا یک-به-چند (ForeignKey).
+        - prefetch_related: برای روابط چند-به-چند یا معکوس یک-به-چند (Reverse ForeignKey).
+        """
+        try:
+            return self.model.objects.select_related(
+                'category',
+                'pricing_config'
+            ).prefetch_related(
+                Prefetch('product_quantity', queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')),
+                Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__width')),
+                Prefetch('product_material', queryset=ProductMaterial.objects.select_related('material').order_by('is_default', 'material__name')),
+                
+                Prefetch(
+                    'options', 
+                    queryset=ProductOption.objects.select_related('option').prefetch_related(
+                        Prefetch(
+                            'choices', 
+                            queryset=ProductOptionValue.objects.order_by('order')
+                        )
+                    ).order_by('order')
+                ),
+                
+                Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
+                Prefetch('product_attachment_product', queryset=ProductAttachment.objects.order_by('id')),
+                
+                Prefetch(
+                    'file_upload_requirements', 
+                    queryset=ProductFileUploadRequirement.objects.select_related('spec').order_by('sort_order')
+                )
+
+            ).get(pk=id, is_active=True)
+            
+        except self.model.DoesNotExist:
+            raise ProductNotFoundException(f"محصولی با اسلاگ '{id}' یافت نشد.")
+
+
     # =====  (Write Methods) ===== #
     def create_product(self, data: dict) -> Product:
         """ ایجاد بدنه اصلی محصول (Shell) """

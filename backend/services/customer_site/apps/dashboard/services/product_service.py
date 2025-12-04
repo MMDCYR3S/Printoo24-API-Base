@@ -85,7 +85,7 @@ class ProductDashboardService:
         if 'default_material_id' in data:
             self._domain_service.sync_materials(product_id, data['default_material_id'])
     
-        return self._domain_service.get_product_detail_by_slug(product_id)
+        return self._domain_service.get_product_detail_by_id(product_id)
     
     # ===== ویرایش آپشن ها ===== #
     @transaction.atomic

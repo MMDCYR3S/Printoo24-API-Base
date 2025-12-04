@@ -31,6 +31,45 @@ class ProductDomainService:
         مستقیماً متد ریپازیتوری را فراخوانی می‌کند.
         """
         return self._repo.get_all_products()
+    
+    def get_product_detail_by_id(self, product_id: int) -> dict:
+        """
+        دریافت جزئیات کامل محصول با استفاده از ID (برای داشبورد).
+        خروجی: دیکشنری شامل product و structured_options.
+        """
+        product = self._repo.get_product_detail_by_id(product_id)
+        
+        # ===== تبدیل ساختار آپشن‌ها (مشابه متد slug) ===== #
+        structured_options = []
+        
+        for prod_opt in product.options.all():
+            option_data = {
+                    "id": prod_opt.id,
+                    "name": prod_opt.option.name,
+                    "label": prod_opt.option.label,
+                    "type": prod_opt.option.input_type,
+                    "is_required": prod_opt.is_required,
+                    "description": prod_opt.option.description,
+                    "has_pricing": prod_opt.has_pricing,
+                    "choices": []
+                }
+            for choice in prod_opt.choices.all():
+                option_data["choices"].append({
+                    "id": choice.id,
+                    "label": choice.label,
+                    "value": choice.value,
+                    "price_impact": choice.price_impact,
+                    "is_default": choice.is_default,
+                    "quantity_step": choice.quantity_step,
+                    "is_step_ceiling": choice.is_step_ceiling,
+                    "description": f"هر {choice.quantity_step} عدد" if choice.quantity_step > 1 else ""
+                })
+            structured_options.append(option_data)
+        
+        return {
+            "product": product,
+            "structured_options": structured_options
+        }
 
     def get_product_detail_by_slug(self, slug: str) -> Optional[Product]:
         """
@@ -64,6 +103,8 @@ class ProductDomainService:
                     "label": choice.label,
                     "value": choice.value,
                     "price_impact": choice.price_impact,
+                    "quantity_step": choice.quantity_step,
+                    "is_step_ceiling": choice.is_step_ceiling,
                     "is_default": choice.is_default,
                     "description": f"هر {choice.quantity_step} عدد" if choice.quantity_step > 1 else ""
                 })
