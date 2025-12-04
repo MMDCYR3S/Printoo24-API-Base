@@ -5,6 +5,11 @@ FROM node:22-bookworm
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+
+# === این خط را اضافه کنید ===
+RUN npm config set registry https://mirror-npm.runflare.com/
+# ============================
+
 RUN npm install
 
 COPY . .

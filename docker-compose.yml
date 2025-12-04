@@ -19,29 +19,53 @@ services:
     networks:
       - data_network
 
-  # ====== Admin Backend ====== #
-  admin_site:
-    build:
-      context: .
-      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
-    container_name: printoo_admin_site
-    command: python manage.py runserver 0.0.0.0:8010
-    volumes:
-      - ./backend/services/admin_site:/app/src
-      # ===== برای ایجاد تغییرات به صورت آنی در پروژه ادمین ===== #
-      - ./backend/shared_libs:/app/shared_libs
-    ports:
-        - "8010:8010"
-    environment:
-      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
-    env_file:
-      - ./env/.env.dev
-    depends_on:
-      - db
-      - redis
-    networks:
-      - admin_site_network
-      - data_network
+# --- شروع بخش‌های غیرفعال شده ---
+
+  # # ====== Admin Backend (غیرفعال شد) ====== #
+  # admin_site:
+  #   build:
+  #     context: .
+  #     dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
+  #   container_name: printoo_admin_site
+  #   command: python manage.py runserver 0.0.0.0:8010
+  #   volumes:
+  #     - ./backend/services/admin_site:/app/src
+  #     - ./backend/shared_libs:/app/shared_libs
+  #   ports:
+  #     - "8010:8010"
+  #   environment:
+  #     - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+  #   env_file:
+  #     - ./env/.env.dev
+  #   depends_on:
+  #     - db
+  #     - redis
+  #   networks:
+  #     - admin_site_network
+  #     - data_network
+
+  # # ====== Celery Workers(Admin Site) (غیرفعال شد) ====== #
+  # celery_worker_admin:
+  #   build:
+  #     context: .
+  #     dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
+  #   container_name: printoo_celery_admin
+  #   command: celery -A admin_site.celery worker -l info
+  #   volumes:
+  #     - ./backend/services/admin_site:/app/src
+  #     - ./backend/shared_libs:/app/shared_libs
+  #   environment:
+  #     - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+  #   env_file:
+  #     - ./env/.env.dev
+  #   depends_on:
+  #     - redis
+  #     - db
+  #   networks:
+  #     - data_network
+
+# --- پایان بخش‌های غیرفعال شده ---
+
   # ====== Customer Backend ====== #
   customer_site:
     build:
@@ -85,26 +109,6 @@ services:
     networks:
       - data_network
 
-  # ====== Celery Workers(Admin Site) ====== #
-  celery_worker_admin:
-    build:
-      context: .
-      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
-    container_name: printoo_celery_admin
-    command: celery -A admin_site.celery worker -l info
-    volumes:
-      - ./backend/services/admin_site:/app/src
-      - ./backend/shared_libs:/app/shared_libs
-    environment:
-      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
-    env_file:
-      - ./env/.env.dev
-    depends_on:
-      - redis
-      - db
-    networks:
-      - data_network
-
 # ====== Frontend (React) ====== #
   frontend:
     build:
@@ -123,15 +127,15 @@ services:
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - customer_site
-      - admin_site
-    # networks:  <--- این قسمت برای فرانت باید پاک یا کامنت بشه چون host mode هست
-    #   - customer_site_network
+      # - admin_site <--- وابستگی به admin_site حذف شد
+    # networks:  <--- این قسمت برای فرانت باید پاک یا کامنت بشه چون host mode هست
+    #   - customer_site_network
 
 # ====== Networks' Settings ====== #
 # === نکته مهم: این بخش باید حتماً فعال باشه (کامنت نباشه) ===
 networks:
-  admin_site_network:
-    driver: bridge
+  # admin_site_network: <--- این شبکه دیگر مورد نیاز نیست و کامنت شد
+  #   driver: bridge
   customer_site_network:
     driver: bridge
   data_network:
