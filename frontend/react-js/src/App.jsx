@@ -1,16 +1,30 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import AuthLayout from './app/features/auth/AuthLayout';
+import LoginPage from './app/features/auth/LoginPage';
+import RegisterPage from './app/features/auth/RegisterPage';
+
+// یک کامپوننت موقت برای داشبورد (بعدا کاملش میکنیم)
+const Dashboard = () => <div className="p-10 text-center text-3xl">خوش آمدید! اینجا پنل کاربری است.</div>;
+
 function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-base-200 gap-4">
-      <h1 className="text-4xl font-bold text-primary">سلام Printoo24!</h1>
-      <button className="btn btn-neutral">تست دکمه DaisyUI</button>
-      <div className="card w-96 bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title">تست کارت</h2>
-          <p>اگر این را زیبا می‌بینید، تیلویند و دیزی‌یوآی فعال هستند.</p>
-        </div>
-      </div>
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        {/* مسیرهای مربوط به احراز هویت */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          {/* بعداً VerifyPage را هم اینجا اضافه می‌کنیم */}
+        </Route>
+
+        {/* مسیرهای محافظت شده (بعدا گارد میگذاریم) */}
+        <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* ریدایرکت پیش‌فرض */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
