@@ -1,2 +1,3 @@
 from .wallet_service import WalletDashboardService
 from .customer_service import CustomerOrchestratorService
+from .product_service import ProductDashboardService

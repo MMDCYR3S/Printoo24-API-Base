@@ -6,6 +6,8 @@ from core.models import (
     ProductMaterial,
     ProductImage,
     ProductSize,
+    ProductOption,
+    ProductOptionValue,
     Size,
     Material,
     ProductQuantity,
@@ -37,3 +39,4 @@ admin.site.register(ProductOption)
 admin.site.register(Option)
 admin.site.register(OptionValue)
 admin.site.register(ProductPricingConfig)
+admin.site.register(ProductOptionValue)

@@ -31,6 +31,45 @@ class ProductDomainService:
         مستقیماً متد ریپازیتوری را فراخوانی می‌کند.
         """
         return self._repo.get_all_products()
+    
+    def get_product_detail_by_id(self, product_id: int) -> dict:
+        """
+        دریافت جزئیات کامل محصول با استفاده از ID (برای داشبورد).
+        خروجی: دیکشنری شامل product و structured_options.
+        """
+        product = self._repo.get_product_detail_by_id(product_id)
+        
+        # ===== تبدیل ساختار آپشن‌ها (مشابه متد slug) ===== #
+        structured_options = []
+        
+        for prod_opt in product.options.all():
+            option_data = {
+                    "id": prod_opt.id,
+                    "name": prod_opt.option.name,
+                    "label": prod_opt.option.label,
+                    "type": prod_opt.option.input_type,
+                    "is_required": prod_opt.is_required,
+                    "description": prod_opt.option.description,
+                    "has_pricing": prod_opt.has_pricing,
+                    "choices": []
+                }
+            for choice in prod_opt.choices.all():
+                option_data["choices"].append({
+                    "id": choice.id,
+                    "label": choice.label,
+                    "value": choice.value,
+                    "price_impact": choice.price_impact,
+                    "is_default": choice.is_default,
+                    "quantity_step": choice.quantity_step,
+                    "is_step_ceiling": choice.is_step_ceiling,
+                    "description": f"هر {choice.quantity_step} عدد" if choice.quantity_step > 1 else ""
+                })
+            structured_options.append(option_data)
+        
+        return {
+            "product": product,
+            "structured_options": structured_options
+        }
 
     def get_product_detail_by_slug(self, slug: str) -> Optional[Product]:
         """
@@ -64,6 +103,8 @@ class ProductDomainService:
                     "label": choice.label,
                     "value": choice.value,
                     "price_impact": choice.price_impact,
+                    "quantity_step": choice.quantity_step,
+                    "is_step_ceiling": choice.is_step_ceiling,
                     "is_default": choice.is_default,
                     "description": f"هر {choice.quantity_step} عدد" if choice.quantity_step > 1 else ""
                 })
@@ -220,6 +261,30 @@ class ProductDomainService:
         return product_option
     
     @transaction.atomic
+    def update_product_option_config(self, product_id: int, product_option_id: int, data: dict):
+        """
+        متد اصلی که توسط سرویس اپلیکیشن صدا زده می‌شود.
+        هم تنظیمات والد (Option) و هم تنظیمات فرزندان (Values) را آپدیت می‌کند.
+        """
+        # ===== اعتبارسنجی ===== #
+        try:
+            prod_opt = ProductOption.objects.get(id=product_option_id, product_id=product_id)
+        except ProductOption.DoesNotExist:
+            raise InvalidProductDataException(f"این ویژگی متعلق به محصول نیست. ID: {product_option_id}")
+        # ===== آپدیت والد ===== #
+        if 'is_required' in data:
+            prod_opt.is_required = data['is_required']
+        if 'has_pricing' in data:
+            prod_opt.has_pricing = data['has_pricing']
+        prod_opt.save()
+
+        # ===== آپدیت فرزندان ===== #
+        if 'values' in data and data['values']:
+            self.update_option_values_pricing(product_id, product_option_id, data['values'])
+            
+        return prod_opt
+    
+    @transaction.atomic
     def update_option_values_pricing(self, product_id: int, product_option_id: int, updates: list[dict]):
         """
         بروزرسانی قیمت و تنظیمات مقادیر یک آپشن خاص.
@@ -234,9 +299,12 @@ class ProductDomainService:
         current_values = self._repo.get_product_option_values(product_option_id)
         value_map = {v.id: v for v in current_values}
 
-        # ===== اعمال تغییرات ===== #
+        # ===== لیست کامل فیلدهایی که باید در دیتابیس آپدیت شوند ===== #
         to_update = []
-        fields_to_update = ['price_impact', 'is_default', 'has_pricing', 'order']
+        fields_to_update = [
+            'price_impact', 'is_default', 'has_pricing', 'order',
+            'quantity_step', 'is_step_ceiling' 
+        ]
 
         for item in updates:
             val_id = item.get('id')
@@ -252,13 +320,16 @@ class ProductDomainService:
                     obj.has_pricing = item['has_pricing']
                 if 'order' in item:
                     obj.order = item['order']
-                
+                if 'quantity_step' in item:
+                    obj.quantity_step = item['quantity_step']
+                if 'is_step_ceiling' in item:
+                    obj.is_step_ceiling = item['is_step_ceiling']
+
                 to_update.append(obj)
 
         # ===== افزودن پیش‌فرض ===== #
         has_new_default = any(item.get('is_default') for item in updates)
         if has_new_default:
-
             pass
 
         # ===== اپدیت ===== #
@@ -319,6 +390,8 @@ class ProductDomainService:
                     
                 price = config.get('price_impact', 0)
                 is_default = config.get('is_default', False)
+                qty_step = config.get('quantity_step', 1)
+                is_ceil = config.get('is_step_ceiling', False)
 
             local_values.append(ProductOptionValue(
                 product_option=product_option,
@@ -328,7 +401,9 @@ class ProductDomainService:
                 order=idx,
                 has_pricing=product_option.has_pricing,
                 price_impact=price,
-                is_default=is_default
+                is_default=is_default,
+                quantity_step=qty_step,
+                is_step_ceiling=is_ceil,
             ))
             
         if local_values:
@@ -362,3 +437,24 @@ class ProductDomainService:
         if new_reqs:
             ProductFileUploadRequirement.objects.bulk_create(new_reqs)
         
+    def delete_product(self, product_id: int):
+        """ حذف کامل محصول """
+        product = self._repo.get_by_id(product_id)
+        if not product:
+            raise ProductNotFoundException("محصول یافت نشد.")
+        try:
+            product.delete()
+        except Exception:
+            # ===== حذف با خطا ===== #
+            product.is_active = False
+            product.save()
+
+    @transaction.atomic
+    def detach_option(self, product_id: int, product_option_id: int):
+        """ حذف یک ویژگی از محصول """
+        # ===== اعتبارسنجی ===== #
+        exists = ProductOption.objects.filter(id=product_option_id, product_id=product_id).exists()
+        if not exists:
+            raise InvalidProductDataException("این ویژگی متعلق به محصول نیست.")
+            
+        ProductOption.objects.filter(id=product_option_id).delete()
