@@ -52,6 +52,7 @@ services:
     volumes:
       - ./backend/services/customer_site:/app/src
       - ./backend/shared_libs:/app/shared_libs
+      - ./backend/services/customer_site/media:/app/media
     ports:
       - "9010:9010"
     environment:
@@ -75,6 +76,7 @@ services:
     volumes:
       - ./backend/services/customer_site:/app/src
       - ./backend/shared_libs:/app/shared_libs
+      - ./backend/services/customer_site/media:/app/media
     environment:
       - PYTHONPATH=/app/shared_libs:$PYTHONPATH
     env_file:

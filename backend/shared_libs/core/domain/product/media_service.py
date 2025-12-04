@@ -35,8 +35,8 @@ class ProductMediaDomainService:
         for index, img_id in enumerate(image_ids):
             if img_id in image_map:
                 img = image_map[img_id]
-                if img.product_id != product_id:
-                     raise ValidationError(f"تصویر {img_id} متعلق به این محصول نیست.")
+                if int(img.product_id) != int(product_id):
+                     raise ValidationError(f"تصویر {img_id} متعلق به این محصول نیست. - محصول: {img.product_id}")
                 
                 img.order = index + 1
                 to_update.append(img)

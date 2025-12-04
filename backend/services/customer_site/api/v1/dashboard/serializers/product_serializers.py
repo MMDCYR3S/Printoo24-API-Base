@@ -115,4 +115,33 @@ class ProductAttachmentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductAttachment
         fields = ['id', 'file_info', 'created_at']
+
+# ===== API 1: Core Create/Update ===== #
+class ProductCoreCreateSerializer(serializers.Serializer):
+    shell = ProductShellSerializer(required=True)
+    pricing_config = ProductPricingConfigSerializer(required=True)
+    
+    # لیست ID ها
+    material_ids = serializers.ListField(child=serializers.IntegerField(), required=False)
+    default_material_id = serializers.IntegerField(required=False, allow_null=True)
+    quantity_ids = serializers.ListField(child=serializers.IntegerField(), required=False)
+    
+    # لیست دیکشنری
+    file_requirements = serializers.ListField(
+        child=FileRequirementItemSerializer(), 
+        required=False
+    )
+
+# ===== API 2: Options Bulk ===== #
+class ProductOptionsBulkSerializer(serializers.Serializer):
+    options = serializers.ListField(
+        child=OptionAttachWithPriceSerializer(),
+        allow_empty=False
+    )
+
+# ===== API 3: Media Sync (JSON part) ===== #
+class ProductMediaSyncSerializer(serializers.Serializer):
+    attachment_ids_to_link = serializers.ListField(child=serializers.IntegerField(), required=False)
+    attachment_ids_to_unlink = serializers.ListField(child=serializers.IntegerField(), required=False)
+    image_orders = serializers.ListField(child=serializers.IntegerField(), required=False)
     

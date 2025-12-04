@@ -19,18 +19,11 @@ from .options_serializers import (
 )
 from .product_serializers import (
     ProductShellSerializer,
-    ProductPricingConfigSerializer,
-    MaterialSyncSerializer,
-    QuantitySyncSerializer,
     OptionAttachWithPriceSerializer,
-    OptionValueOverrideSerializer,
-    OptionPriceUpdateSerializer,
-    FileRequirementSyncSerializer,
-    FileRequirementItemSerializer,
-    OptionValuePriceItemSerializer,
-    ProductAttachmentListSerializer,
-    ProductAttachmentLinkSerializer,
-    ImageReorderSerializer,
+    ProductPricingConfigSerializer,
+    ProductOptionsBulkSerializer,
+    ProductMediaSyncSerializer,
+    ProductCoreCreateSerializer,
     ProductImageSerializer,
-    AttachmentLibrarySerializer
+    AttachmentLibrarySerializer,
 )

@@ -223,6 +223,7 @@ LOGGING = {
             'formatter': 'verbose',
         },
         
+        
         # ===== هندلر برای سرویس آدرس ===== #
         'userprofile_address_service_file': {
             'level': 'DEBUG',
@@ -266,6 +267,25 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/userprofile/notification_service.log', # یا get_log_file(...)
             'maxBytes': 1024 * 1024 * 5, 
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        
+        # ===== هندلر جدید برای سرویس داشبورد محصولات ===== #
+        'dashboard_product_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/dashboard/product_service.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر لاگ تسک‌های داشبورد ===== #
+        'dashboard_tasks_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/dashboard/tasks.log',
+            'maxBytes': 1024 * 1024 * 10,
             'backupCount': 5,
             'formatter': 'verbose',
         },
@@ -409,6 +429,18 @@ LOGGING = {
         # ===== لاگر سرویس اعلان ===== #
         'userprofile.services.notification': {
             'handlers': ['notification_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر اختصاصی سرویس داشبورد ===== #
+        'dashboard.services.product_dashboard': {
+            'handlers': ['dashboard_product_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر اختصاصی تسک‌های سلری داشبورد ===== #
+        'dashboard.tasks': {
+            'handlers': ['dashboard_tasks_file', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },

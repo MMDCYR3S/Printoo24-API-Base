@@ -30,7 +30,7 @@ class ProductMediaRepository:
         return list(ProductImage.objects.filter(id__in=image_ids))
 
     def bulk_update_orders(self, images: List[ProductImage]):
-        ProductImage.objects.bulk_update(images, ['order'])
+        ProductImage.objects.bulk_update(images, ['order',])
 
     # ===== (Attachments Library) ===== #
 
