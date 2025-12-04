@@ -81,6 +81,7 @@ class Role(models.Model):
     name = models.CharField(_('نام'), max_length=150)
     description = models.TextField(_('توضیحات'), blank=True, null=True)
     permission = models.ManyToManyField(Permission, verbose_name=_('مجوز ها'), related_name='roles')
+    is_customer = models.BooleanField(_("آیا نقش برای مشتری است؟"), default=False)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     

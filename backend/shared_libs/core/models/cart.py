@@ -23,13 +23,13 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name='cart_items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='cart_items', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(_('تعداد'), default=1)
-    price = models.DecimalField(_('قیمت'), max_digits=12, decimal_places=2)
-    items = models.JSONField(_('آیتم های اضافی'), blank=True, null=True)
+    price = models.DecimalField(_('قیمت'), max_digits=14, decimal_places=2)
+    items = models.JSONField(_('جزئیات سفارش'), blank=True, null=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
 
     def __str__(self):
-        return f"{self.cart.user.username} - {self.product.name}"
+        return f"{self.product.name} (x{self.quantity})"
     
     class Meta:
         verbose_name = _('آیتم سبد خرید')

@@ -1,22 +1,17 @@
 from django.urls import path
 from .views import (
-    TemporaryFileUploadView,
     AddToCartView,
     CartItemUpdateView,
     CartItemDetailView,
     CartListView,
     CartItemDeleteView,
-    CartClearView
+    CartClearView,
+    CartItemFileUploadView
 )
 
 app_name = "cart"
 
 urlpatterns = [
-    path(
-        'upload-temporary-file/', 
-        TemporaryFileUploadView.as_view(), 
-        name='upload-temporary-file'
-    ),
     path(
         'add/item/', 
         AddToCartView.as_view(), 
@@ -25,8 +20,9 @@ urlpatterns = [
     path(
         'update/item/<int:item_id>/',
         CartItemUpdateView.as_view(),
-        name='cart-item-update-config'
+        name='update-item'
     ),
+    path('items/<int:item_id>/upload/', CartItemFileUploadView.as_view(), name='cart-item-upload'),
     path(
         'items/', 
         CartListView.as_view(), 
