@@ -12,7 +12,10 @@ from .views import (
     FileUploadSpecViewSet,
     OptionViewSet,
     ProductDashboardViewSet,
-    AttachmentLibraryViewSet
+    AttachmentLibraryViewSet,
+    CartDashboardViewSet,
+    CartFileUploadViewSet,
+    OrderDashboardViewSet,
 )
 
 router = DefaultRouter()
@@ -28,6 +31,9 @@ router.register(r'file-specs', FileUploadSpecViewSet, basename='file-specs')
 router.register(r'options', OptionViewSet, basename='options')
 router.register(r'products', ProductDashboardViewSet, basename='products')
 router.register(r'attachments', AttachmentLibraryViewSet, basename='attachments')
+router.register(r'cart', CartDashboardViewSet, basename='cart')
+router.register(r'cart-files', CartFileUploadViewSet, basename='cart-files')
+router.register(r'orders', OrderDashboardViewSet, basename='orders')
 
 app_name = "dashboard"
 

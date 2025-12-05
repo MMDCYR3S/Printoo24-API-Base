@@ -13,3 +13,5 @@ from .options_view import (
     OptionViewSet
 )
 from .product_views import ProductDashboardViewSet
+from .cart_view import CartDashboardViewSet, CartFileUploadViewSet
+from .order_view import OrderDashboardViewSet

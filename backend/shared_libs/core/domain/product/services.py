@@ -280,6 +280,18 @@ class ProductDomainService:
 
         # ===== آپدیت فرزندان ===== #
         if 'values' in data and data['values']:
+            valid_ids = {v.id for v in prod_opt.choices.all()}
+            # ===== بررسی صحت فرزند بودن ===== #
+            for val in data["values"]:
+                if val['id'] not in valid_ids:
+                    raise InvalidProductDataException("اين مقدار متعلق به ویژگی درخواست شده نیست.")
+            # ===== دریافت خطا اگر هر چند ویژگی در حال آپدیت پیش فرض بودند ===== #
+            defaults_requested = [v for v in data["values"] if v.get("is_default")]
+            if len(defaults_requested) > 1:
+                raise InvalidProductDataException("فقط یک مقدار می‌تواند پیش‌فرض باشد.")
+            if len(defaults_requested) == 1:
+                default_id = defaults_requested[0]['id']
+                prod_opt.choices.exclude(id=default_id).update(is_default=False)
             self.update_option_values_pricing(product_id, product_option_id, data['values'])
             
         return prod_opt

@@ -289,6 +289,15 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'verbose',
         },
+        # ===== هندلر اختصاصی برای سرویس فایل سبد خرید ===== #
+        'cart_file_upload_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/cart/file_upload.log', # مسیر ذخیره لاگ
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
         # ====== Console Handler ====== #
         'console': {
             'level': 'INFO',
@@ -318,7 +327,12 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        
+        # ===== لاگر سرویس فایل ===== #
+        'cart.services.file_upload': {
+            'handlers': ['cart_file_upload_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         # ====== Security Logger ====== #
         'accounts.services.security': {
             'handlers': ['accounts_security_file', 'console'],
