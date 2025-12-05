@@ -67,7 +67,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         request=OptionConfigUpdateSerializer,
         responses={200: {'status': 'updated'}}
     )
-    @action(detail=True, methods=['post', 'patch'], url_path='update-option-config')
+    @action(detail=True, methods=['patch'], url_path='update-option-config')
     def update_option_config(self, request, pk=None):
         """
         ویرایش تنظیمات ویژگی.
@@ -84,7 +84,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 option_id=data['product_option_id'],
                 data=data
             )
-            return Response({'status': 'Option configuration updated'}, status=status.HTTP_200_OK)
+            return Response({'status': 'ویژگی با موقیت بروزرسانی شد.'}, status=status.HTTP_200_OK)
             
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
