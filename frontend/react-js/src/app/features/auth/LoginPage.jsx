@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import PasswordInput from '../../components/PasswordInput';
 
 import { loginSchema } from './schemas'; // اسکیمایی که قبلا ساختیم
 import { authService } from '../../services/authService';
@@ -60,11 +61,10 @@ const LoginPage = () => {
         <label className="label">
           <span className="label-text">رمز عبور</span>
         </label>
-        <input 
-          type="password" 
-          placeholder="********" 
-          className={`input input-bordered w-full ${errors.password ? 'input-error' : ''}`}
-          {...register('password')}
+  <PasswordInput 
+          register={register} 
+          name="password" 
+          error={errors.password}
         />
         {errors.password && <span className="text-error text-xs mt-1">{errors.password.message}</span>}
         <label className="label">

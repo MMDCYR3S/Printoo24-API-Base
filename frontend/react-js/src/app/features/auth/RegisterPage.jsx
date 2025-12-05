@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 
 import { registerSchema } from './schemas';
 import { authService } from '../../services/authService';
+import PasswordInput from '../../components/PasswordInput'; // ایمپورت کامپوننت جدید
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -18,20 +19,25 @@ const RegisterPage = () => {
     mutationFn: authService.register,
     onSuccess: (data, variables) => {
       toast.success('ثبت نام انجام شد! کد تایید ارسال گردید.');
-      // انتقال ایمیل کاربر به صفحه وریفای برای راحتی
-      navigate(`/verify?email=${variables.email}`); 
+      // فرض بر این است که بک‌اند ایمیل را برمی‌گرداند، اگر نه از ورودی می‌خوانیم
+      const email = data?.email || variables.email;
+      navigate(`/verify?email=${email}`);
     },
     onError: (error) => {
-      // نمایش خطاهای ولیدیشن سرور (مثلا نام کاربری تکراری)
-      const errorMsg = error.response?.data?.username ? 'این نام کاربری قبلا گرفته شده است' : 'خطا در ثبت نام';
-      toast.error(errorMsg);
+      // حالا که ارور دقیق را می‌دانیم، بهتر نمایش می‌دهیم
+      const data = error.response?.data;
+      if (data?.username) toast.error(`نام کاربری: ${data.username[0]}`);
+      else if (data?.email) toast.error(`ایمیل: ${data.email[0]}`);
+      else if (data?.password) toast.error(`رمز عبور: ${data.password[0]}`);
+      else if (data?.password_2) toast.error(`تکرار رمز: ${data.password_2[0]}`);
+      else toast.error('خطا در ثبت نام. لطفاً ورودی‌ها را چک کنید.');
     }
   });
 
   const onSubmit = (data) => {
-    // فیلد confirmPassword فقط برای فرانت بود، به بکند ارسالش نمی‌کنیم
-    const { confirmPassword, ...serverData } = data; 
-    registerMutation.mutate(serverData);
+    // نکته مهم: حالا data دقیقا شامل {username, email, password, password_2} است
+    // که دقیقا همان چیزی است که بک‌اند می‌خواهد. پس مستقیم می‌فرستیم.
+    registerMutation.mutate(data);
   };
 
   return (
@@ -43,7 +49,8 @@ const RegisterPage = () => {
         <label className="label"><span className="label-text">ایمیل</span></label>
         <input 
           type="email" 
-          className={`input input-bordered w-full ${errors.email ? 'input-error' : ''}`}
+          dir="ltr"
+          className={`input input-bordered w-full text-left ${errors.email ? 'input-error' : ''}`}
           {...register('email')}
         />
         {errors.email && <span className="text-error text-xs">{errors.email.message}</span>}
@@ -54,7 +61,8 @@ const RegisterPage = () => {
         <label className="label"><span className="label-text">نام کاربری</span></label>
         <input 
           type="text" 
-          className={`input input-bordered w-full ${errors.username ? 'input-error' : ''}`}
+          dir="ltr"
+          className={`input input-bordered w-full text-left ${errors.username ? 'input-error' : ''}`}
           {...register('username')}
         />
         {errors.username && <span className="text-error text-xs">{errors.username.message}</span>}
@@ -63,23 +71,22 @@ const RegisterPage = () => {
       {/* رمز عبور */}
       <div className="form-control">
         <label className="label"><span className="label-text">رمز عبور</span></label>
-        <input 
-          type="password" 
-          className={`input input-bordered w-full ${errors.password ? 'input-error' : ''}`}
-          {...register('password')}
+        <PasswordInput 
+          register={register} 
+          name="password" 
+          error={errors.password} 
         />
-        {errors.password && <span className="text-error text-xs">{errors.password.message}</span>}
       </div>
 
-      {/* تکرار رمز عبور */}
+      {/* تکرار رمز عبور (با نام جدید password_2) */}
       <div className="form-control">
         <label className="label"><span className="label-text">تکرار رمز عبور</span></label>
-        <input 
-          type="password" 
-          className={`input input-bordered w-full ${errors.confirmPassword ? 'input-error' : ''}`}
-          {...register('confirmPassword')}
+        <PasswordInput 
+          register={register} 
+          name="password_2" 
+          error={errors.password_2} 
+          placeholder="تکرار رمز عبور"
         />
-        {errors.confirmPassword && <span className="text-error text-xs">{errors.confirmPassword.message}</span>}
       </div>
 
       <button 
