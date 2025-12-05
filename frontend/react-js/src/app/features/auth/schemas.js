@@ -24,6 +24,6 @@ export const registerSchema = z.object({
 export const verifySchema = z.object({
   email: z.string().email('ایمیل نامعتبر است').optional(), // اختیاری چون شاید از URL بیاید
   code: z.string()
-    .length(4, 'کد تایید باید ۴ رقم باشد')
+    .length(6, 'کد تایید باید ۴ رقم باشد')
     .regex(/^\d+$/, 'فقط عدد وارد کنید'),
 });

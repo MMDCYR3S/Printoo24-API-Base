@@ -25,7 +25,7 @@ const LoginPage = () => {
       localStorage.setItem('refreshToken', data.refresh);
       
       toast.success('ورود با موفقیت انجام شد');
-      navigate('/dashboard'); // هدایت به داشبورد
+      navigate('/'); // هدایت به داشبورد
     },
     onError: (error) => {
       // مدیریت خطای بکند

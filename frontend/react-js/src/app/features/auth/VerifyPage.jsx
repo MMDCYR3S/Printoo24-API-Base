@@ -11,13 +11,12 @@ import { authService } from '../../services/authService';
 const VerifyPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const emailFromUrl = searchParams.get('email'); // خواندن ایمیل از URL
+  const emailFromUrl = searchParams.get('email');
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(verifySchema),
   });
 
-  // اگر ایمیل در URL بود، آن را در فرم ست کن
   useEffect(() => {
     if (emailFromUrl) {
       setValue('email', emailFromUrl);
@@ -27,8 +26,21 @@ const VerifyPage = () => {
   const verifyMutation = useMutation({
     mutationFn: authService.verifyEmail,
     onSuccess: (data) => {
-      toast.success('حساب شما با موفقیت تایید شد! حالا وارد شوید.');
-      navigate('/login');
+      // تغییر اصلی اینجاست: 
+      // بررسی می‌کنیم اگر توکن توی ریسپانس بود، لاگین خودکار انجام بشه
+      if (data?.access && data?.refresh) {
+        localStorage.setItem('accessToken', data.access);
+        localStorage.setItem('refreshToken', data.refresh);
+        
+        toast.success('خوش آمدید! حساب شما فعال شد.');
+        // هدایت مستقیم به داشبورد (دیگه به لاگین نمیره)
+        navigate('/'); 
+      } else {
+        // اگر بکند توکن نفرستاد (فقط پیام موفقیت داد)، چاره‌ای نیست جز رفتن به لاگین
+        // اما طبق خواسته شما، فرض بر اینه که توکن میاد
+        toast.success('حساب تایید شد.');
+        navigate('/login');
+      }
     },
     onError: (error) => {
       const msg = error.response?.data?.detail || 'کد وارد شده اشتباه است.';
@@ -37,7 +49,6 @@ const VerifyPage = () => {
   });
 
   const onSubmit = (data) => {
-    // ارسال ایمیل (از URL یا فرم) به همراه کد به سرور
     verifyMutation.mutate({ 
       email: emailFromUrl || data.email, 
       code: data.code 
@@ -51,26 +62,25 @@ const VerifyPage = () => {
         کد تایید به ایمیل <span className="font-bold text-primary">{emailFromUrl}</span> ارسال شد.
       </p>
 
-      {/* اگر ایمیل در URL نبود، اینپوت ایمیل را نشان بده (برای حالت دستی) */}
       {!emailFromUrl && (
         <div className="form-control">
           <label className="label"><span className="label-text">ایمیل</span></label>
           <input 
             type="email" 
-            placeholder="example@mail.com"
+            dir="ltr"
             className="input input-bordered w-full text-left"
             {...register('email')}
           />
         </div>
       )}
 
-      {/* ورودی کد */}
       <div className="form-control">
         <label className="label"><span className="label-text">کد تایید</span></label>
         <input 
           type="text" 
-          maxLength={4} // محدودیت طول
+          maxLength={6} 
           placeholder="- - - -" 
+          dir="ltr"
           className={`input input-bordered w-full text-center text-2xl tracking-[0.5em] font-mono ${errors.code ? 'input-error' : ''}`}
           {...register('code')}
         />
@@ -82,7 +92,7 @@ const VerifyPage = () => {
         className="btn btn-primary w-full mt-4"
         disabled={verifyMutation.isPending}
       >
-        {verifyMutation.isPending ? <span className="loading loading-spinner"></span> : 'تایید و ادامه'}
+        {verifyMutation.isPending ? <span className="loading loading-spinner"></span> : 'تایید و ورود'}
       </button>
 
       <div className="text-center mt-4 text-sm">
