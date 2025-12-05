@@ -8,6 +8,14 @@ from django.contrib.auth import get_user_model
 
 from core.domain.email.email_services import EmailService 
 from core.domain.product import ProductMediaDomainService
+from core.models import (
+    CartItem,
+    ProductFileUploadRequirement,
+    CartItemUpload,
+    OrderItem,
+    ProductFileUploadRequirement,
+    OrderItemFile
+)
 
 User = get_user_model()
 logger = logging.getLogger('dashboard.tasks')
@@ -95,3 +103,107 @@ def upload_attachment_library_task(self, user_id, temp_file_path, original_filen
     except Exception as e:
         logger.error(f"[Attachment Task] Error: {str(e)}")
         raise self.retry(exc=e, countdown=60)
+    
+logger = logging.getLogger('cart.tasks')
+
+# ===== Task: Upload Cart Item File ===== #
+@shared_task(name='upload_cart_item_file_task', bind=True, max_retries=3)
+def upload_cart_item_file_task(self, cart_item_id, requirement_id, temp_file_path, original_filename):
+    """
+    تسک آپلود فایل طراحی توسط کاربر برای یک آیتم سبد خرید.
+    """
+    logger.info(f"[Cart Upload Task] Starting for Item {cart_item_id}")
+    
+    try:
+        # ===== دریافت آیتم ===== #
+        cart_item = CartItem.objects.get(id=cart_item_id)
+        requirement = ProductFileUploadRequirement.objects.get(id=requirement_id)
+
+        # ===== بررسی وجود فایل از قبل و جایگزینی ===== #
+        existing_uploads = CartItemUpload.objects.filter(
+            cart_item=cart_item, 
+            requirement=requirement
+        )
+        
+        for upload in existing_uploads:
+            # ===== حذف فایل ها ===== #
+            if upload.file:
+                upload.file.delete(save=False)
+            upload.delete()
+            logger.info(f"Deleted old file for requirement {requirement_id}")
+
+        # ===== ایجاد فایل ===== #
+        if os.path.exists(temp_file_path):
+            with open(temp_file_path, 'rb') as f:
+                django_file = File(f, name=original_filename)
+                
+                # ===== ایجاد آیتم ===== #
+                upload_instance = CartItemUpload.objects.create(
+                    cart_item=cart_item,
+                    requirement=requirement,
+                    file=django_file
+                )
+            
+            # ===== حذف فایل موقت ===== #
+            os.remove(temp_file_path)
+            logger.info(f"[Cart Upload Task] Success: Upload {upload_instance.id} created.")
+            return f"File uploaded: {upload_instance.id}"
+        else:
+            logger.error(f"[Cart Upload Task] File NOT FOUND at {temp_file_path}")
+            return "Temp file missing"
+
+    except Exception as e:
+        logger.error(f"[Cart Upload Task] Error: {str(e)}")
+        raise self.retry(exc=e, countdown=60)
+
+# ===== Task: Upload Order Item File ===== #
+@shared_task(name='upload_order_item_file_task', bind=True, max_retries=3)
+def upload_order_item_file_task(self, order_item_id, requirement_id, temp_file_path, original_filename):
+    """
+    تسک آپلود فایل طراحی توسط ادمین برای یک آیتم سفارش.
+    """
+    logger.info(f"[Order Upload Task] Starting for OrderItem {order_item_id}")
+    
+    try:
+        # ===== دریافت مدل ها ===== #
+        order_item = OrderItem.objects.get(id=order_item_id)
+        requirement = ProductFileUploadRequirement.objects.get(id=requirement_id)
+        
+        # ===== بررسی وجود فایل از قبل و جایگزینی ===== #
+        existing_uploads = OrderItemFile.objects.filter(
+            order_item=order_item, 
+            requirement=requirement
+        )
+        
+        for upload in existing_uploads:
+            # ===== حذف فایل ها ===== #
+            if upload.file:
+                upload.file.delete(save=False)
+            upload.delete()
+            logger.info(f"Deleted old file for requirement {requirement_id}")
+
+        # ===== دریافت فایل ===== #
+        if os.path.exists(temp_file_path):
+            with open(temp_file_path, 'rb') as f:
+                django_file = File(f, name=original_filename)
+                
+                # ===== ایجاد فایل===== #
+                instance = OrderItemFile.objects.create(
+                    order_item=order_item,
+                    requirement=requirement,
+                    file=django_file
+                )
+            
+            # ===== پاک کردن فایل temp ===== #
+            os.remove(temp_file_path)
+            logger.info(f"[Order Upload Task] Success: File {instance.id} attached to OrderItem {order_item_id}.")
+            return f"File uploaded: {instance.id}"
+        else:
+            error_msg = f"[Order Upload Task] Temp file NOT FOUND at {temp_file_path}"
+            logger.error(error_msg)
+            return "Temp file missing"
+
+    except Exception as e:
+        logger.error(f"[Order Upload Task] Error: {str(e)}", exc_info=True)
+        raise self.retry(exc=e, countdown=60)
+    

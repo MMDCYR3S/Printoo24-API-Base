@@ -125,7 +125,6 @@ class ProductRepository(BaseRepository[Product]):
         except self.model.DoesNotExist:
             raise ProductNotFoundException(f"محصولی با اسلاگ '{id}' یافت نشد.")
 
-
     # =====  (Write Methods) ===== #
     def create_product(self, data: dict) -> Product:
         """ ایجاد بدنه اصلی محصول (Shell) """
