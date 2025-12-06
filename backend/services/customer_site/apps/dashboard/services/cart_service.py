@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Any
 
 from django.db import transaction
@@ -17,6 +18,9 @@ from core.models import (
 from core.domain.cart import CartDomainService
 from core.domain.product import ProductDomainService
 
+# ===== Logger ===== #
+logger = logging.getLogger("dashboard.services.cart_dashboard")
+
 # ===== Cart Dashboard Service ===== #
 class CartDashboardService:
     def __init__(self):
@@ -27,28 +31,41 @@ class CartDashboardService:
     
     def get_user_cart_details(self, user_id: int):
         """ دریافت جزئیات کامل سبد خرید یک کاربر خاص """
-        user = get_object_or_404(User, pk=user_id)
-        # ===== دریافت سبد خرید کاربر ===== #
-        cart = self.domain_service.get_or_create_cart_for_user(user)
-        # ===== دریافت آیتم‌های سبد خرید ===== #
-        cart_queryset = Cart.objects.filter(id=cart.id).prefetch_related(
-            Prefetch(
-                'cart_items',
-                queryset=CartItem.objects.select_related('product').prefetch_related(
-                    'uploads__requirement__spec'
+        logger.info(f"START: Get Cart Details for User ID {user_id}")
+        
+        try:
+            user = get_object_or_404(User, pk=user_id)
+            cart = self.domain_service.get_or_create_cart_for_user(user)
+            
+            # ===== بهینه سازی ===== #
+            cart_queryset = Cart.objects.filter(id=cart.id).prefetch_related(
+                Prefetch(
+                    'cart_items',
+                    queryset=CartItem.objects.select_related('product').prefetch_related(
+                        'uploads__requirement__spec'
+                    )
                 )
-            )
-        ).first()
-        
-        return {
-            'cart': cart_queryset,
-            'user': user
-        }
-        
+            ).first()
+            
+            logger.info(f"SUCCESS: Cart details retrieved for User {user_id}. Cart ID: {cart.id}")
+            
+            return {
+                'cart': cart_queryset,
+                'user': user
+            }
+        except Exception as e:
+            logger.error(f"FAILED: Get Cart Details for User {user_id}. Error: {str(e)}", exc_info=True)
+            raise e
     def clear_user_cart(self, user_id: int):
         """ خالی کردن سبد خرید کاربر """
-        user = get_object_or_404(User, pk=user_id)
-        self.domain_service.clear_cart(user)
+        logger.warning(f"START: Clearing Cart for User ID {user_id}")
+        try:
+            user = get_object_or_404(User, pk=user_id)
+            self.domain_service.clear_cart(user)
+            logger.info(f"SUCCESS: Cart cleared for User {user_id}")
+        except Exception as e:
+            logger.error(f"FAILED: Clear Cart for User {user_id}. Error: {str(e)}", exc_info=True)
+            raise e
 
     # ===== مدیریت آیتم‌ها (Item Management) ===== #
 
@@ -61,8 +78,10 @@ class CartDashboardService:
         user = get_object_or_404(User, pk=user_id)
         # ===== دریافت محصول ===== #
         try:
+            logger.info(f"START: Get cart of the user #{user_id}")
             product = Product.objects.get(slug=data['product_slug'])
         except Product.DoesNotExist:
+            logger.warning(f"Product not found: {data.get('product_slug')}")
             raise ValidationError("محصول یافت نشد.")
         
         selections = data['selections']
@@ -77,6 +96,7 @@ class CartDashboardService:
             quantity=selections['quantity'],
             specs=specs
         )
+        logger.info(f"SUCCESS: Item {cart_item.id} added to cart for User {user_id}. Price: {cart_item.price}")
         return cart_item
     
     def _prepare_specs_simple(self, product, selections):
@@ -136,12 +156,15 @@ class CartDashboardService:
     @transaction.atomic
     def update_cart_item(self, user_id: int, item_id: int, data: Dict[str, Any]):
         """ ویرایش آیتم سبد خرید """
-        user = get_object_or_404(User, pk=user_id)
+        logger.info(f"START: Update Cart Item {item_id} for User {user_id}")
         
         if 'specs' in data:
+            user = get_object_or_404(User, pk=user_id)
             # ===== چک کردن ویژگی هیا محصول ===== #
             item = self.domain_service._item_repo.get_by_id(item_id)
             specs = self._prepare_specs_for_domain(item.product, data['specs'])
+            
+            logger.debug(f"Updating specs for item {item_id}")
             
             return self.domain_service.update_complex_item(
                 user=user,
@@ -150,14 +173,22 @@ class CartDashboardService:
                 specs=specs
             )
         else:
+            logger.debug(f"Updating quantity for item {item_id} to {data['quantity']}")
             return self.domain_service.update_item_quantity(
                 item=self.domain_service._item_repo.get_by_id(item_id),
                 new_quantity=data['quantity']
             )
-
+            
     def remove_item_from_cart(self, user_id: int, item_id: int):
-        user = get_object_or_404(User, pk=user_id)
-        self.domain_service.remove_item(user, item_id)
+        """ حذف آیتم  """
+        logger.info(f"START: Remove Item {item_id} from Cart of User {user_id}")
+        try:
+            user = get_object_or_404(User, pk=user_id)
+            self.domain_service.remove_item(user, item_id)
+            logger.info(f"SUCCESS: Item {item_id} removed.")
+        except Exception as e:
+            logger.error(f"FAILED: Remove Item {item_id}. Error: {str(e)}", exc_info=True)
+            raise e
 
     # ===== متد کمکی (Helper) ===== #
     def _prepare_specs_for_domain(self, product, raw_specs):

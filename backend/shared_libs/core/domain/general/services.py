@@ -1,10 +1,11 @@
 from celery import current_app
 
 from django.db import transaction
+from django.db.models import QuerySet
 from django.core.exceptions import ValidationError
 
-from .repositories import ContactUsRepository, ModalRepository
-from core.models import PromotionalModal, ContactUs
+from .repositories import ContactUsRepository, ModalRepository, SliderRepository
+from core.models import PromotionalModal, ContactUs, SliderIndex
 
 # ===== Content Domain Service ===== #
 class ContentService:
@@ -123,3 +124,50 @@ class ContentService:
             
         modal.save()
         return modal
+
+# ===== Slider Domain Service ===== #
+class SliderDomainService:
+    def __init__(self):
+        self._repo = SliderRepository()
+
+    def get_all(self):
+        return self._repo.get_all_sliders()
+
+    def get_detail(self, pk: int) -> SliderIndex:
+        slider = self._repo.get_by_id(pk)
+        if not slider:
+            raise ValidationError("اسلایدر مورد نظر یافت نشد.")
+        return slider
+
+    @transaction.atomic
+    def create_slider(self, data: dict, file_obj=None) -> SliderIndex:
+        """
+        ایجاد اسلایدر جدید.
+        """
+        if file_obj:
+            data['image'] = file_obj
+            
+        return self._repo.create(data)
+
+    @transaction.atomic
+    def update_slider(self, pk: int, data: dict, file_obj=None) -> SliderIndex:
+        """
+        ویرایش اسلایدر با مدیریت جایگزینی تصویر.
+        """
+        slider = self.get_detail(pk)
+
+        if file_obj:
+            # ===== حذف تصویر قبلی از حافظه ===== #
+            if slider.image:
+                slider.image.delete(save=False)
+            
+            data['image'] = file_obj
+
+        return self._repo.update(slider, data)
+
+    def delete_slider(self, pk: int):
+        slider = self.get_detail(pk)
+        if slider.image:
+            slider.image.delete(save=False)
+            
+        self._repo.delete(slider)

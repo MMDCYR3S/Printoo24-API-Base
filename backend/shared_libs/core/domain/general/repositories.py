@@ -1,7 +1,7 @@
 from typing import Optional
 from django.db.models import QuerySet
 
-from core.models import ContactUs, PromotionalModal
+from core.models import ContactUs, PromotionalModal, SliderIndex
 from ...utils.base_repository import BaseRepository
 
 # ===== Contact Us Repository ===== #
@@ -55,3 +55,17 @@ class ModalRepository(BaseRepository[PromotionalModal]):
         غیرفعال کردن تمام مودال‌ها (برای استفاده در سرویس).
         """
         PromotionalModal.objects.update(is_active=False)
+
+# ===== Slider Repository ===== #
+class SliderRepository(BaseRepository[SliderIndex]):
+    """
+    ریپازیتوری مدیریت اسلایدرهای صفحه اصلی.
+    """
+    def __init__(self):
+        super().__init__(SliderIndex)
+
+    def get_all_sliders(self) -> QuerySet[SliderIndex]:
+        """
+        دریافت تمام اسلایدرها به ترتیب جدیدترین.
+        """
+        return self.model.objects.all().order_by('-created_at')

@@ -90,10 +90,48 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # ===== Media API ===== #
-    @extend_schema(request=ProductMediaSyncSerializer, summary="مدیریت لینک فایل‌ها و ترتیب عکس‌ها")
+    @extend_schema(
+        request=ProductMediaSyncSerializer,
+        summary="مدیریت لینک فایل‌ها و ترتیب عکس‌ها",
+        description="""
+
+        **لینک کردن فایل‌های پیوست و عکس‌های محصول پس از آپلود**
+
+        این متد مرحله نهایی اتصال مدیا به محصول است.
+
+        **مراحل کلی فرآیند:**
+
+        1.  **ایجاد محصول:** ابتدا محصول باید اضافه شده باشد.
+        2.  **آپلود فایل‌ها:** قبل از فراخوانی این متد، باید فایل‌ها را آپلود کرده باشید.
+
+        ---
+
+        ### APIهای پیش‌نیاز برای آپلود:
+
+        برای آپلود عکس و فایل، ابتدا باید از اندپوینت‌های زیر استفاده کنید (ترتیب انجام این مرحله دست خودتان است):
+
+        **۱. آپلود عکس محصول:**
+        POST api/v1/dashboard/products/{id}/upload-image/
+
+        > **نکته مهم:** عکس پس از آپلود، به صورت خودکار به محصول اضافه می‌شود. از این API (`media-sync`) صرفاً برای **ویرایش ترتیب نمایش** (`image_orders`) استفاده کنید. اگر تغییری در ترتیب نیاز ندارید، این فیلد را خالی بگذارید.
+
+        **۲. آپلود فایل پیوست (در کتابخانه):**
+        POST api/v1/dashboard/products/upload-attachment/
+
+        ---
+
+        ### نحوه استفاده از این API (Media Sync):
+
+        پس از اینکه APIهای بالا را زدید و فایل‌های مورد نظر با استفاده از **Celery** پردازش و آپلود شدند، باید با استفاده از این متد آن‌ها را به محصول لینک کنید.
+
+        * **لینک کردن:** ID فایل‌های آپلود شده (در مرحله آپلود پیوست) را بگیرید و تحت یک لیست در `attachment_ids_to_link` ارسال کنید.
+        * **آنلینک کردن (حذف):** برای برداشتن یک فایل پیوست از محصول، شناسه آن را در لیست `attachment_ids_to_unlink` قرار دهید.
+
+        """    
+    )
     @action(detail=True, methods=['post'], url_path='media-sync')
     def sync_media(self, request, pk=None):
-        """ مرحله سوم (بخش اول): لینک فایل‌ها و ترتیب تصاویر """
+        """ لینک کردن اطلاعات پیوست‌ها و تصاویر. """
         serializer = ProductMediaSyncSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
@@ -105,13 +143,29 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         return Response({'status': 'فایل های پیوست با موفقیت به روز شد'})
 
     # ===== آپلود تصاویر (با اصلاح حیاتی) ===== #
-    @extend_schema(summary="آپلود تصویر (تکی)", request=ProductImageSerializer)
+    @extend_schema(
+        summary="آپلود تصویر (تکی)",
+        request=ProductImageSerializer,
+        description=
+        """
+        آپلود عکس های مربوط به محصولات در این قسمت میتوانید تصاویر را آپلود کنید
+        
+        تصاویر باید به صورت یک آرایه ارسال شود
+        
+        مثال: [
+            {
+                "image": "تصویر محصول"
+            },
+            {
+                "image": "تصویر محصول"
+            }
+        ]
+        نکته مهم: باید حتما id مربوط به محصول رو بدی.
+        """
+    )
     @action(detail=True, methods=['post'], url_path='upload-image', parser_classes=[MultiPartParser, FormParser, JSONParser])
     def upload_image(self, request, pk=None):
-        """ 
-        مرحله سوم (بخش دوم): آپلود فیزیکی تصاویر.
-        این متد از صفсинک/Async هوشمند استفاده می‌کند.
-        """
+        """ آپلود عکس محصول """
         file_obj = request.FILES.get('image')
         if not file_obj:
             return Response({'image': 'File required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -133,11 +187,25 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             
         return Response(result, status=status.HTTP_200_OK)
 
-    @extend_schema(summary="آپلود فایل در کتابخانه (جهت استفاده در محصولات)", request=AttachmentLibrarySerializer)
+    @extend_schema(
+        summary="آپلود فایل در کتابخانه (جهت استفاده در محصولات)",
+        request=AttachmentLibrarySerializer,
+        description=
+        """
+        آپلود کردن فایل های پیوست مربوط به محصول
+        این قسمت باید به صورت زیر باشه:
+        {
+            "name": "عنوان فایل",
+            "file": "فایل مورد نظر"
+        }
+        در نظر داشته باش که این قسمت نیازمند ID محصول نیست و در ادامه در قسمت
+        sync-media باید ID این فایل  های پیوست رو به صورت لیست ارائه بدی.
+        """
+    )
     @action(detail=False, methods=['post'], url_path='upload-attachment', parser_classes=[MultiPartParser, FormParser])
     def upload_attachment(self, request):
         """
-        این متد فایل را در Attachment Library آپلود می‌کند تا بعداً توسط ID به محصول لینک شود.
+        این متد فایل را در لینک کردن آنها استفاده میشه آپلود می‌کند تا بعداً توسط ID به محصول لینک شود.
         """
         file_obj = request.FILES.get('file')
         name = request.data.get('name')

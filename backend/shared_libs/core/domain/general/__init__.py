@@ -1,2 +1,2 @@
-from .repositories import ModalRepository, ContactUsRepository
-from .services import ContentService
+from .repositories import ModalRepository, ContactUsRepository, SliderRepository
+from .services import ContentService, SliderDomainService

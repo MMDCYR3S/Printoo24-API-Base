@@ -95,3 +95,22 @@ class PromotionalModal(models.Model):
         if self.image:
             return self.image.url
         return None
+
+# ===== Slider Index ===== #
+class SliderIndex(models.Model):
+    """
+    مدل مربوط به اسلادیر صفحه اصلی
+    """
+    name = models.CharField(_("نام"), max_length=255, blank=True, null=True)
+    image = models.ImageField(_("تصویر"), upload_to='slider/')
+    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = _("اسلایدر")
+        verbose_name_plural = _("اسلایدرها")
+        ordering = ['-created_at']
+    
