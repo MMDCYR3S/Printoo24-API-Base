@@ -2,7 +2,7 @@ import logging
 from celery import shared_task
 from django.conf import settings
 
-from core.domain.email.email_services import EmailService
+from core.domain.communication.email.email_services import EmailService
 
 logger = logging.getLogger(__name__)
 

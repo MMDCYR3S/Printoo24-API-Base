@@ -1,5 +1,5 @@
 from django.db import transaction
-from ...utils.base_repository import BaseRepository
+from core.utils import BaseRepository
 from core.models import Address
 
 class AddressRepository(BaseRepository[Address]):

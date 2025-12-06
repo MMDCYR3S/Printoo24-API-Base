@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import extend_schema
 
-from core.domain.general import SliderDomainService
+from core.domain.infrastructure.general import SliderDomainService
 from .serializers import SliderSerializer
 
 # ===== Slider ViewSet (Customer Side) ===== #

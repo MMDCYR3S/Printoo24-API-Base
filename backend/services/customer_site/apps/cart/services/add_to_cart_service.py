@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any
 from django.db import transaction
 from core.models import User, CartItem
-from core.domain.cart.services import CartDomainService 
+from core.domain.commerce.cart.services import CartDomainService 
 from .cart_validator_service import CartDataValidator
 
 logger = logging.getLogger('cart.services.add_to_cart')

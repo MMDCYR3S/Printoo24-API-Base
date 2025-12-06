@@ -1,7 +1,7 @@
 from typing import Dict, Any, List, Optional
 from django.db.models import QuerySet
 from core.models import Option, OptionValue
-from ...utils.base_repository import BaseRepository
+from core.utils.base_repository import BaseRepository
 
 # ===== Option Repository ===== #
 class OptionRepository(BaseRepository[Option]):

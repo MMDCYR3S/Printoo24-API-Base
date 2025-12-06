@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
 
-from core.domain.product import OptionDomainService
+from core.domain.catalog.product import OptionDomainService
 from ..serializers import OptionSerializer, OptionValueSerializer
 
 # ===== Option View Set ===== #

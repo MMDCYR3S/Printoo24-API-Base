@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.reverse import reverse
 from django.urls import NoReverseMatch
 
-from core.domain.category import ProductCategoryDomainService
-from core.domain.product import ProductRepository
+from core.domain.catalog.category import ProductCategoryDomainService
+from core.domain.catalog.product import ProductRepository
 from core.models import ProductCategory
 
 logger = logging.getLogger('shop.services.category')

@@ -4,7 +4,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from core.models import User, CustomerProfile, Wallet, Role, UserRole
-from core.domain.users import UserRepository
+from core.domain.identity.users import UserRepository
 # اگر ریپازیتوری‌های دیگر موجودند، بهتر است ایمپورت شوند.
 # فعلاً برای سادگی و طبق کد خودت، مدل‌ها را نگه می‌داریم اما با لاگ.
 

@@ -1,7 +1,9 @@
-from typing import List, Optional, Dict, Any
+from typing import Optional, Dict, Any
 from django.db.models import QuerySet
+
 from core.models import Size, Material
-from ...utils.base_repository import BaseRepository
+from core.models import Quantity, FileUploadSpec
+from core.utils.base_repository import BaseRepository
 
 # ===== Size Repository ===== #
 class SizeRepository(BaseRepository[Size]):
@@ -41,10 +43,7 @@ class MaterialRepository(BaseRepository[Material]):
     def create_material(self, data: Dict[str, Any]) -> Material:
         return self.model.objects.create(**data)
     
-from typing import Dict, Any, Optional
-from django.db.models import QuerySet
-from core.models import Quantity, FileUploadSpec
-from ...utils.base_repository import BaseRepository
+
 
 # ===== Quantity Repository ===== #
 class QuantityRepository(BaseRepository[Quantity]):

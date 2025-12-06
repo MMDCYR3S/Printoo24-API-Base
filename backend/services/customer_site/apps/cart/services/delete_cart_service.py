@@ -3,8 +3,8 @@ import logging
 from rest_framework.exceptions import NotFound
 
 from core.models import User
-from core.domain.cart.services import CartDomainService
-from core.domain.cart.exceptions import ItemNotFoundException
+from core.domain.commerce.cart.services import CartDomainService
+from core.domain.commerce.cart.exceptions import ItemNotFoundException
 
 # ===== تعریف لاگر اختصاصی برای سرویس‌های حذف ===== #
 logger = logging.getLogger('cart.services.delete')

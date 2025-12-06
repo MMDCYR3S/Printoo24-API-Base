@@ -1,6 +1,6 @@
 import logging
 from django.core.exceptions import ValidationError
-from core.domain.address import AddressRepository
+from core.domain.identity.address import AddressRepository
 from core.models import City
 
 # ===== تعریف لاگر اختصاصی برای سرویس آدرس ===== #

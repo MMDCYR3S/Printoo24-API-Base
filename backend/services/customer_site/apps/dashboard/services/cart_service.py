@@ -15,8 +15,8 @@ from core.models import (
     Cart,
     CartItem,
 )
-from core.domain.cart import CartDomainService
-from core.domain.product import ProductDomainService
+from core.domain.commerce.cart import CartDomainService
+from core.domain.catalog.product import ProductDomainService
 
 # ===== Logger ===== #
 logger = logging.getLogger("dashboard.services.cart_dashboard")

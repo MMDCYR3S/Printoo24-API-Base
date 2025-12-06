@@ -19,9 +19,9 @@ from core.models import (
     OrderItemFile, ProductOptionValue,
     ProductMaterial, ProductSize, ProductOptionValue
 )
-from core.domain.order import OrderDomainService
-from core.domain.cart import CartDomainService
-from core.domain.product import ProductDomainService
+from core.domain.commerce.order import OrderDomainService
+from core.domain.commerce.cart import CartDomainService
+from core.domain.catalog.product import ProductDomainService
 
 try:
     from apps.dashboard.tasks import upload_order_item_file_task

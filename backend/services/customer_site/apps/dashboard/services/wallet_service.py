@@ -5,8 +5,8 @@ from django.db import transaction
 from rest_framework.exceptions import NotFound, ValidationError
 
 from core.models import Wallet, User
-from core.domain.wallet import WalletDomainService
-from core.domain.users import UserRepository
+from core.domain.identity.wallet import WalletDomainService
+from core.domain.identity.users import UserRepository
 
 # ===== Logger ===== #
 logger = logging.getLogger('dashboard.services.wallet')

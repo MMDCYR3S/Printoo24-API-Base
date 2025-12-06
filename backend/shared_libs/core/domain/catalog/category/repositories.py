@@ -3,7 +3,7 @@ from typing import Optional
 from django.db.models import QuerySet
 
 from core.models import ProductCategory, Product
-from ...utils.base_repository import BaseRepository
+from core.utils.base_repository import BaseRepository
 from .exceptions import ProductCategoryNotFoundException
 
 # ===== Product Category Repository ===== #

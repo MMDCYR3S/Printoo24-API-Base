@@ -3,8 +3,8 @@ from typing import Dict, Any
 
 from django.db import transaction
 
-from core.domain.users.services import UserDomainService
-from core.domain.profile.services import CustomerProfileDomainService
+from core.domain.identity.users.services import UserDomainService
+from core.domain.identity.profile.services import CustomerProfileDomainService
 
 # ===== تعریف لاگر اختصاصی برای سرویس پروفایل ===== #
 logger = logging.getLogger('userprofile.services.profile')

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from django.db.models import Max
 from core.models import Product, ProductImage, Attachment, ProductAttachment
-from ...utils.base_repository import BaseRepository
+from core.utils.base_repository import BaseRepository
 
 class ProductMediaRepository:
     """

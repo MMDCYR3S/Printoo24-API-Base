@@ -11,7 +11,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 
 # ===== سرویس های دامنه ===== #
-from core.domain.product import ProductDomainService, ProductMediaDomainService
+from core.domain.catalog.product import ProductDomainService, ProductMediaDomainService
 
 try:
     from apps.dashboard.tasks import upload_product_image_task, upload_attachment_library_task

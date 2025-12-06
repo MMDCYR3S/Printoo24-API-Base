@@ -2,7 +2,7 @@ from typing import Optional
 from django.db.models import QuerySet
 
 from core.models import ContactUs, PromotionalModal, SliderIndex
-from ...utils.base_repository import BaseRepository
+from core.utils import BaseRepository
 
 # ===== Contact Us Repository ===== #
 class ContactUsRepository(BaseRepository[ContactUs]):

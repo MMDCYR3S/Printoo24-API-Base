@@ -2,8 +2,8 @@ from typing import Any, Dict, Optional
 
 from django.db.models import QuerySet
 
-from ...utils.base_repository import BaseRepository
-from ...models import User
+from ....utils.base_repository import BaseRepository
+from core.models import User
 from .exceptions import (
     EmailAlreadyExistsException,
     EmailNotFoundException,
