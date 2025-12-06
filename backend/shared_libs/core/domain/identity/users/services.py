@@ -1,7 +1,7 @@
 from typing import Dict, Any
 
 from .repositories import UserRepository
-from ...models import User
+from core.models import User
 from .exceptions import (
     EmailAlreadyExistsException,
     UsernameAlreadyExistsException    

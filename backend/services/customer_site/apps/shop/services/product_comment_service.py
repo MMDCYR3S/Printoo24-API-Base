@@ -2,8 +2,8 @@ import logging
 from typing import Dict, Any, List
 from django.shortcuts import get_object_or_404
 from core.models import User, Product, ProductComment
-from core.domain.comment.services import FeedbackDomainService
-from core.domain.comment.repositories import RatingRepository, CommentRepository
+from core.domain.catalog.comment.services import FeedbackDomainService
+from core.domain.catalog.comment.repositories import RatingRepository, CommentRepository
 
 # تعریف لاگر اختصاصی با نام دقیق
 logger = logging.getLogger('shop.services.feedback')

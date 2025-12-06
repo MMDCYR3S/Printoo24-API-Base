@@ -1,7 +1,7 @@
 from typing import List, Optional
 from django.db.models import Prefetch, QuerySet
 
-from ...utils.base_repository import BaseRepository
+from core.utils.base_repository import BaseRepository
 from .exceptions import ProductNotFoundException
 from core.models import (
     Product, 

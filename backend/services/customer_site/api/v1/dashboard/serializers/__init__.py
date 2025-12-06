@@ -45,3 +45,9 @@ from .order_serializers import (
     OrderFileSerializer,
     OrderItemDetailSerializer,
 )
+from .wallet_serializers import(
+    WalletListSerializer,
+    WalletTransactionSerializer,
+    WalletAdjustmentSerializer
+)
+from .slider_serializers import SliderDashboardSerializer

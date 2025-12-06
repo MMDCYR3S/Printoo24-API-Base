@@ -6,7 +6,7 @@ from drf_spectacular.utils import extend_schema
 from core.models import (
     Attachment
 )
-from core.domain.product import (
+from core.domain.catalog.product import (
     SizeDomainService,
     MaterialDomainService,
     QuantityDomainService,

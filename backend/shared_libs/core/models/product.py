@@ -130,6 +130,18 @@ class Product(models.Model):
     has_quantity = models.BooleanField(_('دارای تیراژ'), default=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
+    def validate_has_price(self) -> bool:
+        """
+        بررسی اینکه آیا محصول دارای قیمت هست، اگر بله، نباید تیک
+        has_price رو کاربر بزنه. از طرفی اگر نه، باید تیک رو بزنه.
+        """
+        if self.has_price and self.price == 0:
+            raise ValidationError('محصول باید قیمت داشته باشد')
+        elif not self.has_price and self.price > 0:
+            raise ValidationError('نمی توانید تیک گزینه قیمت رو نزنید و سپس قیمت را وارد کنید.')
+        elif not self.has_price and self.price == 0:
+            return True
+         
     def save(self, *args, **kwargs):
         """ ذخیره اسلاگ محصول به صورت خودکار """
         if not self.slug:

@@ -12,7 +12,7 @@ from core.models import (
     OrderItemFile,
     Address
 )
-from core.domain.cart import CartRepository
+from core.domain.commerce.cart import CartRepository
 from .repositories import (
     OrderRepository,
     OrderItemRepository,

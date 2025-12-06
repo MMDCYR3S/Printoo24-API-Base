@@ -180,7 +180,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug', 'price', 'category', 'thumbnail', 'detail_url']
+        fields = ['id', 'name', 'slug', 'price', 'has_price', 'category', 'thumbnail', 'detail_url']
 
     def get_thumbnail(self, obj):
         img = obj.product_image.first()
@@ -218,6 +218,7 @@ class ProductDetailSerializer(serializers.Serializer):
             "slug": product.slug,
             "description": product.description,
             "price": product.price,
+            "has_price": product.has_price,
             "code": product.code
         }
 

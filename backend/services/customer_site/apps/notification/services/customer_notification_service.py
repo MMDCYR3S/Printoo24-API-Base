@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import NotFound
 
 from core.models import User, CustomerNotification
-from core.domain.notification.repositories import NotificationRepository
+from core.domain.communication.notification.repositories import NotificationRepository
 
 # ===== تعریف لاگر اختصاصی ===== #
 logger = logging.getLogger('userprofile.services.notification')

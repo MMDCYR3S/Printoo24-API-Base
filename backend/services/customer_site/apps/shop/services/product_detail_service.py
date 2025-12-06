@@ -3,7 +3,7 @@ from typing import Dict, Any, List, Optional
 from collections import defaultdict
 from django.db.models import QuerySet
 
-from core.domain.product import ProductDomainService
+from core.domain.catalog.product import ProductDomainService
 from core.models import ProductOption
 
 # ====== Logger Configuration ====== #

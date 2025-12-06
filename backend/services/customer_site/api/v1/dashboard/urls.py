@@ -16,6 +16,7 @@ from .views import (
     CartDashboardViewSet,
     CartFileUploadViewSet,
     OrderDashboardViewSet,
+    SliderDashboardViewSet
 )
 
 router = DefaultRouter()
@@ -34,6 +35,7 @@ router.register(r'attachments', AttachmentLibraryViewSet, basename='attachments'
 router.register(r'cart', CartDashboardViewSet, basename='cart')
 router.register(r'cart-files', CartFileUploadViewSet, basename='cart-files')
 router.register(r'orders', OrderDashboardViewSet, basename='orders')
+router.register(r'sliders', SliderDashboardViewSet, basename='sliders')
 
 app_name = "dashboard"
 

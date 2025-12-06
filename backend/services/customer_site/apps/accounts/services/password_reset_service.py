@@ -8,8 +8,8 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from core.models import User
-from core.domain.users.services import UserDomainService
-from core.domain.cache.cache_services import CacheService
+from core.domain.identity.users.services import UserDomainService
+from core.domain.infrastructure.cache.cache_services import CacheService
 
 from ..tasks import send_password_reset_email_task
 

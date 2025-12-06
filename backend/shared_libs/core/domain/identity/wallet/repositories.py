@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from .exceptions import (
     WalletNotFoundException
 )
-from ...utils.base_repository import BaseRepository
+from core.utils import BaseRepository
 from core.models import User, Wallet, WalletTransaction
 
 # ======== Wallet Repository ======== #

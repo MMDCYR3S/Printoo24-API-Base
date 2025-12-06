@@ -3,7 +3,7 @@ from typing import Dict, Any
 from rest_framework.exceptions import ValidationError, NotFound
 
 from core.models import CartItem
-from core.domain.cart import CartDomainService
+from core.domain.commerce.cart import CartDomainService
 from .cart_validator_service import CartDataValidator
 
 logger = logging.getLogger('cart.services.update')

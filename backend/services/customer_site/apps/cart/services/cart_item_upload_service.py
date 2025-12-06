@@ -6,7 +6,7 @@ from django.core.files.base import ContentFile
 from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 
 from core.models import User, CartItem, ProductFileUploadRequirement, CartItemUpload
-from core.domain.cart import CartItemRepository
+from core.domain.commerce.cart import CartItemRepository
 from ..utils.validators import (
     validate_image_cmyk,
     validate_image_dpi,

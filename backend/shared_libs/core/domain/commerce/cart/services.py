@@ -14,8 +14,8 @@ from core.models import (
     ProductMaterial,
     ProductOptionValue
 )
-from core.domain.product import ProductPriceCalculator
-from core.domain.cart.exceptions import (
+from core.domain.catalog.product import ProductPriceCalculator
+from core.domain.commerce.cart.exceptions import (
     InvalidQuantityException,
     ItemNotFoundException,
 )

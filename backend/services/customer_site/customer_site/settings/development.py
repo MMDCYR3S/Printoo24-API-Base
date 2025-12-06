@@ -289,6 +289,14 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'verbose',
         },
+        'dashboard_cart_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/dashboard/cart_service.log',
+            'maxBytes': 1024 * 1024 * 10,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
         # ===== هندلر اختصاصی برای سرویس فایل سبد خرید ===== #
         'cart_file_upload_file': {
             'level': 'DEBUG',
@@ -296,6 +304,24 @@ LOGGING = {
             'filename': 'logs/cart/file_upload.log', # مسیر ذخیره لاگ
             'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر سرویس مشتریان ===== #
+        'dashboard_customer_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/dashboard/customer_service.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== هندلر سرویس کیف پول ===== #
+        'dashboard_wallet_service_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/dashboard/wallet_service.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 10, # برای مالی بک‌آپ بیشتر نگه می‌داریم
             'formatter': 'verbose',
         },
         # ====== Console Handler ====== #
@@ -455,6 +481,23 @@ LOGGING = {
         # ===== لاگر اختصاصی تسک‌های سلری داشبورد ===== #
         'dashboard.tasks': {
             'handlers': ['dashboard_tasks_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'dashboard.services.cart_dashboard': {
+            'handlers': ['dashboard_cart_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر اختصاصی سرویس مشتریان ===== #
+        'dashboard.services.customer': {
+            'handlers': ['dashboard_customer_service_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # ===== لاگر سرویس کیف پول ===== #
+        'dashboard.services.wallet': {
+            'handlers': ['dashboard_wallet_service_file', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },

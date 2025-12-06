@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from drf_spectacular.utils import extend_schema
 
 # ===== فراخوانی سرویس و مدل‌ها از Shared Libs ===== #
-from core.domain.general import ContentService
+from core.domain.infrastructure.general import ContentService
 from core.models import ContactUs, PromotionalModal
 from ..serializers.general_serializers import (
     ContactUsSerializer,

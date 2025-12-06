@@ -6,8 +6,8 @@ from django.conf import settings
 from django.core.files import File
 from django.contrib.auth import get_user_model
 
-from core.domain.email.email_services import EmailService 
-from core.domain.product import ProductMediaDomainService
+from core.domain.communication.email.email_services import EmailService 
+from core.domain.catalog.product import ProductMediaDomainService
 from core.models import (
     CartItem,
     ProductFileUploadRequirement,

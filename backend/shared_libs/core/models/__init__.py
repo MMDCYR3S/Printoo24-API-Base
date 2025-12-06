@@ -37,4 +37,4 @@ from .product import (
 from .order import Order, OrderItem, OrderItemFile, OrderStatus
 from .cart import Cart, CartItem, CartItemUpload
 from .notification import CustomerNotification
-from .core import ContactUs, PromotionalModal
+from .core import ContactUs, PromotionalModal, SliderIndex
