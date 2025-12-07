@@ -1,5 +1,5 @@
+import uuid
 from slugify import slugify
-from random import randint
 
 from django.db import models
 from django.contrib.auth.models import Permission
@@ -85,7 +85,7 @@ class Role(models.Model):
     ]
     
     name = models.CharField(_('نام'), max_length=150)
-    slug = models.SlugField(_('کد سیستمی'), unique=True, default=randint(000000, 999999))
+    slug = models.SlugField(_('کد سیستمی'), unique=True, default=uuid.uuid4())
     description = models.TextField(_('توضیحات'), blank=True, null=True)
     permission = models.ManyToManyField(Permission, verbose_name=_('مجوز ها'), related_name='roles')
     type = models.CharField(_('نوع کاربر'), max_length=150, choices=USER_TYPE, default='normal')

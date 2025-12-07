@@ -28,7 +28,7 @@ class OrderStatus(models.Model):
 
     name = models.CharField(_('عنوان نمایشی'), max_length=150)
     
-    internal_code = models.SlugField(_('کد سیستمی'), max_length=50, unique=True, default=randint(00000, 99999))
+    internal_code = models.SlugField(_('کد سیستمی'), max_length=50, unique=True, null=True, blank=True)
     
     group = models.CharField(_('گروه وضعیت'), max_length=20, choices=STATUS_GROUPS, default='other')
     description = models.TextField(_('توضیحات'), blank=True, null=True)
@@ -58,7 +58,7 @@ class Order(models.Model):
         verbose_name=_("مشتری"),
         on_delete=models.PROTECT
     )
-    order_code = models.CharField(_("کد پیگیری"), max_length=50, unique=True, db_index=True, default=randint(00000, 99999))
+    order_code = models.CharField(_("کد پیگیری"), max_length=50, unique=True, db_index=True, null=True, blank=True)
     type = models.CharField(_("نوع سفارش"), max_length=150, choices=ORDER_TYPE, default="2")
     current_status = models.ForeignKey(
         OrderStatus,

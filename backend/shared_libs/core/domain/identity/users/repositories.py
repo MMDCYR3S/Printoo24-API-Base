@@ -79,3 +79,6 @@ class UserRepository(BaseRepository[User]):
         return self.model.objects.filter(id=user_id, is_staff=True)\
             .prefetch_related('user_role__role', 'user_permissions')\
             .first()
+            
+    def get_user_role(self, user: User) -> Optional[User]:
+        return user.user_role.select_related('role').first()

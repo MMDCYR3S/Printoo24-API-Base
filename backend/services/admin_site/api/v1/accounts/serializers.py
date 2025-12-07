@@ -59,3 +59,11 @@ class BulkRoleChangeSerializer(serializers.Serializer):
     """ ورودی برای تغییر نقش گروهی """
     ids = serializers.ListField(child=serializers.IntegerField(), allow_empty=False)
     new_role_id = serializers.IntegerField()
+    
+# ========== Authentication DTOs ========== #
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+class RefreshTokenSerializer(serializers.Serializer):
+    refresh = serializers.CharField()

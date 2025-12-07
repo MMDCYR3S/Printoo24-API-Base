@@ -48,3 +48,81 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5173',
     'http://localhost:5173',
 ]
+
+# ===== Logging Configuration ===== #
+LOGS_DIR = os.path.join(BASE_DIR, '..', 'logs')
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+ACCOUNTS_LOGS_DIR = os.path.join(LOGS_DIR, 'accounts')
+os.makedirs(ACCOUNTS_LOGS_DIR, exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        # ========== Accounts Handlers ========== #
+        # ===== Auth Handler ===== #
+        'auth_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/accounts/auth_service.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== Staff Handler ===== #
+        'staff_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/accounts/staff_management.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        # ===== Role Handler ===== #
+        'role_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/accounts/role_management.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        # ========== Accounts Logger ========== #
+        # ===== Auth Logger ===== #
+        'apps.users.services.auth_app_service': {
+            'handlers': ['auth_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # ===== Staff Logger ===== #
+        'apps.users.services.staff_app_service': {
+            'handlers': ['staff_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # ===== Role Logger ===== #
+        'apps.users.services.role_app_service': {
+            'handlers': ['role_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
