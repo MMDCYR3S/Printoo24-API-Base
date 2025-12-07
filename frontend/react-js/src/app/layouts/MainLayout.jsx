@@ -23,7 +23,7 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="drawer">
+    <div className="drawer ">
       <input id="main-drawer" type="checkbox" className="drawer-toggle" />
       
       {/* 🟢 محتوای اصلی صفحه (Page Content) */}
@@ -40,7 +40,7 @@ const MainLayout = () => {
       </div>
 
       {/* 🟠 سایدبار کشویی (Sidebar Content) */}
-      <div className="drawer-side z-50">
+      <div className="drawer-side z-50 " >
         <label htmlFor="main-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
         
         <div className="menu p-0 w-80 min-h-full bg-base-100 text-base-content flex flex-col shadow-2xl">

@@ -1,118 +1,233 @@
 // src/app/components/layout/Header.jsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Bell, User, LogOut, LayoutGrid, Search, ChevronDown } from 'lucide-react';
+import { 
+  Menu, 
+  Bell, 
+  User, 
+  LayoutGrid, 
+  Search, 
+  ChevronDown,
+  Wallet,
+  ShoppingCart
+} from 'lucide-react';
 import MegaMenu from '../components/layout/MegaMenu';
 
 const Header = ({ onOpenDrawer }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const closeTimeoutRef = useRef(null);
 
-  // لینک واتساپ
+  // مدیریت هوشمند hover برای مگامنو
+  const handleMouseEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    setIsMegaMenuOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsMegaMenuOpen(false);
+    }, 100);
+  };
+
   const handleCreditClick = () => {
     window.open('https://wa.me/9647700000000?text=درخواست شارژ حساب دارم', '_blank');
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-base-100 shadow-sm border-b border-base-200" onMouseLeave={() => setIsMegaMenuOpen(false)}>
+    <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-2xl shadow-lg">
       
-      {/* Top Bar */}
-      <div className="bg-neutral text-neutral-content px-4 py-1 text-xs md:text-sm font-bold flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <span className="animate-pulse inline-block w-2 h-2 bg-red-600 rounded-full"></span>
-          <p>وضعیت مرز: <span className="bg-white/20 px-2 rounded mx-1">۲ ساعت تاخیر</span></p>
-        </div>
-        <div className="hidden md:block dir-ltr font-mono">1000 IQD = 42,500 T</div>
-      </div>
-
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between gap-4 relative">
+      {/* هدر اصلی */}
+      <div className="container mx-auto px-4 relative">
         
-        {/* راست: لوگو و تریگر مگامنو */}
-        <div className="flex items-center gap-6 h-full">
-          <button onClick={onOpenDrawer} className="lg:hidden btn btn-square btn-ghost tooltip tooltip-bottom" data-tip="منو">
-            <Menu size={24} />
-          </button>
-
-          <Link to="/" className="text-3xl font-black text-primary tracking-tighter hover:scale-105 transition-transform">
-            Printoo<span className="text-neutral">24</span>
-          </Link>
-
-          {/* دکمه دسته‌بندی (تریگر) */}
-          <div 
-            className="hidden lg:flex items-center h-full"
-            onMouseEnter={() => setIsMegaMenuOpen(true)}
-          >
-            <button className={`btn btn-ghost btn-sm text-base-content/80 font-bold gap-2 text-lg px-4 ${isMegaMenuOpen ? 'bg-base-200' : ''}`}>
-              <LayoutGrid size={20} />
-              دسته‌بندی محصولات
-              <ChevronDown size={16} className={`transition-transform duration-300 ${isMegaMenuOpen ? 'rotate-180' : ''}`}/>
-            </button>
-          </div>
-        </div>
-
-        {/* وسط: سرچ باکس بزرگ */}
-        <div className="flex-1 max-w-2xl hidden md:block px-8">
-          <div className="join w-full shadow-sm hover:shadow-md transition-shadow duration-300">
-            <button className="btn btn-neutral join-item px-6 font-bold text-white">
-               جستجو
-            </button>
-            <input 
-              className="input input-bordered join-item w-full text-right focus:outline-none bg-base-200/50 focus:bg-white transition-colors placeholder:text-base-content/40" 
-              placeholder="نام محصول را بنویسید (مثلاً: تراکت گلاسه)..." 
-            />
-          </div>
-        </div>
-
-        {/* چپ: ابزارها */}
-        <div className="flex items-center gap-3">
+        {/* ردیف اصلی */}
+        <div className="h-14 py-3 flex items-center justify-between gap-3">
           
-          {/* باکس اعتبار */}
-          <div 
-            onClick={handleCreditClick}
-            className="hidden lg:flex flex-col items-end bg-emerald-50 border border-emerald-200 px-4 py-1.5 rounded-xl cursor-pointer hover:shadow-md transition-all group mr-2 tooltip tooltip-bottom"
-            data-tip="برای شارژ کلیک کنید"
-          >
-            <span className="text-[11px] text-emerald-600 font-bold">اعتبار شما</span>
-            <div className="font-black text-xl text-emerald-800 dir-ltr leading-none mt-0.5">
-              250,000 <span className="text-xs font-medium">IQD</span>
-            </div>
-          </div>
-
-          {/* نوتیفیکیشن با تول‌تیپ */}
-          <div className="tooltip tooltip-bottom" data-tip="اطلاعیه‌ها">
-            <button className="btn btn-circle btn-ghost hover:bg-base-200 transition-colors">
-              <div className="indicator">
-                <Bell size={22} />
-                <span className="badge badge-xs badge-error indicator-item animate-pulse"></span>
-              </div>
+          {/* بخش راست: لوگو و منو موبایل */}
+          <div className="flex items-center gap-3">
+            
+            {/* دکمه منو موبایل */}
+            <button 
+              onClick={onOpenDrawer} 
+              className="lg:hidden btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary transition-all"
+              aria-label="باز کردن منو"
+            >
+              <Menu size={26} strokeWidth={2.5} />
             </button>
+
+            {/* لوگو */}
+            <Link 
+              to="/" 
+              className="flex items-center group"
+            >
+              <span className="text-2xl md:text-3xl font-black text-neutral">24</span>
+              <a href='/' className="text-2xl md:text-3xl font-black bg-gradient-to-l from-primary to-secondary bg-clip-text text-transparent transition-transform">
+                Printoo
+              </a>
+            </Link>
           </div>
 
-          {/* پروفایل */}
-          <div className="dropdown dropdown-end tooltip tooltip-left" data-tip="حساب کاربری">
-            <div tabIndex={0} role="button" className="btn btn-circle btn-ghost avatar placeholder border border-base-300">
-              <div className="bg-neutral text-neutral-content rounded-full w-full">
-                <User size={22}/>
+          {/* بخش وسط: جستجو */}
+          <div className="flex-1 max-w-xl hidden md:block">
+            <div className={`
+              relative flex items-center rounded-full border-2 transition-all duration-300
+              ${isSearchFocused 
+                ? 'border-primary shadow-lg shadow-primary/20 bg-white' 
+                : 'border-base-300 bg-base-100 hover:border-primary/50'
+              }
+            `}>
+              <input 
+                className="w-full py-2 px-5 pr-12 bg-transparent rounded-full text-right focus:outline-none placeholder:text-base-content/40" 
+                placeholder="چی میخوای چاپ کنی؟ اینجا بنویس..."
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => setIsSearchFocused(false)}
+              />
+              <button className="absolute right-1 p-2 rounded-full bg-primary text-white hover:bg-primary-focus transition-colors cursor-pointer">
+                <Search size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* بخش چپ: ابزارها */}
+          <div className="flex items-center gap-2">
+            
+
+
+            {/* کیف پول / اعتبار */}
+            <div 
+              onClick={handleCreditClick}
+              className="tooltip tooltip-bottom cursor-pointer"
+              data-tip="شارژ کیف پول"
+            >
+              <div className="hidden sm:flex items-center gap-2 bg-gradient-to-l from-emerald-500 to-teal-500 text-white px-2 py-1 rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95">
+                <Wallet size={20} />
+                <div className="flex flex-col items-start leading-tight">
+                  <span className="text-[10px] opacity-80">موجودی</span>
+                  <span className="font-bold text-sm dir-ltr">250,000 IQD</span>
+                </div>
               </div>
             </div>
-            <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow-lg border border-base-200 menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-              <li className="menu-title text-base-content/50">کاربر عزیز، خوش آمدید</li>
-              <li><Link to="/profile" className="py-2">پروفایل و تنظیمات</Link></li>
-              <li><Link to="/orders" className="py-2">سفارش‌های من</Link></li>
-              <div className="divider my-1"></div>
-              <li><button className="text-error font-bold hover:bg-error/10"><LogOut size={16}/> خروج از حساب</button></li>
-            </ul>
+
+            {/* سبد خرید */}
+            <div className="tooltip tooltip-bottom" data-tip="سبد خرید">
+              <button className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
+                <ShoppingCart size={22} />
+                <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-error text-white rounded-full">
+                  ۳
+                </span>
+              </button>
+            </div>
+
+            {/* اطلاعیه‌ها */}
+            <div className="tooltip tooltip-bottom" data-tip="پیام‌ها و اطلاعیه‌ها">
+              <button className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
+                <Bell size={22} />
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full animate-pulse"></span>
+              </button>
+            </div>
+
+            {/* پروفایل کاربر */}
+            <div className="dropdown dropdown-end">
+              <div 
+                tabIndex={0} 
+                role="button" 
+                className="tooltip tooltip-bottom btn btn-circle btn-ghost hover:bg-primary/10 border-2 border-base-300 hover:border-primary transition-colors"
+                data-tip="حساب کاربری"
+              >
+                <User size={22} />
+              </div>
+              <ul tabIndex={0} className="dropdown-content z-[100] menu p-2 shadow-xl bg-white rounded-2xl w-56 mt-3 border border-base-200">
+                <li>
+                  <Link to="/profile" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
+                    <User size={18} />
+                    حساب کاربری
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/orders" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
+                    <ShoppingCart size={18} />
+                    سفارش‌های من
+                  </Link>
+                </li>
+                <div className="divider my-1"></div>
+                <li>
+                  <button className="flex items-center gap-3 py-3 text-error hover:bg-error/10 rounded-xl">
+                    خروج از حساب
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* مگا منو (خارج از کانتینر محدود کننده) */}
-      {/* این بخش حالا تمام عرض صفحه را می‌گیرد چون خارج از div های بالایی است */}
-      <div 
-        className={`absolute top-full left-0 right-0 bg-base-100 border-t border-base-200 shadow-2xl transition-all duration-300 origin-top ease-out overflow-hidden z-50 ${isMegaMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2 pointer-events-none'}`}
-        onMouseEnter={() => setIsMegaMenuOpen(true)}
-        onMouseLeave={() => setIsMegaMenuOpen(false)}
-      >
-        <MegaMenu />
+        {/* نوار دسته‌بندی - فقط دسکتاپ */}
+        <div className="hidden lg:block border-t border-base-200">
+          <div className="flex items-center gap-1 py-2">
+            
+            {/* دکمه دسته‌بندی با مگامنو */}
+            <div className="relative">
+              <button 
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                className={`
+                  flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-all
+                  ${isMegaMenuOpen 
+                    ? 'bg-primary text-white shadow-lg shadow-primary/30' 
+                    : 'bg-base-200 hover:bg-primary hover:text-white text-base-content'
+                  }
+                `}
+              >
+                <LayoutGrid size={20} />
+                <span>همه دسته‌ها</span>
+                <ChevronDown 
+                  size={16} 
+                  className={`transition-transform duration-300 ${isMegaMenuOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+            </div>
+
+            {/* لینک‌های سریع */}
+            <div className="flex items-center gap-1 mr-2">
+              {[
+                { label: '🔥 پرفروش‌ها', to: '/bestsellers' },
+                { label: '💎 جدیدترین‌ها', to: '/new' },
+                { label: '🎁 تخفیف‌ها', to: '/offers' },
+                { label: '📦 پیگیری سفارش', to: '/tracking' },
+              ].map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="px-4 py-2 text-sm font-medium text-base-content/70 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* شماره تماس پشتیبانی */}
+            <div className="mr-auto flex items-center gap-2 text-sm text-base-content/60">
+              <span>📞</span>
+              <span className="font-bold dir-ltr">0770-000-0000</span>
+              <span className="text-xs">(پشتیبانی ۲۴ ساعته)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* مگامنو */}
+        <div 
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          className={`
+            absolute top-full right-0 left-0
+            transition-all durationorigin-top ease-out z-50
+            ${isMegaMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2 pointer-events-none'}
+          `}
+        >
+          <MegaMenu isOpen={isMegaMenuOpen} />
+        </div>
+
       </div>
     </header>
   );

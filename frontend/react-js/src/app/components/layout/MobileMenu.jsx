@@ -1,59 +1,159 @@
 // src/app/components/layout/MobileMenu.jsx
-import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { categoryService } from '../../services/categoryService';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { categoryService } from "../../services/categoryService";
+import {
+  ChevronDownIcon,
+  Squares2X2Icon,
+  ChevronLeftIcon,
+} from "@heroicons/react/24/outline";
 
 const MobileMenu = ({ onClose }) => {
-  const { data: categories } = useQuery({
-    queryKey: ['categories-tree'],
+  const [expandedId, setExpandedId] = useState(null);
+
+  const { data: categories, isLoading } = useQuery({
+    queryKey: ["categories-tree"],
     queryFn: categoryService.getCategoriesTree,
     staleTime: 1000 * 60 * 60,
   });
 
-  if (!categories) return <div className="p-4 text-center loading loading-dots"></div>;
+  const toggleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (!categories?.length) {
+    return (
+      <div className="text-center py-12 text-base-content/50">
+        <Squares2X2Icon className="w-12 h-12 mx-auto mb-3 opacity-30" />
+        <p>دسته‌بندی یافت نشد</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col w-full">
-      {categories.map((cat) => (
-        <div key={cat.id} className="collapse collapse-arrow border-b border-base-200 rounded-none bg-base-100">
-          <input type="radio" name="mobile-accordion" /> 
-          
-          {/* عنوان دسته اصلی */}
-          <div className="collapse-title text-base font-bold text-base-content/90 py-4 min-h-0 flex items-center">
-            {cat.name}
-          </div>
-          
-          {/* لیست زیردسته‌ها */}
-          <div className="collapse-content px-0"> 
-            <ul className="menu menu-sm bg-base-100 w-full p-0">
-              {/* لینک "همه موارد" برای خود دسته اصلی */}
-              <li>
-                <Link 
-                  to={`/category/${cat.slug}`} 
-                  onClick={onClose}
-                  className="pl-8 py-3 text-primary font-bold border-r-[3px] border-primary/20 hover:bg-base-200"
-                >
-                  همه محصولات {cat.name}
-                </Link>
-              </li>
-              
-              {/* زیردسته‌ها */}
-              {cat.children?.map((sub) => (
-                <li key={sub.id}>
-                  <Link 
-                    to={`/category/${cat.slug}/${sub.slug}`}
+    <nav className="pb-6">
+      {/* هدر منو */}
+      <div className="px-4 py-4 mb-2 border-b border-base-200">
+        <h2 className="text-lg font-bold text-base-content flex items-center gap-2">
+          <Squares2X2Icon className="w-5 h-5 text-primary" />
+          دسته‌بندی محصولات
+        </h2>
+      </div>
+
+      {/* لیست دسته‌ها */}
+      <ul className="space-y-1 px-2">
+        {categories.map((category) => {
+          const isExpanded = expandedId === category.id;
+          const hasChildren = category.children?.length > 0;
+
+          return (
+            <li key={category.id}>
+              {/* دسته اصلی */}
+              <div
+                className={`
+                  flex items-center justify-between w-full px-4 py-3.5 rounded-xl
+                  transition-all duration-200 cursor-pointer select-none
+                  ${
+                    isExpanded
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-base-200 text-base-content"
+                  }
+                `}
+                onClick={() => (hasChildren ? toggleExpand(category.id) : null)}
+              >
+                {/* اگر زیردسته نداشت، لینک مستقیم باشه */}
+                {hasChildren ? (
+                  <>
+                    <span className="font-semibold text-[15px]">
+                      {category.name}
+                    </span>
+                    <ChevronDownIcon
+                      className={`
+                        w-5 h-5 transition-transform duration-300
+                        ${isExpanded ? "rotate-180" : ""}
+                      `}
+                    />
+                  </>
+                ) : (
+                  <Link
+                    to={`/category/${category.slug}`}
                     onClick={onClose}
-                    className="pl-8 py-3 text-base-content/70 border-r-[3px] border-transparent hover:border-base-300"
+                    className="flex items-center justify-between w-full"
                   >
-                    {sub.name}
+                    <span className="font-semibold text-[15px]">
+                      {category.name}
+                    </span>
+                    <ChevronLeftIcon className="w-4 h-4 opacity-40" />
                   </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      ))}
-    </div>
+                )}
+              </div>
+
+              {/* زیردسته‌ها */}
+              {hasChildren && (
+                <div
+                  className={`
+                    overflow-hidden transition-all duration-300 ease-out
+                    ${
+                      isExpanded
+                        ? "max-h-[500px] opacity-100"
+                        : "max-h-0 opacity-0"
+                    }
+                  `}
+                >
+                  <ul className="py-2 pr-4 space-y-0.5">
+                    {/* لینک همه محصولات */}
+                    <li>
+                      <Link
+                        to={`/category/${category.slug}`}
+                        onClick={onClose}
+                        className="
+                          flex items-center gap-3 px-4 py-2.5 rounded-lg
+                          text-primary font-medium text-sm
+                          bg-primary/5 hover:bg-primary/10
+                          transition-colors duration-200
+                        "
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                        مشاهده همه {category.name}
+                      </Link>
+                    </li>
+
+                    {/* زیردسته‌ها */}
+                    {category.children.map((subCategory) => (
+                      <li key={subCategory.id}>
+                        <Link
+                          to={`/category/${category.slug}/${subCategory.slug}`}
+                          onClick={onClose}
+                          className="
+        flex items-center gap-3 px-4 py-2.5 rounded-lg
+        text-base-content/70 text-sm
+        hover:bg-base-200 hover:text-base-content
+        transition-colors duration-200
+      "
+                        >
+                          <span className="w-1 h-1 rounded-full bg-base-content/30"></span>
+                          {/* 🟢 اصلاح شده: نقطه اضافه شد */}
+                          {subCategory.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 };
 

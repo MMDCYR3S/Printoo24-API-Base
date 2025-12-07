@@ -12,7 +12,7 @@ const Home = () => <div className="p-10 text-center text-2xl">صفحه اصلی 
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter >
       <Routes>
         {/* مسیرهای احراز هویت */}
         <Route element={<AuthLayout />}>

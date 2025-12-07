@@ -38,9 +38,10 @@
 /* 🟢 فیکس اصلی: جلوگیری از فضای خالی و اسکرول افقی مزاحم */
 html, body {
   width: 100%;
-  overflow-x: hidden; /* حذف اسکرول افقی و فضای سفید اضافه */
+  overflow-x: clip; /* حذف اسکرول افقی و فضای سفید اضافه */
   margin: 0;
   padding: 0;
+  
 }
 
 /* استایل اسکرول بار باریک و شیک */
@@ -61,4 +62,31 @@ html, body {
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
+}
+
+
+
+
+
+
+
+
+/* در فایل index.css */
+.drawer-side {
+  transition-property: none !important; /* انیمیشن دیزی رو میکشه */
+  visibility: visible !important; /* پرپر زدن رو میگیره */
+  pointer-events: none;
+}
+
+.drawer-toggle:checked ~ .drawer-side {
+  pointer-events: auto;
+}
+
+.drawer-side > .menu {
+  transform: translateX(100%); /* پیش فرض بیرون کادر */
+  transition: transform 0.2s ease-out; /* انیمیشن دستی و سبک */
+}
+
+.drawer-toggle:checked ~ .drawer-side > .menu {
+  transform: translateX(0); /* ورود نرم */
 }
