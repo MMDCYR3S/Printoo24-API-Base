@@ -109,7 +109,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
                         <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
                            <LayoutGrid size={16} />
                         </div>
-                        <h3 className="text-sm font-black text-slate-700">چه چیزی نیاز دارید؟</h3>
+                        <h3 className="text-sm font-black text-slate-700">زیر دسته بندی ها</h3>
                       </div>
                       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4">
                         {sub_categories.map((sub, idx) => (
@@ -134,7 +134,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
                             <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg">
                               <Tag size={16} />
                             </div>
-                            <h3 className="text-sm font-black text-slate-700">پیشنهادات برگزیده</h3>
+                            <h3 className="text-sm font-black text-slate-700">محصولات برگزیده</h3>
                         </div>
                         <button className="text-xs font-bold text-primary hover:text-primary-focus flex items-center gap-1">
                            مشاهده همه <ArrowLeft size={14} />

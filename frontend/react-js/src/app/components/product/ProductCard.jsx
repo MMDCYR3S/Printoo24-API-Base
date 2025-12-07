@@ -25,18 +25,14 @@ const ProductCard = ({ product }) => {
 
         {/* لایه تاریک روی عکس در حالت هاور */}
         <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 backdrop-blur-[2px]">
-           <button className="btn btn-sm btn-circle btn-primary text-white shadow-lg tooltip tooltip-top" data-tip="افزودن">
-             <ShoppingCart size={16} />
+           <button className="btn btn-sm btn-primary bg-primary/50 backdrop-blur-lg text-white shadow-lg ">
+            <Eye size={16} /> مشاهده و سفارش
            </button>
-           <button className="btn btn-sm btn-circle btn-ghost bg-white/20 text-white hover:bg-white hover:text-slate-900 backdrop-blur-md shadow-lg tooltip tooltip-top" data-tip="مشاهده">
-             <Eye size={16} />
-           </button>
+
         </div>
 
         {/* بج "تحویل فوری" یا "جدید" (مثال) */}
-        <div className="absolute top-2 right-2">
-           <span className="badge badge-xs bg-emerald-500 border-none text-white shadow-sm px-2 py-2">فوری</span>
-        </div>
+
       </div>
 
       {/* بدنه کارت */}
