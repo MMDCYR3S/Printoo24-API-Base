@@ -1,11 +1,8 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from core.models import (
-    User,
-    CustomerProfile,
-    Wallet,
-    Cart,
-    Role
+    User, CustomerProfile, Wallet,
+    Cart, Role, UserRole
 )
 
 # ====== Create Wallet When User Created ====== #
@@ -46,4 +43,9 @@ def create_customer_role(sender, instance, created, **kwargs):
     و يك كاربر مي باشد
     """
     if created and not instance.is_superuser and not instance.is_staff:
-        Role.objects.create(name="مشتری", description="نقش مشتری", is_customer=True)
+        try:
+            customer_role, _ = Role.objects.get_or_create(name="مشتری", description="نقش مشتری", is_customer=True, type="normal")
+            UserRole.objects.create(user=instance, role=customer_role)
+        except Role.DoesNotExist:
+            pass
+    

@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 from django.db.models import QuerySet
 
-from ....utils.base_repository import BaseRepository
+from core.utils import BaseRepository
 from core.models import User
 from .exceptions import (
     EmailAlreadyExistsException,
@@ -68,3 +68,17 @@ class UserRepository(BaseRepository[User]):
 
     def bulk_delete(self, user_ids: list[int]) -> tuple:
         return self.model.objects.filter(id__in=user_ids).delete()
+
+    # ========== بخش مربوط به سیستم مدیریت داخلی و ادمین ========== #
+    def get_all_staff(self) -> QuerySet[User]:
+        return self.model.objects.filter(is_staff=True)\
+            .prefetch_related('user_role__role')\
+            .order_by('-created_at')
+
+    def get_staff_detail(self, user_id: int) -> Optional[User]:
+        return self.model.objects.filter(id=user_id, is_staff=True)\
+            .prefetch_related('user_role__role', 'user_permissions')\
+            .first()
+            
+    def get_user_role(self, user: User) -> Optional[User]:
+        return user.user_role.select_related('role').first()

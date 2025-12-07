@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Size, Material, Quantity, FileUploadSpec, User
-from .attribute_repo import (
+from .repositories import (
     SizeRepository,
     MaterialRepository,
     QuantityRepository,

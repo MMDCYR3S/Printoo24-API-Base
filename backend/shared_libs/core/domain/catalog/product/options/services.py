@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Option, OptionValue
-from .option_repo import OptionRepository, OptionValueRepository
+from .repositories import OptionRepository, OptionValueRepository
 
 # ===== Option Domain Service ===== #
 class OptionDomainService:

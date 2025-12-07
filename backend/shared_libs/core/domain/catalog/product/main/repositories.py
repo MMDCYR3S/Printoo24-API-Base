@@ -2,7 +2,7 @@ from typing import List, Optional
 from django.db.models import Prefetch, QuerySet
 
 from core.utils.base_repository import BaseRepository
-from .exceptions import ProductNotFoundException
+from ..exceptions import ProductNotFoundException
 from core.models import (
     Product, 
     ProductQuantity, 
@@ -24,7 +24,46 @@ class ProductRepository(BaseRepository[Product]):
     
     def __init__(self):
         super().__init__(Product)
+       
+    # ===== Helper Methods ===== #
+    def _get_detail_queryset(self) -> QuerySet[Product]:
+        """
+        یک کوئری‌ست پایه و سنگین که تمام روابط مورد نیاز برای صفحه جزئیات محصول
+        را بارگذاری می‌کند (Eager Loading).
+        این متد برای جلوگیری از تکرار کد در get_by_id و get_by_slug ساخته شده است.
+        """
+        return self.model.objects.select_related(
+            'category',
+            'pricing_config'
+        ).prefetch_related(
+            # ===== بارگذاری مقادیر ثابت ===== #
+            Prefetch('product_quantity', queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')),
+            Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__width')),
+            Prefetch('product_material', queryset=ProductMaterial.objects.select_related('material').order_by('is_default', 'material__name')),
+            
+            # ===== بارگذاری ویژگی ها ===== #
+            Prefetch(
+                'options', 
+                queryset=ProductOption.objects.select_related('option').prefetch_related(
+                    Prefetch(
+                        'choices', 
+                        queryset=ProductOptionValue.objects.order_by('order')
+                    )
+                ).order_by('order')
+            ),
+            
+            #  ===== بارگذاری تصاویر و فایل های پیوست ===== #
+            Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
+            Prefetch('product_attachment_product', queryset=ProductAttachment.objects.order_by('id')),
+            
+            # ===== نیازمندی‌های آپلود فایل ===== #
+            Prefetch(
+                'file_upload_requirements', 
+                queryset=ProductFileUploadRequirement.objects.select_related('spec').order_by('sort_order')
+            )
+        )
         
+    # ===== Read Methods ===== #
     def get_all_products(self) -> QuerySet[Product]:
         """
         دریافت لیست تمام محصولات به همراه دسته‌بندی آن‌ها.
@@ -43,49 +82,10 @@ class ProductRepository(BaseRepository[Product]):
         ).select_related('category').prefetch_related('product_image').order_by('-created_at')
 
     def get_product_detail_by_slug(self, slug: str) -> Optional[Product]:
-        """
-        دریافت جزئیات کامل یک محصول با استفاده از اسلاگ.
-        این متد به شدت برای جلوگیری از مشکل N+1 بهینه‌سازی شده است.
-        - select_related: برای روابط یک-به-یک یا یک-به-چند (ForeignKey).
-        - prefetch_related: برای روابط چند-به-چند یا معکوس یک-به-چند (Reverse ForeignKey).
-        """
         try:
-            return self.model.objects.select_related(
-                'category',
-                'pricing_config'
-            ).prefetch_related(
-                Prefetch('product_quantity', queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')),
-                Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__width')),
-                Prefetch('product_material', queryset=ProductMaterial.objects.select_related('material').order_by('is_default', 'material__name')),
-                
-                # ===== اصلاح نام ریلیشن آپشن‌ها ===== #
-                # در مدل ProductOption تعریف کردید: product = ForeignKey(..., related_name='options')
-                # پس اینجا باید بنویسید 'options' نه 'product_option_product'
-                Prefetch(
-                    'options', 
-                    queryset=ProductOption.objects.select_related('option').prefetch_related(
-                        Prefetch(
-                            'choices', 
-                            queryset=ProductOptionValue.objects.order_by('order')
-                        )
-                    ).order_by('order')
-                ),
-                
-                Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
-                Prefetch('product_attachment_product', queryset=ProductAttachment.objects.order_by('id')),
-                
-                # ===== اصلاح فیلد مرتب‌سازی فایل‌ها ===== #
-                # فیلد created_at وجود ندارد، باید با sort_order مرتب کنید
-                Prefetch(
-                    'file_upload_requirements', 
-                    queryset=ProductFileUploadRequirement.objects.select_related('spec').order_by('sort_order') # <--- اصلاح شد
-                )
-
-            ).get(slug=slug, is_active=True)
-            
+            return self._get_detail_queryset().get(slug=slug, is_active=True)
         except self.model.DoesNotExist:
-            raise ProductNotFoundException(f"محصولی با اسلاگ '{slug}' یافت نشد.")
-
+            return None
     def get_product_detail_by_id(self, id: int) -> Optional[Product]:
         """
         دریافت جزئیات کامل یک محصول با استفاده از اسلاگ.

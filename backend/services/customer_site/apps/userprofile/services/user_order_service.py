@@ -3,7 +3,7 @@ from typing import List, Optional, Any
 from rest_framework.exceptions import NotFound # بهتر است از اکسپشن DRF استفاده کنیم
 
 from core.models import Order
-from core.domain.commerce.order.services import OrderDomainService
+from core.domain.commerce.order import OrderDomainService
 
 logger = logging.getLogger('userprofile.services.orders')
 

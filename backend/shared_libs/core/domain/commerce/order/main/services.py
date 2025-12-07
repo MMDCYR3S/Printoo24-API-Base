@@ -1,23 +1,10 @@
-from typing import Optional, Dict, Any, List
-
-from django.db.models import Prefetch
+import uuid
+from typing import Optional, List
 from django.db import transaction
 from django.core.files.base import ContentFile
-
-from core.models import (
-    User,
-    Order,
-    OrderItem,
-    OrderStatus,
-    OrderItemFile,
-    Address
-)
+from core.models import User, Order, OrderItem, OrderStatus, OrderItemFile, Address
 from core.domain.commerce.cart import CartRepository
-from .repositories import (
-    OrderRepository,
-    OrderItemRepository,
-    OrderItemFileRepository
-)
+from .repositories import OrderRepository, OrderItemRepository, OrderItemFileRepository
 
 # ====== Order Domain Service ====== #
 class OrderDomainService:
@@ -27,18 +14,21 @@ class OrderDomainService:
     
     # ===== سازنده ====== #
     def __init__(self):
-            self._order_repo = OrderRepository()
-            self._item_repo = OrderItemRepository()
-            self._cart_repo = CartRepository()
-            self._file_repo = OrderItemFileRepository()
+        self._order_repo = OrderRepository()
+        self._item_repo = OrderItemRepository()
+        self._cart_repo = CartRepository()
+        self._file_repo = OrderItemFileRepository()
+
+    def _generate_order_code(self) -> str:
+        """ تولید کد پیگیری یکتا (8 کاراکتر) """
+        return uuid.uuid4().hex[:8].upper()
 
     # ==== عملیات نهایی تبدیل سبد خرید به سفارش ===== #
     @transaction.atomic
     def checkout_cart(self, user: User, address: Address, order_type: str) -> Order:
-        """
-        تبدیل سبد خرید به سفارش نهایی.
-        """
-        # 1. دریافت سبد خرید
+        """ تبدیل سبد خرید به سفارش نهایی """
+        
+        # ===== دریافت سبد خرید ==== #
         cart = self._cart_repo.get_cart_by_user(user)
         if not cart or not cart.cart_items.exists():
             raise ValueError("سبد خرید شما خالی است.")
@@ -46,45 +36,51 @@ class OrderDomainService:
         cart_items = cart.cart_items.select_related('product').prefetch_related('uploads').all()
 
         # ===== محاسبه قیمت کل ===== #
-        total_price = sum(item.price for item in cart_items)
+        base_price = sum(item.price for item in cart_items)
 
         # ===== ایجاد سفارش ===== #
-        initial_status = OrderStatus.objects.get(name="در انتظار بررسی") # یا نام دقیق در دیتابیس
+        initial_status, _ = OrderStatus.objects.get_or_create(
+            name="در حال بررسی",
+            internal_code="PENDING"
+            )
         
-        order = self._order_repo.create({
-            "user": user,
-            "address": address,
-            "order_status": initial_status,
-            "total_price": total_price,
-            "type": order_type
-        })
-
+        # ===== ایجاد سفارش =====
+        order = self._order_repo.create_order(
+            user=user,
+            order_status=initial_status,
+            address=address,
+            total_price=base_price,
+            base_price=base_price,
+            order_type=order_type,
+            order_code=self._generate_order_code()
+        )
+        
         # ===== ایجاد آیتم‌های سفارش ===== #
         for c_item in cart_items:
-            # ===== ایجاد آیتم سفارش ===== #
             order_item = self._item_repo.create({
                 "order": order,
                 "product": c_item.product,
                 "quantity": c_item.quantity,
+                "unit_price": c_item.product.pricing_config.price,
                 "price": c_item.price,
                 "items": c_item.items 
             })
 
-            # ===== انتقال فایل‌های طراحی ===== #
+            # ===== انتقال فایل‌های طراحی (نسخه بندی شده) ===== #
             for upload in c_item.uploads.all():
                 if upload.file:
                     new_file_content = ContentFile(upload.file.read())
-                    new_file_content.name = upload.file.name.split('/')[-1] 
+                    new_file_content.name = upload.file.name.split('/')[-1]
                     
                     OrderItemFile.objects.create(
                         order_item=order_item,
                         requirement=upload.requirement,
-                        file=new_file_content
+                        file=new_file_content,
+                        version=1,
+                        is_latest=True
                     )
-
         # ===== پاک کردن سبد خرید ===== #
-        cart.cart_items.all().delete()
-
+        cart.delete()
         return order
     
     # ===== دریافت جزئیات سفارش ===== #

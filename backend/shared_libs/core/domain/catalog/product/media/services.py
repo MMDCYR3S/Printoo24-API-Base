@@ -1,8 +1,8 @@
 from typing import List
 from django.db import transaction
 from django.core.exceptions import ValidationError
-from .media_repo import ProductMediaRepository
-from .repositories import ProductRepository
+from .repositories import ProductMediaRepository
+from core.domain.catalog.product import ProductRepository
 
 class ProductMediaDomainService:
     def __init__(self):
