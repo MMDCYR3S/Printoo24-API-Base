@@ -1,7 +1,7 @@
 import logging
 from typing import List
 from core.models import User, ProductComment
-from core.domain.catalog.comment.services import FeedbackDomainService
+from core.domain.catalog.comment import FeedbackDomainService
 
 # ===== Logger ===== #
 logger = logging.getLogger('userprofile.services.feedback')

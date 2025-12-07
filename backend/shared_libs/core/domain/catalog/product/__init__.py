@@ -1,22 +1,20 @@
-from .services import ProductDomainService
-from .repositories import ProductRepository
+from .main import ProductDomainService, ProductRepository
 from .calculators import ProductPriceCalculator
-from .attribute_repo import (
+from .attributes import (
     SizeRepository,
     MaterialRepository,
     QuantityRepository,
-    FileUploadSpecRepository
-)
-from .attribute_services import (
+    FileUploadSpecRepository,
+    
     SizeDomainService,
     MaterialDomainService,
     QuantityDomainService,
     FileUploadSpecDomainService,   
 )
-from .option_repo import (
+from .options import (
     OptionRepository,
-    OptionValueRepository
+    OptionValueRepository,
+    
+    OptionDomainService
 )
-from .option_service import OptionDomainService
-from .media_repo import ProductMediaRepository
-from .media_service import ProductMediaDomainService
+from .media import ProductMediaRepository, ProductMediaDomainService

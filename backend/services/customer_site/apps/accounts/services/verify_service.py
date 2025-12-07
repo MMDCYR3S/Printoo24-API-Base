@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 from ..tasks import send_verification_email_task
 from core.domain.infrastructure.cache.cache_services import CacheService
-from core.domain.identity.users.services import UserDomainService
+from core.domain.identity.users import UserDomainService
 
 # ====== Logger Configuration ====== #
 logger = logging.getLogger('accounts.services.verification')

@@ -1,9 +1,9 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from django.db.models import QuerySet, Max
 from django.db import transaction
 
-from .exceptions import (
+from ..exceptions import (
     ProductNotFoundException,
     ProductAlreadyExistsException,
     InvalidProductDataException
@@ -32,112 +32,84 @@ class ProductDomainService:
         """
         return self._repo.get_all_products()
     
-    def get_product_detail_by_id(self, product_id: int) -> dict:
+    # ===== متد کمکی برای نمایش جزئیات محصول ===== #
+    def _format_product_options(self, product: Product) -> List[Dict[str, Any]]:
+        """
+        متد کمکی برای تبدیل ساختار آپشن‌های دیتابیس به فرمت استاندارد فرانت‌اند.
+        DRY Principle: جلوگیری از تکرار کد در متدهای get_by_id و get_by_slug
+        """
+        structured_options = []
+        for prod_opt in product.options.all():
+            option_data = {
+                "id": prod_opt.id,
+                "name": prod_opt.option.name,
+                "label": prod_opt.option.label,
+                "type": prod_opt.option.input_type,
+                "is_required": prod_opt.is_required,
+                "description": prod_opt.option.description,
+                "has_pricing": prod_opt.has_pricing,
+                "choices": []
+            }
+            for choice in prod_opt.choices.all():
+                option_data["choices"].append({
+                    "id": choice.id,
+                    "label": choice.label,
+                    "value": choice.value,
+                    "price_impact": choice.price_impact,
+                    "is_default": choice.is_default,
+                    "quantity_step": choice.quantity_step,
+                    "is_step_ceiling": choice.is_step_ceiling,
+                    "description": f"هر {choice.quantity_step} عدد" if choice.quantity_step > 1 else ""
+                })
+            structured_options.append(option_data)
+        return structured_options
+    
+    def get_product_detail_by_id(self, product_id: int) -> Dict[str, Any]:
         """
         دریافت جزئیات کامل محصول با استفاده از ID (برای داشبورد).
         خروجی: دیکشنری شامل product و structured_options.
         """
         product = self._repo.get_product_detail_by_id(product_id)
-        
-        # ===== تبدیل ساختار آپشن‌ها (مشابه متد slug) ===== #
-        structured_options = []
-        
-        for prod_opt in product.options.all():
-            option_data = {
-                    "id": prod_opt.id,
-                    "name": prod_opt.option.name,
-                    "label": prod_opt.option.label,
-                    "type": prod_opt.option.input_type,
-                    "is_required": prod_opt.is_required,
-                    "description": prod_opt.option.description,
-                    "has_pricing": prod_opt.has_pricing,
-                    "choices": []
-                }
-            for choice in prod_opt.choices.all():
-                option_data["choices"].append({
-                    "id": choice.id,
-                    "label": choice.label,
-                    "value": choice.value,
-                    "price_impact": choice.price_impact,
-                    "is_default": choice.is_default,
-                    "quantity_step": choice.quantity_step,
-                    "is_step_ceiling": choice.is_step_ceiling,
-                    "description": f"هر {choice.quantity_step} عدد" if choice.quantity_step > 1 else ""
-                })
-            structured_options.append(option_data)
+        if not product:
+            raise ProductNotFoundException(f"محصول با شناسه {product_id} یافت نشد.")
         
         return {
             "product": product,
-            "structured_options": structured_options
+            "structured_options": self._format_product_options(product)
         }
 
     def get_product_detail_by_slug(self, slug: str) -> Optional[Product]:
         """
-        دریافت جزئیات کامل یک محصول با استفاده از اسلاگ آن.
-        این قسمت با استفاده از روابط پیچیده، تمامی ویژگی های محصول
-        را با دقت بررسی کرده و با ساختار درختی درست، آن ها را برای
-        نمایش به فرانت ارسال می کند.
+        مورد استفاده: دریافت جزئیات یک محصول با اسلاگ.
         """
         product = self._repo.get_product_detail_by_slug(slug)
         if not product:
-            raise ProductNotFoundException(f"Product with slug '{slug}' not found.")
+            raise ProductNotFoundException(f"محصول با اسلاگ '{slug}' یافت نشد.")
         
-        # ===== تبدیل ساختار آپشن‌ها به فرمت استاندارد API ===== #
-        structured_options = []
-        
-        # ===== مرتب‌سازی گزینه‌ها ===== #
-        for prod_opt in product.options.all():
-            option_data = {
-                    "id": prod_opt.id,
-                    "name": prod_opt.option.name,
-                    "label": prod_opt.option.label,
-                    "type": prod_opt.option.input_type,
-                    "is_required": prod_opt.is_required,
-                    "description": prod_opt.option.description,
-                    "has_pricing": prod_opt.has_pricing,
-                    "choices": []
-                }
-            for choice in prod_opt.choices.all():
-                option_data["choices"].append({
-                    "id": choice.id,
-                    "label": choice.label,
-                    "value": choice.value,
-                    "price_impact": choice.price_impact,
-                    "quantity_step": choice.quantity_step,
-                    "is_step_ceiling": choice.is_step_ceiling,
-                    "is_default": choice.is_default,
-                    "description": f"هر {choice.quantity_step} عدد" if choice.quantity_step > 1 else ""
-                })
-            structured_options.append(option_data)
-        
-        # ===== بازگشت اطلاعات محصول ===== #
         return {
             "product": product,
-            "structured_options": structured_options
+            "structured_options": self._format_product_options(product)
         }
             
             
     # ===== Product Shell ===== #
     @transaction.atomic
-    def create_product_shell(self, user, data: dict) -> Product:
+    def create_product_shell(self, user, data: Dict[str, Any]) -> Product:
         """
         ایجاد محصول اولیه.
         نکته: pricing_config همزمان با محصول ساخته می‌شود (Empty) تا بعدا پر شود.
         """
         # ===== افزودن کاربر ===== #
         data['user'] = user
-        
         # ===== ایجاد محصول ===== #
         product = self._repo.create_product(data)
-        
         # ===== ایجاد تنظیمات قیمت ===== #
         ProductPricingConfig.objects.create(product=product)
-        
         return product
 
     # ===== Product Shell ===== #
     @transaction.atomic
-    def update_product_shell(self, pk: int, data: dict) -> Product:
+    def update_product_shell(self, pk: int, data: Dict[str, Any]) -> Product:
         product = self._repo.get_by_id(pk)
         if not product:
             raise ProductNotFoundException("محصول یافت نشد.")
@@ -145,16 +117,11 @@ class ProductDomainService:
 
     # ===== Pricing Config ===== #
     @transaction.atomic
-    def update_pricing_config(self, product_id: int, data: dict):
+    def update_pricing_config(self, product_id: int, data: Dict[str, Any]):
         product = self._repo.get_by_id(product_id)
         if not product:
             raise ProductNotFoundException("محصول یافت نشد.")
-
-        config = getattr(product, 'pricing_config', None)
-        if not config:
-            # ===== ایجاد ===== #
-            config = ProductPricingConfig.objects.create(product=product)
-
+        config, _ = ProductPricingConfig.objects.get_or_create(product=product)
         for key, value in data.items():
             setattr(config, key, value)
         config.save()
@@ -257,7 +224,6 @@ class ProductDomainService:
             ))
             
         ProductOptionValue.objects.bulk_create(local_values)
-        
         return product_option
     
     @transaction.atomic
@@ -468,5 +434,4 @@ class ProductDomainService:
         exists = ProductOption.objects.filter(id=product_option_id, product_id=product_id).exists()
         if not exists:
             raise InvalidProductDataException("این ویژگی متعلق به محصول نیست.")
-            
         ProductOption.objects.filter(id=product_option_id).delete()

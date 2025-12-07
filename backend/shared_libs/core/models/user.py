@@ -1,4 +1,5 @@
 from slugify import slugify
+from random import randint
 
 from django.db import models
 from django.contrib.auth.models import Permission
@@ -78,9 +79,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 # ========= Role Model ========= #
 class Role(models.Model):
     """ مدلاسیون نقش کاربر """
+    USER_TYPE = [
+        ("admin", _("ادمین")),
+        ("normal", _("کاربر عادی")),
+    ]
+    
     name = models.CharField(_('نام'), max_length=150)
+    slug = models.SlugField(_('کد سیستمی'), unique=True, default=randint(000000, 999999))
     description = models.TextField(_('توضیحات'), blank=True, null=True)
     permission = models.ManyToManyField(Permission, verbose_name=_('مجوز ها'), related_name='roles')
+    type = models.CharField(_('نوع کاربر'), max_length=150, choices=USER_TYPE, default='normal')
     is_customer = models.BooleanField(_("آیا نقش برای مشتری است؟"), default=False)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)

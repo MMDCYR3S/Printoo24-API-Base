@@ -1,10 +1,8 @@
-from .repositories import (
-    OrderRepository, 
-    OrderItemRepository, 
+from .main import (
+    OrderRepository,
+    OrderItemRepository,
     OrderItemFileRepository
 )
-from .services import (
-    OrderDomainService, 
-    # OrderItemService, 
-    # OrderItemDesignFileService
+from .main import (
+    OrderDomainService,
 )
