@@ -8,6 +8,29 @@ from django.utils.translation import gettext_lazy as _
 
 from .product import Product, ProductFileUploadRequirement
 
+# ===== Order Status Group ===== #
+class OrderStatusGroup(models.Model):
+    """
+    گروه‌بندی وضعیت‌ها به صورت داینامیک.
+    مثال:
+    - عنوان: واحد طراحی / کد: design
+    - عنوان: واحد چاپ / کد: production
+    
+    نکته: با ایجاد هر رکورد در اینجا، سیستم اتوماتیک یک AccessScope می‌سازد.
+    """
+    name = models.CharField(_('عنوان گروه'), max_length=100)
+    code = models.SlugField(_('کد سیستمی'), max_length=50, unique=True, help_text="شناسه یکتا برای لاجیک سیستم (مثلا: design)")
+    description = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('گروه وضعیت')
+        verbose_name_plural = _('گروه‌های وضعیت')
+
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
 # ============================= #
 # ===== Order Status Model ===== #
 # ============================= #
@@ -17,20 +40,11 @@ class OrderStatus(models.Model):
     نکته تحلیلی: فیلد internal_code برای لاجیک‌های کدنویسی حیاتی است 
     تا وابسته به تغییر متن فارسی توسط ادمین نباشیم.
     """
-    STATUS_GROUPS = [
-        ('financial', _('مالی')),
-        ('design', _('طراحی')),
-        ("qc", _('کنترل کیفی')),
-        ('production', _('تولید و چاپ')),
-        ('logistics', _('ارسال و تحویل')),
-        ('other', _('سایر')),
-    ]
-
-    name = models.CharField(_('عنوان نمایشی'), max_length=150)
     
+    name = models.CharField(_('عنوان نمایشی'), max_length=150)
     internal_code = models.SlugField(_('کد سیستمی'), max_length=50, unique=True, null=True, blank=True)
     
-    group = models.CharField(_('گروه وضعیت'), max_length=20, choices=STATUS_GROUPS, default='other')
+    group = models.ForeignKey(OrderStatusGroup, related_name='order_status', on_delete=models.CASCADE, blank=True, null=True)
     description = models.TextField(_('توضیحات'), blank=True, null=True)
     
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
@@ -84,8 +98,8 @@ class Order(models.Model):
     
     class Meta:
         ordering = ['-created_at']
-        verbose_name = _('سفارش')
-        verbose_name_plural = _('سفارشات')
+        # verbose_name = _('سفارش')
+        # verbose_name_plural = _('سفارشات')
 
     def __str__(self):
         return f"{self.order_code} | {self.user}"
@@ -102,7 +116,6 @@ class Order(models.Model):
         آیا سفارش قفل شده است؟ 
         (مثلا اگر در مرحله چاپ باشد نباید بتوان آیتم اضافه کرد)
         """
-        # این لاجیک باید بر اساس internal_code وضعیت‌ها باشد
         locked_statuses = ['PRODUCTION', 'PRINTING', 'SHIPPED', 'DELIVERED']
         return self.current_status.internal_code in locked_statuses
     
@@ -119,6 +132,13 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(_('تعداد'), default=1)
     price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
     items = models.JSONField(_("آیتم های اضافی"), blank=True, null=True)
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='assigned_order_items',
+        verbose_name=_("کارشناس مسئول (طراح)")
+    )
     admin_note = models.TextField(_("یادداشت تولید"), blank=True, help_text="مخصوص اپراتور چاپ")
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)

@@ -15,7 +15,7 @@ class RoleAdminDomainService:
 
     # ========== Single Role Management ========== #
     @transaction.atomic
-    def create_role(self, data: Dict[str, Any], permission_ids: List[int] = None) -> Role:
+    def create_role(self, data: Dict[str, Any], permission_ids: List[int] = None, scope_ids: List[int] = None) -> Role:
         """ ایجاد نقش جدید """
         # ===== بررسی کد تکراری ===== #
         if self.role_repo.get_role_by_code(data.get('code')):
@@ -26,24 +26,29 @@ class RoleAdminDomainService:
         if permission_ids:
             self.role_repo.update_permissions(role, permission_ids)
             
+        if scope_ids:
+            role.scopes.set(scope_ids)
+            
         return role
 
     @transaction.atomic
-    def update_role(self, role_id: int, data: Dict[str, Any], permission_ids: List[int] = None) -> Role:
+    def update_role(self, role_id: int, data: Dict[str, Any], permission_ids: List[int] = None, scope_ids: List[int] = None) -> Role:
         """ ویرایش نقش """
         role = self.role_repo.get_by_id(role_id)
         if not role:
             raise ValidationError("نقش یافت نشد.")
         
-        # ===== بررسی کد تکراری ===== #
-        if 'code' in data and data['code'] != role.code:
-             if self.role_repo.get_role_by_code(data['code']):
+        if 'slug' in data and data['slug'] != role.slug:
+             if self.role_repo.get_role_by_slug(data['slug']):
                 raise ValidationError("کد سیستمی تکراری است.")
 
         self.role_repo.update(role, data)
         
         if permission_ids is not None:
             self.role_repo.update_permissions(role, permission_ids)
+            
+        if scope_ids is not None:
+            role.scopes.set(scope_ids)
             
         return role
 
@@ -52,7 +57,6 @@ class RoleAdminDomainService:
         role = self.role_repo.get_by_id(role_id)
         if not role:
              raise ValidationError("نقش یافت نشد.")
-             
         self._check_role_deletion_safety([role])
         role.delete()
 

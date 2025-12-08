@@ -65,7 +65,7 @@ class OrderRepository(BaseRepository[Order]):
         ).prefetch_related(
             # ===== آیتم های سفارش و فایل های طراحی ===== #
             Prefetch(
-                'items',
+                'order_item_order',
                 queryset=OrderItem.objects.select_related('product').prefetch_related(
                     Prefetch('files', queryset=OrderItemFile.objects.select_related('requirement__spec').order_by('-version'))
                 )
@@ -77,6 +77,20 @@ class OrderRepository(BaseRepository[Order]):
             # ===== مرسوله های مربوط به سفارش ===== #
             Prefetch('shipments', queryset=OrderShipment.objects.select_related('delivery_method'))
         ).filter(id=order_id).first()
+        
+    def get_all_orders_summary(self) -> QuerySet[Order]:
+        """ لیست کل سفارشات برای پنل ادمین (سبک) """
+        return self.model.objects.select_related(
+            'user', 'current_status'
+        ).order_by('-created_at')
+        
+    def get_orders_assigned_to_user(self, user: User) -> QuerySet[Order]:
+        """
+        دریافت سفارشاتی که حداقل یک آیتم آن به کاربر اختصاص داده شده است.
+        """
+        return self._get_detail_queryset().filter(
+            order_item_order__assigned_to=user
+        ).distinct()   
 
 # ======= Order Item Repository ======= #
 class OrderItemRepository(BaseRepository[OrderItem]):

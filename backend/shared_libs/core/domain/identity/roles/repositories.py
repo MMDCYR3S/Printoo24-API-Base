@@ -10,8 +10,8 @@ class RoleRepository(BaseRepository[Role]):
     def get_all_roles(self) -> QuerySet[Role]:
         return self.model.objects.all().prefetch_related('permissions').order_by('id')
 
-    def get_role_by_code(self, code: str) -> Optional[Role]:
-        return self.model.objects.filter(code=code).first()
+    def get_role_by_slug(self, slug: str) -> Optional[Role]:
+        return self.model.objects.filter(slug=slug).first()
 
     def create_role(self, data: Dict[str, Any]) -> Role:
         return self.model.objects.create(**data)
