@@ -22,47 +22,47 @@ services:
 # --- شروع بخش‌های غیرفعال شده ---
 
   # # ====== Admin Backend (غیرفعال شد) ====== #
-  # admin_site:
-  #   build:
-  #     context: .
-  #     dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
-  #   container_name: printoo_admin_site
-  #   command: python manage.py runserver 0.0.0.0:8010
-  #   volumes:
-  #     - ./backend/services/admin_site:/app/src
-  #     - ./backend/shared_libs:/app/shared_libs
-  #   ports:
-  #     - "8010:8010"
-  #   environment:
-  #     - PYTHONPATH=/app/shared_libs:$PYTHONPATH
-  #   env_file:
-  #     - ./env/.env.dev
-  #   depends_on:
-  #     - db
-  #     - redis
-  #   networks:
-  #     - admin_site_network
-  #     - data_network
+  admin_site:
+    build:
+      context: .
+      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_admin_site
+    command: python manage.py runserver 0.0.0.0:8010
+    volumes:
+      - ./backend/services/admin_site:/app/src
+      - ./backend/shared_libs:/app/shared_libs
+    ports:
+      - "8010:8010"
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+    env_file:
+      - ./env/.env.dev
+    depends_on:
+      - db
+      - redis
+    networks:
+      - admin_site_network
+      - data_network
 
   # # ====== Celery Workers(Admin Site) (غیرفعال شد) ====== #
-  # celery_worker_admin:
-  #   build:
-  #     context: .
-  #     dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
-  #   container_name: printoo_celery_admin
-  #   command: celery -A admin_site.celery worker -l info
-  #   volumes:
-  #     - ./backend/services/admin_site:/app/src
-  #     - ./backend/shared_libs:/app/shared_libs
-  #   environment:
-  #     - PYTHONPATH=/app/shared_libs:$PYTHONPATH
-  #   env_file:
-  #     - ./env/.env.dev
-  #   depends_on:
-  #     - redis
-  #     - db
-  #   networks:
-  #     - data_network
+  celery_worker_admin:
+    build:
+      context: .
+      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_celery_admin
+    command: celery -A admin_site.celery worker -l info
+    volumes:
+      - ./backend/services/admin_site:/app/src
+      - ./backend/shared_libs:/app/shared_libs
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+    env_file:
+      - ./env/.env.dev
+    depends_on:
+      - redis
+      - db
+    networks:
+      - data_network
 
 # --- پایان بخش‌های غیرفعال شده ---
 
@@ -117,11 +117,11 @@ services:
       context: ./frontend/react-js
       dockerfile: Dockerfile
     container_name: printoo_frontend
-    #ports:
-    #  - "5173:5173"
+    ports:
+     - "5173:5173"
     
     # === نکته مهم: وقتی هاست مود هست، نتورک‌ها رو پاک می‌کنیم ===
-    network_mode: "host"
+    # network_mode: "host"
     volumes:
       - ./frontend/react-js:/app
       - /app/node_modules
@@ -129,15 +129,15 @@ services:
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - customer_site
-      # - admin_site <--- وابستگی به admin_site حذف شد
-    # networks:  <--- این قسمت برای فرانت باید پاک یا کامنت بشه چون host mode هست
-    #   - customer_site_network
+      - admin_site
+    networks: 
+      - customer_site_network
 
 # ====== Networks' Settings ====== #
 # === نکته مهم: این بخش باید حتماً فعال باشه (کامنت نباشه) ===
 networks:
-  # admin_site_network: <--- این شبکه دیگر مورد نیاز نیست و کامنت شد
-  #   driver: bridge
+  admin_site_network:
+    driver: bridge
   customer_site_network:
     driver: bridge
   data_network:
