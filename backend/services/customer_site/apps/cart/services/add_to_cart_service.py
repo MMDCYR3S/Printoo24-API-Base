@@ -37,9 +37,8 @@ class AddToCartService:
                 product=validated_data["product"],
                 quantity=validated_data["quantity"],
                 specs={
-                    'material_obj': validated_data['material_obj'],
                     'size_obj': validated_data.get('size_obj'),
-                    'option_objs': validated_data['option_values'], # اصلاح شد: option_values
+                    'option_objs': validated_data['option_values'],
                     'width': validated_data["width"],
                     'height': validated_data["height"],
                     'has_design': validated_data.get('has_design'),

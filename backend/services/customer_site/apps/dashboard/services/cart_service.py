@@ -9,7 +9,6 @@ from django.core.exceptions import ValidationError
 from core.models import (
     User,
     Product,
-    ProductMaterial,
     ProductSize,
     ProductOptionValue,
     Cart,
@@ -108,15 +107,6 @@ class CartDashboardService:
             'has_design': selections.get('has_design', True)
         }
 
-        # --- متریال ---
-        try:
-            specs['material_obj'] = ProductMaterial.objects.get(
-                id=selections['material_id'], 
-                product=product
-            )
-        except ProductMaterial.DoesNotExist:
-            raise ValidationError("متریال نامعتبر است.")
-
         # ===== سایز ===== #
         size_id = selections.get('size_id')
         if size_id:
@@ -202,12 +192,6 @@ class CartDashboardService:
             'has_design': raw_specs.get('has_design', True),
             'custom_dimensions': raw_specs.get('custom_dimensions')
         }
-
-        # ===== جنس ===== #
-        if 'material_id' in raw_specs:
-            prepared['material_obj'] = get_object_or_404(
-                ProductMaterial, id=raw_specs['material_id'], product=product
-            )
 
         # ===== سایز ===== #
         if 'size_id' in raw_specs:

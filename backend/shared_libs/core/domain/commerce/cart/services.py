@@ -11,7 +11,6 @@ from core.models import (
     ProductFileUploadRequirement,
     ProductSize,
     User,
-    ProductMaterial,
     ProductOptionValue
 )
 from core.domain.catalog.product import ProductPriceCalculator
@@ -76,8 +75,6 @@ class CartDomainService:
         """
         # 1. استخراج و بررسی دیتای واقعی
         try:
-            material = ProductMaterial.objects.get(id=specs['material_obj'].id, product=product)
-            # فرض بر این است که option_objs لیستی از ProductOptionValue هستند که قبلا ولیدیت شده‌اند
             selected_values = specs.get('option_objs', []) 
         except Exception:
             raise ValueError("اطلاعات ارسالی نامعتبر است.")
@@ -89,7 +86,6 @@ class CartDomainService:
             width=specs['width'],
             height=specs['height'],
             selected_values=selected_values,
-            product_material=material,
             has_design=specs.get('has_design', True)
         )
         calc_result = calculator.calculate()
@@ -99,7 +95,6 @@ class CartDomainService:
         item_details = {
             'width': specs['width'],
             'height': specs['height'],
-            'material': {'id': material.id, 'name': material.material.name},
             'options': [
                 {
                     'id': val.id,
@@ -139,7 +134,6 @@ class CartDomainService:
         # 2. محاسبه مجدد قیمت
         calculator = ProductPriceCalculator(
             product=item.product,
-            product_material=specs['material_obj'],
             quantity=quantity,
             selected_values=specs.get('option_objs', []), # لیست ProductOptionValue
             width=width,
@@ -156,7 +150,6 @@ class CartDomainService:
             'details': {
                 'width': width,
                 'height': height,
-                'material_name': specs['material_obj'].material.name,
                 'size_name': specs['size_obj'].size.name if specs.get('size_obj') else 'Custom',
                 'options': [
                     {

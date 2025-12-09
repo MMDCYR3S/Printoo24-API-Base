@@ -17,7 +17,7 @@ from core.models import (
     User,Order, OrderItem, OrderStatus,
     Product, Address, ProductFileUploadRequirement,
     OrderItemFile, ProductOptionValue,
-    ProductMaterial, ProductSize, ProductOptionValue
+    ProductSize, ProductOptionValue
 )
 from core.domain.commerce.order import OrderDomainService
 from core.domain.commerce.cart import CartDomainService
@@ -89,7 +89,6 @@ class OrderDashboardService:
                 calculated_total += line_total
                 
                 specs_json = {
-                    'material_id': selections.get('material_id'),
                     'size_id': selections.get('size_id'),
                     'option_value_ids': selections.get('option_value_ids'),
                     'custom_width': selections.get('custom_width'),
@@ -149,13 +148,7 @@ class OrderDashboardService:
         تبدیل IDهای خام به داده‌های کامل (نام، ابعاد و...) برای ذخیره در JSON.
         خروجی: (dict_for_json, dict_of_objects_for_calculator)
         """
-        # ===== جنس ===== #
-        material_id = selections.get('material_id')
-        try:
-            material_obj = ProductMaterial.objects.select_related('material').get(id=material_id, product=product)
-        except ProductMaterial.DoesNotExist:
-            raise ValidationError(f"متریال با شناسه {material_id} برای این محصول نامعتبر است.")
-
+        
         # ===== سایز ===== #
         size_id = selections.get('size_id')
         width = 0
@@ -202,16 +195,11 @@ class OrderDashboardService:
             'width': float(width),
             'height': float(height),
             'size_name': size_name,
-            'material': {
-                'id': material_obj.id,
-                'name': material_obj.material.name
-            },
             'has_design': selections.get('has_design', True),
             'options': options_snapshot
         }
 
         resolved_objects = {
-            'material': material_obj,
             'size': size_obj,
             'options': option_objs
         }
@@ -265,8 +253,11 @@ class OrderDashboardService:
                 line_total = product.price * quantity # ساده
 
             specs_json = {
-                'material_id': selections.get('material_id'),
-                # ...
+                'size_id': selections.get('size_id'),
+                'custom_width': selections.get('custom_width'),
+                'custom_height': selections.get('custom_height'),
+                'option_value_ids': selections.get('option_value_ids'),
+                'has_design': selections.get('has_design', True)
             }
 
             # ایجاد آیتم

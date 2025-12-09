@@ -8,14 +8,12 @@ from core.models import (
 )
 from core.domain.catalog.product import (
     SizeDomainService,
-    MaterialDomainService,
     QuantityDomainService,
     FileUploadSpecDomainService,
     ProductMediaDomainService
 )
 from ..serializers import (
     SizeSerializer,
-    MaterialSerializer,
     QuantitySerializer,
     FileUploadSpecSerializer,
     AttachmentLibrarySerializer,
@@ -58,46 +56,6 @@ class SizeViewSet(viewsets.ViewSet):
 
     def destroy(self, request, pk=None):
         self.service.delete_size(pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# ===== Material ViewSet ===== #
-@extend_schema(tags=['Dashboard-Material'])
-class MaterialViewSet(viewsets.ViewSet):
-    """
-    مدیریت متریال‌ها (جنس کاغذ/بنر و...) توسط ادمین.
-    """
-    serializer_class = MaterialSerializer
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.service = MaterialDomainService()
-
-    @extend_schema(responses=MaterialSerializer(many=True))
-    def list(self, request):
-        # ادمین همه را می‌بیند (چه فعال چه غیرفعال)
-        queryset = self.service.get_all(only_active=False)
-        serializer = MaterialSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @extend_schema(request=MaterialSerializer, responses=MaterialSerializer)
-    def create(self, request):
-        serializer = MaterialSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        instance = self.service.create_material(serializer.validated_data)
-        
-        return Response(MaterialSerializer(instance).data, status=status.HTTP_201_CREATED)
-
-    def update(self, request, pk=None):
-        serializer = MaterialSerializer(data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        
-        instance = self.service.update_material(pk, serializer.validated_data)
-        return Response(MaterialSerializer(instance).data)
-
-    def destroy(self, request, pk=None):
-        self.service.delete_material(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # ===== Quantity ViewSet ===== #

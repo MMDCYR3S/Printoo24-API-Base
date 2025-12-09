@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Any
 from django.db.models import QuerySet
 
-from core.models import Size, Material
+from core.models import Size
 from core.models import Quantity, FileUploadSpec
 from core.utils.base_repository import BaseRepository
 
@@ -21,29 +21,6 @@ class SizeRepository(BaseRepository[Size]):
 
     def create_size(self, data: Dict[str, Any]) -> Size:
         return self.model.objects.create(**data)
-
-# ===== Material Repository ===== #
-class MaterialRepository(BaseRepository[Material]):
-    """
-    ریپازیتوری مدیریت جنس‌ها (متریال).
-    """
-    def __init__(self):
-        super().__init__(Material)
-
-    def get_all_materials(self) -> QuerySet[Material]:
-        return self.model.objects.all().order_by('-is_active', 'created_at')
-
-    def get_active_materials(self) -> QuerySet[Material]:
-        """ فقط متریال‌های فعال برای نمایش در سایت """
-        return self.model.objects.filter(is_active=True)
-
-    def get_by_name(self, name: str) -> Optional[Material]:
-        return self.model.objects.filter(name=name).first()
-
-    def create_material(self, data: Dict[str, Any]) -> Material:
-        return self.model.objects.create(**data)
-    
-
 
 # ===== Quantity Repository ===== #
 class QuantityRepository(BaseRepository[Quantity]):

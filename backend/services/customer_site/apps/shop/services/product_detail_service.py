@@ -45,7 +45,6 @@ class ShopProductDetailService:
                 # ===== لیست جدید و هوشمند quantitie =====
                 'quantities': list(product.product_quantity.all()),
                 'sizes': list(product.product_size.all()),
-                'materials': list(product.product_material.all()),
                 
                 #===== لیست جدید و هوشمند آپشن‌ها===== #
                 'options': data['structured_options'],

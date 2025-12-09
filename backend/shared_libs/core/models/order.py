@@ -173,6 +173,7 @@ class OrderItemFile(models.Model):
     """
     
     STATUS_CHOICES = [
+        ('uploading', _('در حال آپلود/پردازش')),
         ('pending', _('در انتظار بررسی')),
         ('approved', _('تایید شده')),
         ('rejected', _('رد شده (نیازمند اصلاح)')),

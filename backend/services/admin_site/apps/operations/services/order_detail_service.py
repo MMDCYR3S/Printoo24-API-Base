@@ -45,5 +45,4 @@ class OrderDetailAppService:
                 if not is_assigned:
                      raise PermissionDenied("این سفارش به طراح دیگری اختصاص دارد.")
 
-
         return order, role.slug

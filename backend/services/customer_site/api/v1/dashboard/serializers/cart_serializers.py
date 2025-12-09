@@ -40,7 +40,6 @@ class CartItemSelectionSerializer(serializers.Serializer):
     ساختار انتخاب‌های محصول (ساده‌سازی شده).
     """
     quantity = serializers.IntegerField(min_value=1)
-    material_id = serializers.IntegerField()
     size_id = serializers.IntegerField(required=False, allow_null=True)
     
     custom_width = serializers.FloatField(required=False)

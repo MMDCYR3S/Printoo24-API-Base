@@ -13,11 +13,9 @@ from .user import (
 from .product import (
     Product,
     ProductCategory,
-    ProductMaterial,
     ProductImage,
     ProductSize,
     Size,
-    Material,
     ProductQuantity,
     Quantity,
     ProductPricingConfig,

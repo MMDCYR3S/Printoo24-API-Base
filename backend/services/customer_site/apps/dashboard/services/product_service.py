@@ -40,8 +40,6 @@ class ProductDashboardService:
         # ===== تفکیک داده ها ===== #
         shell_data = data.get('shell')
         pricing_data = data.get('pricing_config', {})
-        material_ids = data.get('material_ids', [])
-        default_material_id = data.get('default_material_id')
         quantity_ids = data.get('quantity_ids', [])
         file_requirements = data.get('file_requirements', [])
         
@@ -53,7 +51,6 @@ class ProductDashboardService:
             self._domain_service.update_pricing_config(product.id, pricing_data)
             
         # ===== هماهنگی بین وابستگی ها ===== #
-        self._domain_service.sync_materials(product.id, user, material_ids, default_material_id)
         self._domain_service.sync_quantities(product.id, user, quantity_ids)
         self._domain_service.sync_file_requirements(product.id, file_requirements)
 
@@ -73,17 +70,11 @@ class ProductDashboardService:
         if 'pricing_config' in data:
             self._domain_service.update_pricing_config(product_id, data['pricing_config'])
         
-        if 'material_ids' in data:
-            self._domain_service.sync_materials(product_id, data['material_ids'])
-        
         if 'file_requirements' in data:
             self._domain_service.sync_file_requirements(product_id, data['file_requirements'])
             
         if 'quantity_ids' in data:
             self._domain_service.sync_quantities(product_id, data['quantity_ids'])
-            
-        if 'default_material_id' in data:
-            self._domain_service.sync_materials(product_id, data['default_material_id'])
     
         return self._domain_service.get_product_detail_by_id(product_id)
     

@@ -4,7 +4,6 @@ from core.models import (
     ProductCategory, 
     ProductQuantity, 
     ProductSize,  
-    ProductMaterial,  
     ProductOption,  
     ProductOptionValue,
     ProductImage,
@@ -42,7 +41,7 @@ class ProductPricingConfigSerializer(serializers.ModelSerializer):
         ]
 
 # ==========================================
-# 2. LEGACY SUPPORT SERIALIZERS (Size, Material)
+# 2. LEGACY SUPPORT SERIALIZERS (Size)
 # ==========================================
 
 class QuantityDetailSerializer(serializers.ModelSerializer):
@@ -58,14 +57,6 @@ class SizeDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductSize
         fields = ['id', 'name', 'width', 'height', 'price_impact']
-
-class MaterialDetailSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='material.name', read_only=True)
-    description = serializers.CharField(source='material.description', read_only=True)
-    
-    class Meta:
-        model = ProductMaterial
-        fields = ['id', 'name', 'description', 'is_default', 'processing_fee_percentage', 'extra_price_per_unit']
         
 # ==========================================
 # 3. NEW OPTION SYSTEM SERIALIZERS (Dynamic)
@@ -203,7 +194,6 @@ class ProductDetailSerializer(serializers.Serializer):
     # 3. لیست‌های قدیمی (Legacy)
     quantities = QuantityDetailSerializer(many=True)
     sizes = SizeDetailSerializer(many=True)
-    materials = MaterialDetailSerializer(many=True)
     options = serializers.JSONField() 
     
     # 5. فایل‌ها و مدیا

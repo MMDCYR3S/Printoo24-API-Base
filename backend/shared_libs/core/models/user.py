@@ -103,7 +103,7 @@ class Role(models.Model):
     ]
     
     name = models.CharField(_('نام'), max_length=150)
-    slug = models.SlugField(_('کد سیستمی'), unique=True, default=uuid.uuid4())
+    slug = models.SlugField(_('کد سیستمی'), unique=True, null=True, blank=True)
     description = models.TextField(_('توضیحات'), blank=True, null=True)
     permission = models.ManyToManyField(Permission, verbose_name=_('مجوز ها'), related_name='roles')
     scopes = models.ManyToManyField(

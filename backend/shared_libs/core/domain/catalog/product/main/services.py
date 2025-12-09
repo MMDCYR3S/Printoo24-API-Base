@@ -10,7 +10,7 @@ from ..exceptions import (
 )
 from .repositories import ProductRepository
 from core.models import (
-    Product, ProductPricingConfig, ProductMaterial, ProductQuantity, 
+    Product, ProductPricingConfig, ProductQuantity, 
     ProductOption, ProductOptionValue, Option, ProductFileUploadRequirement
 )
 
@@ -126,35 +126,7 @@ class ProductDomainService:
             setattr(config, key, value)
         config.save()
         return config
-
-    # ===== وابستگی ها - جنس ها ====== #
-    @transaction.atomic
-    def sync_materials(self, product_id: int, user, material_ids: List[int], default_material_id: Optional[int] = None):
-        """
-        همگام‌سازی متریال‌ها.
-        لیست قبلی را پاک می‌کند و لیست جدید را می‌سازد (Bulk Create).
-        """
-        product = self._repo.get_by_id(product_id)
-        if not product:
-            raise ProductNotFoundException("محصول یافت نشد.")
-
-        # ===== پاک کردن ===== #
-        self._repo.clear_materials(product)
-
-        # ===== ایجاد ===== #
-        new_relations = []
-        for mat_id in material_ids:
-            is_default = (mat_id == default_material_id)
-            new_relations.append(ProductMaterial(
-                user=user,
-                product=product,
-                material_id=mat_id,
-                is_default=is_default
-            ))
-        
-        if new_relations:
-            ProductMaterial.objects.bulk_create(new_relations)
-
+    
     # ===== وابستگی ها - تیراژ ها ======
     @transaction.atomic
     def sync_quantities(self, product_id: int, user, quantity_ids: List[int]):

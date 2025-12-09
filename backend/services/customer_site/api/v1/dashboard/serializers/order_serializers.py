@@ -49,16 +49,9 @@ class OrderItemSpecsSerializer(serializers.Serializer):
     """
     width = serializers.FloatField(required=False)
     height = serializers.FloatField(required=False)
-    material_name = serializers.SerializerMethodField()
     has_design = serializers.BooleanField(default=True)
     
     options = OrderItemOptionSnapshotSerializer(many=True, required=False)
-
-    def get_material_name(self, obj):
-        material_data = obj.get('material', {})
-        if isinstance(material_data, dict):
-            return material_data.get('name')
-        return str(material_data)
 
 # ===== سطح ۲: آیتم سفارش ===== #
 class OrderItemDetailSerializer(serializers.ModelSerializer):

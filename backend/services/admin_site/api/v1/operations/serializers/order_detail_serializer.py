@@ -62,12 +62,12 @@ class BaseOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
     product_code = serializers.CharField(source='product.code', read_only=True)
     category_name = serializers.CharField(source='product.category.name', read_only=True)
-    
+    designer_name = serializers.CharField(source='assigned_to.username', read_only=True, allow_null=True)
     features_summary = serializers.CharField(source='feature_summary', read_only=True)
     
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_name', 'product_code', 'category_name', 'price', 'quantity', 'features_summary', 'admin_note']
+        fields = ['id', 'product_name', 'product_code', 'designer_name','category_name', 'price', 'quantity', 'features_summary', 'admin_note']
 
 class DesignerOrderItemSerializer(BaseOrderItemSerializer):
     """ آیتم مخصوص طراح (شامل فایل‌ها) """

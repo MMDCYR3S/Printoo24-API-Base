@@ -7,7 +7,6 @@ from .views import (
     CustomerViewSet,
     WalletViewSet,
     SizeViewSet, 
-    MaterialViewSet,
     QuantityViewSet,
     FileUploadSpecViewSet,
     OptionViewSet,
@@ -26,7 +25,6 @@ router.register(r'contacts', ContactUsViewSet, basename='contact_us')
 router.register(r'customers', CustomerViewSet, basename='customer')
 router.register(r'wallets', WalletViewSet, basename='wallet')
 router.register(r'sizes', SizeViewSet, basename='sizes')
-router.register(r'materials', MaterialViewSet, basename='materials')
 router.register(r'quantities', QuantityViewSet, basename='quantities')
 router.register(r'file-specs', FileUploadSpecViewSet, basename='file-specs')
 router.register(r'options', OptionViewSet, basename='options')

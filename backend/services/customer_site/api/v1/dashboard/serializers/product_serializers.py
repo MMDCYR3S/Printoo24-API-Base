@@ -24,14 +24,6 @@ class ProductPricingConfigSerializer(serializers.ModelSerializer):
         model = ProductPricingConfig
         exclude = ['product', 'id']
 
-# ===== Material Sync Serializer ===== #
-class MaterialSyncSerializer(serializers.Serializer):
-    material_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        allow_empty=True
-    )
-    default_material_id = serializers.IntegerField(required=False, allow_null=True)
-
 # ===== Quantity Sync Serializer ===== #
 class QuantitySyncSerializer(serializers.Serializer):
     quantity_ids = serializers.ListField(
@@ -129,10 +121,7 @@ class ProductAttachmentListSerializer(serializers.ModelSerializer):
 class ProductCoreCreateSerializer(serializers.Serializer):
     shell = ProductShellSerializer(required=True)
     pricing_config = ProductPricingConfigSerializer(required=True)
-    
-    # لیست ID ها
-    material_ids = serializers.ListField(child=serializers.IntegerField(), required=False)
-    default_material_id = serializers.IntegerField(required=False, allow_null=True)
+
     quantity_ids = serializers.ListField(child=serializers.IntegerField(), required=False)
     
     # لیست دیکشنری
@@ -158,31 +147,18 @@ class ProductMediaSyncSerializer(serializers.Serializer):
 class ProductDetailSerializer(serializers.Serializer):
     """
     سریالایزر نمایش کامل محصول در داشبورد.
-    ترکیبی از Shell, Config, Materials, Options, Images.
+    ترکیبی از Shell, Config, Options, Images.
     """
     shell = ProductShellSerializer(source='product')
     pricing_config = ProductPricingConfigSerializer(source='product.pricing_config')
     
     # لیست‌ها
-    materials = serializers.SerializerMethodField()
     quantities = serializers.SerializerMethodField()
     file_requirements = serializers.SerializerMethodField()
     images = ProductImageSerializer(source='product.product_image', many=True)
     
     # آپشن‌ها (از ساختار درختی که سرویس برمی‌گرداند)
     options = serializers.ListField(source='structured_options')
-
-    def get_materials(self, obj):
-        # obj یک دیکشنری است که کلید 'product' دارد
-        product = obj['product']
-        return [
-            {
-                'id': pm.material.id,
-                'name': pm.material.name,
-                'is_default': pm.is_default
-            }
-            for pm in product.product_material.all()
-        ]
 
     def get_quantities(self, obj):
         product = obj['product']
