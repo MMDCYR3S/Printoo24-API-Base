@@ -14,3 +14,4 @@ from .status import (
     OrderStatusDomainService,
     OrderStatusRepository
 )
+from .checkout import CheckoutDomainService

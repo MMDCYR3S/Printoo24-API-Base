@@ -1,73 +1,79 @@
 import uuid
+from typing import List
 from django.db import transaction
 from django.core.files.base import ContentFile
-from core.models import Order, OrderItem, OrderItemFile, OrderStatus
+from django.core.exceptions import ValidationError as DjangoValidationError
+
+from core.models import Order, OrderItem, OrderItemFile, OrderStatus, CartItem, Address, User
 from core.domain.commerce.cart import CartRepository
-from ..main.repositories import OrderRepository
+from core.domain.commerce.order import OrderRepository, OrderItemRepository
 
 class CheckoutDomainService:
     def __init__(self):
         self._order_repo = OrderRepository()
+        self._item_repo = OrderItemRepository()
         self._cart_repo = CartRepository()
 
     def _generate_order_code(self):
         """ تولید کد پیگیری خوانا و یکتا """
         return str(uuid.uuid4().hex[:8]).upper()
-
+    
+    def _transfer_files(self, cart_item: CartItem, order_item: OrderItem):
+        """ ===== انتقال فایل‌های طراحی از Cart Item به Order Item ===== """
+        for upload in cart_item.uploads.all():
+            if upload.file:
+                # ===== خواندن فایل های طراحی ===== #
+                try:
+                    upload.file.open()
+                    new_file_content = ContentFile(upload.file.read())
+                    upload.file.close()
+                except Exception as e:
+                    continue
+                new_file_content.name = upload.file.name.split('/')[-1]
+                
+                # ===== ایجاد رکورد فایل جدید برای آیتم سفارش ===== #
+                OrderItemFile.objects.create(
+                    order_item=order_item,
+                    requirement=upload.requirement,
+                    file=new_file_content,
+                    version=1,
+                    is_latest=True,
+                    status='pending'
+                )
+    
     @transaction.atomic
-    def checkout_cart(self, user, address, order_type: str) -> Order:
-        cart = self._cart_repo.get_cart_by_user(user)
-        if not cart or not cart.cart_items.exists():
-            raise ValueError("سبد خرید خالی است.")
-
-        # ===== محاسبه قیمت کل ===== #
-        cart_items = cart.cart_items.select_related('product').prefetch_related('uploads').all()
-        base_price = sum(item.price for item in cart_items)
-
-        # ===== دریافت وضعیت اولیه ===== #
-        initial_status = OrderStatus.objects.get_or_create(
-            name='در حال بررسی',
-            internal_code='PENDING'
+    def checkout_single_item(self, user: User, cart_item: CartItem, address: Address, order_type: str) -> Order:
+        """
+        تبدیل یک CartItem مشخص به یک Order مجزا. (منطق جدید)
+        """
+        
+      # ===== دریافت وضعیت اولیه (باید از طریق کد سیستمی باشد) =====
+        try:
+            initial_status = OrderStatus.objects.get(internal_code="PENDING")
+        except OrderStatus.DoesNotExist:
+            raise DjangoValidationError("خطای سیستمی: وضعیت اولیه سفارش مشخص نیست.")
+        
+        order = self._order_repo.create_order(
+            user=user,
+            order_code=self._generate_order_code(),
+            order_type=order_type,
+            order_status=initial_status,
+            address=address,
+            base_price=cart_item.price,
+            total_price=cart_item.price,
         )
-
-        # ===== ایجاد سفارش ===== #
-        order = self._order_repo.create_order_shell({
-            "user": user,
-            "order_code": self._generate_order_code(),
-            "type": order_type,
-            "current_status": initial_status,
-            "address": address,
-            "base_products_price": base_price,
-            "total_price": base_price,
+        # ===== ایجاد آیتم سفارش ===== #
+        order_item = self._item_repo.create({
+            "order": order,
+            "product": cart_item.product,
+            "quantity": cart_item.quantity,
+            "price": cart_item.price,
+            "items": cart_item.items,
         })
 
-        # ===== انتقال آیتم ها ===== #
-        for c_item in cart_items:
-            order_item = OrderItem.objects.create(
-                order=order,
-                product=c_item.product,
-                quantity=c_item.quantity,
-                unit_price=c_item.product.base_price if hasattr(c_item.product, 'base_price') else 0, # قیمت واحد مهم است
-                price=c_item.price,
-                items=c_item.items,
-            )
-
-            # ===== انتقال فایل‌های طراحی ===== #
-            for upload in c_item.uploads.all():
-                if upload.file:
-                    # ===== انتقال فایل ===== #
-                    new_file_content = ContentFile(upload.file.read())
-                    new_file_content.name = upload.file.name.split('/')[-1]
-                    
-                    OrderItemFile.objects.create(
-                        order_item=order_item,
-                        requirement=upload.requirement,
-                        file=new_file_content,
-                        version=1,
-                        is_latest=True,
-                        status='pending'
-                    )
-        # ===== پاکسازی سبد خرید ===== #
-        cart.delete()
+        # ===== انتقال فایل‌های طراحی ===== #
+        self._transfer_files(cart_item, order_item)
+        
+        self._item_repo.delete(cart_item)
         
         return order

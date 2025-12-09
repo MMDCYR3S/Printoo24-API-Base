@@ -6,3 +6,6 @@ class EmptyCartError(OrderCreationError):
 
 class InsufficientFundsError(OrderCreationError):
     pass
+
+class ItemNotFoundException(OrderCreationError):
+    pass
