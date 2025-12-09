@@ -31,7 +31,8 @@ class AuthAppService:
             raise AuthenticationFailed("حساب کاربری غیرفعال است.")
 
         # ===== بررسی دسترسی کاربر ===== #
-        if not user.is_staff:
+        user_role_rel = user.user_role.select_related("role").first()
+        if not user_role_rel.role.type == "admin":
             logger.warning(f"Login denied: Non-staff user '{username}' tried to access admin panel")
             raise PermissionDenied("شما مجوز ورود به پنل مدیریت را ندارید.")
 
@@ -52,7 +53,7 @@ class AuthAppService:
         # ===== دریافت اطلاعات کاربر برای توکن ===== 
         user_role_obj = self.user_repo.get_user_role(user)
         if user_role_obj:
-            refresh.access_token['role'] = user_role_obj.role.code
+            refresh.access_token['role'] = user_role_obj.role.slug
             refresh.access_token['role_name'] = user_role_obj.role.name
         else:
             refresh.access_token['role'] = None
@@ -63,7 +64,7 @@ class AuthAppService:
             'user': {
                 'id': user.id,
                 'username': user.username,
-                'role': user_role_obj.role.code if user_role_obj else None
+                'role': user_role_obj.role.slug if user_role_obj else None
             }
         }
 

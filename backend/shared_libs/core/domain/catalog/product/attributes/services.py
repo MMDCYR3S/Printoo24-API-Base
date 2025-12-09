@@ -3,10 +3,9 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from core.models import Size, Material, Quantity, FileUploadSpec, User
+from core.models import Size, Quantity, FileUploadSpec, User
 from .repositories import (
     SizeRepository,
-    MaterialRepository,
     QuantityRepository,
     FileUploadSpecRepository
 )
@@ -57,56 +56,6 @@ class SizeDomainService:
             size.delete()
         except Exception as e:
             raise ValidationError(_("امکان حذف این سایز وجود ندارد زیرا در محصولاتی استفاده شده است."))
-
-
-# ===== Material Domain Service ===== #
-class MaterialDomainService:
-    def __init__(self):
-        self.repo = MaterialRepository()
-
-    def get_all(self, only_active=False):
-        if only_active:
-            return self.repo.get_active_materials()
-        return self.repo.get_all_materials()
-
-    def get_by_id(self, material_id: int) -> Material:
-        material = self.repo.get_by_id(material_id)
-        if not material:
-            raise ValidationError(_("جنس مورد نظر یافت نشد."))
-        return material
-
-    @transaction.atomic
-    def create_material(self, data: Dict[str, Any]) -> Material:
-        """
-        ایجاد متریال جدید.
-        """
-        if self.repo.get_by_name(data['name']):
-            raise ValidationError(_("جنسی با این نام قبلاً ثبت شده است."))
-
-        if data.get('price_per_sqm', 0) < 0:
-            raise ValidationError(_("قیمت نمی‌تواند منفی باشد."))
-
-        return self.repo.create_material(data)
-
-    @transaction.atomic
-    def update_material(self, material_id: int, data: Dict[str, Any]) -> Material:
-        material = self.get_by_id(material_id)
-
-        if 'name' in data and data['name'] != material.name:
-            if self.repo.get_by_name(data['name']):
-                raise ValidationError(_("جنسی با این نام قبلاً ثبت شده است."))
-        
-        if 'price_per_sqm' in data and data['price_per_sqm'] < 0:
-             raise ValidationError(_("قیمت نمی‌تواند منفی باشد."))
-
-        return self.repo.update(material, data)
-
-    def delete_material(self, material_id: int):
-        material = self.get_by_id(material_id)
-        try:
-            material.delete()
-        except Exception:
-             raise ValidationError(_("امکان حذف این جنس وجود ندارد زیرا در محصولاتی استفاده شده است."))
 
 # ===== Quantity Domain Service ===== #
 class QuantityDomainService:

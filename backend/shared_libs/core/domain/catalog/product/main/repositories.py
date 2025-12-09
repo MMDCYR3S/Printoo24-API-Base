@@ -7,7 +7,6 @@ from core.models import (
     Product, 
     ProductQuantity, 
     ProductSize, 
-    ProductMaterial, 
     ProductOption,
     ProductOptionValue,
     ProductImage,
@@ -39,7 +38,6 @@ class ProductRepository(BaseRepository[Product]):
             # ===== بارگذاری مقادیر ثابت ===== #
             Prefetch('product_quantity', queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')),
             Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__width')),
-            Prefetch('product_material', queryset=ProductMaterial.objects.select_related('material').order_by('is_default', 'material__name')),
             
             # ===== بارگذاری ویژگی ها ===== #
             Prefetch(
@@ -100,7 +98,6 @@ class ProductRepository(BaseRepository[Product]):
             ).prefetch_related(
                 Prefetch('product_quantity', queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')),
                 Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__width')),
-                Prefetch('product_material', queryset=ProductMaterial.objects.select_related('material').order_by('is_default', 'material__name')),
                 
                 Prefetch(
                     'options', 
@@ -142,11 +139,6 @@ class ProductRepository(BaseRepository[Product]):
         return self.model.objects.filter(pk=pk).first()
 
     # ===== (Relations) ===== #
-    
-    def clear_materials(self, product: Product):
-        """ حذف تمام متریال‌های محصول (برای عملیات Sync) """
-        product.product_material.all().delete()
-
     def clear_quantities(self, product: Product):
         """ حذف تمام تیراژهای محصول """
         product.product_quantity.all().delete()

@@ -50,12 +50,6 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # ===== Logging Configuration ===== #
-LOGS_DIR = os.path.join(BASE_DIR, '..', 'logs')
-os.makedirs(LOGS_DIR, exist_ok=True)
-
-ACCOUNTS_LOGS_DIR = os.path.join(LOGS_DIR, 'accounts')
-os.makedirs(ACCOUNTS_LOGS_DIR, exist_ok=True)
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -103,6 +97,15 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'verbose',
         },
+        # ========== Operations Handlers ========== #
+        'file_processing_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/operations/file_processing.log',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         # ========== Accounts Logger ========== #
@@ -121,6 +124,12 @@ LOGGING = {
         # ===== Role Logger ===== #
         'apps.users.services.role_app_service': {
             'handlers': ['role_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # ========== Operations Logger (NEW) ========== #
+        'apps.operations.tasks': {
+            'handlers': ['file_processing_file', 'console'],
             'level': 'INFO',
             'propagate': False,
         },

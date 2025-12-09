@@ -3,13 +3,11 @@ from django.contrib import admin
 from core.models import (
     Product,
     ProductCategory,
-    ProductMaterial,
     ProductImage,
     ProductSize,
     ProductOption,
     ProductOptionValue,
     Size,
-    Material,
     ProductQuantity,
     Quantity,
     ProductAttachment,
@@ -24,11 +22,9 @@ from core.models import (
 
 admin.site.register(Product)
 admin.site.register(ProductCategory)
-admin.site.register(ProductMaterial)
 admin.site.register(ProductImage)
 admin.site.register(ProductSize)
 admin.site.register(Size)
-admin.site.register(Material)
 admin.site.register(ProductQuantity)
 admin.site.register(Quantity)
 admin.site.register(ProductAttachment)

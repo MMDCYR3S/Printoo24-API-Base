@@ -6,7 +6,6 @@ from rest_framework.exceptions import ValidationError, NotFound
 
 from core.models import (
     Product,
-    ProductMaterial,
     ProductSize,
     ProductOptionValue,
 )
@@ -35,7 +34,6 @@ class CartDataValidator:
 
         # 2. استخراج داده‌ها با مقادیر پیش‌فرض ایمن
         quantity = int(selections.get("quantity", 1))
-        material_id = selections.get("material_id")
         size_id = selections.get("size_id")
         selected_value_ids = selections.get("option_value_ids", [])
         
@@ -55,15 +53,6 @@ class CartDataValidator:
                 raise ValidationError(f"تعداد سفارش باید بین {config.min_quantity} و {config.max_quantity} باشد.")
         elif quantity < config.min_quantity:
             raise ValidationError(f"حداقل تعداد سفارش برای این محصول {config.min_quantity} عدد است.")
-
-        # 4. چک کردن متریال
-        if not material_id:
-            raise ValidationError("لطفاً جنس کاغذ/متریال را انتخاب کنید.")
-        
-        try:
-            material_obj = ProductMaterial.objects.get(id=material_id, product=product)
-        except ProductMaterial.DoesNotExist:
-            raise ValidationError("جنس انتخاب شده برای این محصول نامعتبر است.")
 
         # 5. چک کردن سایز / ابعاد
         size_obj = None
@@ -116,7 +105,6 @@ class CartDataValidator:
         return {
             "product": product,
             "quantity": quantity,
-            "material_obj": material_obj,
             "size_obj": size_obj,
             "option_values": selected_values_objs,
             "width": final_width,

@@ -4,7 +4,6 @@ from .customer_view import CustomerViewSet
 from .wallet_view import WalletViewSet
 from .attribute_product_views import (
     SizeViewSet,
-    MaterialViewSet,
     QuantityViewSet,
     FileUploadSpecViewSet,
     AttachmentLibraryViewSet

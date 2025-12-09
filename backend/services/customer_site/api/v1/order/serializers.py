@@ -53,15 +53,10 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
         """
         raw_data = obj.items_data or {}
         details = raw_data.get('details', {})
-        
-        # Fallback for old data or if structure is flat
-        if not details and 'material_name' not in raw_data:
-             return raw_data 
 
         # Construct clean output
         return {
             "dimensions": f"{details.get('width')} x {details.get('height')} cm",
-            "material": details.get('material_name') or details.get('material', {}).get('name'),
             "size": details.get('size_name'),
             "has_design": details.get('has_design'),
             "options": [

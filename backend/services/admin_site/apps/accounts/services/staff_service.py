@@ -2,7 +2,7 @@ import logging
 from typing import Dict, List, Any
 
 from core.domain.identity.users import UserAdminDomainService, UserRepository
-from ..permissions import AppPermissionChecker
+from apps.permissions import AppPermissionChecker
 
 # ===== Logger Initialization ===== #
 logger = logging.getLogger('apps.users.services.staff_app_service')

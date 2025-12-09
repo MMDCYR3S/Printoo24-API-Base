@@ -9,7 +9,6 @@ from .general_serializers import(
 )
 from .attribute_product_serializers import(
     SizeSerializer,
-    MaterialSerializer,
     QuantitySerializer,
     FileUploadSpecSerializer,
 )

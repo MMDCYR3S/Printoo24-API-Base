@@ -22,7 +22,7 @@ COPY ./backend/shared_libs /app/shared_libs
 
 # ===== نصب و کپی اپلیکیشن ادمین سایت ===== #
 COPY ./backend/services/admin_site/requirements/dev/requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt --index-url https://pypi.kheyrati.com/
+RUN pip install -r /app/requirements.txt
 
 # ===== کپی سورس کد اپلیکیشن ادمین سایت ===== #
 COPY ./backend/services/admin_site /app/src

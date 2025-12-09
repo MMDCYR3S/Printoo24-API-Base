@@ -8,15 +8,14 @@ from .user import (
     City,
     Province,
     CustomerProfile,
+    AccessScope,
 )
 from .product import (
     Product,
     ProductCategory,
-    ProductMaterial,
     ProductImage,
     ProductSize,
     Size,
-    Material,
     ProductQuantity,
     Quantity,
     ProductPricingConfig,
@@ -38,7 +37,7 @@ from .order import (
     Order, OrderItem, OrderItemFile, OrderStatus,
     OrderCostItem, OrderCostType, OrderPackage,
     OrderShipment, OrderStateLog, DeliveryMethod,
-    OrderInvoice, OrderTransaction
+    OrderInvoice, OrderTransaction, OrderStatusGroup
 )
 from .cart import Cart, CartItem, CartItemUpload
 from .notification import CustomerNotification

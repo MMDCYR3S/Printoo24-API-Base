@@ -7,9 +7,6 @@ class SelectionsSerializer(serializers.Serializer):
     """
     quantity = serializers.IntegerField(required=True, min_value=1, help_text="تعداد سفارش")
     
-    # ID متریال (از جدول واسط ProductMaterial)
-    material_id = serializers.IntegerField(required=True, help_text="شناسه جنس کاغذ")
-    
     # سایز استاندارد (اختیاری)
     size_id = serializers.IntegerField(required=False, allow_null=True)
     
@@ -51,7 +48,6 @@ class CartItemUpdateSerializer(serializers.Serializer):
     دقیقاً همان فیلدهای Selections را دارد اما فلت (بدون تودرتو).
     """
     quantity = serializers.IntegerField(required=False, min_value=1)
-    material_id = serializers.IntegerField(required=False)
     size_id = serializers.IntegerField(required=False, allow_null=True)
     width = serializers.FloatField(required=False, min_value=0.1)
     height = serializers.FloatField(required=False, min_value=0.1)

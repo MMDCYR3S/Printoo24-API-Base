@@ -37,7 +37,6 @@ class CartItemUpdateService:
             item_id=cart_item_id,
             quantity=validated_data['quantity'],
             specs={
-                'material_obj': validated_data['material_obj'],
                 'size_obj': validated_data.get('size_obj'),
                 
                 # نکته: خروجی Validator کلید option_values دارد
