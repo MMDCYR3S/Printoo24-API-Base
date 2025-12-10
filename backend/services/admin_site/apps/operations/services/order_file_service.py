@@ -97,47 +97,6 @@ class OrderFileAppService:
         file_obj.save()
         return file_obj
         
-    def _check_and_move_order_status(self, order: Order, requester: User):
-        """
-        
-        بررسی می‌کند آیا تمام فایل‌های آخرین نسخه در این سفارش تایید شده‌اند؟
-        اگر بله، وضعیت اصلی سفارش را به QC می‌برد.
-        """
-        if requester.is_superuser:
-            return
-        
-        user_role_rel = requester.user_role.select_related('role').first()
-        if not user_role_rel:
-            return
-
-        role = user_role_rel.role
-        current_group_code = order.current_status.group.code
-        
-        # ===== بررسی وجود محدوده دسترسی ===== #
-        if current_group_code not in role.allowed_status_groups:
-            return
-        
-        # ===== بررسی شرط اینکه تمامی آیتم ها تایید شدند یا خیر ===== #
-        items_queryset = OrderItem.objects.filter(order=order).prefetch_related('files')
-        is_all_items_approved = True
-        
-        
-        for item in items_queryset:
-            latest_file = item.files.filter(is_latest=True).first()
-            
-            if not latest_file or latest_file.status != 'approved':
-                is_all_items_approved = False
-                break
-        
-        # ===== تغییر وضعیت سفارش ===== #
-        if is_all_items_approved:
-            self.status_flow_service.change_order_status(
-                order=order,
-                new_status_code='DESIGN_QC_READY',
-                user=requester,
-                description="همه فایل‌های طراحی آیتم‌ها تایید شد."
-            )
-        
     def change_file_status(self, requester: User, file_id: int, new_status: str, feedback: str = None):
         """
         تغییر وضعیت یک فایل (تایید / رد) و سپس چک کردن وضعیت کلی سفارش.
@@ -159,7 +118,5 @@ class OrderFileAppService:
             
         file_obj.save()
         
-        if new_status == 'approved':
-            self._check_and_move_order_status(file_obj.order_item.order, requester)
         return file_obj
         

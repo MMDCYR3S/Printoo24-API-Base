@@ -41,8 +41,30 @@ class OrderStatus(models.Model):
     تا وابسته به تغییر متن فارسی توسط ادمین نباشیم.
     """
     
+    # ===== انواع ماهیت وضعیت ===== #
+    TYPE_CHOICES = [
+        ('initial', _('آغازین (Start)')),
+        ('progress', _('در جریان (Progress)')),
+        ('approve', _('تاییدیه (Approve)')),
+        ('reject', _('رد شده (Reject)')),
+        ('cancel', _('لغو شده (Cancel)')),
+    ]
+    
     name = models.CharField(_('عنوان نمایشی'), max_length=150)
-    internal_code = models.SlugField(_('کد سیستمی'), max_length=50, unique=True, null=True, blank=True)
+    internal_code = models.SlugField(_('کد سیستمی'), max_length=150, unique=True, null=True, blank=True)
+    
+    status_type = models.CharField(
+        _('نوع وضعیت'), 
+        max_length=20, 
+        choices=TYPE_CHOICES, 
+        default='progress'
+    )
+    
+    sort_order = models.PositiveIntegerField(
+        _('ترتیب نمایش'), 
+        default=0, 
+        help_text=_("ترتیب قرارگیری در لیست (کم به زیاد).")
+    )
     
     group = models.ForeignKey(OrderStatusGroup, related_name='order_status', on_delete=models.CASCADE, blank=True, null=True)
     description = models.TextField(_('توضیحات'), blank=True, null=True)
@@ -56,7 +78,45 @@ class OrderStatus(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.internal_code})"
-
+    
+    def clean(self):
+        """ اعتبارسنجی‌های خاص """
+        if self.status_type == 'initial':
+            if self.group.order_status.filter(status_type='initial').count() == 1:
+                # ===== بررسی اینکه آیا داریم خود آن یک وضعیت اولیه رو ویرایش میکنیم یا نه ===== #
+                if not self.pk or (self.pk and self.group.order_status.filter(status_type='initial').first().pk != self.pk):
+                    raise ValueError(_("این گروه قبلا یک وضعیت آغازین داشته است."))
+            pass
+        
+    def save(self, *args, **kwargs):
+        """
+        تولید و فرمت‌دهی خودکار کد سیستمی.
+        """
+        if self.group and self.internal_code:
+            # ===== ورودی های اولیه ===== #
+            raw_input = self.internal_code.upper().strip()
+            type_suffix = self.status_type.upper()
+            group_suffix = self.group.code.upper()
+            
+            current_suffix = f"_{type_suffix}_{group_suffix}"
+            
+            if not raw_input.endswith(current_suffix):
+                parts = raw_input.split('_')
+                if len(parts) >= 3 and parts[-1] == group_suffix and parts[-2] == type_suffix:
+                    pass
+                else:
+                    if raw_input.endswith(f"_{group_suffix}"):
+                        raw_input = raw_input.rsplit(f"_{group_suffix}", 1)[0]
+                        
+                    for t_code, _label in self.TYPE_CHOICES:
+                        t_upper = t_code.upper()
+                        if raw_input.endswith(f"_{t_upper}"):
+                            raw_input = raw_input.rsplit(f"_{t_upper}", 1)[0]
+                            break
+                    self.internal_code = f"{raw_input}_{type_suffix}_{group_suffix}"
+                    
+        super().save(*args, **kwargs)
+                
 # ======================= #
 # ===== Order Model ===== #
 # ======================= #

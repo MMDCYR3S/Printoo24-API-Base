@@ -27,9 +27,8 @@ class OrderDetailAppService:
         # ===== اگر ادمین نیست، محدوده دید را بررسی کن ===== #
         if not (requester.is_superuser or role.is_admin):
             allowed_groups = role.allowed_status_groups
-            if order.current_status.group not in allowed_groups:
-                if not (role.slug == 'designer' or order.current_status.internal_code == 'FINANCIAL_APPROVED'):
-                     raise PermissionDenied("شما دسترسی به مشاهده این سفارش در وضعیت فعلی را ندارید.")
+            if order.current_status.group.code not in allowed_groups:
+                raise PermissionDenied("شما دسترسی به مشاهده این سفارش در وضعیت فعلی را ندارید.")
 
             # ===== بررسی دسترسی به سفارش ===== #
             if role.slug == 'designer':

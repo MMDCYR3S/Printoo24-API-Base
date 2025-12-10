@@ -7,6 +7,7 @@ from .views import (
     FileStatusView,
     OrderStatusGroupViewSet,
     OrderStatusViewSet,
+    OrderTransitionView,
 )
 
 router = DefaultRouter()
@@ -19,6 +20,8 @@ urlpatterns = [
     # ===== File Upload - Designer ===== #
     path('items/<int:item_id>/upload/', OrderItemUploadView.as_view(), name='admin-item-upload'),
     path('files/<int:file_id>/status/', FileStatusView.as_view(), name='admin-file-status'),
+    # ===== Status Transition ===== #
+    path('<int:pk>/transition/', OrderTransitionView.as_view(), name='admin-order-transition'),
     # ===== Routers ===== #
     path('', include(router.urls)),
 ]

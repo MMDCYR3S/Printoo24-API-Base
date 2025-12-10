@@ -32,7 +32,6 @@ class OrderListAppService:
         
         # ===== دریافت نقش کاربر ===== #
         role = user_role_rel.role
-        
         if not role:
             return queryset.none()
         
@@ -40,7 +39,6 @@ class OrderListAppService:
             allowed_groups = role.allowed_status_groups
             if not allowed_groups:
                 return Order.objects.none()
-            
             return self.repo.get_all_orders_summary().filter(
                 current_status__group__code__in=allowed_groups
             )

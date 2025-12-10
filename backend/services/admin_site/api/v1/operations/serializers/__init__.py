@@ -24,5 +24,6 @@ from .order_status_group_serializer import(
 )
 from .order_status_serializer import (
     OrderStatusInputSerializer,
-    OrderStatusListSerializer
+    OrderStatusListSerializer,
+    OrderTransitionSerializer
 )
