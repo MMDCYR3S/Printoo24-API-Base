@@ -8,6 +8,7 @@ from .views import (
     OrderStatusGroupViewSet,
     OrderStatusViewSet,
     OrderTransitionView,
+    OrderCostReportCreateView,
 )
 
 router = DefaultRouter()
@@ -15,13 +16,16 @@ router.register(r'status-groups', OrderStatusGroupViewSet, basename='status-grou
 router.register(r'statuses', OrderStatusViewSet, basename='status')
 
 urlpatterns = [
+    # ===== Order List & Detail ===== #
     path('order/list/', OrderListView.as_view(), name='admin-order-list'),
     path('order/detail/<int:pk>/', OrderDetailView.as_view(), name='admin-order-detail'),
     # ===== File Upload - Designer ===== #
-    path('items/<int:item_id>/upload/', OrderItemUploadView.as_view(), name='admin-item-upload'),
-    path('files/<int:file_id>/status/', FileStatusView.as_view(), name='admin-file-status'),
+    path('items/upload/<int:item_id>/', OrderItemUploadView.as_view(), name='admin-item-upload'),
+    path('files/status/<int:file_id>/', FileStatusView.as_view(), name='admin-file-status'),
     # ===== Status Transition ===== #
-    path('<int:pk>/transition/', OrderTransitionView.as_view(), name='admin-order-transition'),
+    path('transition/<int:pk>/', OrderTransitionView.as_view(), name='admin-order-transition'),
+    # ===== Order Cost Report Create ===== #
+    path('costs/reports/<int:pk>/', OrderCostReportCreateView.as_view(), name='order-cost-report-create'),
     # ===== Routers ===== #
     path('', include(router.urls)),
 ]

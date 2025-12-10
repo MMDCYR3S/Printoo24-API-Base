@@ -37,7 +37,8 @@ from .order import (
     Order, OrderItem, OrderItemFile, OrderStatus,
     OrderCostItem, OrderCostType, OrderPackage,
     OrderShipment, OrderStateLog, DeliveryMethod,
-    OrderInvoice, OrderTransaction, OrderStatusGroup
+    OrderInvoice, OrderTransaction, OrderStatusGroup,
+    OrderCostReport, OrderCostCatalog
 )
 from .cart import Cart, CartItem, CartItemUpload
 from .notification import CustomerNotification

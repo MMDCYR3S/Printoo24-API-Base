@@ -359,59 +359,104 @@ class OrderCostType(models.Model):
     def __str__(self):
         return f"{self.title} ({self.get_category_display()})"
 
-# ===== Order Cost Item Model ===== #
-class OrderCostItem(models.Model):
+class OrderCostCatalog(models.Model):
     """
-    هزینه‌های شناور سفارش.
-    می‌تواند به کل سفارش وصل شود (مثل هزینه ارسال)
-    یا به یک آیتم خاص (مثل هزینه طراحی برای کارت ویزیت).
+    لیست استاندارد هزینه‌ها.
+    اینجا "کاغذ"، "زینک"، "تیپاکس" فقط یک بار تعریف می‌شوند.
+    """
+    cost_type = models.ForeignKey(OrderCostType, on_delete=models.PROTECT, verbose_name=_("دسته حسابداری"))
+    title = models.CharField(_("شرح استاندارد"), max_length=200)
+    code = models.CharField(_("کد کالا/خدمت"), max_length=150, unique=True)
+    
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"{self.title} ({self.code})"
+
+# ===== Order Cost Report Model ===== #
+class OrderCostReport(models.Model):
+    """
+    این مدل همان "گزارش" است که کارفرما خواسته.
+    شامل اطلاعات کلی و فایل‌های پیوست.
     """
     order = models.ForeignKey(
         'Order', 
-        related_name='costs', 
+        related_name='cost_reports', 
         on_delete=models.CASCADE,
-        verbose_name=_("سفارش")
-    )
-    # ===== اطلاعات قیمت برای آیتم های هر سفارش ===== #
-    order_item = models.ForeignKey(
-        'OrderItem',
-        related_name='specific_costs',
-        on_delete=models.CASCADE,
-        null=True, blank=True,
-        verbose_name=_("آیتم مرتبط"),
-        help_text=_("اگر خالی باشد، هزینه عمومی سفارش محسوب می‌شود (مثل هزینه ارسال)")
+        verbose_name=_("سفارش مرتبط")
     )
     
-    cost_type = models.ForeignKey(
-        OrderCostType, 
-        on_delete=models.PROTECT,
-        verbose_name=_("نوع هزینه")
-    )
-    
-    title = models.CharField(_("عنوان"), max_length=150, blank=True, null=True)
-    amount = models.DecimalField(_("مبلغ (ریال)"), max_digits=18, decimal_places=0)
-    description = models.TextField(_("شرح هزینه"), blank=True, null=True)
-    
-    # ===== سازنده چه شخصی بوده ===== #
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.PROTECT,
         verbose_name=_("ثبت کننده")
     )
+    
+    title = models.CharField(_("عنوان گزارش"), max_length=200)
+    description = models.TextField(_("توضیحات کلی"), blank=True, null=True)
+    attachment = models.FileField(
+        _("فایل پیوست/سند"), 
+        upload_to='orders/reports/%Y/%m/', 
+        null=True, blank=True
+    )
+    
     is_approved_by_finance = models.BooleanField(_("تایید مالی"), default=False)
+    finance_note = models.TextField(_("یادداشت مالی"), blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _('قلم هزینه')
-        verbose_name_plural = _('اقلام هزینه')
-        ordering = ['created_at']
+        verbose_name = _('گزارش مالی')
+        verbose_name_plural = _('گزارشات مالی')
+        ordering = ['-created_at']
 
     def __str__(self):
-        target = self.order_item.product.name if self.order_item else "General Order"
-        return f"{self.amount} for {target} ({self.cost_type})"
+        return f"{self.title} - {self.order.order_code}"
+    
+    @property
+    def total_amount(self):
+        """ جمع کل هزینه‌های این گزارش """
+        return sum(item.amount for item in self.items.all())
 
+# ===== Order Cost Item Model ===== #
+class OrderCostItem(models.Model):
+    """
+    اقلام ریز هزینه که زیرمجموعه یک گزارش هستند.
+    مثال: "هزینه اول: کاغذ - 12000"
+    """
+    report = models.ForeignKey(
+        OrderCostReport,
+        related_name='items',
+        on_delete=models.CASCADE,
+        verbose_name=_("گزارش مرتبط"),
+        blank=True,
+        null=True
+    )
+    catalog_item = models.ForeignKey(
+        OrderCostCatalog, 
+        on_delete=models.PROTECT,
+        verbose_name=_("شرح هزینه"),
+        null=True, blank=True
+    )
+    custom_title = models.CharField(_("عنوان (متفرقه)"), max_length=150, blank=True, null=True)
+    amount = models.DecimalField(_("مبلغ"), max_digits=18, decimal_places=0)
+    description = models.CharField(_("توضیحات تکمیلی"), max_length=255, blank=True, null=True)
+
+    class Meta:
+        verbose_name = _('قلم هزینه')
+        verbose_name_plural = _('اقلام هزینه')
+
+    @property
+    def final_title(self):
+        """ برای نمایش در فاکتور یا گزارش """
+        if self.catalog_item:
+            return self.catalog_item.title
+        return self.custom_title
+
+    def __str__(self):
+        return f"{self.title}: {self.amount}"
+    
 # ===== Order Invoice Model ===== #
 class OrderInvoice(models.Model):
     """
