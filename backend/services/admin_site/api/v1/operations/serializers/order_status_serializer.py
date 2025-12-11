@@ -26,7 +26,28 @@ class OrderStatusInputSerializer(serializers.ModelSerializer):
         fields = ['name', 'internal_code', 'description', 'group_id']
         
 class OrderTransitionSerializer(serializers.Serializer):
-    """ ورودی تغییر وضعیت دستی """
-    new_status_code = serializers.CharField(required=True, help_text="کد سیستمی وضعیت جدید (مثلاً: DESIGN_APPROVED)")
-    description = serializers.CharField(required=False, allow_blank=True)
+    """ 
+    ورودی تغییر وضعیت دستی (هوشمند).
+    قابلیت تشخیص درخواست برای کل سفارش یا یک آیتم خاص.
+    """
+    new_status_code = serializers.CharField(
+        required=True, 
+        help_text="کد سیستمی وضعیت جدید (مثلاً: DESIGN_APPROVED)"
+    )
+    description = serializers.CharField(
+        required=False, 
+        allow_blank=True,
+        help_text="توضیحات اختیاری (دلیل رد یا تایید)"
+    )
+    
+    # ===== فیلد جدید برای پشتیبانی از آیتم ===== #
+    order_item_id = serializers.IntegerField(
+        required=False, 
+        allow_null=True,
+        help_text="شناسه آیتم (اگر پر شود، تغییر وضعیت فقط روی این آیتم اعمال می‌شود)"
+    )
+    
+    def validate_new_status_code(self, value):
+        """ نرمال‌سازی کد وضعیت به حروف بزرگ """
+        return value.upper().strip()
         

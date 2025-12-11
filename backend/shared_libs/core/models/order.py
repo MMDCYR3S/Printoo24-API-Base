@@ -49,15 +49,32 @@ class OrderStatus(models.Model):
         ('reject', _('رد شده (Reject)')),
         ('cancel', _('لغو شده (Cancel)')),
     ]
+    TARGET_CHOICES = [
+        ('order', _('مختص سفارش (Order Only)')),
+        ('item', _('مختص اقلام (Item Only)')),
+        ('both', _('مشترک (Both)')),
+    ]
     
     name = models.CharField(_('عنوان نمایشی'), max_length=150)
     internal_code = models.SlugField(_('کد سیستمی'), max_length=150, unique=True, null=True, blank=True)
-    
+
+    target_model = models.CharField(
+        _('محدوده کاربرد'), 
+        max_length=10, 
+        choices=TARGET_CHOICES, 
+        default='order',
+        help_text=_("مشخص می‌کند این وضعیت در کدام بخش نمایش داده شود.")
+    )
     status_type = models.CharField(
         _('نوع وضعیت'), 
         max_length=20, 
         choices=TYPE_CHOICES, 
         default='progress'
+    )
+    is_workflow_gate = models.BooleanField(
+        _('دسترسی چندگانه به وضعیت'), 
+        default=False, 
+        help_text=_("آیا این وضعیت می‌تواند مقصد انتقال‌های خاص (مثل QC) باشد؟")
     )
     
     sort_order = models.PositiveIntegerField(
@@ -139,6 +156,7 @@ class Order(models.Model):
         verbose_name=_("وضعیت فعلی"),
         on_delete=models.PROTECT,
         related_name="orders",
+        limit_choices_to=models.Q(target_model__in=['order', 'both']),
         null=True,
         blank=True
     )
@@ -190,6 +208,14 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='order_item_order', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='order_item_product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(_('تعداد'), default=1)
+    status = models.ForeignKey(
+        OrderStatus,
+        related_name='order_items',
+        on_delete=models.PROTECT,
+        verbose_name=_("وضعیت آیتم"),
+        limit_choices_to=models.Q(target_model__in=['item', 'both']),
+        null=True, blank=True
+    )
     price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
     items = models.JSONField(_("آیتم های اضافی"), blank=True, null=True)
     assigned_to = models.ForeignKey(
@@ -455,7 +481,7 @@ class OrderCostItem(models.Model):
         return self.custom_title
 
     def __str__(self):
-        return f"{self.title}: {self.amount}"
+        return f"{self.custom_title}: {self.amount}"
     
 # ===== Order Invoice Model ===== #
 class OrderInvoice(models.Model):

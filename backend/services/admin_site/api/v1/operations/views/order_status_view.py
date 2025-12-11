@@ -83,11 +83,19 @@ class OrderStatusViewSet(viewsets.ViewSet):
         except ValidationError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+# ========== Order Transition View ========== # 
 @extend_schema(tags=['Admin - Order Transition'])
 class OrderTransitionView(GenericAPIView):
     """
-    تغییر وضعیت دستی سفارش (Manual State Transition).
-    مثال: طراح دکمه "ارسال به چاپ" را می‌زند.
+    تغییر وضعیت هوشمند سفارش یا اقلام آن.
+    
+    سناریو ۱ (تغییر وضعیت کل سفارش):
+    - ورودی: { "new_status_code": "PAID" }
+    - نتیجه: کل سفارش و تمام آیتم‌ها تحت تاثیر قرار می‌گیرند.
+    
+    سناریو ۲ (تغییر وضعیت یک آیتم):
+    - ورودی: { "new_status_code": "DESIGN_APPROVED", "order_item_id": 154 }
+    - نتیجه: فقط آیتم ۱۵۴ تغییر می‌کند (و سرویس Rollup وضعیت مادر را چک می‌کند).
     """
     permission_classes = [IsAuthenticated]
     serializer_class = OrderTransitionSerializer
@@ -96,19 +104,41 @@ class OrderTransitionView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
+        data = serializer.validated_data
+        
         try:
             service = OrderTransitionAppService()
-            updated_order = service.execute_transition(
-                requester=request.user,
-                order_id=pk,
-                new_status_code=serializer.validated_data['new_status_code'],
-                description=serializer.validated_data.get('description')
-            )
             
+            order_item_id = data.get('order_item_id')
+            if order_item_id:
+                # --- تغییر وضعیت آیتم ---
+                result_object = service.execute_transition(
+                    requester=request.user,
+                    new_status_code=data['new_status_code'],
+                    order_item_id=order_item_id, # <--- ارسال شناسه آیتم
+                    description=data.get('description')
+                )
+                response_type = "item"
+            else:
+                # --- تغییر وضعیت سفارش ---
+                result_object = service.execute_transition(
+                    requester=request.user,
+                    new_status_code=data['new_status_code'],
+                    order_id=pk,
+                    description=data.get('description')
+                )
+                response_type = "order"
+            status_obj = result_object.status if hasattr(result_object, 'status') else result_object.current_status
+
             return Response({
-                "message": "وضعیت سفارش با موفقیت تغییر کرد.",
-                "current_status": OrderStatusSerializer(updated_order.current_status).data
+                "message": "عملیات تغییر وضعیت با موفقیت انجام شد.",
+                "type": response_type,
+                "id": result_object.id,
+                "new_status": OrderStatusSerializer(status_obj).data
             }, status=status.HTTP_200_OK)
             
         except (ValidationError, PermissionDenied) as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            return Response({"detail": f"خطای سیستمی رخ داده است.{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
