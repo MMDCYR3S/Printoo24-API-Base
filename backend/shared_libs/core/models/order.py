@@ -1,5 +1,4 @@
 import os
-import uuid
 from random import randint
 
 from django.db import models
@@ -346,6 +345,8 @@ class OrderStateLog(models.Model):
     duration_in_previous_status = models.DurationField(_("مدت توقف در مرحله قبل"), null=True, blank=True)
     
     description = models.TextField(_("توضیحات / دلیل تغییر"), blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
         verbose_name = _('تاریخچه تغییر وضعیت')
@@ -395,6 +396,8 @@ class OrderCostCatalog(models.Model):
     code = models.CharField(_("کد کالا/خدمت"), max_length=150, unique=True)
     
     is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     
     def __str__(self):
         return f"{self.title} ({self.code})"
@@ -468,6 +471,8 @@ class OrderCostItem(models.Model):
     custom_title = models.CharField(_("عنوان (متفرقه)"), max_length=150, blank=True, null=True)
     amount = models.DecimalField(_("مبلغ"), max_digits=18, decimal_places=0)
     description = models.CharField(_("توضیحات تکمیلی"), max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
         verbose_name = _('قلم هزینه')
@@ -564,6 +569,8 @@ class OrderTransaction(models.Model):
     
     payment_date = models.DateTimeField(_("تاریخ پرداخت"), auto_now_add=True)
     description = models.TextField(_("توضیحات"), blank=True)
+    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True, null=True, blank=True)
 
     class Meta:
         verbose_name = _('تراکنش مالی سفارش')

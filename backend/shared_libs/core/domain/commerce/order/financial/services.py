@@ -75,3 +75,84 @@ class OrderCostDomainService:
         
         return report
     
+    @transaction.atomic
+    def update_cost_report_header(self, report_id: int, user: User, data: Dict[str, Any]) -> OrderCostReport:
+        """ ویرایش اطلاعات کلی گزارش (عنوان، توضیحات، فایل) """
+        report = self.report_repo.get_by_id(report_id)
+        if not report:
+            raise ValidationError("گزارش هزینه یافت نشد.")
+        
+        if report.is_approved_by_finance:
+            raise ValidationError("این گزارش توسط مالی تایید شده و قابل ویرایش نیست.")
+        
+        update_fields = {}
+        if 'title' in data: update_fields['title'] = data['title']
+        if 'description' in data: update_fields['description'] = data['description']
+        if 'attachment' in data: update_fields['attachment'] = data['attachment']
+        
+        return self.report_repo.update(report, update_fields)
+    
+    @transaction.atomic
+    def update_cost_item(self, item_id: int, user: User, data: Dict[str, Any]) -> OrderCostItem:
+        """ ویرایش یک قلم هزینه خاص """
+        item = self.item_repo.get_by_id(item_id)
+        if not item:
+            raise ValidationError("قلم هزینه یافت نشد.")
+        
+        if item.report.is_approved_by_finance:
+            raise ValidationError("گزارش مربوطه تایید شده و اقلام آن قابل تغییر نیستند.")
+        
+        if 'amount' in data:
+            new_amount = Decimal(str(data['amount']))
+            if new_amount <= 0:
+                raise ValidationError("مبلغ باید مثبت باشد.")
+            item.amount = new_amount
+            
+        if 'description' in data:
+            item.description = data['description']
+            
+        item.save()
+        return item
+    
+    @transaction.atomic
+    def delete_cost_report(self, report_id: int, user: User):
+        """ حذف کل گزارش هزینه """
+        report = self.report_repo.get_by_id(report_id)
+        if not report:
+            raise ValidationError("گزارش هزینه یافت نشد.")
+        
+        if report.is_approved_by_finance:
+            raise ValidationError("امکان حذف گزارش تایید شده وجود ندارد. ابتدا تایید را لغو کنید.")
+            
+        report.delete()
+        
+    @transaction.atomic
+    def delete_cost_item(self, item_id: int, user: User):
+        """ حذف یک قلم از گزارش """
+        item = self.item_repo.get_by_id(item_id)
+        if not item:
+            raise ValidationError("قلم هزینه یافت نشد.")
+        
+        if item.report.is_approved_by_finance:
+            raise ValidationError("گزارش تایید شده است.")
+        
+        item.delete()
+        
+    @transaction.atomic
+    def approve_cost_report(self, report_id: int, user: User, approved: bool = True) -> OrderCostReport:
+        """ 
+        تایید یا رد نهایی گزارش توسط مدیر مالی.
+        وقتی تایید شود، مبلغ آن باید روی فاکتور نهایی اعمال شود (در آینده).
+        """
+        
+        report = self.report_repo.get_by_id(report_id)
+        if not report:
+            raise ValidationError("گزارش یافت نشد.")
+
+        report.is_approved_by_finance = approved
+        if approved:
+            report.finance_note = f"توسط {user.username} تایید شد."
+        
+        report.save()
+        return report
+    
