@@ -668,7 +668,7 @@ class OrderPackage(models.Model):
     )
     
     # ===== اطلاعات مربوط به لیبل ===== #
-    label_uuid = models.UUIDField(_("شناسه لیبل"), default=uuid.uuid4, editable=False, unique=True)
+    label_uuid = models.UUIDField(_("شناسه لیبل"), editable=False, unique=True, null=True, blank=True)
     
     # ===== اطلاعات مربوط به بسته ===== #
     box_number = models.PositiveIntegerField(_("شماره بسته"), default=1)

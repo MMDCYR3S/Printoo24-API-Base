@@ -22,3 +22,9 @@ from .financial import (
     OrderCostCatalogRepository,
     OrderCostDomainService
 )
+from .logistics import (
+    PackageRepository,
+    ShipmentRepository,
+    DeliveryMethodRepository,
+    LogisticDomainService,
+)
