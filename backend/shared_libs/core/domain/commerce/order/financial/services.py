@@ -19,7 +19,7 @@ class OrderCostDomainService:
                            user: User, 
                            title: str, 
                            description: str, 
-                           attachment, 
+                           attachment,
                            items_data: List[Dict[str, Any]]) -> OrderCostReport:
         """
         ایجاد یک گزارش مالی کامل شامل هدر و اقلام ریز هزینه.
@@ -89,7 +89,10 @@ class OrderCostDomainService:
         update_fields = {}
         if 'title' in data: update_fields['title'] = data['title']
         if 'description' in data: update_fields['description'] = data['description']
-        if 'attachment' in data: update_fields['attachment'] = data['attachment']
+        if 'attachment' in data:
+            update_fields['attachment'] = data['attachment']
+        else:
+            pass
         
         return self.report_repo.update(report, update_fields)
     

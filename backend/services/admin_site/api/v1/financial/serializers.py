@@ -57,14 +57,14 @@ class CostReportDetailSerializer(serializers.ModelSerializer):
     """ نمایش جزئیات کامل گزارش به همراه اقلام """
     created_by_name = serializers.CharField(source='created_by.username', read_only=True)
     items = CostItemOutputSerializer(many=True, read_only=True)
-    attachment_url = serializers.CharField(source='attachment.url', read_only=True, allow_null=True)
+    attachment = serializers.FileField(read_only=True)
 
     class Meta:
         model = OrderCostReport
         fields = [
             'id', 'order', 'title', 'description', 'total_amount', 
             'is_approved_by_finance', 'finance_note', 
-            'created_by_name', 'created_at', 'attachment_url', 'items'
+            'created_by_name', 'created_at', 'attachment', 'items'
         ]
 
 class CreateCostReportInputSerializer(serializers.Serializer):
@@ -155,3 +155,7 @@ class TransactionUpdateInputSerializer(serializers.Serializer):
     payment_date = serializers.DateTimeField(required=False)
     dest_account = serializers.CharField(required=False, allow_blank=True)
     receipt_image = serializers.ImageField(required=False)
+
+class CreateInvoiceInputSerializer(serializers.Serializer):
+    """ ورودی برای ایجاد دستی فاکتور """
+    order_id = serializers.IntegerField(required=True, help_text="شناسه سفارشی که فاکتور ندارد")

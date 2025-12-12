@@ -1,8 +1,9 @@
-from rest_framework import viewsets, status, mixins
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema
+from rest_framework.exceptions import ValidationError
 
 from core.models import OrderCostReport, OrderCostCatalog
 from apps.financial.services import FinancialAppService
@@ -13,7 +14,8 @@ from .serializers import (
     CostCatalogSerializer, ApprovalInputSerializer,
     InvoiceDetailSerializer, TransactionInputSerializer, 
     TransactionDetailSerializer, TransactionVerifySerializer,
-    TransactionUpdateInputSerializer, InvoiceUpdateInputSerializer
+    TransactionUpdateInputSerializer, InvoiceUpdateInputSerializer,
+    CreateInvoiceInputSerializer,
 )
 
 # ========== Financial Catalog ViewSet ========== #
@@ -54,9 +56,8 @@ class FinancialReportViewSet(viewsets.GenericViewSet):
     # ===== LIST & RETRIEVE (Read) =====
     def list(self, request):
         queryset = self.service._report_repo.model.objects.select_related('order', 'created_by').all().order_by('-created_at')
-        page = self.paginate_queryset(queryset)
-        serializer = CostReportListSerializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        serializer = CostReportListSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         report = self.service.get_report_details(request.user, pk)
@@ -102,6 +103,11 @@ class FinancialReportViewSet(viewsets.GenericViewSet):
         """ تایید یا لغو تایید مالی """
         serializer = ApprovalInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        
+        # ===== اعتبارسنجی اینکه آیا از قبل تایید شده یا خیر. اگر بله، خطا دهد ===== #
+        report = self.service.get_report_details(request.user, pk)
+        if report.is_approved_by_finance:
+            raise ValidationError("گزارش تایید شده است و امکان تغییر وضیعت آن وجود ندارد.")
         
         report = self.service.toggle_approval(
             user=request.user,
@@ -217,6 +223,21 @@ class FinancialInvoiceViewSet(viewsets.GenericViewSet):
         """ تبدیل به فاکتور رسمی """
         invoice = self.service.finalize_invoice(request.user, pk)
         return Response(InvoiceDetailSerializer(invoice).data)
+    
+    @extend_schema(request=CreateInvoiceInputSerializer, responses=InvoiceDetailSerializer)
+    def create(self, request):
+        """ 
+        صدور دستی فاکتور برای یک سفارش.
+        (فقط در صورتی که سفارش فاقد فاکتور باشد استفاده می‌شود)
+        """
+        serializer = CreateInvoiceInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        invoice = self.service.create_invoice_manually(
+            user=request.user, 
+            order_id=serializer.validated_data['order_id']
+        )
+        return Response(InvoiceDetailSerializer(invoice).data, status=status.HTTP_201_CREATED)
     
 # ========== Financial Catalog ViewSet ========== #
 @extend_schema(tags=['Financial - Transactions'])

@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from core.models import Invoice, Transaction, User, InvoiceStatus, InvoiceStateLog
+from core.models import Invoice, Transaction, User, InvoiceStatus, InvoiceStateLog, Order
 from .repositories import InvoiceRepository, TransactionRepository, InvoiceStatusRepository
 
 class FinancialDomainService:
@@ -14,7 +14,21 @@ class FinancialDomainService:
         self.invoice_repo = InvoiceRepository()
         self.transaction_repo = TransactionRepository()
         self.status_repo = InvoiceStatusRepository()
-        
+    
+    @transaction.atomic
+    def force_create_invoice(self, order: Order, user: User) -> Invoice:
+        """
+        صدور دستی فاکتور برای یک سفارش (اگر قبلاً نداشته باشد).
+        """
+        # ===== اگر فاکتور وجود داشته باشد ===== #
+        if hasattr(order, 'invoice'):
+            raise ValidationError("برای این سفارش قبلاً فاکتور صادر شده است.")
+        # ===== در صورت نبود، ایجاد فاکتور ===== #
+        invoice = self.issue_invoice_from_order(order)
+        # ===== ایجاد لاگ ===== #
+        self._log_status_change(invoice, invoice.status, user, "صدور دستی فاکتور توسط مدیر")
+        return invoice
+    
     # ===== صدور فاکتور برای سفارش ===== #
     @transaction.atomic
     def issue_invoice_from_order(self, order) -> Invoice:
@@ -243,3 +257,19 @@ class FinancialDomainService:
             description=description
         )
             
+    def _log_status_change(self, invoice, new_status, user=None, description=""):
+        """ 
+        تغییر وضعیت اتمیک همراه با لاگ.
+        نام قبلی _change_invoice_status_with_log بود که باعث خطا می‌شد.
+        """
+        old_status = invoice.status
+        invoice.status = new_status
+        invoice.save()
+        
+        InvoiceStateLog.objects.create(
+            invoice=invoice,
+            from_status=old_status,
+            to_status=new_status,
+            user=user,
+            description=description
+        )

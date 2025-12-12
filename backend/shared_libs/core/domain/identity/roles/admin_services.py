@@ -87,7 +87,7 @@ class RoleAdminDomainService:
         
         for role in roles:
             # ===== قانون اول: نقش سیستمی ===== #
-            if role.code in system_codes:
+            if role.slug in system_codes:
                 raise ValidationError(f"نقش '{role.name}' سیستمی است و قابل حذف نیست.")
             
             # ===== قانون دوم: کاربرهای متصل به نقش ===== #
