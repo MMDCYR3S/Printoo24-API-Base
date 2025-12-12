@@ -14,7 +14,7 @@ from .order_detail_serializer import (
 )
 from .order_file_serializer import (
     DesignFileUploadSerializer,
-    FileStatusChangeSerializer
+    FileReviewSerializer
 )
 from .order_status_group_serializer import(
     OrderStatusGroupListSerializer,

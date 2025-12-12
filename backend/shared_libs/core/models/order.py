@@ -48,22 +48,22 @@ class OrderStatus(models.Model):
         ('reject', _('رد شده (Reject)')),
         ('cancel', _('لغو شده (Cancel)')),
     ]
-    TARGET_CHOICES = [
-        ('order', _('مختص سفارش (Order Only)')),
-        ('item', _('مختص اقلام (Item Only)')),
-        ('both', _('مشترک (Both)')),
-    ]
+    # TARGET_CHOICES = [
+    #     ('order', _('مختص سفارش (Order Only)')),
+    #     ('item', _('مختص اقلام (Item Only)')),
+    #     ('both', _('مشترک (Both)')),
+    # ]
     
     name = models.CharField(_('عنوان نمایشی'), max_length=150)
     internal_code = models.SlugField(_('کد سیستمی'), max_length=150, unique=True, null=True, blank=True)
 
-    target_model = models.CharField(
-        _('محدوده کاربرد'), 
-        max_length=10, 
-        choices=TARGET_CHOICES, 
-        default='order',
-        help_text=_("مشخص می‌کند این وضعیت در کدام بخش نمایش داده شود.")
-    )
+    # target_model = models.CharField(
+    #     _('محدوده کاربرد'), 
+    #     max_length=10, 
+    #     choices=TARGET_CHOICES, 
+    #     default='order',
+    #     help_text=_("مشخص می‌کند این وضعیت در کدام بخش نمایش داده شود.")
+    # )
     status_type = models.CharField(
         _('نوع وضعیت'), 
         max_length=20, 
@@ -207,14 +207,14 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='order_item_order', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='order_item_product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(_('تعداد'), default=1)
-    status = models.ForeignKey(
-        OrderStatus,
-        related_name='order_items',
-        on_delete=models.PROTECT,
-        verbose_name=_("وضعیت آیتم"),
-        limit_choices_to=models.Q(target_model__in=['item', 'both']),
-        null=True, blank=True
-    )
+    # status = models.ForeignKey(
+    #     OrderStatus,
+    #     related_name='order_items',
+    #     on_delete=models.PROTECT,
+    #     verbose_name=_("وضعیت آیتم"),
+    #     limit_choices_to=models.Q(target_model__in=['item', 'both']),
+    #     null=True, blank=True
+    # )
     price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
     items = models.JSONField(_("آیتم های اضافی"), blank=True, null=True)
     assigned_to = models.ForeignKey(
@@ -257,12 +257,12 @@ class OrderItemFile(models.Model):
     تحلیل: فایل‌ها پاک نمی‌شوند، بلکه ورژن جدید می‌خورند تا تاریخچه حفظ شود.
     """
     
-    STATUS_CHOICES = [
-        ('uploading', _('در حال آپلود/پردازش')),
-        ('pending', _('در انتظار بررسی')),
-        ('approved', _('تایید شده')),
-        ('rejected', _('رد شده (نیازمند اصلاح)')),
-    ]
+    # STATUS_CHOICES = [
+    #     ('uploading', _('در حال آپلود/پردازش')),
+    #     ('pending', _('در انتظار بررسی')),
+    #     ('approved', _('تایید شده')),
+    #     ('rejected', _('رد شده (نیازمند اصلاح)')),
+    # ]
     
     order_item = models.ForeignKey(
         OrderItem, 
@@ -278,8 +278,8 @@ class OrderItemFile(models.Model):
     file = models.FileField(_('فایل نهایی'), upload_to='orders/designs/%Y/%m/%d/')
     version = models.PositiveIntegerField(_('نسخه فایل'), default=1)
     is_latest = models.BooleanField(_('آخرین نسخه است؟'), default=True)
-    
-    status = models.CharField(_("وضعیت فایل"), max_length=20, choices=STATUS_CHOICES, default='pending')
+    is_accepted = models.BooleanField(_("تایید شده"), default=False)
+    # status = models.CharField(_("وضعیت فایل"), max_length=20, choices=STATUS_CHOICES, default='pending')
     admin_feedback = models.TextField(_("دلیل رد شدن / توضیحات QC"), blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)

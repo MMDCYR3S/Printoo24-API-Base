@@ -27,8 +27,8 @@ class OrderStatusInputSerializer(serializers.ModelSerializer):
         
 class OrderTransitionSerializer(serializers.Serializer):
     """ 
-    ورودی تغییر وضعیت دستی (هوشمند).
-    قابلیت تشخیص درخواست برای کل سفارش یا یک آیتم خاص.
+    ورودی تغییر وضعیت سفارش (Simplified).
+    فقط کد وضعیت جدید و توضیحات دریافت می‌شود.
     """
     new_status_code = serializers.CharField(
         required=True, 
@@ -38,13 +38,6 @@ class OrderTransitionSerializer(serializers.Serializer):
         required=False, 
         allow_blank=True,
         help_text="توضیحات اختیاری (دلیل رد یا تایید)"
-    )
-    
-    # ===== فیلد جدید برای پشتیبانی از آیتم ===== #
-    order_item_id = serializers.IntegerField(
-        required=False, 
-        allow_null=True,
-        help_text="شناسه آیتم (اگر پر شود، تغییر وضعیت فقط روی این آیتم اعمال می‌شود)"
     )
     
     def validate_new_status_code(self, value):

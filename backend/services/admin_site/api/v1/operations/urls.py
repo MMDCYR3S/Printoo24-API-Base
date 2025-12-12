@@ -4,7 +4,7 @@ from .views import (
     OrderListView,
     OrderDetailView,
     OrderItemUploadView,
-    FileStatusView,
+    FileReviewView,
     OrderStatusGroupViewSet,
     OrderStatusViewSet,
     OrderTransitionView,
@@ -23,7 +23,7 @@ urlpatterns = [
     path('order/detail/<int:pk>/', OrderDetailView.as_view(), name='admin-order-detail'),
     # ===== File Upload - Designer ===== #
     path('items/upload/<int:item_id>/', OrderItemUploadView.as_view(), name='admin-item-upload'),
-    path('files/status/<int:file_id>/', FileStatusView.as_view(), name='admin-file-status'),
+    path('files/status/<int:file_id>/', FileReviewView.as_view(), name='admin-file-status'),
     # ===== Status Transition ===== #
     path('transition/<int:pk>/', OrderTransitionView.as_view(), name='admin-order-transition'),
     # ===== Order Cost Report Create ===== #

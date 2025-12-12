@@ -8,7 +8,7 @@ from drf_spectacular.utils import extend_schema
 from apps.operations.services import OrderFileAppService
 from ..serializers import (
     DesignFileUploadSerializer, 
-    FileStatusChangeSerializer, 
+    FileReviewSerializer, 
     FileSerializer
 )
 
@@ -44,14 +44,13 @@ class OrderItemUploadView(GenericAPIView):
         except Exception as e:
             return Response({"detail": "خطای سیستمی در آپلود فایل.", "error": str(e)}, status=500)
 
-# ========== File Status View ========== #
-@extend_schema(tags=['Order-Upload-File'])
-class FileStatusView(GenericAPIView):
+@extend_schema(tags=['Order-Upload-File'], summary="تایید یا رد فایل طراحی")
+class FileReviewView(GenericAPIView):
     """
-    تغییر وضعیت یک فایل (تایید/رد) توسط طراح/QC.
+    تغییر وضعیت تایید/رد یک فایل.
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = FileStatusChangeSerializer
+    serializer_class = FileReviewSerializer
 
     def put(self, request, file_id):
         serializer = self.get_serializer(data=request.data)
@@ -59,10 +58,10 @@ class FileStatusView(GenericAPIView):
         
         try:
             service = OrderFileAppService()
-            updated_file = service.change_file_status(
+            updated_file = service.review_design_file(
                 requester=request.user,
                 file_id=file_id,
-                new_status=serializer.validated_data['status'],
+                is_accepted=serializer.validated_data['is_accepted'],
                 feedback=serializer.validated_data.get('admin_feedback')
             )
             

@@ -16,12 +16,11 @@ logger = logging.getLogger('apps.operations.transition')
 # ========== Order Transition App Service ========== #
 class OrderTransitionAppService:
     """
-    سرویس اپلیکیشن برای مدیریت تغییر وضعیت دستی سفارشات توسط پرسنل.
-    وظیفه اصلی: بررسی Access Scope کاربر قبل از تغییر وضعیت.
+    سرویس اپلیکیشن ساده‌سازی شده برای مدیریت تغییر وضعیت سفارش.
+    تمرکز فقط روی Order است.
     """
     def __init__(self):
         self.order_repo = OrderRepository()
-        self.item_repo = OrderItemRepository()
         self.status_repo = OrderStatusRepository()
         self.flow_domain_service = OrderStatusFlowDomainService()
         
@@ -32,22 +31,29 @@ class OrderTransitionAppService:
         """
         
         # ===== بررسی مجوز برای تغییر وضعیت ===== #
-        logger.info(f"Transition request to '{new_status_code}' by {requester.username}")
+        logger.info(f"Transition request for Order #{order_id} to '{new_status_code}' by {requester.username}")
         AppPermissionChecker.check_has_permission(requester, 'change_orderstatus')
         
         # ===== دریافت سفارش مورد نظر ===== #
+        order = self.order_repo.get_by_id(order_id)
+        if not order:
+            raise ValidationError("سفارش مورد نظر یافت نشد.")
+        
         new_status = self.status_repo.get_status_by_code(new_status_code)
         if not new_status:
             raise ValidationError(f"کد وضعیت نامعتبر است: {new_status_code}")
         
-        if order_item_id:
-            return self._handle_item_transition(requester, order_item_id, new_status, description)
-        elif order_id:
-            if new_status.target_model == 'item':
-                 raise ValidationError("این وضعیت مربوط به اقلام سفارش است، نه کل سفارش.")
-            return self._handle_order_transition(requester, order_id, new_status, description)
-        else:
-            raise ValidationError("شناسه سفارش یا آیتم ارسال نشده است.")
+        self._validate_role_scope(requester, order.current_status)
+        self._validate_transition_direction(order.current_status, new_status)
+        
+        updated_order = self.flow_domain_service.change_order_status(
+            order=order,
+            new_status_code=new_status.internal_code,
+            user=requester,
+            description=description
+        )
+        
+        return updated_order
     
     # ===== افزودن آیتم به سفارش ===== #
     def _handle_item_transition(self, user: User, item_id: int, new_status: OrderStatus, description: str):
@@ -135,19 +141,23 @@ class OrderTransitionAppService:
         
     def _validate_role_scope(self, user: User, current_status: OrderStatus):
         """
-        بررسی اسکوپ برای کل سفارش
+        بررسی می‌کند آیا نقش کاربر اجازه دسترسی به سفارش در وضعیت فعلی را دارد؟
         """
         if user.is_superuser or not current_status:
             return
 
         user_role_rel = user.user_role.select_related('role').first()
+        if not user_role_rel:
+            raise PermissionDenied("کاربر فاقد نقش سیستمی است.")
+            
         role = user_role_rel.role
-        
-        if getattr(role, 'is_admin', False):
+
+        if getattr(role, 'is_admin', False) or getattr(role, 'can_view_all_orders', False):
             return
 
+        # # ===== بررسی دسترسی به تغییر وضعیت سفارش ===== #
         if current_status.group.code not in role.allowed_status_groups:
-            raise PermissionDenied("دسترسی تغییر وضعیت در این مرحله برای شما مجاز نیست.")
+            raise PermissionDenied(f"شما دسترسی به تغییر سفارش در مرحله '{current_status.group.name}' را ندارید.")
 
     def _validate_item_files(self, item: OrderItem):
         """
@@ -185,11 +195,9 @@ class OrderTransitionAppService:
         if not current_status:
             return
             
-        # اگر داریم از یک گروه به گروه دیگر می‌رویم (مثلا طراحی -> چاپ)
-        if current_status.group_id != new_status.group_id:
-            # اینجا می‌توان قوانین سخت‌تری گذاشت
-            return 
+        if current_status.id == new_status.id:
+            return
 
         is_backward = new_status.sort_order < current_status.sort_order
         if is_backward and new_status.status_type != 'reject':
-             raise ValidationError(f"بازگشت به عقب ({new_status.name}) فقط در صورت رد کردن (Reject) مجاز است.")
+             raise ValidationError(f"بازگشت به عقب ({new_status.name}) فقط در صورت 'رد کردن' سفارش مجاز است.")
