@@ -3,12 +3,13 @@ from typing import List, Dict, Any
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from core.models import Order, User, OrderCostReport, OrderCostItem
-from .repositories import OrderCostReportRepository, OrderCostItemRepository
+from core.models import Order, User, OrderCostReport, OrderCostItem, OrderCostType
+from .repositories import OrderCostReportRepository, OrderCostItemRepository, OrderCostTypeRepository
 
 # ========== Order Cost Domain Service ========== #
 class OrderCostDomainService:
     def __init__(self):
+        self.type_repo = OrderCostTypeRepository()
         self.report_repo = OrderCostReportRepository()
         self.item_repo = OrderCostItemRepository()
 
@@ -156,3 +157,34 @@ class OrderCostDomainService:
         report.save()
         return report
     
+    # ========== Order Cost Type ========== #
+    @transaction.atomic
+    def create_cost_type(self, user: User, data: dict) -> OrderCostType:
+        """ ایجاد یک نوع هزینه جدید """
+        if self.type_repo.model.objects.filter(code=data['code']).exists():
+            raise ValidationError("نوع هزینه با این کد سیستمی قبلاً تعریف شده است.")
+
+        return self.type_repo.create({
+            "title": data['title'],
+            "code": data['code'],
+            "category": data['category'],
+            "is_deduction": data.get('is_deduction', False)
+        })
+    
+    @transaction.atomic
+    def update_cost_type(self, type_id: int, user: User, data: dict) -> OrderCostType:
+        """ ویرایش نوع هزینه """
+        cost_type = self.type_repo.get_by_id(type_id)
+        if not cost_type:
+            raise ValidationError("نوع هزینه یافت نشد.")
+        return self.type_repo.update(cost_type, data)
+    
+    @transaction.atomic
+    def delete_cost_type(self, type_id: int, user: User):
+        """ حذف نوع هزینه (با بررسی وابستگی) """
+        cost_type = self.type_repo.get_by_id(type_id)
+        if not cost_type:
+            raise ValidationError("نوع هزینه یافت نشد.")
+        if hasattr(cost_type, 'ordercostcatalog_set') and cost_type.ordercostcatalog_set.exists():
+             raise ValidationError("این نوع هزینه در کاتالوگ‌ها استفاده شده و قابل حذف نیست.")
+        cost_type.delete()

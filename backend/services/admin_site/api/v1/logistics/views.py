@@ -1,5 +1,6 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -7,12 +8,15 @@ from drf_spectacular.utils import extend_schema
 
 from apps.logistics.services import WarehouseAppService
 from apps.permissions import AppPermissionChecker
+from core.models import DeliveryMethod
 from .serializers import (
+    CostReportOutputSerializer,
     CreateShipmentInputSerializer,
     UpdateShipmentInputSerializer,
     ShipmentStatusInputSerializer,
     ShipmentOutputSerializer,
     CreateLogisticCostReportInputSerializer,
+    DeliveryMethodSerializer,
 )
 
 # ===== 1. ایجاد مرسوله و بسته‌ها (POST /api/v1/orders/{pk}/shipments/) =====
@@ -23,7 +27,7 @@ class CreateShipmentView(GenericAPIView):
     serializer_class = CreateShipmentInputSerializer 
     
     def post(self, request, order_pk):
-        AppPermissionChecker.check_has_permission(request.user, 'logistic.add_shipment')
+        AppPermissionChecker.check_has_permission(request.user, 'add_ordershipment')
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -44,21 +48,18 @@ class CreateShipmentView(GenericAPIView):
 class ShipmentDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
-    # متد GET برای نمایش جزئیات (از ShipmentRepository استفاده می‌کند)
-    def get(self, request, pk):
-        # [توجه]: دسترسی مشاهده باید با view_shipment چک شود
-        AppPermissionChecker.check_has_permission(request.user, 'logistic.view_shipment') 
+    def get(self, request, shipment_id):
+        AppPermissionChecker.check_has_permission(request.user, 'view_ordershipment') 
         
-        # فرض می‌کنیم متد get_shipment_with_details در سرویس دامنه وجود دارد
-        shipment = WarehouseAppService()._logistic_domain.get_shipment_with_details(pk)
+        shipment = WarehouseAppService()._logistic_domain.get_shipment_with_details(shipment_id)
         if not shipment:
             return Response({"detail": "مرسوله یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
             
         return Response(ShipmentOutputSerializer(shipment).data, status=status.HTTP_200_OK)
 
-    # متد PATCH برای به‌روزرسانی جزئیات
-    def patch(self, request, pk):
-        AppPermissionChecker.check_has_permission(request.user, 'logistic.change_shipment')
+    # ===== بروزرسانی مرسوله ===== #
+    def patch(self, request, shipment_id):
+        AppPermissionChecker.check_has_permission(request.user, 'change_ordershipment')
         
         serializer = UpdateShipmentInputSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -66,7 +67,7 @@ class ShipmentDetailView(APIView):
         service = WarehouseAppService()
         shipment = service.update_shipment(
             user=request.user, 
-            shipment_id=pk, 
+            shipment_id=shipment_id, 
             data=serializer.validated_data
         )
         
@@ -79,8 +80,8 @@ class UpdateShipmentStatusView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ShipmentStatusInputSerializer
     
-    def post(self, request, pk):
-        AppPermissionChecker.check_has_permission(request.user, 'logistic.change_shipment_status')
+    def post(self, request, shipment_id):
+        AppPermissionChecker.check_has_permission(request.user, 'change_ordershipment')
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -89,7 +90,7 @@ class UpdateShipmentStatusView(GenericAPIView):
         
         shipment = service.change_shipment_status(
             user=request.user, 
-            shipment_id=pk, 
+            shipment_id=shipment_id, 
             new_status_code=serializer.validated_data['new_status_code']
         )
         
@@ -103,7 +104,7 @@ class AddLogisticCostView(GenericAPIView):
     serializer_class = CreateLogisticCostReportInputSerializer
     
     def post(self, request, order_pk):
-        AppPermissionChecker.check_has_permission(request.user, 'logistic.add_cost_report')
+        AppPermissionChecker.check_has_permission(request.user, 'add_ordercostreport')
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -117,3 +118,29 @@ class AddLogisticCostView(GenericAPIView):
         )
         
         return Response(CostReportOutputSerializer(cost_report).data, status=status.HTTP_201_CREATED)
+
+# ========== Delivery Method ========== #
+@extend_schema(tags=['Warehouse - Method'])
+class DeliveryMethodViewSet(ModelViewSet):
+    """
+    مدیریت روش‌های ارسال (پیک، پست، تیپاکس).
+    فقط مدیران سیستم یا مدیران لجستیک باید دسترسی نوشتن داشته باشند.
+    """
+    permission_classes = [IsAuthenticated]
+    queryset = DeliveryMethod.objects.all()
+    serializer_class = DeliveryMethodSerializer
+
+    def get_permissions(self):
+        return super().get_permissions()
+
+    def perform_create(self, serializer):
+        AppPermissionChecker.check_has_permission(self.request.user, 'add_deliverymethod')
+        serializer.save()
+
+    def perform_update(self, serializer):
+        AppPermissionChecker.check_has_permission(self.request.user, 'change_deliverymethod')
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        AppPermissionChecker.check_has_permission(self.request.user, 'delete_deliverymethod')
+        instance.delete()

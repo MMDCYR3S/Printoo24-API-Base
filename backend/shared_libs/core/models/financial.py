@@ -40,7 +40,7 @@ class Invoice(models.Model):
 
     order = models.OneToOneField(
         'core.Order', 
-        related_name='invoice', 
+        related_name='related_invoice', 
         on_delete=models.PROTECT, 
         verbose_name=_("سفارش مرتبط")
     )

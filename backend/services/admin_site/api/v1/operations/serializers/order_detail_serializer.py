@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from core.models import (
     Order, OrderItem, OrderItemFile, OrderStatus, OrderStatusGroup, OrderCostReport,
-    OrderStateLog, OrderCostItem, OrderInvoice, OrderTransaction, OrderShipment
+    OrderStateLog, OrderCostItem, OrderShipment
 )
 
 # ========== 1. Micro Serializers ========== #
@@ -38,11 +38,6 @@ class CostItemSerializer(serializers.ModelSerializer):
         model = OrderCostItem
         fields = ['id', 'final_title', 'amount', 'type_name', 'description', 'custom_title']
         
-class TransactionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderTransaction
-        fields = ['id', 'amount', 'transaction_type', 'status', 'payment_date', 'tracking_code', 'receipt_image']
-        
 class OrderCostReportSerializer(serializers.ModelSerializer):
     """ مدل گزارش هزینه (مدل بالادستی) """
     items = CostItemSerializer(many=True, read_only=True)
@@ -54,12 +49,6 @@ class OrderCostReportSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'is_approved_by_finance', 
             'total_amount', 'created_by_name', 'created_at', 'items'
         ]
-
-class InvoiceSerializer(serializers.ModelSerializer):
-    remaining_amount = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
-    class Meta:
-        model = OrderInvoice
-        fields = ['invoice_number', 'items_total', 'services_total', 'tax_amount', 'discount_amount', 'final_payable_amount', 'paid_amount', 'remaining_amount', 'status']
 
 class StateLogSerializer(serializers.ModelSerializer):
     """ تاریخچه تغییرات وضعیت """
@@ -143,7 +132,6 @@ class DesignerOrderDetailSerializer(BaseOrderDetailSerializer):
 # ===== Role: Finance ===== #
 class FinanceOrderDetailSerializer(BaseOrderDetailSerializer):
     """ مالی همه اطلاعات پولی و گزارشات هزینه را می‌بیند """
-    invoice = InvoiceSerializer(source='invoice_order', read_only=True)
     cost_reports = OrderCostReportSerializer(source='cost_reports', many=True, read_only=True)
     
     class Meta(BaseOrderDetailSerializer.Meta):

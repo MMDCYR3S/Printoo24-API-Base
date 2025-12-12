@@ -1,6 +1,6 @@
 import json
 from rest_framework import serializers
-from core.models import OrderCostReport, OrderCostItem
+from core.models import OrderCostReport, OrderCostItem, OrderCostType
 
 # ========== Order Cost Item Serializers ========== #
 class OrderCostItemSerializer(serializers.ModelSerializer):
@@ -91,3 +91,22 @@ class OrderCostReportDetailSerializer(serializers.ModelSerializer):
             'attachment', 
             'items'
         ]
+
+# ========== Order Cost Type Serializers ========== #
+class CostTypeInputSerializer(serializers.ModelSerializer):
+    """ ورودی برای ایجاد/ویرایش نوع هزینه """
+    class Meta:
+        model = OrderCostType
+        fields = ['title', 'code', 'category', 'is_deduction']
+        
+    def validate_code(self, value):
+        """ نرمال‌سازی کد سیستمی """
+        return value.upper().strip()
+
+class CostTypeDetailSerializer(serializers.ModelSerializer):
+    """ خروجی کامل نوع هزینه """
+    category_display = serializers.CharField(source='get_category_display', read_only=True)
+    
+    class Meta:
+        model = OrderCostType
+        fields = ['id', 'title', 'code', 'category', 'category_display', 'is_deduction', 'created_at']

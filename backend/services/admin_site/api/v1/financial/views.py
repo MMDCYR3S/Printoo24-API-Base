@@ -10,7 +10,10 @@ from .serializers import (
     CostReportListSerializer, CostReportDetailSerializer, 
     CreateCostReportInputSerializer, UpdateCostReportInputSerializer,
     CostItemInputSerializer, CostItemOutputSerializer,
-    CostCatalogSerializer, ApprovalInputSerializer
+    CostCatalogSerializer, ApprovalInputSerializer,
+    InvoiceDetailSerializer, TransactionInputSerializer, 
+    TransactionDetailSerializer, TransactionVerifySerializer,
+    TransactionUpdateInputSerializer, InvoiceUpdateInputSerializer
 )
 
 # ========== Financial Catalog ViewSet ========== #
@@ -153,3 +156,107 @@ class FinancialItemViewSet(viewsets.GenericViewSet):
     def destroy(self, request, pk=None):
         self.service.delete_item(request.user, pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# ========== Financial Invoice ViewSet ========== #
+@extend_schema(tags=['Financial - Invoices'])
+class FinancialInvoiceViewSet(viewsets.GenericViewSet):
+    """ مدیریت فاکتورها و تراکنش‌ها """
+    permission_classes = [IsAuthenticated]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = FinancialAppService()
+
+    def retrieve(self, request, pk=None):
+        """ دریافت جزئیات فاکتور """
+        invoice = self.service.get_invoice_details(request.user, pk)
+        if not invoice:
+            return Response({"detail": "فاکتور یافت نشد"}, status=404)
+        return Response(InvoiceDetailSerializer(invoice).data)
+    
+    @action(detail=True, methods=['post'], url_path='recalculate')
+    def recalculate(self, request, pk=None):
+        """ به‌روزرسانی مبالغ فاکتور (در صورت تغییر هزینه‌های سفارش) """
+        invoice = self.service.recalculate_invoice_manually(request.user, pk)
+        return Response(InvoiceDetailSerializer(invoice).data)
+    
+    @extend_schema(request=TransactionInputSerializer, responses=TransactionDetailSerializer)
+    @action(detail=True, methods=['post'], url_path='add-transaction')
+    def add_transaction(self, request, pk=None):
+        """ ثبت تراکنش دستی روی این فاکتور """
+        serializer = TransactionInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        trx = self.service.register_payment(
+            user=request.user, 
+            invoice_id=pk, 
+            data=serializer.validated_data
+        )
+        return Response(TransactionDetailSerializer(trx).data, status=status.HTTP_201_CREATED)
+    
+    @extend_schema(request=InvoiceUpdateInputSerializer, responses=InvoiceDetailSerializer)
+    def partial_update(self, request, pk=None):
+        """ ویرایش توضیحات یا سررسید فاکتور """
+        serializer = InvoiceUpdateInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        invoice = self.service.update_invoice(
+            request.user, 
+            invoice_id=pk, 
+            data=serializer.validated_data
+        )
+        return Response(InvoiceDetailSerializer(invoice).data)
+
+    def destroy(self, request, pk=None):
+        """ حذف فاکتور (در صورت نداشتن تراکنش معتبر) """
+        self.service.delete_invoice(request.user, invoice_id=pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post'], url_path='finalize')
+    def finalize(self, request, pk=None):
+        """ تبدیل به فاکتور رسمی """
+        invoice = self.service.finalize_invoice(request.user, pk)
+        return Response(InvoiceDetailSerializer(invoice).data)
+    
+# ========== Financial Catalog ViewSet ========== #
+@extend_schema(tags=['Financial - Transactions'])
+class FinancialTransactionViewSet(viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = FinancialAppService()
+    
+    @extend_schema(request=TransactionVerifySerializer)
+    @action(detail=True, methods=['post'], url_path='verify')
+    def verify(self, request, pk=None):
+        """ تایید یا رد تراکنش """
+        serializer = TransactionVerifySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        trx = self.service.verify_payment(
+            user=request.user, 
+            transaction_id=pk, 
+            approved=serializer.validated_data['approved'],
+            reason=serializer.validated_data.get('rejection_reason')
+        )
+        return Response(TransactionDetailSerializer(trx).data)
+    
+    @extend_schema(request=TransactionUpdateInputSerializer, responses=TransactionDetailSerializer)
+    def partial_update(self, request, pk=None):
+        """ ویرایش تراکنش (اگر تایید نشده باشد) """
+        serializer = TransactionUpdateInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        trx = self.service.update_transaction(
+            request.user, 
+            transaction_id=pk, 
+            data=serializer.validated_data
+        )
+        return Response(TransactionDetailSerializer(trx).data)
+
+    def destroy(self, request, pk=None):
+        """ حذف تراکنش (اگر تایید نشده باشد) """
+        self.service.delete_transaction(request.user, transaction_id=pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    

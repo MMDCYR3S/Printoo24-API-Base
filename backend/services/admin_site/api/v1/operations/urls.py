@@ -9,11 +9,13 @@ from .views import (
     OrderStatusViewSet,
     OrderTransitionView,
     OrderCostReportCreateView,
+    CostTypeViewSet,
 )
 
 router = DefaultRouter()
 router.register(r'status-groups', OrderStatusGroupViewSet, basename='status-group')
 router.register(r'statuses', OrderStatusViewSet, basename='status')
+router.register(r'cost-types', CostTypeViewSet, basename='financial-cost-type')
 
 urlpatterns = [
     # ===== Order List & Detail ===== #

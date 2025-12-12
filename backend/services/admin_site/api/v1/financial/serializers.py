@@ -1,5 +1,9 @@
 from rest_framework import serializers
-from core.models import OrderCostReport, OrderCostItem, OrderCostCatalog, OrderCostType
+from core.models import (
+    OrderCostReport, OrderCostItem, OrderCostCatalog,
+    OrderCostType, Invoice, InvoiceStateLog, InvoiceStatus,
+    Transaction
+)
 from decimal import Decimal
 
 # ========== Cost Catalogs (Master) ========== #
@@ -80,3 +84,74 @@ class UpdateCostReportInputSerializer(serializers.Serializer):
 class ApprovalInputSerializer(serializers.Serializer):
     """ ورودی برای اکشن تایید/رد """
     approve = serializers.BooleanField(required=True)
+
+# --- Micro Serializers ---
+class InvoiceStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoiceStatus
+        fields = ['name', 'internal_code', 'color', 'is_considered_paid']
+
+class InvoiceLogSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    from_status = serializers.CharField(source='from_status.name', read_only=True)
+    to_status = serializers.CharField(source='to_status.name', read_only=True)
+    class Meta:
+        model = InvoiceStateLog
+        fields = ['timestamp', 'user_name', 'from_status', 'to_status', 'description']
+
+# --- Transaction Serializers ---
+class TransactionInputSerializer(serializers.Serializer):
+    """ ورودی ثبت تراکنش دستی """
+    amount = serializers.DecimalField(max_digits=18, decimal_places=0)
+    method = serializers.ChoiceField(choices=Transaction.METHOD_CHOICES)
+    tracking_code = serializers.CharField(required=False, allow_blank=True)
+    payment_date = serializers.DateTimeField(required=False)
+    dest_account = serializers.CharField(required=False, allow_blank=True)
+    receipt_image = serializers.ImageField(required=False)
+
+class TransactionVerifySerializer(serializers.Serializer):
+    """ ورودی تایید/رد """
+    approved = serializers.BooleanField()
+    rejection_reason = serializers.CharField(required=False, allow_blank=True)
+
+class TransactionDetailSerializer(serializers.ModelSerializer):
+    """ خروجی نمایش تراکنش """
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    confirmed_by_name = serializers.CharField(source='confirmed_by.username', read_only=True)
+    
+    class Meta:
+        model = Transaction
+        fields = '__all__'
+
+# --- Invoice Serializers ---
+class InvoiceDetailSerializer(serializers.ModelSerializer):
+    """ خروجی کامل فاکتور """
+    status = InvoiceStatusSerializer(read_only=True)
+    transactions = TransactionDetailSerializer(many=True, read_only=True)
+    logs = InvoiceLogSerializer(many=True, read_only=True)
+    # اطلاعات خلاصه مشتری
+    customer_name = serializers.CharField(source='order.user.username', read_only=True) 
+    order_code = serializers.CharField(source='order.order_code', read_only=True)
+
+    class Meta:
+        model = Invoice
+        fields = [
+            'id', 'invoice_number', 'order_code', 'customer_name', 'status',
+            'items_amount', 'services_amount', 'tax_amount', 'discount_amount', 'final_amount',
+            'paid_amount', 'remaining_amount', 'invoice_type',
+            'issued_at', 'due_date', 'transactions', 'logs'
+        ]
+
+class InvoiceUpdateInputSerializer(serializers.Serializer):
+    """ ورودی ویرایش متادیتای فاکتور """
+    due_date = serializers.DateTimeField(required=False, allow_null=True)
+    description = serializers.CharField(required=False, allow_blank=True)
+
+class TransactionUpdateInputSerializer(serializers.Serializer):
+    """ ورودی ویرایش تراکنش (شبیه ایجاد است اما همه فیلدها اختیاری) """
+    amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
+    method = serializers.ChoiceField(choices=Transaction.METHOD_CHOICES, required=False)
+    tracking_code = serializers.CharField(required=False, allow_blank=True)
+    payment_date = serializers.DateTimeField(required=False)
+    dest_account = serializers.CharField(required=False, allow_blank=True)
+    receipt_image = serializers.ImageField(required=False)

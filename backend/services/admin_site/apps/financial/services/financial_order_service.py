@@ -7,6 +7,8 @@ from core.domain.commerce.order import (
     OrderCostDomainService, OrderCostReportRepository,
     OrderCostItemRepository, OrderRepository
 )
+from core.domain.financial import FinancialDomainService
+
 
 # ========== Financial App Service ========== #
 class FinancialAppService:
@@ -88,3 +90,54 @@ class FinancialAppService:
         """ حذف یک آیتم """
         AppPermissionChecker.check_has_permission(user, 'change_cost_report')
         self._cost_domain.delete_cost_item(item_id, user)
+        
+    # ========== مدیریت فاکتورها و تراکنش‌ها ========== #
+    def get_invoice_details(self, user: User, invoice_id: int):
+        """ مشاهده جزئیات فاکتور """
+        AppPermissionChecker.check_has_permission(user, 'financial.view_invoice')
+        return FinancialDomainService().invoice_repo.get_invoice_detail(invoice_id)
+
+    def recalculate_invoice_manually(self, user: User, invoice_id: int):
+        """ دکمه 'محاسبه مجدد' برای مدیر مالی """
+        AppPermissionChecker.check_has_permission(user, 'financial.change_invoice')
+        
+        domain = FinancialDomainService()
+        invoice = domain.invoice_repo.get_by_id(invoice_id)
+        if not invoice: raise ValidationError("فاکتور یافت نشد")
+            
+        return domain.recalculate_invoice(invoice)
+
+    def finalize_invoice(self, user: User, invoice_id: int):
+        """ تبدیل پیش فاکتور به فاکتور نهایی """
+        AppPermissionChecker.check_has_permission(user, 'financial.change_invoice')
+        return self.domain.confirm_invoice_final(invoice_id, user)
+
+    def update_invoice(self, user: User, invoice_id: int, data: dict):
+        """ ویرایش متادیتای فاکتور """
+        AppPermissionChecker.check_has_permission(user, 'financial.change_invoice')
+        return self.domain.update_invoice_metadata(invoice_id, data, user)
+
+    def delete_invoice(self, user: User, invoice_id: int):
+        """ حذف فاکتور """
+        AppPermissionChecker.check_has_permission(user, 'financial.delete_invoice')
+        self.domain.delete_invoice(invoice_id, user)
+    
+    # ========== مدیریت تراکنش‌ها ========== #
+    def register_payment(self, user: User, invoice_id: int, data: dict):
+        """ ثبت فیش دستی توسط ادمین مالی """
+        AppPermissionChecker.check_has_permission(user, 'financial.add_transaction')
+        return FinancialDomainService().register_manual_transaction(invoice_id, user, data)
+
+    def verify_payment(self, user: User, transaction_id: int, approved: bool, reason: str = None):
+        """ تایید یا رد تراکنش """
+        AppPermissionChecker.check_has_permission(user, 'financial.change_transaction')
+        return FinancialDomainService().verify_transaction(transaction_id, user, approved, reason)
+    
+    def update_transaction(self, user: User, transaction_id: int, data: dict):
+        AppPermissionChecker.check_has_permission(user, 'financial.change_transaction')
+        return self.domain.update_transaction_details(transaction_id, data, user)
+
+    def delete_transaction(self, user: User, transaction_id: int):
+        AppPermissionChecker.check_has_permission(user, 'financial.delete_transaction')
+        self.domain.delete_transaction(transaction_id, user)
+    

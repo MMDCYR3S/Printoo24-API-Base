@@ -68,3 +68,24 @@ class OrderCostAppService:
             raise PermissionDenied(
                 f"شما اجازه ثبت هزینه برای سفارشی که در واحد '{current_status.group.name}' است را ندارید."
             )
+
+    # ========== بخش نوع هزینه ها ========== #
+    def list_cost_types(self, user: User):
+        """ لیست همه انواع هزینه """
+        AppPermissionChecker.check_has_permission(user, 'view_ordercosttype')
+        return self.domain_service.type_repo.get_all() 
+
+    def create_cost_type(self, user: User, data: dict):
+        """ تعریف نوع هزینه جدید """
+        AppPermissionChecker.check_has_permission(user, 'add_ordercosttype')
+        return self.domain_service.create_cost_type(user, data)
+
+    def update_cost_type(self, user: User, type_id: int, data: dict):
+        """ ویرایش نوع هزینه """
+        AppPermissionChecker.check_has_permission(user, 'change_ordercosttype')
+        return self.domain_service.update_cost_type(type_id, user, data)
+
+    def delete_cost_type(self, user: User, type_id: int):
+        """ حذف نوع هزینه """
+        AppPermissionChecker.check_has_permission(user, 'delete_ordercosttype')
+        self.domain_service.delete_cost_type(type_id, user)

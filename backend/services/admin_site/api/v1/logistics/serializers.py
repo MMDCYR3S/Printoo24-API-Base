@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import OrderShipment, OrderPackage, OrderCostReport
+from core.models import OrderShipment, OrderPackage, OrderCostReport, DeliveryMethod
 from decimal import Decimal
 
 # --- Micro Serializers (Used for Nested Fields) ---
@@ -85,3 +85,9 @@ class CostReportOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderCostReport
         fields = ['id', 'title', 'created_by_name', 'total_amount', 'is_approved_by_finance', 'created_at']
+
+class DeliveryMethodSerializer(serializers.ModelSerializer):
+    """ سریالایزر برای مدیریت روش‌های ارسال """
+    class Meta:
+        model = DeliveryMethod
+        fields = ['id', 'title', 'description', 'is_price_dynamic', 'base_price', 'is_active']
