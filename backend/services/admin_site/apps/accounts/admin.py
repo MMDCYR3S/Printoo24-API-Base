@@ -11,7 +11,6 @@ from core.models import(
     City,
     Province,
     CustomerProfile,
-    AccessScope,
     OrderItem,
     Order,
     OrderStatus,
@@ -81,23 +80,14 @@ class RoleAdmin(admin.ModelAdmin):
     """
     مدیریت نقش‌ها.
     """
-    list_display = ('name', 'slug', 'get_scopes_count')
+    list_display = ('name', 'slug', 'get_allowed_groups_count')
     search_fields = ('name', 'slug')
-    
-    # برای انتخاب راحت‌تر پرمیشن‌ها و اسکوپ‌ها
-    filter_horizontal = ('scopes',) 
 
-    def get_scopes_count(self, obj):
-        return obj.scopes.count()
-    get_scopes_count.short_description = _('تعداد اسکوپ‌ها')
+    filter_horizontal = ('allowed_groups',) 
 
-# ========================================== #
-# ========== Access Scope Admin ============ #
-# ========================================== #
-@admin.register(AccessScope)
-class AccessScopeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code')
-    search_fields = ('name', 'code')
+    def get_allowed_groups_count(self, obj):
+        return obj.allowed_groups.count()
+    get_allowed_groups_count.short_description = _('تعداد اسکوپ‌ها')
 
 admin.site.register(UserRole)
 admin.site.register(Wallet)

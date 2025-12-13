@@ -8,7 +8,6 @@ from .user import (
     City,
     Province,
     CustomerProfile,
-    AccessScope,
 )
 from .product import (
     Product,

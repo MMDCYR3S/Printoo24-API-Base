@@ -2,7 +2,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from core.models import (
     User, CustomerProfile, Wallet,
-    Cart, Role, UserRole, AccessScope, OrderStatusGroup
+    Cart, Role, UserRole, OrderStatusGroup
 )
 
 # ====== Create Wallet When User Created ====== #
@@ -48,25 +48,3 @@ def create_customer_role(sender, instance, created, **kwargs):
             UserRole.objects.create(user=instance, role=customer_role)
         except Role.DoesNotExist:
             pass
-    
-# ========== Access Scope Signals ========== #
-@receiver(post_save, sender=OrderStatusGroup)
-def sync_access_scope_create_update(sender, instance, created, **kwargs):
-    """
-    هر وقت یک گروه وضعیت (مثلا 'برش لیزر') ساخته یا آپدیت شد،
-    یک AccessScope متناظر با آن در سیستم امنیتی بساز/آپدیت کن.
-    """
-    AccessScope.objects.update_or_create(
-        code=instance.code, # کلید اتصال کد سیستمی است
-        defaults={
-            'name': instance.name,
-            'description': f"دسترسی اتوماتیک تولید شده برای گروه: {instance.name}"
-        }
-    )
-
-@receiver(post_delete, sender=OrderStatusGroup)
-def sync_access_scope_delete(sender, instance, **kwargs):
-    """
-    اگر گروه وضعیت پاک شد، اسکوپ دسترسی آن هم پاک شود.
-    """
-    AccessScope.objects.filter(code=instance.code).delete()

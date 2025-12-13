@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     StaffListCreateView, StaffDetailView, StaffBulkActionsView,
     RoleListCreateView, RoleDetailView, StaffLoginView, StaffLogoutView,
-    PermissionListAPIView, AccessScopeListAPIView
+    PermissionListAPIView
 )
 
 urlpatterns = [
@@ -14,7 +14,6 @@ urlpatterns = [
     path('staff/actions/<str:action>/', StaffBulkActionsView.as_view(), name='staff-bulk-actions'),
     # ===== Role URLs ===== #
     path('roles/permissions/', PermissionListAPIView.as_view(), name='permission-list'),
-    path('roles/scopes/', AccessScopeListAPIView.as_view(), name='scope-list'),
     path('roles/', RoleListCreateView.as_view(), name='role-list-create'),
     path('roles/<int:pk>/', RoleDetailView.as_view(), name='role-detail'),
     # ===== Auth URLs ===== #

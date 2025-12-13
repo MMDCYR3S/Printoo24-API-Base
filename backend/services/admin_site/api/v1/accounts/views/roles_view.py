@@ -7,12 +7,11 @@ from django.contrib.auth.models import Permission
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes
 
 # ===== سرویس‌ها (فرض بر وجود داشتن) ===== #
-from core.models import AccessScope
 from apps.accounts.services import RoleAppService 
 from ..serializers import (
     RoleOutputSerializer, RoleInputSerializer, PermissionSerializer,
     StaffListSerializer, StaffCreateSerializer, StaffUpdateSerializer,
-    BulkIdsSerializer, BulkRoleChangeSerializer, AccessScopeSerializer
+    BulkIdsSerializer, BulkRoleChangeSerializer
 )
 
 # ========== PERMISSIONS ========== #
@@ -34,26 +33,6 @@ class PermissionListAPIView(GenericAPIView):
         permissions = Permission.objects.exclude(content_type__app_label__in=['admin', 'contenttypes', 'sessions'])
         serializer = PermissionSerializer(permissions, many=True)
         return Response(serializer.data)
-
-# ========== Access Scope API View ========== #
-@extend_schema(tags=["Users-Roles"])
-class AccessScopeListAPIView(GenericAPIView):
-    """
-    لیست تمام محدوده‌های دسترسی (Scopes) تعریف شده در سیستم.
-    مثال: 'workshop_access', 'financial_read', ...
-    """
-    permission_classes = [IsAuthenticated, IsAdminUser]
-    serializer_class = AccessScopeSerializer
-
-    @extend_schema(
-        summary="دریافت لیست محدوده‌های دسترسی (Scopes)",
-        responses={200: AccessScopeSerializer(many=True)}
-    )
-    def get(self, request):
-        scopes = AccessScope.objects.all()
-        serializer = self.get_serializer(scopes, many=True)
-        return Response(serializer.data)
-
 # ========== ROLE MANAGEMENT VIEWS ========== #
 @extend_schema(tags=["Users-Roles"])
 class RoleListCreateView(GenericAPIView):

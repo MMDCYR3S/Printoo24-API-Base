@@ -7,6 +7,29 @@ from django.utils.translation import gettext_lazy as _
 
 from .product import Product, ProductFileUploadRequirement
 
+class OrderManager(models.Manager):
+    def filter_by_access(self, user):
+        """
+        فیلتر سفارشات براساس نقش کاربر.
+        منطق: کاربر فقط سفارشاتی را می‌بیند که در "گروه وضعیت" هم‌نام با "کد نقش" او باشند.
+        """
+        # ===== اگر کاربر ادمین بود ===== #
+        if user.is_superuser:
+            return self.get_queryset()
+
+        # ===== اگر کاربر نقش نداشت یا لاگین نبود ===== #
+        if not hasattr(user, 'user_role'):
+            return self.get_queryset().none()
+
+        role = user.user_role.role
+
+        # ===== اگر کارکنان عادی بودند ===== #
+        if role.type == 'normal':
+             return self.get_queryset().filter(current_status__group__code=role.slug)
+         
+        # ===== بازگشت نتیجه به کاربر ===== #
+        return self.get_queryset().filter(current_status__group__code=role.slug)
+
 # ===== Order Status Group ===== #
 class OrderStatusGroup(models.Model):
     """
@@ -155,7 +178,6 @@ class Order(models.Model):
         verbose_name=_("وضعیت فعلی"),
         on_delete=models.PROTECT,
         related_name="orders",
-        limit_choices_to=models.Q(target_model__in=['order', 'both']),
         null=True,
         blank=True
     )
@@ -172,6 +194,8 @@ class Order(models.Model):
     description = models.TextField(_("توضیحات کلی مشتری"), blank=True, null=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+    
+    objects = OrderManager()
     
     class Meta:
         ordering = ['-created_at']
@@ -212,7 +236,6 @@ class OrderItem(models.Model):
     #     related_name='order_items',
     #     on_delete=models.PROTECT,
     #     verbose_name=_("وضعیت آیتم"),
-    #     limit_choices_to=models.Q(target_model__in=['item', 'both']),
     #     null=True, blank=True
     # )
     price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
