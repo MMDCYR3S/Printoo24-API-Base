@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiTypes
 
 from apps.dashboard.services import ProductDashboardService
 from ..serializers import (
@@ -26,8 +26,53 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.app_service = ProductDashboardService()
 
-    # ===== Core API ===== #
-    @extend_schema(request=ProductCoreCreateSerializer, responses=ProductCoreCreateSerializer)
+    # ========== Core Product API Create ========== #
+    @extend_schema(
+        summary="مرحله ۱: ایجاد اطلاعات پایه محصول",
+        description="""
+        **توضیحات:**
+        این اولین مرحله ساخت محصول است. در اینجا اطلاعات شناسنامه‌ای، تنظیمات کلی قیمت‌گذاری (مثل هزینه ستاپ اولیه) و نیازمندی‌های فایل (مثل اینکه محصول نیاز به طرح رو و پشت دارد) مشخص می‌شود.
+        
+        **نکات مهم:**
+        * در بخش `shell` اطلاعات عمومی قرار می‌گیرد.
+        * در بخش `pricing_config` تنظیمات کلی که ربطی به ویژگی‌ها ندارند (مثل هزینه طراحی پایه) قرار می‌گیرند.
+        * در `file_requirements` مشخص می‌کنید کاربر چه فایل‌هایی باید آپلود کند (با استفاده از ID مشخصات فایل).
+        """,
+        request=ProductCoreCreateSerializer,
+        responses={201: OpenApiTypes.OBJECT},
+        examples=[
+            OpenApiExample(
+                'Complete Core Example',
+                summary='نمونه کامل ساخت محصول کارت ویزیت',
+                description='یک محصول کارت ویزیت که نیاز به طرح رو و پشت دارد و دارای تیراژ مشخص است.',
+                value={
+                    "shell": {
+                        "name": "کارت ویزیت لمینت براق",
+                        "category": 1,
+                        "description": "کارت ویزیت با کیفیت بالا و روکش براق",
+                        "has_price": True,
+                        "has_quantity": True,
+                        "price": "0",  # قیمت پایه صفر، چون قیمت از ویژگی‌ها می‌آید
+                        "price_modifier_percent": 0
+                    },
+                    "pricing_config": {
+                        "base_setup_price": 50000,
+                        "design_service_available": True,
+                        "design_fee": 100000,
+                        "allow_custom_quantity": False,
+                        "min_quantity": 1000,
+                        "max_quantity": 10000
+                    },
+                    "quantity_ids": [1, 2, 3],  # ID های مدل Quantity
+                    "file_requirements": [
+                        {"spec_id": 1, "is_required": True},  # مثلا طرح رو
+                        {"spec_id": 2, "is_required": True}   # مثلا طرح پشت
+                    ]
+                },
+                request_only=True,
+            )
+        ]
+    )
     def create(self, request):
         """ مرحله اول: ایجاد محصول با تمام مشخصات پایه """
         serializer = ProductCoreCreateSerializer(data=request.data)
@@ -47,8 +92,69 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         self.app_service.update_full_product_core(pk, serializer.validated_data)
         return Response({'status': 'Product core updated'})
 
-    # ===== Option API ===== #
-    @extend_schema(request=ProductOptionsBulkSerializer, summary="مدیریت تمام ویژگی‌ها")
+    # ========== Option and Pricing API ========== #
+    @extend_schema(
+        summary="مرحله ۲: همگام‌سازی ویژگی‌ها (Options)",
+        description="""
+        **منطق بسیار مهم:**
+        این متد تمام ویژگی‌های محصول را یکجا مدیریت می‌کند (Bulk Sync). 
+        
+        شما لیستی از ویژگی‌ها را می‌فرستید. هر ویژگی شامل:
+        1. `option_id`: شناسه ویژگی گلوبال (مثلاً جنس کاغذ).
+        2. `values_config`: لیستی از مقادیر (مثلاً گلاسه ۳۰۰ گرم، کتان).
+        
+        **نحوه قیمت دهی:**
+        * اگر `global_value_id` بفرستید، یعنی دارید از یک مقدار پیش‌فرض استفاده می‌کنید.
+        * `price_impact`: مبلغی که این گزینه به قیمت پایه اضافه می‌کند.
+        """,
+        request=ProductOptionsBulkSerializer,
+        examples=[
+            OpenApiExample(
+                'Complex Options Scenario',
+                summary='سناریوی کامل (جنس کاغذ + سلفون)',
+                description='در این مثال، دو ویژگی (جنس کاغذ و نوع روکش) به محصول اضافه می‌شود. برخی مقادیر قیمت دارند و برخی رایگان هستند.',
+                value={
+                    "options": [
+                        # ویژگی اول: جنس کاغذ (ID: 10)
+                        {
+                            "option_id": 10,
+                            "is_required": True,
+                            "has_pricing": True,
+                            "values_config": [
+                                # مقدار اول: گلاسه (ID: 101) - قیمت دارد
+                                {
+                                    "global_value_id": 101,
+                                    "price_impact": 5000,
+                                    "is_default": True,
+                                    "quantity_step": 1
+                                },
+                                # مقدار دوم: کتان (ID: 102) - قیمت گران‌تر
+                                {
+                                    "global_value_id": 102,
+                                    "price_impact": 15000,
+                                    "is_default": False
+                                }
+                            ]
+                        },
+                        # ویژگی دوم: گوشه گرد (ID: 25) - فقط یک حالت دارد (Checkbox)
+                        {
+                            "option_id": 25,
+                            "is_required": False,
+                            "has_pricing": True,
+                            "values_config": [
+                                {
+                                    "global_value_id": 505, # بله
+                                    "price_impact": 20000,
+                                    "is_default": False
+                                }
+                            ]
+                        }
+                    ]
+                },
+                request_only=True
+            )
+        ]
+    )
     @action(detail=True, methods=['post'], url_path='options')
     def sync_options(self, request, pk=None):
         """ مرحله دوم: ارسال لیست تمام آپشن‌ها و قیمت‌هایشان """
@@ -61,11 +167,34 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         )
         return Response({'results': results}, status=status.HTTP_200_OK)
     
-   # ===== UPDATE Option Config (اصلاح شده) ===== #
+   # ========== UPDATE Option Config ========== #
     @extend_schema(
-        summary="ویرایش تنظیمات و قیمت‌های یک ویژگی",
+        summary="ویرایش تنظیمات یک ویژگی خاص",
+        description="""
+        این متد برای زمانی است که نمی‌خواهید همه آپشن‌ها را دوباره بفرستید و فقط می‌خواهید قیمت‌های یکی را آپدیت کنید.
+        """,
         request=OptionConfigUpdateSerializer,
-        responses={200: {'status': 'updated'}}
+        examples=[
+            OpenApiExample(
+                'Update Price Example',
+                summary='تغییر قیمت‌های ویژگی جنس کاغذ',
+                value={
+                    "product_option_id": 450,
+                    "has_pricing": True,
+                    "values": [
+                        {
+                            "id": 1200,
+                            "price_impact": 6000,
+                            "is_default": True
+                        },
+                        {
+                            "id": 1201,
+                            "price_impact": 18000
+                        }
+                    ]
+                }
+            )
+        ]
     )
     @action(detail=True, methods=['patch'], url_path='update-option-config')
     def update_option_config(self, request, pk=None):
@@ -89,45 +218,35 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    # ===== Media API ===== #
+    # ========== Media Sync API ========== #
     @extend_schema(
-        request=ProductMediaSyncSerializer,
-        summary="مدیریت لینک فایل‌ها و ترتیب عکس‌ها",
+        summary="مرحله ۳: اتصال فایل‌ها و تصاویر (Media)",
         description="""
-
-        **لینک کردن فایل‌های پیوست و عکس‌های محصول پس از آپلود**
-
-        این متد مرحله نهایی اتصال مدیا به محصول است.
-
-        **مراحل کلی فرآیند:**
-
-        1.  **ایجاد محصول:** ابتدا محصول باید اضافه شده باشد.
-        2.  **آپلود فایل‌ها:** قبل از فراخوانی این متد، باید فایل‌ها را آپلود کرده باشید.
-
-        ---
-
-        ### APIهای پیش‌نیاز برای آپلود:
-
-        برای آپلود عکس و فایل، ابتدا باید از اندپوینت‌های زیر استفاده کنید (ترتیب انجام این مرحله دست خودتان است):
-
-        **۱. آپلود عکس محصول:**
-        POST api/v1/dashboard/products/{id}/upload-image/
-
-        > **نکته مهم:** عکس پس از آپلود، به صورت خودکار به محصول اضافه می‌شود. از این API (`media-sync`) صرفاً برای **ویرایش ترتیب نمایش** (`image_orders`) استفاده کنید. اگر تغییری در ترتیب نیاز ندارید، این فیلد را خالی بگذارید.
-
-        **۲. آپلود فایل پیوست (در کتابخانه):**
-        POST api/v1/dashboard/products/upload-attachment/
-
-        ---
-
-        ### نحوه استفاده از این API (Media Sync):
-
-        پس از اینکه APIهای بالا را زدید و فایل‌های مورد نظر با استفاده از **Celery** پردازش و آپلود شدند، باید با استفاده از این متد آن‌ها را به محصول لینک کنید.
-
-        * **لینک کردن:** ID فایل‌های آپلود شده (در مرحله آپلود پیوست) را بگیرید و تحت یک لیست در `attachment_ids_to_link` ارسال کنید.
-        * **آنلینک کردن (حذف):** برای برداشتن یک فایل پیوست از محصول، شناسه آن را در لیست `attachment_ids_to_unlink` قرار دهید.
-
-        """    
+        **منطق فایل‌ها:**
+        این متد فایل فیزیکی آپلود نمی‌کند. بلکه فایل‌هایی که قبلاً آپلود شده‌اند را به محصول "وصل" (Link) می‌کند.
+        
+        **مراحل:**
+        1. ابتدا با استفاده از `upload-image` یا `upload-attachment` فایل را آپلود کنید و `ID` بگیرید.
+        2. آن `ID`ها را در این متد ارسال کنید.
+        
+        **کاربرد لیست‌ها:**
+        * `attachment_ids_to_link`: لیست ID فایل‌های قالب/پیوست جدید برای اضافه شدن.
+        * `attachment_ids_to_unlink`: لیست ID فایل‌هایی که باید از محصول حذف شوند.
+        * `image_orders`: لیست ID تمام عکس‌های محصول به ترتیبی که باید نمایش داده شوند (Sort).
+        """,
+        request=ProductMediaSyncSerializer,
+        examples=[
+            OpenApiExample(
+                'Media Sync Example',
+                summary='لینک کردن قالب و مرتب‌سازی عکس‌ها',
+                value={
+                    "attachment_ids_to_link": [15, 16],
+                    "attachment_ids_to_unlink": [10],
+                    "image_orders": [102, 105, 101]
+                },
+                request_only=True
+            )
+        ]
     )
     @action(detail=True, methods=['post'], url_path='media-sync')
     def sync_media(self, request, pk=None):

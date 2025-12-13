@@ -1,6 +1,16 @@
 from rest_framework import serializers
-from core.models import User, Role
+from core.models import User, Role, AccessScope
 from django.contrib.auth.models import Permission
+
+# ==========================================
+# ========== Access Scope DTOs =============
+# ==========================================
+
+class AccessScopeSerializer(serializers.ModelSerializer):
+    """ نمایش لیست محدوده‌های دسترسی برای انتخاب در فرانت """
+    class Meta:
+        model = AccessScope
+        fields = ['id', 'name', 'code', 'description']
 
 # ========== Permission & Role DTOs ========== #
 class PermissionSerializer(serializers.ModelSerializer):
@@ -9,23 +19,58 @@ class PermissionSerializer(serializers.ModelSerializer):
         model = Permission
         fields = ['id', 'name', 'codename', 'content_type']
 
+# ==========================================
+# ========== Role DTOs =====================
+# ==========================================
+
 class RoleOutputSerializer(serializers.ModelSerializer):
-    """ فرمت خروجی نقش برای نمایش در لیست """
-    permission = PermissionSerializer(many=True, read_only=True)
+    """ خروجی نقش به همراه تعداد دسترسی‌ها و اسکوپ‌ها """
+    permission_count = serializers.SerializerMethodField()
+    scope_count = serializers.SerializerMethodField() # اضافه شده
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
     
+    # برای نمایش جزئیات اسکوپ‌ها در حالت دیتیل، می‌توانیم این را اضافه کنیم
+    scopes = AccessScopeSerializer(many=True, read_only=True)
+
     class Meta:
         model = Role
-        fields = ['id', 'name', 'slug', 'description', 'is_customer', 'permission']
+        fields = ['id', 'name', 'slug', 'type', 'type_display', 'description', 'is_customer', 'permission_count', 'scope_count', 'scopes']
+
+    def get_permission_count(self, obj):
+        return obj.permission.count()
+    
+    def get_scope_count(self, obj):
+        return obj.scopes.count()
 
 class RoleInputSerializer(serializers.Serializer):
-    """ فرمت ورودی برای ساخت/ویرایش نقش """
+    """ 
+    فرمت ورودی ایجاد/ویرایش نقش.
+    """
     name = serializers.CharField(max_length=150)
     slug = serializers.CharField(max_length=50)
     description = serializers.CharField(required=False, allow_blank=True)
+    
+    type = serializers.ChoiceField(
+        choices=Role.USER_TYPE, 
+        required=True,
+        help_text="نقش ادمین یا کاربر عادی"
+    )
+    is_customer = serializers.BooleanField(default=False)
+    
+    # ===== لیست مجوزها ===== #
     permissions = serializers.ListField(
-        child=serializers.IntegerField(), required=False, allow_empty=True
+        child=serializers.IntegerField(), 
+        required=False, 
+        allow_empty=True
     )
 
+    # ===== لیست اسکوپ‌ها (حیاتی) ===== #
+    scope_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        allow_empty=True,
+        help_text="لیست شناسه (ID) محدوده‌های دسترسی (Scopes)."
+    )
 
 # ========== Staff User DTOs ========== #
 class StaffListSerializer(serializers.ModelSerializer):

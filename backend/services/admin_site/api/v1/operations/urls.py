@@ -10,6 +10,9 @@ from .views import (
     OrderTransitionView,
     OrderCostReportCreateView,
     CostTypeViewSet,
+    OrderPrintUsageListView,
+    OrderPrintUsageCreateView,
+    OrderPrintUsageDetailView,
 )
 
 router = DefaultRouter()
@@ -28,6 +31,11 @@ urlpatterns = [
     path('transition/<int:pk>/', OrderTransitionView.as_view(), name='admin-order-transition'),
     # ===== Order Cost Report Create ===== #
     path('costs/reports/<int:pk>/', OrderCostReportCreateView.as_view(), name='order-cost-report-create'),
+    # ===== Order Print ===== #
+    path('orders/<int:pk>/print-usages/', OrderPrintUsageCreateView.as_view(), name='print-usage-create'),
+    path('orders/<int:pk>/print-usages/list/', OrderPrintUsageListView.as_view(), name='print-usage-list'),
+    path('print-usages/<int:pk>/', OrderPrintUsageDetailView.as_view(), name='print-usage-detail'),
+    
     # ===== Routers ===== #
     path('', include(router.urls)),
 ]

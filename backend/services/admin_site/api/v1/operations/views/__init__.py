@@ -4,3 +4,4 @@ from .order_file_view import FileReviewView, OrderItemUploadView
 from .order_status_group_view import OrderStatusGroupViewSet
 from .order_status_view import OrderStatusViewSet, OrderTransitionView
 from .order_cost_view import OrderCostReportCreateView, CostTypeViewSet
+from .order_print_view import *

@@ -24,10 +24,10 @@ class RoleAppService:
         AppPermissionChecker.check_has_permission(requester, 'add_role')
         
         permission_ids = data.pop('permissions', [])
-        scope_ids = data.pop('scope_ids', [])
+        scope_ids = data.pop('scope_ids', None)
         
         try:
-            role = self.domain_service.create_role(data, permission_ids, scope_ids)
+            role = self.domain_service.create_role(data, permission_ids)
             logger.info(f"Role created: '{role.name}' (Slug: {role.slug}) by '{requester.username}'")
             return role
         except Exception as e:

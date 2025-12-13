@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from core.models import Order, User, OrderCostReport, OrderCostItem, OrderCostType
+from core.models import Order, User, OrderCostReport, OrderCostItem, OrderCostType, OrderCostAttachment
 from .repositories import OrderCostReportRepository, OrderCostItemRepository, OrderCostTypeRepository
 
 # ========== Order Cost Domain Service ========== #
@@ -19,14 +19,10 @@ class OrderCostDomainService:
                            user: User, 
                            title: str, 
                            description: str, 
-                           attachment,
-                           items_data: List[Dict[str, Any]]) -> OrderCostReport:
+                           items_data: List[Dict[str, Any]],
+                           attachments_data: List[Any] = None) -> OrderCostReport:
         """
-        ایجاد یک گزارش مالی کامل شامل هدر و اقلام ریز هزینه.
-        قوانین دامین:
-        1. گزارش بدون آیتم معنی ندارد.
-        2. مبلغ هر آیتم باید مثبت باشد.
-        3. هر آیتم باید یا Catalog ID داشته باشد یا Custom Title.
+        ایجاد گزارش هزینه به همراه اقلام و فایل‌های پیوست.
         """
         
         # ===== 1. اعتبارسنجی اقلام ===== #
@@ -39,7 +35,6 @@ class OrderCostDomainService:
             "created_by": user,
             "title": title,
             "description": description,
-            "attachment": attachment,
             "is_approved_by_finance": False
         })
 
@@ -58,6 +53,8 @@ class OrderCostDomainService:
 
             catalog_id = item.get('catalog_id')
             custom_title = item.get('custom_title')
+            amount = item.get('amount')
+            desc = item.get('description', '')
 
             if not catalog_id and not custom_title:
                 raise ValidationError(f"در ردیف {index+1}، باید یا یک کالا از لیست انتخاب کنید یا عنوان دستی وارد کنید.")
@@ -68,11 +65,22 @@ class OrderCostDomainService:
                 catalog_item_id=catalog_id,
                 custom_title=custom_title if not catalog_id else None,
                 amount=amount,
-                description=item.get('description', '')
+                description=desc
             ))
         
         # ===== 4. ثبت گروهی اقلام ===== #
         self.item_repo.bulk_create_items(cost_items_to_create)
+        
+        # ===== 5. ثبت پیوست ها ===== #
+        if attachments_data:
+            attachments_to_create = []
+            for file in attachments_data:
+                attachments_to_create.append(OrderCostAttachment(
+                    report=report,
+                    file=file,
+                    title=file.name
+                ))
+            OrderCostAttachment.objects.bulk_create(attachments_to_create)
         
         return report
     

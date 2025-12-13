@@ -81,9 +81,8 @@ class RoleAdmin(admin.ModelAdmin):
     """
     مدیریت نقش‌ها.
     """
-    list_display = ('name', 'slug', 'is_admin', 'get_scopes_count')
+    list_display = ('name', 'slug', 'get_scopes_count')
     search_fields = ('name', 'slug')
-    list_filter = ('is_admin',)
     
     # برای انتخاب راحت‌تر پرمیشن‌ها و اسکوپ‌ها
     filter_horizontal = ('scopes',) 

@@ -1,6 +1,15 @@
 import json
 from rest_framework import serializers
-from core.models import OrderCostReport, OrderCostItem, OrderCostType
+from core.models import OrderCostReport, OrderCostItem, OrderCostType, OrderCostAttachment
+
+# ========== Attachment Serializer ========== #
+class OrderCostAttachmentSerializer(serializers.ModelSerializer):
+    """ سریالایزر نمایش فایل‌های پیوست """
+    file_url = serializers.FileField(source='file', read_only=True)
+    
+    class Meta:
+        model = OrderCostAttachment
+        fields = ['id', 'title', 'file_url', 'created_at']
 
 # ========== Order Cost Item Serializers ========== #
 class OrderCostItemSerializer(serializers.ModelSerializer):
@@ -41,16 +50,22 @@ class OrderCostItemSerializer(serializers.ModelSerializer):
 # ========== Order Cost Report Create Serializer ========== #
 class OrderCostReportCreateSerializer(serializers.ModelSerializer):
     """
-    ورودی برای ساخت گزارش.
-    نکته مهم: اگر درخواست Multipart (فایل) باشد، ارسال لیست items کمی پیچیده است.
-    ما اینجا فرض می‌کنیم items به صورت JSON String ارسال می‌شود و آن را پارس می‌کنیم.
+    ورودی ایجاد گزارش هزینه.
+    پشتیبانی از مولتی‌پارت برای چندین فایل و اقلام JSON.
     """
     items = serializers.JSONField(help_text="لیست اقلام به صورت JSON Array")
-    attachment = serializers.FileField(required=False, allow_null=True)
+    
+    # دریافت فایل‌ها به صورت لیست
+    attachments = serializers.ListField(
+        child=serializers.FileField(),
+        required=False,
+        write_only=True,
+        help_text="لیست فایل‌های پیوست"
+    )
 
     class Meta:
         model = OrderCostReport
-        fields = ['title', 'description', 'attachment', 'items']
+        fields = ['title', 'description', 'items', 'attachments']
 
     def validate_items(self, value):
         """
@@ -70,26 +85,19 @@ class OrderCostReportCreateSerializer(serializers.ModelSerializer):
 
 # ========== Order Cost Report Detail Serializer ========== #
 class OrderCostReportDetailSerializer(serializers.ModelSerializer):
-    """
-    خروجی کامل گزارش برای نمایش به مدیر مالی یا اپراتور.
-    """
+    """ خروجی کامل گزارش شامل اقلام و پیوست‌ها """
     items = OrderCostItemSerializer(many=True, read_only=True)
+    attachments = OrderCostAttachmentSerializer(many=True, read_only=True) # نمایش لیست فایل‌ها
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     total_amount = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
 
     class Meta:
         model = OrderCostReport
         fields = [
-            'id', 
-            'title', 
-            'description', 
-            'total_amount', 
-            'is_approved_by_finance', 
-            'finance_note',
-            'created_by_name', 
-            'created_at', 
-            'attachment', 
-            'items'
+            'id', 'title', 'description', 'total_amount', 
+            'is_approved_by_finance', 'finance_note', 
+            'created_by_name', 'created_at', 
+            'attachments', 'items'
         ]
 
 # ========== Order Cost Type Serializers ========== #

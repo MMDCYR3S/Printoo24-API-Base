@@ -70,11 +70,11 @@ class OrderStatus(models.Model):
         choices=TYPE_CHOICES, 
         default='progress'
     )
-    is_workflow_gate = models.BooleanField(
-        _('دسترسی چندگانه به وضعیت'), 
-        default=False, 
-        help_text=_("آیا این وضعیت می‌تواند مقصد انتقال‌های خاص (مثل QC) باشد؟")
-    )
+    # is_workflow_gate = models.BooleanField(
+    #     _('دسترسی چندگانه به وضعیت'), 
+    #     default=False, 
+    #     help_text=_("آیا این وضعیت می‌تواند مقصد انتقال‌های خاص (مثل QC) باشد؟")
+    # )
     
     sort_order = models.PositiveIntegerField(
         _('ترتیب نمایش'), 
@@ -423,11 +423,6 @@ class OrderCostReport(models.Model):
     
     title = models.CharField(_("عنوان گزارش"), max_length=200)
     description = models.TextField(_("توضیحات کلی"), blank=True, null=True)
-    attachment = models.FileField(
-        _("فایل پیوست/سند"), 
-        upload_to='orders/reports/%Y/%m/', 
-        null=True, blank=True
-    )
     
     is_approved_by_finance = models.BooleanField(_("تایید مالی"), default=False)
     finance_note = models.TextField(_("یادداشت مالی"), blank=True)
@@ -487,6 +482,125 @@ class OrderCostItem(models.Model):
 
     def __str__(self):
         return f"{self.custom_title}: {self.amount}"
+    
+class OrderCostAttachment(models.Model):
+    """
+    جدول پیوست‌های گزارش هزینه.
+    جایگزین فیلد تکی 'attachment' در مدل OrderCostReport می‌شود (یا در کنار آن).
+    """
+    report = models.ForeignKey(
+        'OrderCostReport', 
+        related_name='attachments', 
+        on_delete=models.CASCADE,
+        verbose_name=_("گزارش هزینه")
+    )
+    file = models.FileField(_("فایل ضمیمه"), upload_to='financial/costs/attachments/%Y/%m/')
+    title = models.CharField(_("عنوان فایل"), max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('پیوست هزینه')
+        verbose_name_plural = _('پیوست‌های هزینه')
+
+# ==========================================
+# ========== Print Material Models =========
+# ==========================================
+
+class OrderPrintReport(models.Model):
+    """
+    هدر گزارش مصرف متریال چاپ.
+    مثلا: "مصرف کاغذ و زینک برای سفارش شماره ۱۰۰"
+    """
+    order = models.ForeignKey(
+        'Order', 
+        related_name='print_reports', 
+        on_delete=models.CASCADE,
+        verbose_name=_("سفارش مرتبط")
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.PROTECT,
+        verbose_name=_("ثبت کننده (اپراتور)")
+    )
+    title = models.CharField(_("عنوان گزارش"), max_length=200)
+    description = models.TextField(_("توضیحات فنی"), blank=True, null=True)
+    
+    # زمان ثبت مصرف
+    created_at = models.DateTimeField(_("تاریخ ثبت"), auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('گزارش مصرف چاپ')
+        verbose_name_plural = _('گزارشات مصرف چاپ')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} - {self.order.order_code}"
+
+
+class OrderPrintItem(models.Model):
+    """
+    اقلام مصرفی چاپ (به صورت استاتیک).
+    """
+    # ===== تعریف استاتیک متریال‌ها (TextChoices) =====
+    class MaterialType(models.TextChoices):
+        PAPER_GLOSS = 'paper_gloss', _('کاغذ گلاسه')
+        PAPER_MATTE = 'paper_matte', _('کاغذ تحریر/مات')
+        PAPER_KRAFT = 'paper_kraft', _('کاغذ کرافت')
+        ZINC = 'zinc', _('زینک (پلیت)')
+        INK_CMYK = 'ink_cmyk', _('مرکب (CMYK)')
+        INK_SPECIAL = 'ink_special', _('مرکب خاص (پنتون)')
+        GLUE = 'glue', _('چسب صحافی')
+        CELLEPHANE_MATTE = 'cell_matte', _('سلفون مات')
+        CELLEPHANE_GLOSS = 'cell_gloss', _('سلفون براق')
+        OTHER = 'other', _('سایر ملزومات')
+
+    report = models.ForeignKey(
+        OrderPrintReport, 
+        related_name='items', 
+        on_delete=models.CASCADE,
+        verbose_name=_("گزارش مرتبط")
+    )
+    
+    # ===== نوع مواد اولیه ===== #
+    material_type = models.CharField(
+        _("نوع متریال"), 
+        max_length=50, 
+        choices=MaterialType.choices,
+        default=MaterialType.OTHER
+    )
+    custom_title = models.CharField(_("عنوان"), max_length=255, blank=True, null=True)
+    price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
+    description = models.CharField(_("توضیحات"), max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    class Meta:
+        verbose_name = _('قلم متریال')
+        verbose_name_plural = _('اقلام متریال')
+
+    def __str__(self):
+        return f"{self.get_material_type_display()}"
+
+
+class OrderPrintAttachment(models.Model):
+    """
+    فایل‌های پیوست مربوط به متریال چاپ.
+    مثال: عکس فرم چاپی، عکس پالت کاغذ مصرفی.
+    """
+    report = models.ForeignKey(
+        OrderPrintReport, 
+        related_name='attachments', 
+        on_delete=models.CASCADE,
+        verbose_name=_("گزارش چاپ")
+    )
+    file = models.FileField(_("فایل/عکس"), upload_to='orders/print_logs/%Y/%m/')
+    title = models.CharField(_("عنوان"), max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('پیوست چاپ')
+        verbose_name_plural = _('پیوست‌های چاپ')
 
 # ===== Delivery Method Model (تنظیمات روش‌های ارسال) ===== #
 class DeliveryMethod(models.Model):

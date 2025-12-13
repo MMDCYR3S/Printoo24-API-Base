@@ -13,7 +13,7 @@ class OrderCostAppService:
         self.order_repo = OrderRepository()
         self.domain_service = OrderCostDomainService()
 
-    def create_report(self, requester: User, order_id: int, validated_data: dict, file_data=None):
+    def create_report(self, requester: User, order_id: int, validated_data: dict, files_list=None):
         """
         ایجاد گزارش هزینه جدید با بررسی دسترسی نقش کاربر به مرحله جاری سفارش.
         """
@@ -35,8 +35,8 @@ class OrderCostAppService:
             user=requester,
             title=validated_data['title'],
             description=validated_data.get('description'),
-            attachment=file_data,
-            items_data=validated_data['items']
+            items_data=validated_data['items'],
+            attachments_data=files_list
         )
         
         return report

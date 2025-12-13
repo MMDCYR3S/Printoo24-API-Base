@@ -4,10 +4,10 @@ from typing import List
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.utils.translation import gettext as _
 
-from core.models import User, Order, OrderStatus, OrderItem
+from core.models import User, Role, OrderStatus, OrderItem
 from core.domain.commerce.order import(
     OrderRepository, OrderStatusFlowDomainService,
-    OrderItemRepository, OrderStatusRepository
+    OrderStatusRepository
 )
 from apps.permissions import AppPermissionChecker
 
@@ -152,7 +152,7 @@ class OrderTransitionAppService:
             
         role = user_role_rel.role
 
-        if getattr(role, 'is_admin', False) or getattr(role, 'can_view_all_orders', False):
+        if role.type == Role.USER_TYPE.admin or getattr(role, 'can_view_all_orders', False):
             return
 
         # # ===== بررسی دسترسی به تغییر وضعیت سفارش ===== #
