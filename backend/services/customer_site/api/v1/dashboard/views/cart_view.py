@@ -2,8 +2,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAdminUser
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.dashboard.services import CartDashboardService, CartFileService
 from ..serializers import (
@@ -20,12 +21,18 @@ class CartDashboardViewSet(viewsets.ViewSet):
     """
     مدیریت سبد خرید کاربران توسط ادمین.
     """
+    permission_classes = [IsAdminUser]
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.service = CartDashboardService()
 
     # ===== مشاهده سبد خرید کاربر ===== #
-    @extend_schema(responses=UserCartDetailSerializer)
+    @extend_schema(
+        summary="مشاهده جزئیات سبد خرید یک کاربر خاص",
+        description="ID کاربر را در URL وارد کنید تا سبد خرید فعلی او را ببینید.",
+        responses=UserCartDetailSerializer
+    )
     def retrieve(self, request, pk=None):
         """ 
         دریافت سبد خرید یک کاربر.
@@ -44,9 +51,54 @@ class CartDashboardViewSet(viewsets.ViewSet):
 
     # ===== افزودن آیتم به سبد کاربر ===== #
     @extend_schema(
-        request=CartItemAddSimpleSerializer, 
-        summary="افزودن آیتم برای کاربر (فرمت ساده)",
-        description="استفاده از slug محصول و ID ویژگی‌ها"
+        summary="افزودن آیتم به سبد خرید کاربر",
+        description="""
+        **توضیحات مهم برای فرانت‌اند:**
+        
+        1. **product_slug**: اسلاگ محصولی که می‌خواهید اضافه کنید.
+        2. **selections**: تنظیمات انتخاب شده.
+           * `option_value_ids`: لیستی از شناسه (ID) های `ProductOptionValue`. دقت کنید که ID مقدار نهایی انتخاب شده را بفرستید، نه ID گروه ویژگی را.
+           * `size_id`: اگر محصول سایز استاندارد دارد (مثل A4)، شناسه سایز را بفرستید.
+           * `custom_width` و `custom_height`: اگر محصول متراژی است (مثل بنر)، ابعاد را وارد کنید و `size_id` را نال بگذارید.
+        """,
+        request=CartItemAddSimpleSerializer,
+        responses={201: UserCartDetailSerializer},
+        examples=[
+            OpenApiExample(
+                'Scenario 1: Standard Business Card',
+                summary='سناریو ۱: کارت ویزیت (سایز استاندارد + آپشن)',
+                description='افزودن کارت ویزیت لمینت. سایز استاندارد انتخاب شده و دو ویژگی (جنس کاغذ و نوع روکش) دارد.',
+                value={
+                    "product_slug": "business-card-laminate",
+                    "selections": {
+                        "quantity": 1000,
+                        "size_id": 5,  # شناسه سایز مثلاً 9x5
+                        "has_design": True,
+                        "option_value_ids": [102, 205], # ID های مقادیر انتخابی (مثلاً گلاسه ۳۰۰ گرم، روکش مات)
+                        "custom_width": 0,
+                        "custom_height": 0
+                    }
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Scenario 2: Large Banner',
+                summary='سناریو ۲: بنر عریض (ابعاد دلخواه)',
+                description='افزودن بنر که مشتری ابعاد خاص (۳ متر در ۱ متر) می‌خواهد.',
+                value={
+                    "product_slug": "banner-vinyl",
+                    "selections": {
+                        "quantity": 1,
+                        "size_id": None,
+                        "custom_width": 300,
+                        "custom_height": 100,
+                        "has_design": False,
+                        "option_value_ids": [310]
+                    }
+                },
+                request_only=True,
+            )
+        ]
     )
     @action(detail=True, methods=['post'], url_path='items')
     def add_item(self, request, pk=None):
@@ -69,7 +121,17 @@ class CartDashboardViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=CartItemUpdateSerializer, summary="ویرایش آیتم سبد")
+    @extend_schema(
+        summary="ویرایش تعداد یا ویژگی‌های یک آیتم در سبد",
+        request=CartItemUpdateSerializer,
+        examples=[
+            OpenApiExample(
+                'Update Quantity',
+                summary='تغییر تعداد',
+                value={"quantity": 2000}
+            )
+        ]
+    )
     @action(detail=True, methods=['patch'], url_path='items/(?P<item_id>\d+)')
     def update_item(self, request, pk=None, item_id=None):
         """ pk = user_id, item_id = cart_item.id """
@@ -90,7 +152,11 @@ class CartDashboardViewSet(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     # ===== مشاهده لیست تمام سبدها ===== #
-    @extend_schema(responses=CartListSerializer(many=True))
+    @extend_schema(
+        summary="لیست تمام سبدهای خرید فعال",
+        description="لیست کاربرانی که در سبد خریدشان محصولی دارند (جهت پیگیری فروش).",
+        responses=CartListSerializer(many=True)
+    )
     def list(self, request):
         """
         لیست تمام سبدهای خرید فعال (غیر خالی) کاربران.

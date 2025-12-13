@@ -28,3 +28,9 @@ from .logistics import (
     DeliveryMethodRepository,
     LogisticDomainService,
 )
+from .print import (
+    OrderPrintItemRepository,
+    OrderPrintAttachmentRepository,
+    OrderPrintReportRepository,
+    OrderPrintDomainService
+)

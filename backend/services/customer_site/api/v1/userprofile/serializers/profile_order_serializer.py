@@ -65,19 +65,19 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
 # ===== Order With Details Serializer ===== #
 class OrderWithDetailsSerializer(serializers.ModelSerializer):
     order_item = OrderItemDetailSerializer(source="order_item_order", many=True, read_only=True)
-    status_display = serializers.CharField(source='get_order_status_display', read_only=True)
+    status_display = serializers.CharField(source='get_current_status_display', read_only=True)
     
     class Meta:
         model = Order
         fields = [
-            'id', 'user', 'order_status', "status_display", 
+            'id', 'user', 'current_status', "status_display", 
             'total_price', 'address',
             'created_at', 'order_item'
         ]
 
 # ===== Order Detail (Main) ===== #
 class OrderSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source='order_status.name', read_only=True)
+    status = serializers.CharField(source='current_status.name', read_only=True)
     type_display = serializers.CharField(source='get_type_display', read_only=True)
     
     # آدرس (هم دریافت ID برای ثبت، هم نمایش متن برای خواندن)

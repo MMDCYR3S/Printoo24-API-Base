@@ -76,24 +76,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = _('کاربر')
         verbose_name_plural = _('کاربران')
 
-class AccessScope(models.Model):
-    """
-    تعریف محدوده‌های داده‌ای سیستم (Data Scopes).
-    مثال:
-    - عنوان: واحد طراحی / کد: design
-    - عنوان: واحد چاپ / کد: production
-    """
-    name = models.CharField(_("عنوان محدوده"), max_length=100)
-    code = models.SlugField(_("کد سیستمی"), unique=True, help_text="مطابق با group در OrderStatus (مثلا: design)")
-    description = models.TextField(blank=True)
-
-    class Meta:
-        verbose_name = _('محدوده دسترسی')
-        verbose_name_plural = _('محدوده‌های دسترسی')
-
-    def __str__(self):
-        return f"{self.name} ({self.code})"
-
 # ========= Role Model ========= #
 class Role(models.Model):
     """ مدلاسیون نقش کاربر """
@@ -106,21 +88,14 @@ class Role(models.Model):
     slug = models.SlugField(_('کد سیستمی'), unique=True, null=True, blank=True)
     description = models.TextField(_('توضیحات'), blank=True, null=True)
     permission = models.ManyToManyField(Permission, verbose_name=_('مجوز ها'), related_name='roles')
-    can_view_all_orders = models.BooleanField(_('توانایی مشاهده همه سفارشات'), default=False)
-    is_task_based = models.BooleanField(
-        _("وظیفه‌محور (نیازمند تخصیص)"), 
-        default=False,
-        help_text=_("اگر فعال باشد، کاربر فقط سفارشاتی را می‌بیند که مستقیماً به او Assign شده‌اند (مثل طراح). "
-                    "اگر غیرفعال باشد، کاربر همه سفارشات موجود در مرحله کاری خود را می‌بیند (مثل مالی/انبار).")
-    )
-    scopes = models.ManyToManyField(
-        AccessScope, 
-        verbose_name=_("محدوده‌های مجاز"),
+
+    allowed_groups = models.ManyToManyField(
+        'OrderStatusGroup',
+        verbose_name=_("گروه‌های وضعیت مجاز"),
         related_name='roles',
         blank=True
     )
     type = models.CharField(_('نوع کاربر'), max_length=150, choices=USER_TYPE, default='normal')
-    is_admin = models.BooleanField(_("آیا نقش برای ادمین است؟"), default=False)
     is_customer = models.BooleanField(_("آیا نقش برای مشتری است؟"), default=False)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
@@ -131,7 +106,7 @@ class Role(models.Model):
         تبدیل ریلیشن به لیست رشته‌ها برای استفاده راحت در سرویس
         خروجی: ['design', 'qc']
         """
-        return list(self.scopes.values_list('code', flat=True))
+        return list(self.allowed_groups.values_list('code', flat=True))
     
     class Meta:
         verbose_name = _('نقش')

@@ -2,7 +2,7 @@ from typing import List
 from django.db.models import Q
 
 from core.domain.commerce.order.main import OrderRepository
-from core.models import Order, User, OrderItem
+from core.models import Order, User, OrderItem, Role
 from apps.permissions import AppPermissionChecker
 
 # ========== Order List App Service ========== #
@@ -38,7 +38,7 @@ class OrderListAppService:
         if getattr(role, 'can_view_all_orders', False):
             return queryset
         
-        if role.is_admin:
+        if role.type == Role.USER_TYPE.admin:
             return queryset.filter(current_status__group__code__in=allowed_groups)
             
         item_filters = Q(status__group__code__in=allowed_groups)

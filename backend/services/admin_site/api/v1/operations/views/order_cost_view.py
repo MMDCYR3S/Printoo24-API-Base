@@ -72,11 +72,13 @@ class OrderCostReportCreateView(GenericAPIView):
             # ===== ایجاد سرویس و ثبت گزارش ===== #
             service = OrderCostAppService()
             
+            files = serializer.validated_data.get('attachments', [])
+            
             report = service.create_report(
                 requester=request.user,
                 order_id=pk,
                 validated_data=serializer.validated_data,
-                file_data=serializer.validated_data.get('attachment')
+                file_data=files
             )
             
             # ===== آماده‌سازی خروجی ===== #

@@ -9,23 +9,55 @@ class PermissionSerializer(serializers.ModelSerializer):
         model = Permission
         fields = ['id', 'name', 'codename', 'content_type']
 
+# ==========================================
+# ========== Role DTOs =====================
+# ==========================================
 class RoleOutputSerializer(serializers.ModelSerializer):
-    """ فرمت خروجی نقش برای نمایش در لیست """
-    permission = PermissionSerializer(many=True, read_only=True)
-    
+    """ خروجی نقش به همراه تعداد دسترسی‌ها و اسکوپ‌ها """
+    permission_count = serializers.SerializerMethodField()
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
+    allowed_groups = serializers.SerializerMethodField()
+
     class Meta:
         model = Role
-        fields = ['id', 'name', 'slug', 'description', 'is_customer', 'permission']
+        fields = ['id', 'name', 'slug', 'type', 'type_display', 'description', 'is_customer', 'permission_count', 'allowed_groups']
 
+    def get_allowed_groups(self, obj):
+        return [group.name for group in obj.allowed_groups.all()]
+
+    def get_permission_count(self, obj):
+        return obj.permission.count()
+    
+# ========== Role Input DTOs ========== #
 class RoleInputSerializer(serializers.Serializer):
-    """ فرمت ورودی برای ساخت/ویرایش نقش """
+    """ 
+    فرمت ورودی ایجاد/ویرایش نقش.
+    """
     name = serializers.CharField(max_length=150)
     slug = serializers.CharField(max_length=50)
     description = serializers.CharField(required=False, allow_blank=True)
+    
+    type = serializers.ChoiceField(
+        choices=Role.USER_TYPE, 
+        required=True,
+        help_text="نقش ادمین یا کاربر عادی"
+    )
+    is_customer = serializers.BooleanField(default=False)
+    
+    # ===== لیست مجوزها ===== #
     permissions = serializers.ListField(
-        child=serializers.IntegerField(), required=False, allow_empty=True
+        child=serializers.IntegerField(), 
+        required=False, 
+        allow_empty=True
     )
 
+    # ===== لیست اسکوپ‌ها (حیاتی) ===== #
+    allowed_groups_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        allow_empty=True,
+        help_text="لیست شناسه (ID) گروه‌های وضعیت (Order Status Groups) که این نقش اجازه مشاهده آن‌ها را دارد."
+    )
 
 # ========== Staff User DTOs ========== #
 class StaffListSerializer(serializers.ModelSerializer):

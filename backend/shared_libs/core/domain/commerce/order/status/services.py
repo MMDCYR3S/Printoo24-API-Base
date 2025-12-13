@@ -12,6 +12,8 @@ from .repositories import (
 from core.domain.commerce.order import OrderItemRepository
 from core.domain.commerce.order.exceptions import OrderNotFoundException
 
+
+# ========== Order Status Flow Service ========== #
 class OrderStatusFlowDomainService:
     """
     سرویس مدیریت وضعیت سفارش (Workflow Engine).
@@ -25,20 +27,36 @@ class OrderStatusFlowDomainService:
     @transaction.atomic
     def change_order_status(self, order: Order, new_status_code: str, user: User, description: str = None) -> Order:
         """
-        تغییر وضعیت دستی سفارش (مثلاً برای مراحل مالی یا ارسال).
+        تغییر وضعیت سفارش و ثبت لاگ.
         """
-        if not order:
-            raise OrderNotFoundException("سفارش یافت نشد.")
-        
+        # ===== دریافت و اعتبارسنجی وضعیت جدید ===== #
         new_status = self.repo.get_status_by_code(new_status_code)
         if not new_status:
             raise ValidationError(f"کد وضعیت نامعتبر: {new_status_code}")
+        
+        # ===== بررسی تکراری نبودن وضعیت ===== #
+        if order.current_status_id == new_status.id:
+            return order
+        
+        # ===== ثبت لاگ ===== #
+        last_log = self.repo.get_last_state_log(order)
+        duration = timezone.now() - last_log.timestamp if last_log else None
+        
+        # ===== ثبت لاگ ===== #
+        self.repo.create_state_log({
+            "order": order,
+            "from_status": order.current_status,
+            "to_status": new_status,
+            "user": user,
+            "description": description,
+            "duration_in_previous_status": duration
+        })
+        
+        # ===== آپدیت وضعیت سفارش===== #
+        order.current_status = new_status
+        order.save(update_fields=['current_status', 'updated_at'])
 
-        # اگر وضعیت جدید مربوط به "آیتم" باشد، نباید روی "سفارش" ست شود
-        if new_status.target_model == 'item':
-             raise ValidationError("این وضعیت مختص اقلام سفارش است و نمی‌تواند روی کل سفارش اعمال شود.")
-
-        return self._perform_transition(order, new_status, user, description)
+        return order
 
     @transaction.atomic
     def change_item_status(self, item_id: int, new_status_code: str, user: User, description: str = None) -> OrderItem:
