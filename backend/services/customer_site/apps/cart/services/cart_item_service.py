@@ -42,7 +42,7 @@ class CartListService:
             
             # ===== دریافت آیتم‌های سبد خرید ===== #
             items = self._domain_service.get_item_details(cart)
-            logger_list.info(f"Retrieved {items.count()} items for Cart ID: {cart.id}")
+            logger_list.info(f"Retrieved {items} items for Cart ID: {cart.id}")
             
             # ===== محاسبه مجموع قیمت کل سبد خرید ===== #
             total_price = sum(item.price for item in items)
@@ -51,8 +51,7 @@ class CartListService:
                 "cart": cart,
                 "items": items,
                 "summary": {
-                    "total_price": total_price,
-                    "item_count": items.count()
+                    "total_price": total_price
                 }
             }
         except Exception as e:
