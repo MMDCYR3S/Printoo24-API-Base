@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import ValidationError as DjangoValidationError
-from drf_spectacular.views import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.userprofile.services import ProfileDetailService, UserFeedbackService
 from ..serializers import CustomerProfileSerializer, ProfileCommentSerializer
@@ -23,6 +23,29 @@ class CustomerProfileAPIView(APIView):
         # ===== تزریق وابستگی ===== #
         self._service = ProfileDetailService()
         
+    @extend_schema(
+        summary="دریافت اطلاعات کامل پروفایل",
+        description="این متد اطلاعات احراز هویت (User) را با اطلاعات تکمیلی (Profile) ترکیب کرده و برمی‌گرداند.",
+        responses={200: CustomerProfileSerializer},
+        examples=[
+            OpenApiExample(
+                'Full Profile Response',
+                summary='نمونه پاسخ کامل',
+                description='شامل نام کاربری، ایمیل و اطلاعات شخصی.',
+                value={
+                    "username": "reza_ahmadi",
+                    "email": "reza@example.com",
+                    "is_active": True,
+                    "first_name": "رضا",
+                    "last_name": "احمدی",
+                    "phone_number": "09121112233",
+                    "company": "شرکت چاپ برتر",
+                    "bio": "مدیر تدارکات",
+                    "created_at": "2024-01-15T10:30:00Z"
+                }
+            )
+        ]
+    )
     def get(self, request):
         """
         دریافت اطلاعات پروفایل کاربر
@@ -56,6 +79,25 @@ class CustomerProfileAPIView(APIView):
         except Exception as e:
             return Response({'detail': f'خطایی در دریافت اطلاعات رخ داد.{str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    @extend_schema(
+        summary="ویرایش پروفایل",
+        description="فیلدهایی مثل `username` و `email` فقط خواندنی هستند و تغییر نمی‌کنند. فقط اطلاعات پروفایل (نام، شرکت و...) قابل ویرایش است.",
+        request=CustomerProfileSerializer,
+        responses={200: CustomerProfileSerializer},
+        examples=[
+            OpenApiExample(
+                'Update Request',
+                summary='درخواست ویرایش نام و شرکت',
+                value={
+                    "first_name": "محمد",
+                    "last_name": "احمدی",
+                    "company": "شرکت جدید",
+                    "phone_number": "09120000000"
+                },
+                request_only=True
+            )
+        ]
+    )
     def put(self, request):
         """
         ویرایش کامل یا جزئی پروفایل کاربر
@@ -104,6 +146,38 @@ class UserCommentListView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProfileCommentSerializer
 
+    @extend_schema(
+        summary="لیست نظرات کاربر",
+        examples=[
+            OpenApiExample(
+                'Comment History',
+                summary='لیست نظرات',
+                description='شامل یک نظر تایید شده و یک نظر در انتظار بررسی.',
+                value=[
+                    {
+                        "id": 10,
+                        "product_name": "کارت ویزیت لمینت",
+                        "product_slug": "laminate-card",
+                        "message": "کیفیت چاپ عالی بود، ممنون.",
+                        "status": "approved",
+                        "status_display": "تایید شده",
+                        "admin_note": "",
+                        "created_at": "2024-02-01T15:00:00Z"
+                    },
+                    {
+                        "id": 12,
+                        "product_name": "سربرگ A4",
+                        "product_slug": "letterhead-a4",
+                        "message": "آیا امکان تغییر رنگ وجود دارد؟",
+                        "status": "pending",
+                        "status_display": "در انتظار بررسی",
+                        "admin_note": "در حال بررسی توسط واحد طراحی",
+                        "created_at": "2024-02-05T09:00:00Z"
+                    }
+                ]
+            )
+        ]
+    )
     def get_queryset(self):
         service = UserFeedbackService(user=self.request.user)
         return service.get_my_comments()            

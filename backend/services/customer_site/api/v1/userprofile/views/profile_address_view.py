@@ -20,6 +20,27 @@ class UserAddressListCreateAPIView(GenericAPIView):
         super().__init__(**kwargs)
         self.service = UserAddressService()
 
+    @extend_schema(
+        summary="لیست آدرس‌های کاربر",
+        responses={200: AddressSerializer(many=True)},
+        examples=[
+            OpenApiExample(
+                'Address List Example',
+                summary='لیست آدرس‌ها (GET)',
+                description='خروجی شامل جزئیات کامل استان و شهر است.',
+                value=[
+                    {
+                        "id": 1,
+                        "province_detail": {"id": 8, "name": "تهران", "slug": "tehran"},
+                        "city_detail": {"id": 120, "name": "تهران", "slug": "tehran"},
+                        "address": "خیابان آزادی، کوچه مهر، پلاک ۱۰",
+                        "postal_code": "1345678901",
+                        "created_at": "2023-12-01T10:00:00Z"
+                    }
+                ]
+            )
+        ]
+    )
     def get(self, request):
         """لیست آدرس‌های کاربر"""
         addresses = self.service.get_all_addresses(request.user.id)
