@@ -3,7 +3,7 @@ import { Phone, MapPin, Clock } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-800 text-slate-300 pt-16 pb-8 mt-auto">
+    <footer className="bg-slate-950 text-slate-300 pt-16 pb-8 mt-auto">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           
@@ -67,8 +67,8 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="text-center text-slate-500 pt-8 border-t border-slate-700 text-sm font-medium">
-          © ۱۴۰۳ تمامی حقوق محفوظ است. | طراحی با عشق برای کردستان.
+        <div className=" text-center text-slate-500 pt-8 border-t border-slate-700 text-sm font-medium">
+         تمامی حقوق برای Printoo24 محفوظ است 
         </div>
       </div>
     </footer>

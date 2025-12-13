@@ -2,28 +2,23 @@
 import { useEffect } from "react";
 import CategoryHero from "../features/home/CategoryHero";
 import HomeSlider from "../features/home/HomeSlider"; // <--- ایمپورت جدید
-import { ShieldCheck, Truck, Headset, FileCheck } from "lucide-react";
+import { ShieldCheck, Truck, Headset, FileCheck,Plus, Minus, HelpCircle, Phone, MapPin, Mail, Send, Instagram } from "lucide-react";
 import InfoModal from "../components/common/InfoModal";
-import img501 from "../../assets/images/home/501.webp"
+import ContactSection from "../features/home/ContactSection"; // <--- 1. این خط را اضافه کنید
+
+
+
+import img501  from "../../assets/images/home/501.webp"
 import img502 from "../../assets/images/home/502.webp"
 import img503 from "../../assets/images/home/503.webp"
 import img504 from "../../assets/images/home/504.webp"
+
 
 const HomePage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-const PageHelperPictures = ()=>{
-  return(
-    <>
-    <div className="flex flex-row bg-white p-4 m-6 rounded-2xl shadow-sm">
-      <img501 className="w-64 h-64" />
-
-    </div>
-    </>
-  )
-}
 
 
   return (
@@ -55,14 +50,28 @@ const PageHelperPictures = ()=>{
         {/* 3. بخش اعتماد سازی */}
         <TrustSection />
 
+        <FAQSection />
+
+<ContactSection />
+
       </div>
     </>
   );
 };
 
-// ... بقیه کدهای TrustSection و PromoBanner بدون تغییر می‌مانند ...
-// (فقط کد بالا را جایگزین بخش Return اصلی کنید)
-// ...
+const PageHelperPictures = ()=>{
+  return(
+    <>
+    <div className="grid grid-cols-2 lg:grid-cols-4 items-center justify-center bg-white p-4 m-6 rounded-2xl shadow-sm">
+      <a href="#"><img src={img501} alt="pages logo" className="hover:scale-105 duration-200"/></a>
+      <img src={img502} alt="pages logo" className="hover:scale-105 duration-200"/>
+      <img src={img503} alt="pages logo" className="hover:scale-105 duration-200"/>
+      <img src={img504} alt="pages logo" className="hover:scale-105 duration-200"/>
+    </div>
+    </>
+  )
+}
+
 
 const TrustSection = () => {
     // ... کدهای قبلی
@@ -98,32 +107,7 @@ const TrustSection = () => {
         },
       ];
     
-      // --- کامپوننت داخلی: بنر پروموشن (اختیاری) ---
-      const PromoBanner = () => (
-        <section className="container mx-auto px-4">
-          <div className="relative rounded-3xl overflow-hidden bg-slate-800 h-[200px] md:h-[250px] shadow-xl flex items-center p-8 md:p-12">
-            <div className="absolute inset-0 opacity-30">
-              <img
-                src="http://localhost:9010/media/categories/boxes/box_5121_1.jpg"
-                className="w-full h-full object-cover grayscale"
-                alt="Pattern"
-              />
-            </div>
-            <div className="relative z-10 max-w-2xl">
-              <div className="badge badge-warning font-bold mb-3">
-                پیشنهاد ویژه همکاران
-              </div>
-              <h2 className="text-2xl md:text-4xl font-black text-white mb-2">
-                تخفیف ۱۰٪ روی سفارش‌های لارج فرمت
-              </h2>
-              <p className="text-slate-300 mb-6">
-                فقط تا پایان هفته جاری، برای سفارش‌های بالای ۱۰۰ متر مربع.
-              </p>
-            </div>
-          </div>
-        </section>
-      );
-    
+
       return (
         <>
         
@@ -155,12 +139,66 @@ const TrustSection = () => {
               ))}
             </div>
           </section>
-    
-          <PromoBanner />
+
         </>
       );
+
+      
 };
 
+const FAQSection = () => {
+  // دیتای استاتیک (بعداً می‌تونه از API بیاد)
+  const faqs = [
+    {
+      question: "سفارش‌ها چند روزه به دستم می‌رسد؟",
+      answer: "برای شهرهای سلیمانیه و اربیل معمولاً بین ۲۴ تا ۴۸ ساعت کاری زمان می‌برد. برای سایر شهرها بسته به باربری بین ۳ تا ۴ روز.",
+    },
+    {
+      question: "آیا امکان پرداخت در محل وجود دارد؟",
+      answer: "بله، برای مشتریان تأیید شده و همکاران قدیمی امکان تسویه در محل (COD) وجود دارد. همچنین می‌توانید از طریق FastPay پرداخت کنید.",
+    },
+    {
+      question: "اگر چاپ کیفیت لازم را نداشت چه می‌شود؟",
+      answer: "ما کیفیت را تضمین می‌کنیم. اگر ایراد از سمت ما (دستگاه یا متریال) باشد، بدون هیچ هزینه‌ای مجدداً چاپ و ارسال می‌شود.",
+    },
+    {
+      question: "فایل‌ها را با چه فرمتی ارسال کنم؟",
+      answer: "بهترین فرمت برای چاپ لارج فرمت TIFF با مد رنگی CMYK است. فایل‌های PDF و JPG با رزولوشن حداقل 72dpi هم پذیرفته می‌شوند.",
+    },
+  ];
+
+
+  return (
+    <section className="container mx-auto px-4 py-8">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-2 flex items-center justify-center gap-2">
+          <HelpCircle className="text-primary" />
+          سوالات متداول
+        </h2>
+        <p className="text-slate-500">پاسخ به پرسش‌هایی که شاید برای شما هم پیش بیاید</p>
+      </div>
+
+      <div className="grid gap-3 max-w-3xl mx-auto">
+        {faqs.map((item, idx) => (
+          <div 
+            key={idx} 
+            className="collapse collapse-plus bg-white border border-base-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300"
+          >
+            <input type="radio" name="my-accordion-3" defaultChecked={idx === 0} /> 
+            <div className="collapse-title text-lg font-bold text-slate-700">
+              {item.question}
+            </div>
+            <div className="collapse-content">
+              <p className="text-slate-600 leading-relaxed border-t border-base-100 pt-3">
+                {item.answer}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
 
 
 
