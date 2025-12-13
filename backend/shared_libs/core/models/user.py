@@ -106,6 +106,13 @@ class Role(models.Model):
     slug = models.SlugField(_('کد سیستمی'), unique=True, null=True, blank=True)
     description = models.TextField(_('توضیحات'), blank=True, null=True)
     permission = models.ManyToManyField(Permission, verbose_name=_('مجوز ها'), related_name='roles')
+    can_view_all_orders = models.BooleanField(_('توانایی مشاهده همه سفارشات'), default=False)
+    is_task_based = models.BooleanField(
+        _("وظیفه‌محور (نیازمند تخصیص)"), 
+        default=False,
+        help_text=_("اگر فعال باشد، کاربر فقط سفارشاتی را می‌بیند که مستقیماً به او Assign شده‌اند (مثل طراح). "
+                    "اگر غیرفعال باشد، کاربر همه سفارشات موجود در مرحله کاری خود را می‌بیند (مثل مالی/انبار).")
+    )
     scopes = models.ManyToManyField(
         AccessScope, 
         verbose_name=_("محدوده‌های مجاز"),
@@ -139,7 +146,7 @@ class UserRole(models.Model):
     """User Role Model"""
     user = models.ForeignKey(User, related_name='user_role', on_delete=models.CASCADE)
     role = models.ForeignKey(Role, related_name='role_user', on_delete=models.CASCADE)
-        
+
     created_at = models.DateTimeField(_('تاریخ عضویت'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
 

@@ -11,16 +11,16 @@ class PermissionSerializer(serializers.ModelSerializer):
 
 class RoleOutputSerializer(serializers.ModelSerializer):
     """ فرمت خروجی نقش برای نمایش در لیست """
-    permissions = PermissionSerializer(many=True, read_only=True)
+    permission = PermissionSerializer(many=True, read_only=True)
     
     class Meta:
         model = Role
-        fields = ['id', 'name', 'code', 'description', 'is_customer', 'permissions']
+        fields = ['id', 'name', 'slug', 'description', 'is_customer', 'permission']
 
 class RoleInputSerializer(serializers.Serializer):
     """ فرمت ورودی برای ساخت/ویرایش نقش """
     name = serializers.CharField(max_length=150)
-    code = serializers.CharField(max_length=50)
+    slug = serializers.CharField(max_length=50)
     description = serializers.CharField(required=False, allow_blank=True)
     permissions = serializers.ListField(
         child=serializers.IntegerField(), required=False, allow_empty=True

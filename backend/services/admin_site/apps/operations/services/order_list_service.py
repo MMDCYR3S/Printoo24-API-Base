@@ -2,7 +2,7 @@ from typing import List
 from django.db.models import Q
 
 from core.domain.commerce.order.main import OrderRepository
-from core.models import Order, User
+from core.models import Order, User, OrderItem
 from apps.permissions import AppPermissionChecker
 
 # ========== Order List App Service ========== #
@@ -26,34 +26,27 @@ class OrderListAppService:
             return queryset
         
         
-        user_role_rel = requester.user_role.select_related('role').prefetch_related('role__scopes').first()
+        user_role_rel = requester.user_role.select_related('role').first()
         if not user_role_rel:
             return Order.objects.none()
         
+        
         # ===== دریافت نقش کاربر ===== #
         role = user_role_rel.role
+        allowed_groups = role.allowed_status_groups
         
-        if not role:
-            return queryset.none()
+        if getattr(role, 'can_view_all_orders', False):
+            return queryset
         
         if role.is_admin:
-            allowed_groups = role.allowed_status_groups
-            if not allowed_groups:
-                return Order.objects.none()
+            return queryset.filter(current_status__group__code__in=allowed_groups)
             
-            return self.repo.get_all_orders_summary().filter(
-                current_status__group__code__in=allowed_groups
-            )
-            
-        allowed_groups = role.allowed_status_groups
-        if not allowed_groups:
-            return Order.objects.none()
+        item_filters = Q(status__group__code__in=allowed_groups)
         
-        scope_queryset = self.repo.get_all_orders_summary().filter(
-            current_status__group__code__in=allowed_groups
-        )
-        
-        return scope_queryset.filter(
-            Q(order_item_order__assigned_to=requester) | 
-            Q(order_item_order__assigned_to__isnull=True)
-        ).distinct()
+        if role.is_task_based:
+            assignment_filter = Q(assigned_to=requester) | Q(assigned_to__isnull=True)
+            item_filters &= assignment_filter
+
+        final_queryset = queryset.filter(order_item_order__in=OrderItem.objects.filter(item_filters)).distinct()
+
+        return final_queryset

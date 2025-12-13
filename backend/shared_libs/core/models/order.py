@@ -1,5 +1,4 @@
 import os
-import uuid
 from random import randint
 
 from django.db import models
@@ -41,8 +40,47 @@ class OrderStatus(models.Model):
     تا وابسته به تغییر متن فارسی توسط ادمین نباشیم.
     """
     
+    # ===== انواع ماهیت وضعیت ===== #
+    TYPE_CHOICES = [
+        ('initial', _('آغازین (Start)')),
+        ('progress', _('در جریان (Progress)')),
+        ('approve', _('تاییدیه (Approve)')),
+        ('reject', _('رد شده (Reject)')),
+        ('cancel', _('لغو شده (Cancel)')),
+    ]
+    # TARGET_CHOICES = [
+    #     ('order', _('مختص سفارش (Order Only)')),
+    #     ('item', _('مختص اقلام (Item Only)')),
+    #     ('both', _('مشترک (Both)')),
+    # ]
+    
     name = models.CharField(_('عنوان نمایشی'), max_length=150)
-    internal_code = models.SlugField(_('کد سیستمی'), max_length=50, unique=True, null=True, blank=True)
+    internal_code = models.SlugField(_('کد سیستمی'), max_length=150, unique=True, null=True, blank=True)
+
+    # target_model = models.CharField(
+    #     _('محدوده کاربرد'), 
+    #     max_length=10, 
+    #     choices=TARGET_CHOICES, 
+    #     default='order',
+    #     help_text=_("مشخص می‌کند این وضعیت در کدام بخش نمایش داده شود.")
+    # )
+    status_type = models.CharField(
+        _('نوع وضعیت'), 
+        max_length=20, 
+        choices=TYPE_CHOICES, 
+        default='progress'
+    )
+    is_workflow_gate = models.BooleanField(
+        _('دسترسی چندگانه به وضعیت'), 
+        default=False, 
+        help_text=_("آیا این وضعیت می‌تواند مقصد انتقال‌های خاص (مثل QC) باشد؟")
+    )
+    
+    sort_order = models.PositiveIntegerField(
+        _('ترتیب نمایش'), 
+        default=0, 
+        help_text=_("ترتیب قرارگیری در لیست (کم به زیاد).")
+    )
     
     group = models.ForeignKey(OrderStatusGroup, related_name='order_status', on_delete=models.CASCADE, blank=True, null=True)
     description = models.TextField(_('توضیحات'), blank=True, null=True)
@@ -56,7 +94,45 @@ class OrderStatus(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.internal_code})"
-
+    
+    def clean(self):
+        """ اعتبارسنجی‌های خاص """
+        if self.status_type == 'initial':
+            if self.group.order_status.filter(status_type='initial').count() == 1:
+                # ===== بررسی اینکه آیا داریم خود آن یک وضعیت اولیه رو ویرایش میکنیم یا نه ===== #
+                if not self.pk or (self.pk and self.group.order_status.filter(status_type='initial').first().pk != self.pk):
+                    raise ValueError(_("این گروه قبلا یک وضعیت آغازین داشته است."))
+            pass
+        
+    def save(self, *args, **kwargs):
+        """
+        تولید و فرمت‌دهی خودکار کد سیستمی.
+        """
+        if self.group and self.internal_code:
+            # ===== ورودی های اولیه ===== #
+            raw_input = self.internal_code.upper().strip()
+            type_suffix = self.status_type.upper()
+            group_suffix = self.group.code.upper()
+            
+            current_suffix = f"_{type_suffix}_{group_suffix}"
+            
+            if not raw_input.endswith(current_suffix):
+                parts = raw_input.split('_')
+                if len(parts) >= 3 and parts[-1] == group_suffix and parts[-2] == type_suffix:
+                    pass
+                else:
+                    if raw_input.endswith(f"_{group_suffix}"):
+                        raw_input = raw_input.rsplit(f"_{group_suffix}", 1)[0]
+                        
+                    for t_code, _label in self.TYPE_CHOICES:
+                        t_upper = t_code.upper()
+                        if raw_input.endswith(f"_{t_upper}"):
+                            raw_input = raw_input.rsplit(f"_{t_upper}", 1)[0]
+                            break
+                    self.internal_code = f"{raw_input}_{type_suffix}_{group_suffix}"
+                    
+        super().save(*args, **kwargs)
+                
 # ======================= #
 # ===== Order Model ===== #
 # ======================= #
@@ -79,6 +155,7 @@ class Order(models.Model):
         verbose_name=_("وضعیت فعلی"),
         on_delete=models.PROTECT,
         related_name="orders",
+        limit_choices_to=models.Q(target_model__in=['order', 'both']),
         null=True,
         blank=True
     )
@@ -130,6 +207,14 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='order_item_order', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='order_item_product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(_('تعداد'), default=1)
+    # status = models.ForeignKey(
+    #     OrderStatus,
+    #     related_name='order_items',
+    #     on_delete=models.PROTECT,
+    #     verbose_name=_("وضعیت آیتم"),
+    #     limit_choices_to=models.Q(target_model__in=['item', 'both']),
+    #     null=True, blank=True
+    # )
     price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
     items = models.JSONField(_("آیتم های اضافی"), blank=True, null=True)
     assigned_to = models.ForeignKey(
@@ -172,12 +257,12 @@ class OrderItemFile(models.Model):
     تحلیل: فایل‌ها پاک نمی‌شوند، بلکه ورژن جدید می‌خورند تا تاریخچه حفظ شود.
     """
     
-    STATUS_CHOICES = [
-        ('uploading', _('در حال آپلود/پردازش')),
-        ('pending', _('در انتظار بررسی')),
-        ('approved', _('تایید شده')),
-        ('rejected', _('رد شده (نیازمند اصلاح)')),
-    ]
+    # STATUS_CHOICES = [
+    #     ('uploading', _('در حال آپلود/پردازش')),
+    #     ('pending', _('در انتظار بررسی')),
+    #     ('approved', _('تایید شده')),
+    #     ('rejected', _('رد شده (نیازمند اصلاح)')),
+    # ]
     
     order_item = models.ForeignKey(
         OrderItem, 
@@ -193,8 +278,8 @@ class OrderItemFile(models.Model):
     file = models.FileField(_('فایل نهایی'), upload_to='orders/designs/%Y/%m/%d/')
     version = models.PositiveIntegerField(_('نسخه فایل'), default=1)
     is_latest = models.BooleanField(_('آخرین نسخه است؟'), default=True)
-    
-    status = models.CharField(_("وضعیت فایل"), max_length=20, choices=STATUS_CHOICES, default='pending')
+    is_accepted = models.BooleanField(_("تایید شده"), default=False)
+    # status = models.CharField(_("وضعیت فایل"), max_length=20, choices=STATUS_CHOICES, default='pending')
     admin_feedback = models.TextField(_("دلیل رد شدن / توضیحات QC"), blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
@@ -260,6 +345,8 @@ class OrderStateLog(models.Model):
     duration_in_previous_status = models.DurationField(_("مدت توقف در مرحله قبل"), null=True, blank=True)
     
     description = models.TextField(_("توضیحات / دلیل تغییر"), blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
         verbose_name = _('تاریخچه تغییر وضعیت')
@@ -299,149 +386,108 @@ class OrderCostType(models.Model):
     def __str__(self):
         return f"{self.title} ({self.get_category_display()})"
 
-# ===== Order Cost Item Model ===== #
-class OrderCostItem(models.Model):
+class OrderCostCatalog(models.Model):
     """
-    هزینه‌های شناور سفارش.
-    می‌تواند به کل سفارش وصل شود (مثل هزینه ارسال)
-    یا به یک آیتم خاص (مثل هزینه طراحی برای کارت ویزیت).
+    لیست استاندارد هزینه‌ها.
+    اینجا "کاغذ"، "زینک"، "تیپاکس" فقط یک بار تعریف می‌شوند.
+    """
+    cost_type = models.ForeignKey(OrderCostType, on_delete=models.PROTECT, verbose_name=_("دسته حسابداری"))
+    title = models.CharField(_("شرح استاندارد"), max_length=200)
+    code = models.CharField(_("کد کالا/خدمت"), max_length=150, unique=True)
+    
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.title} ({self.code})"
+
+# ===== Order Cost Report Model ===== #
+class OrderCostReport(models.Model):
+    """
+    این مدل همان "گزارش" است که کارفرما خواسته.
+    شامل اطلاعات کلی و فایل‌های پیوست.
     """
     order = models.ForeignKey(
         'Order', 
-        related_name='costs', 
+        related_name='cost_reports', 
         on_delete=models.CASCADE,
-        verbose_name=_("سفارش")
-    )
-    # ===== اطلاعات قیمت برای آیتم های هر سفارش ===== #
-    order_item = models.ForeignKey(
-        'OrderItem',
-        related_name='specific_costs',
-        on_delete=models.CASCADE,
-        null=True, blank=True,
-        verbose_name=_("آیتم مرتبط"),
-        help_text=_("اگر خالی باشد، هزینه عمومی سفارش محسوب می‌شود (مثل هزینه ارسال)")
+        verbose_name=_("سفارش مرتبط")
     )
     
-    cost_type = models.ForeignKey(
-        OrderCostType, 
-        on_delete=models.PROTECT,
-        verbose_name=_("نوع هزینه")
-    )
-    
-    title = models.CharField(_("عنوان"), max_length=150, blank=True, null=True)
-    amount = models.DecimalField(_("مبلغ (ریال)"), max_digits=18, decimal_places=0)
-    description = models.TextField(_("شرح هزینه"), blank=True, null=True)
-    
-    # ===== سازنده چه شخصی بوده ===== #
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.PROTECT,
         verbose_name=_("ثبت کننده")
     )
+    
+    title = models.CharField(_("عنوان گزارش"), max_length=200)
+    description = models.TextField(_("توضیحات کلی"), blank=True, null=True)
+    attachment = models.FileField(
+        _("فایل پیوست/سند"), 
+        upload_to='orders/reports/%Y/%m/', 
+        null=True, blank=True
+    )
+    
     is_approved_by_finance = models.BooleanField(_("تایید مالی"), default=False)
+    finance_note = models.TextField(_("یادداشت مالی"), blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = _('گزارش مالی')
+        verbose_name_plural = _('گزارشات مالی')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} - {self.order.order_code}"
+    
+    @property
+    def total_amount(self):
+        """ جمع کل هزینه‌های این گزارش """
+        return sum(item.amount for item in self.items.all())
+
+# ===== Order Cost Item Model ===== #
+class OrderCostItem(models.Model):
+    """
+    اقلام ریز هزینه که زیرمجموعه یک گزارش هستند.
+    مثال: "هزینه اول: کاغذ - 12000"
+    """
+    report = models.ForeignKey(
+        OrderCostReport,
+        related_name='items',
+        on_delete=models.CASCADE,
+        verbose_name=_("گزارش مرتبط"),
+        blank=True,
+        null=True
+    )
+    catalog_item = models.ForeignKey(
+        OrderCostCatalog, 
+        on_delete=models.PROTECT,
+        verbose_name=_("شرح هزینه"),
+        null=True, blank=True
+    )
+    custom_title = models.CharField(_("عنوان (متفرقه)"), max_length=150, blank=True, null=True)
+    amount = models.DecimalField(_("مبلغ"), max_digits=18, decimal_places=0)
+    description = models.CharField(_("توضیحات تکمیلی"), max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    class Meta:
         verbose_name = _('قلم هزینه')
         verbose_name_plural = _('اقلام هزینه')
-        ordering = ['created_at']
+
+    @property
+    def final_title(self):
+        """ برای نمایش در فاکتور یا گزارش """
+        if self.catalog_item:
+            return self.catalog_item.title
+        return self.custom_title
 
     def __str__(self):
-        target = self.order_item.product.name if self.order_item else "General Order"
-        return f"{self.amount} for {target} ({self.cost_type})"
+        return f"{self.custom_title}: {self.amount}"
 
-# ===== Order Invoice Model ===== #
-class OrderInvoice(models.Model):
-    """
-    فاکتور نهایی سفارش.
-    این جدول نقطه اتصال تمام هزینه‌ها + سود + مالیات است.
-    """
-    INVOICE_STATUS = [
-        ('pending', _('صادر شده - پرداخت نشده')),
-        ('partially_paid', _('پرداخت ناقص (پیش‌پرداخت)')),
-        ('paid', _('تسویه شده')),
-        ('cancelled', _('باطل شده')),
-    ]
-
-    order = models.OneToOneField(
-        'Order', 
-        related_name='invoice_order', 
-        on_delete=models.CASCADE,
-        verbose_name=_("سفارش مرتبط")
-    )
-    
-    invoice_number = models.CharField(_("شماره فاکتور"), max_length=50, unique=True)
-    items_total = models.DecimalField(_("جمع بهای کالاها"), max_digits=18, decimal_places=0, default=0)
-    services_total = models.DecimalField(_("جمع خدمات و هزینه‌ها"), max_digits=18, decimal_places=0, default=0)
-    # ===== محاسبات مالی ===== #
-    tax_amount = models.DecimalField(_("مالیات (۹٪)"), max_digits=18, decimal_places=0, default=0)
-    profit_amount = models.DecimalField(_("سود / کارمزد"), max_digits=18, decimal_places=0, default=0)
-    discount_amount = models.DecimalField(_("تخفیف کل"), max_digits=18, decimal_places=0, default=0)
-    # ===== قیمت نهایی ===== #
-    final_payable_amount = models.DecimalField(_("مبلغ قابل پرداخت"), max_digits=18, decimal_places=0)
-    paid_amount = models.DecimalField(_("مبلغ پرداخت شده"), max_digits=18, decimal_places=0, default=0)
-    # ===== وضعیت سفارش ===== #
-    status = models.CharField(_("وضعیت فاکتور"), max_length=20, choices=INVOICE_STATUS, default='pending')
-    # ===== تاریخ صدور ===== #
-    issued_at = models.DateTimeField(_("تاریخ صدور"), auto_now_add=True)
-    due_date = models.DateTimeField(_("مهلت پرداخت"), null=True, blank=True)
-    # ===== تاریخ بروزرسانی ===== #
-    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
-
-    class Meta:
-        verbose_name = _('فاکتور فروش')
-        verbose_name_plural = _('فاکتورهای فروش')
-
-    def __str__(self):
-        return f"Invoice #{self.invoice_number} | {self.get_status_display()}"
-
-# ===== Order Transaction Model ===== #
-class OrderTransaction(models.Model):
-    """
-    تراکنش‌های مالی مرتبط با فاکتور.
-    شامل پیش‌پرداخت، تسویه نهایی یا استرداد وجه.
-    """
-    TX_TYPE = [
-        ('deposit', _('پیش پرداخت')),
-        ('settlement', _('تسویه حساب')),
-        ('refund', _('استرداد وجه')),
-    ]
-    
-    TX_STATUS = [
-        ('pending', _('در حال پردازش')),
-        ('success', _('موفق')),
-        ('failed', _('ناموفق')),
-    ]
-
-    invoice = models.ForeignKey(
-        OrderInvoice, 
-        related_name='transactions', 
-        on_delete=models.CASCADE,
-        verbose_name=_("فاکتور"),
-    )
-    
-    amount = models.DecimalField(_("مبلغ تراکنش"), max_digits=18, decimal_places=0)
-    transaction_type = models.CharField(_("نوع تراکنش"), max_length=20, choices=TX_TYPE)
-    
-    gateway_name = models.CharField(_("درگاه پرداخت"), max_length=50, blank=True)
-    ref_id = models.CharField(_("کد مرجع بانکی"), max_length=100, unique=True, null=True, blank=True)
-    tracking_code = models.CharField(_("کد رهگیری"), max_length=100, null=True, blank=True)
-    
-    status = models.CharField(_("وضعیت"), max_length=20, choices=TX_STATUS, default='pending')
-    
-    payment_date = models.DateTimeField(_("تاریخ پرداخت"), auto_now_add=True)
-    description = models.TextField(_("توضیحات"), blank=True)
-
-    class Meta:
-        verbose_name = _('تراکنش مالی سفارش')
-        verbose_name_plural = _('تراکنش‌های مالی سفارش')
-        ordering = ['-payment_date']
-
-# ================================================== #
-# ========== بخش مربوط به انبار و تحویل ========== #
-# ================================================== #
 # ===== Delivery Method Model (تنظیمات روش‌های ارسال) ===== #
 class DeliveryMethod(models.Model):
     """
@@ -537,7 +583,7 @@ class OrderPackage(models.Model):
     )
     
     # ===== اطلاعات مربوط به لیبل ===== #
-    label_uuid = models.UUIDField(_("شناسه لیبل"), default=uuid.uuid4, editable=False, unique=True)
+    label_uuid = models.UUIDField(_("شناسه لیبل"), editable=False, unique=True, null=True, blank=True)
     
     # ===== اطلاعات مربوط به بسته ===== #
     box_number = models.PositiveIntegerField(_("شماره بسته"), default=1)

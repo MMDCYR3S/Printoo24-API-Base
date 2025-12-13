@@ -13,34 +13,26 @@ class OrderFileAppService:
     def __init__(self):
         self.item_repo = OrderItemRepository()
         self.file_repo = OrderItemFileRepository()
-        self.status_flow_service = OrderStatusFlowDomainService()
-
     def _check_designer_access(self, requester: User, item_id: int):
-        """
-        چک می‌کند که آیا این کاربر اجازه دستکاری این آیتم خاص را دارد؟
-        """
-        # ===== دریافت آیتم ===== #
+        """ چک کردن دسترسی طراح به آیتم """
         item = self.item_repo.get_by_id(item_id)
         if not item:
             raise ValidationError("آیتم سفارش یافت نشد.")
         
-        # ===== چک کردن اجازه دسترسی ===== #
         if requester.is_superuser:
             return item
         
-        # ===== چک کردن نقش کاربر ===== #
-        user_role = requester.user_role.first()
-        if not user_role:
-            raise PermissionDenied("شما نقشی ندارید.")
-        
         if item.assigned_to_id != requester.id:
-            raise PermissionDenied("این آیتم به شما اختصاص داده نشده است. ابتدا آن را بردارید.")
-
+            user_role = requester.user_role.first()
+            if user_role and not getattr(user_role.role, 'can_view_all_orders', False):
+                raise PermissionDenied("این آیتم به شما اختصاص داده نشده است.")
+            
         return item
-    
+        
     def upload_design_file(self, requester: User, item_id: int, file_data, requirement_id: int):
         """
-        آپلود فایل جدید (ورژن جدید) برای یک آیتم.
+        آپلود فایل جدید.
+        در مدل جدید، فایل جدید به صورت پیش‌فرض is_accepted=False است.
         """
         AppPermissionChecker.check_has_permission(requester, 'change_orderitemfile')
         
@@ -65,12 +57,32 @@ class OrderFileAppService:
             "file": file_data,
             "version": new_version,
             "is_latest": True,
-            "status": "uploading",
+            "is_accepted": False,
+            "admin_feedback": None
         })
         
         process_uploaded_design_file.delay(new_file.id)
         
         return new_file
+        
+    def review_design_file(self, requester: User, file_id: int, is_accepted: bool, feedback: str = None):
+        """
+        بررسی فایل توسط طراح یا QC.
+        ورودی: is_accepted (True/False)
+        """
+        AppPermissionChecker.check_has_permission(requester, 'change_orderitemfile')
+        
+        file_obj = self.file_repo.get_by_id(file_id)
+        if not file_obj:
+            raise ValidationError("فایل یافت نشد.")
+        
+        self._check_designer_access(requester, file_obj.order_item.id)
+        
+        file_obj.is_accepted = is_accepted
+        file_obj.admin_feedback = feedback
+        
+        file_obj.save()
+        return file_obj
         
     def change_file_status(self, requester: User, file_id: int, new_status: str, feedback: str = None):
         """
@@ -96,70 +108,3 @@ class OrderFileAppService:
         
         file_obj.save()
         return file_obj
-        
-    def _check_and_move_order_status(self, order: Order, requester: User):
-        """
-        
-        بررسی می‌کند آیا تمام فایل‌های آخرین نسخه در این سفارش تایید شده‌اند؟
-        اگر بله، وضعیت اصلی سفارش را به QC می‌برد.
-        """
-        if requester.is_superuser:
-            return
-        
-        user_role_rel = requester.user_role.select_related('role').first()
-        if not user_role_rel:
-            return
-
-        role = user_role_rel.role
-        current_group_code = order.current_status.group.code
-        
-        # ===== بررسی وجود محدوده دسترسی ===== #
-        if current_group_code not in role.allowed_status_groups:
-            return
-        
-        # ===== بررسی شرط اینکه تمامی آیتم ها تایید شدند یا خیر ===== #
-        items_queryset = OrderItem.objects.filter(order=order).prefetch_related('files')
-        is_all_items_approved = True
-        
-        
-        for item in items_queryset:
-            latest_file = item.files.filter(is_latest=True).first()
-            
-            if not latest_file or latest_file.status != 'approved':
-                is_all_items_approved = False
-                break
-        
-        # ===== تغییر وضعیت سفارش ===== #
-        if is_all_items_approved:
-            self.status_flow_service.change_order_status(
-                order=order,
-                new_status_code='DESIGN_QC_READY',
-                user=requester,
-                description="همه فایل‌های طراحی آیتم‌ها تایید شد."
-            )
-        
-    def change_file_status(self, requester: User, file_id: int, new_status: str, feedback: str = None):
-        """
-        تغییر وضعیت یک فایل (تایید / رد) و سپس چک کردن وضعیت کلی سفارش.
-        """
-        AppPermissionChecker.check_has_permission(requester, 'change_orderitemfile')
-        
-        file_obj = self.file_repo.get_by_id(file_id)
-        if not file_obj:
-            raise ValidationError("فایل یافت نشد.")
-        
-        self._check_designer_access(requester, file_obj.order_item.id)
-        
-        if new_status not in dict(OrderItemFile.STATUS_CHOICES):
-            raise ValidationError("وضعیت نامعتبر است.")
-        
-        file_obj.status = new_status
-        if feedback:
-            file_obj.admin_feedback = feedback
-            
-        file_obj.save()
-        
-        if new_status == 'approved':
-            self._check_and_move_order_status(file_obj.order_item.order, requester)
-        return file_obj
-        

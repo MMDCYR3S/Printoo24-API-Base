@@ -40,7 +40,7 @@ class Invoice(models.Model):
 
     order = models.OneToOneField(
         'core.Order', 
-        related_name='invoice', 
+        related_name='related_invoice', 
         on_delete=models.PROTECT, 
         verbose_name=_("سفارش مرتبط")
     )
@@ -72,6 +72,10 @@ class Invoice(models.Model):
     finalized_at = models.DateTimeField(_("تاریخ قطعی شدن فاکتور"), null=True, blank=True)
     
     description = models.TextField(_("توضیحات فاکتور"), blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+
 
     class Meta:
         verbose_name = _('فاکتور')
@@ -120,6 +124,8 @@ class InvoiceStateLog(models.Model):
     
     timestamp = models.DateTimeField(auto_now_add=True)
     description = models.TextField(_("توضیحات (علت تغییر)"), blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
         ordering = ['-timestamp']

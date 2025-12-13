@@ -3,7 +3,7 @@ from django.db.models import Prefetch, QuerySet
 from core.utils.base_repository import BaseRepository
 from core.models import (
     Order, OrderItem, OrderItemFile, OrderStatus, Address, User,
-    OrderStateLog, OrderCostItem, OrderShipment
+    OrderStateLog, OrderCostItem, OrderShipment, OrderCostReport
 )
 
 class OrderRepository(BaseRepository[Order]):
@@ -57,25 +57,49 @@ class OrderRepository(BaseRepository[Order]):
     # ===== سمت ادمین - بخش مدیریت داخلی ===== #
     def get_full_order_detail_for_admin(self, order_id: int) -> Optional[Order]:
         """
-        
-        دریافت سوپر-دیتا برای پنل مدیریت (شامل لاگ‌ها، هزینه‌ها، فایل‌ها و...)
+        دریافت سوپر-دیتا برای پنل مدیریت (شامل لاگ‌ها، گزارشات مالی، فایل‌ها و...)
+        اصلاح شده بر اساس ساختار: Order -> CostReport -> CostItem
         """
         return self.model.objects.select_related(
-            'user', 'current_status', 'address', 'invoice_order'
+            'user', 
+            'current_status__group', 
+            'address__city',
+            'address__province', 
+            'invoice_order'
         ).prefetch_related(
-            # ===== آیتم های سفارش و فایل های طراحی ===== #
+            # ===== 1. آیتم های سفارش و فایل های طراحی ===== #
             Prefetch(
                 'order_item_order',
-                queryset=OrderItem.objects.select_related('product').prefetch_related(
-                    Prefetch('files', queryset=OrderItemFile.objects.select_related('requirement__spec').order_by('-version'))
+                queryset=OrderItem.objects.select_related('product', 'assigned_to', 'status__group').prefetch_related(
+                    Prefetch(
+                        'files', 
+                        queryset=OrderItemFile.objects.select_related('requirement__spec').order_by('-version')
+                    )
                 )
             ),
-            # ===== وضعیت سفارش ===== #
-            Prefetch('state_logs', queryset=OrderStateLog.objects.select_related('user', 'from_status', 'to_status').order_by('-timestamp')),
-            # ===== هزینه های شناور مربوط به سفارش ===== #
-            Prefetch('costs', queryset=OrderCostItem.objects.select_related('cost_type', 'created_by')),
-            # ===== مرسوله های مربوط به سفارش ===== #
-            Prefetch('shipments', queryset=OrderShipment.objects.select_related('delivery_method'))
+            
+            # ===== 2. تاریخچه وضعیت سفارش ===== #
+            Prefetch(
+                'state_logs', 
+                queryset=OrderStateLog.objects.select_related('user', 'from_status', 'to_status').order_by('-timestamp')
+            ),
+            
+            # ===== 3. گزارشات و هزینه‌های مالی (اصلاح شده) ===== #
+            Prefetch(
+                'cost_reports',  # نام ریلیشن در مدل Order
+                queryset=OrderCostReport.objects.select_related('created_by').prefetch_related(
+                    Prefetch(
+                        'items',
+                        queryset=OrderCostItem.objects.select_related('catalog_item__cost_type')
+                    )
+                ).order_by('-created_at')
+            ),
+            
+            # ===== 4. مرسوله های مربوط به سفارش ===== #
+            Prefetch(
+                'shipments', 
+                queryset=OrderShipment.objects.select_related('delivery_method', 'destination_address').prefetch_related('packages')
+            )
         ).filter(id=order_id).first()
         
     def get_all_orders_summary(self) -> QuerySet[Order]:

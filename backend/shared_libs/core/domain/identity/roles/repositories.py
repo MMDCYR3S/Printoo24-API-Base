@@ -8,7 +8,7 @@ class RoleRepository(BaseRepository[Role]):
         super().__init__(Role)
 
     def get_all_roles(self) -> QuerySet[Role]:
-        return self.model.objects.all().prefetch_related('permissions').order_by('id')
+        return self.model.objects.all().prefetch_related('permission').order_by('id')
 
     def get_role_by_slug(self, slug: str) -> Optional[Role]:
         return self.model.objects.filter(slug=slug).first()
@@ -17,4 +17,4 @@ class RoleRepository(BaseRepository[Role]):
         return self.model.objects.create(**data)
 
     def update_permissions(self, role: Role, permission_ids: List[int]):
-        role.permissions.set(permission_ids)
+        role.permission.set(permission_ids)

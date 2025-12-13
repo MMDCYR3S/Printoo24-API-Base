@@ -33,67 +33,78 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
     design_files = OrderItemFileSerializer(source='files', many=True, read_only=True)
     
-    # Details field extracted from JSON
     specs = serializers.SerializerMethodField()
+    pricing_breakdown = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
         fields = [
-            'id', 
-            'product_name', 
-            'quantity', 
-            'price', 
-            'specs', 
-            'design_files'
-        ]
-
+             'id', 
+             'product_name', 
+             'quantity', 
+             'price', 
+             'specs', 
+             'design_files',
+             'pricing_breakdown'
+         ]
+    
     def get_specs(self, obj):
         """
-        Parses the JSON `items_data` into a clean format for the frontend.
+        خواند و ساختاردهی مجدد جزئیات (ابعاد و آپشن‌های انتخاب شده)
         """
-        raw_data = obj.items_data or {}
-        details = raw_data.get('details', {})
+        raw_data = obj.items or {}
 
-        # Construct clean output
+        width = raw_data.get('width')
+        height = raw_data.get('height')
+        
+        detailed_options = [
+            {
+                "id": opt.get('id'),
+                "option_name": opt.get('option_name', 'N/A'),
+                "value_label": opt.get('value_label', 'N/A'),
+                "price_impact": float(opt.get('price_impact', 0.0))
+            }
+            for opt in raw_data.get('options', [])
+        ]
+
         return {
-            "dimensions": f"{details.get('width')} x {details.get('height')} cm",
-            "size": details.get('size_name'),
-            "has_design": details.get('has_design'),
-            "options": [
-                f"{opt['name']}: {opt['value']}" 
-                for opt in details.get('options', [])
-            ]
+            "dimensions": f"{width or 'N/A'} x {height or 'N/A'} cm",
+            "has_design": raw_data.get('has_design', False),
+            "options": detailed_options, # <--- ارسال لیست دیکشنری
+            "breakdown_present": bool(raw_data.get('price_breakdown'))
         }
+    
+    def get_pricing_breakdown(self, obj):
+        # ... (بدون تغییر) ...
+        raw_data = obj.items or {}
+        return raw_data.get('price_breakdown', {})
 
 # ===== Order Serializer (Main) ===== #
 class OrderSerializer(serializers.ModelSerializer):
     """
-    Main serializer for creating and viewing orders.
+    Main serializer for creating and viewing orders (Single Item Logic).
     """
     user = serializers.StringRelatedField(read_only=True)
-    status = serializers.CharField(source='order_status.name', read_only=True)
+    status = serializers.CharField(source='current_status.name', read_only=True)
     type_display = serializers.CharField(source='get_type_display', read_only=True)
-    
-    # Display full address string in read operations
-    address = serializers.SerializerMethodField()
 
-    # Input field for Address ID (Write Only) - REQUIRED
+    item_detail = serializers.SerializerMethodField()
+    
+    # Input field for Address ID (Write Only)
     address_id = serializers.PrimaryKeyRelatedField(
         queryset=Address.objects.all(),
         source="address",
         write_only=True,
-        required=True,  # Explicitly required
+        required=True,
         allow_null=False
     )
     
-    # Items (Read Only)
-    items = OrderItemDetailSerializer(many=True, read_only=True)
-    
-    total_price = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+    # آدرس نمایش
+    address = serializers.SerializerMethodField()
+    total_price = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True) # Max_digits باید بزرگتر باشد
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filter address queryset to current user's addresses
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
             self.fields['address_id'].queryset = Address.objects.filter(user=request.user)
@@ -102,17 +113,28 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             'id', 
+            'order_code', # اضافه شد
             'user', 
             'status', 
             'type_display', 
             'total_price', 
             'address', 
-            'address_id', # Included for input
+            'address_id', 
             'created_at', 
-            'items'
+            'item_detail' # <--- آیتم تکی
         ]
+        read_only_fields = ['order_code']
 
     def get_address(self, obj):
         if obj.address:
             return str(obj.address)
-        return "Address not found"
+        return "آدرس یافت نشد"
+
+    def get_item_detail(self, obj):
+        """ 🚨 FIX 2: دریافت آبجکت Item تکی و سریالایز کردن آن. """
+        # فرض می‌کنیم OrderItem.order از related_name='order_item_order' استفاده می‌کند.
+        item = obj.order_item_order.first() 
+        if item:
+            # از سریالایزر آیتم برای نمایش جزئیات استفاده می‌کنیم
+            return OrderItemDetailSerializer(item, context=self.context).data
+        return None

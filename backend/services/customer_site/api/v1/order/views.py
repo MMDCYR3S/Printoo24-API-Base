@@ -12,6 +12,7 @@ from apps.order.exceptions import (
 )
 from .serializers import OrderSerializer
 
+# ========== Create Order View ========== #
 @extend_schema(tags=["Order"])
 class CreateOrderView(GenericAPIView):
     """
@@ -21,25 +22,30 @@ class CreateOrderView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
 
-    def post(self, request, *args, **kwargs):
-        # 1. Validate Input (Address ID is checked here)
+    def post(self, request, item_id, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        # 'address' in validated_data is now the Address instance because of source="address"
         address_instance = serializer.validated_data.get('address')
+        order_type = request.data.get('type', '2')
 
         try:
-            # 2. Execute Business Logic
             service = CreateOrderFromCartService()
-            order = service.execute(
+            
+            # ===== اجرای سرویس ===== #
+            created_order = service.execute(
                 user=request.user, 
-                address=address_instance
+                address=address_instance,
+                order_type=order_type,
+                cart_item_id=item_id
             )
             
-            # 3. Return Full Response
-            # Pass request context for proper file URL generation
-            output_serializer = self.get_serializer(order, context={'request': request})
+            # ===== نمایش خروجی ===== #
+            output_serializer = self.get_serializer(
+                created_order, 
+                many=False,
+                context={'request': request}
+            )
+            
             return Response(output_serializer.data, status=status.HTTP_201_CREATED)
         
         except EmptyCartError as e:

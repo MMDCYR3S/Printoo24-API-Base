@@ -1,6 +1,7 @@
+import math
 import logging
 from decimal import Decimal, ROUND_HALF_UP
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, Tuple
 
 from core.models import (
     Product,
@@ -13,16 +14,9 @@ from core.models import (
 logger = logging.getLogger('shop.services.pricing')
 
 class ProductPriceCalculator:
-    """
-    موتور محاسبه قیمت بر اساس مدل‌های اختصاصی (Quantity, Size, Options).
-    
-    اولویت محاسبه:
-    1. قیمت پایه بر اساس تیراژ (ProductQuantity یا فرمول پایه).
-    2. هزینه سایز (استاندارد یا دلخواه).
-    3. هزینه آپشن‌ها.
-    4. هزینه‌های سربار (طراحی، ستاپ).
-    """
+    # ... (متد __init__ بدون تغییر می‌ماند) ...
 
+    # ===== متد __init__ (بدون تغییر) ===== #
     def __init__(
         self,
         product: Product,
@@ -31,131 +25,133 @@ class ProductPriceCalculator:
         height: float = 0,
         selected_values: List[ProductOptionValue] = None,
         user_input_data: Dict[str, str] = None,
-        selected_size_id: Optional[int] = None, # شناسه سایز استاندارد انتخاب شده
+        selected_size_id: Optional[int] = None,
         has_design: bool = True
     ):
         self.product = product
         self.quantity = int(quantity)
-        
-        # تبدیل ابعاد به Decimal
         self.width = Decimal(str(width or 0))
         self.height = Decimal(str(height or 0))
-        
         self.selected_values = selected_values or []
         self.user_input_data = user_input_data or {}
         self.selected_size_id = selected_size_id
         self.has_design = has_design
         
-        # محاسبات هندسی
-        self.area_sqm = (self.width * self.height) / Decimal(10000) # cm to m2
+        self.area_sqm = (self.width * self.height) / Decimal(10000)
         self.perimeter_m = (self.width + self.height) * Decimal(2) / Decimal(100)
-        
         self.config = getattr(product, 'pricing_config', None)
+        logger.info(f"Calc Init: Product={product.id}, Qty={quantity}, Area={self.area_sqm}m2")
+    # ==================================== #
 
     def calculate(self) -> Dict[str, Union[float, Dict]]:
         if self.quantity <= 0:
             return {"final_price": 0.0, "details": {}}
 
-        # 1. محاسبه قیمت پایه (Base Price Logic)
-        # منطق: آیا این تیراژ در جدول ProductQuantity تعریف شده؟
-        base_total_cost = self._calculate_base_quantity_cost()
+        # 1. محاسبه قیمت پایه (Quantity + Size Base)
+        # این قیمت شامل تیراژ و ابعاد اولیه است و مبنای محاسبه آپشن‌های درصدی قرار می‌گیرد.
+        base_total_cost, base_cost_breakdown = self._calculate_base_price_and_size()
 
-        # 2. محاسبه هزینه سایز (Size Logic)
-        # منطق: سایز استاندارد (ProductSize) یا سایز دلخواه (Custom)?
-        size_total_cost = self._calculate_size_cost()
+        # 2. محاسبه هزینه آپشن‌ها (Options Logic)
+        options_total_cost, options_breakdown = self._calculate_options_cost(base_total_cost)
 
-        # 3. محاسبه هزینه آپشن‌ها (Options Logic)
-        options_total_cost, options_breakdown = self._calculate_options_cost()
-
-        # 4. هزینه‌های سربار (Fees)
+        # 3. هزینه‌های سربار (Fees)
         setup_cost = self.config.base_setup_price if self.config else Decimal(0)
         design_cost = Decimal(0)
         if self.config and self.config.design_service_available and not self.has_design:
             design_cost = self.config.design_fee
 
         # ===== تجمیع نهایی ===== #
-        total_raw = base_total_cost + size_total_cost + options_total_cost + setup_cost + design_cost
+        total_raw = base_total_cost + options_total_cost + setup_cost + design_cost
 
         # اعمال Modifier (درصد تعدیل قیمت روی کل سفارش)
         if self.product.price_modifier_percent != 0:
             modifier = (total_raw * self.product.price_modifier_percent) / 100
             total_raw += modifier
 
-        # رند کردن
         final_price = total_raw.quantize(Decimal('100'), rounding=ROUND_HALF_UP)
 
         return {
             "final_price": float(final_price),
             "breakdown": {
-                "base_quantity_price": float(base_total_cost),
-                "size_cost": float(size_total_cost),
+                "base_price_initial": float(base_total_cost), # قیمت پایه ترکیب شده
                 "options_total": float(options_total_cost),
                 "setup_fee": float(setup_cost),
                 "design_fee": float(design_cost),
-                "options_details": options_breakdown
+                "options_details": options_breakdown,
+                "base_details": base_cost_breakdown
             }
         }
 
-    def _calculate_base_quantity_cost(self) -> Decimal:
+    def _calculate_base_price_and_size(self) -> Tuple[Decimal, Dict]:
         """
-        محاسبه قیمت پایه بر اساس جدول ProductQuantity.
-        اگر تیراژ دقیق پیدا شد، قیمت پکیج را برمی‌گرداند.
-        اگر پیدا نشد (و مجاز بود)، قیمت پایه محصول را ضرب در تعداد می‌کند.
+        محاسبه قیمت پایه ترکیبی (تیراژ + سایز).
+        این متد قیمت اولیه محصول را تعیین می‌کند.
         """
-        # تلاش برای پیدا کردن قیمت دقیق این تیراژ در جدول واسط
-        # نکته: مدل ProductQuantity فیلد price دارد که معمولاً قیمت کلِ آن پکیج است
+        breakdown = {}
+        # 1. تلاش برای پیدا کردن قیمت تیراژ دقیق (پکیج قیمت)
         try:
             pq = ProductQuantity.objects.filter(
                 product=self.product,
                 quantity__value=self.quantity
             ).first()
             
-            if pq:
-                # اگر قیمت در جدول ProductQuantity صفر بود، یعنی قیمت خاصی ندارد و باید محاسبه شود؟
-                # فرض می‌کنیم اگر عدد داشت، همان قیمت کل است.
-                if pq.price > 0:
-                    return Decimal(pq.price)
-        except Exception:
-            pass
-
-        # فال‌بک: اگر تیراژ در جدول نبود (مثلاً تیراژ دلخواه)، از قیمت پایه محصول استفاده کن
-        # Product.price = قیمت واحد
-        return self.product.price * self.quantity
-
-    def _calculate_size_cost(self) -> Decimal:
-        """
-        محاسبه هزینه مربوط به سایز.
-        دو حالت دارد:
-        1. سایز استاندارد (از طریق ProductSize).
-        2. سایز دلخواه (از طریق ابعاد و قیمت بر متر).
-        """
-        # حالت 1: سایز استاندارد انتخاب شده
+            if pq and pq.price > 0:
+                base_total_cost = Decimal(pq.price)
+                base_cost_type = "Package Price"
+            else:
+                raise ProductQuantity.DoesNotExist # فال‌بک به قیمت واحد
+        except ProductQuantity.DoesNotExist:
+            base_total_cost = self.product.price
+            base_cost_type = "Unit Price * Qty"
+            
+        breakdown['quantity_base'] = float(base_total_cost)
+        
+        # 2. محاسبه هزینه سایز (اضافی بر قیمت پایه)
+        size_total_cost = Decimal(0)
+        size_unit_cost = Decimal(0)
+        size_cost_type = "None"
+        
+        # حالت 2.1: سایز استاندارد انتخاب شده
         if self.selected_size_id:
             try:
                 ps = ProductSize.objects.get(
                     product=self.product,
                     size_id=self.selected_size_id
                 )
-                # price_impact معمولاً قیمت اضافه به ازای هر واحد است
-                return ps.price_impact * self.quantity
+                # price_impact قیمت اضافه به ازای هر واحد است
+                size_unit_cost = ps.price_impact
+                size_total_cost = size_unit_cost * self.quantity
+                size_cost_type = "Standard Size Impact"
             except ProductSize.DoesNotExist:
-                pass # اگر پیدا نشد، شاید کاستوم باشد
+                pass
 
-        # حالت 2: سایز دلخواه (Custom Dimension)
-        if self.config and self.config.accepts_custom_dimensions:
+        # حالت 2.2: سایز دلخواه (اگر پیکربندی مجاز باشد)
+        elif self.config and self.config.accepts_custom_dimensions:
             if self.product.price_per_square_unit and self.area_sqm > 0:
-                # فرمول: مساحت کل × قیمت واحد سطح
                 total_area = self.area_sqm * self.quantity
-                return total_area * self.product.price_per_square_unit
+                size_unit_cost = self.product.price_per_square_unit
+                size_total_cost = total_area * size_unit_cost
+                size_cost_type = "Area Price"
+        
+        breakdown['size_cost'] = float(size_total_cost)
+        breakdown['total_description'] = f"{base_cost_type} + {size_cost_type}"
+        
+        return base_total_cost + size_total_cost, breakdown
 
-        return Decimal(0)
 
-    def _calculate_options_cost(self):
+    def _calculate_options_cost(self, current_base_price: Decimal):
         """
         محاسبه هزینه آپشن‌ها.
         """
         total = Decimal(0)
         details = []
+        
+        # ... (تعریف ثابت‌ها) ...
+        STRAT_FIXED = OptionPricingStrategy.FIXED
+        STRAT_PER_SQM = OptionPricingStrategy.PER_SQM
+        STRAT_PER_METER = OptionPricingStrategy.PER_METER_PERIMETER
+        STRAT_PERCENT = OptionPricingStrategy.PERCENTAGE
+        STRAT_INPUT = OptionPricingStrategy.PER_UNIT_INPUT
 
         for val in self.selected_values:
             if not val.has_pricing:
@@ -165,39 +161,37 @@ class ProductPriceCalculator:
             strategy = parent_config.pricing_strategy
             rate = val.price_impact
             
-            # هزینه ستاپ آپشن (اگر باشد)
+            # هزینه ستاپ آپشن (یک بار در هر Order)
             base_opt_price = parent_config.base_price
-            
             variable_cost = Decimal(0)
 
             # --- استراتژی‌های محاسبه --- #
-            if strategy == OptionPricingStrategy.FIXED:
-                # مبلغ ثابت × (تعداد / گام)
+            if strategy == STRAT_FIXED:
                 multiplier = self._get_step_multiplier(val)
                 variable_cost = rate * multiplier
 
-            elif strategy == OptionPricingStrategy.PER_SQM:
-                # (مساحت کل) × نرخ
-                # مناسب برای روکش، سلفون، یووی
+            elif strategy == STRAT_PER_SQM:
+                # مناسب برای روکش، سلفون، یووی (بر اساس مساحت کل)
                 total_area = self.area_sqm * self.quantity
                 variable_cost = total_area * rate
 
-            elif strategy == OptionPricingStrategy.PER_METER_PERIMETER:
+            elif strategy == STRAT_PER_METER:
                 # (محیط کل) × نرخ
-                # مناسب برای دوردوزی
                 total_perimeter = self.perimeter_m * self.quantity
                 variable_cost = total_perimeter * rate
 
-            elif strategy == OptionPricingStrategy.PERCENTAGE:
-                # درصدی از قیمت پایه (تیراژ)
-                base = self._calculate_base_quantity_cost()
-                variable_cost = base * (rate / 100)
-
-            elif strategy == OptionPricingStrategy.PER_UNIT_INPUT:
-                # ورودی عددی کاربر
+            elif strategy == STRAT_PERCENT:
+                # 🚨 FIX: درصدی از قیمت پایه محاسبه شده (Quantity + Size)
+                variable_cost = current_base_price * (rate / 100)
+                
+            # ... (بقیه استراتژی‌ها) ...
+            elif strategy == STRAT_INPUT:
                 input_key = str(parent_config.option.id)
                 user_qty = int(self.user_input_data.get(input_key, 0))
                 variable_cost = (user_qty * self.quantity) * rate
+                
+            else: # اگر استراتژی ناشناخته بود
+                variable_cost = Decimal(0)
 
             line_cost = base_opt_price + variable_cost
             total += line_cost
@@ -205,6 +199,7 @@ class ProductPriceCalculator:
             details.append({
                 "option": parent_config.option.label,
                 "value": val.label,
+                "strategy": strategy,
                 "cost": float(line_cost)
             })
 
@@ -220,6 +215,7 @@ class ProductPriceCalculator:
             
         if val.is_step_ceiling:
             import math
+            print(Decimal(math.ceil(qty / step)))
             return Decimal(math.ceil(qty / step))
         
         return qty / Decimal(step)

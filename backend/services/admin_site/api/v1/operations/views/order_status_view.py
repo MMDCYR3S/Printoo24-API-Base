@@ -1,14 +1,20 @@
 # در فایل: services/admin_site/apps/operations/api/v1/status_groups/views.py
 
+from rest_framework.generics import GenericAPIView
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 from django.core.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 
+from apps.operations.services import OrderTransitionAppService
 from core.domain.commerce.order import OrderStatusDomainService
 from apps.permissions import AppPermissionChecker
-from ..serializers import OrderStatusListSerializer, OrderStatusInputSerializer
+from ..serializers import (
+    OrderStatusListSerializer, OrderStatusInputSerializer,
+    OrderTransitionSerializer, OrderStatusSerializer
+)
 
 # ========== Order Status ViewSet ========== #
 @extend_schema(tags=['Admin - Order Status'])
@@ -77,4 +83,41 @@ class OrderStatusViewSet(viewsets.ViewSet):
         except ValidationError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    
+# ========== Order Transition View ========== # 
+@extend_schema(tags=['Admin - Order Transition'])
+class OrderTransitionView(GenericAPIView):
+    """
+    تغییر وضعیت سفارش (سطح کل سفارش).
+    مناسب برای تیم‌های کوچک/متوسط که فرآیند خطی دارند.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderTransitionSerializer
+
+    def post(self, request, pk):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        data = serializer.validated_data
+        
+        try:
+            service = OrderTransitionAppService()
+            
+            updated_order = service.execute_transition(
+                requester=request.user,
+                order_id=pk,
+                new_status_code=data['new_status_code'],
+                description=data.get('description')
+            )
+            
+            return Response({
+                "message": "وضعیت سفارش با موفقیت تغییر کرد.",
+                "id": updated_order.id,
+                "new_status": updated_order.current_status.name, # یا دیتای کامل وضعیت
+                "new_status_code": updated_order.current_status.internal_code
+            }, status=status.HTTP_200_OK)
+            
+        except (ValidationError, PermissionDenied) as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            return Response({"detail": "خطای سیستمی رخ داده است."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
