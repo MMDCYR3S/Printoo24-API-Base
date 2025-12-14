@@ -7,18 +7,17 @@ from .views import (
     OrderStatusGroupViewSet,
     OrderStatusViewSet,
     OrderTransitionView,
-    OrderCostReportCreateView,
-    CostTypeViewSet,
+    
     OrderPrintUsageListView,
     OrderPrintUsageCreateView,
     OrderPrintUsageDetailView,
     OrderItemStatusUpdateView,
+    OrderCostReportSubmitView,
 )
 
 router = DefaultRouter()
 router.register(r'status-groups', OrderStatusGroupViewSet, basename='status-group')
 router.register(r'statuses', OrderStatusViewSet, basename='status')
-router.register(r'cost-types', CostTypeViewSet, basename='financial-cost-type')
 
 urlpatterns = [
     # ===== Order List & Detail ===== #
@@ -30,7 +29,7 @@ urlpatterns = [
     # ===== Status Transition ===== #
     path('transition/<int:pk>/', OrderTransitionView.as_view(), name='admin-order-transition'),
     # ===== Order Cost Report Create ===== #
-    path('costs/reports/<int:pk>/', OrderCostReportCreateView.as_view(), name='order-cost-report-create'),
+    path('orders/<int:pk>/costs/submit/', OrderCostReportSubmitView.as_view(), name='cost-report-create'),
     # ===== Order Print ===== #
     path('orders/<int:pk>/print-usages/', OrderPrintUsageCreateView.as_view(), name='print-usage-create'),
     path('orders/<int:pk>/print-usages/list/', OrderPrintUsageListView.as_view(), name='print-usage-list'),

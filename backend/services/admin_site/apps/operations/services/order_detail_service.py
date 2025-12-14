@@ -32,15 +32,17 @@ class OrderDetailAppService:
         role = user_role_rel.role
          
         # ===== بررسی وجود گروه وضعیتی ===== #
-        allowed_groups = role.allowed_status_groups
-        if not allowed_groups:
+        allowed_group_codes = [g.code for g in role.allowed_groups.all()]
+        
+        if not allowed_group_codes:
              raise PermissionDenied("گروه وضعیتی برای شما تعریف نشده است.")
          
          # ===== بررسی دسترسی مدیریتی ===== #
-        is_global_access = order.current_status.group.code in allowed_groups
+        is_global_access = order.current_status.group.code in allowed_group_codes
         
-        if not (is_global_access):
-             raise PermissionDenied("شما دسترسی به مشاهده این سفارش در وضعیت فعلی را ندارید.")
-
+        current_group_code = order.current_status.group.code
+        if current_group_code not in allowed_group_codes:
+             raise PermissionDenied(f"شما دسترسی به مشاهده سفارش در مرحله '{order.current_status.group.name}' را ندارید.")
+         
         # ===== 5. بازگشت نتیجه =====
         return order, role.slug

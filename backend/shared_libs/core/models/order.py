@@ -2,6 +2,7 @@ import os
 from random import randint
 
 from django.db import models
+from django.db.models import Sum, Q, F
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
@@ -383,10 +384,12 @@ class OrderCostCategory(models.Model):
     def __str__(self):
         return self.title
 
+# ========== Order Cost Sheet ========== #
 class OrderCostSheet(models.Model):
     """
-    پرونده مالی داخلی (صورت‌وضعیت هزینه).
-    این مدل دقیقاً "فاکتور داخلی" است که تمام هزینه‌های یک سفارش در آن تجمیع می‌شود.
+    سند کل بهای تمام شده سفارش (Internal Invoice).
+    این مدل هیچ دیتای توصیفی ندارد، فقط اعداد نهایی را برای گزارش‌گیری مالی نگه می‌دارد.
+    این رکورد باید همزمان با ایجاد سفارش (یا در اولین مرحله مالی) ساخته شود.
     """
     order = models.OneToOneField(
         'core.Order', 
@@ -394,44 +397,129 @@ class OrderCostSheet(models.Model):
         related_name='cost_sheet',
         verbose_name=_("سفارش مرتبط")
     )
-    created_by = models.ForeignKey(
-        "core.User", 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
-        related_name='cost_sheet_created_by',
-        verbose_name=_("ایجاد کننده")
+    
+    # ===== وضعیت کلی سند ===== #
+    is_locked = models.BooleanField(
+        _("قفل شده؟"), 
+        default=False, 
+        help_text="اگر تیک بخورد، هیچ گزارشی دیگر قابل اضافه شدن نیست (پایان سال مالی یا تسویه نهایی)."
     )
-    # ===== وضعیت پرونده ===== #
-    is_finalized = models.BooleanField(_("نهایی شده؟"), default=False, help_text="آیا محاسبه هزینه‌ها تمام شده است؟")
-    approved_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.SET_NULL, 
-        null=True, blank=True,
-        related_name='approved_cost_sheets',
-        verbose_name=_("تایید کننده مالی")
-    )
-    # ===== خلاصه مالی ===== #
-    total_material_cost = models.DecimalField(_("هزینه متریال"), max_digits=18, decimal_places=0, default=0)
-    total_operational_cost = models.DecimalField(_("هزینه عملیاتی/خدمات"), max_digits=18, decimal_places=0, default=0)
-    total_outsourcing_cost = models.DecimalField(_("هزینه برون‌سپاری"), max_digits=18, decimal_places=0, default=0)
-    total_overhead_cost = models.DecimalField(_("هزینه سربار/متفرقه"), max_digits=18, decimal_places=0, default=0)
-    # ===== جمع کل هزینه ===== #
-    total_cost = models.DecimalField(_("جمع کل هزینه‌ها"), max_digits=18, decimal_places=0, default=0)
-    # ===== تحلیل سود (Profit Analysis) ===== #
-    revenue_amount = models.DecimalField(_("مبلغ فروش (درآمد)"), max_digits=18, decimal_places=0, default=0, help_text="مبلغ نهایی فاکتور مشتری")
-    net_profit = models.DecimalField(_("سود خالص"), max_digits=18, decimal_places=0, default=0)
+    
+    # ===== تجمیع هزینه‌ها (Auto Calculated) ===== #
+    total_material_cost = models.DecimalField(_("جمع هزینه مواد"), max_digits=18, decimal_places=0, default=0)
+    total_service_cost = models.DecimalField(_("جمع هزینه خدمات/چاپ"), max_digits=18, decimal_places=0, default=0)
+    total_shipping_cost = models.DecimalField(_("جمع هزینه ارسال"), max_digits=18, decimal_places=0, default=0)
+    total_overhead_cost = models.DecimalField(_("جمع سربار/سایر"), max_digits=18, decimal_places=0, default=0)
+    
+    # ===== اعداد نهایی سود و زیان ===== #
+    final_total_cost = models.DecimalField(_("بهای تمام شده کل"), max_digits=18, decimal_places=0, default=0)
+    
+    revenue_amount = models.DecimalField(_("مبلغ فروش (فاکتور)"), max_digits=18, decimal_places=0, default=0)
+    net_profit = models.DecimalField(_("سود/زیان خالص"), max_digits=18, decimal_places=0, default=0)
     profit_margin_percent = models.FloatField(_("حاشیه سود (%)"), default=0.0)
-    admin_note = models.TextField(_("یادداشت مدیریت"), blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("پرونده مالی سفارش")
-        verbose_name_plural = _("پرونده‌های مالی سفارشات")
+        verbose_name = _("سند بهای تمام شده")
+        verbose_name_plural = _("اسناد بهای تمام شده")
 
     def __str__(self):
-        return f"Cost Sheet: {self.order.order_code}"
+        return f"Sheet for {self.order.order_code}"
+
+    def recalculate_totals(self):
+        """
+        این متد باید هربار که یک Report تایید می‌شود صدا زده شود.
+        تمام گزارش‌های تایید شده را جمع می‌زند و در اینجا ذخیره می‌کند.
+        """
+        # ===== دریافت گزارش‌های تایید شده ===== #
+        approved_reports = self.reports.filter(status='approved')
+        
+        # ===== ریست کردن مقادیر برای محاسبه مجدد ===== #
+        items_qs = OrderCostItem.objects.filter(
+            report__sheet=self,
+            report__is_approved=True
+        )
+        
+        aggregates = items_qs.aggregate(
+            mat_cost=Sum('amount', filter=Q(report__cost_type='material')),
+            srv_cost=Sum('amount', filter=Q(report__cost_type='service')),
+            shp_cost=Sum('amount', filter=Q(report__cost_type='transport')),
+            ovr_cost=Sum('amount', filter=Q(report__cost_type__in=['overhead', 'other'])),
+        )
+
+        # ===== کل هزینه ===== #
+        self.total_material_cost = aggregates['mat_cost'] or 0
+        self.total_service_cost = aggregates['srv_cost'] or 0
+        self.total_shipping_cost = aggregates['shp_cost'] or 0
+        self.total_overhead_cost = aggregates['ovr_cost'] or 0
+        
+        # ===== محاسبه هزینه های کل ===== #
+        self.final_total_cost = (
+            self.total_material_cost + 
+            self.total_service_cost + 
+            self.total_shipping_cost + 
+            self.total_overhead_cost
+        )   
+        
+        # ===== محاسبه سود و زیاد کل ===== #
+        if self.revenue_amount:
+            self.net_profit = self.revenue_amount - self.final_total_cost
+            if self.revenue_amount > 0:
+                self.profit_margin_percent = (self.net_profit / self.revenue_amount) * 100
+        
+        self.save()
+
+
+# ===== Order Cost Report ===== #
+class OrderCostReport(models.Model):
+    """
+    گزارش هزینه ارسالی از سمت دپارتمان‌ها.
+    این موجودیت توسط اپراتورها پر می‌شود و به تایید مدیر مالی می‌رسد.
+    """
+    
+    DEPARTMENT_CHOICES = [
+        ('design', _('واحد طراحی')),
+        ('production', _('واحد تولید/چاپ')),
+        ('warehouse', _('انبار')),
+        ('logistics', _('لجستیک و ارسال')),
+        ('outsourcing', _('برون‌سپاری')),
+        ('management', _('مدیریت (سربار)')),
+    ]
+
+    sheet = models.ForeignKey(
+        OrderCostSheet, 
+        on_delete=models.CASCADE, 
+        related_name='reports',
+        verbose_name=_("سند مادر")
+    )
+    
+    submitter = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.PROTECT,
+        verbose_name=_("ارسال کننده گزارش")
+    )
+    
+    title = models.CharField(_("عنوان گزارش"), max_length=200, help_text="مثلا: هزینه کاغذ مصرفی بخش افست")
+    department = models.CharField(_("دپارتمان"), max_length=20, choices=DEPARTMENT_CHOICES)
+
+    is_approved = models.BooleanField(_("تایید شده"), default=False)
+    
+    description = models.TextField(_("توضیحات تکمیلی"), blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('گزارش هزینه داخلی')
+        verbose_name_plural = _('گزارشات هزینه داخلی')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.title} ({self.get_status_display()})"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
 # ===== Order Cost Item Model ===== #
 class OrderCostItem(models.Model):

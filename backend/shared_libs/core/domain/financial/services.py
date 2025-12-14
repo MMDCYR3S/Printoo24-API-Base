@@ -1,110 +1,114 @@
 from decimal import Decimal
+from typing import List, Dict, Any
 from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from core.models import Invoice, Transaction, User, InvoiceStatus, InvoiceStateLog, Order
-from .repositories import InvoiceRepository, TransactionRepository, InvoiceStatusRepository
+from core.models import (
+    Invoice, Transaction, User, InvoiceStatus, InvoiceStateLog, Order, 
+    Quotation, QuotationItem, OrderStatus, Address
+)
+from core.domain.commerce.order import OrderRepository # برای تبدیل استعلام به سفارش
+from .repositories import (
+    InvoiceRepository, TransactionRepository, InvoiceStatusRepository, 
+    QuotationRepository, QuotationItemRepository
+)
 
+# ========== FINANCIAL DOMAIN SERVICE ========== #
 class FinancialDomainService:
     """
-    سرویس دامنه برای مدیریت منطق کسب‌وکارهای مالی.
-    شامل: صدور فاکتور، ثبت تراکنش، مغایرت‌گیری و تغییر وضعیت‌ها.
+    سرویس دامنه جامع مالی:
+    ۱. مدیریت فاکتورها (Invoice)
+    ۲. مدیریت تراکنش‌ها (Transaction)
+    ۳. مدیریت استعلام قیمت (Quotation)
     """
     def __init__(self):
         self.invoice_repo = InvoiceRepository()
         self.transaction_repo = TransactionRepository()
         self.status_repo = InvoiceStatusRepository()
+        self.quotation_repo = QuotationRepository()
+        self.quotation_item_repo = QuotationItemRepository()
+        self.order_repo = OrderRepository() # جهت ایجاد سفارش از روی استعلام
     
+    # ========================================== #
+    # ============ INVOICE MANAGEMENT ========== #
+    # ========================================== #
+
     @transaction.atomic
     def force_create_invoice(self, order: Order, user: User) -> Invoice:
-        """
-        صدور دستی فاکتور برای یک سفارش (اگر قبلاً نداشته باشد).
-        """
-        # ===== اگر فاکتور وجود داشته باشد ===== #
-        if hasattr(order, 'invoice'):
+        """ صدور دستی فاکتور (اگر سیستم خودکار صادر نکرده باشد) """
+        if hasattr(order, 'related_invoice'):
             raise ValidationError("برای این سفارش قبلاً فاکتور صادر شده است.")
-        # ===== در صورت نبود، ایجاد فاکتور ===== #
+            
         invoice = self.issue_invoice_from_order(order)
-        # ===== ایجاد لاگ ===== #
         self._log_status_change(invoice, invoice.status, user, "صدور دستی فاکتور توسط مدیر")
         return invoice
     
-    # ===== صدور فاکتور برای سفارش ===== #
     @transaction.atomic
-    def issue_invoice_from_order(self, order) -> Invoice:
+    def issue_invoice_from_order(self, order: Order) -> Invoice:
         """
-        صدور خودکار فاکتور (معمولاً پیش‌فاکتور) هنگام ثبت سفارش.
-        این متد توسط OrderDomainService صدا زده می‌شود.
+        صدور سیستماتیک فاکتور بر اساس مبالغ سفارش.
         """
-        
-        # ===== دریافت وضعیت اولیه فاکتور ===== #
+        # ===== دریافت وضعیت اولیه ===== #
         initial_status = self.status_repo.get_by_code('PENDING_PAYMENT')
         if not initial_status:
             initial_status, _ = InvoiceStatus.objects.get_or_create(
-                name="در انتظار پرداخت", internal_code='PENDING_PAYMENT', color='warning'
+                internal_code='PENDING_PAYMENT',
+                defaults={'name': "در انتظار پرداخت", 'color': 'warning'}
             )
         
-        # ===== محاسبه مجموعه هزینه ها و مبلغ نهایی ===== #
+        # ===== محاسبه مبالغ ===== #
         items_total = order.base_products_price
         services_total = Decimal(0)
-        # ===== محاسبه مالیات + ایجاد قیمت کل ===== #
         tax_amount = (items_total + services_total) * Decimal('0.09')
         final_amount = items_total + services_total + tax_amount
         
-        # ===== ایجاد فاکتور ===== #
         invoice_data = {
             "order": order,
-            "invoice_type": 'proforma',
             "invoice_number": f"INV-{order.order_code}",
             "items_amount": items_total,
             "services_amount": services_total,
             "tax_amount": tax_amount,
             "final_amount": final_amount,
             "paid_amount": 0,
-            "status": initial_status
+            "discount_amount": 0,
+            "status": initial_status,
+            "description": "صدور خودکار سیستم"
         }
         
         return self.invoice_repo.create(invoice_data)
     
     @transaction.atomic
     def confirm_invoice_final(self, invoice_id: int, user: User) -> Invoice:
-        """
-        تبدیل پیش‌فاکتور به فاکتور نهایی (Finalize).
-        بعد از این مرحله، اقلام فاکتور نباید تغییر کنند.
-        """
+        """ تبدیل به فاکتور نهایی (Finalize) """
         invoice = self.invoice_repo.get_by_id(invoice_id)
         if not invoice: raise ValidationError("فاکتور یافت نشد.")
-        # ===== چک کردن اینکه آیا فاکتور نهایی شده است ===== #
-        if invoice.invoice_type == 'final':
-            raise ValidationError("این فاکتور قبلاً نهایی شده است.")
-        # ===== تبدیل به فاکتور نهایی ===== #
-        invoice.convert_to_final()
         
+        if invoice.status.internal_code == 'FINALIZE':
+             raise ValidationError("این فاکتور قبلاً نهایی شده است.")
+
+        invoice.convert_to_final()
         self._log_status_change(invoice, invoice.status, user, "تبدیل به فاکتور رسمی و قطعی")
         return invoice
     
     @transaction.atomic
-    def delete_invoice(self, invoice_id: int, user: User):
+    def recalculate_invoice(self, invoice_id: int) -> Invoice:
         """
-        حذف فاکتور.
-        قانون: فاکتوری که تراکنش تایید شده دارد یا نهایی شده است، نباید حذف شود.
+        محاسبه مجدد مبالغ فاکتور.
         """
-        invoice = self.invoice_repo.get_invoice_detail(invoice_id)
+        invoice = self.invoice_repo.get_by_id(invoice_id)
         if not invoice: raise ValidationError("فاکتور یافت نشد.")
-        # ===== چک کردن تراکنش‌های تایید شده ===== #
-        if invoice.transactions.filter(status='confirmed').exists():
-            raise ValidationError("این فاکتور دارای تراکنش‌های مالی تایید شده است و قابل حذف نیست.")
+
+        invoice.tax_amount = (invoice.items_amount + invoice.services_amount) * Decimal('0.09')
+        invoice.final_amount = invoice.items_amount + invoice.services_amount + invoice.tax_amount - invoice.discount_amount
         
-        # ===== چک کردن وضعیت فاکتور ===== #
-        if invoice.status.is_considered_paid:
-             raise ValidationError("فاکتور تسویه شده قابل حذف نیست.")
-        invoice.delete()
-        
+        invoice.save()
+        self._update_invoice_payment_status(invoice)
+        return invoice
+
     @transaction.atomic
     def update_invoice_metadata(self, invoice_id: int, data: dict, user: User) -> Invoice:
         """
         ویرایش اطلاعات غیر مالی فاکتور (توضیحات، تاریخ سررسید).
-        مبالغ فقط از طریق recalculate آپدیت می‌شوند.
         """
         invoice = self.invoice_repo.get_by_id(invoice_id)
         if not invoice: raise ValidationError("فاکتور یافت نشد.")
@@ -114,34 +118,34 @@ class FinancialDomainService:
         
         invoice.save()
         return invoice
-    
-    # ===== محاسبه مجدد فاکتور ===== #
+
     @transaction.atomic
-    def recalculate_invoice(self, invoice: Invoice):
+    def delete_invoice(self, invoice_id: int, user: User):
         """
-        محاسبه مجدد فاکتور (زمانی که هزینه‌های لجستیک یا خدمات تغییر می‌کند).
+        حذف فاکتور.
+        قانون: فاکتوری که تراکنش تایید شده دارد یا تسویه شده است، نباید حذف شود.
         """
-        approved_costs = invoice.order.cost_reports.filter(is_approved_by_finance=True)
-        new_services_total = sum(report.total_amount for report in approved_costs)
+        invoice = self.invoice_repo.get_invoice_detail(invoice_id)
+        if not invoice: raise ValidationError("فاکتور یافت نشد.")
         
-        invoice.services_amount = new_services_total
-        invoice.tax_amount = (invoice.items_amount + invoice.services_amount) * Decimal('0.09')
-        invoice.final_amount = invoice.items_amount + invoice.services_amount + invoice.tax_amount - invoice.discount_amount
+        # ===== چک کردن تراکنش‌های تایید شده ===== #
+        if invoice.transactions.filter(status='confirmed').exists():
+            raise ValidationError("این فاکتور دارای تراکنش‌های مالی تایید شده است و قابل حذف نیست.")
         
-        invoice.save()
-        
-        self._update_invoice_payment_status(invoice)
-        return invoice
-    
-    # ========== مدیریت تراکنش‌ها ========== #
+        # ===== چک کردن وضعیت پرداخت ===== #
+        if invoice.status.is_considered_paid:
+             raise ValidationError("فاکتور تسویه شده قابل حذف نیست.")
+            
+        invoice.delete()
+
+    # ============ TRANSACTION MANAGEMENT ============ #
     @transaction.atomic
     def register_manual_transaction(self, invoice_id: int, user: User, data: dict) -> Transaction:
-        """ ثبت فیش بانکی یا تراکنش دستی توسط مشتری یا ادمین """
+        """ ثبت فیش واریزی """
         invoice = self.invoice_repo.get_by_id(invoice_id)
-        if not invoice:
-            raise ValidationError("فاکتور یافت نشد.")
+        if not invoice: raise ValidationError("فاکتور یافت نشد.")
         
-        transaction = self.transaction_repo.create({
+        return self.transaction_repo.create({
             "invoice": invoice,
             "user": user,
             "amount": data['amount'],
@@ -153,14 +157,11 @@ class FinancialDomainService:
             "status": 'pending'
         })
         
-        return transaction
-        
     @transaction.atomic
     def verify_transaction(self, transaction_id: int, admin_user: User, is_approved: bool, rejection_reason: str = None):
-        """ تایید یا رد تراکنش توسط واحد مالی """
+        """ تایید/رد تراکنش """
         trx = self.transaction_repo.get_by_id(transaction_id)
-        if not trx:
-            raise ValidationError("تراکنش یافت نشد.")
+        if not trx: raise ValidationError("تراکنش یافت نشد.")
             
         if trx.status != 'pending':
             raise ValidationError("این تراکنش قبلاً تعیین تکلیف شده است.")
@@ -169,7 +170,6 @@ class FinancialDomainService:
             trx.status = 'confirmed'
             trx.confirmed_by = admin_user
             trx.save()
-            
             self._apply_payment_to_invoice(trx.invoice, trx.amount)
         else:
             trx.status = 'rejected'
@@ -178,7 +178,7 @@ class FinancialDomainService:
             trx.save()
             
         return trx
-    
+
     @transaction.atomic
     def update_transaction_details(self, transaction_id: int, data: dict, user: User) -> Transaction:
         """ 
@@ -188,11 +188,9 @@ class FinancialDomainService:
         if not trx:
             raise ValidationError("تراکنش یافت نشد.")
 
-        # ===== ثابت ماندن تراکنش تاییده شده/رد شده ===== #
         if trx.status != 'pending':
             raise ValidationError("این تراکنش تعیین تکلیف شده و قابل ویرایش نیست.")
 
-        # ===== آپدیت فیلدها ===== #
         if 'amount' in data: trx.amount = data['amount']
         if 'method' in data: trx.method = data['method']
         if 'tracking_code' in data: trx.tracking_code = data['tracking_code']
@@ -216,19 +214,119 @@ class FinancialDomainService:
             raise ValidationError("تراکنش تایید شده است و سند حسابداری خورده. قابل حذف نیست.")
 
         trx.delete()
-    
+
+    # ========================================== #
+    # ============ QUOTATION MANAGEMENT ======== #
+    # ========================================== #
+
+    @transaction.atomic
+    def create_quotation(self, user: User, data: dict, items_data: List[dict]) -> Quotation:
+        """ ایجاد استعلام قیمت جدید """
+        # ===== محاسبه مبالغ ===== #
+        total_amount = sum(Decimal(str(item['unit_price'])) * int(item['quantity']) for item in items_data)
+        tax_amount = total_amount * Decimal('0.09')
+        discount_amount = Decimal(str(data.get('discount_amount', 0)))
+        final_amount = total_amount + tax_amount - discount_amount
+
+        # ===== ایجاد هدر ===== #
+        quotation = self.quotation_repo.create({
+            "user": user,
+            "title": data['title'],
+            "quotation_number": f"QUO-{timezone.now().strftime('%Y%m%d')}-{user.id}", # لاجیک ساده شماره‌گذاری
+            "valid_until": data['valid_until'],
+            "status": 'draft',
+            "total_amount": total_amount,
+            "tax_amount": tax_amount,
+            "discount_amount": discount_amount,
+            "final_amount": final_amount,
+            "description": data.get('description', '')
+        })
+
+        # ===== ایجاد اقلام ===== #
+        items = [
+            QuotationItem(
+                quotation=quotation,
+                product_name=item['product_name'],
+                description=item.get('description', ''),
+                quantity=item['quantity'],
+                unit_price=item['unit_price']
+            ) for item in items_data
+        ]
+        self.quotation_item_repo.bulk_create_items(items)
+        
+        return quotation
+
+    @transaction.atomic
+    def update_quotation_status(self, quotation_id: int, status: str, user: User) -> Quotation:
+        """ تغییر وضعیت استعلام (تایید مشتری، رد شدن، ارسال شده) """
+        quotation = self.quotation_repo.get_by_id(quotation_id)
+        if not quotation: raise ValidationError("استعلام یافت نشد.")
+        
+        if quotation.status == 'converted':
+            raise ValidationError("این استعلام قبلاً به سفارش تبدیل شده است.")
+            
+        quotation.status = status
+        quotation.save()
+        return quotation
+
+    @transaction.atomic
+    def convert_quotation_to_order(self, quotation_id: int, user: User, address_id: int) -> Order:
+        """
+        تبدیل استعلام تایید شده به سفارش واقعی و صدور فاکتور.
+        نکته: چون QuotationItem محصول واقعی ندارد (فقط تکست است)،
+        در اینجا یک سفارش "اختصاصی" (Type 2) ایجاد می‌کنیم.
+        """
+        quotation = self.quotation_repo.get_quotation_detail(quotation_id)
+        if not quotation: raise ValidationError("استعلام یافت نشد.")
+        
+        if quotation.status != 'accepted':
+            raise ValidationError("فقط استعلام‌های 'تایید شده توسط مشتری' قابل تبدیل هستند.")
+            
+        if quotation.converted_order:
+            raise ValidationError("این استعلام قبلاً تبدیل شده است.")
+
+        # ===== 1. ایجاد سفارش ===== #
+        address = Address.objects.get(id=address_id)
+
+        initial_status, _ = OrderStatus.objects.get_or_create(internal_code='PENDING', defaults={'name': 'در انتظار بررسی'})
+
+        order = self.order_repo.create({
+            "user": quotation.user,
+            "order_code": f"ORD-{quotation.quotation_number.split('-')[1]}",
+            "type": "2",
+            "current_status": initial_status,
+            "address": address,
+            "base_products_price": quotation.total_amount,
+            "total_price": quotation.final_amount,
+            "description": f"تبدیل شده از استعلام {quotation.quotation_number}. \n {quotation.description}"
+        })
+
+        # ===== 2. لینک کردن ===== #
+        quotation.converted_order = order
+        quotation.status = 'converted'
+        quotation.save()
+
+        # ===== 3. صدور فاکتور ===== #
+        invoice = self.issue_invoice_from_order(order)
+        
+        invoice.discount_amount = quotation.discount_amount
+        invoice.final_amount = quotation.final_amount
+        invoice.save()
+
+        return order
+
+    # ============ INTERNAL HELPERS ============ #
     def _apply_payment_to_invoice(self, invoice: Invoice, amount: Decimal):
-        """ افزودن مبلغ به پرداختی‌های فاکتور و چک کردن وضعیت تسویه """
+        """ افزایش مبلغ پرداختی و بررسی وضعیت تسویه """
         invoice.paid_amount += amount
         invoice.save()
         self._update_invoice_payment_status(invoice)
 
     def _update_invoice_payment_status(self, invoice: Invoice):
-        """ ماشین وضعیت هوشمند پرداخت """
+        """ ماشین وضعیت خودکار پرداخت """
         remaining = invoice.remaining_amount
         
         new_status_code = None
-        
         if remaining <= 0:
             new_status_code = 'PAID_FULL'
         elif invoice.paid_amount > 0:
@@ -236,32 +334,16 @@ class FinancialDomainService:
         else:
             return
 
-        new_status = self.status_repo.get_by_code(new_status_code)
-        
-        if new_status and invoice.status != new_status:
-            self._change_invoice_status_with_log(
-                invoice, new_status, user=None, description="تغییر اتوماتیک بر اساس تایید تراکنش"
-            )
-    
-    def _change_invoice_status_with_log(self, invoice, new_status, user=None, description=""):
-        """ تغییر وضعیت اتمیک همراه با لاگ """
-        old_status = invoice.status
-        invoice.status = new_status
-        invoice.save()
-        
-        InvoiceStateLog.objects.create(
-            invoice=invoice,
-            from_status=old_status,
-            to_status=new_status,
-            user=user,
-            description=description
-        )
-            
+        if invoice.status.internal_code != new_status_code:
+            new_status = self.status_repo.get_by_code(new_status_code)
+            if new_status:
+                self._log_status_change(
+                    invoice, new_status, user=None, 
+                    description="تغییر اتوماتیک وضعیت بر اساس تایید تراکنش"
+                )
+
     def _log_status_change(self, invoice, new_status, user=None, description=""):
-        """ 
-        تغییر وضعیت اتمیک همراه با لاگ.
-        نام قبلی _change_invoice_status_with_log بود که باعث خطا می‌شد.
-        """
+        """ لاگ کردن تغییر وضعیت فاکتور """
         old_status = invoice.status
         invoice.status = new_status
         invoice.save()

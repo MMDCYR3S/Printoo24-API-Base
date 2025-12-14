@@ -6,86 +6,94 @@ from apps.permissions import AppPermissionChecker
 
 class OrderCostAppService:
     """
-    سرویس اپلیکیشن برای مدیریت گزارشات هزینه.
-    این سرویس توسط واحدهای مختلف (چاپ، انبار، طراحی) استفاده می‌شود.
+    سرویس اپلیکیشن برای مدیریت چرخه مالی سفارشات.
+    وظایف:
+    1. دریافت گزارش هزینه از واحدها (Submit)
+    2. مدیریت تایید/رد گزارشات توسط مالی (Approve/Reject)
+    3. بستن حساب سفارش (Finalize)
     """
     def __init__(self):
         self.order_repo = OrderRepository()
         self.domain_service = OrderCostDomainService()
-
-    def create_report(self, requester: User, order_id: int, validated_data: dict, files_list=None):
+        
+    # ========== SUBMIT REPORT ========== #
+    def submit_department_report(self, requester: User, order_id: int, validated_data: dict, files_list=None):
         """
-        ایجاد گزارش هزینه جدید با بررسی دسترسی نقش کاربر به مرحله جاری سفارش.
+        ارسال گزارش هزینه توسط پرسنل (انبار، چاپ، طراحی).
+        جایگزین متد قدیمی add_cost_items.
         """
-        # ===== بررسی مجوز دسترسی ===== #
+        # ===== بررسی مجوز کلی ===== #
         AppPermissionChecker.check_has_permission(requester, 'add_ordercostreport')
 
-        # ===== بررسی وجود سفارش ===== #
+        # ===== دریافت سفارش ===== #
         order = self.order_repo.get_by_id(order_id)
         if not order:
-            raise ValidationError("سفارش یافت نشد.")
+            raise ValidationError("سفارش مورد نظر یافت نشد.")
 
-        # ===== بررسی دسترسی کاربر ===== #
+        # ===== بررسی دسترسی فاز (Scope Validation) ===== #
         if not requester.is_superuser:
             self._validate_access_scope(requester, order)
 
-        # ===== ایجاد گزارش ===== #
-        report = self.domain_service.create_cost_report(
-            order=order,
+        # ===== فراخوانی دومین سرویس ===== #
+        report = self.domain_service.submit_cost_report(
+            order_id=order.id,
             user=requester,
+            department=validated_data['department'],
+            cost_type=validated_data['cost_type'],
             title=validated_data['title'],
-            description=validated_data.get('description'),
             items_data=validated_data['items'],
-            attachments_data=files_list
+            attachments_data=files_list,
+            description=validated_data.get('description', "")
         )
         
         return report
 
-    def _validate_access_scope(self, user: User, order: Order):
-        """
-        بررسی می‌کند که آیا کاربر اجازه دارد در 'وضعیت فعلی سفارش' هزینه ثبت کند؟
-        مثال:
-        - اگر سفارش در مرحله 'Design' است، کاربر 'چاپ' نباید بتواند هزینه ثبت کند.
-        - اگر کاربر 'Financial' است، معمولاً روی همه مراحل دسترسی دارد (بسته به تنظیمات Role).
-        """
-        # ===== دریافت نقش کاربر ===== #
-        user_role_rel = user.user_role.select_related('role').first()
-        if not user_role_rel:
-            raise PermissionDenied("شما هیچ نقش فعالی در سیستم ندارید.")
-        
-        role = user_role_rel.role
-        
-        if getattr(role, 'is_super_role', False):
-            return
-
-        # ===== دریافت کد گروه وضعیت ===== #
-        current_status = order.current_status
-        if not current_status or not current_status.group:
-            raise PermissionDenied("وضعیت سفارش نامعتبر است.")
-
-        current_group_code = current_status.group.code
-        if current_group_code not in role.allowed_status_groups:
-            raise PermissionDenied(
-                f"شما اجازه ثبت هزینه برای سفارشی که در واحد '{current_status.group.name}' است را ندارید."
-            )
-
-    # ========== بخش نوع هزینه ها ========== #
+    # ========== 2. MASTER DATA (Config) ========== #
     def list_cost_types(self, user: User):
-        """ لیست همه انواع هزینه """
-        AppPermissionChecker.check_has_permission(user, 'view_ordercosttype')
-        return self.domain_service.type_repo.get_all() 
+        """ لیست کردن انواع هزینه‌ها برای نمایش در دراپ‌داون """
+        AppPermissionChecker.check_has_permission(user, 'view_ordercostcategory')
+        return self.domain_service.get_all_categories()
 
     def create_cost_type(self, user: User, data: dict):
-        """ تعریف نوع هزینه جدید """
-        AppPermissionChecker.check_has_permission(user, 'add_ordercosttype')
-        return self.domain_service.create_cost_type(user, data)
+        """ تعریف نوع هزینه جدید (مثلا: چسب صحافی) """
+        AppPermissionChecker.check_has_permission(user, 'add_ordercostcategory')
+        return self.domain_service.create_category(data)
 
-    def update_cost_type(self, user: User, type_id: int, data: dict):
-        """ ویرایش نوع هزینه """
-        AppPermissionChecker.check_has_permission(user, 'change_ordercosttype')
-        return self.domain_service.update_cost_type(type_id, user, data)
+    def update_cost_type(self, user: User, category_id: int, data: dict):
+        """ ویرایش عنوان یا کد نوع هزینه """
+        AppPermissionChecker.check_has_permission(user, 'change_ordercostcategory')
+        return self.domain_service.update_category(category_id, data)
 
-    def delete_cost_type(self, user: User, type_id: int):
+    def delete_cost_type(self, user: User, category_id: int):
         """ حذف نوع هزینه """
-        AppPermissionChecker.check_has_permission(user, 'delete_ordercosttype')
-        self.domain_service.delete_cost_type(type_id, user)
+        AppPermissionChecker.check_has_permission(user, 'delete_ordercostcategory')
+        self.domain_service.delete_category(user, category_id)
+
+    # ========== INTERNAL HELPER METHODS ========== #
+    def _validate_access_scope(self, user: User, order: Order):
+        """
+        بررسی دقیق دسترسی کاربر به ثبت هزینه در وضعیت فعلی سفارش.
+        منطق: کاربر انبار فقط زمانی می‌تواند هزینه ثبت کند که سفارش در وضعیت‌های مربوط به انبار باشد.
+        """
+        # ===== دریافت نقش کاربر ===== #
+        if not hasattr(user, 'user_role'):
+             raise PermissionDenied("کاربر فاقد نقش سیستمی است.")
+             
+        user_role = user.user_role
+        if getattr(user_role.role, 'is_super_role', False):
+             return
+
+        # ===== بررسی وضعیت فعلی سفارش ===== #
+        current_status = order.current_status
+        if not current_status or not current_status.group:
+            raise PermissionDenied("وضعیت فعلی سفارش نامعتبر است.")
+
+        current_group_code = current_status.group.code
+        
+        # ===== بررسی دسترسی کاربر به گروه وضعیت ===== #
+        allowed_codes = list(user_role.role.allowed_groups.values_list('code', flat=True))
+        
+        if current_group_code not in allowed_codes:
+            raise PermissionDenied(
+                f"نقش شما ({user_role.role.title}) مجاز به ثبت هزینه در مرحله '{current_status.group.name}' نیست."
+            )

@@ -1,153 +1,112 @@
 from rest_framework.exceptions import ValidationError
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from apps.permissions import AppPermissionChecker
-from core.models import User, OrderCostSheet
+from core.models import User, OrderCostReport, OrderCostSheet
 from core.domain.commerce.order import (
-    OrderCostDomainService, OrderCostSheetRepository,
-    OrderCostItemRepository, OrderRepository
+    OrderCostDomainService, 
+    OrderCostReportRepository, 
+    OrderCostSheetRepository,
+    OrderRepository
 )
-from core.domain.financial import FinancialDomainService
 
-
-# ========== Financial App Service ========== #
-class FinancialAppService:
+# ============ Financial Order App Service ============ #
+class FinancialOrderAppService:
     """
-    سرویس اپلیکیشن برای مدیریت کامل فرآیندهای مالی (Cost Reports, Catalog, Approval).
-    مسئولیت: چک دسترسی و هماهنگی بین ریپازیتوری‌ها و سرویس‌های دامنه مالی.
+    سرویس اپلیکیشن مدیریت هزینه‌های سفارش (Cost Accounting).
+    
+    وظایف اصلی:
+    1. مدیریت گزارش‌های واصله از واحدها (مشاهده، تایید، رد)
+    2. نظارت بر بهای تمام شده (مشاهده شیت و سود/زیان)
+    3. عملیات پایان دوره سفارش (قفل کردن حساب‌ها)
     """
+    
     def __init__(self):
-        # ===== تزریق وابستگی‌های دامنه ===== #
-        self._cost_domain = OrderCostDomainService() 
-        self._report_repo = OrderCostSheetRepository()
-        self._item_repo = OrderCostItemRepository()
+        self._domain_service = OrderCostDomainService()
+        self._report_repo = OrderCostReportRepository()
+        self._sheet_repo = OrderCostSheetRepository()
         self._order_repo = OrderRepository()
-        self._domain_service = FinancialDomainService()
-        
-    def get_report_details(self, user: User, report_id: int) -> OrderCostSheet:
-        """ مشاهده جزئیات یک گزارش هزینه """
+    
+    # ============ REPORT MANAGEMENT ============ #
+    def get_order_reports(self, user: User, order_id: int) -> List[OrderCostReport]:
+        """ 
+        مشاهده لیست تمام گزارش‌های هزینه یک سفارش خاص.
+        """
+        # ===== بررسی مجوز مشاهده ===== #
         AppPermissionChecker.check_has_permission(user, 'view_ordercostreport')
         
-        report = self._report_repo.model.objects.prefetch_related('items').filter(id=report_id).first()
+        sheet = self._sheet_repo.get_by_order_id(order_id)
+        if not sheet:
+            return []
+            
+        return self._report_repo.get_reports_by_sheet(sheet.id)
+
+    def get_report_detail(self, user: User, report_id: int) -> OrderCostReport:
+        """ 
+        مشاهده جزئیات یک گزارش هزینه خاص به همراه اقلام و پیوست‌ها.
+        """
+        # ===== بررسی مجوز مشاهده ===== #
+        AppPermissionChecker.check_has_permission(user, 'view_ordercostreport')
+        
+        report = self._report_repo.get_report_detail(report_id)
         if not report:
-            raise ValidationError("گزارش یافت نشد.")
+            raise ValidationError("گزارش هزینه مورد نظر یافت نشد.")
         return report
-    
-    def create_manual_cost(self, user: User, order_id: int, data: Dict[str, Any]):
-        """ ایجاد دستی هزینه توسط مدیر مالی """
-        AppPermissionChecker.check_has_permission(user, 'add_ordercostreport')
-        order = self._order_repo.get_by_id(order_id)
+
+    def approve_report(self, user: User, report_id: int):
+        """ 
+        تایید نهایی گزارش هزینه توسط مدیر مالی.
+        نکته: این عملیات باعث محاسبه مجدد شیت مادر می‌شود.
+        """
+        # ===== بررسی مجوز تغییر (تایید) ===== #
+        AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
         
-        if not order:
-            raise ValidationError("سفارش یافت نشد.")
+        return self._domain_service.approve_report(report_id, user)
+
+    def reject_report(self, user: User, report_id: int, reason: str):
+        """ 
+        رد کردن گزارش هزینه (عودت به واحد مربوطه جهت اصلاح).
+        """
+        # ===== بررسی مجوز تغییر (رد) ===== #
+        AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
         
-        return self._cost_domain.create_cost_report(
-            order=order,
-            user=user,
-            title=data['title'],
-            description=data.get('description', ''),
-            attachment=data.get('attachment', ''),
-            items_data=data['items']
-        )
-    
-    def update_cost_report(self, user: User, report_id: int, data: Dict[str, Any]):
-        """ ویرایش هدر گزارش """
-        AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
-        return self._cost_domain.update_cost_report_header(report_id, user, data)
-
-    def delete_cost_report(self, user: User, report_id: int):
-        """ حذف کامل گزارش """
-        AppPermissionChecker.check_has_permission(user, 'delete_ordercostreport')
-        self._cost_domain.delete_cost_report(report_id, user)
-
-    def toggle_approval(self, user: User, report_id: int, approve: bool):
-        """ تایید یا لغو تایید مالی """
-        AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
-        return self._cost_domain.approve_cost_report(report_id, user, approve)
-    
-    # ========== مدیریت اقلام هزینه ========== #
-    def add_item_to_report(self, user: User, report_id: int, data: Dict[str, Any]):
-        """ اضافه کردن یک آیتم جدید به گزارش موجود """
-        AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
-
-        report = self._report_repo.get_by_id(report_id)
-        if report.is_approved_by_finance:
-            raise ValidationError("گزارش تایید شده است.")
+        if not reason:
+            raise ValidationError("ذکر دلیل رد برای گزارش الزامی است.")
             
-        return self._cost_domain.item_repo.create({
-            "report": report,
-            "catalog_item_id": data.get('catalog_id'),
-            "custom_title": data.get('custom_title'),
-            "amount": data['amount'],
-            "description": data.get('description')
-        })
+        return self._domain_service.reject_report(report_id, user, reason)
 
-    def update_item(self, user: User, item_id: int, data: Dict[str, Any]):
-        """ ویرایش یک آیتم """
-        AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
-        return self._cost_domain.update_cost_item(item_id, user, data)
-
-    def delete_item(self, user: User, item_id: int):
-        """ حذف یک آیتم """
-        AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
-        self._cost_domain.delete_cost_item(item_id, user)
+    # ============ SHEET MANAGEMENT ============ #
+    def get_order_cost_sheet(self, user: User, order_id: int) -> OrderCostSheet:
+        """ 
+        مشاهده سند کل بهای تمام شده سفارش (Ledger).
+        شامل سود، زیان، حاشیه سود و وضعیت قفل بودن.
+        """
+        # ===== بررسی مجوز مشاهده ===== #
+        AppPermissionChecker.check_has_permission(user, 'view_ordercostsheet')
         
-    # ========== مدیریت فاکتورها و تراکنش‌ها ========== #
-    def create_invoice_manually(self, user: User, order_id: int):
-        """ ایجاد دستی فاکتور برای یک سفارش فاقد فاکتور """
-        AppPermissionChecker.check_has_permission(user, 'financial.add_invoice')
-        
-        order = self._order_repo.get_by_id(order_id)
-        if not order:
-            raise ValidationError("سفارش یافت نشد.")
+        sheet = self._sheet_repo.get_by_order_id(order_id)
+        if not sheet:
+            raise ValidationError("سند مالی برای این سفارش هنوز ایجاد نشده است.")
             
-        return self._domain_service.force_create_invoice(order, user)
-    
-    def get_invoice_details(self, user: User, invoice_id: int):
-        """ مشاهده جزئیات فاکتور """
-        AppPermissionChecker.check_has_permission(user, 'financial.view_invoice')
-        return self._domain_service.invoice_repo.get_invoice_detail(invoice_id)
+        return sheet
 
-    def recalculate_invoice_manually(self, user: User, invoice_id: int):
-        """ دکمه 'محاسبه مجدد' برای مدیر مالی """
-        AppPermissionChecker.check_has_permission(user, 'financial.change_invoice')
+    def get_financial_summary(self, user: User, order_id: int) -> Dict[str, Any]:
+        """
+        دریافت خلاصه مدیریتی (Dashboard View).
+        مناسب برای نمایش اعداد کلیدی بدون بارگذاری کل آبجکت‌ها.
+        """
+        # ===== بررسی مجوز مشاهده ===== #
+        AppPermissionChecker.check_has_permission(user, 'view_ordercostsheet')
         
-        invoice = self._domain_service.invoice_repo.get_by_id(invoice_id)
-        if not invoice: raise ValidationError("فاکتور یافت نشد")
-            
-        return self._domain_service.recalculate_invoice(invoice)
+        return self._domain_service.get_order_financial_summary(order_id)
 
-    def finalize_invoice(self, user: User, invoice_id: int):
-        """ تبدیل پیش فاکتور به فاکتور نهایی """
-        AppPermissionChecker.check_has_permission(user, 'financial.change_invoice')
-        return self._domain_service.confirm_invoice_final(invoice_id, user)
-
-    def update_invoice(self, user: User, invoice_id: int, data: dict):
-        """ ویرایش متادیتای فاکتور """
-        AppPermissionChecker.check_has_permission(user, 'financial.change_invoice')
-        return self._domain_service.update_invoice_metadata(invoice_id, data, user)
-
-    def delete_invoice(self, user: User, invoice_id: int):
-        """ حذف فاکتور """
-        AppPermissionChecker.check_has_permission(user, 'financial.delete_invoice')
-        self._domain_service.delete_invoice(invoice_id, user)
-    
-    # ========== مدیریت تراکنش‌ها ========== #
-    def register_payment(self, user: User, invoice_id: int, data: dict):
-        """ ثبت فیش دستی توسط ادمین مالی """
-        AppPermissionChecker.check_has_permission(user, 'financial.add_transaction')
-        return self._domain_service.register_manual_transaction(invoice_id, user, data)
-
-    def verify_payment(self, user: User, transaction_id: int, approved: bool, reason: str = None):
-        """ تایید یا رد تراکنش """
-        AppPermissionChecker.check_has_permission(user, 'financial.change_transaction')
-        return self._domain_service.verify_transaction(transaction_id, user, approved, reason)
-    
-    def update_transaction(self, user: User, transaction_id: int, data: dict):
-        AppPermissionChecker.check_has_permission(user, 'financial.change_transaction')
-        return self._domain_service.update_transaction_details(transaction_id, data, user)
-
-    def delete_transaction(self, user: User, transaction_id: int):
-        AppPermissionChecker.check_has_permission(user, 'financial.delete_transaction')
-        self._domain_service.delete_transaction(transaction_id, user)
-    
+    def lock_order_costs(self, user: User, order_id: int):
+        """ 
+        بستن نهایی حساب‌های سفارش (Locking).
+        پس از این کار، هیچ هزینه‌ای قابل ثبت یا تغییر نیست.
+        معمولاً پس از تحویل سفارش و تسویه نهایی انجام می‌شود.
+        """
+        # ===== بررسی مجوز قفل کردن ===== #
+        AppPermissionChecker.check_has_permission(user, 'change_ordercostsheet')
+        
+        return self._domain_service.lock_cost_sheet(order_id, user)

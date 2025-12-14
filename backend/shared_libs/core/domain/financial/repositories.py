@@ -1,7 +1,7 @@
 from typing import List, Optional
 from django.db.models import QuerySet, Prefetch
 from core.utils.base_repository import BaseRepository
-from core.models import Invoice, Transaction, InvoiceStatus, Order
+from core.models import Invoice, Transaction, InvoiceStatus, Order, Quotation, QuotationItem
 
 # ===== Invoice Repository ===== #
 class InvoiceRepository(BaseRepository[Invoice]):
@@ -45,4 +45,19 @@ class InvoiceStatusRepository(BaseRepository[InvoiceStatus]):
         
     def get_by_code(self, code: str) -> Optional[InvoiceStatus]:
         return self.model.objects.filter(internal_code=code).first()
+
+# ===== Quotation Repository (NEW) ===== #
+class QuotationRepository(BaseRepository[Quotation]):
+    """ مدیریت استعلام قیمت / پیش‌فاکتور رسمی """
+    def __init__(self):
+        super().__init__(Quotation)
+
+    def get_quotation_detail(self, quotation_id: int) -> Optional[Quotation]:
+        return self.model.objects.select_related('user', 'converted_order').prefetch_related('items').filter(id=quotation_id).first()
+
+class QuotationItemRepository(BaseRepository[QuotationItem]):
+    def __init__(self):
+        super().__init__(QuotationItem)
         
+    def bulk_create_items(self, items: List[QuotationItem]):
+        return self.model.objects.bulk_create(items)

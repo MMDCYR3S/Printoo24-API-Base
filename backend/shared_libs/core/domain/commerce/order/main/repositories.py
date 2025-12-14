@@ -3,7 +3,8 @@ from django.db.models import Prefetch, QuerySet
 from core.utils.base_repository import BaseRepository
 from core.models import (
     Order, OrderItem, OrderItemFile, OrderStatus, Address, User,
-    OrderStateLog, OrderCostItem, OrderShipment, OrderCostSheet, OrderPrintReport, OrderPrintItem
+    OrderStateLog, OrderCostItem, OrderShipment, OrderCostSheet, 
+    OrderPrintReport, OrderPrintItem, OrderCostReport
 )
 
 class OrderRepository(BaseRepository[Order]):
@@ -24,7 +25,7 @@ class OrderRepository(BaseRepository[Order]):
             .order_by('-created_at')
     
     def create_order(self, user: User, order_status: OrderStatus, address: Address, 
-                     total_price: float, order_type: str, order_code: str, base_price: float): 
+                     total_price: float, order_type: str, order_code: str, base_price: float) -> Order: 
         return self.create({
             "user": user,
             "current_status": order_status,
@@ -37,28 +38,28 @@ class OrderRepository(BaseRepository[Order]):
     
     def get_order_with_items(self, user_id: int, order_id: int) -> Optional[Order]:
         """
-        دریافت جزئیات کامل سفارش با ساختار جدید (OrderItemFile).
+        دریافت جزئیات کامل سفارش برای کاربر نهایی.
         """
-        # ===== دریافت فایل های سفارش ===== #
         files_prefetch = Prefetch(
             'files',
-            queryset=OrderItemFile.objects.select_related('requirement__spec')
+            queryset=OrderItemFile.objects.filter(is_latest=True).select_related('requirement__spec')
         )
-        # ===== ایجاد ریلیشن های جدید ===== #
+        
         items_prefetch = Prefetch(
             'order_item_order',
             queryset=OrderItem.objects.select_related('product').prefetch_related(files_prefetch)
         )
+        
         return self.model.objects.filter(id=order_id, user_id=user_id)\
-            .select_related('order_status', 'address')\
+            .select_related('current_status', 'address')\
             .prefetch_related(items_prefetch)\
             .first()
     
     # ===== سمت ادمین - بخش مدیریت داخلی ===== #
     def get_full_order_detail_for_admin(self, order_id: int) -> Optional[Order]:
         """
-        دریافت سوپر-دیتا برای پنل مدیریت (شامل لاگ‌ها، گزارشات مالی، فایل‌ها و...)
-        اصلاح شده بر اساس ساختار: Order -> CostReport -> CostItem
+        دریافت سوپر-دیتا برای پنل مدیریت.
+        ساختار جدید مالی: Order -> CostSheet -> CostReports -> CostItems
         """
         return self.model.objects.select_related(
             'user', 
@@ -67,7 +68,7 @@ class OrderRepository(BaseRepository[Order]):
             'address__province', 
             'related_invoice'
         ).prefetch_related(
-            # ===== آیتم های سفارش و فایل های طراحی ===== #
+            # 1. آیتم‌ها و فایل‌ها
             Prefetch(
                 'order_item_order',
                 queryset=OrderItem.objects.select_related('product').prefetch_related(
@@ -78,34 +79,42 @@ class OrderRepository(BaseRepository[Order]):
                 )
             ),
             
-            # ===== تاریخچه وضعیت سفارش ===== #
+            # 2. لاگ وضعیت
             Prefetch(
                 'state_logs', 
                 queryset=OrderStateLog.objects.select_related('user', 'from_status', 'to_status').order_by('-timestamp')
             ),
             
-            # ===== گزارشات و هزینه‌های مالی ===== #
+            # 3. ساختار مالی جدید (Sheet -> Reports -> Items)
             Prefetch(
                 'cost_sheet',
-                queryset=OrderCostSheet.objects.select_related('created_by').prefetch_related(
+                queryset=OrderCostSheet.objects.prefetch_related(
                     Prefetch(
-                        'items',
-                        queryset=OrderCostItem.objects.select_related('catalog_item__cost_type')
+                        'reports',
+                        queryset=OrderCostReport.objects.select_related('submitter').prefetch_related(
+                            Prefetch(
+                                'items',
+                                queryset=OrderCostItem.objects.select_related('catalog_item')
+                            ),
+                            'attachments'
+                        ).order_by('-created_at')
                     )
-                ).order_by('-created_at')
+                )
             ),
-            # ===== بخش هزینه های مواد اولیه چاپ ===== #
+
+            # 4. گزارشات چاپ
             Prefetch(
                 'print_reports',
-                    queryset=OrderPrintReport.objects.prefetch_related(
+                    queryset=OrderPrintReport.objects.select_related('created_by').prefetch_related(
                         Prefetch(
                             'items',
-                            queryset=OrderPrintItem.objects.select_related('catalog_item__cost_type')
-                        )
+                            queryset=OrderPrintItem.objects.select_related('material_type')
+                        ),
+                        'attachments'
                     )
             ),
             
-            # ===== 4. مرسوله های مربوط به سفارش ===== #
+            # 5. مرسولات
             Prefetch(
                 'shipments', 
                 queryset=OrderShipment.objects.select_related('delivery_method', 'destination_address').prefetch_related('packages')
@@ -113,20 +122,15 @@ class OrderRepository(BaseRepository[Order]):
         ).filter(id=order_id).first()
         
     def get_all_orders_summary(self) -> QuerySet[Order]:
-        """ لیست کل سفارشات برای پنل ادمین (سبک) """
         return self.model.objects.select_related(
             'user', 'current_status'
         ).order_by('-created_at')
 
-# ======= Order Item Repository ======= #
+# ======= Order Item Repositories ======= #
 class OrderItemRepository(BaseRepository[OrderItem]):
     def __init__(self):
         super().__init__(OrderItem)
 
-# ======= Order Item File Repository (NEW) ======= #
 class OrderItemFileRepository(BaseRepository[OrderItemFile]):
-    """
-    جایگزین ریپازیتوری‌های قدیمی فایل طراحی.
-    """
     def __init__(self):
         super().__init__(OrderItemFile)
