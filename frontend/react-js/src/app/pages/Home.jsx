@@ -1,10 +1,10 @@
 // src/app/pages/Home.jsx
 import { useEffect } from "react";
 import CategoryHero from "../features/home/CategoryHero";
-import HomeSlider from "../features/home/HomeSlider"; // <--- ایمپورت جدید
+import HomeSlider from "../features/home/HomeSlider"; 
 import { ShieldCheck, Truck, Headset, FileCheck,Plus, Minus, HelpCircle, Phone, MapPin, Mail, Send, Instagram } from "lucide-react";
 import InfoModal from "../components/common/InfoModal";
-import ContactSection from "../features/home/ContactSection"; // <--- 1. این خط را اضافه کنید
+import ContactSection from "../features/home/ContactSection"; 
 
 
 
