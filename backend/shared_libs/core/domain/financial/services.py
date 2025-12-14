@@ -1,3 +1,5 @@
+import uuid
+
 from decimal import Decimal
 from typing import List, Dict, Any
 from django.db import transaction
@@ -5,12 +7,12 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from core.models import (
     Invoice, Transaction, User, InvoiceStatus, InvoiceStateLog, Order, 
-    Quotation, QuotationItem, OrderStatus, Address
+    Quotation, OrderStatus, Address
 )
 from core.domain.commerce.order import OrderRepository # برای تبدیل استعلام به سفارش
 from .repositories import (
     InvoiceRepository, TransactionRepository, InvoiceStatusRepository, 
-    QuotationRepository, QuotationItemRepository
+    QuotationRepository
 )
 
 # ========== FINANCIAL DOMAIN SERVICE ========== #
@@ -26,7 +28,6 @@ class FinancialDomainService:
         self.transaction_repo = TransactionRepository()
         self.status_repo = InvoiceStatusRepository()
         self.quotation_repo = QuotationRepository()
-        self.quotation_item_repo = QuotationItemRepository()
         self.order_repo = OrderRepository() # جهت ایجاد سفارش از روی استعلام
     
     # ========================================== #
@@ -83,7 +84,7 @@ class FinancialDomainService:
         invoice = self.invoice_repo.get_by_id(invoice_id)
         if not invoice: raise ValidationError("فاکتور یافت نشد.")
         
-        if invoice.status.internal_code == 'FINALIZE':
+        if invoice.status.allows_editing == False:
              raise ValidationError("این فاکتور قبلاً نهایی شده است.")
 
         invoice.convert_to_final()
@@ -96,6 +97,8 @@ class FinancialDomainService:
         محاسبه مجدد مبالغ فاکتور.
         """
         invoice = self.invoice_repo.get_by_id(invoice_id)
+        if invoice.status.allows_editing == False:
+            raise ValidationError("فاکتور تایید شده قابل ویرایش نیست.")
         if not invoice: raise ValidationError("فاکتور یافت نشد.")
 
         invoice.tax_amount = (invoice.items_amount + invoice.services_amount) * Decimal('0.09')
@@ -111,7 +114,11 @@ class FinancialDomainService:
         ویرایش اطلاعات غیر مالی فاکتور (توضیحات، تاریخ سررسید).
         """
         invoice = self.invoice_repo.get_by_id(invoice_id)
-        if not invoice: raise ValidationError("فاکتور یافت نشد.")
+        if invoice.status.allows_editing == False:
+            raise ValidationError("فاکتور تایید شده قابل ویرایش نیست.")
+
+        if not invoice:
+            raise ValidationError("فاکتور یافت نشد.")
         
         if 'due_date' in data: invoice.due_date = data['due_date']
         if 'description' in data: invoice.description = data['description']
@@ -126,7 +133,10 @@ class FinancialDomainService:
         قانون: فاکتوری که تراکنش تایید شده دارد یا تسویه شده است، نباید حذف شود.
         """
         invoice = self.invoice_repo.get_invoice_detail(invoice_id)
-        if not invoice: raise ValidationError("فاکتور یافت نشد.")
+        if invoice.status.allows_editing == False:
+            raise ValidationError("فاکتور تسویه شده قابل حذف نیست.")
+        if not invoice:
+            raise ValidationError("فاکتور یافت نشد.")
         
         # ===== چک کردن تراکنش‌های تایید شده ===== #
         if invoice.transactions.filter(status='confirmed').exists():
@@ -220,41 +230,75 @@ class FinancialDomainService:
     # ========================================== #
 
     @transaction.atomic
-    def create_quotation(self, user: User, data: dict, items_data: List[dict]) -> Quotation:
+    def create_quotation(self, customer: User, creator: User, data: dict) -> Quotation:
         """ ایجاد استعلام قیمت جدید """
-        # ===== محاسبه مبالغ ===== #
-        total_amount = sum(Decimal(str(item['unit_price'])) * int(item['quantity']) for item in items_data)
-        tax_amount = total_amount * Decimal('0.09')
-        discount_amount = Decimal(str(data.get('discount_amount', 0)))
-        final_amount = total_amount + tax_amount - discount_amount
-
+        
+        try:
+            total_amount_decimal = Decimal(str(data['total_amount'] or 0))
+            tax_amount_decimal = Decimal(str(data.get('tax_amount') or 0))
+            discount_amount_decimal = Decimal(str(data.get('discount_amount') or 0))
+            final_amount_decimal = Decimal(str(data.get('final_amount') or 0))
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"مقدار پولی ارسالی معتبر نیست و نمی‌تواند به دسیمال تبدیل شود: {e}")
+        
         # ===== ایجاد هدر ===== #
         quotation = self.quotation_repo.create({
-            "user": user,
+            "user": customer,
+            "created_by": creator,
             "title": data['title'],
-            "quotation_number": f"QUO-{timezone.now().strftime('%Y%m%d')}-{user.id}", # لاجیک ساده شماره‌گذاری
+            "quotation_number": f"QUO-{timezone.now().strftime('%Y%m%d')}-{customer.id}-{uuid.uuid4().hex[:4].upper()}",
             "valid_until": data['valid_until'],
             "status": 'draft',
-            "total_amount": total_amount,
-            "tax_amount": tax_amount,
-            "discount_amount": discount_amount,
-            "final_amount": final_amount,
+           "total_amount": total_amount_decimal,
+            "tax_amount": tax_amount_decimal,
+            "discount_amount": discount_amount_decimal,
+            "final_amount": final_amount_decimal,
             "description": data.get('description', '')
-        })
-
-        # ===== ایجاد اقلام ===== #
-        items = [
-            QuotationItem(
-                quotation=quotation,
-                product_name=item['product_name'],
-                description=item.get('description', ''),
-                quantity=item['quantity'],
-                unit_price=item['unit_price']
-            ) for item in items_data
-        ]
-        self.quotation_item_repo.bulk_create_items(items)
-        
+        }) 
         return quotation
+
+    @transaction.atomic
+    def update_quotation(self, quotation_id: int, data: dict) -> Quotation:
+        """ ویرایش پیش‌فاکتور (فقط در حالت پیش‌نویس) """
+        quotation = self.quotation_repo.get_by_id(quotation_id)
+        if not quotation:
+            raise ValidationError("پیش‌فاکتور یافت نشد.")
+            
+        if quotation.status != 'draft':
+            raise ValidationError("فقط پیش‌فاکتورهای 'پیش‌نویس' قابل ویرایش هستند.")
+
+        # ===== ویرایش پارامترهای پیش‌فاکتور =====
+        if 'title' in data: quotation.title = data['title']
+        if 'description' in data: quotation.description = data['description']
+        if 'valid_until' in data: quotation.valid_until = data['valid_until']
+        if 'total_amount' in data:
+            quotation.total_amount = Decimal(str(data['total_amount']))
+            quotation.final_amount = quotation.total_amount + quotation.tax_amount - quotation.discount_amount
+        
+        if 'tax_amount' in data:
+            quotation.tax_amount = Decimal(str(data['tax_amount']))
+            quotation.final_amount = quotation.total_amount + quotation.tax_amount - quotation.discount_amount
+            
+        if 'discount_amount' in data:
+            quotation.discount_amount = Decimal(str(data['discount_amount']))
+            quotation.final_amount = quotation.total_amount + quotation.tax_amount - quotation.discount_amount
+            
+        if 'final_amount' in data:
+            quotation.final_amount = Decimal(str(data['final_amount']))
+
+        quotation.save()
+        return quotation
+
+    @transaction.atomic
+    def delete_quotation(self, quotation_id: int):
+        """ حذف پیش‌فاکتور """
+        quotation = self.quotation_repo.get_by_id(quotation_id)
+        if not quotation:
+            raise ValidationError("پیش‌فاکتور یافت نشد.")
+        if quotation.status in ['accepted', 'converted']:
+            raise ValidationError("این پیش‌فاکتور تایید یا تبدیل شده است و قابل حذف نیست.")
+            
+        quotation.delete()
 
     @transaction.atomic
     def update_quotation_status(self, quotation_id: int, status: str, user: User) -> Quotation:
@@ -270,51 +314,59 @@ class FinancialDomainService:
         return quotation
 
     @transaction.atomic
-    def convert_quotation_to_order(self, quotation_id: int, user: User, address_id: int) -> Order:
+    def convert_quotation_to_invoice(self, quotation_id: int, user: User, order_id: int) -> Invoice:
         """
-        تبدیل استعلام تایید شده به سفارش واقعی و صدور فاکتور.
-        نکته: چون QuotationItem محصول واقعی ندارد (فقط تکست است)،
-        در اینجا یک سفارش "اختصاصی" (Type 2) ایجاد می‌کنیم.
+        تبدیل استعلام (پیش‌فاکتور) به فاکتور اصلی برای سفارش موجود.
         """
+        # ===== 1. دریافت و اعتبارسنجی استعلام ===== #
         quotation = self.quotation_repo.get_quotation_detail(quotation_id)
-        if not quotation: raise ValidationError("استعلام یافت نشد.")
+        if not quotation: 
+            raise ValidationError("استعلام یافت نشد.")
         
-        if quotation.status != 'accepted':
-            raise ValidationError("فقط استعلام‌های 'تایید شده توسط مشتری' قابل تبدیل هستند.")
-            
         if quotation.converted_order:
-            raise ValidationError("این استعلام قبلاً تبدیل شده است.")
+            raise ValidationError("این استعلام قبلاً به یک سفارش متصل شده است.")
 
-        # ===== 1. ایجاد سفارش ===== #
-        address = Address.objects.get(id=address_id)
+        if quotation.status != 'accepted':
+            raise ValidationError("اول باید استعلام را تایید کنیدیا توسط مشتری تایید شود.")
 
-        initial_status, _ = OrderStatus.objects.get_or_create(internal_code='PENDING', defaults={'name': 'در انتظار بررسی'})
+        # ===== 2. دریافت و اعتبارسنجی سفارش موجود ===== #
+        order = self.order_repo.get_by_id(order_id)
+        if not order:
+            raise ValidationError("سفارش مورد نظر یافت نشد.")
 
-        order = self.order_repo.create({
-            "user": quotation.user,
-            "order_code": f"ORD-{quotation.quotation_number.split('-')[1]}",
-            "type": "2",
-            "current_status": initial_status,
-            "address": address,
-            "base_products_price": quotation.total_amount,
-            "total_price": quotation.final_amount,
-            "description": f"تبدیل شده از استعلام {quotation.quotation_number}. \n {quotation.description}"
+        if hasattr(order, 'related_invoice'):
+            raise ValidationError(f"سفارش شماره {order.order_code} از قبل دارای فاکتور است.")
+
+        # ===== 3. صدور فاکتور با مبالغ پیش‌فاکتور ===== #
+        initial_status = self.status_repo.get_by_code('PENDING_PAYMENT')
+        if not initial_status:
+            initial_status, _ = InvoiceStatus.objects.get_or_create(internal_code='PENDING_PAYMENT', defaults={'name': 'در انتظار پرداخت'})
+
+        invoice = self.invoice_repo.create({
+            "order": order,
+            "invoice_number": f"INV-{order.order_code}",
+            
+            # ===== مشخص کردن مبالغ ===== #
+            "items_amount": quotation.total_amount,
+            "services_amount": 0,
+            "tax_amount": quotation.tax_amount,
+            "discount_amount": quotation.discount_amount,
+            "final_amount": quotation.final_amount,
+            "paid_amount": 0,
+            
+            "status": initial_status,
+            "description": f"صادر شده بر اساس پیش‌فاکتور شماره {quotation.quotation_number}\n{quotation.description}"
         })
 
-        # ===== 2. لینک کردن ===== #
+        # ===== 4. آپدیت وضعیت پیش‌فاکتور ===== #
         quotation.converted_order = order
         quotation.status = 'converted'
         quotation.save()
 
-        # ===== 3. صدور فاکتور ===== #
-        invoice = self.issue_invoice_from_order(order)
-        
-        invoice.discount_amount = quotation.discount_amount
-        invoice.final_amount = quotation.final_amount
-        invoice.save()
+        # ===== 5. لاگ ===== #
+        self._log_status_change(invoice, initial_status, user, "صدور فاکتور از روی پیش‌فاکتور")
 
-        return order
-
+        return invoice
     # ============ INTERNAL HELPERS ============ #
     def _apply_payment_to_invoice(self, invoice: Invoice, amount: Decimal):
         """ افزایش مبلغ پرداختی و بررسی وضعیت تسویه """

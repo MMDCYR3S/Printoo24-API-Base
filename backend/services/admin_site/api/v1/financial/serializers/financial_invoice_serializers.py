@@ -4,7 +4,7 @@ from core.models import Invoice, InvoiceStatus, InvoiceStateLog
 class InvoiceStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = InvoiceStatus
-        fields = ['name', 'internal_code', 'color', 'is_considered_paid']
+        fields = ['name', 'internal_code', 'is_considered_paid']
 
 class InvoiceLogSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.username', read_only=True)

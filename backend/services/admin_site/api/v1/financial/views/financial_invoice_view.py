@@ -42,7 +42,7 @@ class FinancialInvoiceViewSet(viewsets.GenericViewSet):
     
     @action(detail=True, methods=['post'], url_path='finalize')
     def finalize(self, request, pk=None):
-        """ تبدیل پیش‌فاکتور به فاکتور نهایی """
+        """ تبدیل فاکتور به فاکتور نهایی """
         invoice = self.service.finalize_invoice(request.user, pk)
         return Response(InvoiceDetailSerializer(invoice).data)
     

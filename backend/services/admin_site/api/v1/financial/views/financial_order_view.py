@@ -75,8 +75,7 @@ class FinancialReportActionViewSet(viewsets.GenericViewSet):
             self.service.approve_report(request.user, report_id=pk)
         else:
             self.service.reject_report(
-                request.user, 
-                report_id=pk, 
-                reason=serializer.validated_data.get('rejection_reason')
+                request.user,
+                report_id=pk
             )
         return Response(status=status.HTTP_200_OK)

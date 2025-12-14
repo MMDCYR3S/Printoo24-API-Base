@@ -18,21 +18,19 @@ class OrderCostItemSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = OrderCostItem
-        fields = ['id', 'custom_title', 'catalog_title', 'amount', 'quantity', 'description']
+        fields = ['id', 'custom_title', 'catalog_title', 'amount', 'description']
 
 class OrderCostReportDetailSerializer(serializers.ModelSerializer):
     """ جزئیات کامل یک گزارش هزینه برای تایید """
     items = OrderCostItemSerializer(many=True, read_only=True)
     submitter_name = serializers.CharField(source='submitter.username', read_only=True)
-    status_display = serializers.CharField(source='get_status_display', read_only=True)
     
     class Meta:
         model = OrderCostReport
         fields = [
-            'id', 'title', 'department', 'cost_type', 
+            'id', 'title', 'department', 
             'submitter_name', 'created_at', 
-            'is_approved', 'rejection_reason', 'status_display',
-            'items', 'description'
+            'is_approved', 'items', 'description'
         ]
 
 class OrderCostReportListSerializer(serializers.ModelSerializer):
@@ -41,7 +39,7 @@ class OrderCostReportListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = OrderCostReport
-        fields = ['id', 'title', 'department', 'cost_type', 'submitter_name', 'is_approved', 'created_at']
+        fields = ['id', 'title', 'department', 'submitter_name', 'is_approved', 'created_at']
 
 # ========================================== #
 # ========== 3. Cost Sheet Serializer ====== #
@@ -62,4 +60,3 @@ class OrderCostSheetSerializer(serializers.ModelSerializer):
 # ========================================== #
 class ApproveReportInputSerializer(serializers.Serializer):
     approve = serializers.BooleanField(required=True)
-    rejection_reason = serializers.CharField(required=False, allow_blank=True)

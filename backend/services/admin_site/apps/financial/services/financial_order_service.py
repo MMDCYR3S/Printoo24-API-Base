@@ -63,17 +63,15 @@ class FinancialOrderAppService:
         
         return self._domain_service.approve_report(report_id, user)
 
-    def reject_report(self, user: User, report_id: int, reason: str):
+    def reject_report(self, user: User, report_id: int):
         """ 
         رد کردن گزارش هزینه (عودت به واحد مربوطه جهت اصلاح).
         """
         # ===== بررسی مجوز تغییر (رد) ===== #
         AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
         
-        if not reason:
-            raise ValidationError("ذکر دلیل رد برای گزارش الزامی است.")
             
-        return self._domain_service.reject_report(report_id, user, reason)
+        return self._domain_service.reject_report(report_id, user)
 
     # ============ SHEET MANAGEMENT ============ #
     def get_order_cost_sheet(self, user: User, order_id: int) -> OrderCostSheet:

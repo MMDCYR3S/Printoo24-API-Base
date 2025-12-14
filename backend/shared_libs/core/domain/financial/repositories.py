@@ -1,7 +1,7 @@
-from typing import List, Optional
-from django.db.models import QuerySet, Prefetch
+from typing import Optional
+from django.db.models import QuerySet
 from core.utils.base_repository import BaseRepository
-from core.models import Invoice, Transaction, InvoiceStatus, Order, Quotation, QuotationItem
+from core.models import Invoice, Transaction, InvoiceStatus, Quotation
 
 # ===== Invoice Repository ===== #
 class InvoiceRepository(BaseRepository[Invoice]):
@@ -53,11 +53,5 @@ class QuotationRepository(BaseRepository[Quotation]):
         super().__init__(Quotation)
 
     def get_quotation_detail(self, quotation_id: int) -> Optional[Quotation]:
-        return self.model.objects.select_related('user', 'converted_order').prefetch_related('items').filter(id=quotation_id).first()
+        return self.model.objects.select_related('user', 'converted_order').filter(id=quotation_id).first()
 
-class QuotationItemRepository(BaseRepository[QuotationItem]):
-    def __init__(self):
-        super().__init__(QuotationItem)
-        
-    def bulk_create_items(self, items: List[QuotationItem]):
-        return self.model.objects.bulk_create(items)

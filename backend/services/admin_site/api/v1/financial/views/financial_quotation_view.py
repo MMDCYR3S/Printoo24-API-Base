@@ -6,9 +6,11 @@ from drf_spectacular.utils import extend_schema
 
 from apps.financial.services import FinancialQuotationAppService
 from ..serializers import (
-    QuotationDetailSerializer, CreateQuotationInputSerializer, ConvertQuotationInputSerializer
+    QuotationDetailSerializer, CreateQuotationInputSerializer,
+    ConvertQuotationInputSerializer, UpdateQuotationInputSerializer, InvoiceDetailSerializer
 )
 
+# ========== Financial Quotation ViewSet ========== #
 @extend_schema(tags=['Financial - Quotations'])
 class FinancialQuotationViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
@@ -25,23 +27,40 @@ class FinancialQuotationViewSet(viewsets.GenericViewSet):
     def create(self, request):
         serializer = CreateQuotationInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        data = serializer.validated_data
-        items = data.pop('items')
-        
-        quo = self.service.create_quotation(request.user, data, items)
+
+        quo = self.service.create_quotation(request.user, serializer.validated_data)
         return Response(QuotationDetailSerializer(quo).data, status=status.HTTP_201_CREATED)
 
-    @extend_schema(request=ConvertQuotationInputSerializer)
+    @extend_schema(request=UpdateQuotationInputSerializer)
+    def partial_update(self, request, pk=None):
+        """ ویرایش اطلاعات پیش‌فاکتور """
+        serializer = UpdateQuotationInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        quo = self.service.update_quotation(request.user, pk, serializer.validated_data)
+        return Response(QuotationDetailSerializer(quo).data)
+
+    def destroy(self, request, pk=None):
+        """ حذف پیش‌فاکتور """
+        self.service.delete_quotation(request.user, pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=['post'], url_path='convert')
     def convert(self, request, pk=None):
-        """ تبدیل استعلام به سفارش """
+        """ 
+        این متد پیش‌فاکتور را گرفته و برای سفارش مشخص شده، فاکتور صادر می‌کند.
+        """
         serializer = ConvertQuotationInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        order = self.service.convert_to_order(
+        # تبدیل انجام می‌شود و فاکتور برمی‌گردد
+        invoice = self.service.convert_to_invoice(
             request.user, 
             quotation_id=pk, 
-            address_id=serializer.validated_data['address_id']
+            order_id=serializer.validated_data['order_id']
         )
-        return Response({"order_id": order.id, "message": "تبدیل با موفقیت انجام شد."}, status=status.HTTP_200_OK)
+        
+        return Response(
+            InvoiceDetailSerializer(invoice).data, 
+            status=status.HTTP_201_CREATED
+        )

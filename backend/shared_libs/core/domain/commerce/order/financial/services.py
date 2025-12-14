@@ -201,13 +201,12 @@ class OrderCostDomainService:
         return report
 
     @transaction.atomic
-    def reject_report(self, report_id: int, user: User, reason: str) -> OrderCostReport:
+    def reject_report(self, report_id: int, user: User) -> OrderCostReport:
         """ رد گزارش """
         report = self.report_repo.get_report_detail(report_id)
         if not report: raise ValidationError("گزارش یافت نشد.")
 
         report.is_approved = False
-        report.rejection_reason = reason
         report.save()
         return report
 

@@ -14,14 +14,14 @@ class InvoiceStatus(models.Model):
     # ===== تعیین نوع رفتار سیستم ===== #
     is_considered_paid = models.BooleanField(_('به معنی پرداخت شده است؟'), default=False)
     allows_editing = models.BooleanField(_('اجازه ویرایش فاکتور دارد؟'), default=True)
-    
-    color = models.CharField(_('رنگ نمایش'), max_length=20, default='secondary', help_text="primary, success, danger, ...")
-    sort_order = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = _('وضعیت فاکتور')
         verbose_name_plural = _('وضعیت‌های فاکتور')
-        ordering = ['sort_order']
+        
+    def save(self, *args, **kwargs):
+        self.internal_code = self.internal_code.upper()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -75,7 +75,7 @@ class Invoice(models.Model):
         این متد زمانی صدا زده می‌شود که سفارش تولید شده، هزینه‌های حمل اضافه شده
         و حالا مشتری باید تسویه نهایی را انجام دهد.
         """
-        self.status = InvoiceStatus.objects.get(internal_code="FINALIZE")
+        self.status = InvoiceStatus.objects.get(allows_editing=False)
         self.finalized_at = timezone.now()
         self.save()
             
@@ -182,7 +182,7 @@ class Transaction(models.Model):
 # ===== Quotation (Independent) ===== #
 class Quotation(models.Model):
     """
-    مدل استعلام قیمت / پیش‌فاکتور مستقل.
+    مدل پیش‌فاکتور قیمت / پیش‌فاکتور مستقل.
     این مدل به سفارش وصل نیست و برای مراحل بازاریابی و پیش از ثبت سفارش است.
     """
     STATUS_CHOICES = [
@@ -201,9 +201,17 @@ class Quotation(models.Model):
         related_name='quotations'
     )
     
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name=_("ایجاد کننده (کارمند)"),
+        related_name='created_quotations'
+    )
+    
     # ===== اطلاعات کلی ===== #
-    title = models.CharField(_("عنوان استعلام"), max_length=200)
-    quotation_number = models.CharField(_("شماره استعلام"), max_length=50, unique=True)
+    title = models.CharField(_("عنوان پیش‌فاکتور"), max_length=200)
+    quotation_number = models.CharField(_("شماره پیش‌فاکتور"), max_length=50, unique=True)
     # ===== زمانبندی کلی ===== #
     created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
     valid_until = models.DateTimeField(_("تاریخ اعتبار"), help_text=_("این قیمت‌ها تا کی معتبر هستند؟"))
@@ -224,28 +232,9 @@ class Quotation(models.Model):
     )
 
     class Meta:
-        verbose_name = _('استعلام قیمت')
-        verbose_name_plural = _('استعلام‌های قیمت')
+        verbose_name = _('پیش‌فاکتور قیمت')
+        verbose_name_plural = _('پیش‌فاکتور‌های قیمت')
         ordering = ['-created_at']
 
     def __str__(self):
         return f"Quote #{self.quotation_number} - {self.user}"
-
-class QuotationItem(models.Model):
-    """
-    اقلام موجود در استعلام قیمت.
-    """
-    quotation = models.ForeignKey(
-        Quotation,
-        related_name='items',
-        on_delete=models.CASCADE,
-        verbose_name=_("استعلام مرتبط")
-    )
-    product_name = models.CharField(_("نام محصول/خدمت"), max_length=200)
-    description = models.TextField(_("شرح فنی"), blank=True)
-    quantity = models.PositiveIntegerField(_("تعداد"), default=1)
-    unit_price = models.DecimalField(_("قیمت واحد"), max_digits=18, decimal_places=0)
-
-    class Meta:
-        verbose_name = _('قلم استعلام')
-        verbose_name_plural = _('اقلام استعلام')

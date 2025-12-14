@@ -429,46 +429,6 @@ class OrderCostSheet(models.Model):
         return f"Sheet for {self.order.order_code}"
 
     def recalculate_totals(self):
-        """
-        این متد باید هربار که یک Report تایید می‌شود صدا زده شود.
-        تمام گزارش‌های تایید شده را جمع می‌زند و در اینجا ذخیره می‌کند.
-        """
-        # ===== دریافت گزارش‌های تایید شده ===== #
-        approved_reports = self.reports.filter(status='approved')
-        
-        # ===== ریست کردن مقادیر برای محاسبه مجدد ===== #
-        items_qs = OrderCostItem.objects.filter(
-            report__sheet=self,
-            report__is_approved=True
-        )
-        
-        aggregates = items_qs.aggregate(
-            mat_cost=Sum('amount', filter=Q(report__cost_type='material')),
-            srv_cost=Sum('amount', filter=Q(report__cost_type='service')),
-            shp_cost=Sum('amount', filter=Q(report__cost_type='transport')),
-            ovr_cost=Sum('amount', filter=Q(report__cost_type__in=['overhead', 'other'])),
-        )
-
-        # ===== کل هزینه ===== #
-        self.total_material_cost = aggregates['mat_cost'] or 0
-        self.total_service_cost = aggregates['srv_cost'] or 0
-        self.total_shipping_cost = aggregates['shp_cost'] or 0
-        self.total_overhead_cost = aggregates['ovr_cost'] or 0
-        
-        # ===== محاسبه هزینه های کل ===== #
-        self.final_total_cost = (
-            self.total_material_cost + 
-            self.total_service_cost + 
-            self.total_shipping_cost + 
-            self.total_overhead_cost
-        )   
-        
-        # ===== محاسبه سود و زیاد کل ===== #
-        if self.revenue_amount:
-            self.net_profit = self.revenue_amount - self.final_total_cost
-            if self.revenue_amount > 0:
-                self.profit_margin_percent = (self.net_profit / self.revenue_amount) * 100
-        
         self.save()
 
 
@@ -516,7 +476,7 @@ class OrderCostReport(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title} ({self.get_status_display()})"
+        return f"{self.title}"
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -528,7 +488,7 @@ class OrderCostItem(models.Model):
     مثال: "هزینه اول: کاغذ - 12000"
     """
     report = models.ForeignKey(
-        OrderCostSheet,
+        OrderCostReport,
         related_name='items',
         on_delete=models.CASCADE,
         verbose_name=_("گزارش مرتبط"),
@@ -567,7 +527,7 @@ class OrderCostAttachment(models.Model):
     جایگزین فیلد تکی 'attachment' در مدل OrderCostSheet می‌شود (یا در کنار آن).
     """
     report = models.ForeignKey(
-        'OrderCostSheet', 
+        OrderCostReport, 
         related_name='attachments', 
         on_delete=models.CASCADE,
         verbose_name=_("گزارش هزینه")

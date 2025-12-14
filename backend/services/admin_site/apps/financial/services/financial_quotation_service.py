@@ -2,6 +2,7 @@ from typing import Dict, Any, List
 from rest_framework.exceptions import ValidationError
 
 from core.models import User, Quotation
+from core.domain.identity.users import UserRepository
 from core.domain.financial import FinancialDomainService, QuotationRepository
 from apps.permissions import AppPermissionChecker
 
@@ -18,6 +19,7 @@ class FinancialQuotationAppService:
     def __init__(self):
         self._domain_service = FinancialDomainService()
         self._quotation_repo = QuotationRepository()
+        self._user_repo = UserRepository()
 
     # ============ QUOTATION OPS ============ #
     def get_quotation_detail(self, user: User, quotation_id: int) -> Quotation:
@@ -30,13 +32,42 @@ class FinancialQuotationAppService:
             raise ValidationError("استعلام مورد نظر یافت نشد.")
         return quotation
 
-    def create_quotation(self, user: User, data: Dict[str, Any], items: List[Dict[str, Any]]):
+    # ============ CREATE QUOTATION ============ #
+    def create_quotation(self, requester: User, data: Dict[str, Any]):
         """ 
         ایجاد یک استعلام قیمت جدید.
         """
         # ===== بررسی مجوز ایجاد ===== #
-        AppPermissionChecker.check_has_permission(user, 'add_quotation')
-        return self._domain_service.create_quotation(user, data, items)
+        AppPermissionChecker.check_has_permission(requester, 'add_quotation')
+        # ===== دریافت مشتری ===== #
+        customer_id = data.get('customer_id')
+        customer = self._user_repo.get_by_id(customer_id)
+        
+        if not customer:
+            raise ValidationError("مشتری با این شناسه یافت نشد.")
+        
+        is_valid_customer = customer.user_role.filter(role__is_customer=True).exists()
+        if not is_valid_customer:
+            raise ValidationError("این شخص مشتری نیست.")
+        
+        # ===== اجرای عملیات ===== #
+        return self._domain_service.create_quotation(
+            customer=customer,
+            creator=requester, 
+            data=data
+        )
+        
+    # ============ UPDATE QUOTATION ============ #
+    def update_quotation(self, requester: User, quotation_id: int, data: Dict[str, Any]):
+        """ ویرایش پیش‌فاکتور """
+        AppPermissionChecker.check_has_permission(requester, 'change_quotation')
+        return self._domain_service.update_quotation(quotation_id, data)
+
+    # ============ DELETE QUOTATION ============ #
+    def delete_quotation(self, requester: User, quotation_id: int):
+        """ حذف پیش‌فاکتور """
+        AppPermissionChecker.check_has_permission(requester, 'delete_quotation')
+        self._domain_service.delete_quotation(quotation_id)
 
     def update_quotation_status(self, user: User, quotation_id: int, status: str):
         """ 
@@ -45,12 +76,15 @@ class FinancialQuotationAppService:
         # ===== بررسی مجوز تغییر ===== #
         AppPermissionChecker.check_has_permission(user, 'change_quotation')
         return self._domain_service.update_quotation_status(quotation_id, status, user)
-
-    def convert_to_order(self, user: User, quotation_id: int, address_id: int):
+    def convert_to_invoice(self, user: User, quotation_id: int, order_id: int):
         """ 
-        تبدیل استعلام تایید شده به سفارش و صدور فاکتور.
+        تبدیل پیش‌فاکتور به فاکتور اصلی برای یک سفارش موجود.
         """
-        # ===== بررسی مجوز تبدیل (معمولاً فروش یا مالی) ===== #
-        AppPermissionChecker.check_has_permission(user, 'add_order') 
+        # ===== بررسی مجوز (ادمین/فروش/مالی) ===== #
+        AppPermissionChecker.check_has_permission(user, 'add_invoice') 
         
-        return self._domain_service.convert_quotation_to_order(quotation_id, user, address_id)
+        return self._domain_service.convert_quotation_to_invoice(
+            quotation_id=quotation_id, 
+            user=user, 
+            order_id=order_id
+        )
