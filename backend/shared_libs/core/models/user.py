@@ -229,4 +229,3 @@ class Address(models.Model):
     address = models.TextField(_('آدرس'))
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-

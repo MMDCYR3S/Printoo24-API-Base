@@ -25,28 +25,18 @@ class OrderListAppService:
         if requester.is_superuser:
             return queryset
         
-        
+        # ===== بررسی وجود نقش برای کاربر ===== #
         user_role_rel = requester.user_role.select_related('role').first()
         if not user_role_rel:
             return Order.objects.none()
-        
         
         # ===== دریافت نقش کاربر ===== #
         role = user_role_rel.role
         allowed_groups = role.allowed_status_groups
         
-        if getattr(role, 'can_view_all_orders', False):
-            return queryset
-        
-        if role.type == Role.USER_TYPE.admin:
+        if role.type == "admin":
             return queryset.filter(current_status__group__code__in=allowed_groups)
-            
-        item_filters = Q(status__group__code__in=allowed_groups)
-        
-        if role.is_task_based:
-            assignment_filter = Q(assigned_to=requester) | Q(assigned_to__isnull=True)
-            item_filters &= assignment_filter
 
-        final_queryset = queryset.filter(order_item_order__in=OrderItem.objects.filter(item_filters)).distinct()
+        final_queryset = queryset.filter(Q(current_status__group__code__in=allowed_groups))
 
         return final_queryset

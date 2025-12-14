@@ -1,6 +1,6 @@
 import json
 from rest_framework import serializers
-from core.models import OrderCostReport, OrderCostItem, OrderCostType, OrderCostAttachment
+from core.models import OrderCostSheet, OrderCostItem, OrderCostCategory, OrderCostAttachment
 
 # ========== Attachment Serializer ========== #
 class OrderCostAttachmentSerializer(serializers.ModelSerializer):
@@ -64,8 +64,12 @@ class OrderCostReportCreateSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = OrderCostReport
-        fields = ['title', 'description', 'items', 'attachments']
+        model = OrderCostSheet
+        fields = [
+            'id', 'is_finalized', 'approved_by',
+            'total_operational_cost', 'total_material_cost',
+            'total_outsourcing_cost','total_overhead_cost',
+        ]
 
     def validate_items(self, value):
         """
@@ -89,32 +93,32 @@ class OrderCostReportDetailSerializer(serializers.ModelSerializer):
     items = OrderCostItemSerializer(many=True, read_only=True)
     attachments = OrderCostAttachmentSerializer(many=True, read_only=True) # نمایش لیست فایل‌ها
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    total_amount = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
+    total_cost = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
 
     class Meta:
-        model = OrderCostReport
+        model = OrderCostSheet
         fields = [
-            'id', 'title', 'description', 'total_amount', 
-            'is_approved_by_finance', 'finance_note', 
-            'created_by_name', 'created_at', 
-            'attachments', 'items'
+            'id', 'is_finalized', 'approved_by',
+            'total_operational_cost', 'total_material_cost',
+            'total_outsourcing_cost','total_overhead_cost',
+            'total_cost', 'created_by_name', 'created_at', 
+            'items', 'attachments'
         ]
 
 # ========== Order Cost Type Serializers ========== #
 class CostTypeInputSerializer(serializers.ModelSerializer):
     """ ورودی برای ایجاد/ویرایش نوع هزینه """
     class Meta:
-        model = OrderCostType
-        fields = ['title', 'code', 'category', 'is_deduction']
+        model = OrderCostCategory
+        fields = ['title', 'slug', 'cost_type', 'is_deduction']
         
-    def validate_code(self, value):
+    def validate_slug(self, value):
         """ نرمال‌سازی کد سیستمی """
         return value.upper().strip()
 
 class CostTypeDetailSerializer(serializers.ModelSerializer):
     """ خروجی کامل نوع هزینه """
-    category_display = serializers.CharField(source='get_category_display', read_only=True)
     
     class Meta:
-        model = OrderCostType
-        fields = ['id', 'title', 'code', 'category', 'category_display', 'is_deduction', 'created_at']
+        model = OrderCostCategory
+        fields = ['id', 'title', 'slug', 'cost_type', 'created_at']

@@ -5,7 +5,7 @@ from core.domain.commerce.order import (
     OrderItemRepository, OrderItemFileRepository,
     OrderStatusFlowDomainService
 )
-from core.models import User, OrderItemFile, Order, OrderItem
+from core.models import User, OrderItemFile
 from apps.permissions import AppPermissionChecker
 from apps.operations.tasks import process_uploaded_design_file
 
@@ -21,18 +21,12 @@ class OrderFileAppService:
         
         if requester.is_superuser:
             return item
-        
-        if item.assigned_to_id != requester.id:
-            user_role = requester.user_role.first()
-            if user_role and not getattr(user_role.role, 'can_view_all_orders', False):
-                raise PermissionDenied("این آیتم به شما اختصاص داده نشده است.")
             
         return item
         
     def upload_design_file(self, requester: User, item_id: int, file_data, requirement_id: int):
         """
         آپلود فایل جدید.
-        در مدل جدید، فایل جدید به صورت پیش‌فرض is_accepted=False است.
         """
         AppPermissionChecker.check_has_permission(requester, 'change_orderitemfile')
         
@@ -57,7 +51,6 @@ class OrderFileAppService:
             "file": file_data,
             "version": new_version,
             "is_latest": True,
-            "is_accepted": False,
             "admin_feedback": None
         })
         
@@ -65,10 +58,9 @@ class OrderFileAppService:
         
         return new_file
         
-    def review_design_file(self, requester: User, file_id: int, is_accepted: bool, feedback: str = None):
+    def review_design_file(self, requester: User, file_id: int, feedback: str = None):
         """
         بررسی فایل توسط طراح یا QC.
-        ورودی: is_accepted (True/False)
         """
         AppPermissionChecker.check_has_permission(requester, 'change_orderitemfile')
         
@@ -78,7 +70,6 @@ class OrderFileAppService:
         
         self._check_designer_access(requester, file_obj.order_item.id)
         
-        file_obj.is_accepted = is_accepted
         file_obj.admin_feedback = feedback
         
         file_obj.save()

@@ -1,10 +1,10 @@
-from rest_framework.exceptions import ValidationError, PermissionDenied
-from typing import Dict, Any, List, Optional
+from rest_framework.exceptions import ValidationError
+from typing import Dict, Any
 
 from apps.permissions import AppPermissionChecker
-from core.models import User, OrderCostReport, OrderCostItem, OrderCostCatalog
+from core.models import User, OrderCostSheet
 from core.domain.commerce.order import (
-    OrderCostDomainService, OrderCostReportRepository,
+    OrderCostDomainService, OrderCostSheetRepository,
     OrderCostItemRepository, OrderRepository
 )
 from core.domain.financial import FinancialDomainService
@@ -19,12 +19,12 @@ class FinancialAppService:
     def __init__(self):
         # ===== تزریق وابستگی‌های دامنه ===== #
         self._cost_domain = OrderCostDomainService() 
-        self._report_repo = OrderCostReportRepository()
+        self._report_repo = OrderCostSheetRepository()
         self._item_repo = OrderCostItemRepository()
         self._order_repo = OrderRepository()
         self._domain_service = FinancialDomainService()
         
-    def get_report_details(self, user: User, report_id: int) -> OrderCostReport:
+    def get_report_details(self, user: User, report_id: int) -> OrderCostSheet:
         """ مشاهده جزئیات یک گزارش هزینه """
         AppPermissionChecker.check_has_permission(user, 'view_ordercostreport')
         

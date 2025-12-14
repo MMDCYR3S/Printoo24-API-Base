@@ -5,11 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from drf_spectacular.utils import extend_schema
 
-from apps.operations.services import OrderFileAppService
+from apps.operations.services import OrderFileAppService, OrderItemStatusAppService
 from ..serializers import (
-    DesignFileUploadSerializer, 
-    FileReviewSerializer, 
-    FileSerializer
+    DesignFileUploadSerializer,
+    FileSerializer,
+    OrderItemStatusUpdateSerializer,
+    BaseOrderItemSerializer
 )
 
 # ========== Order Item Upload View ========== #
@@ -44,31 +45,34 @@ class OrderItemUploadView(GenericAPIView):
         except Exception as e:
             return Response({"detail": "خطای سیستمی در آپلود فایل.", "error": str(e)}, status=500)
 
-@extend_schema(tags=['Order-Upload-File'], summary="تایید یا رد فایل طراحی")
-class FileReviewView(GenericAPIView):
+# ========== Order Item Status Update View ========== #
+@extend_schema(tags=['Order-Item-Status'])
+class OrderItemStatusUpdateView(GenericAPIView):
     """
-    تغییر وضعیت تایید/رد یک فایل.
+    تغییر وضعیت فنی یک قلم سفارش (Item).
+    مخصوص طراح، ناظر چاپ و QC.
     """
     permission_classes = [IsAuthenticated]
-    serializer_class = FileReviewSerializer
+    serializer_class = OrderItemStatusUpdateSerializer
 
-    def put(self, request, file_id):
+    def put(self, request, pk):
+        """ pk: شناسه آیتم (OrderItem ID) """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         try:
-            service = OrderFileAppService()
-            updated_file = service.review_design_file(
+            service = OrderItemStatusAppService()
+            updated_item = service.change_item_status(
                 requester=request.user,
-                file_id=file_id,
-                is_accepted=serializer.validated_data['is_accepted'],
-                feedback=serializer.validated_data.get('admin_feedback')
+                item_id=pk,
+                new_status=serializer.validated_data['new_status'],
+                admin_note=serializer.validated_data.get('admin_note')
             )
             
             return Response(
-                FileSerializer(updated_file, context={'request': request}).data,
+                BaseOrderItemSerializer(updated_item).data, 
                 status=status.HTTP_200_OK
             )
             
-        except (ValidationError, PermissionDenied) as e:
+        except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)

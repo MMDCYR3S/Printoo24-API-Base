@@ -32,11 +32,6 @@ class Invoice(models.Model):
     مدل فاکتور.
     این موجودیت مستقل است و "سند قطعی بدهی" مشتری محسوب می‌شود.
     """
-    TYPE_CHOICES = [
-        ('proforma', _('پیش‌فاکتور')),
-        ('final', _('فاکتور رسمی')),
-    ]
-
 
     order = models.OneToOneField(
         'core.Order', 
@@ -44,38 +39,27 @@ class Invoice(models.Model):
         on_delete=models.PROTECT, 
         verbose_name=_("سفارش مرتبط")
     )
-    
-    invoice_type = models.CharField(_("نوع سند"), max_length=20, choices=TYPE_CHOICES, default='proforma')
     invoice_number = models.CharField(_("شماره فاکتور"), max_length=50, unique=True, db_index=True)
-    
     # ===== مبالغ مختلف ===== #
     items_amount = models.DecimalField(_("جمع اقلام"), max_digits=18, decimal_places=0)
     services_amount = models.DecimalField(_("جمع خدمات و هزینه‌ها"), max_digits=18, decimal_places=0, default=0)
-    
     tax_amount = models.DecimalField(_("مالیات"), max_digits=18, decimal_places=0, default=0)
     discount_amount = models.DecimalField(_("تخفیف"), max_digits=18, decimal_places=0, default=0)
-    
     final_amount = models.DecimalField(_("مبلغ کل فاکتور"), max_digits=18, decimal_places=0)
-    
-    # ===== وضعیت حساب ===== #
     paid_amount = models.DecimalField(_("مبلغ دریافتی تایید شده"), max_digits=18, decimal_places=0, default=0)
-    
+    # ===== وضعیت حساب ===== #
     status = models.ForeignKey(
         InvoiceStatus, 
         on_delete=models.PROTECT, 
         verbose_name=_("وضعیت جاری"),
         related_name='invoices'
     )
-    
     issued_at = models.DateTimeField(_("تاریخ صدور"), auto_now_add=True)
     due_date = models.DateTimeField(_("سررسید"), null=True, blank=True)
     finalized_at = models.DateTimeField(_("تاریخ قطعی شدن فاکتور"), null=True, blank=True)
-    
     description = models.TextField(_("توضیحات فاکتور"), blank=True)
-    
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
-
 
     class Meta:
         verbose_name = _('فاکتور')
@@ -91,10 +75,9 @@ class Invoice(models.Model):
         این متد زمانی صدا زده می‌شود که سفارش تولید شده، هزینه‌های حمل اضافه شده
         و حالا مشتری باید تسویه نهایی را انجام دهد.
         """
-        if self.invoice_type == 'proforma':
-            self.invoice_type = 'final'
-            self.finalized_at = timezone.now()
-            self.save()
+        self.status = InvoiceStatus.objects.get(internal_code="FINALIZE")
+        self.finalized_at = timezone.now()
+        self.save()
             
     @property
     def is_pre_payment_done(self):
@@ -195,3 +178,74 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.get_method_display()} - {self.amount}"
+
+# ===== Quotation (Independent) ===== #
+class Quotation(models.Model):
+    """
+    مدل استعلام قیمت / پیش‌فاکتور مستقل.
+    این مدل به سفارش وصل نیست و برای مراحل بازاریابی و پیش از ثبت سفارش است.
+    """
+    STATUS_CHOICES = [
+        ('draft', _('پیش‌نویس')),
+        ('sent', _('ارسال شده برای مشتری')),
+        ('accepted', _('تایید شده توسط مشتری')),
+        ('rejected', _('رد شده')),
+        ('expired', _('منقضی شده')),
+        ('converted', _('تبدیل شده به سفارش')),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        verbose_name=_("مشتری / درخواست کننده"),
+        related_name='quotations'
+    )
+    
+    # ===== اطلاعات کلی ===== #
+    title = models.CharField(_("عنوان استعلام"), max_length=200)
+    quotation_number = models.CharField(_("شماره استعلام"), max_length=50, unique=True)
+    # ===== زمانبندی کلی ===== #
+    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
+    valid_until = models.DateTimeField(_("تاریخ اعتبار"), help_text=_("این قیمت‌ها تا کی معتبر هستند؟"))
+    status = models.CharField(_("وضعیت"), max_length=20, choices=STATUS_CHOICES, default='draft')
+    # ===== مبالغ کلی ===== #
+    total_amount = models.DecimalField(_("مبلغ کل"), max_digits=18, decimal_places=0, default=0)
+    tax_amount = models.DecimalField(_("مالیات"), max_digits=18, decimal_places=0, default=0)
+    discount_amount = models.DecimalField(_("تخفیف"), max_digits=18, decimal_places=0, default=0)
+    final_amount = models.DecimalField(_("مبلغ قابل پرداخت"), max_digits=18, decimal_places=0, default=0)
+    description = models.TextField(_("توضیحات / شرایط"), blank=True)
+    # ===== لینک کردن به سفارش ===== #
+    converted_order = models.OneToOneField(
+        'core.Order',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name=_("سفارش تبدیل شده"),
+        related_name='origin_quotation'
+    )
+
+    class Meta:
+        verbose_name = _('استعلام قیمت')
+        verbose_name_plural = _('استعلام‌های قیمت')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Quote #{self.quotation_number} - {self.user}"
+
+class QuotationItem(models.Model):
+    """
+    اقلام موجود در استعلام قیمت.
+    """
+    quotation = models.ForeignKey(
+        Quotation,
+        related_name='items',
+        on_delete=models.CASCADE,
+        verbose_name=_("استعلام مرتبط")
+    )
+    product_name = models.CharField(_("نام محصول/خدمت"), max_length=200)
+    description = models.TextField(_("شرح فنی"), blank=True)
+    quantity = models.PositiveIntegerField(_("تعداد"), default=1)
+    unit_price = models.DecimalField(_("قیمت واحد"), max_digits=18, decimal_places=0)
+
+    class Meta:
+        verbose_name = _('قلم استعلام')
+        verbose_name_plural = _('اقلام استعلام')

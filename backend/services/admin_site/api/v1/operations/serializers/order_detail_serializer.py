@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from core.models import (
-    Order, OrderItem, OrderItemFile, OrderStatus, OrderStatusGroup, OrderCostReport,
+    Order, OrderItem, OrderItemFile, OrderStatus, OrderStatusGroup, OrderCostSheet,
     OrderStateLog, OrderCostItem, OrderShipment
 )
 
@@ -28,8 +28,8 @@ class FileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = OrderItemFile
-        fields = ['id', 'file_url', 'filename', 'version', 'status', 'admin_feedback', 'requirement_name']
-
+        fields = ['id', 'file_url', 'filename', 'version', 'admin_feedback', 'requirement_name']
+    
 class CostItemSerializer(serializers.ModelSerializer):
     """ نمایش اقلام ریز هزینه (زیرمجموعه گزارش) """
     type_name = serializers.CharField(source='catalog_item.cost_type.title', read_only=True)
@@ -44,10 +44,12 @@ class OrderCostReportSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.username', read_only=True)
     
     class Meta:
-        model = OrderCostReport
+        model = OrderCostSheet
         fields = [
-            'id', 'title', 'description', 'is_approved_by_finance', 
-            'total_amount', 'created_by_name', 'created_at', 'items'
+            'id', 'is_finalized', 'approved_by', 
+            'total_operational_cost', 'total_material_cost',
+            'total_outsourcing_cost','total_overhead_cost',
+            'total_cost', 'created_by_name', 'created_at', 'items'
         ]
 
 class StateLogSerializer(serializers.ModelSerializer):
@@ -74,11 +76,11 @@ class BaseOrderItemSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='product.category.name', read_only=True)
     designer_name = serializers.CharField(source='assigned_to.username', read_only=True, allow_null=True)
     features_summary = serializers.CharField(source='feature_summary', read_only=True)
-    item_status = OrderStatusSerializer(source='status', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_name', 'product_code', 'designer_name', 'category_name', 'price', 'quantity', 'features_summary', 'admin_note', 'item_status']
+        fields = ['id', 'product_name', 'product_code', 'designer_name', 'category_name', 'status_display', 'status', 'price', 'quantity', 'features_summary', 'admin_note']
 
 class DesignerOrderItemSerializer(BaseOrderItemSerializer):
     """ آیتم مخصوص طراح (شامل فایل‌ها) """

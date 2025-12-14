@@ -3,7 +3,7 @@ from django.db.models import Prefetch, QuerySet
 from core.utils.base_repository import BaseRepository
 from core.models import (
     Order, OrderItem, OrderItemFile, OrderStatus, Address, User,
-    OrderStateLog, OrderCostItem, OrderShipment, OrderCostReport
+    OrderStateLog, OrderCostItem, OrderShipment, OrderCostSheet, OrderPrintReport, OrderPrintItem
 )
 
 class OrderRepository(BaseRepository[Order]):
@@ -65,34 +65,44 @@ class OrderRepository(BaseRepository[Order]):
             'current_status__group', 
             'address__city',
             'address__province', 
-            'invoice_order'
+            'related_invoice'
         ).prefetch_related(
-            # ===== 1. آیتم های سفارش و فایل های طراحی ===== #
+            # ===== آیتم های سفارش و فایل های طراحی ===== #
             Prefetch(
                 'order_item_order',
-                queryset=OrderItem.objects.select_related('product', 'assigned_to', 'status__group').prefetch_related(
+                queryset=OrderItem.objects.select_related('product').prefetch_related(
                     Prefetch(
                         'files', 
-                        queryset=OrderItemFile.objects.select_related('requirement__spec').order_by('-version')
+                        queryset=OrderItemFile.objects.filter(is_latest=True).select_related('requirement__spec').order_by('-version')
                     )
                 )
             ),
             
-            # ===== 2. تاریخچه وضعیت سفارش ===== #
+            # ===== تاریخچه وضعیت سفارش ===== #
             Prefetch(
                 'state_logs', 
                 queryset=OrderStateLog.objects.select_related('user', 'from_status', 'to_status').order_by('-timestamp')
             ),
             
-            # ===== 3. گزارشات و هزینه‌های مالی (اصلاح شده) ===== #
+            # ===== گزارشات و هزینه‌های مالی ===== #
             Prefetch(
-                'cost_reports',  # نام ریلیشن در مدل Order
-                queryset=OrderCostReport.objects.select_related('created_by').prefetch_related(
+                'cost_sheet',
+                queryset=OrderCostSheet.objects.select_related('created_by').prefetch_related(
                     Prefetch(
                         'items',
                         queryset=OrderCostItem.objects.select_related('catalog_item__cost_type')
                     )
                 ).order_by('-created_at')
+            ),
+            # ===== بخش هزینه های مواد اولیه چاپ ===== #
+            Prefetch(
+                'print_reports',
+                    queryset=OrderPrintReport.objects.prefetch_related(
+                        Prefetch(
+                            'items',
+                            queryset=OrderPrintItem.objects.select_related('catalog_item__cost_type')
+                        )
+                    )
             ),
             
             # ===== 4. مرسوله های مربوط به سفارش ===== #
@@ -107,14 +117,6 @@ class OrderRepository(BaseRepository[Order]):
         return self.model.objects.select_related(
             'user', 'current_status'
         ).order_by('-created_at')
-        
-    def get_orders_assigned_to_user(self, user: User) -> QuerySet[Order]:
-        """
-        دریافت سفارشاتی که حداقل یک آیتم آن به کاربر اختصاص داده شده است.
-        """
-        return self._get_detail_queryset().filter(
-            order_item_order__assigned_to=user
-        ).distinct()   
 
 # ======= Order Item Repository ======= #
 class OrderItemRepository(BaseRepository[OrderItem]):

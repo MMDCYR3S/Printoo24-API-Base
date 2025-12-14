@@ -3,14 +3,14 @@ from typing import List, Dict, Any
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from core.models import Order, User, OrderCostReport, OrderCostItem, OrderCostType, OrderCostAttachment
-from .repositories import OrderCostReportRepository, OrderCostItemRepository, OrderCostTypeRepository
+from core.models import Order, User, OrderCostSheet, OrderCostItem, OrderCostCategory, OrderCostAttachment
+from .repositories import OrderCostSheetRepository, OrderCostItemRepository, OrderCostCategoryRepository
 
 # ========== Order Cost Domain Service ========== #
 class OrderCostDomainService:
     def __init__(self):
-        self.type_repo = OrderCostTypeRepository()
-        self.report_repo = OrderCostReportRepository()
+        self.type_repo = OrderCostCategoryRepository()
+        self.report_repo = OrderCostSheetRepository()
         self.item_repo = OrderCostItemRepository()
 
     @transaction.atomic
@@ -20,7 +20,7 @@ class OrderCostDomainService:
                            title: str, 
                            description: str, 
                            items_data: List[Dict[str, Any]],
-                           attachments_data: List[Any] = None) -> OrderCostReport:
+                           attachments_data: List[Any] = None) -> OrderCostSheet:
         """
         ایجاد گزارش هزینه به همراه اقلام و فایل‌های پیوست.
         """
@@ -85,7 +85,7 @@ class OrderCostDomainService:
         return report
     
     @transaction.atomic
-    def update_cost_report_header(self, report_id: int, user: User, data: Dict[str, Any]) -> OrderCostReport:
+    def update_cost_report_header(self, report_id: int, user: User, data: Dict[str, Any]) -> OrderCostSheet:
         """ ویرایش اطلاعات کلی گزارش (عنوان، توضیحات، فایل) """
         report = self.report_repo.get_by_id(report_id)
         if not report:
@@ -151,7 +151,7 @@ class OrderCostDomainService:
         item.delete()
         
     @transaction.atomic
-    def approve_cost_report(self, report_id: int, user: User, approved: bool = True) -> OrderCostReport:
+    def approve_cost_report(self, report_id: int, user: User, approved: bool = True) -> OrderCostSheet:
         """ 
         تایید یا رد نهایی گزارش توسط مدیر مالی.
         وقتی تایید شود، مبلغ آن باید روی فاکتور نهایی اعمال شود (در آینده).
@@ -170,7 +170,7 @@ class OrderCostDomainService:
     
     # ========== Order Cost Type ========== #
     @transaction.atomic
-    def create_cost_type(self, user: User, data: dict) -> OrderCostType:
+    def create_cost_type(self, user: User, data: dict) -> OrderCostCategory:
         """ ایجاد یک نوع هزینه جدید """
         if self.type_repo.model.objects.filter(code=data['code']).exists():
             raise ValidationError("نوع هزینه با این کد سیستمی قبلاً تعریف شده است.")
@@ -183,7 +183,7 @@ class OrderCostDomainService:
         })
     
     @transaction.atomic
-    def update_cost_type(self, type_id: int, user: User, data: dict) -> OrderCostType:
+    def update_cost_type(self, type_id: int, user: User, data: dict) -> OrderCostCategory:
         """ ویرایش نوع هزینه """
         cost_type = self.type_repo.get_by_id(type_id)
         if not cost_type:

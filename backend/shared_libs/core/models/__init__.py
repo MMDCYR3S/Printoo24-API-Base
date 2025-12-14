@@ -34,11 +34,10 @@ from .product import (
 )
 from .order import (
     Order, OrderItem, OrderItemFile, OrderStatus,
-    OrderCostType, OrderPackage, OrderCostItem,
+    OrderCostCategory, OrderPackage, OrderCostItem,
     OrderShipment, OrderStateLog, DeliveryMethod,
-    OrderStatusGroup, OrderCostReport, OrderCostCatalog,
-    OrderCostAttachment, OrderPrintAttachment,
-    OrderPrintReport, OrderPrintItem,
+    OrderStatusGroup, OrderCostSheet, OrderCostAttachment,
+    OrderPrintAttachment, OrderPrintReport, OrderPrintItem,
 )
 from .cart import Cart, CartItem, CartItemUpload
 from .notification import CustomerNotification

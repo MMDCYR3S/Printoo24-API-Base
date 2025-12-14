@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from core.models import (
-    OrderCostReport, OrderCostItem, OrderCostCatalog,
-    OrderCostType, Invoice, InvoiceStateLog, InvoiceStatus,
+    OrderCostSheet, OrderCostItem, OrderCostCategory,
+    Invoice, InvoiceStateLog, InvoiceStatus,
     Transaction
 )
 from decimal import Decimal
@@ -12,13 +12,8 @@ class CostCatalogSerializer(serializers.ModelSerializer):
     type_name = serializers.CharField(source='cost_type.title', read_only=True)
     
     class Meta:
-        model = OrderCostCatalog
+        model = OrderCostCategory
         fields = ['id', 'cost_type', 'type_name', 'title', 'code', 'is_active']
-
-class CostTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderCostType
-        fields = ['id', 'title', 'code', 'category']
 
 # ========== Cost Items (Details) ========== #
 class CostItemInputSerializer(serializers.Serializer):
@@ -50,7 +45,7 @@ class CostReportListSerializer(serializers.ModelSerializer):
     items_count = serializers.IntegerField(source='items.count', read_only=True)
 
     class Meta:
-        model = OrderCostReport
+        model = OrderCostSheet
         fields = ['id', 'order', 'order_code', 'title', 'total_amount', 'is_approved_by_finance', 'created_by_name', 'created_at', 'items_count']
 
 class CostReportDetailSerializer(serializers.ModelSerializer):
@@ -60,7 +55,7 @@ class CostReportDetailSerializer(serializers.ModelSerializer):
     attachment = serializers.FileField(read_only=True)
 
     class Meta:
-        model = OrderCostReport
+        model = OrderCostSheet
         fields = [
             'id', 'order', 'title', 'description', 'total_amount', 
             'is_approved_by_finance', 'finance_note', 

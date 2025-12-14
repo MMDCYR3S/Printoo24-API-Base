@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from rest_framework.exceptions import ValidationError
 
-from core.models import OrderCostReport, OrderCostCatalog
+from core.models import OrderCostSheet, OrderCostCategory
 from apps.financial.services import FinancialAppService
 from .serializers import (
     CostReportListSerializer, CostReportDetailSerializer, 
@@ -23,7 +23,7 @@ from .serializers import (
 class FinancialCatalogViewSet(viewsets.ModelViewSet):
     """ مدیریت داده‌های پایه هزینه‌ها (CRUD ساده) """
     permission_classes = [IsAuthenticated]
-    queryset = OrderCostCatalog.objects.select_related('cost_type').all()
+    queryset = OrderCostCategory.objects.select_related('cost_type').all()
     serializer_class = CostCatalogSerializer
 
 # ========== Financial Report ViewSet ========== #
@@ -40,7 +40,7 @@ class FinancialReportViewSet(viewsets.GenericViewSet):
         self.service = FinancialAppService()
 
     def get_queryset(self):
-        return OrderCostReport.objects.all()
+        return OrderCostSheet.objects.all()
 
     def get_serializer_class(self):
         if self.action == 'list':

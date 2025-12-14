@@ -112,7 +112,7 @@ class OrderTransitionView(GenericAPIView):
             return Response({
                 "message": "وضعیت سفارش با موفقیت تغییر کرد.",
                 "id": updated_order.id,
-                "new_status": updated_order.current_status.name, # یا دیتای کامل وضعیت
+                "new_status": updated_order.current_status.name,
                 "new_status_code": updated_order.current_status.internal_code
             }, status=status.HTTP_200_OK)
             
@@ -120,4 +120,4 @@ class OrderTransitionView(GenericAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         except Exception as e:
-            return Response({"detail": "خطای سیستمی رخ داده است."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": f"خطای سیستمی رخ داده است.{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

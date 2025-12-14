@@ -3,7 +3,7 @@ from typing import Dict, Any
 from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from apps.permissions import AppPermissionChecker
-from core.models import User, Order, OrderShipment, OrderPackage, OrderCostReport
+from core.models import User, Order, OrderShipment, OrderPackage, OrderCostSheet
 from core.domain.commerce.order import (
     LogisticDomainService,
     OrderCostDomainService,
@@ -107,7 +107,7 @@ class WarehouseAppService:
     # ========== 3. عملیات هزینه لجستیک (Ad-hoc Cost) ==========
     # ==================================================
     
-    def add_logistic_cost_report(self, user: User, order_id: int, data: Dict[str, Any]) -> OrderCostReport:
+    def add_logistic_cost_report(self, user: User, order_id: int, data: Dict[str, Any]) -> OrderCostSheet:
         """
         عملیات: اضافه کردن گزارش هزینه لجستیک جدید (مانند هزینه بیمه، بسته‌بندی اضافی).
         """
@@ -124,7 +124,6 @@ class WarehouseAppService:
             attachment=data.get('attachment'),
             items_data=data['items'],
             user=user
-            # Category باید در داخل متد create_cost_report بر اساس نوع هزینه فیلتر شود.
         )
         return cost_report
 

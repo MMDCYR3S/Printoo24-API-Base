@@ -4,7 +4,6 @@ from .views import (
     OrderListView,
     OrderDetailView,
     OrderItemUploadView,
-    FileReviewView,
     OrderStatusGroupViewSet,
     OrderStatusViewSet,
     OrderTransitionView,
@@ -13,6 +12,7 @@ from .views import (
     OrderPrintUsageListView,
     OrderPrintUsageCreateView,
     OrderPrintUsageDetailView,
+    OrderItemStatusUpdateView,
 )
 
 router = DefaultRouter()
@@ -26,7 +26,7 @@ urlpatterns = [
     path('order/detail/<int:pk>/', OrderDetailView.as_view(), name='admin-order-detail'),
     # ===== File Upload - Designer ===== #
     path('items/upload/<int:item_id>/', OrderItemUploadView.as_view(), name='admin-item-upload'),
-    path('files/status/<int:file_id>/', FileReviewView.as_view(), name='admin-file-status'),
+    path('order/item/<int:pk>/status/', OrderItemStatusUpdateView.as_view(), name='order-item-status-update'),
     # ===== Status Transition ===== #
     path('transition/<int:pk>/', OrderTransitionView.as_view(), name='admin-order-transition'),
     # ===== Order Cost Report Create ===== #

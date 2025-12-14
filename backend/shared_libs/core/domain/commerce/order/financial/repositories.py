@@ -2,18 +2,18 @@ from typing import List, Optional
 from django.db.models import QuerySet
 from core.utils.base_repository import BaseRepository
 from core.models import (
-    OrderCostReport, 
-    OrderCostItem, 
-    OrderCostCatalog, 
-    OrderCostType
+    OrderCostSheet,
+    OrderCostCategory,
+    OrderCostItem,
+    OrderCostAttachment
 )
 
 # ===== 1. Repository for Cost Reports (Header) ===== #
-class OrderCostReportRepository(BaseRepository[OrderCostReport]):
+class OrderCostSheetRepository(BaseRepository[OrderCostSheet]):
     def __init__(self):
-        super().__init__(OrderCostReport)
+        super().__init__(OrderCostSheet)
 
-    def get_reports_by_order(self, order_id: int) -> QuerySet[OrderCostReport]:
+    def get_reports_by_order(self, order_id: int) -> QuerySet[OrderCostSheet]:
         """ دریافت تمام گزارش‌های یک سفارش با جزئیات اقلام """
         return self.model.objects.filter(order_id=order_id)\
             .select_related('created_by')\
@@ -30,18 +30,13 @@ class OrderCostItemRepository(BaseRepository[OrderCostItem]):
         return self.model.objects.bulk_create(items)
 
 # ===== 3. Repository for Cost Catalog (Master Data) ===== #
-class OrderCostCatalogRepository(BaseRepository[OrderCostCatalog]):
+class OrderCostCategoryRepository(BaseRepository[OrderCostCategory]):
     def __init__(self):
-        super().__init__(OrderCostCatalog)
+        super().__init__(OrderCostCategory)
 
-    def get_active_items_by_type(self, cost_type_id: int = None) -> QuerySet[OrderCostCatalog]:
+    def get_active_items_by_type(self, cost_type_id: int = None) -> QuerySet[OrderCostCategory]:
         """ دریافت لیست کالا/خدمات فعال (برای دراپ‌دان فرانت) """
         qs = self.model.objects.filter(is_active=True)
         if cost_type_id:
             qs = qs.filter(cost_type_id=cost_type_id)
         return qs
-
-# ===== 4. Repository for Cost Types ===== #
-class OrderCostTypeRepository(BaseRepository[OrderCostType]):
-    def __init__(self):
-        super().__init__(OrderCostType)

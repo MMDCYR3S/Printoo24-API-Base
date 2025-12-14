@@ -1,11 +1,11 @@
 import json
 from rest_framework import serializers
-from core.models import OrderPrintReport, OrderPrintItem, OrderPrintAttachment
+from core.models import OrderPrintReport, OrderPrintItem, OrderPrintAttachment, OrderCostCategory
 
 # ========== Sub-Serializers ========== #
 class PrintItemInputSerializer(serializers.Serializer):
     """ ورودی هر قلم مصرفی """
-    material_type = serializers.ChoiceField(choices=OrderPrintItem.MaterialType.choices)
+    # material_type = serializers.ChoiceField(choices=OrderCostCategory.objects.filter(cost_type='material'))
     custom_title = serializers.CharField(required=False, allow_blank=True)
     price = serializers.DecimalField(max_digits=12, decimal_places=2)
     description = serializers.CharField(required=False, allow_blank=True)
@@ -77,7 +77,7 @@ class PrintItemUpdateSerializer(serializers.Serializer):
     تفاوت با Create: فیلد id اختیاری است (اگر باشد Update، نباشد Create).
     """
     id = serializers.IntegerField(required=False, allow_null=True) # <--- مهم
-    material_type = serializers.ChoiceField(choices=OrderPrintItem.MaterialType.choices)
+    # material_type = serializers.ChoiceField(choices=OrderCostCategory.objects.filter(cost_type='material'))
     description = serializers.CharField(required=False, allow_blank=True)
 
 class PrintReportUpdateSerializer(serializers.Serializer):

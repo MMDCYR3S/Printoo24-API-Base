@@ -47,10 +47,7 @@ class OrderTransitionAppService:
         # ===== اعتبارسنجی ===== #
         self._validate_role_scope(requester, order.current_status)
         self._validate_transition_direction(order.current_status, new_status)
-        
-        # ===== اعتبارسنجی فایل‌ها ===== #
-        if new_status.requires_file_check:
-            self._validate_all_order_files(order)
+        self._validate_all_order_files(order)
         
         # ===== اجرای تغییر وضعیت ===== #
         return self.flow_domain_service.change_order_status(
@@ -99,12 +96,16 @@ class OrderTransitionAppService:
         if not current_status:
             return
 
-        role = user.user_role.role
+        user_role_rel = user.user_role.select_related('role').first()
+        role = user_role_rel.role
         if role.type == 'admin':
             return
             
+        # ===== بررسی اینکه آیا وضعیت گروه دسترسی برای کاربر هست یا خیر. اگر نه، نباید تغییر دهد ===== #
         if not role.allowed_groups.filter(id=current_status.group_id).exists():
-             raise PermissionDenied(f"شما دسترسی به سفارشات مرحله '{current_status.group.name}' را ندارید.")
+             raise PermissionDenied(f"شما دسترسی به ویرایش سفارش در مرحله '{current_status.group.name}' را ندارید.")
+         
+         
 
     def _validate_transition_direction(self, current_status: OrderStatus, new_status: OrderStatus):
         """
@@ -132,11 +133,16 @@ class OrderTransitionAppService:
             product = item.product
             required_specs = product.file_upload_requirements.filter(is_required=True)
             
+            # ===== اگر آیتم تایید نشده بود، خطابده ===== #
+            if not item.status == "approved":
+                errors.append(f"آیتم باید تایید شود.")
+                continue
+            
             if not required_specs.exists():
                 continue
 
             # فایل‌های آپلود شده برای این آیتم
-            uploaded_files = item.files.filter(is_latest=True).exclude(status='rejected')
+            uploaded_files = item.files.filter(is_latest=True)
             uploaded_req_ids = set(f.requirement_id for f in uploaded_files)
             
             missing = []
