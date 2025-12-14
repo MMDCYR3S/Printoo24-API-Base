@@ -17,6 +17,11 @@ class CartListView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CartListSerializer
 
+    @extend_schema(
+        summary="مشاهده سبد خرید کامل",
+        description="لیست تمام آیتم‌های موجود در سبد خرید به همراه قیمت کل محاسبه شده.",
+        responses={200: CartListSerializer}
+    )
     def get(self, request):
         # ===== ایجاد سرویس نمایش لیست سبد خرید ===== #
         service = CartListService()
@@ -43,6 +48,10 @@ class CartItemDetailView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CartItemSerializer
     
+    @extend_schema(
+        summary="دریافت جزئیات یک آیتم",
+        responses={200: CartItemSerializer}
+    )
     def get(self, request, item_id):
         # ===== ایجاد سرویس مربوط به نمایش جزئیات آیتم سبد خرید ===== #
         service = CartItemDetailService()
