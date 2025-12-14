@@ -37,17 +37,6 @@ class ContactUsViewSet(mixins.CreateModelMixin,
         super().__init__(**kwargs)
         self.service = ContentService()
 
-    @extend_schema(tags=['Contact'], summary="ارسال پیام تماس با ما")
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        # ===== انتقال لاجیک ذخیره‌سازی به سرویس ===== #
-        instance = self.service.submit_contact_form(serializer.validated_data)
-        
-        output_serializer = self.get_serializer(instance)
-        return Response(output_serializer.data, status=status.HTTP_201_CREATED)
-
     # ===== اکشن پاسخ (Reply Action) ===== #
     @extend_schema(
         summary="پاسخ ادمین به پیام (ارسال ایمیل)",

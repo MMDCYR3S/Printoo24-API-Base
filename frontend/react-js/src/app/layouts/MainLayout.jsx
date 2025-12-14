@@ -4,6 +4,7 @@ import Header from './Header';
 import Footer from './Footer';
 import MobileMenu from '../components/layout/MobileMenu'; // اطمینان از ایمپورت
 import { X } from 'lucide-react';
+import SupportFloat from '../components/common/SupportFloat';
 
 const MainLayout = () => {
   
@@ -37,6 +38,8 @@ const MainLayout = () => {
         </main>
         
         <Footer />
+
+        <SupportFloat />
       </div>
 
       {/* 🟠 سایدبار کشویی (Sidebar Content) */}

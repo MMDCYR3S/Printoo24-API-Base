@@ -22,3 +22,11 @@ class NotificationSerializer(serializers.ModelSerializer):
     def get_time_since(self, obj):
         from django.utils.timesince import timesince
         return timesince(obj.created_at)
+
+# ===== Notification Response Wrapper ===== #
+class NotificationListResponseSerializer(serializers.Serializer):
+    """
+    سریالایزر ساختار پاسخ لیست اعلان‌ها (شامل تعداد ناخوانده).
+    """
+    unread_count = serializers.IntegerField(help_text="تعداد کل اعلان‌های خوانده نشده")
+    results = NotificationSerializer(many=True, help_text="لیست اعلان‌ها")

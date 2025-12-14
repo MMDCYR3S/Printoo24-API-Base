@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample
 
 from ..serializers import CartItemFileUploadSerializer
 from apps.cart.services import CartItemUploadService
@@ -19,6 +19,33 @@ class CartItemFileUploadView(GenericAPIView):
     serializer_class = CartItemFileUploadSerializer
     parser_classes = (MultiPartParser, FormParser)
 
+    @extend_schema(
+        summary="آپلود فایل برای آیتم سبد",
+        description="""
+        فایل طراحی را برای یک آیتم خاص در سبد خرید آپلود می‌کند.
+        
+        **توجه:** این ریکوئست باید به صورت `multipart/form-data` ارسال شود.
+        """,
+        request=CartItemFileUploadSerializer,
+        responses={
+            201: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT
+        },
+        examples=[
+            OpenApiExample(
+                'Upload Response Success',
+                summary='پاسخ موفق آپلود',
+                value={
+                    "message": "فایل با موفقیت آپلود شد.",
+                    "upload_id": 15,
+                    "file_name": "design_front.pdf",
+                    "requirement_id": 2
+                },
+                response_only=True,
+                status_codes=[201]
+            )
+        ]
+    )
     def post(self, request, item_id):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
