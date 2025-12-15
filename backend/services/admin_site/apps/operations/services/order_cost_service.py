@@ -39,7 +39,6 @@ class OrderCostAppService:
             order_id=order.id,
             user=requester,
             department=validated_data['department'],
-            cost_type=validated_data['cost_type'],
             title=validated_data['title'],
             items_data=validated_data['items'],
             attachments_data=files_list,

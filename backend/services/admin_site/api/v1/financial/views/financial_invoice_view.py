@@ -6,7 +6,7 @@ from drf_spectacular.utils import extend_schema
 
 from apps.financial.services import FinancialInvoiceAppService
 from ..serializers import (
-    InvoiceDetailSerializer, InvoiceUpdateInputSerializer, CreateInvoiceInputSerializer
+    InvoiceDetailSerializer, InvoiceUpdateSerializer, CreateInvoiceInputSerializer
 )
 
 @extend_schema(tags=['Financial - Invoices'])
@@ -17,6 +17,11 @@ class FinancialInvoiceViewSet(viewsets.GenericViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.service = FinancialInvoiceAppService()
+
+    def list(self, request):
+        """ لیست فاکتورها """
+        invoices = self.service._invoice_repo.get_all()
+        return Response(InvoiceDetailSerializer(invoices, many=True).data)
 
     def retrieve(self, request, pk=None):
         invoice = self.service.get_invoice_detail(request.user, pk)
@@ -46,13 +51,26 @@ class FinancialInvoiceViewSet(viewsets.GenericViewSet):
         invoice = self.service.finalize_invoice(request.user, pk)
         return Response(InvoiceDetailSerializer(invoice).data)
     
-    @extend_schema(request=InvoiceUpdateInputSerializer)
-    def partial_update(self, request, pk=None):
-        """ ویرایش متادیتا """
-        serializer = InvoiceUpdateInputSerializer(data=request.data)
+    @extend_schema(request=InvoiceUpdateSerializer, responses=InvoiceDetailSerializer)
+    def update(self, request, pk=None):
+        """ ویرایش کامل فاکتور """
+        serializer = InvoiceUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        invoice = self.service.update_invoice_metadata(
+        invoice = self.service.update_invoice(
+            request.user, 
+            invoice_id=pk, 
+            data=serializer.validated_data
+        )
+        return Response(InvoiceDetailSerializer(invoice).data)
+
+    @extend_schema(request=InvoiceUpdateSerializer, responses=InvoiceDetailSerializer)
+    def partial_update(self, request, pk=None):
+        """ ویرایش جزئی فاکتور (مثلاً فقط توضیحات یا فقط مبلغ تخفیف) """
+        serializer = InvoiceUpdateSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        
+        invoice = self.service.update_invoice(
             request.user, 
             invoice_id=pk, 
             data=serializer.validated_data

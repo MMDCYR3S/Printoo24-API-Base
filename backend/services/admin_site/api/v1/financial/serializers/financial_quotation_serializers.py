@@ -10,12 +10,11 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
 
 class CreateQuotationInputSerializer(serializers.Serializer):
     """ ورودی ایجاد پیش‌فاکتور """
-    # فیلد جدید: انتخاب مشتری
-    customer_id = serializers.IntegerField(required=True, help_text="شناسه کاربری مشتری")
+    user = serializers.IntegerField(required=True, help_text="شناسه کاربری مشتری")
     title = serializers.CharField(max_length=200)
     valid_until = serializers.DateTimeField()
     description = serializers.CharField(required=False, allow_blank=True)
-    total_amount = serializers.DecimalField(max_digits=18, decimal_places=0)
+    items_amount = serializers.DecimalField(max_digits=18, decimal_places=0)
     tax_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
     final_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
     discount_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False, default=0)
@@ -25,7 +24,7 @@ class UpdateQuotationInputSerializer(serializers.Serializer):
     title = serializers.CharField(required=False)
     valid_until = serializers.DateTimeField(required=False)
     description = serializers.CharField(required=False, allow_blank=True)
-    total_amount = serializers.DecimalField(max_digits=18, decimal_places=0)
+    items_amount = serializers.DecimalField(max_digits=18, decimal_places=0)
     tax_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
     final_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
     discount_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)

@@ -431,7 +431,6 @@ class OrderCostSheet(models.Model):
     def recalculate_totals(self):
         self.save()
 
-
 # ===== Order Cost Report ===== #
 class OrderCostReport(models.Model):
     """
