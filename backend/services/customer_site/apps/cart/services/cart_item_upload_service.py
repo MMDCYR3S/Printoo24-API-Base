@@ -40,16 +40,19 @@ class CartItemUploadService:
         except ProductFileUploadRequirement.DoesNotExist:
             raise ValidationError("این نیازمندی فایل برای محصول انتخابی معتبر نیست.")
 
-        # 3. استخراج ابعاد ذخیره شده در آیتم
-        # چون در مرحله AddToCart ابعاد دقیق محاسبه و در JSON ذخیره شده است
+        config = cart_item.items 
+            
+
+        required_width = float(config.get('width', 0))
+        required_height = float(config.get('height', 0))
+        logger.debug(f"Checked dimensions: W={required_width}, H={required_height}")
+        
         try:
-            item_details = cart_item.items.get('details', {})
-            required_width = float(item_details.get('width', 0))
-            required_height = float(item_details.get('height', 0))
+            if 'details' in config:
+                required_width = float(config['details'].get('width', 0))
+                required_height = float(config['details'].get('height', 0))
             
             if required_width <= 0 or required_height <= 0:
-                # فال‌بک: اگر در جیسون نبود (محصولات قدیمی)، دوباره محاسبه کنیم؟ 
-                # فعلا خطا می‌دهیم چون دیتای آیتم باید کامل باشد
                 raise ValidationError("ابعاد آیتم در سبد خرید مشخص نیست.")
                 
         except (AttributeError, ValueError):
@@ -77,15 +80,10 @@ class CartItemUploadService:
         اجرای ولیدیتورهای تخصصی روی فایل در حافظه
         """
         try:
-            # 1. ابعاد
-            file.seek(0)
-            validate_image_dimensions(file, width, height)
-            
-            # 2. رنگ (CMYK)
+            # رنگ (CMYK)
             file.seek(0)
             validate_image_cmyk(file)
-            
-            # 3. کیفیت (DPI)
+            # کیفیت (DPI)
             file.seek(0)
             validate_image_dpi(file)
             

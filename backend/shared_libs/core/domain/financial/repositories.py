@@ -43,5 +43,5 @@ class QuotationRepository(BaseRepository[Quotation]):
         super().__init__(Quotation)
 
     def get_quotation_detail(self, quotation_id: int) -> Optional[Quotation]:
-        return self.model.objects.select_related('user', 'converted_order').filter(id=quotation_id).first()
+        return self.model.objects.select_related('created_by', 'converted_order').filter(id=quotation_id).first()
 

@@ -1,6 +1,7 @@
 import os
 from random import randint
 
+from django.utils import timezone
 from django.db import models
 from django.db.models import Sum, Q, F
 from django.conf import settings
@@ -721,18 +722,13 @@ class OrderPackage(models.Model):
     )
     
     # ===== اطلاعات مربوط به لیبل ===== #
-    label_uuid = models.UUIDField(_("شناسه لیبل"), editable=False, unique=True, null=True, blank=True)
-    
-    # ===== اطلاعات مربوط به بسته ===== #
-    box_number = models.PositiveIntegerField(_("شماره بسته"), default=1)
-    weight_grams = models.PositiveIntegerField(_("وزن (گرم)"), default=0)
-    width_cm = models.PositiveIntegerField(_("عرض (cm)"), default=0)
-    length_cm = models.PositiveIntegerField(_("طول (cm)"), default=0)
-    height_cm = models.PositiveIntegerField(_("ارتفاع (cm)"), default=0)
-    
+    label_uuid = models.CharField(_("شناسه لیبل"), max_length=50, editable=False, unique=True, null=True, blank=True)
     # ===== محتویات داخل بسته ===== #
+    customer_name = models.CharField(_("نام مشتری"), max_length=150, null=True, blank=True)
+    phone_number = models.CharField(_("شماره تماس"), max_length=11, null=True, blank=True)
+    address = models.TextField(_("آدرس"), null=True, blank=True)
+    order_image = models.ImageField(_("تصویر سفارش"), null=True, blank=True)
     content_summary = models.TextField(_("خلاصه محتویات"), blank=True, help_text="مثلا: ۱۰۰۰ عدد کارت ویزیت لمینت")
-    
     # ===== مسئول بسته بندی ===== #
     packed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
@@ -747,14 +743,60 @@ class OrderPackage(models.Model):
     class Meta:
         verbose_name = _('بسته/کارتن')
         verbose_name_plural = _('بسته‌ها و لیبل‌ها')
-        # ===== یکتا بودن با شماره بسته ===== #
-        unique_together = ['shipment', 'box_number']
 
     def __str__(self):
-        return f"Box {self.box_number} (Weight: {self.weight_grams}g)"
+        return f"{self.customer_name} - {self.label_code}"
     
     @property
     def label_code(self):
         """کد کوتاه خوانا برای چاپ روی لیبل"""
         return str(self.label_uuid).split('-')[0].upper()
-    
+
+# ========== ORDER SCHEDULE ========== #
+class OrderSchedule(models.Model):
+    """
+    مدل برای زمانبندی دقیق و اختصاصی هر سفارش
+    """
+    order = models.OneToOneField(
+        Order, 
+        on_delete=models.CASCADE, 
+        related_name='schedule'
+    )
+    start_date = models.DateTimeField(verbose_name="تاریخ شروع فرآیند")
+    due_date = models.DateTimeField(verbose_name="تاریخ تحویل نهایی (Deadline)")
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name="تاریخ تکمیل واقعی")
+    schedule_notes = models.TextField(blank=True, null=True)
+    is_locked = models.BooleanField(default=False, help_text="اگر قفل شود، تاریخ‌ها به صورت خودکار تغییر نمی‌کنند")
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['start_date', 'due_date']),
+        ]
+
+    @property
+    def duration_days(self):
+        """مدت زمان کل پروژه"""
+        return (self.due_date - self.start_date).days
+
+    @property
+    def remaining_days(self):
+        """روزهای باقی‌مانده تا ددلاین"""
+        if self.completed_at:
+            return 0
+        
+        now = timezone.now()
+        delta = self.due_date - now
+        return delta.days
+
+# ========== SCHEDULE MILESTONE ========== #
+class ScheduleMilestone(models.Model):
+    """
+    مدل برای ریزجزئیات و برنامه های مربوط به زمانبندی سفارش
+    زمانی که کارکنان کارهای خود را می خواهند انجام دهند، باید
+    از قبل سفارشات خود را باز کنند و زمانبندی آن‌ها را
+    تنظیم کنند.
+    """
+    schedule = models.ForeignKey(OrderSchedule, related_name='milestones', on_delete=models.CASCADE)
+    title = models.CharField(max_length=150)
+    due_date = models.DateTimeField()
+    is_completed = models.BooleanField(default=False)

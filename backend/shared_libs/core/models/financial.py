@@ -1,30 +1,9 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
-from django.utils import timezone
-
-class BaseFinancialDocument(models.Model):
-    """
-    کلاس والد انتزاعی برای جلوگیری از تکرار کد بین فاکتور و پیش‌فاکتور.
-    این کلاس در دیتابیس جدول نخواهد داشت.
-    """
-    # فیلدهای مشترک مالی
-    items_amount = models.DecimalField(_("جمع اقلام"), max_digits=18, decimal_places=0, null=True, blank=True)
-    services_amount = models.DecimalField(_("جمع خدمات"), max_digits=18, decimal_places=0, default=0)
-    tax_amount = models.DecimalField(_("مالیات"), max_digits=18, decimal_places=0, default=0)
-    discount_amount = models.DecimalField(_("تخفیف"), max_digits=18, decimal_places=0, default=0)
-    final_amount = models.DecimalField(_("مبلغ قابل پرداخت"), max_digits=18, decimal_places=0, default=0)
-    
-    description = models.TextField(_("توضیحات"), blank=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
-
-    class Meta:
-        abstract = True
 
 # ===== Invoice Model ===== #
-class Invoice(BaseFinancialDocument):
+class Invoice(models.Model):
     class Status(models.TextChoices):
         PENDING = 'PENDING', _('در انتظار پرداخت')
         PAID_PARTIAL = 'PAID_PARTIAL', _('پرداخت ناقص')
@@ -42,6 +21,12 @@ class Invoice(BaseFinancialDocument):
     invoice_number = models.CharField(_("شماره فاکتور"), max_length=50, unique=True, db_index=True)
     
     paid_amount = models.DecimalField(_("مبلغ دریافتی تایید شده"), max_digits=18, decimal_places=0, default=0)
+    items_amount = models.DecimalField(_("جمع اقلام"), max_digits=18, decimal_places=0, null=True, blank=True)
+    services_amount = models.DecimalField(_("جمع خدمات"), max_digits=18, decimal_places=0, default=0)
+    tax_amount = models.DecimalField(_("مالیات"), max_digits=18, decimal_places=0, default=0)
+    discount_amount = models.DecimalField(_("تخفیف"), max_digits=18, decimal_places=0, default=0)
+    final_amount = models.DecimalField(_("مبلغ قابل پرداخت"), max_digits=18, decimal_places=0, default=0)
+    description = models.TextField(_("توضیحات"), blank=True)
     status = models.CharField(
         _("وضعیت"), max_length=20, choices=Status.choices, default=Status.PENDING, db_index=True
     )
@@ -50,6 +35,9 @@ class Invoice(BaseFinancialDocument):
     due_date = models.DateTimeField(_("سررسید"), null=True, blank=True)
     finalized_at = models.DateTimeField(_("تاریخ قطعی شدن"), null=True, blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    
     class Meta:
         verbose_name = _('فاکتور')
         verbose_name_plural = _('فاکتورها')
@@ -158,7 +146,7 @@ class Transaction(models.Model):
         return f"{self.get_method_display()} - {self.amount}"
 
 # ===== Quotation (Independent) ===== #
-class Quotation(BaseFinancialDocument):
+class Quotation(models.Model):
     class Status(models.TextChoices):
         DRAFT = 'draft', _('پیش‌نویس')
         SENT = 'sent', _('ارسال شده')
@@ -168,12 +156,9 @@ class Quotation(BaseFinancialDocument):
         CONVERTED = 'converted', _('تبدیل شده به سفارش')
 
     # فیلدهای اختصاصی پیش‌فاکتور
-    quotation_number = models.CharField(_("شماره پیش‌فاکتور"), max_length=50, unique=True)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.PROTECT,
-        verbose_name=_("مشتری"),
-        related_name='quotations'
+    quotation_number = models.CharField(
+        _("شماره پیش‌فاکتور"),
+        max_length=50, unique=True,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -182,11 +167,6 @@ class Quotation(BaseFinancialDocument):
         verbose_name=_("ایجاد کننده"),
         related_name='created_quotations'
     )
-    
-    title = models.CharField(_("عنوان"), max_length=200)
-    valid_until = models.DateTimeField(_("تاریخ اعتبار"))
-    status = models.CharField(_("وضعیت"), max_length=20, choices=Status.choices, default=Status.DRAFT)
-    
     # ===== سفارش مربوط به پیش فاکتور ===== #
     converted_order = models.OneToOneField(
         'core.Order',
@@ -195,6 +175,27 @@ class Quotation(BaseFinancialDocument):
         verbose_name=_("سفارش تبدیل شده"),
         related_name='origin_quotation'
     )
+    customer_name = models.CharField(_("نام مشتری"), max_length=255, null=True)
+    product_name = models.CharField(_("نام محصول"), max_length=255, null=True)
+    product_snapshot = models.JSONField(
+        _("جزئیات پیکربندی (Snapshot)"),
+        default=dict,
+        null=True, blank=True,
+        help_text=_("شامل ابعاد، متریال، آپشن‌ها و ویژگی‌های انتخابی در لحظه صدور")
+    )
+    quantity = models.PositiveIntegerField(_("تیراژ"), default=0)
+    estimated_delivery_date = models.DateField(_("تاریخ تخمینی تحویل"), null=True, blank=True)
+    total_price = models.DecimalField(_("مبلغ کل"), max_digits=18, decimal_places=0, default=0)
+    
+    status = models.CharField(
+        _("وضعیت"), max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT
+    )
+    
+    valid_until = models.DateField(_("معتبر تا تاریخ"), null=True, blank=True)
+    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True, null=True)
 
     class Meta:
         verbose_name = _('پیش‌فاکتور')
@@ -203,3 +204,10 @@ class Quotation(BaseFinancialDocument):
 
     def __str__(self):
         return f"Quote #{self.quotation_number}"
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        if self.valid_until and self.valid_until < timezone.now().date():
+            return True
+        return False

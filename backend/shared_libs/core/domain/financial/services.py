@@ -130,20 +130,6 @@ class FinancialDomainService:
     # ============ QUOTATION LOGIC ============ #
 
     @transaction.atomic
-    def recalculate_quotation_totals(self, quotation: Quotation) -> Quotation:
-        """
-        قانون بیزنس: محاسبه مالیات و جمع کل پیش‌فاکتور.
-        مشابه فاکتور، بعد از آپدیت خام توسط App Service صدا زده می‌شود.
-        """
-        quotation.final_amount = (
-            quotation.items_amount + 
-            quotation.tax_amount - 
-            quotation.discount_amount
-        )
-        quotation.save()
-        return quotation
-
-    @transaction.atomic
     def convert_quotation_to_invoice(self, quotation_id: int, user: User, order_id: int) -> Invoice:
         """
         قانون بیزنس پیچیده: تبدیل موجودیت A به B.
@@ -165,11 +151,11 @@ class FinancialDomainService:
         invoice = self.invoice_repo.create({
             "order": order,
             "invoice_number": f"INV-{order.order_code}",
-            "items_amount": quotation.items_amount,
+            "items_amount": quotation.total_price,
             "services_amount": 0,
-            "tax_amount": quotation.tax_amount,
-            "discount_amount": quotation.discount_amount,
-            "final_amount": quotation.final_amount,
+            "tax_amount": 0,
+            "discount_amount": 0,
+            "final_amount": quotation.total_price,
             "status": Invoice.Status.PENDING,
             "description": f"تبدیل از پیش‌فاکتور {quotation.quotation_number}"
         })

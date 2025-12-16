@@ -27,8 +27,9 @@ class FinancialQuotationViewSet(viewsets.GenericViewSet):
     def create(self, request):
         serializer = CreateQuotationInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
 
-        quo = self.service.create_quotation(request.user, serializer.validated_data)
+        quo = self.service.create_quotation(request.user, validated_data['converted_order'], validated_data)
         return Response(QuotationDetailSerializer(quo).data, status=status.HTTP_201_CREATED)
 
     @extend_schema(request=UpdateQuotationInputSerializer)

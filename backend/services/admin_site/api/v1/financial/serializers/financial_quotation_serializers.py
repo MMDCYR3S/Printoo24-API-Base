@@ -8,26 +8,20 @@ class QuotationDetailSerializer(serializers.ModelSerializer):
         model = Quotation
         fields = '__all__'
 
-class CreateQuotationInputSerializer(serializers.Serializer):
+class CreateQuotationInputSerializer(serializers.ModelSerializer):
     """ ورودی ایجاد پیش‌فاکتور """
-    user = serializers.IntegerField(required=True, help_text="شناسه کاربری مشتری")
-    title = serializers.CharField(max_length=200)
-    valid_until = serializers.DateTimeField()
-    description = serializers.CharField(required=False, allow_blank=True)
-    items_amount = serializers.DecimalField(max_digits=18, decimal_places=0)
-    tax_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
-    final_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
-    discount_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False, default=0)
+    class Meta:
+        model = Quotation
+        fields = '__all__'
+        read_only_fields = ['created_by', 'status', 'quotation_number', 'created_at', 'updated_at']
 
-class UpdateQuotationInputSerializer(serializers.Serializer):
+class UpdateQuotationInputSerializer(serializers.ModelSerializer):
     """ ورودی ویرایش پیش‌فاکتور """
-    title = serializers.CharField(required=False)
-    valid_until = serializers.DateTimeField(required=False)
-    description = serializers.CharField(required=False, allow_blank=True)
-    items_amount = serializers.DecimalField(max_digits=18, decimal_places=0)
-    tax_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
-    final_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
-    discount_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
+    class Meta:
+        model = Quotation
+        fields = '__all__'
+        read_only_fields = ["created_by", 'quotation_number', 'created_at', 'updated_at']
+
 
 class ConvertQuotationInputSerializer(serializers.Serializer):
     """ ورودی برای اتصال پیش‌فاکتور به یک سفارش موجود و صدور فاکتور """

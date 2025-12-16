@@ -179,6 +179,9 @@ class CustomerProfile(models.Model):
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
+    def fullname(self):
+        return self.first_name + " " + self.last_name
+    
     def __str__(self):
         return self.first_name + " " + self.last_name
     

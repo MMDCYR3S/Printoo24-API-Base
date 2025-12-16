@@ -147,7 +147,7 @@ class CartDomainService:
         # 3. آپدیت JSON
         serializable_specs = {
             'raw_selections': specs.get('raw_selections', {}),
-            'details': {
+            'items': {
                 'width': width,
                 'height': height,
                 'size_name': specs['size_obj'].size.name if specs.get('size_obj') else 'Custom',
