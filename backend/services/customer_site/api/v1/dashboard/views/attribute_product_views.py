@@ -85,6 +85,17 @@ class QuantityViewSet(viewsets.ViewSet):
             value=serializer.validated_data['value']
         )
         return Response(QuantitySerializer(instance).data, status=status.HTTP_201_CREATED)
+    
+    @extend_schema(request=QuantitySerializer, responses=QuantitySerializer)
+    def update(self, request, pk=None):
+        serializer = QuantitySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        instance = self.service.update_quantity(
+            pk, 
+            value=serializer.validated_data['value']
+        )
+        return Response(QuantitySerializer(instance).data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk=None):
         self.service.delete_quantity(pk)

@@ -70,12 +70,18 @@ class CheckoutDomainService:
             "price": cart_item.price,
             "items": cart_item.items,
         })
+        
+        product_image_obj = cart_item.product.product_image.filter(order=0).first()
+        if not product_image_obj:
+            product_image_obj = cart_item.product.product_image.first()
+        final_image_file = product_image_obj.image if product_image_obj else None
         # ===== ایجاد پیش فاکتور ===== #
         Quotation.objects.create(
             quotation_number=f"QUOT-{order.order_code}",
             converted_order=order,
             customer_name=user.customer_profile.fullname() if user.customer_profile.first_name else 'نامشخص',
             product_name=cart_item.product.name if cart_item.product else "محصول حذف شده",
+            product_image=final_image_file,
             product_snapshot=cart_item.items,
             quantity=cart_item.quantity,
             total_price=cart_item.price,

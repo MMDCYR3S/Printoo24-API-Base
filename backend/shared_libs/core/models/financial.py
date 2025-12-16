@@ -177,6 +177,11 @@ class Quotation(models.Model):
     )
     customer_name = models.CharField(_("نام مشتری"), max_length=255, null=True)
     product_name = models.CharField(_("نام محصول"), max_length=255, null=True)
+    product_image = models.ImageField(
+        _("تصویر محصول"),
+        upload_to='quotations/products/%Y/%m/%d/',
+        null=True, blank=True
+    )
     product_snapshot = models.JSONField(
         _("جزئیات پیکربندی (Snapshot)"),
         default=dict,

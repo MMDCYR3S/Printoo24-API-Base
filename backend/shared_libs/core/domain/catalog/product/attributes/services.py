@@ -69,7 +69,14 @@ class QuantityDomainService:
         instance = self.repo.get_by_id(pk)
         if not instance:
             raise ValidationError(_("تیراژ مورد نظر یافت نشد."))
-        return instance
+        return 
+    
+    def update_quantity(self, pk: int, data: Dict[str, Any]) -> Quantity:
+        instance = self.get_by_id(pk)
+        if 'value' in data and data['value'] != instance.value:
+            if self.repo.get_by_value(data['value']):
+                raise ValidationError(_("اين مقدار تيرژي قبلا ثبت شده است."))
+        return self.repo.update(instance, data)
 
     @transaction.atomic
     def create_quantity(self, user: User, value: int) -> Quantity:
