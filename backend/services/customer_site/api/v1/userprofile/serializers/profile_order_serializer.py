@@ -1,5 +1,46 @@
 from rest_framework import serializers
-from core.models import Order, OrderItem, OrderItemFile, Product, Address
+from core.models import Order, OrderItem, OrderItemFile, Product, Address, Quotation
+
+# ===== Quotation ===== #
+class QuotationSerializer(serializers.ModelSerializer):
+    product_image_url = serializers.SerializerMethodField()
+    # snapshot_details = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Quotation
+        fields = [
+            'id',
+            'quotation_number',
+            'customer_name',
+            'product_name',
+            'product_image_url',
+            'product_snapshot',
+            'quantity',
+            'total_price',
+            'created_at',
+            'status',
+        ]
+
+    def get_product_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.product_image:
+            return request.build_absolute_uri(obj.product_image.url) if request else obj.product_image.url
+        return None
+
+    # def get_snapshot_details(self, obj):
+    #     """
+    #     تبدیل JSON ذخیره شده به فرمت قابل نمایش
+    #     """
+    #     raw_data = obj.product_snapshot or {}
+    #     details = raw_data.get('details', {})
+        
+    #     return {
+    #         "dimensions": f"{details.get('width', 0)} x {details.get('height', 0)}",
+    #         "material": details.get('material_name', 'نامشخص'),
+    #         "features": [
+    #             f"{opt['name']}: {opt['value']}" for opt in details.get('options', [])
+    #         ]
+    #     }
 
 # ===== Product Summary ===== #
 class ProductSummarySerializer(serializers.ModelSerializer):

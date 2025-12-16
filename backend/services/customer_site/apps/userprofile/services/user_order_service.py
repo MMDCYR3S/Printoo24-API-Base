@@ -1,9 +1,10 @@
 import logging
-from typing import List, Optional, Any
-from rest_framework.exceptions import NotFound # بهتر است از اکسپشن DRF استفاده کنیم
+from typing import List
+from rest_framework.exceptions import NotFound
 
-from core.models import Order
+from core.models import Order, Quotation
 from core.domain.commerce.order import OrderDomainService
+from core.domain.financial import QuotationRepository
 
 logger = logging.getLogger('userprofile.services.orders')
 
@@ -13,8 +14,8 @@ class UserOrderListService:
     """
     
     def __init__(self):
-        # استفاده از دامین سرویس به جای ریپازیتوری مستقیم (معماری تمیزتر)
         self._domain_service = OrderDomainService()
+        self._quotation_repo = QuotationRepository()
 
     def get_user_orders(self, user_id: int) -> List[Order]:
         """
@@ -36,7 +37,6 @@ class UserOrderListService:
         logger.info(f"Fetching detail Order {order_id} for User {user_id}")
         
         try:
-            # فراخوانی متد دامین سرویس که شامل Prefetch فایل‌ها و آیتم‌هاست
             order = self._domain_service.get_user_order_item_details(user_id, order_id)
             
             if not order:
@@ -48,3 +48,19 @@ class UserOrderListService:
         except Exception as e:
             logger.error(f"Error fetching order detail: {e}")
             raise e
+
+    def get_order_quotation(self, user_id: int, order_id: int) -> Quotation:
+        """
+        دریافت پیش‌فاکتور مربوط به یک سفارش خاص برای کاربر.
+        """
+        quotation = self._quotation_repo.get_quotation_by_order(order_id)
+
+        if not quotation:
+            logger.warning(f"Quotation not found for order {order_id}")
+            raise NotFound("پیش‌فاکتور برای این سفارش صادر نشده است.")
+
+        if quotation.converted_order.user_id != user_id:
+            logger.warning(f"Security Alert: User {user_id} tried to access quotation of Order {order_id}")
+            raise NotFound("سفارش مورد نظر یافت نشد.")
+
+        return quotation
