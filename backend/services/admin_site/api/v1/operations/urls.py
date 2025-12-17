@@ -7,12 +7,12 @@ from .views import (
     OrderStatusGroupViewSet,
     OrderStatusViewSet,
     OrderTransitionView,
-    
     OrderPrintUsageListView,
     OrderPrintUsageCreateView,
     OrderPrintUsageDetailView,
     OrderItemStatusUpdateView,
     OrderCostReportSubmitView,
+    OrderScheduleManageView,
 )
 
 router = DefaultRouter()
@@ -34,6 +34,8 @@ urlpatterns = [
     path('orders/<int:pk>/print-usages/', OrderPrintUsageCreateView.as_view(), name='print-usage-create'),
     path('orders/<int:pk>/print-usages/list/', OrderPrintUsageListView.as_view(), name='print-usage-list'),
     path('print-usages/<int:pk>/', OrderPrintUsageDetailView.as_view(), name='print-usage-detail'),
+    # ===== Order Schedule ===== #
+    path('orders/<int:pk>/schedule/', OrderScheduleManageView.as_view(), name='order-schedule-manage'),
     
     # ===== Routers ===== #
     path('', include(router.urls)),

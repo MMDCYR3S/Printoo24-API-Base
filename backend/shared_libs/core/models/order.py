@@ -3,7 +3,7 @@ from random import randint
 
 from django.utils import timezone
 from django.db import models
-from django.db.models import Sum, Q, F
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
@@ -755,48 +755,59 @@ class OrderPackage(models.Model):
 # ========== ORDER SCHEDULE ========== #
 class OrderSchedule(models.Model):
     """
-    مدل برای زمانبندی دقیق و اختصاصی هر سفارش
+    مدل زمان‌بندی سفارش.
+    به صورت One-to-One به سفارش متصل است.
     """
     order = models.OneToOneField(
-        Order, 
+        'core.Order', 
         on_delete=models.CASCADE, 
-        related_name='schedule'
+        related_name='schedule',
+        verbose_name=_("سفارش مرتبط")
     )
-    start_date = models.DateTimeField(verbose_name="تاریخ شروع فرآیند")
-    due_date = models.DateTimeField(verbose_name="تاریخ تحویل نهایی (Deadline)")
-    completed_at = models.DateTimeField(null=True, blank=True, verbose_name="تاریخ تکمیل واقعی")
-    schedule_notes = models.TextField(blank=True, null=True)
-    is_locked = models.BooleanField(default=False, help_text="اگر قفل شود، تاریخ‌ها به صورت خودکار تغییر نمی‌کنند")
+    
+    # ===== بازه‌های زمانی ===== #
+    start_date = models.DateTimeField(_("تاریخ شروع فرآیند"), default=timezone.now)
+    due_date = models.DateTimeField(_("تاریخ تحویل نهایی (Deadline)"))
+    # ===== وضعیت اجرا ===== #
+    completed_at = models.DateTimeField(_("تاریخ تکمیل واقعی"), null=True, blank=True)
+    # ===== تنظیمات مدیریتی ===== #
+    # schedule_notes = models.TextField(_("یادداشت برنامه‌ریزی"), blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
+        verbose_name = _('زمان‌بندی سفارش')
+        verbose_name_plural = _('زمان‌بندی‌های سفارش')
         indexes = [
             models.Index(fields=['start_date', 'due_date']),
+            models.Index(fields=['completed_at']),
         ]
+
+    def __str__(self):
+        return f"Schedule: {self.order.order_code}"
+
+    def clean(self):
+        """ اعتبارسنجی سطح دیتابیس """
+        if self.due_date and self.start_date and self.due_date < self.start_date:
+            raise ValidationError(_("تاریخ تحویل نمی‌تواند قبل از تاریخ شروع باشد."))
 
     @property
     def duration_days(self):
-        """مدت زمان کل پروژه"""
+        """ مدت زمان برنامه‌ریزی شده (روز) """
         return (self.due_date - self.start_date).days
 
     @property
-    def remaining_days(self):
-        """روزهای باقی‌مانده تا ددلاین"""
+    def is_overdue(self):
+        """ آیا از موعد تحویل گذشته و هنوز تمام نشده؟ """
         if self.completed_at:
-            return 0
-        
-        now = timezone.now()
-        delta = self.due_date - now
-        return delta.days
+            return False
+        return timezone.now() > self.due_date
 
-# ========== SCHEDULE MILESTONE ========== #
-class ScheduleMilestone(models.Model):
-    """
-    مدل برای ریزجزئیات و برنامه های مربوط به زمانبندی سفارش
-    زمانی که کارکنان کارهای خود را می خواهند انجام دهند، باید
-    از قبل سفارشات خود را باز کنند و زمانبندی آن‌ها را
-    تنظیم کنند.
-    """
-    schedule = models.ForeignKey(OrderSchedule, related_name='milestones', on_delete=models.CASCADE)
-    title = models.CharField(max_length=150)
-    due_date = models.DateTimeField()
-    is_completed = models.BooleanField(default=False)
+    @property
+    def delay_days(self):
+        """ میزان تاخیر (اگر تکمیل شده: تفاوت تکمیل با ددلاین / اگر نشده: تفاوت الان با ددلاین) """
+        target_date = self.completed_at if self.completed_at else timezone.now()
+        if target_date > self.due_date:
+            return (target_date - self.due_date).days
+        return 0
