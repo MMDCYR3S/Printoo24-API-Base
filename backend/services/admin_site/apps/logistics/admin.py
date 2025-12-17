@@ -1,3 +1,6 @@
 from django.contrib import admin
+from core.models import OrderShipment, DeliveryMethod, OrderPackage
 
-# Register your models here.
+admin.site.register(OrderShipment)
+admin.site.register(DeliveryMethod)
+admin.site.register(OrderPackage)

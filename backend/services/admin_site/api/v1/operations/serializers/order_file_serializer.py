@@ -1,15 +1,22 @@
 from rest_framework import serializers
-from core.models import OrderItemFile
+from core.models import OrderItem
 
 class DesignFileUploadSerializer(serializers.Serializer):
     """ ورودی آپلود فایل """
     requirement_id = serializers.IntegerField()
     file = serializers.FileField()
 
-class FileReviewSerializer(serializers.Serializer):
-    """ 
-    ورودی بررسی فایل (تایید یا رد).
-    جایگزین FileStatusChangeSerializer قدیمی.
+class OrderItemStatusUpdateSerializer(serializers.Serializer):
     """
-    is_accepted = serializers.BooleanField(required=True, help_text="True برای تایید، False برای رد")
-    admin_feedback = serializers.CharField(required=False, allow_blank=True, help_text="توضیحات یا دلیل رد")
+    ورودی تغییر وضعیت آیتم
+    """
+    new_status = serializers.ChoiceField(
+        choices=OrderItem.STATUS_CHOICES, 
+        required=True,
+        help_text="وضعیت جدید (pending, approved, rejected, cancelled)"
+    )
+    admin_note = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        help_text="توضیحات فنی (مثلاً دلیل رد کردن)"
+    )

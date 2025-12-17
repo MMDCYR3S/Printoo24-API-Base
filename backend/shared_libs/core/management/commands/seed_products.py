@@ -9,7 +9,6 @@ from django.utils.text import slugify
 from core.models import (
     ProductCategory, Product, ProductPricingConfig,
     Size, ProductSize,
-    Material, ProductMaterial,
     Quantity, ProductQuantity,
     ProductImage,
     Option, OptionPricingStrategy, 
@@ -38,9 +37,6 @@ class Command(BaseCommand):
             # 3. ساخت سایزهای استاندارد (USER اضافه شد)
             sizes = self.create_master_sizes(admin_user) 
             
-            # 4. ساخت متریال‌ها (USER اضافه شد)
-            materials = self.create_master_materials(admin_user)
-            
             # 5. ساخت آپشن‌ها (USER اضافه شد)
             options_dict = self.create_master_options(admin_user)
             
@@ -52,7 +48,7 @@ class Command(BaseCommand):
 
             # 8. ساخت محصولات اصلی
             self.create_products(
-                admin_user, categories, sizes, materials, 
+                admin_user, categories, sizes, 
                 options_dict, file_specs, quantities
             )
 
@@ -86,28 +82,6 @@ class Command(BaseCommand):
                 defaults={'user': user, 'width': w, 'height': h}
             )
             objs.append(s)
-        return objs
-
-    def create_master_materials(self, user):
-        """ متریال‌ها """
-        data = [
-            ('گلاسه ۳۰۰ گرم', 15000),
-            ('تحریر ۸۰ گرم', 5000),
-            ('کتان آلمان', 25000),
-            ('بنر ۱۳ انس', 45000),
-            ('استیکر شیشه‌ای', 60000),
-        ]
-        objs = []
-        for name, price in data:
-            m, _ = Material.objects.get_or_create(
-                name=name,
-                defaults={
-                    'user': user,  # <--- اضافه شد
-                    'price_per_sqm': Decimal(price),
-                    'description': f'توضیحات فنی برای {name}'
-                }
-            )
-            objs.append(m)
         return objs
 
     def create_master_options(self, user):
@@ -161,7 +135,7 @@ class Command(BaseCommand):
     # CORE PRODUCT CREATION
     # ==========================================
 
-    def create_products(self, user, categories, sizes, materials, options_map, file_specs, quantities):
+    def create_products(self, user, categories, sizes, options_map, file_specs, quantities):
         
         product_bases = [
             ('کارت ویزیت لاکچری', False), ('تراکت تبلیغاتی', False), 
@@ -215,18 +189,6 @@ class Command(BaseCommand):
                 
                 for q in quantities:
                     ProductQuantity.objects.create(user=user, product=product, quantity=q, price=0)
-
-            # 5. Materials (ProductMaterial)
-            selected_mats = random.sample(materials, k=2)
-            for mat in selected_mats:
-                ProductMaterial.objects.create(
-                    user=user,
-                    product=product,
-                    material=mat,
-                    is_default=random.choice([True, False]),
-                    processing_fee_percentage=Decimal(random.randint(0, 15)),
-                    extra_price_per_unit=0
-                )
 
             # 6. OPTIONS (The New Complex Part)
             # انتخاب چند آپشن برای این محصول

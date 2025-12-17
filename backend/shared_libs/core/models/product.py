@@ -282,7 +282,7 @@ class ProductImage(models.Model):
     order = models.IntegerField(_('ترتیب'), default=0)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
-    
+
     def __str__(self):
         return str(self.pk)
     

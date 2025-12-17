@@ -1,7 +1,9 @@
 import os
 from random import randint
 
+from django.utils import timezone
 from django.db import models
+from django.db.models import Sum, Q, F
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
@@ -71,34 +73,16 @@ class OrderStatus(models.Model):
         ('reject', _('رد شده (Reject)')),
         ('cancel', _('لغو شده (Cancel)')),
     ]
-    # TARGET_CHOICES = [
-    #     ('order', _('مختص سفارش (Order Only)')),
-    #     ('item', _('مختص اقلام (Item Only)')),
-    #     ('both', _('مشترک (Both)')),
-    # ]
     
     name = models.CharField(_('عنوان نمایشی'), max_length=150)
     internal_code = models.SlugField(_('کد سیستمی'), max_length=150, unique=True, null=True, blank=True)
 
-    # target_model = models.CharField(
-    #     _('محدوده کاربرد'), 
-    #     max_length=10, 
-    #     choices=TARGET_CHOICES, 
-    #     default='order',
-    #     help_text=_("مشخص می‌کند این وضعیت در کدام بخش نمایش داده شود.")
-    # )
     status_type = models.CharField(
         _('نوع وضعیت'), 
         max_length=20, 
         choices=TYPE_CHOICES, 
         default='progress'
     )
-    # is_workflow_gate = models.BooleanField(
-    #     _('دسترسی چندگانه به وضعیت'), 
-    #     default=False, 
-    #     help_text=_("آیا این وضعیت می‌تواند مقصد انتقال‌های خاص (مثل QC) باشد؟")
-    # )
-    
     sort_order = models.PositiveIntegerField(
         _('ترتیب نمایش'), 
         default=0, 
@@ -228,25 +212,25 @@ class OrderItem(models.Model):
     آیتم‌های سفارش.
     تحلیل: هر آیتم ویژگی‌های فنی (Features) خودش را دارد که در JSON ذخیره می‌شود.
     """
+    
+    STATUS_CHOICES = [
+        ('pending', _('در انتظار بررسی')),
+        ('approved', _('تایید شده')),
+        ('rejected', _('رد شده (نیازمند اصلاح)')),
+        ('cancelled', _('لغو شده')),
+    ]
+        
     order = models.ForeignKey(Order, related_name='order_item_order', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='order_item_product', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(_('تعداد'), default=1)
-    # status = models.ForeignKey(
-    #     OrderStatus,
-    #     related_name='order_items',
-    #     on_delete=models.PROTECT,
-    #     verbose_name=_("وضعیت آیتم"),
-    #     null=True, blank=True
-    # )
     price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
-    items = models.JSONField(_("آیتم های اضافی"), blank=True, null=True)
-    assigned_to = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='assigned_order_items',
-        verbose_name=_("کارشناس مسئول (طراح)")
+    status = models.CharField(
+        _("وضعیت فایل"), max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        db_index=True
     )
+    items = models.JSONField(_("آیتم های اضافی"), blank=True, null=True)
     admin_note = models.TextField(_("یادداشت تولید"), blank=True, help_text="مخصوص اپراتور چاپ")
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
@@ -280,13 +264,6 @@ class OrderItemFile(models.Model):
     تحلیل: فایل‌ها پاک نمی‌شوند، بلکه ورژن جدید می‌خورند تا تاریخچه حفظ شود.
     """
     
-    # STATUS_CHOICES = [
-    #     ('uploading', _('در حال آپلود/پردازش')),
-    #     ('pending', _('در انتظار بررسی')),
-    #     ('approved', _('تایید شده')),
-    #     ('rejected', _('رد شده (نیازمند اصلاح)')),
-    # ]
-    
     order_item = models.ForeignKey(
         OrderItem, 
         related_name='files', 
@@ -301,8 +278,6 @@ class OrderItemFile(models.Model):
     file = models.FileField(_('فایل نهایی'), upload_to='orders/designs/%Y/%m/%d/')
     version = models.PositiveIntegerField(_('نسخه فایل'), default=1)
     is_latest = models.BooleanField(_('آخرین نسخه است؟'), default=True)
-    is_accepted = models.BooleanField(_("تایید شده"), default=False)
-    # status = models.CharField(_("وضعیت فایل"), max_length=20, choices=STATUS_CHOICES, default='pending')
     admin_feedback = models.TextField(_("دلیل رد شدن / توضیحات QC"), blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
@@ -382,89 +357,129 @@ class OrderStateLog(models.Model):
 # ========================================================= #
 # ========== مدلاسیون مربوط به هزینه های سفارش ========== #
 # ========================================================= #
-# ===== Order Cost Type Model ===== #
-class OrderCostType(models.Model):
+class OrderCostCategory(models.Model):
     """
-    تعریف انواع هزینه‌های قابل اضافه شدن به سفارش.
-    مثال: هزینه تیپاکس، هزینه خدمات طراحی، هزینه برش خاص، هزینه فوریت.
+    دسته‌بندی هزینه‌ها برای گزارش‌گیری دقیق.
+    مثال: "مواد اولیه"، "خدمات چاپ"، "برون‌سپاری"، "حمل و نقل"، "سربار"
     """
-    CATEGORY_CHOICES = [
-        ('production', _('تولید و چاپ')),
-        ('logistics', _('انبار و ارسال')),
+    COST_TYPE = [
         ('design', _('طراحی')),
-        ('general', _('عمومی/سربار')),
+        ('print', _('چاپ')),
+        ('material', _('مواد اولیه')),
+        ('transport', _('حمل و نقل')),
+        ('packing', _('بسته‌بندی')),
+        ('storage', _('برون‌سپاری')),
+        ('other', _('سایر')),
     ]
-
-    title = models.CharField(_('عنوان هزینه'), max_length=150)
-    code = models.SlugField(_('کد سیستمی'), unique=True, help_text="برای استفاده در محاسبات (مثلا: SHIPPING_FEE)")
-    category = models.CharField(_('دسته بندی'), max_length=20, choices=CATEGORY_CHOICES)
-    is_deduction = models.BooleanField(_('کسورات؟'), default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _('نوع هزینه')
-        verbose_name_plural = _('انواع هزینه')
-
-    def __str__(self):
-        return f"{self.title} ({self.get_category_display()})"
-
-class OrderCostCatalog(models.Model):
-    """
-    لیست استاندارد هزینه‌ها.
-    اینجا "کاغذ"، "زینک"، "تیپاکس" فقط یک بار تعریف می‌شوند.
-    """
-    cost_type = models.ForeignKey(OrderCostType, on_delete=models.PROTECT, verbose_name=_("دسته حسابداری"))
-    title = models.CharField(_("شرح استاندارد"), max_length=200)
-    code = models.CharField(_("کد کالا/خدمت"), max_length=150, unique=True)
     
-    is_active = models.BooleanField(default=True)
+    title = models.CharField(_("عنوان دسته"), max_length=100)
+    slug = models.SlugField(_("کد سیستمی"), unique=True)
+    cost_type = models.CharField(_("نوع هزینه"), max_length=20, choices=COST_TYPE, default='other')
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     
-    def __str__(self):
-        return f"{self.title} ({self.code})"
+    class Meta:
+        verbose_name = _("دسته هزینه")
+        verbose_name_plural = _("دسته‌های هزینه")
 
-# ===== Order Cost Report Model ===== #
-class OrderCostReport(models.Model):
+    def __str__(self):
+        return self.title
+
+# ========== Order Cost Sheet ========== #
+class OrderCostSheet(models.Model):
     """
-    این مدل همان "گزارش" است که کارفرما خواسته.
-    شامل اطلاعات کلی و فایل‌های پیوست.
+    سند کل بهای تمام شده سفارش (Internal Invoice).
+    این مدل هیچ دیتای توصیفی ندارد، فقط اعداد نهایی را برای گزارش‌گیری مالی نگه می‌دارد.
+    این رکورد باید همزمان با ایجاد سفارش (یا در اولین مرحله مالی) ساخته شود.
     """
-    order = models.ForeignKey(
-        'Order', 
-        related_name='cost_reports', 
-        on_delete=models.CASCADE,
+    order = models.OneToOneField(
+        'core.Order', 
+        on_delete=models.CASCADE, 
+        related_name='cost_sheet',
         verbose_name=_("سفارش مرتبط")
     )
     
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.PROTECT,
-        verbose_name=_("ثبت کننده")
+    # ===== وضعیت کلی سند ===== #
+    is_locked = models.BooleanField(
+        _("قفل شده؟"), 
+        default=False, 
+        help_text="اگر تیک بخورد، هیچ گزارشی دیگر قابل اضافه شدن نیست (پایان سال مالی یا تسویه نهایی)."
     )
     
-    title = models.CharField(_("عنوان گزارش"), max_length=200)
-    description = models.TextField(_("توضیحات کلی"), blank=True, null=True)
+    # ===== تجمیع هزینه‌ها (Auto Calculated) ===== #
+    total_material_cost = models.DecimalField(_("جمع هزینه مواد"), max_digits=18, decimal_places=0, default=0)
+    total_service_cost = models.DecimalField(_("جمع هزینه خدمات/چاپ"), max_digits=18, decimal_places=0, default=0)
+    total_shipping_cost = models.DecimalField(_("جمع هزینه ارسال"), max_digits=18, decimal_places=0, default=0)
+    total_overhead_cost = models.DecimalField(_("جمع سربار/سایر"), max_digits=18, decimal_places=0, default=0)
     
-    is_approved_by_finance = models.BooleanField(_("تایید مالی"), default=False)
-    finance_note = models.TextField(_("یادداشت مالی"), blank=True)
+    # ===== اعداد نهایی سود و زیان ===== #
+    final_total_cost = models.DecimalField(_("بهای تمام شده کل"), max_digits=18, decimal_places=0, default=0)
     
+    revenue_amount = models.DecimalField(_("مبلغ فروش (فاکتور)"), max_digits=18, decimal_places=0, default=0)
+    net_profit = models.DecimalField(_("سود/زیان خالص"), max_digits=18, decimal_places=0, default=0)
+    profit_margin_percent = models.FloatField(_("حاشیه سود (%)"), default=0.0)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _('گزارش مالی')
-        verbose_name_plural = _('گزارشات مالی')
+        verbose_name = _("سند بهای تمام شده")
+        verbose_name_plural = _("اسناد بهای تمام شده")
+
+    def __str__(self):
+        return f"Sheet for {self.order.order_code}"
+
+    def recalculate_totals(self):
+        self.save()
+
+# ===== Order Cost Report ===== #
+class OrderCostReport(models.Model):
+    """
+    گزارش هزینه ارسالی از سمت دپارتمان‌ها.
+    این موجودیت توسط اپراتورها پر می‌شود و به تایید مدیر مالی می‌رسد.
+    """
+    
+    DEPARTMENT_CHOICES = [
+        ('design', _('واحد طراحی')),
+        ('production', _('واحد تولید/چاپ')),
+        ('warehouse', _('انبار')),
+        ('logistics', _('لجستیک و ارسال')),
+        ('outsourcing', _('برون‌سپاری')),
+        ('management', _('مدیریت (سربار)')),
+    ]
+
+    sheet = models.ForeignKey(
+        OrderCostSheet, 
+        on_delete=models.CASCADE, 
+        related_name='reports',
+        verbose_name=_("سند مادر")
+    )
+    
+    submitter = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.PROTECT,
+        verbose_name=_("ارسال کننده گزارش")
+    )
+    
+    title = models.CharField(_("عنوان گزارش"), max_length=200, help_text="مثلا: هزینه کاغذ مصرفی بخش افست")
+    department = models.CharField(_("دپارتمان"), max_length=20, choices=DEPARTMENT_CHOICES)
+
+    is_approved = models.BooleanField(_("تایید شده"), default=False)
+    
+    description = models.TextField(_("توضیحات تکمیلی"), blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('گزارش هزینه داخلی')
+        verbose_name_plural = _('گزارشات هزینه داخلی')
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title} - {self.order.order_code}"
+        return f"{self.title}"
     
-    @property
-    def total_amount(self):
-        """ جمع کل هزینه‌های این گزارش """
-        return sum(item.amount for item in self.items.all())
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
 # ===== Order Cost Item Model ===== #
 class OrderCostItem(models.Model):
@@ -481,7 +496,7 @@ class OrderCostItem(models.Model):
         null=True
     )
     catalog_item = models.ForeignKey(
-        OrderCostCatalog, 
+        OrderCostCategory, 
         on_delete=models.PROTECT,
         verbose_name=_("شرح هزینه"),
         null=True, blank=True
@@ -509,10 +524,10 @@ class OrderCostItem(models.Model):
 class OrderCostAttachment(models.Model):
     """
     جدول پیوست‌های گزارش هزینه.
-    جایگزین فیلد تکی 'attachment' در مدل OrderCostReport می‌شود (یا در کنار آن).
+    جایگزین فیلد تکی 'attachment' در مدل OrderCostSheet می‌شود (یا در کنار آن).
     """
     report = models.ForeignKey(
-        'OrderCostReport', 
+        OrderCostReport, 
         related_name='attachments', 
         on_delete=models.CASCADE,
         verbose_name=_("گزارش هزینه")
@@ -547,8 +562,7 @@ class OrderPrintReport(models.Model):
     )
     title = models.CharField(_("عنوان گزارش"), max_length=200)
     description = models.TextField(_("توضیحات فنی"), blank=True, null=True)
-    
-    # زمان ثبت مصرف
+    # ===== زمان مصرف ===== #
     created_at = models.DateTimeField(_("تاریخ ثبت"), auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -565,18 +579,6 @@ class OrderPrintItem(models.Model):
     """
     اقلام مصرفی چاپ (به صورت استاتیک).
     """
-    # ===== تعریف استاتیک متریال‌ها (TextChoices) =====
-    class MaterialType(models.TextChoices):
-        PAPER_GLOSS = 'paper_gloss', _('کاغذ گلاسه')
-        PAPER_MATTE = 'paper_matte', _('کاغذ تحریر/مات')
-        PAPER_KRAFT = 'paper_kraft', _('کاغذ کرافت')
-        ZINC = 'zinc', _('زینک (پلیت)')
-        INK_CMYK = 'ink_cmyk', _('مرکب (CMYK)')
-        INK_SPECIAL = 'ink_special', _('مرکب خاص (پنتون)')
-        GLUE = 'glue', _('چسب صحافی')
-        CELLEPHANE_MATTE = 'cell_matte', _('سلفون مات')
-        CELLEPHANE_GLOSS = 'cell_gloss', _('سلفون براق')
-        OTHER = 'other', _('سایر ملزومات')
 
     report = models.ForeignKey(
         OrderPrintReport, 
@@ -586,11 +588,11 @@ class OrderPrintItem(models.Model):
     )
     
     # ===== نوع مواد اولیه ===== #
-    material_type = models.CharField(
-        _("نوع متریال"), 
-        max_length=50, 
-        choices=MaterialType.choices,
-        default=MaterialType.OTHER
+    material_type = models.ForeignKey(
+        OrderCostCategory, 
+        related_name='print_items', 
+        on_delete=models.PROTECT,
+        verbose_name=_("نوع مواد اولیه")
     )
     custom_title = models.CharField(_("عنوان"), max_length=255, blank=True, null=True)
     price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
@@ -720,18 +722,13 @@ class OrderPackage(models.Model):
     )
     
     # ===== اطلاعات مربوط به لیبل ===== #
-    label_uuid = models.UUIDField(_("شناسه لیبل"), editable=False, unique=True, null=True, blank=True)
-    
-    # ===== اطلاعات مربوط به بسته ===== #
-    box_number = models.PositiveIntegerField(_("شماره بسته"), default=1)
-    weight_grams = models.PositiveIntegerField(_("وزن (گرم)"), default=0)
-    width_cm = models.PositiveIntegerField(_("عرض (cm)"), default=0)
-    length_cm = models.PositiveIntegerField(_("طول (cm)"), default=0)
-    height_cm = models.PositiveIntegerField(_("ارتفاع (cm)"), default=0)
-    
+    label_uuid = models.CharField(_("شناسه لیبل"), max_length=50, editable=False, unique=True, null=True, blank=True)
     # ===== محتویات داخل بسته ===== #
+    customer_name = models.CharField(_("نام مشتری"), max_length=150, null=True, blank=True)
+    phone_number = models.CharField(_("شماره تماس"), max_length=11, null=True, blank=True)
+    address = models.TextField(_("آدرس"), null=True, blank=True)
+    order_image = models.ImageField(_("تصویر سفارش"), null=True, blank=True)
     content_summary = models.TextField(_("خلاصه محتویات"), blank=True, help_text="مثلا: ۱۰۰۰ عدد کارت ویزیت لمینت")
-    
     # ===== مسئول بسته بندی ===== #
     packed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
@@ -746,14 +743,60 @@ class OrderPackage(models.Model):
     class Meta:
         verbose_name = _('بسته/کارتن')
         verbose_name_plural = _('بسته‌ها و لیبل‌ها')
-        # ===== یکتا بودن با شماره بسته ===== #
-        unique_together = ['shipment', 'box_number']
 
     def __str__(self):
-        return f"Box {self.box_number} (Weight: {self.weight_grams}g)"
+        return f"{self.customer_name} - {self.label_code}"
     
     @property
     def label_code(self):
         """کد کوتاه خوانا برای چاپ روی لیبل"""
         return str(self.label_uuid).split('-')[0].upper()
-    
+
+# ========== ORDER SCHEDULE ========== #
+class OrderSchedule(models.Model):
+    """
+    مدل برای زمانبندی دقیق و اختصاصی هر سفارش
+    """
+    order = models.OneToOneField(
+        Order, 
+        on_delete=models.CASCADE, 
+        related_name='schedule'
+    )
+    start_date = models.DateTimeField(verbose_name="تاریخ شروع فرآیند")
+    due_date = models.DateTimeField(verbose_name="تاریخ تحویل نهایی (Deadline)")
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name="تاریخ تکمیل واقعی")
+    schedule_notes = models.TextField(blank=True, null=True)
+    is_locked = models.BooleanField(default=False, help_text="اگر قفل شود، تاریخ‌ها به صورت خودکار تغییر نمی‌کنند")
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['start_date', 'due_date']),
+        ]
+
+    @property
+    def duration_days(self):
+        """مدت زمان کل پروژه"""
+        return (self.due_date - self.start_date).days
+
+    @property
+    def remaining_days(self):
+        """روزهای باقی‌مانده تا ددلاین"""
+        if self.completed_at:
+            return 0
+        
+        now = timezone.now()
+        delta = self.due_date - now
+        return delta.days
+
+# ========== SCHEDULE MILESTONE ========== #
+class ScheduleMilestone(models.Model):
+    """
+    مدل برای ریزجزئیات و برنامه های مربوط به زمانبندی سفارش
+    زمانی که کارکنان کارهای خود را می خواهند انجام دهند، باید
+    از قبل سفارشات خود را باز کنند و زمانبندی آن‌ها را
+    تنظیم کنند.
+    """
+    schedule = models.ForeignKey(OrderSchedule, related_name='milestones', on_delete=models.CASCADE)
+    title = models.CharField(max_length=150)
+    due_date = models.DateTimeField()
+    is_completed = models.BooleanField(default=False)

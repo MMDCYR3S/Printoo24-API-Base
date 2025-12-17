@@ -158,3 +158,78 @@ class CreateOrderView(GenericAPIView):
                 {"error": "An error occurred while placing the order.", "detail": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+@extend_schema(tags=["Order"])
+class BulkCreateOrderView(GenericAPIView):
+    """
+    POST /api/v1/orders/checkout/bulk/
+    Converts ALL items in the user's cart into separate orders.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
+    
+    @extend_schema(
+        summary="ثبت سفارش کل سبد خرید (Bulk Checkout)",
+        description="""
+        تمام آیتم‌های موجود در سبد خرید را به سفارش‌های جداگانه تبدیل می‌کند.
+        مبلغ کل محاسبه شده و به صورت یکجا از کیف پول کسر می‌گردد.
+        """,
+        request=OrderSerializer, # ورودی فقط آدرس و نوع سفارش است
+        responses={
+            201: OrderSerializer(many=True), # خروجی لیستی از سفارش‌هاست
+            400: OpenApiTypes.OBJECT,
+            402: OpenApiTypes.OBJECT
+        },
+        examples=[
+            OpenApiExample(
+                'Bulk Checkout Request',
+                value={"address_id": 15, "type": "2"},
+                request_only=True
+            ),
+             OpenApiExample(
+                'Insufficient Funds',
+                summary='خطای کمبود موجودی',
+                value={"error": "موجودی کافی نیست. مبلغ کل سفارشات: 5,000,000 تومان"},
+                response_only=True,
+                status_codes=[402]
+            )
+        ]
+    )
+    def post(self, request, *args, **kwargs):
+        # اعتبارسنجی ورودی (آدرس و نوع سفارش)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        address_instance = serializer.validated_data.get('address')
+        order_type = request.data.get('type', '2')
+
+        try:
+            service = CreateOrderFromCartService()
+            
+            # ===== اجرای سرویس Bulk ===== #
+            created_orders_list = service.execute_bulk(
+                user=request.user, 
+                address=address_instance,
+                order_type=order_type
+            )
+            
+            # ===== نمایش خروجی (لیست) ===== #
+            output_serializer = self.get_serializer(
+                created_orders_list, 
+                many=True, # نکته مهم: many=True
+                context={'request': request}
+            )
+            
+            return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+        
+        except EmptyCartError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+        except InsufficientFundsError as e:
+            return Response({"error": str(e)}, status=status.HTTP_402_PAYMENT_REQUIRED)
+            
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred during bulk checkout.", "detail": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

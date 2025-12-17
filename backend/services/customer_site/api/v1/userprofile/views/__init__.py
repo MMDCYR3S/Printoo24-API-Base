@@ -1,8 +1,5 @@
 from .profile_detail_view import CustomerProfileAPIView , UserCommentListView
-from .profile_order_view import (
-    UserOrderDetailAPIView,
-    UserOrderListAPIView
-)
+from .profile_order_view import *
 from .profile_address_view import (
     UserAddressDetailAPIView,
     UserAddressListCreateAPIView

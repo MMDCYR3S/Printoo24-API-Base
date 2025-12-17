@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError, NotFound
 from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.userprofile.services import UserOrderListService
-from ..serializers import OrderWithDetailsSerializer, OrderSerializer
+from ..serializers import OrderWithDetailsSerializer, OrderSerializer, QuotationSerializer
 
 # ===== User Order List APIView ===== #
 @extend_schema(tags=["Profile"])
@@ -128,5 +128,60 @@ class UserOrderDetailAPIView(APIView):
         except Exception as e:
             return Response(
                 {'detail': 'خطایی رخ داد.', 'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+@extend_schema(tags=["Profile"])
+class UserOrderQuotationAPIView(APIView):
+    """
+    نمایش پیش‌فاکتور (Quotation) یک سفارش خاص.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._service = UserOrderListService()
+
+    @extend_schema(
+        summary="دریافت پیش‌فاکتور سفارش",
+        description="این متد اطلاعات پیش‌فاکتور صادر شده در لحظه ثبت سفارش (شامل قیمت قطعی و مشخصات فنی فریز شده) را برمی‌گرداند.",
+        responses={200: QuotationSerializer},
+        examples=[
+            OpenApiExample(
+                'Quotation Example',
+                value={
+                    "id": 101,
+                    "quotation_number": "QUOT-A1B2C3D4",
+                    "customer_name": "علی علوی",
+                    "product_name": "کارت ویزیت",
+                    "product_image_url": "http://api.../media/...",
+                    "quantity": 1000,
+                    "total_price": "1500000.00",
+                    "created_at": "2023-12-01T10:00:00Z",
+                    "status": "converted",
+                    "snapshot_details": {
+                        "dimensions": "9 x 6",
+                        "material": "گلاسه ۳۰۰ گرم",
+                        "features": ["روکش: سلفون مات"]
+                    }
+                }
+            )
+        ]
+    )
+    def get(self, request, order_id):
+        try:
+            quotation = self._service.get_order_quotation(request.user.id, order_id)
+            
+            serializer = QuotationSerializer(
+                quotation, 
+                context={'request': request}
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except NotFound as e:
+            return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(
+                {'detail': 'خطایی در دریافت پیش‌فاکتور رخ داد.', 'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

@@ -27,8 +27,7 @@ class CreateOrderFromCartService:
         if address is None:
             raise ValidationError("لطفاً آدرس ارسال سفارش را انتخاب کنید.")
 
-        # 1. دریافت آیتم مشخص و چک مالکیت
-        # ما باید متد get_item_details را در CartItemRepository یا سرویس دامنه بسازیم
+        # ===== دریافت سبد خرید ===== # 
         cart = self._cart_domain._cart_repo.get_cart_by_user(user)
         if not cart:
             raise EmptyCartError("سبد خرید یافت نشد.")
@@ -37,30 +36,81 @@ class CreateOrderFromCartService:
         if not cart_item:
             raise ItemNotFoundException("آیتم مورد نظر در سبد خرید شما یافت نشد.")
         
-        # 2. محاسبه قیمت (فقط قیمت این آیتم)
+        # ===== محاسبه قیمت ===== #
         item_price = cart_item.price
         
-        # 3. چک کردن کیف پول
+        # ===== چک کردن کیف پول ===== #
         user_balance = self._wallet_service.get_user_balance(user)
         if user_balance < item_price:
             logger.warning(f"Insufficient funds: User {user.id}, Need {item_price}, Has {user_balance}")
             raise InsufficientFundsError(f"موجودی کافی نیست. مبلغ سفارش: {item_price:,} تومان")
         
         try:
-            # 4. 🚨 اجرای ایجاد سفارش تکی در Domain Service
+            # ===== تسویه حساب ===== #
             order = self._checkout_domain.checkout_single_item(
                 user=user, 
-                cart_item=cart_item, # ارسال آبجکت آیتم به جای کل سبد خرید
+                cart_item=cart_item,
                 address=address, 
                 order_type=order_type
             )
             
-            # 5. کسر از کیف پول
+            # ===== کسر مبلغ از کیف پول ===== #
             self._wallet_service.debit(user=user, amount=item_price)
             
             logger.info(f"Order {order.order_code} created successfully for CartItem {cart_item_id}.")
-            return order # بازگشت یک Order تکی
+            return order
 
         except Exception as e:
             logger.error(f"Order creation failed for CartItem {cart_item_id}: {e}")
+            raise e
+
+    @transaction.atomic
+    def execute_bulk(self, user: User, address: Address, order_type: str = "2") -> List[Order]:
+        """
+        اجرای فرآیند تسویه حساب برای کل سبد خرید.
+        - هر آیتم سبد خرید -> یک سفارش مجزا
+        - کسر موجودی -> به صورت یکجا
+        """
+        logger.info(f"Start BULK checkout for User {user.id}")
+
+        if address is None:
+            raise ValidationError("لطفاً آدرس ارسال سفارش را انتخاب کنید.")
+        
+        # ===== دریافت سبد خرید و آیتم ها ===== #
+        cart = self._cart_domain._cart_repo.get_cart_by_user(user)
+        if not cart or not cart.cart_items.exists():
+            raise EmptyCartError("سبد خرید شما خالی است.")
+        
+        cart_items = list(cart.cart_items.select_related('product').prefetch_related('uploads').all())
+        
+        # ===== محاسبه قیمت ===== #
+        total_price = sum(item.price for item in cart_items)
+        
+        # ===== چک کردن کیف پول ===== #
+        user_balance = self._wallet_service.get_user_balance(user)
+        if user_balance < total_price:
+            logger.warning(f"Insufficient funds for bulk: User {user.id}, Need {total_price}, Has {user_balance}")
+            raise InsufficientFundsError(f"موجودی کافی نیست. مبلغ کل سفارشات: {total_price:,} تومان")
+        
+        created_orders = []
+        
+        try:
+            # ===== کسر از کیف پول ===== #
+            self._wallet_service.debit(user=user, amount=total_price)
+            
+            # ===== حلقه برای ساخت سفارش های جداگانه ===== #
+            for cart_item in cart_items:
+                order = self._checkout_domain.checkout_single_item(
+                    user=user, 
+                    cart_item=cart_item,
+                    address=address, 
+                    order_type=order_type
+                )
+                created_orders.append(order)
+            
+            logger.info(f"Bulk checkout completed. {len(created_orders)} orders created for User {user.id}.")
+            return created_orders
+
+        except Exception as e:
+            logger.error(f"Bulk checkout failed for User {user.id}: {e}")
             raise e

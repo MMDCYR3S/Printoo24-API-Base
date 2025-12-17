@@ -8,6 +8,7 @@ from .views import (
     UserAddressDetailAPIView,
     WalletDetailAPIView,
     WalletHistoryAPIView,
+    UserOrderQuotationAPIView
 )
 
 urlpatterns = [
@@ -16,6 +17,7 @@ urlpatterns = [
     # ===== بخش سابقه سفارشات ===== #
     path('orders/', UserOrderListAPIView.as_view(), name='user-order-list'),
     path('orders/<int:order_id>/', UserOrderDetailAPIView.as_view(), name='user-order-detail'),
+    path("orders/quotation/<int:order_id>/", UserOrderQuotationAPIView.as_view(), name="user-order-quotation"),
     # ===== بخش آدرس ===== #
     path('addresses/', UserAddressListCreateAPIView.as_view(), name='user-address-list-create'),
     path('addresses/<int:address_id>/', UserAddressDetailAPIView.as_view(), name='user-address-detail'),

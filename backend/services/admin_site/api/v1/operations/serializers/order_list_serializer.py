@@ -21,11 +21,6 @@ class OrderListSerializer(serializers.ModelSerializer):
     
     # ===== وضعیت کل سفارش ===== #
     current_status = OrderStatusSerializer(read_only=True)
-    
-    # ===== وظایف کارمند (جدید و حیاتی) ===== #
-    my_tasks_count = serializers.SerializerMethodField(
-        help_text="تعداد آیتم‌هایی در این سفارش که در محدوده کاری کاربر جاری قرار دارند (و نیاز به توجه دارند)."
-    )
 
     class Meta:
         model = Order
@@ -38,8 +33,7 @@ class OrderListSerializer(serializers.ModelSerializer):
             'total_price', 
             'current_status', 
             'items_count', 
-            'is_locked',
-            'my_tasks_count',
+            'is_locked'
         ]
         read_only_fields = ['items_count', 'is_locked']
 
@@ -57,21 +51,3 @@ class OrderListSerializer(serializers.ModelSerializer):
         if hasattr(obj.user, 'customer_profile') and obj.user.customer_profile:
             return obj.user.customer_profile.company or ''
         return ''
-        
-    def get_my_tasks_count(self, obj: Order):
-        """
-        محاسبه تعداد وظایف مرتبط با کاربر جاری (تعداد آیتم‌هایی که در حال حاضر در اسکوپ کاری کاربر هستند).
-        
-        🚨 نکته عملکردی: این فیلد باید توسط Annotation در OrderListAppService محاسبه و به آبجکت Order اضافه شود.
-        اگر این کار انجام شده باشد، ما از فیلد Annotation استفاده می‌کنیم تا از N+1 Query جلوگیری شود.
-        """
-        # حالت بهینه: استفاده از Annotation (فرض می‌کنیم در AppService فیلدی به نام 'my_tasks_count_annotated' اضافه شده)
-        if hasattr(obj, 'my_tasks_count_annotated'):
-             return obj.my_tasks_count_annotated
-             
-        request = self.context.get('request')
-        if not request or not request.user.is_authenticated:
-            return 0
-        
-        count = sum(1 for item in obj.order_item_order.all() if item.assigned_to_id == request.user.id)
-        return count

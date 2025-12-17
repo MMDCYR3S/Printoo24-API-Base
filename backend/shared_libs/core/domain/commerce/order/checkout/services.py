@@ -1,10 +1,11 @@
 import uuid
 from typing import List
+from django.utils import timezone
 from django.db import transaction
 from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError as DjangoValidationError
 
-from core.models import Order, OrderItem, OrderItemFile, OrderStatus, CartItem, Address, User
+from core.models import Order, OrderItem, OrderItemFile, OrderStatus, CartItem, Address, User, Quotation
 from core.domain.commerce.cart import CartRepository
 from core.domain.commerce.order import OrderRepository, OrderItemRepository
 
@@ -37,8 +38,7 @@ class CheckoutDomainService:
                     requirement=upload.requirement,
                     file=new_file_content,
                     version=1,
-                    is_latest=True,
-                    status='pending'
+                    is_latest=True
                 )
     
     @transaction.atomic
@@ -49,7 +49,7 @@ class CheckoutDomainService:
         
       # ===== دریافت وضعیت اولیه (باید از طریق کد سیستمی باشد) =====
         try:
-            initial_status = OrderStatus.objects.get(internal_code="PENDING")
+            initial_status = OrderStatus.objects.get(internal_code="PENDING_INITIAL_ADMIN")
         except OrderStatus.DoesNotExist:
             raise DjangoValidationError("خطای سیستمی: وضعیت اولیه سفارش مشخص نیست.")
         
@@ -70,6 +70,24 @@ class CheckoutDomainService:
             "price": cart_item.price,
             "items": cart_item.items,
         })
+        
+        product_image_obj = cart_item.product.product_image.filter(order=0).first()
+        if not product_image_obj:
+            product_image_obj = cart_item.product.product_image.first()
+        final_image_file = product_image_obj.image if product_image_obj else None
+        # ===== ایجاد پیش فاکتور ===== #
+        Quotation.objects.create(
+            quotation_number=f"QUOT-{order.order_code}",
+            converted_order=order,
+            customer_name=user.customer_profile.fullname() if user.customer_profile.first_name else 'نامشخص',
+            product_name=cart_item.product.name if cart_item.product else "محصول حذف شده",
+            product_image=final_image_file,
+            product_snapshot=cart_item.items,
+            quantity=cart_item.quantity,
+            total_price=cart_item.price,
+            status=Quotation.Status.CONVERTED,
+            created_at=timezone.now(),
+        )
 
         # ===== انتقال فایل‌های طراحی ===== #
         self._transfer_files(cart_item, order_item)
