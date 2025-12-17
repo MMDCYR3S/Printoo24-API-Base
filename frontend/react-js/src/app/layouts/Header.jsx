@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import MegaMenu from '../components/layout/MegaMenu';
 
+
 const Header = ({ onOpenDrawer }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -129,7 +130,7 @@ const Header = ({ onOpenDrawer }) => {
             </div>
 
             {/* پروفایل کاربر */}
-            <div className="dropdown dropdown-end">
+            <div className="dropdown dropdown-end" Link to="/profile">
               <div 
                 tabIndex={0} 
                 role="button" 
