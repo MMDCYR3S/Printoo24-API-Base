@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
+
 from core.models import (
     ProductCategory,
     ContactUs,
@@ -11,15 +13,27 @@ from core.models import (
 # ===== سریالایزر مدیریت دسته‌بندی‌ها (داشبورد) ===== #
 class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
     banner_wide_url = serializers.CharField(source='get_banner_wide_url', read_only=True)
+    children = serializers.SerializerMethodField()
+    parent_name = serializers.CharField(source='parent.name', read_only=True)
     
     class Meta:
         model = ProductCategory
         fields = [
-            'id', 'name', 'slug', 'parent', 'description',
+            'id', 'name', 'slug', 'parent', 'parent_name', 'description',
             'banner_wide', 'banner_box', 'banner_wide_url',
-            'is_active', 'created_at', 'updated_at'
+            'is_active', 'children', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'slug', 'created_at', 'updated_at', 'banner_wide_url']
+        
+    @extend_schema_field(serializers.ListField(child=serializers.DictField()))
+    def get_children(self, obj):
+        """
+        بازگرداندن فرزندان به صورت بازگشتی.
+        اگر فرزندی وجود داشته باشد، همین سریالایزر را برای آن‌ها صدا می‌زنیم.
+        """
+        if obj.get_children().exists():
+            return ProductCategoryDashboardSerializer(obj.get_children(), many=True).data
+        return []
 
 # ===== سریالایزر تماس با ما ===== #
 class ContactUsSerializer(serializers.ModelSerializer):

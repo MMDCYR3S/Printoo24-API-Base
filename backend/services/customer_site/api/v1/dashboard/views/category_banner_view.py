@@ -25,8 +25,12 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
 
     # ===== بازنویسی متد get_queryset ===== #
     def get_queryset(self):
-        # استفاده از سرویس برای گرفتن کوئری
         return self.service.get_category_tree_queryset()
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     # ===== بازنویسی متد create (افزودن) ===== #
     def create(self, request, *args, **kwargs):
