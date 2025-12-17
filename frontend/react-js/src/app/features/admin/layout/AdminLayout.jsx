@@ -38,7 +38,7 @@ const AdminLayout = () => {
         <ul className="menu p-4 w-80 min-h-full bg-base-100 text-base-content border-l border-base-300">
           {/* لوگو یا تایتل */}
           <li className="mb-6">
-             <div className="text-2xl font-bold text-primary px-2">Admin Panel</div>
+             <div className="text-2xl font-bold text-primary px-2">Admin Panel printoooooo</div>
           </li>
 
           {/* آیتم‌های منو */}

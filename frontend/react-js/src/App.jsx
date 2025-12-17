@@ -12,8 +12,12 @@ import OrderDetailPage from './app/features/profile/OrderDetailPage';
 import AddressPage from './app/features/profile/AddressPage';
 
 // admin pages
-import DashboardPage from './app/admin/features/dashboard/DashboardPage'
-import AdminLayout from './app/admin/layout/AdminLayout'
+import AdminLayout from './app/features/admin/layout/AdminLayout';
+import AdminGuard from './app/features/auth/AdminGuard';
+
+
+const AdminDashboard = () => <div className="text-2xl font-bold">به پنل مدیریت خوش آمدید 👋</div>;
+const AdminOrders = () => <div className="text-xl">لیست سفارشات اینجا میاد...</div>;
 
 // فعلا یک صفحه اصلی ساده میذاریم تا بعدا که گفتی چی توش باشه
 const Home = () => <div className="p-10 text-center text-2xl">صفحه اصلی فروشگاه (مخصوص مشتری)</div>;
@@ -33,11 +37,6 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
 
-        <Route  element={<AdminLayout />}>
-
-        <Route path='/admin' element={<DashboardPage/>} />
-        </ Route>
-
         {/* ریدایرکت هر آدرس پرتی به خانه */}
         <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
@@ -51,6 +50,17 @@ function App() {
 
 
         </Route>
+
+        {/* 🔐 مسیرهای ادمین */}
+        <Route path="/admin" element={<AdminGuard />}>
+          <Route element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="orders" element={<AdminOrders />} />
+            {/* بقیه روت‌های ادمین اینجا اضافه میشن */}
+          </Route>
+        </Route>
+
+
       </Routes>
     </BrowserRouter>
   );
