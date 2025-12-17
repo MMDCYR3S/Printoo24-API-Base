@@ -1,5 +1,5 @@
 // نمونه برای src/app/features/admin/products/ProductListPage.jsx
-const ProductEditorPage = () => {
+const SliderSettingPage = () => {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold text-slate-800">مدیریت محصولات</h1>
@@ -9,4 +9,4 @@ const ProductEditorPage = () => {
     </div>
   );
 };
-export default ProductEditorPage;
+export default SliderSettingPage;

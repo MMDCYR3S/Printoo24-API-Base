@@ -15,8 +15,24 @@ import AddressPage from './app/features/profile/AddressPage';
 import AdminLayout from './app/features/admin/layout/AdminLayout';
 import AdminGuard from './app/features/auth/AdminGuard';
 
+// import AuthLayout from './app/features/auth/AuthLayout';
 
-const AdminDashboard = () => <div className="text-2xl font-bold">به پنل مدیریت خوش آمدید 👋</div>;
+// Admin Pages (Imports) 👈 ایمپورت‌های جدید
+import AdminDashboard from './app/features/admin/features/dashboard/AdminDashboard';
+import ProductListPage from './app/features/admin/features/products/ProductListPage';
+import ProductCreatePage from './app/features/admin/features/products/ProductEditorPage';
+import ProductSizesPage from './app/features/admin/features/products/ProductSizesPage';
+import ProductQuantitiesPage from './app/features/admin/features/products/ProductQuantitiesPage';
+import CategoryListPage from './app/features/admin/features/categories/CategoryListPage';
+import SubCategoryPage from './app/features/admin/features/categories/SubCategoryPage';
+import OrderListPage from './app/features/admin/features/orders/OrderListPage';
+import OrderCreatePage from './app/features/admin/features/orders/OrderCreatePage';
+import UserListPage from './app/features/admin/features/users/UsersListPage';
+import MessageListPage from './app/features/admin/features/messages/MessageListPage';
+import SliderSettingsPage from './app/features/admin/features/settings/SliderSettingsPage';
+import ModalSettingsPage from './app/features/admin/features/settings/ModalSettingsPage';
+
+
 const AdminOrders = () => <div className="text-xl">لیست سفارشات اینجا میاد...</div>;
 
 // فعلا یک صفحه اصلی ساده میذاریم تا بعدا که گفتی چی توش باشه
@@ -57,8 +73,43 @@ function App() {
             <Route index element={<AdminDashboard />} />
             <Route path="orders" element={<AdminOrders />} />
             {/* بقیه روت‌های ادمین اینجا اضافه میشن */}
+          {/* محصولات */}
+            <Route path="products">
+              <Route index element={<ProductListPage />} />
+              <Route path="create" element={<ProductCreatePage />} />
+              <Route path="sizes" element={<ProductSizesPage />} />
+              <Route path="quantities" element={<ProductQuantitiesPage />} />
+              {/* برای ویرایش بعدا اینو اضافه میکنیم: path="edit/:id" */}
+            </Route>
+
+            {/* دسته‌بندی‌ها */}
+            <Route path="categories">
+              <Route index element={<CategoryListPage />} />
+              <Route path="sub" element={<SubCategoryPage />} />
+            </Route>
+
+            {/* سفارشات */}
+            <Route path="orders">
+              <Route index element={<OrderListPage />} />
+              <Route path="create" element={<OrderCreatePage />} />
+              {/* دیتیل سفارش: path=":id" */}
+            </Route>
+
+            {/* کاربران */}
+            <Route path="users" element={<UserListPage />} />
+
+            {/* پیام‌ها */}
+            <Route path="messages" element={<MessageListPage />} />
+
+            {/* تنظیمات */}
+            <Route path="settings">
+              <Route path="sliders" element={<SliderSettingsPage />} />
+              <Route path="modals" element={<ModalSettingsPage />} />
+            </Route>
+            
           </Route>
         </Route>
+
 
 
       </Routes>
