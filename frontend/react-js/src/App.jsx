@@ -11,7 +11,9 @@ import MyOrdersPage from './app/features/profile/MyOrdersPage';
 import OrderDetailPage from './app/features/profile/OrderDetailPage';
 import AddressPage from './app/features/profile/AddressPage';
 
-
+// admin pages
+import DashboardPage from './app/admin/features/dashboard/DashboardPage'
+import AdminLayout from './app/admin/layout/AdminLayout'
 
 // فعلا یک صفحه اصلی ساده میذاریم تا بعدا که گفتی چی توش باشه
 const Home = () => <div className="p-10 text-center text-2xl">صفحه اصلی فروشگاه (مخصوص مشتری)</div>;
@@ -30,6 +32,11 @@ function App() {
         {/* صفحه اصلی مشتری */}
 
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        <Route  element={<AdminLayout />}>
+
+        <Route path='/admin' element={<DashboardPage/>} />
+        </ Route>
 
         {/* ریدایرکت هر آدرس پرتی به خانه */}
         <Route element={<MainLayout />}>
