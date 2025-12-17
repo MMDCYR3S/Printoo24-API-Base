@@ -51,7 +51,7 @@ class SizeDomainService:
         return self.repo.update(size, data)
 
     def delete_size(self, size_id: int):
-        size = self.get_by_id(size_id)
+        size = self.repo.get_by_id(size_id)
         try:
             size.delete()
         except Exception as e:
@@ -72,10 +72,16 @@ class QuantityDomainService:
         return 
     
     def update_quantity(self, pk: int, data: Dict[str, Any]) -> Quantity:
-        instance = self.get_by_id(pk)
-        if 'value' in data and data['value'] != instance.value:
-            if self.repo.get_by_value(data['value']):
-                raise ValidationError(_("اين مقدار تيرژي قبلا ثبت شده است."))
+        """
+        آپدیت تیراژ
+        """
+        instance = self.repo.get_by_id(pk)
+        if instance is None:
+            raise ValidationError(_("تیراژ مورد نظر با شناسه وارد شده یافت نشد."))
+        if data["value"] != instance.value:
+            existing_quantity = self.repo.get_by_value(data["value"])
+            if existing_quantity:
+                raise ValidationError(_("این مقدار تیراژ قبلاً ثبت شده است."))
         return self.repo.update(instance, data)
 
     @transaction.atomic
@@ -94,7 +100,7 @@ class QuantityDomainService:
 
     @transaction.atomic
     def delete_quantity(self, pk: int):
-        instance = self.get_by_id(pk)
+        instance = self.repo.get_by_id(pk)
         try:
             instance.delete()
         except Exception:
@@ -136,7 +142,7 @@ class FileUploadSpecDomainService:
         return self.repo.update(instance, data)
 
     def delete_spec(self, pk: int):
-        instance = self.get_by_id(pk)
+        instance = self.repo.get_by_id(pk)
         try:
             instance.delete()
         except Exception:
