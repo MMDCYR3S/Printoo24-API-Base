@@ -87,8 +87,8 @@ class CustomerManagementSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'password', 'is_active', 
-            'first_name', 'last_name', 'phone_number', 'company', 'bio', 
+            'id', 'username', 'email', 'password', 'is_active', 'is_staff', 'is_superuser',
+            'is_verified', 'first_name', 'last_name', 'phone_number', 'company', 'bio', 
             'wallet_balance', 'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'wallet_balance']

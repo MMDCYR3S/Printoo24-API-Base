@@ -62,6 +62,9 @@ class CustomerProfileAPIView(APIView):
                 'username': user.username,
                 'email': user.email,
                 'is_active': user.is_active,
+                'is_verified': user.is_verified,
+                'is_staff': user.is_staff,
+                'is_superuser': user.is_superuser,
                 # ===== اطلاعات پروفایل ===== # 
                 'first_name': profile.first_name if profile else '',
                 'last_name': profile.last_name if profile else '',
