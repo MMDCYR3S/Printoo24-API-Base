@@ -10,8 +10,7 @@ from core.domain.commerce.order import (
     OrderCostDomainService,
     OrderRepository,
     ShipmentRepository,
-    PackageRepository,
-    DeliveryMethodRepository
+    PackageRepository
 )
 
 # ========== Warehouse App Service ========== #
@@ -24,7 +23,6 @@ class WarehouseAppService:
         self._order_repo = OrderRepository()
         self._shipment_repo = ShipmentRepository()
         self._package_repo = PackageRepository()
-        self._delivery_method_repo = DeliveryMethodRepository()
         # ===== سرویس های دامنه مورد نیاز ===== #
         self._logistic_domain = LogisticDomainService()
         self._cost_domain = OrderCostDomainService() 
@@ -68,20 +66,23 @@ class WarehouseAppService:
         """ ایجاد مرسوله و بسته‌های اولیه به صورت یکجا """
         AppPermissionChecker.check_has_permission(user, 'add_ordershipment')
 
+        # ===== دریافت روش ارسال ===== #
+        method_type = data.get('delivery_method')
+        
+        # ===== اعتبارسنجی روش ارسال ===== #
+        valid_methods = dict(OrderShipment.METHOD_CHOICES).keys()
+        if method_type not in valid_methods:
+             raise ValidationError(f"روش ارسال '{method_type}' نامعتبر است.")
+        
         order = self._get_order(order_id)
-        # ===== اعتبارسنجی متد ارسال ===== #
-        delivery_method = self._delivery_method_repo.get_by_id(data.get('delivery_method_id'))
-        if not delivery_method:
-            raise ValidationError("روش ارسال نامعتبر است.")
-
         # ===== ایجاد مرسوله ===== #
         shipment = self._shipment_repo.create({
             "order": order,
-            "delivery_method": delivery_method,
+            "delivery_method": method_type,
             "destination_address": data.get('destination_address', order.address),
             "tracking_code": self._logistic_domain.generate_code(order.order_code),
             "driver_info": data.get('driver_info'),
-            "shipping_cost_real": data.get('shipping_cost_real', delivery_method.base_price),
+            "shipping_cost_real": data.get('shipping_cost_real', ""),
             "expected_delivery_date": data.get('expected_delivery_date'),
             "status": "pending"
         })
@@ -112,12 +113,25 @@ class WarehouseAppService:
         AppPermissionChecker.check_has_permission(user, 'change_ordershipment')
         # ===== دریافت مرسوله ===== #
         shipment = self._get_shipment(shipment_id)
+        if 'delivery_method_id' in data:
+             raise ValidationError("لطفا از فیلدهای معتبر استفاده کنید.")
         # ===== بررسی قوانین دامنه ===== #
         self._logistic_domain.validate_shipment_modification(shipment)
         # ===== اعمال ویرایش ===== #
         if data:
             shipment = self._shipment_repo.update(shipment, data)
         return shipment
+    
+    # ========== DELETE SHIPMENT ========== #
+    @transaction.atomic
+    def delete_shipment(self, user: User, shipment_id: int) -> OrderShipment:
+        """ حذف مرسوله """
+        AppPermissionChecker.check_has_permission(user, 'delete_ordershipment')
+        # ===== بررسی وجود ===== #
+        shipment = self._get_shipment(shipment_id)
+        # ===== بررسی قوانین ===== #
+        self._logistic_domain.validate_shipment_modification(shipment)
+        self._shipment_repo.delete(shipment)
     
     # ========== CHANGE SHIPMENT STATUS ========== #
     @transaction.atomic

@@ -627,29 +627,6 @@ class OrderPrintAttachment(models.Model):
         verbose_name = _('پیوست چاپ')
         verbose_name_plural = _('پیوست‌های چاپ')
 
-# ===== Delivery Method Model (تنظیمات روش‌های ارسال) ===== #
-class DeliveryMethod(models.Model):
-    """
-    روش‌های ارسال موجود در سیستم.
-    مثال: پیک موتوری، پست پیشتاز، تیپاکس، باربری ترمینال.
-    """
-    title = models.CharField(_('عنوان روش'), max_length=100)
-    description = models.TextField(_('توضیحات'), blank=True)
-    # ===== قیمت ارسال شناور است یا خیر؟ ===== #
-    is_price_dynamic = models.BooleanField(_('قیمت شناور؟'), default=False)
-    base_price = models.DecimalField(_("هزینه پایه"), max_digits=15, decimal_places=0, default=0)
-    
-    is_active = models.BooleanField(default=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = _('روش ارسال')
-        verbose_name_plural = _('روش‌های ارسال')
-
-    def __str__(self):
-        return self.title
-
 # ===== Order Shipment ===== #
 class OrderShipment(models.Model):
     """
@@ -665,6 +642,12 @@ class OrderShipment(models.Model):
         ('returned', _('مرجوع شد')),
     ]
     
+    METHOD_CHOICES = [
+        ('terminal', _('باربری ترمینال')),
+        ('pickup', _('تحویل حضوری(درب کارگاه)')),
+        ('other', _('سایر')),
+    ]
+    
     order = models.ForeignKey(
         'Order', 
         related_name='shipments', 
@@ -672,10 +655,11 @@ class OrderShipment(models.Model):
         verbose_name=_("سفارش مربوطه")
     )
     
-    delivery_method = models.ForeignKey(
-        DeliveryMethod, 
-        on_delete=models.PROTECT,
-        verbose_name=_("روش ارسال")
+    delivery_method = models.CharField(
+        _("روش ارسال"), 
+        max_length=50, 
+        choices=METHOD_CHOICES,
+        default='other'
     )
 
     # ===== اطلاعات ارسال ===== #

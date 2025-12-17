@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import OrderShipment, OrderPackage, OrderCostSheet, DeliveryMethod
+from core.models import OrderShipment, OrderPackage, OrderCostSheet
 from decimal import Decimal
 
 # ========== PACKAGE SERIALIZERS ========== #
@@ -41,12 +41,13 @@ class CostReportOutputSerializer(serializers.ModelSerializer):
 class CreateShipmentInputSerializer(serializers.ModelSerializer):
     """ ورودی برای API ایجاد مرسوله جدید """
     packages = PackageInputSerializer(many=True, required=True, min_length=1)
-    delivery_method_id = serializers.IntegerField(required=True)
+    delivery_method = serializers.ChoiceField(choices=OrderShipment.METHOD_CHOICES, required=True)
+
     class Meta:
         model = OrderShipment
         fields = [
             'order',
-            'delivery_method_id',
+            'delivery_method',
             'driver_info',
             'shipping_cost_real',
             'expected_delivery_date',
@@ -79,17 +80,26 @@ class ShipmentStatusInputSerializer(serializers.Serializer):
     )
 
 class ShipmentOutputSerializer(serializers.ModelSerializer):
-    """ خروجی مدل مرسوله (برای نمایش جزئیات کامل) """
-    delivery_method = serializers.CharField(source='delivery_method.title', read_only=True)
+    """ خروجی مدل مرسوله """
     packages = PackageOutputSerializer(many=True, read_only=True)
+    delivery_method_display = serializers.CharField(source='get_delivery_method_display', read_only=True)
     
     class Meta:
         model = OrderShipment
-        fields = '__all__' 
+        fields = [
+            'id',
+            'order',
+            'delivery_method',
+            'delivery_method_display',
+            'destination_address',
+            'driver_info',
+            'shipping_cost_real',
+            'expected_delivery_date',
+            'dispatched_at',
+            'delivered_at',
+            'packages',
+            'status',
+            'tracking_code',
+        ]
+        
 
-# ========== DELIVERY SERIALIZER ========== #
-class DeliveryMethodSerializer(serializers.ModelSerializer):
-    """ سریالایزر برای مدیریت روش‌های ارسال """
-    class Meta:
-        model = DeliveryMethod
-        fields = ['id', 'title', 'description', 'is_price_dynamic', 'base_price', 'is_active']
