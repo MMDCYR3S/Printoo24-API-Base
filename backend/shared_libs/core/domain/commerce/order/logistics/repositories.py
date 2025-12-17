@@ -1,11 +1,5 @@
 from core.utils.base_repository import BaseRepository
-from core.models import DeliveryMethod, OrderShipment, OrderPackage
-
-# ====== Delivery Method Repository ====== #
-class DeliveryMethodRepository(BaseRepository[DeliveryMethod]):
-    """ مدیریت متدهای ارسال """
-    def __init__(self):
-        super().__init__(DeliveryMethod)
+from core.models import OrderShipment, OrderPackage
 
 # ====== Order Shipment Repository ====== #
 class ShipmentRepository(BaseRepository[OrderShipment]):
@@ -16,7 +10,6 @@ class ShipmentRepository(BaseRepository[OrderShipment]):
     def get_shipment_with_details(self, shipment_id: int):
         """ دریافت یک مرسوله با تمام جزئیات مربوطه (آدرس، متد، بسته‌ها) """
         return self.model.objects.select_related(
-            'delivery_method', 
             'destination_address__city', 
             'destination_address__province'
         ).prefetch_related('packages').filter(id=shipment_id).first()

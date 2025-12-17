@@ -1,14 +1,10 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
+from datetime import datetime
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Count, Q
 
 from core.utils import BaseRepository
-from core.models import User
-from .exceptions import (
-    EmailAlreadyExistsException,
-    EmailNotFoundException,
-    UsernameNotFoundException
-)
+from core.models import User, UserRole
 
 # ====== User Repository ====== #
 class UserRepository(BaseRepository[User]):
@@ -82,3 +78,47 @@ class UserRepository(BaseRepository[User]):
             
     def get_user_role(self, user: User) -> Optional[User]:
         return user.user_role.select_related('role').first()
+
+    # ========================================= #
+    # ======== Dashboard / Stats Methods ======= #
+    # ========================================= #
+
+    def get_total_count(self) -> int:
+        """تعداد کل کاربران سیستم"""
+        return self.model.objects.count()
+
+    def get_count_by_date_range(self, start_date: datetime, end_date: datetime) -> int:
+        """
+        تعداد کاربران ثبت‌نام کرده در یک بازه زمانی خاص.
+        کاربرد: محاسبه رشد ماهانه.
+        """
+        return self.model.objects.filter(created_at__range=(start_date, end_date)).count()
+
+    def get_status_breakdown(self) -> Dict[str, int]:
+        """
+        تفکیک وضعیت فعال/غیرفعال کاربران.
+        """
+        return self.model.objects.aggregate(
+            active=Count('id', filter=Q(is_active=True)),
+            inactive=Count('id', filter=Q(is_active=False))
+        )
+
+    def get_role_breakdown(self) -> List[Dict[str, Any]]:
+        """
+        تفکیک کاربران بر اساس نقش (Role).
+        نکته: از مدل UserRole برای شمارش استفاده می‌کنیم.
+        خروجی: [{'role__name': 'Admin', 'count': 5}, ...]
+        """
+        # ما می‌خواهیم بدانیم از هر نقش چند کاربر داریم
+        return UserRole.objects.values('role__name', 'role__slug') \
+            .annotate(count=Count('user_id')) \
+            .order_by('-count')
+
+    def get_customer_vs_staff_count(self) -> Dict[str, int]:
+        """
+        مقایسه تعداد پرسنل و مشتریان
+        """
+        return self.model.objects.aggregate(
+            staff_count=Count('id', filter=Q(is_staff=True)),
+            customer_count=Count('id', filter=Q(is_staff=False, is_superuser=False))
+        )

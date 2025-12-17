@@ -15,3 +15,4 @@ from .product_views import ProductDashboardViewSet
 from .cart_view import CartDashboardViewSet, CartFileUploadViewSet
 from .order_view import OrderDashboardViewSet
 from .slider_view import SliderDashboardViewSet
+from .dashboard_view import *

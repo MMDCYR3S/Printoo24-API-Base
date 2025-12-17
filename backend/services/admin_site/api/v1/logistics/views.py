@@ -5,13 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from apps.logistics.services import WarehouseAppService
-from core.models import OrderShipment, DeliveryMethod
+from core.models import OrderShipment
 from .serializers import (
     CreateShipmentInputSerializer,
     UpdateShipmentInputSerializer,
     ShipmentStatusInputSerializer,
     ShipmentOutputSerializer,
-    DeliveryMethodSerializer,
     CreateLogisticCostReportInputSerializer,
     CostReportOutputSerializer,
     PackageInputSerializer,
@@ -31,7 +30,7 @@ class ShipmentViewSet(viewsets.ViewSet):
         responses={200: ShipmentOutputSerializer(many=True)}
     )
     def list(self, request):
-        queryset = OrderShipment.objects.all().select_related('order', 'delivery_method').prefetch_related('packages')
+        queryset = OrderShipment.objects.all().select_related('order').prefetch_related('packages')
         serializer = ShipmentOutputSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -82,8 +81,10 @@ class ShipmentViewSet(viewsets.ViewSet):
     
     @extend_schema(summary="حذف مرسوله (اگر پیاده‌سازی شده باشد)")
     def destroy(self, request, pk=None):
-        # بسته به بیزنس لاجیک شما ممکن است حذف مجاز نباشد
-        return Response({'detail': 'حذف مرسوله مجاز نیست.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        service = WarehouseAppService()
+        shipment = service.delete_shipment(request.user, pk)
+        return Response(shipment, status=status.HTTP_204_NO_CONTENT)
+    
     @extend_schema(
         summary="تغییر وضعیت مرسوله",
         request=ShipmentStatusInputSerializer,
@@ -119,16 +120,6 @@ class ShipmentViewSet(viewsets.ViewSet):
             data=serializer.validated_data
         )
         return Response(PackageOutputSerializer(package).data, status=status.HTTP_201_CREATED)
-
-# ========== DELIVERY METHODS ========== #
-@extend_schema(tags=['Warehouse - Utils'])
-class DeliveryMethodViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    فقط خواندنی: لیست روش‌های ارسال
-    """
-    queryset = DeliveryMethod.objects.filter(is_active=True)
-    serializer_class = DeliveryMethodSerializer
-    permission_classes = [IsAuthenticated]
 
 # ========== LOGISTIC COSTS ========== #
 @extend_schema(tags=['Warehouse - Costs'])

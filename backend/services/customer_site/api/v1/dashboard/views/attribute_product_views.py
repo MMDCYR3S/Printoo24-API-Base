@@ -87,13 +87,13 @@ class QuantityViewSet(viewsets.ViewSet):
         return Response(QuantitySerializer(instance).data, status=status.HTTP_201_CREATED)
     
     @extend_schema(request=QuantitySerializer, responses=QuantitySerializer)
-    def update(self, request, pk=None):
+    def update(self, request, pk):
         serializer = QuantitySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         instance = self.service.update_quantity(
             pk, 
-            value=serializer.validated_data['value']
+            data=serializer.validated_data
         )
         return Response(QuantitySerializer(instance).data, status=status.HTTP_201_CREATED)
 

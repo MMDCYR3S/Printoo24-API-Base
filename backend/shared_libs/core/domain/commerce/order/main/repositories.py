@@ -1,5 +1,10 @@
-from typing import List, Optional
-from django.db.models import Prefetch, QuerySet
+from typing import List, Optional, Any, Dict
+from datetime import datetime, timedelta
+
+from django.utils import timezone
+from django.db.models import Prefetch, QuerySet, Count, Sum, Avg
+from django.db.models.functions import TruncDay
+
 from core.utils.base_repository import BaseRepository
 from core.models import (
     Order, OrderItem, OrderItemFile, OrderStatus, Address, User,
@@ -125,6 +130,73 @@ class OrderRepository(BaseRepository[Order]):
         return self.model.objects.select_related(
             'user', 'current_status'
         ).order_by('-created_at')
+        
+    # ======== Dashboard / Stats Methods ======= #
+    def get_total_count(self) -> int:
+        """دریافت تعداد کل سفارشات ثبت شده"""
+        return self.model.objects.count()
+
+    def get_count_by_date_range(self, start_date: datetime, end_date: datetime) -> int:
+        """
+        تعداد سفارشات در یک بازه زمانی خاص.
+        کاربرد: محاسبه تعداد سفارشات ماه جاری و ماه قبل.
+        """
+        return self.model.objects.filter(created_at__range=(start_date, end_date)).count()
+
+    def get_pending_initial_count(self, status_code: str = 'PENDING_INITIAL_ADMIN') -> int:
+        """
+        تعداد سفارشاتی که در وضعیت 'در انتظار تایید اولیه' هستند.
+        """
+        return self.model.objects.filter(current_status__internal_code=status_code).count()
+
+    def get_status_breakdown(self) -> List[Dict[str, Any]]:
+        """
+        تفکیک سفارشات بر اساس وضعیت.
+        خروجی: لیستی از دیکشنری‌ها شامل نام وضعیت و تعداد.
+        Example: [{'current_status__name': 'تکمیل شده', 'count': 50}, ...]
+        """
+        return self.model.objects.values('current_status__name') \
+            .annotate(count=Count('id')) \
+            .order_by('-count')
+
+    # ========== Dashboard / Financial Chart ========== #
+    def get_total_revenue(self) -> int:
+        """جمع کل مبلغ سفارشات (درآمد کل)"""
+        result = self.model.objects.aggregate(total=Sum('total_price'))
+        return result['total'] or 0
+
+    def get_revenue_by_date_range(self, start_date, end_date) -> int:
+        """درآمد در یک بازه زمانی خاص"""
+        result = self.model.objects.filter(
+            created_at__range=(start_date, end_date)
+        ).aggregate(total=Sum('total_price'))
+        return result['total'] or 0
+
+    def get_average_order_value(self) -> int:
+        """میانگین ارزش سبد خرید (AOV)"""
+        result = self.model.objects.aggregate(avg=Avg('total_price'))
+        return int(result['avg'] or 0)
+
+    def get_daily_revenue_chart_data(self, days: int = 30) -> List[Dict[str, Any]]:
+        """
+        دریافت داده‌های نموداری: فروش روزانه در N روز گذشته.
+        خروجی: لیستی از دیکشنری‌ها {date: '2023-10-01', total: 5000000}
+        """
+        start_date = timezone.now() - timedelta(days=days)
+        
+        chart_data = self.model.objects.filter(created_at__gte=start_date) \
+            .annotate(date=TruncDay('created_at')) \
+            .values('date') \
+            .annotate(total=Sum('total_price'), count=Count('id')) \
+            .order_by('date')
+            
+        return list(chart_data)
+
+    def get_top_customers_by_revenue(self, limit: int = 5) -> QuerySet:
+        """(اختیاری) برترین مشتریان بر اساس پول خرج شده"""
+        return self.model.objects.values('user__username', 'user__customer_profile__last_name') \
+            .annotate(total_spent=Sum('total_price')) \
+            .order_by('-total_spent')[:limit]
 
 # ======= Order Item Repositories ======= #
 class OrderItemRepository(BaseRepository[OrderItem]):

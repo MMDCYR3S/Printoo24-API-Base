@@ -15,7 +15,11 @@ from .views import (
     CartDashboardViewSet,
     CartFileUploadViewSet,
     OrderDashboardViewSet,
-    SliderDashboardViewSet
+    SliderDashboardViewSet,
+    ProductDashboardStatsView,
+    UserDashboardStatsView,
+    OrderDashboardStatsView,
+    FinancialDashboardStatsView,
 )
 
 router = DefaultRouter()
@@ -38,5 +42,9 @@ router.register(r'sliders', SliderDashboardViewSet, basename='sliders')
 app_name = "dashboard"
 
 urlpatterns = [
+    path("product-stats/", ProductDashboardStatsView.as_view(), name="product-stats"),
+    path("user-stats/", UserDashboardStatsView.as_view(), name="user-stats"),
+    path("order-stats/", OrderDashboardStatsView.as_view(), name="order-stats"),
+    path('stats/financial/', FinancialDashboardStatsView.as_view(), name='dashboard-financial-stats'),
     path("", include(router.urls)),
 ]

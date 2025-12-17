@@ -3,7 +3,7 @@ from random import randint
 
 from django.utils import timezone
 from django.db import models
-from django.db.models import Sum, Q, F
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
@@ -301,59 +301,6 @@ class OrderItemFile(models.Model):
     def is_rejected(self):
         return self.status == 'rejected'
 
-# ========================= #
-# ===== Order State Log ===== #
-# ========================= #
-class OrderStateLog(models.Model):
-    """
-    این مدل تمام تغییرات وضعیت سفارش را ثبت می‌کند.
-    هیچ رکوردی در این جدول آپدیت یا پاک نمی‌شود (Append Only).
-    """
-    order = models.ForeignKey(
-        Order, 
-        related_name='state_logs', 
-        on_delete=models.CASCADE,
-        verbose_name=_("سفارش مرتبط")
-    )
-    
-    from_status = models.ForeignKey(
-        OrderStatus, 
-        related_name='log_from_status', 
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        verbose_name=_("از وضعیت")
-    )
-    
-    # ===== وضعیت جدید ===== #
-    to_status = models.ForeignKey(
-        OrderStatus, 
-        related_name='log_to_status', 
-        on_delete=models.PROTECT,
-        verbose_name=_("به وضعیت")
-    )
-    
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        verbose_name=_("تغییر دهنده")
-    )
-    
-    timestamp = models.DateTimeField(_("زمان تغییر"), auto_now_add=True)
-    duration_in_previous_status = models.DurationField(_("مدت توقف در مرحله قبل"), null=True, blank=True)
-    
-    description = models.TextField(_("توضیحات / دلیل تغییر"), blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
-
-    class Meta:
-        verbose_name = _('تاریخچه تغییر وضعیت')
-        verbose_name_plural = _('تاریخچه تغییرات وضعیت')
-        ordering = ['-timestamp']
-
-    def __str__(self):
-        return f"{self.order.order_code} | {self.from_status} -> {self.to_status}"
-
 # ========================================================= #
 # ========== مدلاسیون مربوط به هزینه های سفارش ========== #
 # ========================================================= #
@@ -627,29 +574,6 @@ class OrderPrintAttachment(models.Model):
         verbose_name = _('پیوست چاپ')
         verbose_name_plural = _('پیوست‌های چاپ')
 
-# ===== Delivery Method Model (تنظیمات روش‌های ارسال) ===== #
-class DeliveryMethod(models.Model):
-    """
-    روش‌های ارسال موجود در سیستم.
-    مثال: پیک موتوری، پست پیشتاز، تیپاکس، باربری ترمینال.
-    """
-    title = models.CharField(_('عنوان روش'), max_length=100)
-    description = models.TextField(_('توضیحات'), blank=True)
-    # ===== قیمت ارسال شناور است یا خیر؟ ===== #
-    is_price_dynamic = models.BooleanField(_('قیمت شناور؟'), default=False)
-    base_price = models.DecimalField(_("هزینه پایه"), max_digits=15, decimal_places=0, default=0)
-    
-    is_active = models.BooleanField(default=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = _('روش ارسال')
-        verbose_name_plural = _('روش‌های ارسال')
-
-    def __str__(self):
-        return self.title
-
 # ===== Order Shipment ===== #
 class OrderShipment(models.Model):
     """
@@ -665,6 +589,12 @@ class OrderShipment(models.Model):
         ('returned', _('مرجوع شد')),
     ]
     
+    METHOD_CHOICES = [
+        ('terminal', _('باربری ترمینال')),
+        ('pickup', _('تحویل حضوری(درب کارگاه)')),
+        ('other', _('سایر')),
+    ]
+    
     order = models.ForeignKey(
         'Order', 
         related_name='shipments', 
@@ -672,10 +602,11 @@ class OrderShipment(models.Model):
         verbose_name=_("سفارش مربوطه")
     )
     
-    delivery_method = models.ForeignKey(
-        DeliveryMethod, 
-        on_delete=models.PROTECT,
-        verbose_name=_("روش ارسال")
+    delivery_method = models.CharField(
+        _("روش ارسال"), 
+        max_length=50, 
+        choices=METHOD_CHOICES,
+        default='other'
     )
 
     # ===== اطلاعات ارسال ===== #
@@ -755,48 +686,59 @@ class OrderPackage(models.Model):
 # ========== ORDER SCHEDULE ========== #
 class OrderSchedule(models.Model):
     """
-    مدل برای زمانبندی دقیق و اختصاصی هر سفارش
+    مدل زمان‌بندی سفارش.
+    به صورت One-to-One به سفارش متصل است.
     """
     order = models.OneToOneField(
-        Order, 
+        'core.Order', 
         on_delete=models.CASCADE, 
-        related_name='schedule'
+        related_name='schedule',
+        verbose_name=_("سفارش مرتبط")
     )
-    start_date = models.DateTimeField(verbose_name="تاریخ شروع فرآیند")
-    due_date = models.DateTimeField(verbose_name="تاریخ تحویل نهایی (Deadline)")
-    completed_at = models.DateTimeField(null=True, blank=True, verbose_name="تاریخ تکمیل واقعی")
-    schedule_notes = models.TextField(blank=True, null=True)
-    is_locked = models.BooleanField(default=False, help_text="اگر قفل شود، تاریخ‌ها به صورت خودکار تغییر نمی‌کنند")
+    
+    # ===== بازه‌های زمانی ===== #
+    start_date = models.DateTimeField(_("تاریخ شروع فرآیند"), default=timezone.now)
+    due_date = models.DateTimeField(_("تاریخ تحویل نهایی (Deadline)"))
+    # ===== وضعیت اجرا ===== #
+    completed_at = models.DateTimeField(_("تاریخ تکمیل واقعی"), null=True, blank=True)
+    # ===== تنظیمات مدیریتی ===== #
+    # schedule_notes = models.TextField(_("یادداشت برنامه‌ریزی"), blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     class Meta:
+        verbose_name = _('زمان‌بندی سفارش')
+        verbose_name_plural = _('زمان‌بندی‌های سفارش')
         indexes = [
             models.Index(fields=['start_date', 'due_date']),
+            models.Index(fields=['completed_at']),
         ]
+
+    def __str__(self):
+        return f"Schedule: {self.order.order_code}"
+
+    def clean(self):
+        """ اعتبارسنجی سطح دیتابیس """
+        if self.due_date and self.start_date and self.due_date < self.start_date:
+            raise ValidationError(_("تاریخ تحویل نمی‌تواند قبل از تاریخ شروع باشد."))
 
     @property
     def duration_days(self):
-        """مدت زمان کل پروژه"""
+        """ مدت زمان برنامه‌ریزی شده (روز) """
         return (self.due_date - self.start_date).days
 
     @property
-    def remaining_days(self):
-        """روزهای باقی‌مانده تا ددلاین"""
+    def is_overdue(self):
+        """ آیا از موعد تحویل گذشته و هنوز تمام نشده؟ """
         if self.completed_at:
-            return 0
-        
-        now = timezone.now()
-        delta = self.due_date - now
-        return delta.days
+            return False
+        return timezone.now() > self.due_date
 
-# ========== SCHEDULE MILESTONE ========== #
-class ScheduleMilestone(models.Model):
-    """
-    مدل برای ریزجزئیات و برنامه های مربوط به زمانبندی سفارش
-    زمانی که کارکنان کارهای خود را می خواهند انجام دهند، باید
-    از قبل سفارشات خود را باز کنند و زمانبندی آن‌ها را
-    تنظیم کنند.
-    """
-    schedule = models.ForeignKey(OrderSchedule, related_name='milestones', on_delete=models.CASCADE)
-    title = models.CharField(max_length=150)
-    due_date = models.DateTimeField()
-    is_completed = models.BooleanField(default=False)
+    @property
+    def delay_days(self):
+        """ میزان تاخیر (اگر تکمیل شده: تفاوت تکمیل با ددلاین / اگر نشده: تفاوت الان با ددلاین) """
+        target_date = self.completed_at if self.completed_at else timezone.now()
+        if target_date > self.due_date:
+            return (target_date - self.due_date).days
+        return 0

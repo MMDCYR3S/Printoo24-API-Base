@@ -1,5 +1,7 @@
-from typing import List, Optional
-from django.db.models import Prefetch, QuerySet
+from datetime import datetime
+from typing import Optional
+
+from django.db.models import Prefetch, QuerySet, Q, Count
 
 from core.utils.base_repository import BaseRepository
 from ..exceptions import ProductNotFoundException
@@ -156,3 +158,30 @@ class ProductRepository(BaseRepository[Product]):
     def clear_file_requirements(self, product: Product):
         """ حذف تمام نیازمندی‌های فایل فعلی """
         product.file_upload_requirements.all().delete()
+
+    # ========== Dashboard / Stats Methods ========== #
+    def get_total_count(self) -> int:
+        """تعداد کل محصولات"""
+        return self.model.objects.count()
+
+    def get_count_by_date_range(self, start_date: datetime, end_date: datetime) -> int:
+        """تعداد محصولات ایجاد شده در یک بازه زمانی خاص"""
+        return self.model.objects.filter(created_at__range=(start_date, end_date)).count()
+
+    def get_status_breakdown(self) -> dict:
+        """
+        تفکیک وضعیت (فعال/غیرفعال)
+        خروجی: {'active': 10, 'inactive': 2}
+        """
+        return self.model.objects.aggregate(
+            active=Count('id', filter=Q(is_active=True)),
+            inactive=Count('id', filter=Q(is_active=False))
+        )
+    
+    def get_quantity_status_breakdown(self) -> dict:
+        """تعداد محصولات دارای تیراژ و بدون تیراژ"""
+        return self.model.objects.aggregate(
+            with_quantity=Count('id', filter=Q(has_quantity=True)),
+            without_quantity=Count('id', filter=Q(has_quantity=False))
+        )
+

@@ -1,7 +1,9 @@
+from typing import Dict, Any
+
 from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from typing import Dict, Any
+from django.utils.translation import gettext_lazy as _
 
 from core.models import Order, User, OrderStatusGroup, OrderStatus, OrderItem
 from .repositories import (
@@ -11,6 +13,7 @@ from .repositories import (
 )
 from core.domain.commerce.order import OrderItemRepository
 from core.domain.commerce.order.exceptions import OrderNotFoundException
+from core.domain.infrastructure.logger import AuditLogDomainService
 
 
 # ========== Order Status Flow Service ========== #
@@ -23,40 +26,22 @@ class OrderStatusFlowDomainService:
         self.repo = StatusFlowRepository()
         self.item_repo = OrderItemRepository()
         self.status_repo = OrderStatusRepository()
+        self.audit_service = AuditLogDomainService()
         
     @transaction.atomic
     def change_order_status(self, order: Order, new_status_code: str, user: User, description: str = None) -> Order:
         """
-        تغییر وضعیت سفارش و ثبت لاگ.
+        تغییر وضعیت سفارش توسط کاربر یا سیستم.
         """
-        # ===== دریافت و اعتبارسنجی وضعیت جدید ===== #
+        # ===== بررسی اینکه آیا وضعیت جدید معتبر است ===== #
         new_status = self.repo.get_status_by_code(new_status_code)
         if not new_status:
             raise ValidationError(f"کد وضعیت نامعتبر: {new_status_code}")
-        
-        # ===== بررسی تکراری نبودن وضعیت ===== #
+        # ===== جلوگیری از تکرار ===== #
         if order.current_status_id == new_status.id:
             return order
-        
-        # ===== ثبت لاگ ===== #
-        last_log = self.repo.get_last_state_log(order)
-        duration = timezone.now() - last_log.timestamp if last_log else None
-        
-        # ===== ثبت لاگ ===== #
-        self.repo.create_state_log({
-            "order": order,
-            "from_status": order.current_status,
-            "to_status": new_status,
-            "user": user,
-            "description": description,
-            "duration_in_previous_status": duration
-        })
-        
-        # ===== آپدیت وضعیت سفارش===== #
-        order.current_status = new_status
-        order.save(update_fields=['current_status', 'updated_at'])
-
-        return order
+        # ===== اجرای تغییر وضعیت ===== #
+        return self._perform_transition(order, new_status, user, description)
 
     @transaction.atomic
     def change_item_status(self, item_id: int, new_status_code: str, user: User, description: str = None) -> OrderItem:
@@ -80,8 +65,22 @@ class OrderStatusFlowDomainService:
         if old_status and old_status.internal_code == new_status_code:
             return item
 
-        # ثبت لاگ آیتم (باید مدل لاگ آیتم داشته باشی یا از همون لاگ سفارش با فیلد item استفاده کنی)
-        # self.repo.create_item_state_log(...) 
+        changes = {
+            "field": "status",
+            "from_id": old_status.id if old_status else None,
+            "to_id": new_status.id,
+            "from_title": old_status.title if old_status else "N/A",
+            "to_title": new_status.title,
+            "internal_code_change": f"{old_status.internal_code if old_status else 'None'} -> {new_status.internal_code}"
+        }
+
+        self.audit_service.record_log(
+            user=user,
+            obj=item,
+            action='STATUS_CHANGE',
+            changes=changes,
+            description=description or _("تغییر وضعیت آیتم سفارش")
+        )
         
         item.status = new_status
         item.save(update_fields=['status', 'updated_at'])
@@ -91,76 +90,92 @@ class OrderStatusFlowDomainService:
 
         return item
     
-    # ================================================= #
-    # ============ منطق هسته (Core Logic) ============ #
-    # ================================================= #
+    # ============ منطق هسته ============ #
     def _perform_transition(self, order: Order, new_status: OrderStatus, user: User, description: str = None):
         """ متد کمکی برای جلوگیری از تکرار کد در تغییر وضعیت سفارش """
         old_status = order.current_status
         
-        if old_status and old_status.internal_code == new_status.internal_code:
-            return order
+        # ===== محاسبه مدت زمان توقف در مرحله قبل ===== #
+        last_log = self.audit_service.get_last_action_log(order, action='STATUS_CHANGE')
         
-        # محاسبه مدت زمان
-        last_log = self.repo.get_last_state_log(order)
-        duration = timezone.now() - last_log.timestamp if last_log else None
+        duration_seconds = 0
+        formatted_duration = "N/A"
         
-        # ثبت لاگ
-        self.repo.create_state_log({
-            "order": order,
-            "from_status": old_status,
-            "to_status": new_status,
-            "user": user,
-            "description": description,
-            "duration_in_previous_status": duration
-        })
+        if last_log:
+            delta = timezone.now() - last_log.timestamp
+            duration_seconds = delta.total_seconds()
+            formatted_duration = str(delta).split('.')[0]
+        
+        # ===== آماده‌سازی داده‌های لاگ ===== #
+        changes_data = {
+            "transition": "order_status_update",
+            "from_status": {
+                "id": old_status.id if old_status else None,
+                "title": old_status.title if old_status else "آغاز فرایند",
+                "code": old_status.internal_code if old_status else None
+            },
+            "to_status": {
+                "id": new_status.id,
+                "title": new_status.title,
+                "code": new_status.internal_code
+            },
+            "metrics": {
+                "duration_seconds": int(duration_seconds),
+                "duration_readable": formatted_duration
+            }
+        }
 
-        # آپدیت
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=order,
+            action='STATUS_CHANGE',
+            changes=changes_data,
+            description=description or _(f"تغییر وضعیت سفارش به {new_status.title}")
+        )
+
+        # ===== آپدیت نهایی دیتابیس ===== #
         order.current_status = new_status
         order.save(update_fields=['current_status', 'updated_at'])
+        
         return order
 
     def _update_master_order_status(self, order: Order, user: User):
         """
-        همون Rollup Logic معروف!
-        بررسی می‌کند وضعیت آیتم‌ها چیست و وضعیت سفارش را بر اساس آن تنظیم می‌کند.
+        منطق تجمیع وضعیت آیتم‌ها (Rollup Logic).
+        این بخش منطق بیزینس است و تغییری نکرده، اما حالا از متد _perform_transition جدید استفاده می‌کند.
         """
-        items = order.order_item_order.all() # فرض بر اینکه related_name='order_item_order' است
+        items = order.order_item_order.all()
         total_items = items.count()
 
         if total_items == 0:
             return
 
-        # 1. اگر حتی یک آیتم رد شده باشد -> وضعیت سفارش: بررسی لازم (Attention)
-        if items.filter(status__status_type='reject').exists():
-            target_code = 'ATTENTION_NEEDED' # باید در دیتابیس تعریف شده باشد
+        target_code = None
         
-        # 2. اگر همه تکمیل شده‌اند -> وضعیت سفارش: تکمیل شده (Completed)
+        # ===== رد شدن آیتم ===== #
+        if items.filter(status__status_type='reject').exists():
+            target_code = 'ATTENTION_NEEDED'
+            
+        # ===== تایید شدن آیتم ===== #
         elif items.filter(status__internal_code='DELIVERED').count() == total_items:
             target_code = 'COMPLETED'
             
-        # 3. اگر همه در حال چاپ هستند (یا جلوتر) -> وضعیت سفارش: در حال پردازش
         elif items.filter(status__group__code='production').count() == total_items:
-             target_code = 'IN_PRODUCTION'
-             
-        else:
-            # هیچ کاری نکن یا وضعیت پیش‌فرض بذار
-            return 
+            target_code = 'IN_PRODUCTION'
+        
+        if not target_code:
+            return
 
-        # دریافت آبجکت وضعیت
         new_master_status = self.status_repo.get_status_by_code(target_code)
         
-        # اگر وضعیت جدید با فعلی فرق دارد، سفارش را آپدیت کن
-        if new_master_status and order.current_status != new_master_status:
+        if new_master_status and order.current_status_id != new_master_status.id:
             self._perform_transition(
                 order=order, 
                 new_status=new_master_status, 
-                user=user, 
-                description="تغییر وضعیت اتوماتیک بر اساس پیشرفت آیتم‌ها"
+                user=user,
+                description="بروزرسانی خودکار بر اساس وضعیت آیتم‌ها"
             )
-
-
-
 
 # ===== Order Status Group Domain Service ===== #
 class OrderStatusGroupDomainService:
