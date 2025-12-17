@@ -1,68 +1,63 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Box, LogOut } from "lucide-react";
+// src/app/features/admin/layouts/AdminLayout.jsx
+import { Outlet, Link } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
+import { authService } from '../../../services/authService';
+import SidebarItem from './SidebarItem';
+import AdminHeader from './AdminHeader';
+import { ADMIN_NAVIGATION } from '../constants/navigation';
 
 const AdminLayout = () => {
-  const location = useLocation();
-
-  const menuItems = [
-    { title: "داشبورد", icon: <LayoutDashboard size={20} />, path: "/admin" },
-    { title: "محصولات", icon: <Box size={20} />, path: "/admin/products" },
-    { title: "کاربران", icon: <Users size={20} />, path: "/admin/users" },
-  ];
+  const handleLogout = () => {
+     authService.logout();
+     window.location.href = '/login';
+  };
 
   return (
-    <div className="drawer lg:drawer-open font-sans bg-base-200 min-h-screen">
+    <div className="drawer lg:drawer-open font-sans bg-slate-50 min-h-screen">
       <input id="admin-drawer" type="checkbox" className="drawer-toggle" />
       
-      {/* محتوای اصلی صفحه */}
-      <div className="drawer-content flex flex-col">
-        {/* هدر موبایل */}
-        <div className="w-full navbar bg-base-100 lg:hidden shadow-sm">
-          <div className="flex-none">
-            <label htmlFor="admin-drawer" aria-label="open sidebar" className="btn btn-square btn-ghost">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-6 h-6 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </label>
-          </div>
-          <div className="flex-1 px-2 mx-2 font-bold text-primary">پنل مدیریت</div>
-        </div>
-
-        {/* محل رندر شدن صفحات داخلی ادمین */}
-        <main className="p-6">
-            <Outlet />
+      {/* === محتوای اصلی === */}
+      <div className="drawer-content flex flex-col transition-all duration-300">
+        <AdminHeader />
+        
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+          {/* اینجا محتوای صفحات ادمین رندر میشه */}
+          <Outlet />
         </main>
       </div> 
       
-      {/* سایدبار */}
-      <div className="drawer-side z-50">
-        <label htmlFor="admin-drawer" aria-label="close sidebar" className="drawer-overlay"></label> 
-        <ul className="menu p-4 w-80 min-h-full bg-base-100 text-base-content border-l border-base-300">
-          {/* لوگو یا تایتل */}
-          <li className="mb-6">
-             <div className="text-2xl font-bold text-primary px-2">Admin Panel printoooooo</div>
-          </li>
+      {/* === سایدبار === */}
+      <div className="drawer-side z-50 shadow-2xl lg:shadow-none">
+        <label htmlFor="admin-drawer" className="drawer-overlay bg-black/20 backdrop-blur-sm"></label> 
+        
+        <aside className="w-72 min-h-full bg-white text-base-content flex flex-col border-l border-base-200">
+          {/* هدر سایدبار */}
+          <div className="h-16 flex items-center gap-2 px-6 border-b border-base-100">
+            <span className="text-2xl font-black text-slate-800">Printoo</span>
+            <span className="badge badge-primary badge-outline text-xs font-bold">Admin Panel</span>
+          </div>
 
-          {/* آیتم‌های منو */}
-          {menuItems.map((item) => (
-            <li key={item.path} className="mb-1">
-              <Link 
-                to={item.path} 
-                className={location.pathname === item.path ? "active font-bold" : ""}
-              >
-                {item.icon}
-                {item.title}
-              </Link>
-            </li>
-          ))}
+          {/* لیست منوها */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar py-4 px-3 space-y-1">
+             {ADMIN_NAVIGATION.map((item, index) => (
+                <SidebarItem key={index} item={item} />
+             ))}
+          </div>
 
-          <div className="divider"></div>
-          
-          <li>
-            <button className="text-error hover:bg-error/10">
-              <LogOut size={20} />
-              خروج
+          {/* فوتر سایدبار */}
+          <div className="p-4 border-t border-base-100 bg-slate-50">
+            <button 
+              onClick={handleLogout}
+              className="btn btn-outline btn-error w-full btn-sm gap-2 hover:shadow-error/20"
+            >
+              <LogOut size={16} />
+              خروج امن
             </button>
-          </li>
-        </ul>
+            <div className="text-center text-[10px] text-slate-300 mt-3 font-mono">
+              v2.0.0 Pro Edition
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );

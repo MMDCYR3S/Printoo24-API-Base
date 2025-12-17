@@ -10,26 +10,22 @@ export const useAdminAuth = () => {
     queryFn: profileService.getProfileInfo,
     enabled: !!token,
     retry: false,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // 5 دقیقه
+    // ✅ این خط طلاییه: دیتای اولیه رو از لوکال استوریج می‌خونه
+    initialData: () => {
+      const storedUser = localStorage.getItem('userData');
+      return storedUser ? JSON.parse(storedUser) : undefined;
+    },
   });
 
-  // 🕵️‍♂️ بخش دیباگ (بعد از حل مشکل می‌تونی پاکش کنی)
-  if (user) {
-    console.log("🔥 [AdminAuth Debug] User Data:", user);
-    console.log("❓ is_staff:", user.is_staff);
-    console.log("❓ is_superuser:", user.is_superuser);
-  } else if (isError) {
-    console.error("❌ [AdminAuth Debug] Failed to fetch user profile");
-  }
-
   // لاجیک تشخیص ادمین
-  // نکته: ممکنه توی دیتابیس شما is_admin باشه، اینجا هر سه حالت رو چک می‌کنیم
-  const isAdmin = user?.is_staff || user?.is_superuser || user?.is_admin; 
+  const isAdmin = user?.is_staff || user?.is_superuser;
 
   return { 
     user, 
     isAdmin, 
-    isLoading, 
+    // ✅ اگر دیتای اولیه باشه، دیگه isLoading ترو نمیشه و صفحه سفید نمیاد
+    isLoading: isLoading && !user, 
     isAuthenticated: !!token && !isError 
   };
 };

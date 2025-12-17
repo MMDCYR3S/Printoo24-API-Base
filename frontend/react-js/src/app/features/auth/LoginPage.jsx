@@ -2,7 +2,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query'; // 👈 ایمپورت useQueryClient
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import PasswordInput from '../../components/PasswordInput';
 import { loginSchema } from './schemas';
@@ -11,7 +11,7 @@ import { authService } from '../../services/authService';
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient(); // 👈 گرفتن اینستنس کلاینت
+  const queryClient = useQueryClient();
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema),
@@ -19,20 +19,30 @@ const LoginPage = () => {
 
   const loginMutation = useMutation({
     mutationFn: authService.login,
-    onSuccess: async (data) => {
-      // ۱. ذخیره توکن‌ها
-      localStorage.setItem('accessToken', data.access);
-      localStorage.setItem('refreshToken', data.refresh);
+    onSuccess: (data) => {
+      const accessToken = data.tokens?.access;
+      const refreshToken = data.tokens?.refresh;
+
+      if (!accessToken) {
+        toast.error("خطا: توکن دریافت نشد!");
+        return;
+      }
+
+      // 1. ذخیره توکن‌ها
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
       
-      toast.success('ورود با موفقیت انجام شد');
+      // ✅ 2. ذخیره اطلاعات کاربر در LocalStorage (همون چیزی که خواستی)
+      if (data.user) {
+        localStorage.setItem('userData', JSON.stringify(data.user));
+        
+        // آپدیت کردن کش ریکت کوئری همزمان
+        queryClient.setQueryData(['profile-info'], data.user);
+      }
 
-      // 💥 ۲. پاکسازی کش پروفایل (قاتل باگ شما اینجاست!)
-      // این خط باعث میشه useAdminAuth مجبور بشه دوباره از سرور استعلام بگیره
-      await queryClient.invalidateQueries({ queryKey: ['profile-info'] });
+      toast.success('ورود موفقیت‌آمیز');
 
-      // ۳. ریدایرکت هوشمند
-      // اگر کاربر میخواست بره ادمین و پرت شد بیرون، برش میگردونیم همونجا
-      const from = location.state?.from?.pathname || '/';
+      const from = location.state?.from?.pathname || '/admin';
       navigate(from, { replace: true });
     },
     onError: (error) => {
@@ -48,7 +58,7 @@ const LoginPage = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <h2 className="text-xl font-semibold text-center mb-4">ورود به حساب کاربری</h2>
-
+      
       <div className="form-control">
         <label className="label"><span className="label-text">نام کاربری</span></label>
         <input 
@@ -64,7 +74,9 @@ const LoginPage = () => {
         <label className="label"><span className="label-text">رمز عبور</span></label>
         <PasswordInput register={register} name="password" error={errors.password} />
         <label className="label">
-           <Link to="/forgot-password" class="label-text-alt link link-hover text-primary">رمز عبور را فراموش کردید؟</Link>
+           <Link to="/forgot-password" className="label-text-alt link link-hover text-primary">
+             رمز عبور را فراموش کردید؟
+           </Link>
         </label>
       </div>
 
