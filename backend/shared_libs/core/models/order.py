@@ -301,59 +301,6 @@ class OrderItemFile(models.Model):
     def is_rejected(self):
         return self.status == 'rejected'
 
-# ========================= #
-# ===== Order State Log ===== #
-# ========================= #
-class OrderStateLog(models.Model):
-    """
-    این مدل تمام تغییرات وضعیت سفارش را ثبت می‌کند.
-    هیچ رکوردی در این جدول آپدیت یا پاک نمی‌شود (Append Only).
-    """
-    order = models.ForeignKey(
-        Order, 
-        related_name='state_logs', 
-        on_delete=models.CASCADE,
-        verbose_name=_("سفارش مرتبط")
-    )
-    
-    from_status = models.ForeignKey(
-        OrderStatus, 
-        related_name='log_from_status', 
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        verbose_name=_("از وضعیت")
-    )
-    
-    # ===== وضعیت جدید ===== #
-    to_status = models.ForeignKey(
-        OrderStatus, 
-        related_name='log_to_status', 
-        on_delete=models.PROTECT,
-        verbose_name=_("به وضعیت")
-    )
-    
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        verbose_name=_("تغییر دهنده")
-    )
-    
-    timestamp = models.DateTimeField(_("زمان تغییر"), auto_now_add=True)
-    duration_in_previous_status = models.DurationField(_("مدت توقف در مرحله قبل"), null=True, blank=True)
-    
-    description = models.TextField(_("توضیحات / دلیل تغییر"), blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
-
-    class Meta:
-        verbose_name = _('تاریخچه تغییر وضعیت')
-        verbose_name_plural = _('تاریخچه تغییرات وضعیت')
-        ordering = ['-timestamp']
-
-    def __str__(self):
-        return f"{self.order.order_code} | {self.from_status} -> {self.to_status}"
-
 # ========================================================= #
 # ========== مدلاسیون مربوط به هزینه های سفارش ========== #
 # ========================================================= #

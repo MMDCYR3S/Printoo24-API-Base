@@ -1,7 +1,7 @@
 from typing import Optional
 from django.db.models import QuerySet, Count
 from core.utils.base_repository import BaseRepository
-from core.models import Order, OrderStatus, OrderStateLog, OrderStatusGroup
+from core.models import Order, OrderStatus, OrderStatusGroup
 
 class StatusFlowRepository(BaseRepository[OrderStatus]):
     """
@@ -16,18 +16,6 @@ class StatusFlowRepository(BaseRepository[OrderStatus]):
         """
         return self.model.objects.filter(internal_code=internal_code).first()
     
-    def create_state_log(self, data: dict) -> OrderStateLog:
-        """
-        ایجاد رکورد در تاریخچه تغییر وضعیت سفارش.
-        """
-        return OrderStateLog.objects.create(**data)
-    
-    def get_last_state_log(self, order: Order) -> Optional[OrderStateLog]:
-        """
-        دریافت آخرین رکورد لاگ برای محاسبه مدت توقف در مرحله قبل.
-        """
-        return order.state_logs.order_by('-timestamp').first()
-
 class OrderStatusGroupRepository(BaseRepository[OrderStatusGroup]):
     """
     ریپازیتوری مدیریت گروه وضعیت (CRUD).

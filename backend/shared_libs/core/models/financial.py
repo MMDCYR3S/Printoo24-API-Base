@@ -54,32 +54,6 @@ class Invoice(models.Model):
     def is_paid(self):
         return self.status in [self.Status.PAID_FULL, self.Status.FINALIZE]
 
-# ===== Invoice State Log Model ===== #
-class InvoiceStateLog(models.Model):
-    """
-    این مدل دقیقاً پاسخ سوال توست: 'چه کسی و کی وضعیت را عوض کرد؟'
-    """
-    invoice = models.ForeignKey(Invoice, related_name='logs', on_delete=models.SET_NULL, null=True)
-    
-    from_status = models.CharField(_("از وضعیت"), max_length=50, null=True, blank=True)
-    to_status = models.CharField(_("به وضعیت"), max_length=50)
-    
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.PROTECT, 
-        verbose_name=_("تغییر دهنده"),
-        null=True, blank=True,
-    )
-    
-    timestamp = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(_("توضیحات (علت تغییر)"), blank=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
-
-    class Meta:
-        ordering = ['-timestamp']
-        verbose_name = _('لاگ وضعیت فاکتور')
-
 # ===== Transaction Model ===== #
 class Transaction(models.Model):
     """
