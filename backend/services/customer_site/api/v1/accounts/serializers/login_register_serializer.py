@@ -65,3 +65,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         """
         return User.objects.create_user(**validated_data)
 
+# ========== User Detail Serializer ========== #
+class UserDetailSerializer(serializers.ModelSerializer):
+    """
+    بخش نمایش اطلاعات کاربر
+    """
+    
+    class Meta:
+        model = User
+        fields = ["username", "is_active", "is_staff", "is_superuser", "is_verified"]

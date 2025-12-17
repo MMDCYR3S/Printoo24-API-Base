@@ -6,7 +6,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 
-from ..serializers import RegisterSerializer, LoginSerializer
+from ..serializers import RegisterSerializer, LoginSerializer, UserDetailSerializer
 from apps.accounts.services import AuthService
 
 # ======= Register API View ======= #
@@ -73,7 +73,14 @@ class LoginAPIView(GenericAPIView):
         try:
             # ==== اعتبارسنجی و ورود کاربر با اطلاعات داده شده ==== #
             login_data = auth_service.login_customer({"username": username, "password": password})
-            return Response(login_data["tokens"], status=status.HTTP_200_OK)
+            user_instance = login_data["user"]
+            tokens = login_data["tokens"]
+            user_data = UserDetailSerializer(user_instance).data
+            response_data = {
+                "user": user_data,
+                "tokens": tokens
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
         
         except ValidationError as e:
             return Response({'error': e.messages[0]}, status=status.HTTP_400_BAD_REQUEST)
