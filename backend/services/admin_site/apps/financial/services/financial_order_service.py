@@ -1,6 +1,8 @@
 from typing import Dict, Any, List
+
 from rest_framework.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
+from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 
 from apps.permissions import AppPermissionChecker
@@ -19,6 +21,7 @@ from core.domain.commerce.order import (
     OrderRepository,
     OrderCostDomainService 
 )
+from core.domain.infrastructure.logger.services import AuditLogDomainService
 
 # ============ Financial Order App Service ============ #
 class FinancialOrderAppService:
@@ -34,6 +37,7 @@ class FinancialOrderAppService:
     def __init__(self):
         # ===== سرویس دامنه ===== #
         self._domain_service = OrderCostDomainService()
+        self.audit_service = AuditLogDomainService()
         # ===== ریپازیتوری ها ===== #
         self._report_repo = OrderCostReportRepository()
         self._sheet_repo = OrderCostSheetRepository()
@@ -54,7 +58,17 @@ class FinancialOrderAppService:
         if self._category_repo.get_by_slug(data.get('slug')):
             raise ValidationError("کد دسته‌بندی (slug) تکراری است.")
             
-        return self._category_repo.create(data)
+        category = self._category_repo.create(data)
+
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=category,
+            action='CREATE_COST_CATEGORY',
+            changes={'title': category.title, 'slug': category.slug},
+            description=_(f"ایجاد دسته‌بندی هزینه: {category.title}")
+        )
+        return category
 
     @transaction.atomic
     def update_category(self, user: User, category_id: int, data: Dict[str, Any]) -> OrderCostCategory:
@@ -70,8 +84,17 @@ class FinancialOrderAppService:
             if self._category_repo.get_by_slug(new_slug):
                 raise ValidationError("کد دسته‌بندی تکراری است.")
 
-        return self._category_repo.update(category, data)
+        updated_cat = self._category_repo.update(category, data)
 
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=updated_cat,
+            action='UPDATE_COST_CATEGORY',
+            changes={'updated_fields': list(data.keys())},
+            description=_(f"ویرایش دسته‌بندی هزینه: {updated_cat.name}")
+        )
+        return updated_cat
     @transaction.atomic
     def delete_category(self, user: User, category_id: int) -> None:
         AppPermissionChecker.check_has_permission(user, 'delete_ordercostcategory')
@@ -84,7 +107,17 @@ class FinancialOrderAppService:
         if self._item_repo.filter(catalog_item_id=category_id).exists():
              raise ValidationError("این دسته‌بندی در گزارش‌های مالی استفاده شده و قابل حذف نیست.")
              
+        cat_name = category.title
         self._category_repo.delete(category)
+
+        # ===== ثبت لاگ حذف ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=None,
+            action='DELETE_COST_CATEGORY',
+            changes={'deleted_id': category_id, 'title': cat_name},
+            description=_(f"حذف دسته‌بندی هزینه")
+        )
     
     # ============ REPORT MANAGEMENT ============ #
     @transaction.atomic
@@ -107,13 +140,28 @@ class FinancialOrderAppService:
             "is_approved": False
         }
         report = self._report_repo.create(report_data)
-        # ===== ایجاد آیتم‌ها ===== #
+        
+        # ===== ایجاد آیتم‌ها و پیوست‌ها ===== #
         self._bulk_create_items(report, items)
-        # ===== ایجاد پیوست‌ها ===== #
         if attachments:
             self._create_attachments(report, attachments)
-        # ===== محاسبه مجدد قیمت ===== #
+        
+        # ===== محاسبه مجدد ===== #
         self._domain_service.recalculate_sheet_totals(sheet)
+        
+        # ===== ثبت لاگ جامع ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=report.sheet,
+            action='CREATE_COST_REPORT',
+            changes={
+                'report_id': report.id,
+                'title': report.title,
+                'items_count': len(items),
+                'total_amount': sum(float(i.get('amount', 0)) for i in items)
+            },
+            description=_(f"ثبت گزارش هزینه جدید: {report.title}")
+        )
         
         return report
     
@@ -125,8 +173,17 @@ class FinancialOrderAppService:
         report = self._domain_service.validate_report_modification(report_id)
         # ===== تغییرات اصلی ===== #
         updated_report = self._report_repo.update(report, data)
-        # ===== محاسبه مجدد قیمت ===== #
         self._domain_service.recalculate_sheet_totals(updated_report.sheet)
+
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=updated_report.sheet,
+            action='UPDATE_COST_REPORT',
+            changes={'report_id': report_id, 'updated_fields': list(data.keys())},
+            description=_(f"ویرایش هدر گزارش هزینه: {updated_report.title}")
+        )
+
         return updated_report
 
     @transaction.atomic
@@ -135,10 +192,20 @@ class FinancialOrderAppService:
         # ===== اعتبارسنجی گزارش مالی ===== #
         report = self._domain_service.validate_report_modification(report_id)
         sheet = report.sheet
-        # ===== حذف ===== #
+        report_title = report.title
+        total_value = report.total_amount
+
         self._report_repo.delete(report)
-        # ===== محاسبه مجدد سند مالی ===== #
         self._domain_service.recalculate_sheet_totals(sheet)
+
+        # ===== ثبت لاگ حذف ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=sheet,
+            action='DELETE_COST_REPORT',
+            changes={'deleted_report_id': report_id, 'title': report_title, 'value_removed': str(total_value)},
+            description=_(f"حذف گزارش هزینه")
+        )
 
     def get_order_reports(self, user: User, order_id: int) -> List[OrderCostReport]:
         """ 
@@ -191,8 +258,16 @@ class FinancialOrderAppService:
         data['report'] = report
         # ===== ایجاد ===== #
         item = self._item_repo.create(data)
-        # ===== محاسبه مجدد ===== #
         self._domain_service.recalculate_sheet_totals(report.sheet)
+
+        # ===== ثبت لاگ آیتم ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=report.sheet,
+            action='ADD_COST_ITEM',
+            changes={'report_id': report_id, 'amount': str(item.amount), 'description': item.description},
+            description=_(f"افزودن آیتم هزینه جدید")
+        )
         return item
 
     @transaction.atomic
@@ -204,8 +279,23 @@ class FinancialOrderAppService:
         self._domain_service.validate_item_modification(item.report)
         if 'category_id' in data:
             data['catalog_item'] = self._category_repo.get_by_id(data.pop('category_id'))
+        # ===== آپدیت ===== #
+        old_amount = item.amount
         updated_item = self._item_repo.update(item, data)
         self._domain_service.recalculate_sheet_totals(item.report.sheet)
+
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=item.report.sheet,
+            action='UPDATE_COST_ITEM',
+            changes={
+                'item_id': item_id, 
+                'amount_change': f"{old_amount} -> {updated_item.amount}",
+                'updated_fields': list(data.keys())
+            },
+            description=_(f"ویرایش آیتم هزینه")
+        )
         return updated_item
 
     @transaction.atomic
@@ -217,10 +307,20 @@ class FinancialOrderAppService:
         # ===== اعتبارسنجی ===== #
         self._domain_service.validate_item_modification(item.report)
         sheet = item.report.sheet
+        deleted_amount = str(item.amount)
         # ===== حذف ===== #
         self._item_repo.delete(item)
         # ===== محاسبه مجدد ===== #
         self._domain_service.recalculate_sheet_totals(sheet)
+        
+        # ===== ثبت لاگ حذف ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=sheet,
+            action='DELETE_COST_ITEM',
+            changes={'deleted_item_id': item_id, 'amount_removed': deleted_amount},
+            description=_(f"حذف آیتم هزینه")
+        )
 
     # ============ SHEET MANAGEMENT ============ #
     @transaction.atomic
@@ -236,7 +336,17 @@ class FinancialOrderAppService:
         if not self._order_repo.filter(id=order_id).exists():
              raise ValidationError("سفارش مورد نظر یافت نشد.")
         # ===== ایجاد ===== #
-        return self._sheet_repo.create({"order_id": order_id})
+        sheet = self._sheet_repo.create({"order_id": order_id})
+
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=sheet,
+            action='CREATE_COST_SHEET',
+            description=_(f"افتتاح سند مالی سفارش")
+        )
+        return sheet
+
     @transaction.atomic
     def update_sheet(self, user: User, sheet_id: int, data: Dict[str, Any]) -> OrderCostSheet:
         """
@@ -270,7 +380,16 @@ class FinancialOrderAppService:
         if has_approved_reports:
              raise ValidationError("این سند دارای گزارش‌های تایید شده است و قابل حذف نیست. ابتدا گزارش‌ها را رد/حذف کنید.")
         # ===== حذف ===== #
+        order_code = sheet.order.order_code if sheet.order else "Unknown"
         self._sheet_repo.delete(sheet)
+        # ===== ثبت لاگ حذف ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=None,
+            action='DELETE_COST_SHEET',
+            changes={'deleted_sheet_id': sheet_id, 'order_code': order_code},
+            description=_(f"حذف سند مالی سفارش")
+        )
     
     def get_order_cost_sheet(self, user: User, order_id: int) -> OrderCostSheet:
         """ 
