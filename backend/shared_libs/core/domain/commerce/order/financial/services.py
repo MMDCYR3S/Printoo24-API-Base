@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from core.models import (
     User, OrderCostSheet, OrderCostReport, 
@@ -7,12 +8,14 @@ from core.models import (
 from .repositories import (
     OrderCostSheetRepository, OrderCostReportRepository, 
 )
+from core.domain.infrastructure.logger import AuditLogDomainService
 
 # ============ ORDER COST DOMAIN SERVICE ============ #
 class OrderCostDomainService:
     def __init__(self):
         self.sheet_repo = OrderCostSheetRepository()
         self.report_repo = OrderCostReportRepository()
+        self.audit_service = AuditLogDomainService()
 
     # ============ BUSINESS LOGIC & STATE TRANSITIONS ============ #
     @transaction.atomic
@@ -26,11 +29,23 @@ class OrderCostDomainService:
         if not report:
             raise ValidationError("گزارش یافت نشد.")
 
-        # ===== اعمال قوانین ===== #
         self._validate_sheet_is_modifiable(report.sheet)
         
         if report.is_approved:
             raise ValidationError("این گزارش قبلاً تایید شده است.")
+
+        self.audit_service.record_log(
+            user=approver,
+            obj=report.sheet,
+            action='APPROVE',
+            changes={
+                'target': 'CostReport',
+                'report_id': report.id,
+                'report_title': report.title,
+                'status_change': 'Pending -> Approved'
+            },
+            description=_(f"تایید گزارش هزینه: {report.title}")
+        )
 
         # ===== تغییر وضعیت ===== #
         report.is_approved = True
@@ -40,12 +55,11 @@ class OrderCostDomainService:
         self.recalculate_sheet_totals(report.sheet)
         
         return report
-    
+
     @transaction.atomic
     def reject_report(self, report_id: int, user: User) -> OrderCostReport:
         """
-        رد کردن گزارش هزینه.
-        ساید افکت: اگر گزارش قبلا تایید شده بود و حالا رد شود، باید از محاسبات کسر شود.
+        رد کردن گزارش هزینه و ثبت لاگ.
         """
         report = self.report_repo.get_report_detail(report_id)
         if not report:
@@ -55,6 +69,20 @@ class OrderCostDomainService:
 
         was_approved = report.is_approved
         
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=report.sheet,
+            action='REJECT',
+            changes={
+                'target': 'CostReport',
+                'report_id': report.id,
+                'report_title': report.title,
+                'status_change': 'Approved -> Rejected' if was_approved else 'Pending -> Rejected'
+            },
+            description=_(f"رد کردن گزارش هزینه: {report.title}")
+        )
+
         # ===== تغییر وضعیت ===== #
         report.is_approved = False
         report.save()
@@ -68,9 +96,7 @@ class OrderCostDomainService:
     @transaction.atomic
     def lock_cost_sheet(self, order_id: int, user: User) -> OrderCostSheet:
         """
-        قفل کردن سند مالی.
-        قانون: بعد از قفل شدن، هیچ تغییری در گزارش‌های زیرمجموعه مجاز نیست.
-        ساید افکت: محاسبه نهایی تمام ارقام قبل از قفل کردن.
+        قفل کردن سند مالی و ثبت لاگ امنیتی.
         """
         sheet = self.sheet_repo.get_by_order_id(order_id)
         if not sheet:
@@ -79,11 +105,20 @@ class OrderCostDomainService:
         if sheet.is_locked:
             raise ValidationError("این سند قبلاً قفل شده است.")
 
-        # ===== محاسبه دوباره ===== #
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=sheet,
+            action='LOCK',
+            changes={'is_locked': True, 'final_total': str(sheet.total_cost)},
+            description=_("قفل نهایی سند مالی سفارش")
+        )
+
+        # ===== محاسبه و قفل ===== #
         self.recalculate_sheet_totals(sheet)
-        
         sheet.is_locked = True
         sheet.save()
+        
         return sheet
 
     def recalculate_sheet_totals(self, sheet: OrderCostSheet) -> None:

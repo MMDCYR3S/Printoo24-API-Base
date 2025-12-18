@@ -2,6 +2,6 @@ from .repositories import (
     OrderPrintAttachmentRepository, OrderPrintReportRepository,
     OrderPrintItemRepository
 )
-from .serivces import(
+from .services import(
     OrderPrintDomainService
 )

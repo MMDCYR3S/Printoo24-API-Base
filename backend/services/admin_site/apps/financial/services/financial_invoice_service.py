@@ -41,7 +41,7 @@ class FinancialInvoiceAppService:
         if not order:
             raise ValidationError("سفارش یافت نشد.")
             
-        return self._domain_service.issue_invoice_from_order(order)
+        return self._domain_service.issue_invoice_from_order(order, user)
 
     @transaction.atomic
     def update_invoice(self, user: User, invoice_id: int, data: Dict[str, Any]):
@@ -63,7 +63,7 @@ class FinancialInvoiceAppService:
         updated_invoice = self._invoice_repo.update(invoice, data)
         
         # ===== انجام محاسبات ===== #
-        return self._domain_service.recalculate_invoice_totals(updated_invoice)
+        return self._domain_service.recalculate_invoice_totals(updated_invoice, user)
 
     @transaction.atomic
     def finalize_invoice(self, user: User, invoice_id: int):

@@ -57,4 +57,4 @@ class OrderPrintAppService:
     def delete_print_usage(self, user: User, report_id: int):
         """ حذف گزارش مصرف """
         AppPermissionChecker.check_has_permission(user, 'delete_orderprintreport')
-        self.domain_service.delete_report(report_id)
+        self.domain_service.delete_report(report_id, user)

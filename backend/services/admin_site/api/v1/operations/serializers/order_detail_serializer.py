@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from core.models import (
     Order, OrderItem, OrderItemFile, OrderStatus, OrderStatusGroup,
-    OrderStateLog, OrderShipment, OrderPackage, Invoice
+    OrderShipment, OrderPackage, Invoice
 )
 from .order_cost_serializer import OrderCostSheetSerializer
 
@@ -27,15 +27,6 @@ class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItemFile
         fields = ['id', 'file_url', 'filename', 'version', 'is_latest', 'admin_feedback', 'requirement_name']
-
-class StateLogSerializer(serializers.ModelSerializer):
-    user_name = serializers.CharField(source='user.username', read_only=True)
-    from_status = serializers.CharField(source='from_status.name', read_only=True, allow_null=True)
-    to_status = serializers.CharField(source='to_status.name', read_only=True)
-    
-    class Meta:
-        model = OrderStateLog
-        fields = ['timestamp', 'user_name', 'from_status', 'to_status', 'description', 'duration_in_previous_status']
 
 class PackageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -153,7 +144,6 @@ class AdminOrderDetailSerializer(BaseOrderDetailSerializer):
     items = FullOrderItemSerializer(source='order_item_order', many=True, read_only=True)
     cost_sheet = OrderCostSheetSerializer(read_only=True)
     logistics = serializers.SerializerMethodField()
-    logs = StateLogSerializer(source='state_logs', many=True)
     
     # اصلاح: استفاده مستقیم از سریالایزر به جای SerializerMethodField ناقص
     invoice = InvoiceSimpleSerializer(source='related_invoice', read_only=True)
@@ -163,8 +153,7 @@ class AdminOrderDetailSerializer(BaseOrderDetailSerializer):
             'items', 
             'cost_sheet',
             'invoice',
-            'logistics', 
-            'logs', 
+            'logistics',
             'total_price', 
             'base_products_price'
         ]
