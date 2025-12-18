@@ -41,6 +41,6 @@ class StaffLogoutView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             service = AuthAppService()
-            service.logout(serializer.validated_data['refresh'])
+            service.logout(serializer.validated_data['refresh'], request.user)
             return Response({"detail": "با موفقیت خارج شدید."}, status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

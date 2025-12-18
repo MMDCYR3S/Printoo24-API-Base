@@ -1,5 +1,6 @@
 from django.contrib import admin
 from core.models import OrderShipment, OrderPackage
+from core.site import custom_admin_site
 
-admin.site.register(OrderShipment)
-admin.site.register(OrderPackage)
+custom_admin_site.register(OrderShipment)
+custom_admin_site.register(OrderPackage)
