@@ -1,6 +1,7 @@
 from typing import List, Dict, Any
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 
 from core.models import Order, User, OrderPrintReport, OrderPrintItem, OrderPrintAttachment
 from .repositories import (
@@ -8,7 +9,9 @@ from .repositories import (
     OrderPrintItemRepository, 
     OrderPrintAttachmentRepository
 )
+from core.domain.infrastructure.logger import AuditLogDomainService
 
+# ========== PRINT SERVICE ========== #
 class OrderPrintDomainService:
     """
     سرویس دامنه برای مدیریت مصرف متریال در واحد چاپ.
@@ -17,6 +20,7 @@ class OrderPrintDomainService:
         self.report_repo = OrderPrintReportRepository()
         self.item_repo = OrderPrintItemRepository()
         self.attachment_repo = OrderPrintAttachmentRepository()
+        self.audit_service = AuditLogDomainService()
 
     @transaction.atomic
     def register_usage_report(self, 
@@ -66,6 +70,20 @@ class OrderPrintDomainService:
                 ))
             self.attachment_repo.bulk_create_attachments(attachments_to_create)
 
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=order,
+            action='CREATE_PRINT_REPORT',
+            changes={
+                'report_id': report.id,
+                'title': title,
+                'items_count': len(items_data),
+                'total_price': sum(float(i['price']) for i in items_data)
+            },
+            description=_(f"ثبت گزارش مصرف چاپ: {title}")
+        )
+
         return report
 
     @transaction.atomic
@@ -87,6 +105,11 @@ class OrderPrintDomainService:
         report.save()
 
         # ===== ویرایش اقلام ===== #
+        changes_log = {'report_id': report_id}
+        if 'items' in data:
+            changes_log['items_modified'] = True
+            changes_log['new_items_count'] = len(data['items'])
+
         if 'items' in data:
             incoming_items = data['items'] # لیست دیکشنری‌ها
             
@@ -136,12 +159,37 @@ class OrderPrintDomainService:
                 ))
             self.attachment_repo.bulk_create_attachments(attachments_to_create)
 
+                        
+        self.audit_service.record_log(
+            user=user,
+            obj=report.order,
+            action='UPDATE_PRINT_REPORT',
+            changes=changes_log,
+            description=_(f"ویرایش گزارش مصرف چاپ: {report.title}")
+        )
+
         return report
 
     @transaction.atomic
-    def delete_report(self, report_id: int):
+    def delete_report(self, report_id: int, user: User):
         """ حذف گزارش """
         report = self.report_repo.get_by_id(report_id)
+        
+        report_title = report.title
+        order = report.order
+        
         if not report:
             raise ValidationError("گزارش یافت نشد.")
+
         report.delete()
+        
+        self.audit_service.record_log(
+            user=user,
+            obj=order,
+            action='DELETE_PRINT_REPORT',
+            changes={
+                'deleted_report_id': report_id,
+                'deleted_report_title': report_title
+            },
+            description=_(f"حذف گزارش مصرف چاپ: {report_title}")
+        )

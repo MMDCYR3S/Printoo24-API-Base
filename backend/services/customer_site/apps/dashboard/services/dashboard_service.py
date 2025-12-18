@@ -17,6 +17,10 @@ class ProductDashboardService:
     def __init__(self):
         self._repo = ProductRepository()
 
+    def get_all_products(self):
+        """ دریافت تمامی محصولات """
+        return self._repo.get_all()
+
     def _calculate_percentage_change(self, current: int, previous: int) -> float:
         """متد کمکی برای محاسبه درصد تغییر"""
         if previous == 0:

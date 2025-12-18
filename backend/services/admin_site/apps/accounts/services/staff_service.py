@@ -1,7 +1,10 @@
 import logging
 from typing import Dict, List, Any
 
+from django.utils.translation import gettext as _
+
 from core.domain.identity.users import UserAdminDomainService, UserRepository
+from core.domain.infrastructure.logger import AuditLogDomainService
 from apps.permissions import AppPermissionChecker
 
 # ===== Logger Initialization ===== #
@@ -13,6 +16,7 @@ class StaffAppService:
         # ===== اتصال به سرویس ===== #
         self.domain_service = UserAdminDomainService()
         self.repo = UserRepository()
+        self.audit_service = AuditLogDomainService()
 
     def get_staff_list(self, requester):
         """ مشاهده لیست کارکنان """
@@ -25,8 +29,16 @@ class StaffAppService:
         # ===== دریافت شناسه نقش ===== #
         try:
             role_id = data.pop('role_id')
-            logger.info(f"Staff created: '{user.username}' by Admin '{requester.username}'")
             user = self.domain_service.create_staff(data, role_id)
+            
+            self.audit_service.record_log(
+                user=requester,
+                obj=user,
+                action='CREATE_STAFF',
+                changes={'username': user.username, 'role_id': role_id},
+                description=_(f"ایجاد کارمند جدید: {user.username}")
+            )
+            logger.info(f"Staff created: '{user.username}' by Admin '{requester.username}'")
             return user
         except Exception as e:
             logger.error(f"Error creating staff by '{requester.username}': {str(e)}")
@@ -39,6 +51,19 @@ class StaffAppService:
         role_id = data.pop('role_id', None)
         try:
             user = self.domain_service.update_staff(user_id, data, role_id)
+            
+            changes_log = {'updated_fields': list(data.keys())}
+            if role_id:
+                changes_log['new_role_id'] = role_id
+                
+            self.audit_service.record_log(
+                user=requester,
+                obj=user,
+                action='UPDATE_STAFF',
+                changes=changes_log,
+                description=_(f"ویرایش اطلاعات کارمند: {user.username}")
+            )
+            
             logger.info(f"Staff updated: ID {user_id} by Admin '{requester.username}'")
             return user
         except Exception as e:
@@ -49,7 +74,19 @@ class StaffAppService:
         """ حذف کارمند """
         AppPermissionChecker.check_has_permission(requester, 'delete_user')
         try:
+            target_user = self.repo.get_by_id(user_id)
+            target_username = target_user.username if target_user else "Unknown"
+            
             self.domain_service.delete_single_staff(user_id)
+            
+            self.audit_service.record_log(
+                user=requester,
+                obj=None,
+                action='DELETE_STAFF',
+                changes={'deleted_user_id': user_id, 'username': target_username},
+                description=_(f"حذف کارمند: {target_username}")
+            )
+            
             logger.info(f"Staff deleted: ID {user_id} by Admin '{requester.username}'")
         except Exception as e:
             logger.error(f"Error deleting staff ID {user_id}: {str(e)}")
@@ -60,6 +97,15 @@ class StaffAppService:
     def bulk_delete(self, requester, user_ids: List[int]):
         AppPermissionChecker.check_has_permission(requester, 'delete_user')
         res = self.domain_service.bulk_delete_staff(user_ids)
+        
+        self.audit_service.record_log(
+            user=requester,
+            obj=None,
+            action='BULK_DELETE_STAFF',
+            changes={'count': res.get('deleted', 0), 'ids': user_ids},
+            description=_("حذف گروهی کارکنان")
+        )
+        
         logger.info(f"Bulk staff delete: {res['deleted']} users by '{requester.username}'")
         return res
 
@@ -67,11 +113,32 @@ class StaffAppService:
         AppPermissionChecker.check_has_permission(requester, 'change_user')
         count = self.domain_service.bulk_toggle_active_status(user_ids, is_active)
         action = "activated" if is_active else "deactivated"
+        
+        action_name = "ACTIVATE_STAFF" if is_active else "DEACTIVATE_STAFF"
+        action_desc = "فعال‌سازی" if is_active else "غیرفعال‌سازی"
+        
+        self.audit_service.record_log(
+            user=requester,
+            obj=None,
+            action=action_name,
+            changes={'count': count, 'ids': user_ids, 'new_status': is_active},
+            description=_(f"{action_desc} گروهی کارکنان")
+        )
+        
         logger.info(f"Bulk staff {action}: {count} users by '{requester.username}'")
         return count
     
     def bulk_change_role(self, requester, user_ids: List[int], new_role_id: int):
         AppPermissionChecker.check_has_permission(requester, 'change_user')
         count = self.domain_service.bulk_change_role(user_ids, new_role_id)
+        
+        self.audit_service.record_log(
+            user=requester,
+            obj=None,
+            action='BULK_ROLE_CHANGE',
+            changes={'count': count, 'ids': user_ids, 'new_role_id': new_role_id},
+            description=_("تغییر گروهی نقش کارکنان")
+        )
+        
         logger.info(f"Bulk role change: {count} users -> Role ID {new_role_id} by '{requester.username}'")
         return count

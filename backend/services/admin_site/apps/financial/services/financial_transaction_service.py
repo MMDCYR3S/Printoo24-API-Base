@@ -1,9 +1,12 @@
 from typing import Dict, Any, List
+
 from django.db import transaction
 from rest_framework.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from core.models import User, Transaction
 from core.domain.financial import FinancialDomainService, TransactionRepository
+from core.domain.infrastructure.logger.services import AuditLogDomainService
 from apps.permissions import AppPermissionChecker
 
 # ========== Financial Transaction App Service ========== #
@@ -19,6 +22,7 @@ class FinancialTransactionAppService:
     def __init__(self):
         self._domain_service = FinancialDomainService()
         self._trx_repo = TransactionRepository()
+        self.audit_service = AuditLogDomainService()
 
     # ============ LIST TRANSACTIONS ============ #
     def list_transactions(self, user: User, filters: Dict[str, Any] = None) -> List[Transaction]:
@@ -50,7 +54,17 @@ class FinancialTransactionAppService:
             "created_by": user,
             "status": "pending"
         }
-        return self._trx_repo.create(trx_data)
+        trx = self._trx_repo.create(trx_data)
+
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=trx,
+            action='REGISTER_PAYMENT',
+            changes={'amount': str(trx.amount), 'invoice_id': invoice.id, 'method': trx.payment_method},
+            description=_(f"ثبت دستی فیش واریزی")
+        )
+        return trx
 
     # ============ VERIFY TRANSACTION ============ #
     @transaction.atomic
@@ -76,8 +90,19 @@ class FinancialTransactionAppService:
         
         if trx.status != 'pending':
             raise ValidationError("تراکنش‌های تعیین تکلیف شده قابل ویرایش نیستند.")
+        
+        updated_trx = self._trx_repo.update(trx, data)
+        
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=updated_trx,
+            action='UPDATE_TRANSACTION',
+            changes={'updated_fields': list(data.keys())},
+            description=_(f"ویرایش جزئیات تراکنش")
+        )
             
-        return self._trx_repo.update(trx, data)
+        return updated_trx
     
     # ============ DELETE TRANSACTION ============ #
     def delete_transaction(self, user: User, transaction_id: int):
@@ -89,4 +114,16 @@ class FinancialTransactionAppService:
         if trx.status != 'pending':
              raise ValidationError("نمی‌توان تراکنش تایید/رد شده را حذف کرد.")
              
+        amount = str(trx.amount)
+        trx_id = trx.id
+
         self._trx_repo.delete(trx)
+
+        # ===== ثبت لاگ حذف ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=None,
+            action='DELETE_TRANSACTION',
+            changes={'deleted_id': trx_id, 'amount': amount},
+            description=_(f"حذف تراکنش معلق")
+        )

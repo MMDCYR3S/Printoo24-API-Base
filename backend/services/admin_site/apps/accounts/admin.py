@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
+from core.site import custom_admin_site
 from core.models import(
     User,
     UserRole,
@@ -89,15 +91,16 @@ class RoleAdmin(admin.ModelAdmin):
         return obj.allowed_groups.count()
     get_allowed_groups_count.short_description = _('تعداد اسکوپ‌ها')
 
-admin.site.register(UserRole)
-admin.site.register(Wallet)
-admin.site.register(WalletTransaction)
-admin.site.register(Address)
-admin.site.register(City)
-admin.site.register(Province)
-admin.site.register(CustomerProfile)
-admin.site.register(OrderItem)
-admin.site.register(Order)
-admin.site.register(OrderStatus)
-admin.site.register(OrderStatusGroup)
-admin.site.register(OrderItemFile)
+custom_admin_site.register(User)
+custom_admin_site.register(UserRole)
+custom_admin_site.register(Wallet)
+custom_admin_site.register(WalletTransaction)
+custom_admin_site.register(Address)
+custom_admin_site.register(City)
+custom_admin_site.register(Province)
+custom_admin_site.register(CustomerProfile)
+custom_admin_site.register(OrderItem)
+custom_admin_site.register(Order)
+custom_admin_site.register(OrderStatus)
+custom_admin_site.register(OrderStatusGroup)
+custom_admin_site.register(OrderItemFile)

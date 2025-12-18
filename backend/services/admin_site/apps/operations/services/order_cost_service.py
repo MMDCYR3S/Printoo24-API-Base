@@ -1,7 +1,10 @@
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from django.utils.translation import gettext_lazy as _
+
 from core.models import User, Order
 from core.domain.commerce.order import OrderRepository
 from core.domain.commerce.order import OrderCostDomainService
+from core.domain.infrastructure.logger.services import AuditLogDomainService
 from apps.permissions import AppPermissionChecker
 
 class OrderCostAppService:
@@ -15,6 +18,7 @@ class OrderCostAppService:
     def __init__(self):
         self.order_repo = OrderRepository()
         self.domain_service = OrderCostDomainService()
+        self.audit_service = AuditLogDomainService()
         
     # ========== SUBMIT REPORT ========== #
     def submit_department_report(self, requester: User, order_id: int, validated_data: dict, files_list=None):
@@ -45,6 +49,19 @@ class OrderCostAppService:
             description=validated_data.get('description', "")
         )
         
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=requester,
+            obj=report.sheet,
+            action='SUBMIT_COST_REPORT',
+            changes={
+                'department': validated_data['department'],
+                'report_title': validated_data['title'],
+                'items_count': len(validated_data['items'])
+            },
+            description=_(f"ثبت گزارش هزینه توسط واحد {validated_data['department']}")
+        )
+        
         return report
 
     # ========== 2. MASTER DATA (Config) ========== #
@@ -56,17 +73,43 @@ class OrderCostAppService:
     def create_cost_type(self, user: User, data: dict):
         """ تعریف نوع هزینه جدید (مثلا: چسب صحافی) """
         AppPermissionChecker.check_has_permission(user, 'add_ordercostcategory')
-        return self.domain_service.create_category(data)
+        category = self.domain_service.create_category(data)
+        
+        self.audit_service.record_log(
+            user=user,
+            obj=category,
+            action='CREATE_COST_TYPE',
+            changes={'name': category.name, 'slug': category.slug},
+            description=_(f"تعریف نوع هزینه جدید: {category.name}")
+        )
+        return category
 
     def update_cost_type(self, user: User, category_id: int, data: dict):
         """ ویرایش عنوان یا کد نوع هزینه """
         AppPermissionChecker.check_has_permission(user, 'change_ordercostcategory')
-        return self.domain_service.update_category(category_id, data)
+        category = self.domain_service.update_category(category_id, data)
+        
+        self.audit_service.record_log(
+            user=user,
+            obj=category,
+            action='UPDATE_COST_TYPE',
+            changes={'updated_fields': list(data.keys())},
+            description=_(f"ویرایش نوع هزینه: {category.name}")
+        )
+        return category
 
     def delete_cost_type(self, user: User, category_id: int):
         """ حذف نوع هزینه """
         AppPermissionChecker.check_has_permission(user, 'delete_ordercostcategory')
         self.domain_service.delete_category(user, category_id)
+        
+        self.audit_service.record_log(
+            user=user,
+            obj=None,
+            action='DELETE_COST_TYPE',
+            changes={'deleted_category_id': category_id},
+            description=_("حذف نوع هزینه")
+        )
 
     # ========== INTERNAL HELPER METHODS ========== #
     def _validate_access_scope(self, user: User, order: Order):
@@ -93,6 +136,18 @@ class OrderCostAppService:
         allowed_codes = list(user_role.role.allowed_groups.values_list('code', flat=True))
         
         if current_group_code not in allowed_codes:
+            # ===== لاگ امنیتی تلاش غیرمجاز ===== #
+            self.audit_service.record_log(
+                user=user,
+                obj=order,
+                action='SCOPE_ACCESS_DENIED',
+                changes={
+                    'current_stage': current_group_code,
+                    'user_role': user_role.role.slug,
+                    'allowed_stages': allowed_codes
+                },
+                description=_("تلاش غیرمجاز برای ثبت هزینه در مرحله غیرمرتبط")
+            )
             raise PermissionDenied(
                 f"نقش شما ({user_role.role.title}) مجاز به ثبت هزینه در مرحله '{current_status.group.name}' نیست."
             )

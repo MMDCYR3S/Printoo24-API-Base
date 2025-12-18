@@ -5,6 +5,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.utils.translation import gettext as _
 
 from core.models import User, Order, OrderStatus, OrderItem
+from core.domain.infrastructure.logger.services import AuditLogDomainService
 from core.domain.commerce.order import(
     OrderRepository, OrderStatusFlowDomainService,
     OrderStatusRepository
@@ -23,6 +24,7 @@ class OrderTransitionAppService:
         self.order_repo = OrderRepository()
         self.status_repo = OrderStatusRepository()
         self.flow_domain_service = OrderStatusFlowDomainService()
+        self.audit_service = AuditLogDomainService()
         
     def execute_transition(self, requester: User, new_status_code: str, order_id: int, description: str = None):
         """
@@ -30,11 +32,11 @@ class OrderTransitionAppService:
         ورودی: فقط شناسه سفارش (چون آیتم وضعیت ندارد).
         """
         
-        # ===== بررسی مجوز برای تغییر وضعیت ===== #
+       # ===== بررسی مجوز سطح دسترسی اپلیکیشن ===== #
         logger.info(f"Transition request for Order #{order_id} to '{new_status_code}' by {requester.username}")
         AppPermissionChecker.check_has_permission(requester, 'change_orderstatus')
         
-        # ===== دریافت سفارش مورد نظر ===== #
+        # ===== دریافت سفارش ===== #
         order = self.order_repo.get_by_id(order_id)
         if not order:
             raise ValidationError("سفارش یافت نشد.")
@@ -44,18 +46,35 @@ class OrderTransitionAppService:
         if not new_status:
             raise ValidationError(f"کد وضعیت نامعتبر است: {new_status_code}")
         
-        # ===== اعتبارسنجی ===== #
-        self._validate_role_scope(requester, order.current_status)
-        self._validate_transition_direction(order.current_status, new_status)
-        self._validate_all_order_files(order)
-        
-        # ===== اجرای تغییر وضعیت ===== #
-        return self.flow_domain_service.change_order_status(
-            order=order,
-            new_status_code=new_status.internal_code,
-            user=requester,
-            description=description
-        )
+        try:
+            # ===== اعتبارسنجی‌ها (Guards) ===== #
+            self._validate_role_scope(requester, order.current_status)
+            self._validate_transition_direction(order.current_status, new_status)
+            self._validate_all_order_files(order)
+            
+            # ===== اجرای تغییر وضعیت (Delegation to Domain) ===== #
+            return self.flow_domain_service.change_order_status(
+                order=order,
+                new_status_code=new_status.internal_code,
+                user=requester,
+                description=description
+            )
+
+        except (ValidationError, PermissionDenied) as e:
+            # ===== لاگ شکست عملیات (بسیار مهم) ===== #
+            self.audit_service.record_log(
+                user=requester,
+                obj=order,
+                action='TRANSITION_FAILED',
+                changes={
+                    'from': order.current_status.internal_code if order.current_status else 'None',
+                    'target': new_status_code,
+                    'error_type': type(e).__name__,
+                    'error_message': str(e)
+                },
+                description=_(f"تلاش ناموفق برای تغییر وضعیت سفارش")
+            )
+            raise e
         
     def _validate_item_permission(self, user: User, item: OrderItem, new_status: OrderStatus):
         """

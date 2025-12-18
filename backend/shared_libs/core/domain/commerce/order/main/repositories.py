@@ -8,7 +8,7 @@ from django.db.models.functions import TruncDay
 from core.utils.base_repository import BaseRepository
 from core.models import (
     Order, OrderItem, OrderItemFile, OrderStatus, Address, User,
-    OrderStateLog, OrderCostItem, OrderShipment, OrderCostSheet, 
+    OrderCostItem, OrderShipment, OrderCostSheet, 
     OrderPrintReport, OrderPrintItem, OrderCostReport
 )
 
@@ -82,12 +82,6 @@ class OrderRepository(BaseRepository[Order]):
                         queryset=OrderItemFile.objects.filter(is_latest=True).select_related('requirement__spec').order_by('-version')
                     )
                 )
-            ),
-            
-            # 2. لاگ وضعیت
-            Prefetch(
-                'state_logs', 
-                queryset=OrderStateLog.objects.select_related('user', 'from_status', 'to_status').order_by('-timestamp')
             ),
             
             # 3. ساختار مالی جدید (Sheet -> Reports -> Items)

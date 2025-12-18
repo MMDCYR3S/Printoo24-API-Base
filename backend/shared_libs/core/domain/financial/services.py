@@ -1,19 +1,20 @@
-import uuid
+from random import randint
 from decimal import Decimal
-from typing import Optional
-from django.db import transaction
+
+from django.db import transaction, IntegrityError
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from core.models import (
-    Invoice, Transaction, User, InvoiceStateLog, Order, 
-    Quotation
+    Invoice, User, Order, Quotation
 )
 from core.domain.commerce.order import OrderRepository
 from .repositories import (
     InvoiceRepository, TransactionRepository, 
     QuotationRepository
 )
+from core.domain.infrastructure.logger import AuditLogDomainService
 
 # ========== Financial Domain Service ========== #
 class FinancialDomainService:
@@ -26,17 +27,26 @@ class FinancialDomainService:
         self.transaction_repo = TransactionRepository()
         self.quotation_repo = QuotationRepository()
         self.order_repo = OrderRepository()
+        self.audit_service = AuditLogDomainService()
     
     # ========================================== #
     # ============ INVOICE LOGIC =============== #
     # ========================================== #
 
     @transaction.atomic
-    def issue_invoice_from_order(self, order: Order) -> Invoice:
+    def issue_invoice_from_order(self, order: Order, user: User = None) -> Invoice:
         """
-        قانون بیزنس: صدور سیستماتیک فاکتور بر اساس مبالغ سفارش.
-        این یک CRUD ساده نیست، چون شامل محاسبه مالیات و تولید شماره فاکتور است.
+        صدور فاکتور بر اساس سفارش و ثبت لاگ ایجاد.
         """
+        invoice_num = f"INV-{order.order_code}"
+
+        # ===== بررسی وجود فاکتور ===== #
+        existing_invoice = self.invoice_repo.filter(invoice_number=invoice_num).first()
+        
+        if existing_invoice:
+            raise ValidationError(f"فاکتور برای این سفارش قبلاً صادر شده است (شماره: {invoice_num}).")
+
+        # ===== بررسی وجود فاکتور برای سفارش ===== #
         if hasattr(order, 'invoice'):
              raise ValidationError("برای این سفارش قبلاً فاکتور صادر شده است.")
 
@@ -46,9 +56,11 @@ class FinancialDomainService:
         tax_amount = (items_total + services_total) * Decimal('0.09')
         final_amount = items_total + services_total + tax_amount
         
+        # ===== دریافت اسلاگ محصول از طریق آیتم سفارش و محصول آن ===== #
+        
         invoice_data = {
             "order": order,
-            "invoice_number": f"INV-{order.order_code}",
+            "invoice_number": invoice_num,
             "items_amount": items_total,
             "services_amount": services_total,
             "tax_amount": tax_amount,
@@ -59,7 +71,28 @@ class FinancialDomainService:
             "description": "صدور خودکار سیستم"
         }
         
-        return self.invoice_repo.create(invoice_data)
+        try:
+            invoice = self.invoice_repo.create(invoice_data)
+            
+        except IntegrityError as e:
+            if 'unique constraint' in str(e):
+                 raise ValidationError(f"فاکتور با شماره {invoice_num} هم‌اکنون توسط درخواست دیگری صادر شد.")
+            raise e
+        
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=invoice,
+            action='CREATE_INVOICE',
+            changes={
+                'invoice_number': invoice.invoice_number,
+                'final_amount': str(final_amount),
+                'order_code': order.order_code
+            },
+            description=_("صدور اولیه فاکتور سفارش")
+        )
+        
+        return invoice
     
     @transaction.atomic
     def confirm_invoice_final(self, invoice: Invoice, user: User) -> Invoice:
@@ -75,11 +108,22 @@ class FinancialDomainService:
         invoice.finalized_at = timezone.now()
         invoice.save()
         
-        self._log_status_change(invoice, old_status, invoice.status, user, "تبدیل به فاکتور رسمی و قطعی")
+        self.audit_service.record_log(
+            user=user,
+            obj=invoice,
+            action='INVOICE_STATUS_CHANGE',
+            changes={
+                'from': old_status,
+                'to': Invoice.Status.FINALIZE,
+                'finalized_at': str(invoice.finalized_at)
+            },
+            description=_("نهایی‌سازی فاکتور (قطعی)")
+        )
+        
         return invoice
     
     @transaction.atomic
-    def recalculate_invoice_totals(self, invoice: Invoice) -> Invoice:
+    def recalculate_invoice_totals(self, invoice: Invoice, user: User = None) -> Invoice:
         """
         قانون بیزنس: محاسبه مجدد مبالغ.
         App Service بعد از اینکه داده‌های خام (مبلغ آیتم و...) را آپدیت کرد، 
@@ -87,6 +131,8 @@ class FinancialDomainService:
         """
         if not invoice.allows_editing:
              raise ValidationError("فاکتور جهت محاسبه مجدد قفل است.")
+
+        old_final_amount = invoice.final_amount
 
         invoice.tax_amount = (invoice.items_amount + invoice.services_amount) * Decimal('0.09')
         invoice.final_amount = (
@@ -97,8 +143,19 @@ class FinancialDomainService:
         )
         
         invoice.save()
-        # چک کردن مجدد وضعیت پرداخت (شاید با تغییر مبلغ، بدهکار شود)
-        self._update_invoice_payment_status(invoice)
+        if old_final_amount != invoice.final_amount:
+            self.audit_service.record_log(
+                user=user,
+                obj=invoice,
+                action='INVOICE_RECALCULATION',
+                changes={
+                    'field': 'final_amount',
+                    'from': str(old_final_amount),
+                    'to': str(invoice.final_amount)
+                },
+                description=_("بروزرسانی مبالغ فاکتور")
+            )
+        self._update_invoice_payment_status(invoice, user)
         return invoice
 
     # ============ TRANSACTION LOGIC ============ #
@@ -114,16 +171,36 @@ class FinancialDomainService:
         if trx.status != 'pending':
             raise ValidationError("این تراکنش قبلاً تعیین تکلیف شده است.")
 
+        action_type = 'APPROVE_TRANSACTION' if is_approved else 'REJECT_TRANSACTION'
+
         if is_approved:
             trx.status = 'confirmed'
             trx.confirmed_by = admin_user
             trx.save()
-            self._apply_payment_to_invoice(trx.invoice, trx.amount)
+            
+            self.audit_service.record_log(
+                user=admin_user,
+                obj=trx,
+                action=action_type,
+                changes={'status': 'confirmed', 'amount': str(trx.amount)},
+                description=_("تایید تراکنش مالی")
+            )
+            
+            self._apply_payment_to_invoice(trx.invoice, trx.amount, admin_user)
+            
         else:
             trx.status = 'rejected'
             trx.rejection_reason = rejection_reason
             trx.confirmed_by = admin_user
             trx.save()
+            
+            self.audit_service.record_log(
+                user=admin_user,
+                obj=trx,
+                action=action_type,
+                changes={'status': 'rejected', 'reason': rejection_reason},
+                description=_("رد تراکنش مالی")
+            )
             
         return trx
 
@@ -150,7 +227,7 @@ class FinancialDomainService:
         # ===== ایجاد فاکتور ===== #
         invoice = self.invoice_repo.create({
             "order": order,
-            "invoice_number": f"INV-{order.order_code}",
+            "invoice_number": f"INV-{order.order_code}-{randint(0000, 9999)}",
             "items_amount": quotation.total_price,
             "services_amount": 0,
             "tax_amount": 0,
@@ -164,19 +241,46 @@ class FinancialDomainService:
         quotation.converted_order = order
         quotation.status = Quotation.Status.CONVERTED
         quotation.save()
+        
+        # ===== ثبت لاگ تبدیل ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=quotation,
+            action='CONVERT_TO_INVOICE',
+            changes={'converted_to_invoice_id': invoice.id},
+            description=_("تبدیل موفق به فاکتور")
+        )
+        
+        # ===== لاگ ایجاد فاکتور ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=invoice,
+            action='CREATE_FROM_QUOTATION',
+            changes={'source_quotation_id': quotation.id},
+            description=_("ایجاد اتوماتیک از پیش‌فاکتور")
+        )
 
         self._log_status_change(invoice, None, invoice.status, user, "ایجاد خودکار از پیش‌فاکتور")
         return invoice
 
     # ============ INTERNAL HELPERS ============ #
     
-    def _apply_payment_to_invoice(self, invoice: Invoice, amount: Decimal):
+    def _apply_payment_to_invoice(self, invoice: Invoice, amount: Decimal, user: User = None):
         """ منطق داخلی: افزایش مبلغ پرداختی و تریگر کردن وضعیت """
         invoice.paid_amount += amount
         invoice.save()
-        self._update_invoice_payment_status(invoice)
+        
+        self.audit_service.record_log(
+            user=user,
+            obj=invoice,
+            action='PAYMENT_RECEIVED',
+            changes={'amount_added': str(amount), 'new_paid_total': str(invoice.paid_amount)},
+            description=_("ثبت پرداخت روی فاکتور")
+        )
+        
+        self._update_invoice_payment_status(invoice, user)
 
-    def _update_invoice_payment_status(self, invoice: Invoice):
+    def _update_invoice_payment_status(self, invoice: Invoice, user: User = None):
         """ ماشین وضعیت (State Machine) پرداخت """
         remaining = invoice.remaining_amount
         old_status = invoice.status
@@ -194,13 +298,15 @@ class FinancialDomainService:
                 invoice, old_status, new_status, user=None, 
                 description="تغییر اتوماتیک وضعیت بر اساس تراکنش"
             )
-
-    def _log_status_change(self, invoice, from_status, to_status, user=None, description=""):
-        """ ثبت تاریخچه تغییرات """
-        InvoiceStateLog.objects.create(
-            invoice=invoice,
-            from_status=from_status,
-            to_status=to_status,
-            user=user,
-            description=description
-        )
+            
+            self.audit_service.record_log(
+                user=user,
+                obj=invoice,
+                action='INVOICE_STATUS_CHANGE',
+                changes={
+                    'from': old_status,
+                    'to': new_status,
+                    'reason': 'Automatic payment calculation'
+                },
+                description=_("تغییر وضعیت خودکار بر اساس پرداخت")
+            )

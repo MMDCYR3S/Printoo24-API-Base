@@ -1,9 +1,8 @@
 from django.contrib import admin
-from core.models import Product, OrderCostItem, OrderCostCategory, OrderCostSheet, OrderStateLog
-# Register your models here.
+from core.models import Product, OrderCostItem, OrderCostCategory, OrderCostSheet# Register your models here.
+from core.site import custom_admin_site
 
-admin.site.register(Product)
-admin.site.register(OrderCostItem)
-admin.site.register(OrderCostCategory)
-admin.site.register(OrderCostSheet)
-admin.site.register(OrderStateLog)
+custom_admin_site.register(Product)
+custom_admin_site.register(OrderCostItem)
+custom_admin_site.register(OrderCostCategory)
+custom_admin_site.register(OrderCostSheet)

@@ -1,15 +1,7 @@
 from rest_framework import serializers
-from core.models import Invoice, InvoiceStateLog
-
-# ========== Invoice Log Serializer ========== #
-class InvoiceLogSerializer(serializers.ModelSerializer):
-    user_name = serializers.CharField(source='user.username', read_only=True)
-    class Meta:
-        model = InvoiceStateLog
-        fields = ['timestamp', 'user_name', 'from_status', 'to_status', 'description']
+from core.models import Invoice
 
 class InvoiceDetailSerializer(serializers.ModelSerializer):
-    logs = InvoiceLogSerializer(many=True, read_only=True)
     customer_name = serializers.CharField(source='order.user.username', read_only=True) 
     order_code = serializers.CharField(source='order.order_code', read_only=True)
     # ===== نمایش وضعیت فاکتور ===== #
@@ -18,11 +10,12 @@ class InvoiceDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = [
-            'id', 'invoice_number', 'order_code', 'customer_name', 
-            'status', 'status_display',
-            'items_amount', 'services_amount', 'tax_amount', 'discount_amount', 'final_amount',
+            'id', 'invoice_number', 'order_code',
+            'customer_name', 'status', 'status_display',
+            'items_amount', 'services_amount', 'tax_amount',
+            'discount_amount', 'final_amount',
             'paid_amount', 'remaining_amount',
-            'issued_at', 'due_date', 'description', 'logs'
+            'issued_at', 'due_date', 'description'
         ]
 
 class InvoiceUpdateSerializer(serializers.ModelSerializer):
