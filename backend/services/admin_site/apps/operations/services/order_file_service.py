@@ -1,11 +1,11 @@
-from django.core.files.base import ContentFile
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from core.domain.commerce.order import (
-    OrderItemRepository, OrderItemFileRepository,
-    OrderStatusFlowDomainService
+    OrderItemRepository, OrderItemFileRepository
 )
 from core.models import User, OrderItemFile
+from core.domain.infrastructure.logger.services import AuditLogDomainService
 from apps.permissions import AppPermissionChecker
 from apps.operations.tasks import process_uploaded_design_file
 
@@ -13,6 +13,8 @@ class OrderFileAppService:
     def __init__(self):
         self.item_repo = OrderItemRepository()
         self.file_repo = OrderItemFileRepository()
+        self.audit_service = AuditLogDomainService()
+
     def _check_designer_access(self, requester: User, item_id: int):
         """ چک کردن دسترسی طراح به آیتم """
         item = self.item_repo.get_by_id(item_id)
@@ -56,6 +58,20 @@ class OrderFileAppService:
         
         process_uploaded_design_file.delay(new_file.id)
         
+        # ===== ثبت لاگ آپلود ===== #
+        self.audit_service.record_log(
+            user=requester,
+            obj=item,
+            action='UPLOAD_DESIGN_FILE',
+            changes={
+                'file_id': new_file.id,
+                'version': new_version,
+                'file_type': requirement.title,
+                'filename': str(file_data)
+            },
+            description=_(f"آپلود فایل طراحی نسخه {new_version}")
+        )
+        
         return new_file
         
     def review_design_file(self, requester: User, file_id: int, feedback: str = None):
@@ -71,8 +87,17 @@ class OrderFileAppService:
         self._check_designer_access(requester, file_obj.order_item.id)
         
         file_obj.admin_feedback = feedback
-        
         file_obj.save()
+        
+        # ===== ثبت لاگ بررسی ===== #
+        self.audit_service.record_log(
+            user=requester,
+            obj=file_obj.order_item,
+            action='REVIEW_DESIGN_FILE',
+            changes={'file_id': file_id, 'feedback_snippet': feedback[:50] if feedback else "No Feedback"},
+            description=_(f"ثبت نظر روی فایل طراحی")
+        )
+        
         return file_obj
         
     def change_file_status(self, requester: User, file_id: int, new_status: str, feedback: str = None):
@@ -93,9 +118,24 @@ class OrderFileAppService:
         if new_status not in dict(OrderItemFile.STATUS_CHOICES):
             raise ValidationError("وضعیت نامعتبر است.")
 
+        old_status = file_obj.status
         file_obj.status = new_status
         if feedback:
             file_obj.admin_feedback = feedback
-        
         file_obj.save()
+        
+        # ===== ثبت لاگ تغییر وضعیت فایل ===== #
+        self.audit_service.record_log(
+            user=requester,
+            obj=file_obj.order_item,
+            action='FILE_STATUS_CHANGE',
+            changes={
+                'file_id': file_id,
+                'from': old_status,
+                'to': new_status,
+                'feedback': feedback
+            },
+            description=_(f"تغییر وضعیت فایل به {new_status}")
+        )
+        
         return file_obj

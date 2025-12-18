@@ -1,13 +1,13 @@
+from random import randint
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from core.models import (
-    Invoice, Transaction, User, Order, 
-    Quotation
+    Invoice, User, Order, Quotation
 )
 from core.domain.commerce.order import OrderRepository
 from .repositories import (
@@ -38,6 +38,15 @@ class FinancialDomainService:
         """
         صدور فاکتور بر اساس سفارش و ثبت لاگ ایجاد.
         """
+        invoice_num = f"INV-{order.order_code}"
+
+        # ===== بررسی وجود فاکتور ===== #
+        existing_invoice = self.invoice_repo.filter(invoice_number=invoice_num).first()
+        
+        if existing_invoice:
+            raise ValidationError(f"فاکتور برای این سفارش قبلاً صادر شده است (شماره: {invoice_num}).")
+
+        # ===== بررسی وجود فاکتور برای سفارش ===== #
         if hasattr(order, 'invoice'):
              raise ValidationError("برای این سفارش قبلاً فاکتور صادر شده است.")
 
@@ -47,9 +56,11 @@ class FinancialDomainService:
         tax_amount = (items_total + services_total) * Decimal('0.09')
         final_amount = items_total + services_total + tax_amount
         
+        # ===== دریافت اسلاگ محصول از طریق آیتم سفارش و محصول آن ===== #
+        
         invoice_data = {
             "order": order,
-            "invoice_number": f"INV-{order.order_code}",
+            "invoice_number": invoice_num,
             "items_amount": items_total,
             "services_amount": services_total,
             "tax_amount": tax_amount,
@@ -60,7 +71,13 @@ class FinancialDomainService:
             "description": "صدور خودکار سیستم"
         }
         
-        invoice = self.invoice_repo.create(invoice_data)
+        try:
+            invoice = self.invoice_repo.create(invoice_data)
+            
+        except IntegrityError as e:
+            if 'unique constraint' in str(e):
+                 raise ValidationError(f"فاکتور با شماره {invoice_num} هم‌اکنون توسط درخواست دیگری صادر شد.")
+            raise e
         
         # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
@@ -75,7 +92,7 @@ class FinancialDomainService:
             description=_("صدور اولیه فاکتور سفارش")
         )
         
-        return self.invoice_repo.create(invoice_data)
+        return invoice
     
     @transaction.atomic
     def confirm_invoice_final(self, invoice: Invoice, user: User) -> Invoice:
@@ -210,7 +227,7 @@ class FinancialDomainService:
         # ===== ایجاد فاکتور ===== #
         invoice = self.invoice_repo.create({
             "order": order,
-            "invoice_number": f"INV-{order.order_code}",
+            "invoice_number": f"INV-{order.order_code}-{randint(0000, 9999)}",
             "items_amount": quotation.total_price,
             "services_amount": 0,
             "tax_amount": 0,

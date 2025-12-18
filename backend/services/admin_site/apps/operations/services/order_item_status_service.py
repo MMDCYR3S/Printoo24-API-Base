@@ -6,6 +6,7 @@ from django.utils.translation import gettext as _
 
 from core.models import User, OrderItem
 from core.domain.commerce.order import OrderItemRepository
+from core.domain.infrastructure.logger.services import AuditLogDomainService
 from apps.permissions import AppPermissionChecker
 
 # ========== Logger ========== #
@@ -18,7 +19,8 @@ class OrderItemStatusAppService:
     """
     def __init__(self):
         self.item_repo = OrderItemRepository()
-        
+        self.audit_service = AuditLogDomainService()
+
     def change_item_status(self, requester: User, item_id: int, new_status: str, admin_note: str = None):
         """
         تغییر وضعیت آیتم توسط پرسنل (طراح/چاپخانه).
@@ -56,6 +58,20 @@ class OrderItemStatusAppService:
         
         logger.info(f"Item #{item.id} status changed: {old_status} -> {new_status} by {requester.username}")
         
+        # ===== ثبت لاگ سیستماتیک ===== #
+        self.audit_service.record_log(
+            user=requester,
+            obj=item,
+            action='ITEM_STATUS_CHANGE',
+            changes={
+                'from': old_status,
+                'to': new_status,
+                'note_added': bool(admin_note),
+                'note_snippet': admin_note[:50] if admin_note else None
+            },
+            description=_(f"تغییر وضعیت آیتم سفارش به {new_status}")
+        )
+        
         return item
     
     # ========== VALIDATORS ========== #
@@ -75,4 +91,11 @@ class OrderItemStatusAppService:
         
         order_group_code = item.order.current_status.group.code
         if order_group_code not in role.allowed_status_groups:
-             raise PermissionDenied("شما در این مرحله از سفارش اجازه تغییر آیتم را ندارید.")
+            self.audit_service.record_log(
+                user=user,
+                obj=item,
+                action='ITEM_ACCESS_DENIED',
+                changes={'current_stage': order_group_code, 'user_role': role.slug},
+                description=_("تلاش غیرمجاز برای تغییر آیتم در مرحله غیرمرتبط")
+            )
+            raise PermissionDenied("شما در این مرحله از سفارش اجازه تغییر آیتم را ندارید.")

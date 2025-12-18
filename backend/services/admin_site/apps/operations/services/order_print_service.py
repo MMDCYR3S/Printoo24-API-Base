@@ -1,6 +1,7 @@
 from rest_framework.exceptions import ValidationError
 
 from core.models import User
+from core.domain.infrastructure.logger.services import AuditLogDomainService
 from core.domain.commerce.order import OrderRepository, OrderPrintDomainService
 from apps.permissions import AppPermissionChecker
 
@@ -13,6 +14,7 @@ class OrderPrintAppService:
     def __init__(self):
         self.order_repo = OrderRepository()
         self.domain_service = OrderPrintDomainService()
+        self.audit_service = AuditLogDomainService()
 
     def create_print_usage(self, user: User, order_id: int, validated_data: dict, files_list=None):
         """
