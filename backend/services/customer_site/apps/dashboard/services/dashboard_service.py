@@ -10,7 +10,7 @@ from core.models import Order
 # ========================================= #
 # ======== Product Dashboard Logic ======== #
 # ========================================= #
-class ProductDashboardService:
+class ProductDashboardStateService:
     """
     همان کلاس قبلی برای محصولات (بدون تغییر)
     """

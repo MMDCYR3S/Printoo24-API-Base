@@ -7,6 +7,21 @@ from core.models import (
     ProductAttachment
 )
 
+# =====Product  Serializer ===== #
+class ProductSerializer(serializers.ModelSerializer):
+    detail_url = serializers.HyperlinkedIdentityField(
+        view_name='api:v1:dashboard:products-detail', 
+        lookup_field='id'
+    )
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'name', 'slug', 'category', 'description', 
+            'code', 'is_active', 'has_price', 'has_quantity', 
+            'price_modifier_percent', 'detail_url'
+        ]
+        read_only_fields = ['id', 'code', 'slug', 'detail_url']
+
 # =====Product Shell Serializer ===== #
 class ProductShellSerializer(serializers.ModelSerializer):
     class Meta:

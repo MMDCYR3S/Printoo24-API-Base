@@ -13,7 +13,7 @@ from ..serializers import (
     AttachmentLibrarySerializer,
     ProductDetailSerializer,
     OptionConfigUpdateSerializer,
-    ProductShellSerializer,
+    ProductSerializer,
 )
 
 # ===== Product Dashboard View Set ===== #
@@ -22,6 +22,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
     """
     مدیریت محصول با معماری ۳-مرحله‌ای (Core, Options, Media).
     """
+    lookup_field = 'id'
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -32,7 +33,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         """ نمایش لیست محصولات """
         try:
             products = self.app_service.get_all_products() 
-            serializer = ProductShellSerializer(products, many=True)
+            serializer = ProductSerializer(products, many=True, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
@@ -97,12 +98,12 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         return Response({'id': product.id, 'message': 'اطلاعات پایه محصول با موفقیت ایجاد شدند.'}, status=status.HTTP_201_CREATED)
 
     @extend_schema(request=ProductCoreCreateSerializer)
-    def update(self, request, pk=None):
+    def update(self, request, id=None):
         """ ویرایش کلی اطلاعات پایه """
         serializer = ProductCoreCreateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         
-        self.app_service.update_full_product_core(pk, serializer.validated_data)
+        self.app_service.update_full_product_core(id, serializer.validated_data)
         return Response({'status': 'Product core updated'})
 
     # ========== Option and Pricing API ========== #
@@ -169,13 +170,13 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         ]
     )
     @action(detail=True, methods=['post'], url_path='options')
-    def sync_options(self, request, pk=None):
+    def sync_options(self, request, id=None):
         """ مرحله دوم: ارسال لیست تمام آپشن‌ها و قیمت‌هایشان """
         serializer = ProductOptionsBulkSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         results = self.app_service.bulk_sync_options(
-            product_id=pk, 
+            product_id=id, 
             options_data=serializer.validated_data['options']
         )
         return Response({'results': results}, status=status.HTTP_200_OK)
@@ -210,7 +211,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         ]
     )
     @action(detail=True, methods=['patch'], url_path='update-option-config')
-    def update_option_config(self, request, pk=None):
+    def update_option_config(self, request, id=None):
         """
         ویرایش تنظیمات ویژگی.
         ID ویژگی در بدنه درخواست (JSON) ارسال می‌شود.
@@ -222,7 +223,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         
         try:
             self.app_service.update_option_configuration(
-                product_id=pk,
+                product_id=id,
                 option_id=data['product_option_id'],
                 data=data
             )
@@ -262,13 +263,13 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         ]
     )
     @action(detail=True, methods=['post'], url_path='media-sync')
-    def sync_media(self, request, pk=None):
+    def sync_media(self, request, id=None):
         """ لینک کردن اطلاعات پیوست‌ها و تصاویر. """
         serializer = ProductMediaSyncSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         self.app_service.sync_media_assets(
-            product_id=pk, 
+            product_id=id, 
             user=request.user,
             data=serializer.validated_data
         )
@@ -296,7 +297,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         """
     )
     @action(detail=True, methods=['post'], url_path='upload-image', parser_classes=[MultiPartParser, FormParser, JSONParser])
-    def upload_image(self, request, pk=None):
+    def upload_image(self, request, id=None):
         """ آپلود عکس محصول """
         file_obj = request.FILES.get('image')
         if not file_obj:
@@ -304,7 +305,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
         # ===== آپلود تصاویر ===== #
         result = self.app_service.upload_product_image_async(
-            product_id=pk,
+            product_id=id,
             user=request.user,
             file_obj=file_obj
         )
@@ -361,32 +362,32 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ===== GET: Retrieve Product Details ===== #
     @extend_schema(responses=ProductDetailSerializer)
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, id=None):
         """ دریافت جزئیات کامل محصول """
         try:
             # سرویس دامین خروجی دیکشنری {product: ..., structured_options: ...} می‌دهد
-            data = self.app_service.get_product_detail(pk)
-            serializer = ProductDetailSerializer(data)
+            data = self.app_service.get_product_detail(id)
+            serializer = ProductDetailSerializer(data, context={'request': request})
             return Response(serializer.data)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
     # ===== DELETE: Remove Product ===== #
-    def destroy(self, request, pk=None):
+    def destroy(self, request, id=None):
         """ حذف محصول (یا غیرفعال کردن در صورت وابستگی) """
-        self.app_service.delete_product(pk)
+        self.app_service.delete_product(id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     # ===== DELETE Option (Detach) ===== #
     @extend_schema(summary="حذف یک ویژگی از محصول")
     @action(detail=True, methods=['delete'], url_path='options/(?P<option_id>\d+)')
-    def remove_option(self, request, pk=None, option_id=None):
+    def remove_option(self, request, id=None, option_id=None):
         """ 
         حذف ویژگی از محصول.
         option_id: شناسه ProductOption (نه ویژگی گلوبال).
         """
         try:
-            self.app_service.remove_option_from_product(pk, option_id)
+            self.app_service.remove_option_from_product(id, option_id)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

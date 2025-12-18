@@ -197,6 +197,10 @@ class ProductDashboardService:
                 logger.error(f"Sync attachment upload failed: {str(sync_error)}")
                 raise sync_error
 
+    def get_all_products(self):
+        """ دریافت لیست کامل محصولات (فرمت درختی) """
+        return self._domain_service.get_all_active_products()
+
     def get_product_detail(self, product_id):
         """ دریافت جزئیات کامل محصول (فرمت درختی) """
         return self._domain_service.get_product_detail_by_id(product_id) 
