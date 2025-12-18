@@ -590,6 +590,21 @@ class ProductFileUploadRequirement(models.Model):
     )
     is_required = models.BooleanField(_("الزامی بودن"), default=True)
     sort_order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
+    ASPECT_RATIO_CHOICES = [
+        ('1:1', '1:1 (مربعی)'),
+        ('16:9', '16:9 (عریض)'),
+        ('4:3', '4:3 (استاندارد)'),
+        ('2:3', '2:3 (کلاسیک عمودی)'),
+        ('9:16', '9:16 (عمودی)'),
+        ('free', 'بدون محدودیت'),
+    ]
+
+    allowed_aspect_ratios = models.JSONField(
+        _("نسبت‌های تصویر مجاز"),
+        default=list,
+        help_text=_("لیستی از نسبت‌های تصویر مجاز را انتخاب کنید"),
+        null=True, blank=True
+    )
     created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True, null=True)
     updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True, null=True)
 

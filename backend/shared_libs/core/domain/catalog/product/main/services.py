@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 
-from django.db.models import QuerySet, Max
+from django.db.models import QuerySet, Max, ProtectedError
 from django.db import transaction
 
 from ..exceptions import (
@@ -407,3 +407,39 @@ class ProductDomainService:
         if not exists:
             raise InvalidProductDataException("این ویژگی متعلق به محصول نیست.")
         ProductOption.objects.filter(id=product_option_id).delete()
+
+    # ===== Bulk Operations ===== #
+    @transaction.atomic
+    def bulk_update_status(self, product_ids: List[int], is_active: bool) -> int:
+        """
+        تغییر وضعیت گروهی.
+        """
+        updated_count = Product.objects.filter(id__in=product_ids).update(is_active=is_active)
+        return updated_count
+
+    @transaction.atomic
+    def bulk_delete_products(self, product_ids: List[int]) -> Dict[str, int]:
+        """
+        حذف گروهی هوشمند.
+        اگر محصول قابل حذف باشد -> Hard Delete
+        اگر وابسته باشد (مثلا در سفارشات باشد) -> Soft Delete (is_active=False)
+        """
+        products = Product.objects.filter(id__in=product_ids)
+        deleted_count = 0
+        archived_count = 0
+        
+        for product in products:
+            try:
+                with transaction.atomic():
+                    product.delete()
+                    deleted_count += 1
+            except (ProtectedError, Exception):
+                product.is_active = False
+                product.save()
+                archived_count += 1
+        
+        return {
+            "deleted_count": deleted_count,
+            "archived_count": archived_count,
+            "total_processed": len(product_ids)
+        }
