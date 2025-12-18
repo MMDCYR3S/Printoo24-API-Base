@@ -12,6 +12,12 @@ class ProductCategoryDomainService:
     def __init__(self):
         self._repo = ProductCategoryRepository()
     
+    def get_root_categories(self) -> QuerySet[ProductCategory]:
+        """
+        دریافت فقط دسته‌بندی‌های والد (ریشه) که فعال هستند.
+        """
+        return self._repo.model.objects.filter(parent__isnull=True, is_active=True).order_by('tree_id')
+    
     # ===== دریافت لیست دسته‌بندی‌ها به صورت درختی ===== #
     def get_category_tree_queryset(self) -> QuerySet[ProductCategory]:
         """

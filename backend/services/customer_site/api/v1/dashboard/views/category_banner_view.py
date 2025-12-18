@@ -6,7 +6,11 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from core.domain.catalog.category import ProductCategoryDomainService
-from ..serializers.general_serializers import ProductCategoryDashboardSerializer
+from ..serializers.general_serializers import (
+    ProductCategoryDashboardSerializer,
+    ParentCategoryListSerializer,
+    ProductCategoryDetailWithLinksSerializer
+)
 
 # ===== ویو‌ست مدیریت دسته‌بندی‌ها ===== #
 @extend_schema(tags=['Dashboard-Category-Banner'])
@@ -17,6 +21,7 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
     """
     serializer_class = ProductCategoryDashboardSerializer
     permission_classes = [IsAdminUser]
+    lookup_field = 'id'
     
     # ===== تزریق وابستگی ===== #
     def __init__(self, **kwargs):
@@ -27,10 +32,30 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
     def get_queryset(self):
         return self.service.get_category_tree_queryset()
     
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+    # ===== بازنویسی متد retrieve (مشاهده جزئیات) ===== #
+    @extend_schema(
+        summary="مشاهده جزئیات دسته‌بندی",
+        description="نمایش جزئیات کامل. اگر دسته‌بندی دارای فرزند باشد، لینک آن‌ها نمایش داده می‌شود.",
+        responses=ProductCategoryDetailWithLinksSerializer
+    )
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = ProductCategoryDetailWithLinksSerializer(instance, context={'request': request})
         return Response(serializer.data)
+
+    @extend_schema(
+        summary="لیست دسته‌بندی‌های والد (ریشه)",
+        description="نمایش فقط دسته‌بندی‌های سطح بالا بدون عکس، همراه با لینک دسترسی به جزئیات.",
+        responses=ParentCategoryListSerializer(many=True)
+    )
+    def list(self, request):
+        """
+        اکشن اختصاصی برای گرفتن لیست والدها
+        """
+        queryset = self.service.get_root_categories()
+        
+        serializer = ParentCategoryListSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     # ===== بازنویسی متد create (افزودن) ===== #
     def create(self, request, *args, **kwargs):
