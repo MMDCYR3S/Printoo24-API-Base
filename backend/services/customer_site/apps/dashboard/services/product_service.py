@@ -199,7 +199,7 @@ class ProductDashboardService:
 
     def get_all_products(self):
         """ دریافت لیست کامل محصولات (فرمت درختی) """
-        return self._domain_service.get_all_active_products()
+        return self._domain_service._repo.get_all()
 
     def get_product_detail(self, product_id):
         """ دریافت جزئیات کامل محصول (فرمت درختی) """
@@ -224,3 +224,17 @@ class ProductDashboardService:
         except Exception as e:
             logger.error(f"Failed to update option config: {str(e)}")
             raise e
+        
+    # ========== BULK ACTIONS ========== #
+    def bulk_update_product_status(self, product_ids: List[int], is_active: bool) -> int:
+        """
+        تغییر وضعیت فعال/غیرفعال برای لیستی از محصولات.
+        """
+        return self._domain_service.bulk_update_status(product_ids, is_active)
+
+    def bulk_delete_products(self, product_ids: List[int]) -> Dict[str, int]:
+        """
+        حذف گروهی محصولات.
+        خروجی: تعداد حذف شده‌های واقعی و تعداد غیرفعال شده‌ها (Soft Delete).
+        """
+        return self._domain_service.bulk_delete_products(product_ids)

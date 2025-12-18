@@ -119,10 +119,10 @@ class ProductRepository(BaseRepository[Product]):
                     queryset=ProductFileUploadRequirement.objects.select_related('spec').order_by('sort_order')
                 )
 
-            ).get(pk=id, is_active=True)
+            ).get(pk=id)
             
         except self.model.DoesNotExist:
-            raise ProductNotFoundException(f"محصولی با اسلاگ '{id}' یافت نشد.")
+            raise ProductNotFoundException(f"محصولی با شناسه '{id}' یافت نشد.")
 
     # =====  (Write Methods) ===== #
     def create_product(self, data: dict) -> Product:

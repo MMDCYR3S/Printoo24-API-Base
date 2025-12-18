@@ -7,18 +7,27 @@ from core.models import (
     ProductAttachment
 )
 
+# ===== Product Image Serializer ===== #
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image', 'order', 'created_at']
+        read_only_fields = ['id', 'order', 'created_at']
+
+
 # =====Product  Serializer ===== #
 class ProductSerializer(serializers.ModelSerializer):
     detail_url = serializers.HyperlinkedIdentityField(
         view_name='api:v1:dashboard:products-detail', 
         lookup_field='id'
     )
+    images = ProductImageSerializer(source='product_image', many=True)
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'slug', 'category', 'description', 
             'code', 'is_active', 'price', 'has_price', 'has_quantity', 
-            'price_modifier_percent', 'detail_url'
+            'price_modifier_percent', 'detail_url', 'images'
         ]
         read_only_fields = ['id', 'code', 'slug', 'detail_url']
 
@@ -99,13 +108,6 @@ class FileRequirementSyncSerializer(serializers.Serializer):
         child=FileRequirementItemSerializer(),
         allow_empty=True
     )
-    
-# ===== Product Image Serializer ===== #
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ['id', 'image', 'order', 'created_at']
-        read_only_fields = ['id', 'order', 'created_at']
 
 # ===== Image Reorder Serializer =====
 class ImageReorderSerializer(serializers.Serializer):

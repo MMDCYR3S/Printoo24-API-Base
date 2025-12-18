@@ -1,8 +1,9 @@
+from rest_framework import serializers
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes, inline_serializer
 
 from apps.dashboard.services import ProductDashboardService
 from ..serializers import (
@@ -391,3 +392,81 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ========== BULK ACTIONS ========== #
+    # ========== BULK ACTIONS ========== #
+    @extend_schema(
+        summary="تغییر وضعیت گروهی محصولات",
+        description="""
+        فعال یا غیرفعال کردن چندین محصول به صورت همزمان.
+        """,
+        request=inline_serializer(
+            name='BulkStatusUpdate',
+            fields={
+                'product_ids': serializers.ListField(child=serializers.IntegerField()),
+                'is_active': serializers.BooleanField()
+            }
+        ),
+        responses={200: OpenApiTypes.OBJECT},
+        examples=[
+            OpenApiExample(
+                'Activate Products',
+                value={'product_ids': [10, 12, 15], 'is_active': True},
+                request_only=True
+            )
+        ]
+    )
+    @action(detail=False, methods=['patch'], url_path='bulk-status')
+    def bulk_update_status(self, request):
+        """ تغییر وضعیت گروهی (Active/Inactive) """
+        product_ids = request.data.get('product_ids', [])
+        is_active = request.data.get('is_active')
+
+        if not product_ids or is_active is None:
+            return Response(
+                {'error': 'product_ids and is_active are required.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            count = self.app_service.bulk_update_product_status(product_ids, is_active)
+            return Response(
+                {'message': f'{count} محصول با موفقیت بروزرسانی شدند.', 'updated_count': count},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary="حذف گروهی محصولات",
+        description="""
+        حذف چندین محصول به صورت همزمان.
+        باید مقدار زیر رو پاس بدی:
+        product_ids = [1, 2, 3, 4, 5, ...., n]
+        حالت لیست داشته باشه.
+        دقت کن که حتما لیستی از اعداد باشه.
+        """,
+        request=inline_serializer(
+            name='BulkDelete',
+            fields={
+                'product_ids': serializers.ListField(child=serializers.IntegerField())
+            }
+        ),
+        responses={200: OpenApiTypes.OBJECT}
+    )
+    @action(detail=False, methods=['delete'], url_path='bulk-delete')
+    def bulk_delete(self, request):
+        """ حذف گروهی محصولات """
+        product_ids = request.data.get('product_ids', [])
+
+        if not product_ids:
+            return Response(
+                {'error': 'product_ids is required.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            result = self.app_service.bulk_delete_products(product_ids)
+            return Response(result, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

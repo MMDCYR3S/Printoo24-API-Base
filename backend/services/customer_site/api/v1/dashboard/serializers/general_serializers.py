@@ -11,6 +11,58 @@ from core.models import (
 )
 
 # ===== سریالایزر مدیریت دسته‌بندی‌ها (داشبورد) ===== #
+class CategoryLinkSerializer(serializers.ModelSerializer):
+    """
+    نمایش نام و لینک جزئیات برای فرزندان
+    """
+    detail_url = serializers.HyperlinkedIdentityField(
+        view_name='api:v1:dashboard:product_category_dashboard-detail',
+        lookup_field='id'
+    )
+
+    class Meta:
+        model = ProductCategory
+        fields = ['id', 'name', 'detail_url']
+
+# ======= 
+class ParentCategoryListSerializer(serializers.ModelSerializer):
+    """
+    مخصوص لیست والدها: بدون عکس، فقط اطلاعات پایه و لینک جزئیات
+    """
+    detail_url = serializers.HyperlinkedIdentityField(
+        view_name='api:v1:dashboard:product_category_dashboard-detail',
+        lookup_field='id'
+    )
+    children_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductCategory
+        fields = ['id', 'name', 'slug', 'detail_url', 'is_active', 'children_count']
+        
+    def get_children_count(self, obj):
+        """
+        محاسبه تعداد فرزندان مستقیم
+        """
+        return obj.get_children().count()
+
+# ========== جزئیات با لینک ========== #
+class ProductCategoryDetailWithLinksSerializer(serializers.ModelSerializer):
+    """
+    نمایش جزئیات کامل + لیست فرزندان به صورت لینک
+    """
+    banner_wide_url = serializers.CharField(source='get_banner_wide_url', read_only=True)
+    children = CategoryLinkSerializer(many=True, read_only=True, source='get_children')
+    parent_name = serializers.CharField(source='parent.name', read_only=True)
+
+    class Meta:
+        model = ProductCategory
+        fields = [
+            'id', 'name', 'slug', 'parent', 'parent_name', 'description',
+            'banner_wide', 'banner_box', 'banner_wide_url',
+            'is_active', 'children', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'slug', 'created_at', 'updated_at', 'banner_wide_url']
+
 class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
     banner_wide_url = serializers.CharField(source='get_banner_wide_url', read_only=True)
     children = serializers.SerializerMethodField()
