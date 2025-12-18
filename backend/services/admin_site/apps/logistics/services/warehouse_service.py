@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
 
 from rest_framework.exceptions import ValidationError, NotFound
+from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 
 from apps.permissions import AppPermissionChecker
@@ -12,6 +13,7 @@ from core.domain.commerce.order import (
     ShipmentRepository,
     PackageRepository
 )
+from core.domain.infrastructure.logger import AuditLogDomainService
 
 # ========== Warehouse App Service ========== #
 class WarehouseAppService:
@@ -26,6 +28,7 @@ class WarehouseAppService:
         # ===== سرویس های دامنه مورد نیاز ===== #
         self._logistic_domain = LogisticDomainService()
         self._cost_domain = OrderCostDomainService() 
+        self.audit_service = AuditLogDomainService()
 
     def _get_order_and_validate_access(self, user: User, order_id: int) -> Order:
         """ متد کمکی برای دریافت سفارش """
@@ -104,6 +107,20 @@ class WarehouseAppService:
                 "packed_by": user,
             })
         
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=shipment,
+            action='CREATE_SHIPMENT',
+            changes={
+                'order_code': order.order_code,
+                'tracking_code': shipment.tracking_code,
+                'packages_count': len(packages_data),
+                'method': method_type
+            },
+            description=_(f"ایجاد مرسوله جدید برای سفارش {order.order_code}")
+        )
+        
         return shipment
     
     # ========== UPDATE SHIPMENT ========== #
@@ -120,6 +137,15 @@ class WarehouseAppService:
         # ===== اعمال ویرایش ===== #
         if data:
             shipment = self._shipment_repo.update(shipment, data)
+
+            # ===== ثبت لاگ ===== #
+            self.audit_service.record_log(
+                user=user,
+                obj=shipment,
+                action='UPDATE_SHIPMENT',
+                changes={'updated_fields': list(data.keys())},
+                description=_(f"ویرایش اطلاعات مرسوله")
+            )
         return shipment
     
     # ========== DELETE SHIPMENT ========== #
@@ -130,8 +156,20 @@ class WarehouseAppService:
         # ===== بررسی وجود ===== #
         shipment = self._get_shipment(shipment_id)
         # ===== بررسی قوانین ===== #
+        tracking_code = shipment.tracking_code
+        order_code = shipment.order.order_code
+        
         self._logistic_domain.validate_shipment_modification(shipment)
         self._shipment_repo.delete(shipment)
+        
+        # ===== ثبت لاگ حذف ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=None, # مرسوله حذف شده
+            action='DELETE_SHIPMENT',
+            changes={'deleted_shipment_id': shipment_id, 'tracking_code': tracking_code, 'order_code': order_code},
+            description=_(f"حذف مرسوله سفارش")
+        )
     
     # ========== CHANGE SHIPMENT STATUS ========== #
     @transaction.atomic
@@ -140,12 +178,26 @@ class WarehouseAppService:
         AppPermissionChecker.check_has_permission(user, 'change_ordershipment')
         # ===== بررسی وجود ===== #
         shipment = self._get_shipment(shipment_id)
+        old_status = shipment.status
         # ===== بررسی وضعیت ===== #
         update_fields = self._logistic_domain.apply_status_change_logic(shipment, new_status_code)
         # ===== اعمال تغییر وضعیت ===== #
         if update_fields:
             shipment = self._shipment_repo.update(shipment, update_fields)
             
+            # ===== ثبت لاگ تغییر وضعیت ===== #
+            self.audit_service.record_log(
+                user=user,
+                obj=shipment,
+                action='SHIPMENT_STATUS_CHANGE',
+                changes={
+                    'from': old_status, 
+                    'to': new_status_code,
+                    'auto_updated_fields': list(update_fields.keys())
+                },
+                description=_(f"تغییر وضعیت مرسوله به {new_status_code}")
+            )
+
         return shipment
         
     # ========== ADD PACKAGE TO SHIPMENT ========== #
@@ -165,13 +217,23 @@ class WarehouseAppService:
                 # ===== ایجاد بسته بندی ===== #
         package = self._package_repo.create({
             "shipment": shipment,
-            "label_uuid": self._logistic_domain.generate_label_code(shipment),
+            "label_uuid": self._logistic_domain.generate_code(shipment),
             "customer_name": customer_name,
             "phone_number": phone_number,
             "address": address_text,
             "content_summary": data.get('content_summary'),
             "packed_by": user
         })
+        
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=shipment,
+            action='ADD_PACKAGE',
+            changes={'package_id': package.id, 'label': package.label_uuid},
+            description=_(f"افزودن بسته جدید به مرسوله")
+        )
+        
         return package
     
     # ========== DELETE PACKAGE FROM SHIPMENT ========== #
@@ -184,14 +246,32 @@ class WarehouseAppService:
         if not package:
             raise NotFound("بسته یافت نشد.")
         # ===== بررسی قوانین دامنه ===== #
+        shipment = package.shipment
+        label = package.label_uuid
         self._logistic_domain.validate_package_operation(package.shipment)
         # ===== حذف ===== #
         self._package_repo.delete(package)
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=shipment,
+            action='DELETE_PACKAGE',
+            changes={'deleted_package_id': package_id, 'label': label},
+            description=_(f"حذف بسته از مرسوله")
+        )
     
     # ========== ADD LOGISTIC COST REPORT ========== #
     def add_logistic_cost_report(self, user: User, order_id: int, data: Dict[str, Any]) -> OrderCostSheet:
         AppPermissionChecker.check_has_permission(user, 'add_ordercostreport')
         order = self._get_order(order_id)
+        
+        self.audit_service.record_log(
+            user=user,
+            obj=order,
+            action='LOGISTIC_COST_REPORT',
+            changes={'title': data.get('title'), 'amount_items': len(data.get('items', []))},
+            description=_(f"ثبت گزارش هزینه لجستیک توسط انبار")
+        )
         
         return self._cost_domain.create_cost_report(
             order=order,
