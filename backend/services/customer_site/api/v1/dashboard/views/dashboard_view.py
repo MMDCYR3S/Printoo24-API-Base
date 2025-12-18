@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAdminUser
 from drf_spectacular.utils import extend_schema
 
 from apps.dashboard.services import (
-    ProductDashboardService, OrderDashboardService,
-    UserDashboardService, FinancialDashboardService
+    ProductDashboardStateService, OrderDashboardStateService,
+    UserDashboardStateService, FinancialDashboardStateService
 )
 from ..serializers import (
     ProductDashboardStatsSerializer, OrderDashboardStatsSerializer,
@@ -27,7 +27,7 @@ class ProductDashboardStatsView(APIView):
     )
     def get(self, request):
         # ===== دریافت آمار کلی محصولات ===== #
-        service = ProductDashboardService()
+        service = ProductDashboardStateService()
         stats_data = service.get_product_statistics()
         
         # ===== دریافت سریالایزر ===== #
@@ -50,7 +50,7 @@ class OrderDashboardStatsView(APIView):
         responses={200: OrderDashboardStatsSerializer}
     )
     def get(self, request):
-        service = OrderDashboardService()
+        service = OrderDashboardStateService()
         stats_data = service.get_order_statistics()
         serializer = OrderDashboardStatsSerializer(instance=stats_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -70,7 +70,7 @@ class UserDashboardStatsView(APIView):
         responses={200: UserDashboardStatsSerializer}
     )
     def get(self, request):
-        service = UserDashboardService()
+        service = UserDashboardStateService()
         stats_data = service.get_user_statistics()
         serializer = UserDashboardStatsSerializer(instance=stats_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -89,7 +89,7 @@ class FinancialDashboardStatsView(APIView):
         responses={200: FinancialDashboardStatsSerializer}
     )
     def get(self, request):
-        service = FinancialDashboardService()
+        service = FinancialDashboardStateService()
         stats_data = service.get_financial_statistics()
         serializer = FinancialDashboardStatsSerializer(instance=stats_data)
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -359,3 +359,11 @@ class OrderDashboardService:
                 logger.critical(f"SYNC FAILED: {str(sync_error)}", exc_info=True)
                 if os.path.exists(temp_path): os.remove(temp_path)
                 raise sync_error
+
+    # ===== Bulk Operations ===== #
+    def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, int]:
+        """
+        حذف گروهی سفارشات با فراخوانی سرویس دامنه.
+        """
+        logger.warning(f"Bulk delete requested for {len(order_ids)} orders.")
+        return self.order_domain.bulk_delete_orders(order_ids)

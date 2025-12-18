@@ -72,7 +72,7 @@ class ProductDashboardStateService:
 # ========================================= #
 # ========= Order Dashboard Logic ========= #
 # ========================================= #
-class OrderDashboardService:
+class OrderDashboardStateService:
     """
     سرویس اپلیکیشن داشبورد سفارشات.
     این سرویس حالا کاملاً به ریپازیتوری وابسته است و هیچ کوئری مستقیمی نمی‌پرسد.
@@ -137,7 +137,7 @@ class OrderDashboardService:
 # ========================================= #
 # ========= User Dashboard Logic ========== #
 # ========================================= #
-class UserDashboardService:
+class UserDashboardStateService:
     """
     سرویس اپلیکیشن مخصوص داشبورد کاربران.
     """
@@ -208,7 +208,7 @@ class UserDashboardService:
 # ========================================= #
 # ======= Financial Dashboard Logic ======= #
 # ========================================= #
-class FinancialDashboardService:
+class FinancialDashboardStateService:
     """
     سرویس داشبورد مالی.
     وظیفه: محاسبات سود/زیان، رشد درآمد و فرمت‌دهی نمودارها.
