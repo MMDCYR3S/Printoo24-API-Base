@@ -33,11 +33,16 @@ class ParentCategoryListSerializer(serializers.ModelSerializer):
         view_name='api:v1:dashboard:product_category_dashboard-detail',
         lookup_field='id'
     )
+    banner_wide_url = serializers.CharField(source='get_banner_wide_url', read_only=True)
     children_count = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductCategory
-        fields = ['id', 'name', 'slug', 'detail_url', 'is_active', 'children_count']
+        fields = [
+            'id', 'name', 'slug', 'detail_url', 'is_active',
+            'banner_wide', 'banner_box', 'banner_wide_url',
+            'children_count'
+        ]
         
     def get_children_count(self, obj):
         """

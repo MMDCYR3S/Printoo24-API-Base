@@ -1,8 +1,9 @@
 import uuid
-from typing import Optional, List
+from typing import List, Dict
 from django.db import transaction
+from django.db.models import Q
 from django.core.files.base import ContentFile
-from core.models import User, Order, OrderItem, OrderStatus, OrderItemFile, Address, OrderCostSheet
+from core.models import User, Order, OrderStatus, Address, OrderCostSheet, Invoice
 from core.domain.commerce.cart import CartRepository
 from .repositories import OrderRepository, OrderItemRepository, OrderItemFileRepository
 
@@ -83,3 +84,37 @@ class OrderDomainService:
 
     def get_user_orders_summary(self, user_id: int) -> List[Order]:
         return self._order_repo.get_user_orders_summary(user_id)
+    
+    @transaction.atomic
+    def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, int]:
+        """
+        حذف گروهی هوشمند سفارشات.
+        قانون 1: فقط سفارشاتی که وضعیتشان اجازه حذف می‌دهد (مثلاً در حال بررسی یا لغو شده) حذف می‌شوند.
+        قانون 2: سفارشاتی که فاکتور نهایی شده یا پرداخت کامل دارند، به هیچ وجه حذف نمی‌شوند.
+        """
+        deletable_types = ['initial', 'cancel', 'pending']
+        orders_to_delete = Order.objects.filter(
+            id__in=order_ids,
+            current_status__status_type__in=deletable_types
+        )
+
+        orders_to_delete = orders_to_delete.exclude(
+            Q(invoice__status=Invoice.Status.FINALIZE) | 
+            Q(invoice__status=Invoice.Status.PAID_FULL) |
+            Q(invoice__status=Invoice.Status.PAID_PARTIAL)
+        )
+
+        count_to_delete = orders_to_delete.count()
+        deleted_ids = list(orders_to_delete.values_list('id', flat=True))
+        
+        Invoice.objects.filter(order__in=orders_to_delete).delete()
+
+        orders_to_delete.delete()
+        
+        return {
+            "requested_count": len(order_ids),
+            "deleted_count": count_to_delete,
+            "skipped_count": len(order_ids) - count_to_delete,
+            "deleted_ids": deleted_ids,
+            "message": f"{count_to_delete} سفارش با موفقیت حذف شدند."
+        }

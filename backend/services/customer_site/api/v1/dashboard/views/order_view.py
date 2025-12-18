@@ -1,8 +1,9 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from drf_spectacular.utils import extend_schema
+from rest_framework.parsers import MultiPartParser, JSONParser
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes, inline_serializer
+from rest_framework import serializers
 
 from apps.dashboard.services import OrderDashboardService
 from ..serializers import (
@@ -104,3 +105,43 @@ class OrderDashboardViewSet(viewsets.ViewSet):
             return Response(result, status=status.HTTP_202_ACCEPTED)
         
         return Response(result, status=status.HTTP_201_CREATED)
+    
+    # ========== BULK ACTIONS ========== #
+    @extend_schema(
+        summary="حذف گروهی سفارشات",
+        description="""
+        حذف چندین سفارش به صورت همزمان.
+        **نکته مهم:** فقط سفارشاتی که در وضعیت‌های اولیه (مثل Pending یا Canceled) هستند قابل حذف می‌باشند.
+        سفارشاتی که فاکتور نهایی یا پرداختی دارند حذف نمی‌شوند.
+        """,
+        request=inline_serializer(
+            name='OrderBulkDelete',
+            fields={
+                'order_ids': serializers.ListField(child=serializers.IntegerField())
+            }
+        ),
+        responses={200: OpenApiTypes.OBJECT},
+        examples=[
+            OpenApiExample(
+                'Delete Draft Orders',
+                value={'order_ids': [101, 102, 105]},
+                request_only=True
+            )
+        ]
+    )
+    @action(detail=False, methods=['delete'], url_path='bulk-delete')
+    def bulk_delete(self, request):
+        """ حذف گروهی سفارشات """
+        order_ids = request.data.get('order_ids', [])
+
+        if not order_ids:
+            return Response(
+                {'error': 'order_ids is required.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            result = self.service.bulk_delete_orders(order_ids)
+            return Response(result, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
