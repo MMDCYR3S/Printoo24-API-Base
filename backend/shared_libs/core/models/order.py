@@ -221,7 +221,12 @@ class OrderItem(models.Model):
     ]
         
     order = models.ForeignKey(Order, related_name='order_item_order', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, related_name='order_item_product', on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product,
+        related_name='order_item_product',
+        on_delete=models.CASCADE,
+        null=True, blank=True
+    )
     quantity = models.PositiveIntegerField(_('تعداد'), default=1)
     price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
     status = models.CharField(

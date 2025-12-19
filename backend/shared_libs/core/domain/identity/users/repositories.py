@@ -67,12 +67,12 @@ class UserRepository(BaseRepository[User]):
 
     # ========== بخش مربوط به سیستم مدیریت داخلی و ادمین ========== #
     def get_all_staff(self) -> QuerySet[User]:
-        return self.model.objects.filter(is_staff=True)\
+        return self.model.objects.filter(user_role__role__is_customer=False)\
             .prefetch_related('user_role__role')\
             .order_by('-created_at')
 
     def get_staff_detail(self, user_id: int) -> Optional[User]:
-        return self.model.objects.filter(id=user_id, is_staff=True)\
+        return self.model.objects.filter(id=user_id, user_role__role__is_customer=False)\
             .prefetch_related('user_role__role', 'user_permissions')\
             .first()
             
