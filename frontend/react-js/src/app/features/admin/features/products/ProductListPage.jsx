@@ -1,224 +1,283 @@
-// src/app/features/admin/ProductListPage.jsx
-import React from 'react';
-import { 
-  Search, Filter, MoreVertical, Edit, Trash2, Eye, 
-  ChevronDown, ArrowUp, ArrowDown, Package, Plus 
-} from 'lucide-react';
-import { useAdminProducts } from '../../hooks/useAdminProducts';
+// src/app/features/admin/products/ProductListPage.jsx
+import { useState } from 'react';
+import { useAdminProducts } from './hooks/useAdminProducts';
+import { Package, Plus, ArrowUp, ArrowDown, Image as ImageIcon } from 'lucide-react';
+import ProductFilters from './components/ProductFilters';
+import BulkActionsBar from './components/BulkActionsBar';
+import clsx from 'clsx';
 
 const ProductListPage = () => {
   const {
-    products,
-    totalItems,
-    totalPages,
-    currentPage,
-    setCurrentPage,
-    searchQuery,
-    setSearchQuery,
-    sortConfig,
-    handleSort,
+    products, totalItems, totalPages, currentPage, setCurrentPage,
+    searchQuery, setSearchQuery,
+    categoryFilter, setCategoryFilter,
+    statusFilter, setStatusFilter, categories,
+    sortConfig, handleSort,
     isLoading,
+    bulkDeleteMutation, bulkStatusMutation
   } = useAdminProducts();
 
-  // فرمتر قیمت
-  const formatPrice = (price) => 
-    new Intl.NumberFormat('fa-IQ').format(parseFloat(price));
+  // State برای آیتم‌های انتخاب شده
+  const [selectedIds, setSelectedIds] = useState([]);
 
-  // کامپوننت کمکی برای هدر جدول (جهت سورت)
-  const SortableHeader = ({ label, sortKey }) => (
+  // --- Selection Handlers ---
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedIds(products.map(p => p.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = () => {
+    if (confirm(`آیا مطمئن هستید که می‌خواهید ${selectedIds.length} محصول را حذف کنید؟`)) {
+      bulkDeleteMutation.mutate(selectedIds);
+      setSelectedIds([]);
+    }
+  };
+
+  const handleBulkStatus = (isActive) => {
+    bulkStatusMutation.mutate({ product_ids: selectedIds, is_active: isActive });
+    setSelectedIds([]);
+  };
+
+  // --- Formatters ---
+  const formatPrice = (price) => new Intl.NumberFormat('fa-IR').format(Number(price));
+
+  // --- Table Header Component ---
+  const Th = ({ label, sortKey, className }) => (
     <th 
-      className="cursor-pointer hover:bg-base-200 transition-colors select-none group"
-      onClick={() => handleSort(sortKey)}
+      className={clsx("cursor-pointer hover:bg-base-200 transition-colors select-none", className)}
+      onClick={() => sortKey && handleSort(sortKey)}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {label}
-        <span className={`opacity-0 group-hover:opacity-50 ${sortConfig.key === sortKey ? '!opacity-100 text-primary' : ''}`}>
-          {sortConfig.key === sortKey && sortConfig.direction === 'asc' ? <ArrowUp size={14}/> : <ArrowDown size={14}/>}
-        </span>
+        {sortKey && sortConfig.key === sortKey && (
+          sortConfig.direction === 'asc' ? <ArrowUp size={14} className="text-primary"/> : <ArrowDown size={14} className="text-primary"/>
+        )}
       </div>
     </th>
   );
 
   return (
-    <div className="p-4 md:p-6 min-h-screen bg-base-100/50 space-y-6">
+    <div className="p-4 md:p-8 min-h-screen bg-base-100/50 space-y-6 pb-24">
       
-      {/* --- هدر صفحه --- */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-base-content flex items-center gap-2">
-            <Package className="text-primary" />
+          <h1 className="text-3xl font-black text-slate-800 flex items-center gap-2">
+            <Package className="text-primary" size={32} />
             مدیریت محصولات
           </h1>
-          <p className="text-sm text-base-content/60 mt-1">
-            لیست کامل محصولات چاپی، ویرایش قیمت‌ها و موجودی
+          <p className="text-slate-500 mt-1 text-sm font-medium">
+            لیست کامل {totalItems} محصول | مدیریت موجودی و قیمت‌ها
           </p>
         </div>
-        <button className="btn btn-primary shadow-lg shadow-primary/30 text-white gap-2">
-          <Plus size={18} />
-          افزودن محصول جدید
+        <button className="btn btn-primary px-6 shadow-lg shadow-primary/30 text-white gap-2 rounded-xl">
+          <Plus size={20} /> محصول جدید
         </button>
       </div>
 
-      {/* --- باکس ابزارها (Search & Filter) --- */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-base-200 flex flex-col md:flex-row gap-4 items-center justify-between sticky top-2 z-20 backdrop-blur-xl bg-white/90">
-        
-        {/* جستجو */}
-        <div className="relative w-full md:w-96">
-          <input
-            type="text"
-            placeholder="جستجو نام، کد محصول یا دسته‌بندی..."
-            className="input input-bordered w-full pl-10 bg-gray-50 focus:bg-white transition-all"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1); // برگشت به صفحه اول بعد از سرچ
-            }}
-          />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" size={18} />
-        </div>
+      {/* Filters */}
+      <ProductFilters 
+        searchTerm={searchQuery} onSearchChange={setSearchQuery}
+        category={categoryFilter} onCategoryChange={setCategoryFilter} categories={categories}
+        status={statusFilter} onStatusChange={setStatusFilter}
+      />
 
-        {/* خلاصه وضعیت */}
-        <div className="text-xs font-medium text-base-content/50 bg-base-100 px-3 py-2 rounded-lg">
-          نمایش {products.length} از {totalItems} محصول
-        </div>
-      </div>
-
-      {/* --- جدول دیتا --- */}
-      <div className="bg-white rounded-2xl shadow-xl shadow-base-200/50 border border-base-200 overflow-hidden flex flex-col min-h-[500px]">
+      {/* Table Content */}
+      <div className="bg-white rounded-3xl border border-base-200 shadow-xl shadow-base-200/50 overflow-hidden">
         {isLoading ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-3">
-             <span className="loading loading-spinner loading-lg text-primary"></span>
-             <span className="text-sm text-gray-400">در حال دریافت لیست محصولات...</span>
+          <div className="p-20 flex flex-col items-center justify-center gap-4 text-primary">
+            <span className="loading loading-spinner loading-lg"></span>
+            <span className="text-slate-400 text-sm">در حال بارگذاری محصولات...</span>
           </div>
         ) : (
-          <div className="overflow-x-auto flex-1">
-            <table className="table table-pin-rows table-md w-full">
-              {/* هدر */}
-              <thead>
-                <tr className="bg-base-100/50 text-base-content/70">
-                  <SortableHeader label="#" sortKey="id" />
-                  <SortableHeader label="نام محصول" sortKey="name" />
-                  <SortableHeader label="کد محصول (SKU)" sortKey="code" />
-                  <SortableHeader label="قیمت پایه" sortKey="price" />
-                  <th className="text-center">وضعیت</th>
-                  <th className="text-center w-24">عملیات</th>
+          <div className="overflow-x-auto">
+            <table className="table w-full">
+              {/* Table Head */}
+              <thead className="bg-slate-50/80 text-slate-500 text-xs uppercase font-bold tracking-wider">
+                <tr>
+                  <th className="w-12">
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        className="checkbox checkbox-sm rounded-md checkbox-primary"
+                        onChange={handleSelectAll}
+                        checked={products.length > 0 && selectedIds.length === products.length}
+                      />
+                    </label>
+                  </th>
+                  <Th label="تصویر" className="w-20"/>
+                  <Th label="نام محصول" sortKey="name" />
+                  <Th label="کد (SKU)" sortKey="code" />
+                  <Th label="دسته‌بندی" sortKey="category" />
+                  <Th label="قیمت پایه" sortKey="price" />
+                  <Th label="وضعیت" sortKey="is_active" className="text-center" />
+                  <th className="text-center">عملیات</th>
                 </tr>
               </thead>
               
-              {/* بدنه */}
-              <tbody>
-                {products.length > 0 ? (
-                  products.map((product) => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors group">
-                      <td className="font-mono text-xs opacity-50">{product.id}</td>
-                      
-                      <td>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-base-content group-hover:text-primary transition-colors">
-                            {product.name}
-                          </span>
-                          <span className="text-[10px] text-gray-400">slug: {product.slug}</span>
-                        </div>
-                      </td>
-
-                      <td>
-                        <div className="badge badge-ghost badge-sm font-mono text-xs gap-1">
-                          <span className="opacity-50">#</span>{product.code.split('-').pop()}
-                        </div>
-                      </td>
-
-                      <td>
-                        {parseFloat(product.price) > 0 ? (
-                          <div className="font-bold text-emerald-600">
-                            {formatPrice(product.price)} <span className="text-[10px]">IQD</span>
-                          </div>
-                        ) : (
-                          <div className="badge badge-warning badge-outline text-xs">تماس بگیرید</div>
-                        )}
-                      </td>
-
-                      <td className="text-center">
-                        <label className="swap swap-rotate">
-                          <input type="checkbox" checked={product.is_active} readOnly />
-                          <span className="swap-on badge badge-success badge-xs gap-1 text-white shadow-success/40 shadow-md">
-                            فعال
-                          </span>
-                          <span className="swap-off badge badge-error badge-xs gap-1 text-white">
-                            غیرفعال
-                          </span>
-                        </label>
-                      </td>
-
-                      <td>
-                        <div className="dropdown dropdown-left dropdown-bottom">
-                          <button tabIndex={0} className="btn btn-ghost btn-sm btn-square text-gray-400 hover:text-primary hover:bg-primary/10">
-                            <MoreVertical size={16} />
-                          </button>
-                          <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-white rounded-xl w-48 border border-base-100">
-                             <li>
-                               <button className="text-xs font-medium hover:text-primary">
-                                 <Eye size={14}/> مشاهده جزئیات
-                               </button>
-                             </li>
-                             <li>
-                               <button className="text-xs font-medium hover:text-warning">
-                                 <Edit size={14}/> ویرایش محصول
-                               </button>
-                             </li>
-                             <div className="divider my-1"></div>
-                             <li>
-                               <button className="text-xs font-medium text-error hover:bg-error/10">
-                                 <Trash2 size={14}/> حذف محصول
-                               </button>
-                             </li>
-                          </ul>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
+              {/* Table Body */}
+              <tbody className="divide-y divide-slate-100">
+                {products.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="h-64 text-center text-gray-400">
-                      محصولی با این مشخصات یافت نشد :(
+                    <td colSpan="8" className="text-center py-20 text-slate-400">
+                      محصولی یافت نشد :/
                     </td>
                   </tr>
+                ) : (
+                  products.map((product) => {
+                    const isSelected = selectedIds.includes(product.id);
+                    return (
+                      <tr 
+                        key={product.id} 
+                        className={clsx(
+                          "hover:bg-slate-50 transition-colors group",
+                          isSelected && "bg-primary/5 hover:bg-primary/10"
+                        )}
+                      >
+                        {/* Checkbox */}
+                        <th>
+                          <label>
+                            <input 
+                              type="checkbox" 
+                              className="checkbox checkbox-sm rounded-md checkbox-primary"
+                              checked={isSelected}
+                              onChange={() => handleSelectOne(product.id)}
+                            />
+                          </label>
+                        </th>
+
+                        {/* Image */}
+                        <td>
+                          <div className="avatar">
+                            <div className="w-12 h-12 rounded-xl ring-1 ring-slate-100 bg-slate-50 flex items-center justify-center">
+                              {product.images && product.images.length > 0 ? (
+                                <img src={product.images[0].image} alt={product.name} className="object-cover" />
+                              ) : (
+                                <ImageIcon size={20} className="text-slate-300" />
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Name */}
+                        <td>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-bold text-slate-800 text-sm line-clamp-1 group-hover:text-primary transition-colors">
+                              {product.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono hidden md:inline-block">
+                              {product.slug}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* SKU */}
+                        <td>
+                           <span className="badge badge-ghost badge-sm font-mono text-[10px] text-slate-500">
+                             {product.code.split('-')[0]}...
+                           </span>
+                        </td>
+
+                        {/* Category */}
+                        <td>
+                           {/* اینجا چون فقط آیدی داریم، اگر لیست کتگوری‌ها لود شده باشه اسمش رو نشون میدیم */}
+                           <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-lg">
+                             {categories.find(c => c.id === product.category)?.name || `ID: ${product.category}`}
+                           </span>
+                        </td>
+
+                        {/* Price */}
+                        <td>
+                           {product.has_price ? (
+                             <div className="font-bold text-slate-700 text-sm dir-ltr text-right">
+                               {formatPrice(product.price)} <span className="text-[10px] text-slate-400">IQD</span>
+                             </div>
+                           ) : (
+                             <span className="badge badge-warning badge-outline text-xs">تماس بگیرید</span>
+                           )}
+                        </td>
+
+                        {/* Status */}
+                        <td className="text-center">
+                           <div className={clsx(
+                             "badge badge-sm gap-1 border-none px-3 py-2",
+                             product.is_active ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-600"
+                           )}>
+                             <div className={clsx("w-1.5 h-1.5 rounded-full", product.is_active ? "bg-emerald-500" : "bg-red-500")}></div>
+                             {product.is_active ? 'فعال' : 'غیرفعال'}
+                           </div>
+                        </td>
+
+                        {/* Actions */}
+                        <td>
+                           <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button className="btn btn-sm btn-ghost btn-square text-blue-500 hover:bg-blue-50">
+                                <Plus size={16}/> {/* ویرایش فرضی */}
+                              </button>
+                           </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
         )}
-
-        {/* --- Pagination --- */}
-        <div className="p-4 border-t border-base-200 bg-gray-50 flex items-center justify-between">
-            <button 
-              className="btn btn-sm btn-ghost"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(p => p - 1)}
-            >
-              قبلی
-            </button>
-            
-            <div className="join shadow-sm bg-white">
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  className={`join-item btn btn-sm ${currentPage === i + 1 ? 'btn-primary text-white' : 'btn-ghost'}`}
+        
+        {/* Pagination Footer */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-sm">
+           <span className="text-slate-400">
+             نمایش صفحه <span className="font-bold text-slate-700">{currentPage}</span> از {totalPages}
+           </span>
+           <div className="join bg-white shadow-sm border border-slate-200">
+              <button 
+                className="join-item btn btn-sm btn-ghost disabled:bg-transparent" 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => p - 1)}
+              >
+                «
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button 
+                  key={i} 
+                  className={clsx(
+                    "join-item btn btn-sm",
+                    currentPage === i + 1 ? "btn-primary text-white" : "btn-ghost"
+                  )}
                   onClick={() => setCurrentPage(i + 1)}
                 >
                   {i + 1}
                 </button>
               ))}
-            </div>
-
-            <button 
-              className="btn btn-sm btn-ghost"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(p => p + 1)}
-            >
-              بعدی
-            </button>
+              <button 
+                className="join-item btn btn-sm btn-ghost disabled:bg-transparent" 
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => p + 1)}
+              >
+                »
+              </button>
+           </div>
         </div>
       </div>
+
+      {/* Bulk Actions Bar (Floating) */}
+      <BulkActionsBar 
+        selectedCount={selectedIds.length}
+        onClear={() => setSelectedIds([])}
+        onDelete={handleBulkDelete}
+        onStatusChange={handleBulkStatus}
+      />
+
     </div>
   );
 };

@@ -4,55 +4,46 @@ import apiClient from '../../../services/apiClient'; // فرض بر این اس�
 const BASE_URL = '/dashboard/categories/';
 
 export const adminCategoryService = {
-  // دریافت لیست کامل
-  getAll: async () => {
-    const response = await apiClient.get(BASE_URL);
-    return response.data;
+  // دریافت لیست (می‌تواند شامل فیلترهای کوئری باشد)
+  getAll: async (params = {}) => {
+    const { data } = await apiClient.get(BASE_URL, { params });
+    return data;
   },
 
-  // دریافت یک آیتم تکی (برای ویرایش دقیق‌تر اگر نیاز شد)
   getById: async (id) => {
-    const response = await apiClient.get(`${BASE_URL}${id}/`);
-    return response.data;
+    const { data } = await apiClient.get(`${BASE_URL}${id}/`);
+    return data;
   },
 
-  // ایجاد دسته جدید (FormData چون فایل آپلود می‌کنیم)
-  create: async (data) => {
-    // تبدیل آبجکت به FormData برای هندل کردن تصاویر
-    const formData = new FormData();
-    Object.keys(data).forEach(key => {
-      // فقط مقادیر غیر null را بفرستیم
-      if (data[key] !== null && data[key] !== undefined) {
-        formData.append(key, data[key]);
-      }
-    });
-    
-    const response = await apiClient.post(BASE_URL, formData, {
+  create: async (formData) => {
+    const { data } = await apiClient.post(BASE_URL, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+    return data;
   },
 
-  // ویرایش
-  update: async (id, data) => {
-    const formData = new FormData();
-    Object.keys(data).forEach(key => {
-      // در متد PATCH، اگر عکسی تغییر نکرده باشد، نباید ارسال شود یا باید مدیریت شود
-      // اینجا فرض ساده‌سازی است
-      if (data[key] !== null && data[key] !== undefined) {
-        formData.append(key, data[key]);
-      }
+  update: async (id, formData) => {
+    const { data } = await apiClient.patch(`${BASE_URL}${id}/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
-
-    const response = await apiClient.patch(`${BASE_URL}${id}/`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return response.data;
+    return data;
   },
 
-  // حذف
   delete: async (id) => {
-    const response = await apiClient.delete(`${BASE_URL}${id}/`);
-    return response.data;
+    await apiClient.delete(`${BASE_URL}${id}/`);
+    return id;
+  },
+
+  // --- عملیات گروهی ---
+  bulkDelete: async (ids) => {
+    // طبق داکیومنت، متد DELETE بادی می‌گیرد (استاندارد REST مدرن)
+    await apiClient.delete(`${BASE_URL}bulk-delete/`, { data: { ids } });
+    return ids;
+  },
+
+  bulkStatus: async ({ ids, active }) => {
+    // طبق داکیومنت: active کوئری پارامتر است، ids در بادی
+    await apiClient.patch(`${BASE_URL}bulk-status/?active=${active}`, { ids });
+    return { ids, active };
   },
 };
