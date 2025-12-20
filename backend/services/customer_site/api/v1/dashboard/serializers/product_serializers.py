@@ -47,7 +47,7 @@ class ProductShellSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'slug', 'category', 'description', 
             'code', 'is_active', 'has_price', 'has_quantity', 
-            'price_modifier_percent'
+            'price_modifier_percent', 'created_at'
         ]
         read_only_fields = ['id', 'code', 'slug']
 
