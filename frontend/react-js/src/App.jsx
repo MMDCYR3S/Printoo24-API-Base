@@ -31,6 +31,10 @@ import UserListPage from './app/features/admin/features/users/UsersListPage';
 import MessageListPage from './app/features/admin/features/messages/MessageListPage';
 import SliderSettingsPage from './app/features/admin/features/settings/SliderSettingsPage';
 import ModalSettingsPage from './app/features/admin/features/settings/ModalSettingsPage';
+import CategoryUpsertPage from './app/features/admin/features/categories/CategoryUpsertPage'
+import CategoryDetailPage from './app/features/admin/features/categories/CategoryDetailPage'
+
+
 
 
 const AdminOrders = () => <div className="text-xl">لیست سفارشات اینجا میاد...</div>;
@@ -82,10 +86,22 @@ function App() {
               {/* برای ویرایش بعدا اینو اضافه میکنیم: path="edit/:id" */}
             </Route>
 
-            {/* دسته‌بندی‌ها */}
+{/* 👇 اصلاح بخش دسته‌بندی‌ها 👇 */}
             <Route path="categories">
+              {/* این یعنی: /admin/categories */}
               <Route index element={<CategoryListPage />} />
+              
+              {/* این یعنی: /admin/categories/sub */}
               <Route path="sub" element={<SubCategoryPage />} />
+              
+              {/* این یعنی: /admin/categories/create */}
+              <Route path="create" element={<CategoryUpsertPage />} />
+              
+              {/* این یعنی: /admin/categories/:id */}
+              <Route path=":id" element={<CategoryDetailPage />} />
+              
+              {/* این یعنی: /admin/categories/edit/:id */}
+              <Route path="edit/:id" element={<CategoryUpsertPage />} />
             </Route>
 
             {/* سفارشات */}
