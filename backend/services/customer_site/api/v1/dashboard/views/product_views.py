@@ -457,7 +457,13 @@ class ProductDashboardViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['delete'], url_path='bulk-delete')
     def bulk_delete(self, request):
         """ حذف گروهی محصولات """
-        product_ids = request.data.get('product_ids', [])
+        data = request.data
+        product_ids = []
+
+        if isinstance(data, list):
+            product_ids = data
+        elif isinstance(data, dict):
+            product_ids = data.get('product_ids', [])
 
         if not product_ids:
             return Response(
