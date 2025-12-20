@@ -76,7 +76,7 @@ class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = [
-            'id', 'name', 'slug', 'parent', 'parent_name', 'description',
+            'id', 'user', 'name', 'slug', 'parent', 'parent_name', 'description',
             'banner_wide', 'banner_box', 'banner_wide_url',
             'is_active', 'children', 'created_at', 'updated_at'
         ]
