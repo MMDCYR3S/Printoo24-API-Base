@@ -2,6 +2,7 @@ from rest_framework import serializers
 from core.models import (
     Product,
     ProductPricingConfig,
+    ProductCategory,
     ProductImage,
     Attachment, 
     ProductAttachment
@@ -14,13 +15,21 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image', 'order', 'created_at']
         read_only_fields = ['id', 'order', 'created_at']
 
+# ===== Product Category Serializer ===== #
+class ProductCategorySerializer(serializers.ModelSerializer):
+    parent_name = serializers.CharField(source='parent.name', read_only=True)
+    class Meta:
+        model = ProductCategory
+        fields = ['name', 'slug', 'parent_name']
+        read_only_fields = ['id', 'slug']
 
-# =====Product  Serializer ===== #
+# ===== Product  Serializer ===== #
 class ProductSerializer(serializers.ModelSerializer):
     detail_url = serializers.HyperlinkedIdentityField(
         view_name='api:v1:dashboard:products-detail', 
         lookup_field='id'
     )
+    category = ProductCategorySerializer(read_only=True)
     images = ProductImageSerializer(source='product_image', many=True)
     class Meta:
         model = Product
