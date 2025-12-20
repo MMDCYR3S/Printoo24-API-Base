@@ -29,7 +29,7 @@ class ProductSerializer(serializers.ModelSerializer):
         view_name='api:v1:dashboard:products-detail', 
         lookup_field='id'
     )
-    category = ProductCategorySerializer(read_only=True)
+    category = serializers.CharField(source="category.name", read_only=True)
     images = ProductImageSerializer(source='product_image', many=True)
     class Meta:
         model = Product
