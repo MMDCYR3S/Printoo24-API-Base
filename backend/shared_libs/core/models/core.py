@@ -31,6 +31,14 @@ class ContactUs(models.Model):
         default=False, 
         verbose_name=_("خوانده شده توسط ادمین")
     )
+    admin_reply = models.TextField(_("پاسخ ادمین"), blank=True, null=True)
+    replied_at = models.DateTimeField(_("تاریخ پاسخ"), blank=True, null=True)
+    replied_by = models.ForeignKey(
+        'core.User',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name=_("پاسخ دهنده")
+    )
     created_at = models.DateTimeField(
         auto_now_add=True, 
         verbose_name=_("تاریخ ایجاد")
@@ -43,6 +51,11 @@ class ContactUs(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.subject}"
+
+    @property
+    def is_replied(self):
+        """ پراپرتی کمکی برای چک کردن وضعیت پاسخ """
+        return bool(self.admin_reply)
 
 
 # ===== Promotional Modal ===== #
