@@ -1,8 +1,12 @@
-// src/app/features/admin/hooks/useAdminProducts.js
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
-import { adminService } from '../services/adminService';
+// اصلاح مهم: ایمپورت سرویس درست که شما دارید
+import { adminProductService } from '../services/adminProductService'; 
+// نکته: اگر فایل سرویس داخل پوشه products/services است، مسیر را چک کنید:
+// import { adminProductService } from '../products/services/adminProductService';
+
+console.log("⚠️ HOOK LOADED: useAdminProducts");
 
 export const useAdminProducts = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -10,62 +14,66 @@ export const useAdminProducts = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // 1. دریافت دیتا از سرور
-  const { data: rawProducts, isLoading, error, refetch } = useQuery({
+  // 1. دریافت دیتا
+  const { data: rawProducts = [], isLoading, error, refetch } = useQuery({
     queryKey: ['admin-products'],
-    queryFn: adminService.getAllProducts,
-    staleTime: 1000 * 60 * 5, // 5 دقیقه کش
+    // اصلاح مهم: استفاده از متد getAll که داخل فایل adminProductService.js شماست
+    queryFn: adminProductService.getAll, 
+    staleTime: 1000 * 60 * 5,
   });
 
-  // 2. پردازش دیتا (جستجو و سورت)
+  // لاگ برای اطمینان
+  if (error) console.error("❌ Hook Error:", error);
+  if (rawProducts?.length) console.log("📦 Loaded Products:", rawProducts.length);
+
+  // 2. پردازش دیتا
   const processedData = useMemo(() => {
-    if (!rawProducts) return [];
+    // ایمنی: اگر دیتا نال بود، آرایه خالی بده
+    if (!rawProducts || !Array.isArray(rawProducts)) return [];
 
     let result = [...rawProducts];
 
-    // الف) جستجو با Fuse.js
+    // جستجو
     if (searchQuery.trim()) {
       const fuse = new Fuse(result, {
-        keys: ['name', 'code', 'category'], // فیلدهای قابل جستجو
-        threshold: 0.3, // میزان حساسیت (0 دقیق، 1 خیلی بیخیال)
+        keys: ['name', 'code', 'slug'], // فیلدهای قابل جستجو
+        threshold: 0.3,
       });
       result = fuse.search(searchQuery).map((r) => r.item);
     }
 
-    // ب) سورت کردن
+    // سورت
     result.sort((a, b) => {
       const aValue = a[sortConfig.key];
       const bValue = b[sortConfig.key];
-
-      // هندل کردن اعداد و رشته‌ها
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
-      }
       
-      // هندل کردن قیمت (چون استرینگ است)
+      // هندل کردن قیمت
       if (sortConfig.key === 'price') {
-        return sortConfig.direction === 'asc' 
-          ? parseFloat(a.price) - parseFloat(b.price) 
-          : parseFloat(b.price) - parseFloat(a.price);
+        const pA = typeof a.price === 'string' ? parseFloat(a.price) : a.price;
+        const pB = typeof b.price === 'string' ? parseFloat(b.price) : b.price;
+        return sortConfig.direction === 'asc' ? pA - pB : pB - pA;
       }
 
-      return sortConfig.direction === 'asc'
-        ? String(aValue).localeCompare(String(bValue))
-        : String(bValue).localeCompare(String(aValue));
+      // هندل کردن متن
+      const valA = aValue ? String(aValue).toLowerCase() : '';
+      const valB = bValue ? String(bValue).toLowerCase() : '';
+
+      if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
     });
 
     return result;
   }, [rawProducts, searchQuery, sortConfig]);
 
-  // 3. صفحه‌بندی (Pagination)
+  // 3. صفحه‌بندی
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return processedData.slice(startIndex, startIndex + itemsPerPage);
   }, [processedData, currentPage]);
 
-  const totalPages = Math.ceil(processedData.length / itemsPerPage);
+  const totalPages = Math.ceil(processedData.length / itemsPerPage) || 1;
 
-  // هندلرها
   const handleSort = (key) => {
     setSortConfig((current) => ({
       key,
@@ -75,6 +83,8 @@ export const useAdminProducts = () => {
 
   return {
     products: paginatedData,
+    // لیست کامل برای دراپ‌داون ثبت سفارش
+    allProducts: processedData || [], 
     totalItems: processedData.length,
     totalPages,
     currentPage,
