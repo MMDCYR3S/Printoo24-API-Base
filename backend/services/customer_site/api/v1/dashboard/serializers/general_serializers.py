@@ -76,7 +76,7 @@ class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = [
-            'id', 'name', 'slug', 'parent', 'parent_name', 'description',
+            'id', 'user', 'name', 'slug', 'parent', 'parent_name', 'description',
             'banner_wide', 'banner_box', 'banner_wide_url',
             'is_active', 'children', 'created_at', 'updated_at'
         ]
@@ -94,13 +94,22 @@ class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
 
 # ===== سریالایزر تماس با ما ===== #
 class ContactUsSerializer(serializers.ModelSerializer):
-    """
-    این سریالایزر برای اعتبارسنجی و نمایش فرم تماس با ما است.
-    """
+    status_display = serializers.SerializerMethodField()
+    
     class Meta:
         model = ContactUs
-        fields = ['id', 'full_name', 'email', 'phone_number', 'subject', 'message', 'created_at']
-        read_only_fields = ['id', 'created_at', 'is_read'] # کاربر نباید بتواند تیک خوانده شده را بزند!
+        fields = [
+            'id', 'full_name', 'email', 'phone_number', 'subject', 'message', 
+            'is_read', 'admin_reply', 'replied_at', 'created_at', 'status_display'
+        ]
+        read_only_fields = ['is_read', 'admin_reply', 'replied_at', 'created_at']
+
+    def get_status_display(self, obj):
+        if obj.admin_reply:
+            return "پاسخ داده شده"
+        if obj.is_read:
+            return "خوانده شده (بدون پاسخ)"
+        return "جدید"
 
 
 # ===== سریالایزر مودال تبلیغاتی ===== #

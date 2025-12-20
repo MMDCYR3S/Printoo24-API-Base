@@ -1,7 +1,7 @@
 from celery import current_app
 
 from django.db import transaction
-from django.db.models import QuerySet
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 from .repositories import ContactUsRepository, ModalRepository, SliderRepository
@@ -17,24 +17,33 @@ class ContentService:
         self.contact_repo = ContactUsRepository()
         self.modal_repo = ModalRepository()
 
-    def reply_to_user_message(self, message_id: int, reply_text: str):
+    def reply_to_user_message(self, message_id: int, reply_text: str, admin_user=None):
         """
-        1. پیام را پیدا می‌کند.
-        2. وضعیت را به خوانده شده تغییر می‌دهد.
-        3. تسک ارسال ایمیل را در صف سلری می‌گذارد.
+        1. چک می‌کند پیام قبلاً پاسخ داده نشده باشد.
+        2. پاسخ را ذخیره و وضعیت را آپدیت می‌کند.
+        3. ایمیل ارسال می‌کند.
         """
-        # ===== پیام را پیدا می‌کند. ===== 
         message = self.contact_repo.get_by_id(message_id)
         if not message:
             raise ValidationError("پیام مورد نظر یافت نشد.")
             
+        # ===== جلوگیری از پاسخ مجدد ===== #
+        if message.admin_reply:
+            raise ValidationError("به این پیام قبلاً پاسخ داده شده است.")
+
         if not message.email:
              raise ValidationError("کاربر ایمیل ندارد، امکان ارسال پاسخ نیست.")
 
+        # ===== ذخیره پاسخ و تغییر وضعیت ===== #
         message.is_read = True
+        message.admin_reply = reply_text
+        message.replied_at = timezone.now()
+        if admin_user:
+            message.replied_by = admin_user
+            
         message.save()
 
-        # --- بخش فراخوانی تسک (Decoupled) ---
+        # ===== ارسال تسک ایمیل ===== #
         current_app.send_task(
             'send_contact_us_reply',
             kwargs={

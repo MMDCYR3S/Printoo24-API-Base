@@ -2,6 +2,7 @@ from rest_framework import viewsets, status, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 
 # ===== فراخوانی سرویس و مدل‌ها از Shared Libs ===== #
@@ -14,54 +15,72 @@ from ..serializers.general_serializers import (
 )
 
 # ===== ویو مدیریت تماس با ما ===== #
+# ===== ویو مدیریت تماس با ما (مخصوص ادمین) ===== #
 @extend_schema(tags=['Dashboard-Contact-Us'])
-class ContactUsViewSet(mixins.CreateModelMixin,
-                       mixins.ListModelMixin,
+class ContactUsViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin,
                        viewsets.GenericViewSet):
     """
-    این ویو دو نقش دارد:
-    1. متد Create: عمومی است (برای کاربران سایت).
-    2. متد List/Retrieve: مخصوص ادمین است (برای دیدن پیام‌ها).
+    مدیریت پیام‌های تماس با ما در داشبورد ادمین.
+    عملیات مجاز: مشاهده لیست، مشاهده جزئیات، حذف پیام، و پاسخ دادن.
+    نکته: ایجاد پیام (Create) در اینجا وجود ندارد چون مربوط به سایت مشتری است.
     """
-    queryset = ContactUs.objects.all()
+    queryset = ContactUs.objects.all().order_by('-created_at')
     serializer_class = ContactUsSerializer
+    permission_classes = [IsAdminUser]
     
-    def get_permissions(self):
-        # ===== تفکیک دسترسی بر اساس نوع درخواست ===== #
-        if self.action == 'create':
-            return [AllowAny()]
-        return [IsAdminUser()]
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.service = ContentService()
 
-    # ===== اکشن پاسخ (Reply Action) ===== #
+    def retrieve(self, request, *args, **kwargs):
+        """
+        مشاهده جزئیات پیام.
+        به محض مشاهده، وضعیت پیام به 'خوانده شده' تغییر می‌کند.
+        """
+        instance = self.get_object()
+        
+        # لاجیک Seen شدن پیام
+        if not instance.is_read:
+            instance.is_read = True
+            instance.save(update_fields=['is_read'])
+            
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    # ===== 3. REPLY ACTION (POST /:id/reply) ===== #
     @extend_schema(
-        summary="پاسخ ادمین به پیام (ارسال ایمیل)",
+        summary="پاسخ به پیام",
+        description="ارسال پاسخ ادمین به ایمیل کاربر و ذخیره آن در سیستم.",
         request=ReplyMessageSerializer,
-        responses={200: ContactUsSerializer},
-        description="متن پاسخ را می‌گیرد، وضعیت پیام را آپدیت می‌کند و ایمیل ارسال می‌شود."
+        responses={200: ContactUsSerializer}
     )
     @action(detail=True, methods=['post'], url_path='reply')
     def reply(self, request, pk=None):
-        # ===== سریالایزر ===== #
         input_serializer = ReplyMessageSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         
         reply_txt = input_serializer.validated_data['reply_text']
 
-        # ===== فراخوانی تاسک ===== #
         try:
-            updated_instance = self.service.reply_to_user_message(pk, reply_txt)
+            updated_instance = self.service.reply_to_user_message(
+                message_id=pk, 
+                reply_text=reply_txt,
+                admin_user=request.user 
+            )
             
-            # ===== بازگشت داده به کاربر ===== #
             output_serializer = self.get_serializer(updated_instance)
             return Response(output_serializer.data, status=status.HTTP_200_OK)
             
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ===== 4. DELETE (DELETE /:id) ===== #
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # ===== ویو مدیریت مودال‌ها (Dashboard & Public) ===== #
 @extend_schema(tags=['Dashboard-Modal'])

@@ -25,7 +25,7 @@ from .views import (
 router = DefaultRouter()
 router.register(r'categories', ProductCategoryDashboardViewSet, basename='product_category_dashboard')
 router.register(r'modals', PromotionalModalViewSet, basename='promotional_modal')
-router.register(r'contacts', ContactUsViewSet, basename='contact_us')
+router.register(r'contacts', ContactUsViewSet, basename='contact-us')
 router.register(r'customers', CustomerViewSet, basename='customer')
 router.register(r'wallets', WalletViewSet, basename='wallet')
 router.register(r'sizes', SizeViewSet, basename='sizes')

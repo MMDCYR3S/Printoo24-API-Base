@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.models import User, Role, UserRole, CustomerProfile, Wallet, WalletTransaction, Address, City, Province
+from core.models import User, Role, UserRole, CustomerProfile, Wallet, WalletTransaction, Address, City, Province, ContactUs
 
 admin.site.register(User)
 admin.site.register(Role)
@@ -11,3 +11,4 @@ admin.site.register(WalletTransaction)
 admin.site.register(Address)
 admin.site.register(City)
 admin.site.register(Province)
+admin.site.register(ContactUs)
