@@ -1,9 +1,8 @@
-import math
 import logging
 from decimal import Decimal, ROUND_HALF_UP
 from typing import List, Dict, Union, Optional, Tuple
 
-from core.models import (
+from core.product.models import (
     Product,
     ProductOptionValue,
     ProductQuantity,
@@ -13,6 +12,7 @@ from core.models import (
 
 logger = logging.getLogger('shop.services.pricing')
 
+# ========== PRICE CALCULATOR SERVICE ========== #
 class ProductPriceCalculator:
     def __init__(
         self,
@@ -44,14 +44,13 @@ class ProductPriceCalculator:
         if self.quantity <= 0:
             return {"final_price": 0.0, "details": {}}
 
-        # 1. محاسبه قیمت پایه (Quantity + Size Base)
-        # این قیمت شامل تیراژ و ابعاد اولیه است و مبنای محاسبه آپشن‌های درصدی قرار می‌گیرد.
+        # ===== محاسبه قیمت پایه ===== #
         base_total_cost, base_cost_breakdown = self._calculate_base_price_and_size()
 
-        # 2. محاسبه هزینه آپشن‌ها (Options Logic)
+        # ===== محاسبه هزینه آپشن‌ها ===== #
         options_total_cost, options_breakdown = self._calculate_options_cost(base_total_cost)
 
-        # 3. هزینه‌های سربار (Fees)
+        # ===== محاسبه هزینه ===== #
         setup_cost = self.config.base_setup_price if self.config else Decimal(0)
         design_cost = Decimal(0)
         if self.config and self.config.design_service_available and not self.has_design:
@@ -70,7 +69,7 @@ class ProductPriceCalculator:
         return {
             "final_price": float(final_price),
             "breakdown": {
-                "base_price_initial": float(base_total_cost), # قیمت پایه ترکیب شده
+                "base_price_initial": float(base_total_cost),
                 "options_total": float(options_total_cost),
                 "setup_fee": float(setup_cost),
                 "design_fee": float(design_cost),
