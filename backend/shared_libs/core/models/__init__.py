@@ -1,4 +1,4 @@
-from .user import *
+from core.users.models import *
 from .product import *
 from .order import *
 from .cart import Cart, CartItem, CartItemUpload

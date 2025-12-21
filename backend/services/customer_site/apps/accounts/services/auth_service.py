@@ -7,57 +7,54 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from core.models import User, Role, UserRole
-from core.domain.identity.users import UserDomainService
+from core.users.models import User
+from core.users.services import UserIdentityService
 from .verify_service import VerificationService
 
 # ====== Logger Configuration ====== #
 logger = logging.getLogger('accounts.services.auth')
 
 
-# ======= Authentication Service ======= #
+# ======= Authentication Application Service ======= #
 class AuthService:
     """
-    کلاس سرویس احراز هویت برای مدیریت ثبت‌نام و ورود کاربران.
-    این سرویس منطق کامل ثبت‌نام، اختصاص نقش و ورود کاربر را کپسوله می‌کند.
+    سرویس اپلیکیشن احراز هویت (Application Layer).
+    وظیفه: هماهنگی بین سرویس دامین (ثبت نام) و سرویس‌های جانبی (ایمیل، توکن).
     """
     def __init__(self):
-        """تعیین سرویس‌های وابسته"""
-        self._user_domain_service = UserDomainService()
+        self._identity_service = UserIdentityService()
         self._verify_service = VerificationService()
-        logger.debug("AuthService initialized")
+        logger.debug("AuthService initialized with UserIdentityService")
     
     def _generate_tokens(self, user) -> Dict[str, str]:
-        """متد داخلی برای تولید توکن"""
+        """تولید اکسس توکن و رفرش توکن"""
         refresh = RefreshToken.for_user(user)
         return {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
         
+    # ========== REGISTER ========== #
     @transaction.atomic
     def register_customer(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        ثبت نام مشتری (Customer Registration Flow)
+        مدیریت جریان ثبت نام مشتری.
+        Flow: Validate & Create (Domain) -> Send Email (Notification) -> Generate Token (Auth)
         """
-        logger.info(f"Registering new customer: {data.get('email')}")
-        
-        username = data.get('username', 'N/A')
+        email = data.get('email')
+        logger.info(f"Starting registration process for: {email}")
         
         try:
-            # ===== ایجاد کاربر ===== #
-            user = self._user_domain_service.register_new_user(data)
-            logger.info(f"User created successfully - User ID: {user.id}, Username: {user.username}")
+            # ===== ایجاد یوزر ===== # 
+            user = self._identity_service.register_new_customer(data)
+            
+            logger.info(f"User created in DB - ID: {user.id}")
             
             # ===== ارسال کد تأیید ===== #
-            logger.info(f"Sending verification code to email: {user.email}")
+            logger.info(f"Sending verification code to: {email}")
             self._verify_service.send_verification_code(user.email)
-            logger.info(f"Verification code sent successfully to {user.email}")
             
-            logger.info(
-                f"User registration completed successfully - "
-                f"User ID: {user.id}, Username: {user.username}"
-            )
+            # ===== تولید توکن ===== #
             tokens = self._generate_tokens(user)
             
             return {
@@ -66,50 +63,44 @@ class AuthService:
             }
             
         except ValidationError as e:
-            logger.warning(
-                f"User registration failed - Email: {data.get('email')}, Error: {str(e)}"
-            )
-            raise ValidationError(f"خطای اعتبارسنجی: {str(e)}")
+            logger.warning(f"Registration validation failed for {email}: {e}")
+            raise e
             
         except Exception as e:
-            logger.error(
-                f"Unexpected error during user registration - Username: {username}, Error: {str(e)}",
-                exc_info=True
-            )
-            raise ValidationError(f"خطای غیرمنتظره در ثبت‌نام: {str(e)}")
+            logger.error(f"Critical error during registration for {email}: {e}", exc_info=True)
+            raise ValidationError("خطایی در سیستم رخ داده است. لطفاً مجددا تلاش کنید.")
 
+    # ========== LOGIN ========== #
     def login_customer(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        ورود کاربر و صدور توکن
+        ورود مشتری.
         """
-        username = data.get('username')
+        username = data.get('username') or data.get('email')
         password = data.get('password')
         
-        logger.info(f"Login attempt - Username: {username}")
+        logger.info(f"Login attempt for: {username}")
         
         try:
-            # ====== اعتبارسنجی کاربر ====== #
+            # ===== اعتبارسنجی ===== #
             user = authenticate(username=username, password=password)
             
             if not user:
-                logger.warning(f"Failed login attempt - Invalid credentials for username: {username}")
-                raise ValidationError("نام کاربری یا رمز عبور نامعتبر است")
+                logger.warning(f"Invalid credentials for: {username}")
+                raise ValidationError("نام کاربری یا رمز عبور اشتباه است.")
             
-            logger.debug(f"User authenticated successfully - User ID: {user.id}, Username: {user.username}")
-            
-            # ====== بررسی وضعیت فعال بودن کاربر ====== #
+            # ===== حساب کاربری فعال باشد ===== #
             if not user.is_active:
-                logger.warning(f"Login denied - Inactive user: {user.username} (ID: {user.id})")
-                raise ValidationError("حساب کاربری غیرفعال است")
+                logger.warning(f"Login blocked - Inactive user: {username}")
+                raise ValidationError("حساب کاربری شما غیرفعال است.")
+
+            # ===== ایمیل تأیید شده باشد ===== #
+            if not user.is_verified:
+                raise ValidationError("لطفاً ابتدا ایمیل خود را تأیید کنید.")
             
-            # ====== ایجاد توکن برای کاربر پس از ورود ====== #
-            logger.debug(f"Generating authentication tokens for user: {user.username}")
+            # ===== تولید توکن ===== #
             tokens = self._generate_tokens(user)
             
-            logger.info(
-                f"User logged in successfully - "
-                f"User ID: {user.id}, Username: {user.username}"
-            )
+            logger.info(f"User logged in: {user.id}")
             
             return {
                 "user": user,
@@ -117,12 +108,7 @@ class AuthService:
             }
             
         except ValidationError:
-            # خطاهای ValidationError را مستقیماً پرتاب می‌کنیم
             raise
-            
         except Exception as e:
-            logger.error(
-                f"Unexpected error during login - Username: {username}, Error: {str(e)}",
-                exc_info=True
-            )
-            raise ValidationError(f"خطای غیرمنتظره در ورود: {str(e)}")
+            logger.error(f"Login error for {username}: {e}", exc_info=True)
+            raise ValidationError("خطای سیستمی در ورود.")

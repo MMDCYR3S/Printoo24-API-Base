@@ -4,10 +4,12 @@ import random
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
 from ..tasks import send_verification_email_task
 from core.domain.infrastructure.cache.cache_services import CacheService
-from core.domain.identity.users import UserDomainService
+from core.users.models import User
+from core.users.services.identity import UserIdentityService
 
 # ====== Logger Configuration ====== #
 logger = logging.getLogger('accounts.services.verification')
@@ -17,80 +19,38 @@ security_logger = logging.getLogger('accounts.services.security')
 # ======= Verification Service ======= #
 class VerificationService:
     """
-    سرویس برای ارسال ایمیل به سمت کاربر برای احراز هویت و فعال‌سازی حساب کاربری.
-    
-    این سرویس شامل:
-    - ایجاد کد تصادفی 6 رقمی
-    - ذخیره کد در کش با محدودیت زمانی
-    - ارسال ایمیل حاوی کد فعال‌سازی
-    - اعتبارسنجی کد و فعال‌سازی حساب کاربری
+    سرویس اپلیکیشن برای مدیریت فرآیند ارسال و بررسی کد تایید.
+    (Application Layer Service)
     """
     
     VERIFICATION_CODE_TIMEOUT_IN_SECONDS = timedelta(minutes=5).total_seconds()
     VERIFICATION_CODE_KEY_PREFIX = "verification_code"
     
     def __init__(self):
-        """
-        مقداردهی اولیه سرویس احراز هویت.
-        
-        Args:
-            user_service: سرویس مدیریت کاربران
-        """
-        self._user_service = UserDomainService()
+        self._identity_service = UserIdentityService()
+        self._cache_service = CacheService()
         logger.debug("VerificationService initialized")
     
     def _generate_code_number(self) -> str:
-        """
-        ایجاد یک عدد تصادفی 6 رقمی به صورت رشته برای فعال‌سازی.
-        
-        Returns:
-            str: کد 6 رقمی تصادفی
-        """
+        """ایجاد کد 6 رقمی"""
         code = str(random.randint(100000, 999999))
-        logger.debug(f"Verification code generated: {code[:2]}****")
         return code
     
     def _get_cache_key(self, email: str) -> str:
-        """
-        ایجاد کلید کش برای ذخیره کد فعال‌سازی.
-        
-        کلید کش به صورت منحصر به فرد و با استفاده از ایمیل شخص ساخته می‌شود.
-        
-        Args:
-            email: ایمیل کاربر
-            
-        Returns:
-            str: کلید کش منحصر به فرد
-        """
         cache_key = f"{self.VERIFICATION_CODE_KEY_PREFIX}_{email.lower().strip()}"
         logger.debug(f"Generated verification cache key for email: {email}")
         return cache_key
     
     def send_verification_code(self, email: str) -> None:
-        """
-        ارسال ایمیل فعال‌سازی حساب کاربری به همراه کد.
-        
-        فرآیند:
-        1- ایجاد کد تصادفی 6 رقمی
-        2- ذخیره کد در کش با timeout مشخص
-        3- ارسال ایمیل به صورت async
-        
-        Args:
-            email: ایمیل کاربر برای ارسال کد
-        """
-        logger.info(f"Sending verification code to email: {email}")
+        """ارسال کد فعال‌سازی"""
+        logger.info(f"Initiating verification code send for: {email}")
         
         try:
             # ===== ایجاد کد فعال‌سازی ===== # 
             code = self._generate_code_number()
-            logger.debug(f"Verification code created for email: {email}")
-
-            # ===== ذخیره کد فعال‌سازی در کش ===== # 
             cache_key = self._get_cache_key(email)
             
-            # ===== ایجاد کش با استفاده از سرویس ===== # 
-            cache_service = CacheService()
-            cache_service.set(cache_key, code, self.VERIFICATION_CODE_TIMEOUT_IN_SECONDS)
+            self._cache_service.set(cache_key, code, self.VERIFICATION_CODE_TIMEOUT_IN_SECONDS)
             
             logger.debug(
                 f"Verification code cached - Email: {email}, "
@@ -98,122 +58,59 @@ class VerificationService:
             )
             
             #  ===== ارسال ایمیل (Async Task) ===== #
-            logger.debug(f"Triggering verification email task for: {email}")
+            if settings.DEBUG:
+                logger.info(f"DEBUG MODE - Verification Code for {email}: {code}")
+
             send_verification_email_task.delay(email, code)
             
-            logger.info(f"Verification email task queued successfully for: {email}")
+            logger.info(f"Verification code sent/queued for: {email}")
             
         except Exception as e:
-            logger.error(
-                f"Failed to send verification code - Email: {email}, Error: {str(e)}",
-                exc_info=True
-            )
-            raise ValidationError("خطا در ارسال کد فعال‌سازی.")
+            logger.error(f"Error sending verification code to {email}: {e}", exc_info=True)
+            raise ValidationError("خطا در ارسال کد فعال‌سازی. لطفاً مجددا تلاش کنید.")
         
-    def verify_code(self, email: str, code: str) -> bool:
+    # ========== VERIFY CODE ========== #
+    def verify_code(self, email: str, code: str):
         """
-        اعتبارسنجی کد ارسال شده به کاربر.
-        
-        فرایند:
-        1- بررسی وجود کاربر با ایمیل مورد نظر
-        2- بررسی اینکه آیا کاربر قبلاً فعال شده یا خیر
-        3- مقایسه کد ارسالی با کد ذخیره شده در کش
-        4- فعال‌سازی حساب کاربری و حذف کد از کش
-        
-        Args:
-            email: ایمیل کاربر
-            code: کد ارسال شده توسط کاربر
-            
-        Returns:
-            User: کاربر فعال شده
-            
-        Raises:
-            ValidationError: در صورت نامعتبر بودن ایمیل، کد یا فعال بودن قبلی حساب
+        بررسی کد و فعال‌سازی کاربر.
         """
-        logger.info(f"Verification code check requested for email: {email}")
+        logger.info(f"Verifying code for: {email}")
         
         try:
-            # ===== صحت‌سنجی کاربر ===== #
-            user = self._user_service.get_by_email(email)
-            
-            if not user:
-                logger.warning(f"Verification attempt for non-existent email: {email}")
-                security_logger.warning(
-                    f"Verification attempt for non-existent email: {email}"
-                )
-                raise ValidationError("این ایمیل موجود نمی‌باشد.")
-            
-            logger.debug(f"User found for verification - User ID: {user.id}, Email: {email}")
-            
+            # ===== بررسی وجود کاربر ===== #
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                logger.warning(f"Verification failed - User not found: {email}")
+                raise ValidationError("کاربری با این ایمیل یافت نشد.")
+
+            # ===== بررسی فعال‌سازی ===== #
             if user.is_verified:
-                logger.warning(
-                    f"Verification attempt for already verified user - "
-                    f"User ID: {user.id}, Email: {email}"
-                )
-                raise ValidationError("این حساب کاربری قبلاً فعال شده است.")
-            
-            # ====== بررسی کش و مقایسه کد ===== #
-            cache_service = CacheService()
+                raise ValidationError("این حساب قبلاً فعال شده است.")
+
+            # ===== بررسی وجود کد ===== #
             cache_key = self._get_cache_key(email)
-            cache_code = cache_service.get(cache_key)
+            cached_code = self._cache_service.get(cache_key)
             
-            # ===== بررسی تاریخ انقضای کد ===== #
-            if not cache_code:
-                logger.warning(
-                    f"Verification code expired or not found - "
-                    f"User ID: {user.id}, Email: {email}"
-                )
-                security_logger.warning(
-                    f"Expired verification code attempt - User: {user.username} ({email})"
-                )
-                raise ValidationError("کد فعال‌سازی منقضی شده است. لطفاً کد جدید درخواست کنید.")
+            if not cached_code:
+                raise ValidationError("کد تأیید منقضی شده است. لطفاً درخواست کد جدید دهید.")
             
-                        
-            if not hmac.compare_digest(cache_code, str(code)):
-                logger.warning(
-                    f"Invalid verification code - User: {email}, "
-                    f"Expected: {str(cache_code)[:2]}****, Received: {str(code)[:2]}****"
-                )
+            # ===== بررسی کد ===== #
+            if not hmac.compare_digest(str(cached_code), str(code)):
+                security_logger.warning(f"Invalid code attempt for {email}")
                 raise ValidationError("کد وارد شده صحیح نیست.")
+
+            # ===== فعال‌سازی کاربر ===== #
+            verified_user = self._identity_service.verify_user(user)
             
-            if cache_code != str(code):
-                logger.warning(
-                    f"Invalid verification code submitted - "
-                    f"User ID: {user.id}, Email: {email}, "
-                    f"Expected: {cache_code[:2]}****, Received: {str(code)[:2]}****"
-                )
-                security_logger.warning(
-                    f"Invalid verification code - User: {user.username} ({email})"
-                )
-                raise ValidationError("کد ارسال شده صحیح نیست.")
+            # ===== پاک کردن کد ===== #
+            self._cache_service.delete(cache_key)
             
-            logger.debug(f"Verification code matched for user: {email}")
-            
-            # ===== فعال‌سازی کاربر و حذف کش ===== #
-            logger.info(f"Activating user account - User ID: {user.id}, Email: {email}")
-            verified_user = self._user_service.verify_user(user)
-            
-            cache_service.delete(cache_key)
-            logger.debug(f"Verification code cache deleted for email: {email}")
-            
-            logger.info(
-                f"User account verified successfully - "
-                f"User ID: {verified_user.id}, Username: {verified_user.username}"
-            )
-            
-            security_logger.info(
-                f"Account activated - User: {verified_user.username} ({verified_user.email})"
-            )
-            
+            logger.info(f"User verified successfully: {email}")
             return verified_user
             
         except ValidationError:
             raise
-            
         except Exception as e:
-            logger.error(
-                f"Unexpected error during code verification - Email: {email}, Error: {str(e)}",
-                exc_info=True
-            )
-            raise ValidationError("خطای غیرمنتظره در تأیید کد.")
-    
+            logger.error(f"Unexpected error validating code for {email}: {e}", exc_info=True)
+            raise ValidationError("خطای سیستمی در تأیید کد.")

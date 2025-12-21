@@ -6,42 +6,12 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin 
 from django.utils.translation import gettext_lazy as _
 
-# ====== User Manager ====== #
-class UserManager(BaseUserManager):
-    """ 
-    مدیر سفارشی برای مدل User که با ایمیل به عنوان شناسه یکتا کار می‌کند.
-    """
-
-    def create_user(self, username, email, password=None, **extra_fields):
-        """
-        یک کاربر جدید ایجاد و ذخیره می‌کند.
-        """
-        if not email:
-            raise ValueError(_('The Email must be set'))
-        if not username:
-            raise ValueError(_('The Username must be set'))
-            
-        email = self.normalize_email(email)
-        user = self.model(username=username, email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, username, email, password=None, **extra_fields):
-        """
-        یک ابرکاربر (superuser) جدید ایجاد و ذخیره می‌کند.
-        """
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('is_verified', True)
-
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError(_('Superuser must have is_staff=True.'))
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError(_('Superuser must have is_superuser=True.'))
-            
-        return self.create_user(username, email, password, **extra_fields)
+from .managers import (
+    UserManager, RoleManager, 
+    WalletManager, WalletTransactionManager,
+    CustomerProfileManager,
+    AddressManager, ProvinceManager, CityManager
+)
 
 # ====== User Model ====== #
 class User(AbstractBaseUser, PermissionsMixin):
@@ -73,6 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f"{self.username}"
     
     class Meta:
+        app_label = 'core'
         verbose_name = _('کاربر')
         verbose_name_plural = _('کاربران')
 
@@ -100,6 +71,8 @@ class Role(models.Model):
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
+    objects = RoleManager()
+    
     @property
     def allowed_status_groups(self):
         """
@@ -109,6 +82,7 @@ class Role(models.Model):
         return list(self.allowed_groups.values_list('code', flat=True))
     
     class Meta:
+        app_label = 'core'
         verbose_name = _('نقش')
         verbose_name_plural = _('نقش ها')
 
@@ -126,8 +100,9 @@ class UserRole(models.Model):
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
 
     class Meta:
-        verbose_name = _('نقش کاربر')
-        verbose_name_plural = _('نقش های کاربر')
+        app_label = 'core'
+        verbose_name = _('واسط نقش کاربر')
+        verbose_name_plural = _('واسط نقش های کاربر')
         
     def __str__(self):
         return f"{self.user.username} - {self.role.name}"
@@ -139,6 +114,13 @@ class Wallet(models.Model):
     decimal = models.DecimalField(_("مقدار"), max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+
+    objects = WalletManager()    
+
+    class Meta:
+        app_label = 'core'
+        verbose_name = 'کیف پول'
+        verbose_name_plural = 'کیف های پول'
     
     def __str__(self):
         return self.user.username
@@ -166,6 +148,13 @@ class WalletTransaction(models.Model):
     amount_after = models.DecimalField(_("مقدار بعد از عملیات"), max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+    
+    objects = WalletTransactionManager()
+    
+    class Meta:
+        app_label = 'core'
+        verbose_name = 'تراکنش کیف پول'
+        verbose_name_plural = 'تراکنش های کیف پول'
 
 # ========= Customer Profile Model ========= #
 class CustomerProfile(models.Model):
@@ -179,6 +168,8 @@ class CustomerProfile(models.Model):
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
+    objects = CustomerProfileManager()
+    
     def fullname(self):
         return self.first_name + " " + self.last_name
     
@@ -186,6 +177,7 @@ class CustomerProfile(models.Model):
         return self.first_name + " " + self.last_name
     
     class Meta:
+        app_label = 'core'
         verbose_name = _('مشتری')
         verbose_name_plural = _('مشتریان')
 
@@ -196,6 +188,13 @@ class Province(models.Model):
     slug = models.SlugField(_('نامک'), unique=True, null=True, blank=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = ProvinceManager()
+    
+    class Meta:
+        app_label = 'core'
+        verbose_name = _('استان')
+        verbose_name_plural = _('استان ها')
     
     def __str__(self):
         return f"{self.name}"
@@ -213,6 +212,13 @@ class City(models.Model):
     province = models.ForeignKey(Province, related_name='cities', on_delete=models.CASCADE)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = CityManager()
+
+    class Meta:
+        app_label = 'core'
+        verbose_name = _('شهر')
+        verbose_name_plural = _('شهر ها')
 
     def __str__(self):
         return f"{self.name}"
@@ -232,3 +238,10 @@ class Address(models.Model):
     address = models.TextField(_('آدرس'))
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = AddressManager()
+
+    class Meta:
+        app_label = 'core'
+        verbose_name = _('آدرس')
+        verbose_name_plural = _('آدرس ها')
