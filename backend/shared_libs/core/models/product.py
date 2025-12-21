@@ -102,21 +102,6 @@ class Product(models.Model):
         decimal_places=2, 
         default=0.0,
     )
-    # ====== قیمت گذاری براساس واحد سطح ====== #
-    price_per_square_unit = models.DecimalField(
-        _("قیمت بر واحد سطح (مثلا سانتی‌متر مربع)"), 
-        max_digits=10, 
-        decimal_places=2, 
-        null=True, blank=True,
-        help_text=_("اگر این محصول ابعاد دلخواه دارد، قیمت هر واحد سطح را وارد کنید. در غیر این صورت خالی بگذارید.")
-    )
-    price_modifier_percent = models.DecimalField(
-        _("درصد تعدیل قیمت"), 
-        max_digits=5, 
-        decimal_places=2, 
-        default=0.0, 
-        help_text=_("یک عدد برای تغییر کلی قیمت. مثال: 15.0 برای افزایش 15 درصدی یا -10.0 برای کاهش 10 درصدی.")
-    )
     # ===== قیمت گذاری براساس مقدار ==== #
     price_per_unit = models.PositiveIntegerField(
         _("گام شمارش (تعداد مبنا)"),
@@ -171,7 +156,7 @@ class ProductPricingConfig(models.Model):
     """
     product = models.OneToOneField(
         Product, 
-        on_delete=models.PROTECT, 
+        on_delete=models.CASCADE,
         related_name='pricing_config',
         verbose_name=_("محصول مرتبط")
     )
@@ -228,7 +213,7 @@ class Size(models.Model):
 class ProductSize(models.Model):
     """ مدل واسط بین سایز و محصول"""
     user = models.ForeignKey("core.User", related_name='product_size', on_delete=models.PROTECT)
-    product = models.ForeignKey(Product, related_name='product_size', on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, related_name='product_size', on_delete=models.CASCADE)
     size = models.ForeignKey(Size, related_name='size_product', on_delete=models.PROTECT)
     # ==== قیمت هر سایز ==== #
     price_impact = models.DecimalField(
@@ -267,7 +252,7 @@ class Quantity(models.Model):
 class ProductQuantity(models.Model):
     """ کلاس واسط بین مدل محصول و تیراژ """
     user = models.ForeignKey('core.User', related_name='product_quantity_user', on_delete=models.PROTECT)
-    product = models.ForeignKey(Product, related_name='product_quantity', on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, related_name='product_quantity', on_delete=models.CASCADE)
     quantity = models.ForeignKey(Quantity, related_name='quantity_product', on_delete=models.PROTECT)
     price = models.IntegerField(_('قیمت'), default=0)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
@@ -284,7 +269,7 @@ class ProductQuantity(models.Model):
 class ProductImage(models.Model):
     """ مدل عکس محصول """
     user = models.ForeignKey("core.User", related_name='user_product_image', on_delete=models.PROTECT)
-    product = models.ForeignKey(Product, related_name='product_image', on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, related_name='product_image', on_delete=models.CASCADE)
     image = models.ImageField(_('تصویر'), upload_to='products/')
     order = models.IntegerField(_('ترتیب'), default=0)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
@@ -317,7 +302,7 @@ class Attachment(models.Model):
 # ======= Product Attachment Model ======= #
 class ProductAttachment(models.Model):
     """ مدل واسط بین محصول و فایل """
-    user = models.ForeignKey("core.User", related_name='product_attachment_user', on_delete=models.PROTECT)
+    user = models.ForeignKey("core.User", related_name='product_attachment_user', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='product_attachment_product', on_delete=models.PROTECT)
     attachment = models.ForeignKey(Attachment, related_name='product_attachment_file', on_delete=models.PROTECT)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
@@ -368,7 +353,6 @@ class Option(models.Model):
         help_text=_("شناسه یکتا برای کدنویسی (مثال: paper_type)")
     )
     label = models.CharField(_("عنوان نمایشی"), max_length=150, null=True, blank=True)
-    description = models.TextField(_("توضیحات راهنما"), blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -387,7 +371,13 @@ class OptionValue(models.Model):
     """
     option = models.ForeignKey(Option, related_name='global_values', on_delete=models.PROTECT)
     label = models.CharField(_("عنوان مقدار"), max_length=150, null=True, blank=True)
-    value = models.CharField(_("کد سیستمی"), max_length=150)
+    value = models.CharField(_("کد سیستمی"), max_length=150, null=True, blank=True)
+    input_type = models.CharField(
+        _("نوع ویژگی"),
+        max_length=25,
+        choices=OptionInputType.choices,
+        default=OptionInputType.TEXT
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -404,25 +394,12 @@ class ProductOption(models.Model):
     اتصال ویژگی به محصول.
     اینجا تعیین می‌کنیم ویژگی چه رفتاری در این محصول خاص دارد.
     """
-    product = models.ForeignKey(Product, related_name='options', on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, related_name='options', on_delete=models.CASCADE, null=True)
     option = models.ForeignKey(Option, related_name='product_configs', on_delete=models.PROTECT)
     
     # ===== تنظیمات نمایش (UI) ===== #
     is_required = models.BooleanField(_("اجباری؟"), default=False)
     order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
-    
-    # ===== تنظیمات استراتژی قیمت (Logic) ===== #
-    has_pricing = models.BooleanField(
-        _("محاسبه قیمت فعال است؟"), 
-        default=True,
-        help_text=_("سطح ۱ کنترل: اگر خاموش باشد، کل این ویژگی غیرمالی می‌شود.")
-    )
-    
-    base_price = models.DecimalField(
-        _("هزینه سربار (Setup Cost)"), 
-        max_digits=14, decimal_places=0, default=Decimal('0'),
-        help_text=_("هزینه‌ای که صرفاً بابت وجود این ویژگی اضافه می‌شود (مستقل از انتخاب کاربر).")
-    )
 
     class Meta:
         verbose_name = _("پیکربندی ویژگی محصول")
@@ -538,7 +515,7 @@ class ProductRating(models.Model):
     )
     product = models.ForeignKey(
         "core.Product", 
-        on_delete=models.PROTECT, 
+        on_delete=models.CASCADE,
         related_name="ratings",
         verbose_name=_("محصول")
     )
@@ -601,7 +578,7 @@ class ProductComment(models.Model):
     )
     product = models.ForeignKey(
         "core.Product", 
-        on_delete=models.PROTECT, 
+         on_delete=models.CASCADE,
         related_name="comments",
         verbose_name=_("محصول")
     )

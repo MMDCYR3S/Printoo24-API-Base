@@ -41,7 +41,6 @@ class ProductDashboardService:
         shell_data = data.get('shell')
         pricing_data = data.get('pricing_config', {})
         quantity_ids = data.get('quantity_ids', [])
-        file_requirements = data.get('file_requirements', [])
         
         # ===== ایجاد محصول ===== #
         product = self._domain_service.create_product_shell(user, shell_data)
@@ -52,7 +51,6 @@ class ProductDashboardService:
             
         # ===== هماهنگی بین وابستگی ها ===== #
         self._domain_service.sync_quantities(product.id, user, quantity_ids)
-        self._domain_service.sync_file_requirements(product.id, file_requirements)
 
         return product
     
@@ -69,10 +67,7 @@ class ProductDashboardService:
         # ===== بروزرسانی سایر بخش ها در صورت وجود ===== #
         if 'pricing_config' in data:
             self._domain_service.update_pricing_config(product_id, data['pricing_config'])
-        
-        if 'file_requirements' in data:
-            self._domain_service.sync_file_requirements(product_id, data['file_requirements'])
-            
+
         if 'quantity_ids' in data:
             self._domain_service.sync_quantities(product_id, data['quantity_ids'])
     

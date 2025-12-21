@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any, List
 
 from django.db.models import Prefetch, QuerySet, Q, Count
 
@@ -13,6 +13,7 @@ from core.models import (
     ProductOptionValue,
     ProductImage,
     ProductAttachment,
+    ProductPricingConfig
 )
 
 # ====== Product Repository ====== #
@@ -54,6 +55,24 @@ class ProductRepository(BaseRepository[Product]):
             #  ===== بارگذاری تصاویر و فایل های پیوست ===== #
             Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
             Prefetch('product_attachment_product', queryset=ProductAttachment.objects.order_by('id')),
+        )
+        
+    # ===== Helper Methods (Internal) ===== #
+    def _get_optimized_queryset(self) -> QuerySet[Product]:
+        """
+        کوئری‌ست پایه با بارگذاری روابط اصلی (بدون آپشن‌ها و فایل‌ها).
+        """
+        return self.model.objects.select_related(
+            'category',
+            'pricing_config'
+        ).prefetch_related(
+            # ===== بارگذاری تیراژ ===== #
+            Prefetch(
+                'product_quantity', 
+                queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')
+            ),
+            # ===== تصویر محصول ===== #
+            Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
         )
         
     # ===== Read Methods ===== #
@@ -113,20 +132,29 @@ class ProductRepository(BaseRepository[Product]):
             raise ProductNotFoundException(f"محصولی با شناسه '{id}' یافت نشد.")
 
     # =====  (Write Methods) ===== #
-    def create_product(self, data: dict) -> Product:
-        """ ایجاد بدنه اصلی محصول (Shell) """
+    def create_product(self, data: Dict[str, Any]) -> Product:
+        """ایجاد بدنه اصلی محصول"""
         return self.model.objects.create(**data)
 
-    def update_product(self, instance: Product, data: dict) -> Product:
-        """ آپدیت اطلاعات پایه """
+    def update_product(self, product: Product, data: Dict[str, Any]) -> Product:
+        """آپدیت فیلدهای محصول"""
         for key, value in data.items():
-            setattr(instance, key, value)
-        instance.save()
-        return instance
+            setattr(product, key, value)
+        product.save()
+        return product
 
     def get_by_id(self, pk: int) -> Optional[Product]:
         """ دریافت محصول برای ویرایش (بدون کوئری‌های سنگین) """
         return self.model.objects.filter(pk=pk).first()
+
+    # ===== Pricing Config Management ===== #
+    def update_or_create_pricing_config(self, product: Product, data: Dict[str, Any]) -> ProductPricingConfig:
+        """ایجاد یا ویرایش تنظیمات قیمت"""
+        config, created = ProductPricingConfig.objects.update_or_create(
+            product=product,
+            defaults=data
+        )
+        return config
 
     # ===== (Relations) ===== #
     def clear_quantities(self, product: Product):
@@ -142,6 +170,23 @@ class ProductRepository(BaseRepository[Product]):
     def get_product_option_values(self, product_option_id: int):
         """ دریافت تمام مقادیر یک آپشن خاص محصول """
         return ProductOptionValue.objects.filter(product_option_id=product_option_id)
+    
+    # ===== Quantity Relations Management ===== #
+    def sync_product_quantities(self, product: Product, user, quantity_ids: List[int]):
+        """
+        همگام‌سازی تیراژهای محصول.
+        استراتژی: حذف قبلی‌ها و ایجاد جدیدها (Full Sync).
+        """
+        # 1. حذف همه روابط قبلی
+        ProductQuantity.objects.filter(product=product).delete()
+        
+        # 2. ایجاد روابط جدید
+        new_relations = [
+            ProductQuantity(user=user, product=product, quantity_id=qid, price=0)
+            for qid in quantity_ids
+        ]
+        if new_relations:
+            ProductQuantity.objects.bulk_create(new_relations)
     
     # ========== Dashboard / Stats Methods ========== #
     def get_total_count(self) -> int:

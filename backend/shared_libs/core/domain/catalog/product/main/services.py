@@ -44,10 +44,7 @@ class ProductDomainService:
                 "id": prod_opt.id,
                 "name": prod_opt.option.name,
                 "label": prod_opt.option.label,
-                "type": prod_opt.option.input_type,
                 "is_required": prod_opt.is_required,
-                "description": prod_opt.option.description,
-                "has_pricing": prod_opt.has_pricing,
                 "choices": []
             }
             for choice in prod_opt.choices.all():
@@ -57,9 +54,6 @@ class ProductDomainService:
                     "value": choice.value,
                     "price_impact": choice.price_impact,
                     "is_default": choice.is_default,
-                    "quantity_step": choice.quantity_step,
-                    "is_step_ceiling": choice.is_step_ceiling,
-                    "description": f"هر {choice.quantity_step} عدد" if choice.quantity_step > 1 else ""
                 })
             structured_options.append(option_data)
         return structured_options
@@ -105,6 +99,7 @@ class ProductDomainService:
         product = self._repo.create_product(data)
         # ===== ایجاد تنظیمات قیمت ===== #
         ProductPricingConfig.objects.create(product=product)
+        
         return product
 
     # ===== Product Shell ===== #
@@ -177,7 +172,6 @@ class ProductDomainService:
             product=product,
             option=global_option,
             order=max_order + 1,
-            has_pricing=True
         )
 
         # ===== دریافت مقدارهای ویژگی =====
@@ -191,7 +185,6 @@ class ProductDomainService:
                 label=g_val.label,
                 value=g_val.value,
                 order=idx,
-                has_pricing=True,
                 price_impact=0
             ))
             
@@ -212,8 +205,6 @@ class ProductDomainService:
         # ===== آپدیت والد ===== #
         if 'is_required' in data:
             prod_opt.is_required = data['is_required']
-        if 'has_pricing' in data:
-            prod_opt.has_pricing = data['has_pricing']
         prod_opt.save()
 
         # ===== آپدیت فرزندان ===== #
@@ -252,8 +243,7 @@ class ProductDomainService:
         # ===== لیست کامل فیلدهایی که باید در دیتابیس آپدیت شوند ===== #
         to_update = []
         fields_to_update = [
-            'price_impact', 'is_default', 'has_pricing', 'order',
-            'quantity_step', 'is_step_ceiling' 
+            'price_impact', 'is_default', 'order'
         ]
 
         for item in updates:
@@ -266,14 +256,8 @@ class ProductDomainService:
                     obj.price_impact = item['price_impact']
                 if 'is_default' in item:
                     obj.is_default = item['is_default']
-                if 'has_pricing' in item:
-                    obj.has_pricing = item['has_pricing']
                 if 'order' in item:
                     obj.order = item['order']
-                if 'quantity_step' in item:
-                    obj.quantity_step = item['quantity_step']
-                if 'is_step_ceiling' in item:
-                    obj.is_step_ceiling = item['is_step_ceiling']
 
                 to_update.append(obj)
 
@@ -316,7 +300,6 @@ class ProductDomainService:
             option=global_option,
             order=max_order + 1,
             is_required=data.get('is_required', False),
-            has_pricing=data.get('has_pricing', True)
         )
 
         # ===== مقادیر (Values) ===== #
@@ -340,8 +323,6 @@ class ProductDomainService:
                     
                 price = config.get('price_impact', 0)
                 is_default = config.get('is_default', False)
-                qty_step = config.get('quantity_step', 1)
-                is_ceil = config.get('is_step_ceiling', False)
 
             local_values.append(ProductOptionValue(
                 product_option=product_option,
@@ -349,11 +330,8 @@ class ProductDomainService:
                 label=g_val.label,
                 value=g_val.value,
                 order=idx,
-                has_pricing=product_option.has_pricing,
                 price_impact=price,
-                is_default=is_default,
-                quantity_step=qty_step,
-                is_step_ceiling=is_ceil,
+                is_default=is_default
             ))
             
         if local_values:
