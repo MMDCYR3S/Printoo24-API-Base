@@ -15,7 +15,7 @@ class OptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Option
-        fields = ['id', 'name', 'label', 'description', 'values', 'created_at']
+        fields = ['id', 'name', 'label', 'values', 'created_at']
         read_only_fields = ['id', 'created_at']
         
     def validate(self, data):
