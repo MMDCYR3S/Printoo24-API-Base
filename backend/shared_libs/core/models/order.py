@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
-from .product import Product, ProductFileUploadRequirement
+from .product import Product
 
 class OrderManager(models.Manager):
     def filter_by_access(self, user):
@@ -274,11 +274,6 @@ class OrderItemFile(models.Model):
         related_name='files', 
         on_delete=models.CASCADE,
         verbose_name=_("آیتم سفارش")
-    )
-    requirement = models.ForeignKey(
-        ProductFileUploadRequirement, 
-        on_delete=models.PROTECT,
-        verbose_name=_("نوع فایل")
     )
     file = models.FileField(_('فایل نهایی'), upload_to='orders/designs/%Y/%m/%d/')
     version = models.PositiveIntegerField(_('نسخه فایل'), default=1)

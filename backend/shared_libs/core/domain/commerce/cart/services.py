@@ -8,7 +8,6 @@ from core.models import (
     CartItem,
     CartItemUpload,
     Product,
-    ProductFileUploadRequirement,
     ProductSize,
     User,
     ProductOptionValue

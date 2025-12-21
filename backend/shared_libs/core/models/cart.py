@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .product import Product, ProductFileUploadRequirement
+from .product import Product
 
 # ===== Cart Model ===== #
 class Cart(models.Model):
@@ -45,11 +45,6 @@ class CartItemUpload(models.Model):
         verbose_name=_("آیتم سبد خرید"),
         on_delete=models.CASCADE,
         related_name="uploads"
-    )
-    requirement = models.ForeignKey(
-        ProductFileUploadRequirement,
-        verbose_name=_("نیازمندی مربوطه"),
-        on_delete=models.PROTECT 
     )
     file = models.FileField(_("فایل"), upload_to='cart_uploads/%Y/%m/%d/')
     uploaded_at = models.DateTimeField(auto_now_add=True)

@@ -7,3 +7,4 @@ from .order_serializers import *
 from .wallet_serializers import *
 from .slider_serializers import *
 from .dashboard_serializers import *
+from .location_serializers import *

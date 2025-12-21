@@ -2,7 +2,7 @@ from typing import Optional, Dict, Any
 from django.db.models import QuerySet
 
 from core.models import Size
-from core.models import Quantity, FileUploadSpec
+from core.models import Quantity
 from core.utils.base_repository import BaseRepository
 
 # ===== Size Repository ===== #
@@ -37,21 +37,4 @@ class QuantityRepository(BaseRepository[Quantity]):
         return self.model.objects.filter(value=value).first()
     
     def create_quantity(self, data: Dict[str, Any]) -> Quantity:
-        return self.model.objects.create(**data)
-
-# ===== File Upload Spec Repository ===== #
-class FileUploadSpecRepository(BaseRepository[FileUploadSpec]):
-    """
-    ریپازیتوری مدیریت انواع فایل‌های طراحی (مثل طرح رو، خط برش و...).
-    """
-    def __init__(self):
-        super().__init__(FileUploadSpec)
-
-    def get_all_specs(self) -> QuerySet[FileUploadSpec]:
-        return self.model.objects.all().order_by('name')
-
-    def get_by_name(self, name: str) -> Optional[FileUploadSpec]:
-        return self.model.objects.filter(name=name).first()
-    
-    def create_spec(self, data: Dict[str, Any]) -> FileUploadSpec:
         return self.model.objects.create(**data)

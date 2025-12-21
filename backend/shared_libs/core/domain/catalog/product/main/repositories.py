@@ -13,7 +13,6 @@ from core.models import (
     ProductOptionValue,
     ProductImage,
     ProductAttachment,
-    ProductFileUploadRequirement,
 )
 
 # ====== Product Repository ====== #
@@ -55,12 +54,6 @@ class ProductRepository(BaseRepository[Product]):
             #  ===== بارگذاری تصاویر و فایل های پیوست ===== #
             Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
             Prefetch('product_attachment_product', queryset=ProductAttachment.objects.order_by('id')),
-            
-            # ===== نیازمندی‌های آپلود فایل ===== #
-            Prefetch(
-                'file_upload_requirements', 
-                queryset=ProductFileUploadRequirement.objects.select_related('spec').order_by('sort_order')
-            )
         )
         
     # ===== Read Methods ===== #
@@ -113,11 +106,6 @@ class ProductRepository(BaseRepository[Product]):
                 
                 Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
                 Prefetch('product_attachment_product', queryset=ProductAttachment.objects.order_by('id')),
-                
-                Prefetch(
-                    'file_upload_requirements', 
-                    queryset=ProductFileUploadRequirement.objects.select_related('spec').order_by('sort_order')
-                )
 
             ).get(pk=id)
             
@@ -155,10 +143,6 @@ class ProductRepository(BaseRepository[Product]):
         """ دریافت تمام مقادیر یک آپشن خاص محصول """
         return ProductOptionValue.objects.filter(product_option_id=product_option_id)
     
-    def clear_file_requirements(self, product: Product):
-        """ حذف تمام نیازمندی‌های فایل فعلی """
-        product.file_upload_requirements.all().delete()
-
     # ========== Dashboard / Stats Methods ========== #
     def get_total_count(self) -> int:
         """تعداد کل محصولات"""

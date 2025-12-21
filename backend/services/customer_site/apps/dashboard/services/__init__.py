@@ -5,3 +5,4 @@ from .cart_service import CartDashboardService
 from .cart_file_service import CartFileService
 from .order_service import OrderDashboardService
 from .dashboard_service import *
+from .location_service import *

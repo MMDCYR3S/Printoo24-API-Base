@@ -11,7 +11,7 @@ from ..exceptions import (
 from .repositories import ProductRepository
 from core.models import (
     Product, ProductPricingConfig, ProductQuantity, 
-    ProductOption, ProductOptionValue, Option, ProductFileUploadRequirement
+    ProductOption, ProductOptionValue, Option
 )
 
 # ======== Product Service ======== #
@@ -360,33 +360,7 @@ class ProductDomainService:
             ProductOptionValue.objects.bulk_create(local_values)
             
         return product_option
-        
-    @transaction.atomic
-    def sync_file_requirements(self, product_id: int, requirements: list[dict]):
-        """
-        تنظیم می‌کند که محصول چه فایل‌هایی لازم دارد.
-        requirements = [{spec_id: 1, is_required: True}, {spec_id: 2, ...}]
-        """
-        product = self._repo.get_by_id(product_id)
-        if not product:
-            raise ProductNotFoundException("محصول یافت نشد.")
 
-        # ===== پاک کردن فایل های مورد نیاز قبلی ===== #
-        self._repo.clear_file_requirements(product)
-
-        # ===== ایجاد لیست جدید ===== #
-        new_reqs = []
-        for index, req_data in enumerate(requirements):
-            new_reqs.append(ProductFileUploadRequirement(
-                product=product,
-                spec_id=req_data['spec_id'],
-                is_required=req_data.get('is_required', True),
-                sort_order=index + 1
-            ))
-        
-        if new_reqs:
-            ProductFileUploadRequirement.objects.bulk_create(new_reqs)
-        
     def delete_product(self, product_id: int):
         """ حذف کامل محصول """
         product = self._repo.get_by_id(product_id)

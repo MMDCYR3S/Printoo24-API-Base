@@ -8,7 +8,6 @@ from .views import (
     WalletViewSet,
     SizeViewSet, 
     QuantityViewSet,
-    FileUploadSpecViewSet,
     OptionViewSet,
     ProductDashboardViewSet,
     AttachmentLibraryViewSet,
@@ -20,6 +19,8 @@ from .views import (
     UserDashboardStatsView,
     OrderDashboardStatsView,
     FinancialDashboardStatsView,
+    CityDashboardViewSet,
+    ProvinceDashboardViewSet,
 )
 
 router = DefaultRouter()
@@ -30,7 +31,6 @@ router.register(r'customers', CustomerViewSet, basename='customer')
 router.register(r'wallets', WalletViewSet, basename='wallet')
 router.register(r'sizes', SizeViewSet, basename='sizes')
 router.register(r'quantities', QuantityViewSet, basename='quantities')
-router.register(r'file-specs', FileUploadSpecViewSet, basename='file-specs')
 router.register(r'options', OptionViewSet, basename='options')
 router.register(r'products', ProductDashboardViewSet, basename='products')
 router.register(r'attachments', AttachmentLibraryViewSet, basename='attachments')
@@ -38,6 +38,8 @@ router.register(r'cart', CartDashboardViewSet, basename='cart')
 router.register(r'cart-files', CartFileUploadViewSet, basename='cart-files')
 router.register(r'orders', OrderDashboardViewSet, basename='orders')
 router.register(r'sliders', SliderDashboardViewSet, basename='sliders')
+router.register(r'provinces', ProvinceDashboardViewSet, basename='provinces')
+router.register(r'cities', CityDashboardViewSet, basename='cities')
 
 app_name = "dashboard"
 

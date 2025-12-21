@@ -3,11 +3,9 @@ from .calculators import ProductPriceCalculator
 from .attributes import (
     SizeRepository,
     QuantityRepository,
-    FileUploadSpecRepository,
     
     SizeDomainService,
-    QuantityDomainService,
-    FileUploadSpecDomainService,   
+    QuantityDomainService,   
 )
 from .options import (
     OptionRepository,

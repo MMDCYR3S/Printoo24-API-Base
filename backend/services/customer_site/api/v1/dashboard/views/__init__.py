@@ -5,7 +5,6 @@ from .wallet_view import WalletViewSet
 from .attribute_product_views import (
     SizeViewSet,
     QuantityViewSet,
-    FileUploadSpecViewSet,
     AttachmentLibraryViewSet
 )
 from .options_view import (
@@ -16,3 +15,4 @@ from .cart_view import CartDashboardViewSet, CartFileUploadViewSet
 from .order_view import OrderDashboardViewSet
 from .slider_view import SliderDashboardViewSet
 from .dashboard_view import *
+from .location_views import *

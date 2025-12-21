@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 
 from core.models import (
     User,Order, OrderItem, OrderStatus,
-    Product, Address, ProductFileUploadRequirement,
+    Product, Address,
     OrderItemFile, ProductOptionValue,
     ProductSize, ProductOptionValue
 )
@@ -333,11 +333,9 @@ class OrderDashboardService:
             
             try:
                 order_item = OrderItem.objects.get(id=order_item_id)
-                requirement = ProductFileUploadRequirement.objects.get(id=requirement_id)
                 
                 existing_uploads = OrderItemFile.objects.filter(
-                    order_item=order_item, 
-                    requirement=requirement
+                    order_item=order_item
                 )
                 for upload in existing_uploads:
                     if upload.file:

@@ -8,7 +8,7 @@ class CartItemUploadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CartItemUpload
-        fields = ('id', 'file', 'file_url', 'requirement')
+        fields = ('id', 'file', 'file_url')
 
     def get_file_url(self, obj):
         request = self.context.get('request')

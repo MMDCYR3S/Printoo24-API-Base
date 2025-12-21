@@ -9,13 +9,11 @@ from core.models import (
 from core.domain.catalog.product import (
     SizeDomainService,
     QuantityDomainService,
-    FileUploadSpecDomainService,
     ProductMediaDomainService
 )
 from ..serializers import (
     SizeSerializer,
     QuantitySerializer,
-    FileUploadSpecSerializer,
     AttachmentLibrarySerializer,
 )
 
@@ -99,44 +97,6 @@ class QuantityViewSet(viewsets.ViewSet):
 
     def destroy(self, request, pk=None):
         self.service.delete_quantity(pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# ===== File Upload Spec ViewSet ===== #
-@extend_schema(tags=['Dashboard-FileUploadSpec'])
-class FileUploadSpecViewSet(viewsets.ViewSet):
-    """
-    مدیریت انواع فایل‌های طراحی (لایه باز، خط برش و ...).
-    """
-    serializer_class = FileUploadSpecSerializer
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.service = FileUploadSpecDomainService()
-
-    @extend_schema(responses=FileUploadSpecSerializer(many=True))
-    def list(self, request):
-        queryset = self.service.get_all()
-        serializer = FileUploadSpecSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @extend_schema(request=FileUploadSpecSerializer, responses=FileUploadSpecSerializer)
-    def create(self, request):
-        serializer = FileUploadSpecSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        instance = self.service.create_spec(serializer.validated_data)
-        return Response(FileUploadSpecSerializer(instance).data, status=status.HTTP_201_CREATED)
-
-    def update(self, request, pk=None):
-        serializer = FileUploadSpecSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        instance = self.service.update_spec(pk, serializer.validated_data)
-        return Response(FileUploadSpecSerializer(instance).data)
-
-    def destroy(self, request, pk=None):
-        self.service.delete_spec(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # ===== Attachment Library ViewSet ===== #

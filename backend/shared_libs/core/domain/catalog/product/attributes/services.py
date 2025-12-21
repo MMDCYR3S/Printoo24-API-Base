@@ -3,11 +3,10 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from core.models import Size, Quantity, FileUploadSpec, User
+from core.models import Size, Quantity, User
 from .repositories import (
     SizeRepository,
-    QuantityRepository,
-    FileUploadSpecRepository
+    QuantityRepository
 )
 
 # ===== Size Domain Service ===== #
@@ -105,45 +104,3 @@ class QuantityDomainService:
             instance.delete()
         except Exception:
             raise ValidationError(_("امکان حذف این تیراژ وجود ندارد (در محصولات استفاده شده است)."))
-
-
-# ===== File Upload Spec Domain Service ===== #
-class FileUploadSpecDomainService:
-    def __init__(self):
-        self.repo = FileUploadSpecRepository()
-
-    def get_all(self):
-        return self.repo.get_all_specs()
-
-    def get_by_id(self, pk: int) -> FileUploadSpec:
-        instance = self.repo.get_by_id(pk)
-        if not instance:
-            raise ValidationError(_("مشخصات فایل یافت نشد."))
-        return instance
-
-    @transaction.atomic
-    def create_spec(self, data: Dict[str, Any]) -> FileUploadSpec:
-        """
-        ایجاد نوع فایل جدید.
-        """
-        if self.repo.get_by_name(data['name']):
-            raise ValidationError(_("این عنوان قبلاً ثبت شده است."))
-            
-        return self.repo.create_spec(data)
-
-    @transaction.atomic
-    def update_spec(self, pk: int, data: Dict[str, Any]) -> FileUploadSpec:
-        instance = self.get_by_id(pk)
-        
-        if 'name' in data and data['name'] != instance.name:
-            if self.repo.get_by_name(data['name']):
-                raise ValidationError(_("این عنوان قبلاً ثبت شده است."))
-        
-        return self.repo.update(instance, data)
-
-    def delete_spec(self, pk: int):
-        instance = self.repo.get_by_id(pk)
-        try:
-            instance.delete()
-        except Exception:
-            raise ValidationError(_("این مشخصات در محصولاتی استفاده شده و قابل حذف نیست."))

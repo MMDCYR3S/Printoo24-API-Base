@@ -5,7 +5,7 @@ from typing import Tuple
 from django.core.files.base import ContentFile
 from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 
-from core.models import User, CartItem, ProductFileUploadRequirement, CartItemUpload
+from core.models import User, CartItem, CartItemUpload
 from core.domain.commerce.cart import CartItemRepository
 from ..utils.validators import (
     validate_image_cmyk,
@@ -31,15 +31,6 @@ class CartItemUploadService:
         if not cart_item:
             raise NotFound("آیتم مورد نظر در سبد خرید یافت نشد.")
 
-        # 2. دریافت نیازمندی فایل (Requirement)
-        try:
-            requirement = ProductFileUploadRequirement.objects.get(
-                id=requirement_id, 
-                product=cart_item.product
-            )
-        except ProductFileUploadRequirement.DoesNotExist:
-            raise ValidationError("این نیازمندی فایل برای محصول انتخابی معتبر نیست.")
-
         config = cart_item.items 
             
 
@@ -63,12 +54,11 @@ class CartItemUploadService:
 
         # 5. حذف فایل قبلی اگر وجود دارد (Replace Logic)
         # اگر کاربر قبلاً برای این Requirement فایلی آپلود کرده، آن را پاک می‌کنیم
-        CartItemUpload.objects.filter(cart_item=cart_item, requirement=requirement).delete()
+        CartItemUpload.objects.filter(cart_item=cart_item).delete()
 
         # 6. ذخیره فایل نهایی
         upload_instance = CartItemUpload.objects.create(
             cart_item=cart_item,
-            requirement=requirement,
             file=file_obj
         )
         

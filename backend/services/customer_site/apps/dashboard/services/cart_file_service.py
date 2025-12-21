@@ -6,7 +6,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 from kombu.exceptions import OperationalError
 
-from core.models import CartItem, ProductFileUploadRequirement, CartItemUpload
+from core.models import CartItem, CartItemUpload
 
 # ===== اصلاح مسیر ایمپورت ===== #
 try:
@@ -72,11 +72,9 @@ class CartFileService:
             try:
                 logger.info("START: Sync upload fallback")
                 cart_item = CartItem.objects.get(id=cart_item_id)
-                requirement = ProductFileUploadRequirement.objects.get(id=requirement_id)
                 
                 existing_uploads = CartItemUpload.objects.filter(
-                    cart_item=cart_item, 
-                    requirement=requirement
+                    cart_item=cart_item
                 )
                 for upload in existing_uploads:
                     if upload.file:
@@ -90,7 +88,6 @@ class CartFileService:
                     django_file = File(f, name=original_name)
                     instance = CartItemUpload.objects.create(
                         cart_item=cart_item,
-                        requirement=requirement,
                         file=django_file
                     )
                 

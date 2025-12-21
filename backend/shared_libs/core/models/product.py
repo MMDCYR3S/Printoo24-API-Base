@@ -117,6 +117,13 @@ class Product(models.Model):
         default=0.0, 
         help_text=_("یک عدد برای تغییر کلی قیمت. مثال: 15.0 برای افزایش 15 درصدی یا -10.0 برای کاهش 10 درصدی.")
     )
+    # ===== قیمت گذاری براساس مقدار ==== #
+    price_per_unit = models.PositiveIntegerField(
+        _("گام شمارش (تعداد مبنا)"),
+        default=1,
+        validators=[MinValueValidator(1)],
+        help_text=_("قیمت بالا به ازای چه تعدادی است؟ (مثلا: ۱۰۰۰ تومان به ازای هر ۱۰ عدد).")
+    )
     description = models.TextField(_('توضیحات'), blank=True, null=True)
     code = models.CharField(
         _("کد محصول"),
@@ -330,7 +337,7 @@ class OptionInputType(models.TextChoices):
     SELECT = 'select', _('لیست کشویی (Select)')
     RADIO = 'radio', _('رادیو باتن (Radio)')
     CHECKBOX = 'checkbox', _('چک‌باکس چندتایی (Checkbox)')
-    BOOLEAN = 'boolean', _('سوییچ / تیک (Boolean)') 
+    BOOLEAN = 'boolean', _('سوییچ / تیک (Boolean)')
 
 # ====== Option Pricing Strategy Model ====== #
 class OptionPricingStrategy(models.TextChoices):
@@ -361,12 +368,7 @@ class Option(models.Model):
         help_text=_("شناسه یکتا برای کدنویسی (مثال: paper_type)")
     )
     label = models.CharField(_("عنوان نمایشی"), max_length=150, null=True, blank=True)
-    input_type = models.CharField(
-        _("نوع ورودی"), 
-        max_length=20, 
-        choices=OptionInputType.choices, 
-        default=OptionInputType.SELECT
-    )
+    
     description = models.TextField(_("توضیحات راهنما"), blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -417,14 +419,6 @@ class ProductOption(models.Model):
         help_text=_("سطح ۱ کنترل: اگر خاموش باشد، کل این ویژگی غیرمالی می‌شود.")
     )
     
-    pricing_strategy = models.CharField(
-        _("استراتژی محاسبه قیمت"),
-        max_length=20,
-        choices=OptionPricingStrategy.choices,
-        default=OptionPricingStrategy.FIXED,
-        help_text=_("تعیین فرمول محاسبه (ثابت، متری، درصدی و...)")
-    )
-
     base_price = models.DecimalField(
         _("هزینه سربار (Setup Cost)"), 
         max_digits=14, decimal_places=0, default=Decimal('0'),
@@ -483,20 +477,6 @@ class ProductOptionValue(models.Model):
         help_text=_("اگر استراتژی ثابت است: کل مبلغ. اگر متری/تعدادی است: نرخ واحد.")
     )
     
-    # ===== منطق تیراژ و پله‌ای (Step Logic) ===== #
-    quantity_step = models.PositiveIntegerField(
-        _("گام شمارش (تعداد مبنا)"),
-        default=1,
-        validators=[MinValueValidator(1)],
-        help_text=_("قیمت بالا به ازای چه تعدادی است؟ (مثلا: ۱۰۰۰ تومان به ازای هر ۱۰ عدد).")
-    )
-    
-    is_step_ceiling = models.BooleanField(
-        _("محاسبه بسته‌ای (Ceiling)؟"),
-        default=False,
-        help_text=_("اگر فعال باشد، ۱۵ عدد را ۲ بسته ۱۰ تایی حساب می‌کند (گرد به بالا).")
-    )
-    
     is_default = models.BooleanField(_("پیش‌فرض"), default=False)
     order = models.PositiveIntegerField(_("ترتیب"), default=0)
 
@@ -544,78 +524,6 @@ class ProductOptionValue(models.Model):
         price_str = f"+{self.price_impact:,}" if self.has_pricing else "Free"
         step_str = f"/{self.quantity_step}" if self.quantity_step > 1 else ""
         return f"{self.label} ({price_str}{step_str})"
-
-
-# ======= File Upload Spec Model ======= #
-class FileUploadSpec(models.Model):
-    """
-    تعریف یک نوع یا اسلات آپلود فایل.
-    مانند 'طرح رو'، 'طرح پشت'، 'فایل خط برش'.
-    این مدل از تکرار داده جلوگیری می‌کند.
-    """
-    name = models.CharField(
-        _("نام مشخصات"),
-        max_length=100,
-        unique=True,
-        help_text=_("مثال: طرح رو، طرح پشت، فایل UV")
-    )
-    description = models.TextField(_("توضیحات"), blank=True, null=True)
-    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = _("مشخصات آپلود فایل")
-        verbose_name_plural = _("انواع مشخصات آپلود فایل")
-
-# ======== Product File Upload Requirement Model ======== #
-class ProductFileUploadRequirement(models.Model):
-    """
-    این مدل تعیین می‌کند که یک محصول خاص به چه نوع فایل‌هایی نیاز دارد.
-    این همان مدل واسطی است که شما به درستی به آن اشاره کردید.
-    """
-    product = models.ForeignKey(
-        Product,
-        verbose_name=_("محصول"),
-        on_delete=models.PROTECT,
-        related_name="file_upload_requirements"
-    )
-    spec = models.ForeignKey(
-        FileUploadSpec,
-        verbose_name=_("مشخصات"),
-        on_delete=models.PROTECT,
-        related_name="product_requirements"
-    )
-    is_required = models.BooleanField(_("الزامی بودن"), default=True)
-    sort_order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
-    ASPECT_RATIO_CHOICES = [
-        ('1:1', '1:1 (مربعی)'),
-        ('16:9', '16:9 (عریض)'),
-        ('4:3', '4:3 (استاندارد)'),
-        ('2:3', '2:3 (کلاسیک عمودی)'),
-        ('9:16', '9:16 (عمودی)'),
-        ('free', 'بدون محدودیت'),
-    ]
-
-    allowed_aspect_ratios = models.JSONField(
-        _("نسبت‌های تصویر مجاز"),
-        default=list,
-        help_text=_("لیستی از نسبت‌های تصویر مجاز را انتخاب کنید"),
-        null=True, blank=True
-    )
-    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True, null=True)
-
-    def __str__(self):
-        return f"{self.product.name} -> {self.spec.name}"
-
-    class Meta:
-        verbose_name = _("نیازمندی آپلود فایل محصول")
-        verbose_name_plural = _("نیازمندی‌های آپلود فایل محصولات")
-        ordering = ['sort_order']
-        unique_together = ('product', 'spec')
 
 # ===== Product Rating Model ===== #
 class ProductRating(models.Model):

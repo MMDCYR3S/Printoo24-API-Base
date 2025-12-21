@@ -10,7 +10,6 @@ from core.models import (
     ProductAttachment,
     ProductComment,
     ProductPricingConfig,
-    ProductFileUploadRequirement
 )
 
 # ==========================================
@@ -128,14 +127,6 @@ class ProductImageSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.image.url) if request else obj.image.url
         return None
 
-class FileUploadRequirementSerializer(serializers.ModelSerializer):
-    spec_name = serializers.CharField(source='spec.name', read_only=True)
-    spec_description = serializers.CharField(source='spec.description', read_only=True)
-
-    class Meta:
-        model = ProductFileUploadRequirement
-        fields = ['id', 'spec_name', 'spec_description', 'is_required', 'sort_order']
-
 # ======= Product Attachment Serializer ======= #
 class ProductAttachmentSerializer(serializers.ModelSerializer):
     """سریالایزر برای فایل های هر محصول"""
@@ -198,7 +189,6 @@ class ProductDetailSerializer(serializers.Serializer):
     
     # 5. فایل‌ها و مدیا
     images = ProductImageSerializer(many=True)
-    file_requirements = FileUploadRequirementSerializer(many=True)
 
     def get_product_info(self, obj):
         product = obj['product']
