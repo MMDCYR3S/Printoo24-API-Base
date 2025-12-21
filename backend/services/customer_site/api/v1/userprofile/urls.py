@@ -8,7 +8,9 @@ from .views import (
     UserAddressDetailAPIView,
     WalletDetailAPIView,
     WalletHistoryAPIView,
-    UserOrderQuotationAPIView
+    UserOrderQuotationAPIView,
+    ProvinceListAPIView,
+    CityListAPIView,
 )
 
 urlpatterns = [
@@ -24,4 +26,7 @@ urlpatterns = [
     # ===== بخش کیف پول ===== #
     path('wallet/', WalletDetailAPIView.as_view(), name='wallet-detail'),
     path('wallet/history/', WalletHistoryAPIView.as_view(), name='wallet-history'),
+    # ===== نمایش استان و شهر ===== #
+    path('locations/provinces/', ProvinceListAPIView.as_view(), name='location-provinces'),
+    path('locations/cities/', CityListAPIView.as_view(), name='location-cities'),
 ]

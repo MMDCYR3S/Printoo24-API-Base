@@ -1,7 +1,7 @@
 import logging
 from django.core.exceptions import ValidationError
 from core.domain.identity.address import AddressRepository
-from core.models import City
+from core.models import City, Province
 
 # ===== تعریف لاگر اختصاصی برای سرویس آدرس ===== #
 logger = logging.getLogger('userprofile.services.address')
@@ -110,3 +110,23 @@ class UserAddressService:
                 raise e
             logger.exception(f"Unexpected error removing address {address_id}")
             raise ValidationError("خطای سیستمی در حذف آدرس.")
+
+    def get_all_provinces(self):
+        """
+        دریافت لیست تمام استان‌ها مرتب شده بر اساس نام.
+        """
+        return Province.objects.all().order_by('name')
+
+    def get_cities_by_province(self, province_id: int):
+        """
+        دریافت شهرهای یک استان خاص.
+        """
+        if not province_id:
+            return City.objects.none()
+            
+        return City.objects.filter(province_id=province_id).order_by('name')
+    
+    def get_all_cities(self):
+        """دریافت کل شهرها (در صورت نیاز)"""
+        return City.objects.all().order_by('name')
+    

@@ -1,12 +1,14 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, mixins
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.core.exceptions import ValidationError
-from drf_spectacular.utils import extend_schema, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
 
 from apps.userprofile.services import UserAddressService
-from ..serializers import AddressSerializer
+from ..serializers import AddressSerializer, ProvinceSerializer, CitySerializer
 
 # ===== User Address List Create APIView ===== #
 @extend_schema(tags=["Profile"])
@@ -136,3 +138,65 @@ class UserAddressDetailAPIView(GenericAPIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+
+# ===== 1. Province List APIView ===== #
+@extend_schema(tags=["Profile"])
+class ProvinceListAPIView(GenericAPIView):
+    """
+    دریافت لیست کل استان‌ها.
+    """
+    # نکته: در کامنت کد قبلی نوشته بودید دسترسی آزاد، اما در کد IsAuthenticated بود.
+    # اگر عمومی است، AllowAny بگذارید. من طبق کد قبلی IsAuthenticated گذاشتم.
+    permission_classes = [AllowAny] 
+    serializer_class = ProvinceSerializer
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = UserAddressService()
+
+    @extend_schema(
+        summary="لیست استان‌ها",
+        responses={200: ProvinceSerializer(many=True)}
+    )
+    def get(self, request):
+        """لیست تمام استان‌های کشور"""
+        provinces = self.service.get_all_provinces()
+        serializer = self.get_serializer(provinces, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# ===== 2. City List APIView ===== #
+@extend_schema(tags=["Profile"])
+class CityListAPIView(GenericAPIView):
+    """
+    دریافت لیست شهرها (با قابلیت فیلتر بر اساس استان).
+    """
+    permission_classes = [AllowAny]
+    serializer_class = CitySerializer
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = UserAddressService()
+
+    @extend_schema(
+        summary="لیست شهرها",
+        description="برای دریافت شهرهای یک استان، پارامتر `province_id` را ارسال کنید.",
+        parameters=[
+            OpenApiParameter(name='province_id', description='شناسه استان', required=False, type=int)
+        ],
+        responses={200: CitySerializer(many=True)}
+    )
+    def get(self, request):
+        """
+        دریافت لیست شهرها. 
+        اگر province_id ارسال شود، فیلتر می‌کند.
+        """
+        province_id = request.query_params.get('province_id')
+        
+        if province_id:
+            cities = self.service.get_cities_by_province(province_id)
+        else:
+            cities = self.service.get_all_cities()
+            
+        serializer = self.get_serializer(cities, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

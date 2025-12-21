@@ -5,7 +5,7 @@ from core.models import Size, Quantity
 class SizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Size
-        fields = ['id', 'user','name', 'width', 'height', 'created_at']
+        fields = ['id','name', 'width', 'height', 'created_at']
         read_only_fields = ['id', 'created_at']
         
 # ===== Quantity Serializer ===== #
