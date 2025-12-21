@@ -24,7 +24,7 @@ class SizeDomainService:
         return size
 
     @transaction.atomic
-    def create_size(self, data: Dict[str, Any]) -> Size:
+    def create_size(self, user: User, data: Dict[str, Any]) -> Size:
         """
         ایجاد سایز جدید با بررسی قوانین دامین.
         """
