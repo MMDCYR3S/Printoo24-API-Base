@@ -107,7 +107,7 @@ const ProductSizesPage = () => {
             <thead className="bg-slate-50 text-slate-500 font-bold">
               <tr>
                 <th>#</th>
-                <th>نام سایز</th>
+                <th className='text-right' >نام سایز</th>
                 <th className="text-center">ابعاد (cm)</th>
                 <th className="text-center">عملیات</th>
               </tr>
@@ -116,7 +116,7 @@ const ProductSizesPage = () => {
               {sizes?.map((item, index) => (
                 <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                   <th>{index + 1}</th>
-                  <td className="font-bold text-slate-700">{item.name}</td>
+                  <td className="font-bold text-slate-700 text-right">{item.name}</td>
                   <td className="text-center dir-ltr">
                     <span className="badge badge-ghost font-mono">{item.width} x {item.height}</span>
                   </td>

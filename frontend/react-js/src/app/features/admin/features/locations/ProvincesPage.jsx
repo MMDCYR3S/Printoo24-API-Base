@@ -81,15 +81,15 @@ const ProvincesPage = () => {
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <table className="table w-full">
           <thead className="bg-slate-50 text-slate-500 font-bold">
-            <tr>
-              <th className="w-12">
+            <tr className='text-right'>
+              <th className="w-12 text-right ">
                 <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" 
                   checked={provinces.length > 0 && selectedIds.length === provinces.length}
                   onChange={toggleAll}
                 />
               </th>
-              <th>نام استان</th>
-              <th>نامک (Slug)</th>
+              <th className='text-right'>نام استان</th>
+              <th className='text-right'>نامک (Slug)</th>
               <th className="text-center w-24">عملیات</th>
             </tr>
           </thead>
@@ -107,8 +107,8 @@ const ProvincesPage = () => {
                        onChange={() => toggleSelect(province.id)}
                     />
                   </th>
-                  <td className="font-bold text-slate-700 text-lg">{province.name}</td>
-                  <td className="font-mono text-xs opacity-50">{province.slug}</td>
+                  <td className="font-bold text-slate-700 text-lg text-right">{province.name}</td>
+                  <td className="font-mono text-xs opacity-50 text-right">{province.slug}</td>
                   <td>
                     <button onClick={() => openModal(province)} className="btn btn-ghost btn-sm btn-square text-blue-500 hover:bg-blue-50">
                       <Edit size={16} />

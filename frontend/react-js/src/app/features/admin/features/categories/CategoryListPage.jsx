@@ -159,12 +159,12 @@ const CategoryListPage = () => {
                     />
                   </label>
                 </th>
-                <th className="w-24">تصویر</th>
+                <th className="w-24 text-right">تصویر</th>
                 <ThSortable label="نام دسته‌بندی" sortKey="name" />
                 <ThSortable label="نامک (Slug)" sortKey="slug" />
-                <th>دسته مادر</th>
-                <ThSortable label="وضعیت" sortKey="is_active" className="text-center" />
-                <th className="text-left pl-6 w-40">عملیات</th>
+                <th className='text-right'>دسته مادر</th>
+                <ThSortable label="وضعیت" sortKey="is_active" className="text-right" />
+                <th className="text-left pl-6 w-40 text-right pr-14">عملیات</th>
               </tr>
             </thead>
             
@@ -183,7 +183,7 @@ const CategoryListPage = () => {
                     <tr 
                         key={cat.id} 
                         className={clsx(
-                            "group hover:bg-blue-50/30 transition-colors duration-200",
+                            "group hover:bg-blue-50/30 transition-colors duration-200 text-right",
                             selectedIds.includes(cat.id) && "bg-blue-50/60"
                         )}
                     >
@@ -255,7 +255,7 @@ const CategoryListPage = () => {
                       </td>
 
                       {/* Status Toggle */}
-                      <td className="text-center">
+                      <td className="text-right">
                         <button 
                             onClick={() => toggleStatusMutation.mutate({ ids: [cat.id], active: !cat.is_active })}
                             className={clsx(

@@ -28,7 +28,7 @@ const CustomerRow = memo(({ user, isSelected, onToggle, onEdit }) => {
           <div className="avatar placeholder">
             <div className={clsx(
               "rounded-full w-10 h-10 ring-2 ring-offset-2 ring-offset-base-100 transition-all",
-              user.is_active ? "bg-neutral text-neutral-content ring-success/20" : "bg-base-300 text-base-content/50 ring-error/20"
+              user.is_active ? "bg-neutral text-neutral-content flex items-center justify-center ring-success/20" : "bg-base-300 text-base-content/50 ring-error/20"
             )}>
               <span className="text-sm font-bold uppercase">{user.username.slice(0, 2)}</span>
             </div>

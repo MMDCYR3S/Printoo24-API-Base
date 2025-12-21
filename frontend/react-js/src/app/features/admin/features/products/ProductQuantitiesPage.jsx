@@ -100,7 +100,7 @@ const ProductQuantitiesPage = () => {
           <thead className="bg-slate-50 text-slate-500 font-bold">
             <tr>
               <th className="w-16">#</th>
-              <th>مقدار تیراژ</th>
+              <th className='text-right' >مقدار تیراژ</th>
               <th className="text-center w-32">عملیات</th>
             </tr>
           </thead>
@@ -108,7 +108,7 @@ const ProductQuantitiesPage = () => {
             {quantities?.map((item, index) => (
               <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                 <th>{index + 1}</th>
-                <td className="font-bold text-lg text-slate-700 dir-ltr text-left">
+                <td className="font-bold text-lg text-slate-700 dir-ltr text-right ">
                   {new Intl.NumberFormat('en-US').format(item.value)} <span className="text-xs text-slate-400 font-normal">عدد</span>
                 </td>
                 <td>

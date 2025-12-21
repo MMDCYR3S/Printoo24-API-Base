@@ -113,7 +113,7 @@ const CitiesPage = () => {
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden min-h-[400px]">
         <table className="table w-full">
           <thead className="bg-slate-50 text-slate-500 font-bold">
-            <tr>
+            <tr className='text-right'>
               <th className="w-12">
                 <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" 
                    checked={cities.length > 0 && selectedIds.length === cities.length}
@@ -126,7 +126,7 @@ const CitiesPage = () => {
               <th className="text-center w-24">عملیات</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className='text-right'>
             {isLoading ? (
                <tr><td colSpan="5" className="text-center py-10"><span className="loading loading-spinner text-primary"></span></td></tr>
             ) : cities.length === 0 ? (

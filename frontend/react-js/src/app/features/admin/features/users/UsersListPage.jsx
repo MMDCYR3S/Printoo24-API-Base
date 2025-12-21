@@ -167,7 +167,7 @@ const CustomerList = () => {
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead className="bg-slate-50 text-slate-500 font-semibold uppercase text-xs tracking-wider">
-              <tr>
+              <tr className='text-right'>
                 <th className="w-12">
                   <label className="cursor-pointer">
                     <input 
@@ -203,7 +203,7 @@ const CustomerList = () => {
               </tr>
             </thead>
             
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 text-right">
               {paginatedData.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-20">

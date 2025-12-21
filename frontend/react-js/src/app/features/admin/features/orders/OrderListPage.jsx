@@ -128,7 +128,7 @@ const OrderListPage = () => {
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead className="bg-slate-50/80 text-slate-500 font-semibold text-xs uppercase tracking-wider backdrop-blur-sm sticky top-0 z-10">
-              <tr>
+              <tr className='text-right'>
                 <th className="w-12">
                   <label>
                     <input 
@@ -156,7 +156,7 @@ const OrderListPage = () => {
                 <th className="text-left w-20">عملیات</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 text-right">
               {orders.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="text-center py-20 text-slate-400">
