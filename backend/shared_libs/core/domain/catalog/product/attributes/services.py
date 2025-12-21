@@ -36,7 +36,10 @@ class SizeDomainService:
         if data.get('width', 0) <= 0 or data.get('height', 0) <= 0:
             raise ValidationError(_("طول و عرض باید بزرگتر از صفر باشند."))
 
-        size_data = {"user": user, "data": data}
+        # ===== راه حل صحیح: ادغام دیکشنری‌ها ===== #
+        size_data = data.copy()
+        size_data['user'] = user
+
         return self.repo.create_size(size_data)
 
     @transaction.atomic
