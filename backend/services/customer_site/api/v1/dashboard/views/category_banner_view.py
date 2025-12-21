@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from shared_libs.core.domain.catalog.category import ProductCategoryDomainService
+from core.domain.catalog.category import ProductCategoryDomainService
 from ..serializers.general_serializers import (
     ProductCategoryDashboardSerializer,
     ParentCategoryListSerializer,
