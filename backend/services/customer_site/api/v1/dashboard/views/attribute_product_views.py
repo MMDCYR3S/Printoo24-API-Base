@@ -41,8 +41,10 @@ class SizeViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         
         # ===== انتقال لاجیک ذخیره‌سازی به سرویس ===== #
-        instance = self.service.create_size(serializer.validated_data)
-        
+        instance = self.service.create_size(
+            user=request.user,  # <--- اضافه شد
+            data=serializer.validated_data
+        )
         return Response(SizeSerializer(instance).data, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):

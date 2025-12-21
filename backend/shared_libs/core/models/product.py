@@ -368,7 +368,6 @@ class Option(models.Model):
         help_text=_("شناسه یکتا برای کدنویسی (مثال: paper_type)")
     )
     label = models.CharField(_("عنوان نمایشی"), max_length=150, null=True, blank=True)
-    
     description = models.TextField(_("توضیحات راهنما"), blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
