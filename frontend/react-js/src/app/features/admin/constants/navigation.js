@@ -1,7 +1,7 @@
 // src/app/features/admin/constants/navigation.js
 import { 
   LayoutDashboard, ShoppingCart, Box, Users, 
-  MessageSquare, Settings, Layers, Hash, FilePlus, List
+  MessageSquare, Settings, Layers, Hash, FilePlus, List , Map , MapPin
 } from 'lucide-react';
 
 export const ADMIN_NAVIGATION = [
@@ -28,6 +28,14 @@ export const ADMIN_NAVIGATION = [
       { title: 'زیر‌دسته‌ها', path: '/admin/categories/sub', icon: Layers }, // اگه جداست
     ]
   },
+  {
+  title: 'مناطق جغرافیایی',
+  icon: Map, // Import Map from lucide-react
+  children: [
+    { title: 'مدیریت استان‌ها', path: '/admin/provinces', icon: Layers },
+    { title: 'مدیریت شهرها', path: '/admin/cities', icon: MapPin },
+  ]
+},
   {
     title: 'سفارشات',
     icon: ShoppingCart,

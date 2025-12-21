@@ -33,7 +33,8 @@ import SliderSettingsPage from './app/features/admin/features/settings/SliderSet
 import ModalSettingsPage from './app/features/admin/features/settings/ModalSettingsPage';
 import CategoryUpsertPage from './app/features/admin/features/categories/CategoryUpsertPage'
 import CategoryDetailPage from './app/features/admin/features/categories/CategoryDetailPage'
-
+import ProvincesPage from './app/features/admin/features/locations/ProvincesPage';
+import CitiesPage from './app/features/admin/features/locations/CitiesPage';
 
 
 
@@ -122,6 +123,9 @@ function App() {
               <Route path="sliders" element={<SliderSettingsPage />} />
               <Route path="modals" element={<ModalSettingsPage />} />
             </Route>
+
+            <Route path="provinces" element={<ProvincesPage />} />
+        <Route path="cities" element={<CitiesPage />} />
             
           </Route>
         </Route>
