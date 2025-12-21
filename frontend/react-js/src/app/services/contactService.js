@@ -4,7 +4,7 @@ export const contactService = {
   // ارسال پیام تماس با ما
   sendMessage: async (data) => {
     // POST /api/v1/dashboard/contacts/
-    const response = await apiClient.post('/dashboard/contacts/', data);
+    const response = await apiClient.post('/home/contact/', data);
     return response.data;
   },
 };
