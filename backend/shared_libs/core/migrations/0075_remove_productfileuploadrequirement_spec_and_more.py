@@ -10,19 +10,17 @@ class Migration(migrations.Migration):
         ('core', '0074_contactus_admin_reply_contactus_replied_at_and_more'),
     ]
 
+    # operations لیست اصلاح شده:
+
     operations = [
-        migrations.RemoveField(
-            model_name='productfileuploadrequirement',
-            name='spec',
-        ),
+        # 1. اول قید یکتایی را بردارید (تا وقتی فیلدها هنوز هستند، ایندکس پاک شود)
         migrations.AlterUniqueTogether(
             name='productfileuploadrequirement',
-            unique_together=None,
+            unique_together=set(),
         ),
-        migrations.RemoveField(
-            model_name='productfileuploadrequirement',
-            name='product',
-        ),
+        
+        # 2. حالا وابستگی‌های خارجی را حذف کنید (Foreign Keyهایی که به این مدل اشاره دارند)
+        # این‌ها باید قبل از حذف خود مدل انجام شوند
         migrations.RemoveField(
             model_name='orderitemfile',
             name='requirement',
@@ -31,6 +29,19 @@ class Migration(migrations.Migration):
             model_name='cartitemupload',
             name='requirement',
         ),
+
+        # 3. حالا می‌توانید فیلدهای داخلی مدل را حذف کنید (یا کلاً ننویسید چون DeleteModel همه را پاک می‌کند)
+        # اما اگر می‌خواهید نگه دارید، ترتیبش مهم نیست چون UniqueTogether حل شد.
+        migrations.RemoveField(
+            model_name='productfileuploadrequirement',
+            name='spec',
+        ),
+        migrations.RemoveField(
+            model_name='productfileuploadrequirement',
+            name='product',
+        ),
+
+        # 4. سایر تغییرات مدل‌های دیگر
         migrations.RemoveField(
             model_name='option',
             name='input_type',
@@ -52,6 +63,8 @@ class Migration(migrations.Migration):
             name='price_per_unit',
             field=models.PositiveIntegerField(default=1, help_text='قیمت بالا به ازای چه تعدادی است؟ (مثلا: ۱۰۰۰ تومان به ازای هر ۱۰ عدد).', validators=[django.core.validators.MinValueValidator(1)], verbose_name='گام شمارش (تعداد مبنا)'),
         ),
+        
+        # 5. در نهایت حذف کامل مدل‌ها
         migrations.DeleteModel(
             name='FileUploadSpec',
         ),

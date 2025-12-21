@@ -42,7 +42,7 @@ class SizeViewSet(viewsets.ViewSet):
         
         # ===== انتقال لاجیک ذخیره‌سازی به سرویس ===== #
         instance = self.service.create_size(
-            user=request.user,  # <--- اضافه شد
+            user=request.user,
             data=serializer.validated_data
         )
         return Response(SizeSerializer(instance).data, status=status.HTTP_201_CREATED)
