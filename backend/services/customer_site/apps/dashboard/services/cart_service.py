@@ -14,8 +14,8 @@ from core.models import (
     Cart,
     CartItem,
 )
-from core.domain.commerce.cart import CartDomainService
-from core.domain.catalog.product import ProductDomainService
+from core.cart.services import CartService
+from core.product.services import ProductService
 
 # ===== Logger ===== #
 logger = logging.getLogger("dashboard.services.cart_dashboard")
@@ -23,8 +23,8 @@ logger = logging.getLogger("dashboard.services.cart_dashboard")
 # ===== Cart Dashboard Service ===== #
 class CartDashboardService:
     def __init__(self):
-        self.domain_service = CartDomainService()
-        self.product_service = ProductDomainService()
+        self.domain_service = CartService()
+        self.product_service = ProductService()
 
     # ===== مدیریت سبد خرید (Cart Management) ===== #
     
@@ -151,7 +151,7 @@ class CartDashboardService:
         if 'specs' in data:
             user = get_object_or_404(User, pk=user_id)
             # ===== چک کردن ویژگی هیا محصول ===== #
-            item = self.domain_service._item_repo.get_by_id(item_id)
+            item = self.domain_service.get_by_id(item_id)
             specs = self._prepare_specs_for_domain(item.product, data['specs'])
             
             logger.debug(f"Updating specs for item {item_id}")
@@ -165,7 +165,7 @@ class CartDashboardService:
         else:
             logger.debug(f"Updating quantity for item {item_id} to {data['quantity']}")
             return self.domain_service.update_item_quantity(
-                item=self.domain_service._item_repo.get_by_id(item_id),
+                item=self.domain_service.get_by_id(item_id),
                 new_quantity=data['quantity']
             )
             

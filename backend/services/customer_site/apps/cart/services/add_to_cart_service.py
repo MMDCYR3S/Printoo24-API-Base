@@ -2,7 +2,7 @@ import logging
 from typing import Dict, Any
 from django.db import transaction
 from core.models import User, CartItem
-from core.domain.commerce.cart.services import CartDomainService 
+from core.cart.services import CartService 
 from .cart_validator_service import CartDataValidator
 
 logger = logging.getLogger('cart.services.add_to_cart')
@@ -10,7 +10,7 @@ logger = logging.getLogger('cart.services.add_to_cart')
 class AddToCartService:
     def __init__(self, user: User):
         self.user = user
-        self.domain_service = CartDomainService()
+        self.domain_service = CartService()
         self.validator = CartDataValidator()
         
     @transaction.atomic

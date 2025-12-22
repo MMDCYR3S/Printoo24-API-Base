@@ -3,7 +3,7 @@ from typing import Dict, Any
 from rest_framework.exceptions import ValidationError, NotFound
 
 from core.models import CartItem
-from core.domain.commerce.cart import CartDomainService
+from core.cart.services import CartService
 from .cart_validator_service import CartDataValidator
 
 logger = logging.getLogger('cart.services.update')
@@ -11,7 +11,7 @@ logger = logging.getLogger('cart.services.update')
 class CartItemUpdateService:
     def __init__(self, user):
         self.user = user
-        self.domain_service = CartDomainService()
+        self.domain_service = CartService()
         self.validator = CartDataValidator()
         
     def update(self, cart_item_id: int, raw_data: Dict[str, Any]) -> CartItem:

@@ -3,7 +3,7 @@ from typing import Dict, Any, List, Optional
 from collections import defaultdict
 from django.db.models import QuerySet
 
-from core.domain.catalog.product import ProductDomainService
+from core.product.services import ProductService
 from core.models import ProductOption
 
 # ====== Logger Configuration ====== #
@@ -16,7 +16,7 @@ class ShopProductDetailService:
     سرویس لایه کاربردی برای مورد استفاده "نمایش جزئیات یک محصول"
     """
     def __init__(self):
-        self._product_service = ProductDomainService()
+        self._product_service = ProductService()
         logger.debug("ShopProductDetailService initialized")
         
     def get_product_detail_for_display(self, slug: str) -> Optional[Dict[str, Any]]:

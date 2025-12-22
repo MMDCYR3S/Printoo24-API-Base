@@ -4,9 +4,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from core.models import User, CustomerProfile, Wallet, Role, UserRole
-from core.domain.identity.users import UserRepository
-# اگر ریپازیتوری‌های دیگر موجودند، بهتر است ایمپورت شوند.
-# فعلاً برای سادگی و طبق کد خودت، مدل‌ها را نگه می‌داریم اما با لاگ.
+from core.users.services import CustomerService
 
 # تعریف لاگر اختصاصی
 logger = logging.getLogger('dashboard.services.customer')
@@ -16,7 +14,7 @@ class CustomerOrchestratorService:
     سرویس ارکستراسیون برای مدیریت جامع مشتریان (User + Profile + Wallet + Role).
     """
     def __init__(self):
-        self.user_repo = UserRepository()
+        self.user_repo = CustomerService()
 
     def get_customer_list(self):
         logger.debug("Fetching customer list")
@@ -52,7 +50,7 @@ class CustomerOrchestratorService:
             }
 
             # ===== ایجاد کاربر ===== #
-            user = self.user_repo.create_user(user_data)
+            user = self.user_repo.create_customer(user_data)
             logger.info(f"User created: ID={user.id}")
 
             # ===== ایجاد پروفایل در صورت نبود ===== #
@@ -86,7 +84,7 @@ class CustomerOrchestratorService:
         logger.info(f"START: Updating Customer {user_id}")
         
         try:
-            user = self.user_repo.get_by_id(user_id)
+            user = self.user_repo.get_customer_by_id(user_id)
             if not user:
                 raise ValidationError("کاربر یافت نشد.")
 
@@ -95,7 +93,7 @@ class CustomerOrchestratorService:
             user_update_data = {k: v for k, v in data.items() if k in allowed_user_fields}
             
             if user_update_data:
-                self.user_repo.update(user, user_update_data)
+                self.user_repo.update_customer(user, user_update_data)
                 logger.debug(f"User base info updated for {user_id}")
             
             # ===== تغییر رمز ===== #
@@ -130,7 +128,7 @@ class CustomerOrchestratorService:
     def delete_customer(self, user_id: int):
         logger.warning(f"START: Deleting Customer {user_id}")
         try:
-            user = self.user_repo.get_by_id(user_id)
+            user = self.user_repo.get_customer_by_id(user_id)
             if user:
                 user.delete()
                 logger.info(f"SUCCESS: Customer {user_id} deleted.")
@@ -147,4 +145,4 @@ class CustomerOrchestratorService:
 
     def bulk_delete(self, user_ids: List[int]):
         logger.warning(f"Bulk deleting {len(user_ids)} users: {user_ids}")
-        return self.user_repo.bulk_delete(user_ids)
+        return self.user_repo.bulk_delete_customers(user_ids)

@@ -19,9 +19,7 @@ from core.models import (
     OrderItemFile, ProductOptionValue,
     ProductSize, ProductOptionValue
 )
-from core.domain.commerce.order import OrderDomainService
-from core.domain.commerce.cart import CartDomainService
-from core.domain.catalog.product import ProductDomainService
+from core.order.services import OrderService
 
 try:
     from apps.dashboard.tasks import upload_order_item_file_task
@@ -32,9 +30,7 @@ logger = logging.getLogger('dashboard.services.order_dashboard')
 
 class OrderDashboardService:
     def __init__(self):
-        self.order_domain = OrderDomainService()
-        self.cart_domain = CartDomainService()
-        self.product_domain = ProductDomainService()
+        self.order_domain = OrderService()
         self.temp_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_order_uploads'))
 
     # ===== لیست و جزئیات ===== #

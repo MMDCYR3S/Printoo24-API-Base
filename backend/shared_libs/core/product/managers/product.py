@@ -66,6 +66,10 @@ class ProductQuerySet(BaseQuerySet):
     def get_all_active(self):
         """دریافت لیست تمام محصولات فعال"""
         return self.filter(is_active=True).select_related('category')
+    
+    def get_all(self):
+        """دریافت تمام محصولات"""
+        return self.select_related('category').order_by('-created_at')
 
     def get_by_category_ids(self, category_ids: list):
         """دریافت محصولات فعال بر اساس لیست دسته‌بندی‌ها"""
@@ -109,6 +113,9 @@ class ProductManager(models.Manager):
 
     def get_all_active_products(self):
         return self.get_queryset().get_all_active()
+    
+    def get_all_products(self):
+        return self.get_queryset().get_all()
 
     def get_products_by_category_ids(self, category_ids: list):
         return self.get_queryset().get_by_category_ids(category_ids)

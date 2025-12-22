@@ -6,8 +6,7 @@ from django.core.files.base import ContentFile
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from core.order.models import Order, OrderItem, OrderItemFile, OrderStatus
-from core.models import User, Address, Quotation
-from cart.models import CartItem
+from core.models import User, Address, Quotation, CartItem
 
 # ========== CHECKOUT SERVICE ========== #
 class CheckoutService:

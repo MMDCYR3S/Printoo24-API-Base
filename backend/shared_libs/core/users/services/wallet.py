@@ -76,3 +76,9 @@ class WalletService:
         )
         
         return wallet
+
+class WalletTransactionService:
+    """ سرویس تراکنش‌های کیف پول """
+    
+    def get_history_by_user(self, user_id: int):
+        return WalletTransaction.objects.get_history_by_user(user_id)

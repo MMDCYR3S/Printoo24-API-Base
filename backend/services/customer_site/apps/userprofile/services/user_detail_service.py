@@ -3,8 +3,7 @@ from typing import Dict, Any
 
 from django.db import transaction
 
-from core.domain.identity.users import UserDomainService
-from core.domain.identity.profile import CustomerProfileDomainService
+from core.users.services import CustomerService, CustomerProfileService
 
 # ===== تعریف لاگر اختصاصی برای سرویس پروفایل ===== #
 logger = logging.getLogger('userprofile.services.profile')
@@ -19,8 +18,8 @@ class ProfileDetailService:
     
     def __init__(self):
         # ===== تزریق وابستگی‌ها ===== #
-        self._user_domain = UserDomainService()
-        self._profile_domain = CustomerProfileDomainService()
+        self._user_domain = CustomerService()
+        self._profile_domain = CustomerProfileService()
         
     def get_profile_detail(self, user_id: int) -> Dict[str, Any]:
         """
@@ -29,7 +28,7 @@ class ProfileDetailService:
         :return: دیکشنری شامل آبجکت User و Profile
         """
         logger.info(f"Fetching profile details for User ID: {user_id}")
-        user = self._user_domain._repo.get_by_id(user_id)
+        user = self._user_domain.get_customer_by_id(user_id)
         if not user:
             logger.warning(f"User ID {user_id} not found.")
             raise ValueError("کاربر یافت نشد.")
@@ -53,10 +52,10 @@ class ProfileDetailService:
         
         
         # ===== 1. دریافت آبجکت‌ها ===== #
-        user = self._user_domain._repo.get_by_id(user_id)
+        user = self._user_domain.get_customer_by_id(user_id)
         
         if 'username' in data or 'email' in data:
-            self._user_domain.update(user, data)
+            self._user_domain.update_customer(user, data)
             
         profile_data = {k:v for k,v in data.items() if k in ['first_name', 'last_name', 'phone_number', 'company', 'bio']}
         updated_profile = self._profile_domain.update_profile(user, profile_data)

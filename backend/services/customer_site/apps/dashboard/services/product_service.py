@@ -11,7 +11,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 
 # ===== سرویس های دامنه ===== #
-from core.domain.catalog.product import ProductDomainService, ProductMediaDomainService
+from core.product.services import ProductService, ProductMediaService
 
 try:
     from apps.dashboard.tasks import upload_product_image_task, upload_attachment_library_task
@@ -27,8 +27,8 @@ class ProductDashboardService:
     سرویس اپلیکیشن (Application Service) مخصوص داشبورد.
     """
     def __init__(self):
-        self._domain_service = ProductDomainService()
-        self.media_service = ProductMediaDomainService()
+        self._domain_service = ProductService()
+        self.media_service = ProductMediaService()
         self.temp_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_uploads'))
     # ===== ایجاد اطلاعات اولیه ===== #
     @transaction.atomic
@@ -194,7 +194,7 @@ class ProductDashboardService:
 
     def get_all_products(self):
         """ دریافت لیست کامل محصولات (فرمت درختی) """
-        return self._domain_service._repo.get_all()
+        return self._domain_service.get_all_products()
 
     def get_product_detail(self, product_id):
         """ دریافت جزئیات کامل محصول (فرمت درختی) """

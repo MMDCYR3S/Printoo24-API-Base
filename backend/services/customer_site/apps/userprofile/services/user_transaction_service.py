@@ -5,7 +5,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from core.models import User
-from core.domain.identity.wallet import WalletRepository, WalletTransactionRepository
+from core.users.services import WalletService, WalletTransactionService
 
 # ===== تعریف لاگر اختصاصی کیف پول با پیشوند userprofile ===== #
 logger = logging.getLogger('userprofile.services.wallet')
@@ -21,8 +21,8 @@ class WalletService:
     def __init__(self, user: User):
         self.user = user
         # ===== تزریق وابستگی‌های مخزن کیف پول و تراکنش ===== #
-        self._wallet_repo = WalletRepository()
-        self._trans_repo = WalletTransactionRepository()
+        self._wallet_repo = WalletService()
+        self._trans_repo = WalletTransactionService()
 
     def get_wallet_balance(self, user_id: int):
         """
@@ -31,7 +31,7 @@ class WalletService:
         logger.info(f"Fetching wallet balance for User ID: {user_id}")
         
         try:
-            wallet = self._wallet_repo.get_by_user(user_id)
+            wallet = self._wallet_repo.get_user_balance(user_id)
             
             if not wallet:
                 logger.warning(f"No wallet found for User ID: {self.user.id}")

@@ -5,8 +5,8 @@ from django.db import transaction
 from rest_framework.exceptions import NotFound, ValidationError
 
 from core.models import Wallet, User
-from core.domain.identity.wallet import WalletDomainService
-from core.domain.identity.users import UserRepository
+from core.users.services import WalletService, CustomerService
+
 
 # ===== Logger ===== #
 logger = logging.getLogger('dashboard.services.wallet')
@@ -16,8 +16,8 @@ class WalletDashboardService:
     سرویس مدیریت کیف پول مخصوص داشبورد ادمین.
     """
     def __init__(self):
-        self.domain_service = WalletDomainService()
-        self.user_repo = UserRepository()
+        self.domain_service = WalletService()
+        self.user_repo = CustomerService()
 
     # ===== دریافت لیست کیف پول‌ها ===== #
     def get_wallets_queryset(self) -> QuerySet[Wallet]:
@@ -37,7 +37,7 @@ class WalletDashboardService:
         logger.info(f"START: Adjust balance for User {user_id}. Amount: {amount}, Type: {action_type}")
         
         try:
-            user = self.user_repo.get_by_id(user_id)
+            user = self.user_repo.get_customer_by_id(user_id)
             if not user:
                 raise NotFound("کاربر مورد نظر یافت نشد.")
 

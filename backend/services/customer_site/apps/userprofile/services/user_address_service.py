@@ -1,11 +1,13 @@
 import logging
 from django.core.exceptions import ValidationError
-from core.domain.identity.address import AddressRepository
+
+from core.users.services import AddressService
 from core.models import City, Province
 
 # ===== تعریف لاگر اختصاصی برای سرویس آدرس ===== #
 logger = logging.getLogger('userprofile.services.address')
 
+# ========== ADDRESS SERVICE ========== #
 class UserAddressService:
     """
     سرویس مدیریت آدرس‌های کاربر.
@@ -16,7 +18,7 @@ class UserAddressService:
     
     def __init__(self):
         # ===== تزریق وابستگی مخزن آدرس ===== #
-        self._repo = AddressRepository()
+        self._repo = AddressService()
 
     def _validate_location(self, province_id, city_id):
         """

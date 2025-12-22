@@ -10,10 +10,8 @@ from core.domain.communication.email.email_services import EmailService
 from core.domain.catalog.product import ProductMediaDomainService
 from core.models import (
     CartItem,
-    ProductFileUploadRequirement,
     CartItemUpload,
     OrderItem,
-    ProductFileUploadRequirement,
     OrderItemFile
 )
 
@@ -108,7 +106,7 @@ logger = logging.getLogger('cart.tasks')
 
 # ===== Task: Upload Cart Item File ===== #
 @shared_task(name='upload_cart_item_file_task', bind=True, max_retries=3)
-def upload_cart_item_file_task(self, cart_item_id, requirement_id, temp_file_path, original_filename):
+def upload_cart_item_file_task(self, cart_item_id, temp_file_path, original_filename):
     """
     تسک آپلود فایل طراحی توسط کاربر برای یک آیتم سبد خرید.
     """
@@ -117,12 +115,10 @@ def upload_cart_item_file_task(self, cart_item_id, requirement_id, temp_file_pat
     try:
         # ===== دریافت آیتم ===== #
         cart_item = CartItem.objects.get(id=cart_item_id)
-        requirement = ProductFileUploadRequirement.objects.get(id=requirement_id)
 
         # ===== بررسی وجود فایل از قبل و جایگزینی ===== #
         existing_uploads = CartItemUpload.objects.filter(
-            cart_item=cart_item, 
-            requirement=requirement
+            cart_item=cart_item
         )
         
         for upload in existing_uploads:
@@ -130,7 +126,6 @@ def upload_cart_item_file_task(self, cart_item_id, requirement_id, temp_file_pat
             if upload.file:
                 upload.file.delete(save=False)
             upload.delete()
-            logger.info(f"Deleted old file for requirement {requirement_id}")
 
         # ===== ایجاد فایل ===== #
         if os.path.exists(temp_file_path):
@@ -140,7 +135,6 @@ def upload_cart_item_file_task(self, cart_item_id, requirement_id, temp_file_pat
                 # ===== ایجاد آیتم ===== #
                 upload_instance = CartItemUpload.objects.create(
                     cart_item=cart_item,
-                    requirement=requirement,
                     file=django_file
                 )
             
@@ -158,7 +152,7 @@ def upload_cart_item_file_task(self, cart_item_id, requirement_id, temp_file_pat
 
 # ===== Task: Upload Order Item File ===== #
 @shared_task(name='upload_order_item_file_task', bind=True, max_retries=3)
-def upload_order_item_file_task(self, order_item_id, requirement_id, temp_file_path, original_filename):
+def upload_order_item_file_task(self, order_item_id, temp_file_path, original_filename):
     """
     تسک آپلود فایل طراحی توسط ادمین برای یک آیتم سفارش.
     """
@@ -167,12 +161,10 @@ def upload_order_item_file_task(self, order_item_id, requirement_id, temp_file_p
     try:
         # ===== دریافت مدل ها ===== #
         order_item = OrderItem.objects.get(id=order_item_id)
-        requirement = ProductFileUploadRequirement.objects.get(id=requirement_id)
         
         # ===== بررسی وجود فایل از قبل و جایگزینی ===== #
         existing_uploads = OrderItemFile.objects.filter(
-            order_item=order_item, 
-            requirement=requirement
+            order_item=order_item
         )
         
         for upload in existing_uploads:
@@ -180,7 +172,6 @@ def upload_order_item_file_task(self, order_item_id, requirement_id, temp_file_p
             if upload.file:
                 upload.file.delete(save=False)
             upload.delete()
-            logger.info(f"Deleted old file for requirement {requirement_id}")
 
         # ===== دریافت فایل ===== #
         if os.path.exists(temp_file_path):
@@ -190,7 +181,6 @@ def upload_order_item_file_task(self, order_item_id, requirement_id, temp_file_p
                 # ===== ایجاد فایل===== #
                 instance = OrderItemFile.objects.create(
                     order_item=order_item,
-                    requirement=requirement,
                     file=django_file
                 )
             

@@ -1,7 +1,8 @@
 import logging
 from typing import List
+
 from core.models import User, ProductComment
-from core.domain.catalog.comment import FeedbackDomainService
+from core.product.services import FeedbackService
 
 # ===== Logger ===== #
 logger = logging.getLogger('userprofile.services.feedback')
@@ -15,7 +16,7 @@ class UserFeedbackService:
     def __init__(self, user: User):
         self.user = user
         # ===== تزریق وابستگی‌ها ===== #
-        self._domain_service = FeedbackDomainService()
+        self._domain_service = FeedbackService()
 
     def get_my_comments(self) -> List[ProductComment]:
         """

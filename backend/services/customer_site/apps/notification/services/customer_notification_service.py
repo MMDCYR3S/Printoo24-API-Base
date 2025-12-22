@@ -1,14 +1,14 @@
 import logging
-from typing import Dict, Any, List
-from django.core.exceptions import ObjectDoesNotExist
+from typing import List
 from rest_framework.exceptions import NotFound
 
 from core.models import User, CustomerNotification
-from core.domain.communication.notification.repositories import NotificationRepository
+from core.notifications.services import NotificationService
 
 # ===== تعریف لاگر اختصاصی ===== #
 logger = logging.getLogger('userprofile.services.notification')
 
+# ========== NOTIFICATION SERVICE ========== #
 class NotificationAppService:
     """
     سرویس اپلیکیشن برای مدیریت اعلان‌های کاربر در پنل کاربری.
@@ -16,7 +16,7 @@ class NotificationAppService:
     
     def __init__(self, user: User):
         self.user = user
-        self._repo = NotificationRepository()
+        self.domain_service = NotificationService()
 
     def get_my_notifications(self) -> List[CustomerNotification]:
         """
@@ -25,7 +25,8 @@ class NotificationAppService:
         logger.info(f"Fetching notifications for User ID: {self.user.id}")
         
         try:
-            notifications = self._repo.get_user_notifications(self.user)
+            # اکنون این متد در دامین سرویس وجود دارد
+            notifications = self.domain_service.get_user_notifications(self.user)
             logger.debug(f"Found {notifications.count()} notifications for User ID: {self.user.id}")
             return notifications
             
@@ -37,7 +38,7 @@ class NotificationAppService:
         """
         تعداد پیام‌های ناخوانده.
         """
-        return self._repo.get_unread_count(self.user)
+        return self.domain_service.get_unread_count(self.user)
 
     def mark_as_read(self, notification_id: int) -> CustomerNotification:
         """
@@ -47,7 +48,10 @@ class NotificationAppService:
         
         try:
             # ===== یافتن اعلان با بررسی مالکیت ===== #
-            notification = self._repo.model.objects.get(id=notification_id, recipient=self.user)
+            # نکته: اینجا مستقیماً از مدل استفاده می‌کنیم چون یک کوئری خاص است که در سرویس دامین نیست
+            # یا می‌توانیم یک متد get_my_notification در دامین اضافه کنیم.
+            # فعلاً مستقیم:
+            notification = CustomerNotification.objects.get(id=notification_id, recipient=self.user)
             
             notification.mark_as_read()
             logger.info(f"Notification {notification_id} marked as read.")
@@ -66,4 +70,4 @@ class NotificationAppService:
         خواندن همه پیام‌ها.
         """
         logger.info(f"Marking ALL notifications as read for User ID: {self.user.id}")
-        self._repo.mark_all_as_read(self.user)
+        self.domain_service.mark_all_as_read(self.user)

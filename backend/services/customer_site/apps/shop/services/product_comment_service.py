@@ -1,9 +1,9 @@
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any
 from django.shortcuts import get_object_or_404
-from core.models import User, Product, ProductComment
-from core.domain.catalog.comment.services import FeedbackDomainService
-from core.domain.catalog.comment.repositories import RatingRepository, CommentRepository
+
+from core.models import User, Product
+from core.product.services import FeedbackService
 
 # تعریف لاگر اختصاصی با نام دقیق
 logger = logging.getLogger('shop.services.feedback')
@@ -14,9 +14,26 @@ class FeedbackService:
     مسئول ثبت نظرات و امتیازات و نمایش آن‌ها.
     """
     def __init__(self):
-        self._domain_service = FeedbackDomainService()
-        self._comment_read_repo = CommentRepository()
-        self._rating_read_repo = RatingRepository()
+        self.domain_service = FeedbackService()
+
+    def get_product_feedback_summary(self, product_id: int, user_id: int = None):
+        """
+        دریافت خلاصه فیدبک محصول (میانگین امتیاز + نظرات + امتیاز کاربر جاری).
+        """
+        avg_score = self.domain_service.get_product_average_score(product_id)
+        comments = self.domain_service.get_approved_comments(product_id)
+        
+        user_rating = None
+        if user_id:
+            rating_obj = self.domain_service.get_user_rating_for_product(user_id, product_id)
+            if rating_obj:
+                user_rating = rating_obj.score
+
+        return {
+            "average_score": avg_score,
+            "comments": comments,
+            "user_rating": user_rating
+        }
 
     def submit_review(self, user: User, product_slug: str, data: Dict[str, Any]):
         """
@@ -38,7 +55,7 @@ class FeedbackService:
                 score = data['score']
                 logger.debug(f"Attempting to add rating: {score} for Product ID: {product.id}")
                 
-                self._domain_service.add_rating(user, product, score)
+                self.domain_service.add_rating(user, product, score)
                 
                 results['rating'] = "امتیاز شما با موفقیت ثبت شد."
                 logger.info(f"Rating {score} added successfully for User ID: {user.id}")
@@ -54,7 +71,7 @@ class FeedbackService:
                 message = data['message']
                 logger.debug(f"Attempting to add comment for Product ID: {product.id}")
                 
-                self._domain_service.add_comment(user, product, message)
+                self.domain_service.add_comment(user, product, message)
                 
                 results['comment'] = "نظر شما ثبت شد و پس از بررسی نمایش داده می‌شود."
                 logger.info(f"Comment submitted successfully for User ID: {user.id}")

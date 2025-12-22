@@ -1,12 +1,10 @@
 import uuid
-from typing import List, Dict, Optional
+from typing import List, Dict
 from django.db import transaction
 from django.db.models import Q
-from django.core.files.base import ContentFile
 
-from core.order.models import Order, OrderItem, OrderItemFile, OrderStatus, OrderCostSheet
-from core.models import User, Address, Invoice
-from cart.models import Cart
+from core.order.models import Order
+from core.models import User, Invoice
 
 from ..exceptions import OrderNotFoundException
 
@@ -18,6 +16,9 @@ class OrderService:
 
     def _generate_order_code(self) -> str:
         return uuid.uuid4().hex[:8].upper()
+
+    def get_order_by_id(self, order_id: int):
+        return Order.objects.get_order_by_id(order_id)
 
     def get_order_details(self, user_id: int, order_id: int) -> Order:
         """

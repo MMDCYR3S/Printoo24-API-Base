@@ -2,8 +2,7 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 
 from core.models import User, CartItem
-from core.domain.commerce.cart.services import CartDomainService
-from core.domain.commerce.cart.repositories import CartItemRepository
+from core.cart.services import CartService
 
 # ===== تعریف لاگرهای اختصاصی با پیشوند cart ===== #
 logger_list = logging.getLogger('cart.services.list')
@@ -21,7 +20,7 @@ class CartListService:
     def __init__(self
         ):
         # ===== تزریق وابستگی‌ها ===== #
-        self._domain_service = CartDomainService()
+        self._domain_service = CartService()
         
     def get_user_cart_items(self, user: User) -> dict:
         """
@@ -69,7 +68,7 @@ class CartItemDetailService:
     
     def __init__(self):
         # ===== تزریق وابستگی‌ها ===== #
-        self._item_repo = CartItemRepository()
+        self._item_repo = CartService()
         
     def get_item_detail(self, item_id: int, user: User) -> CartItem:
         """

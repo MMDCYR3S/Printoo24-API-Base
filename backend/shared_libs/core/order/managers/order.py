@@ -32,6 +32,12 @@ class OrderQuerySet(models.QuerySet):
             .select_related('current_status')\
             .order_by('-created_at')
 
+    def get_order_by_id(self, order_id: int):
+        """
+        دریافت یک سفارش با شناسه.
+        """
+        return self.filter(id=order_id).first()
+
     def get_order_with_items(self, user_id: int, order_id: int):
         """
         دریافت جزئیات کامل سفارش برای کاربر نهایی.

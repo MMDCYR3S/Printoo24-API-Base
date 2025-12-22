@@ -5,8 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.reverse import reverse
 from django.urls import NoReverseMatch
 
-from core.domain.catalog.category import ProductCategoryDomainService
-from core.domain.catalog.product import ProductRepository
+from core.product.services import ProductCategoryService, ProductService
 from core.models import ProductCategory
 
 logger = logging.getLogger('shop.services.category')
@@ -18,8 +17,8 @@ class ShopCategoryService:
     """
     def __init__(self, request=None):
         self.request = request
-        self._domain_service = ProductCategoryDomainService()
-        self._product_repo = ProductRepository()
+        self._domain_service = ProductCategoryService()
+        self._product_repo = ProductService()
         
     # ===== Get Category Tree Structure ===== #
     def get_category_tree_structure(self) -> List[Dict[str, Any]]:
@@ -57,7 +56,7 @@ class ShopCategoryService:
         logger.info(f"Fetching landing data for category: {slug}")
         
         # ===== دریافت دسته‌بندی ===== #
-        category = self._domain_service._repo.get_category_by_slug(slug)
+        category = self._domain_service.get_category_by_slug(slug)
         if not category:
             return None
 
@@ -107,7 +106,7 @@ class ShopCategoryService:
         logger.info("Fetching all root categories with products")
 
         # ===== دریافت کوئری‌ست دسته‌بندی‌ها ===== #
-        root_categories = self._domain_service._repo.get_all_active_categories().filter(parent__isnull=True)
+        root_categories = self._domain_service.get_all_active_categories().filter(parent__isnull=True)
         
         result_list = []
 

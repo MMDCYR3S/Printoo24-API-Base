@@ -1,7 +1,6 @@
 import logging
 from typing import Dict, Any
 
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError, NotFound
 
 from core.models import (

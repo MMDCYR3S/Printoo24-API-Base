@@ -3,8 +3,8 @@ from typing import List
 from rest_framework.exceptions import NotFound
 
 from core.models import Order, Quotation
-from core.domain.commerce.order import OrderDomainService
-from core.domain.financial import QuotationRepository
+from core.order.services import OrderService
+from core.financial.services import FinancialService
 
 logger = logging.getLogger('userprofile.services.orders')
 
@@ -14,8 +14,8 @@ class UserOrderListService:
     """
     
     def __init__(self):
-        self._domain_service = OrderDomainService()
-        self._quotation_repo = QuotationRepository()
+        self._domain_service = OrderService()
+        self._quotation_repo = FinancialService()
 
     def get_user_orders(self, user_id: int) -> List[Order]:
         """
@@ -37,7 +37,7 @@ class UserOrderListService:
         logger.info(f"Fetching detail Order {order_id} for User {user_id}")
         
         try:
-            order = self._domain_service.get_user_order_item_details(user_id, order_id)
+            order = self._domain_service.get_order_details(user_id, order_id)
             
             if not order:
                 logger.warning(f"Order {order_id} not found for user {user_id}")

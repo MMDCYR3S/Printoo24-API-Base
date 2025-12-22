@@ -20,6 +20,9 @@ class ProductService:
     def get_all_active_products(self):
         return Product.objects.get_all_active_products()
     
+    def get_all_products(self):
+        return Product.objects.get_all()
+    
     def _format_product_options(self, product: Product) -> List[Dict[str, Any]]:
         """
         متد کمکی برای تبدیل ساختار آپشن‌های دیتابیس به فرمت استاندارد فرانت‌اند.
@@ -55,6 +58,12 @@ class ProductService:
             "product": product,
             "structured_options": self._format_product_options(product)
         }
+
+    def get_products_by_category_ids(self, category_ids: List[int]):
+        """
+        دریافت محصولات بر اساس لیست دسته‌بندی‌ها (برای لندینگ و فیلتر).
+        """
+        return Product.objects.get_products_by_category_ids(category_ids)
 
     def get_product_detail_by_slug(self, slug: str) -> Optional[Product]:
         product = Product.objects.get_product_detail_by_slug(slug)

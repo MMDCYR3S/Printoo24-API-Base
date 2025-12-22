@@ -177,3 +177,13 @@ class CartService:
         cart = Cart.objects.get_queryset().get_cart_by_user(user)
         if cart:
             CartItem.objects.delete_all_items_by_cart(cart)
+
+    def get_by_id(self, item_id: int) -> CartItem:
+        """
+        دریافت مستقیم آیتم سبد خرید (بدون چک کردن مالکیت در لحظه دریافت).
+        معمولاً برای استفاده در متدهای داخلی یا ادمین.
+        """
+        try:
+            return CartItem.objects.get(id=item_id)
+        except CartItem.DoesNotExist:
+            raise ItemNotFoundException("آیتم سبد خرید یافت نشد.")
