@@ -220,6 +220,12 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                                     "global_value_id": 201,
                                     "price_impact": "20000",
                                     "is_default": False
+                                },
+                                {
+                                    "global_value_id": "null",
+                                    "label": "کاغذ مخصوص وارداتی",
+                                    "value": "imported_special",
+                                    "price_impact": 50000
                                 }
                             ]
                         }

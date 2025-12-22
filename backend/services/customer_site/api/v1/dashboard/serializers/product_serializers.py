@@ -5,7 +5,9 @@ from core.models import (
     ProductCategory,
     ProductImage,
     Attachment, 
-    ProductAttachment
+    ProductAttachment,
+    ProductOption,
+    ProductOptionValue
 )
 
 # ===== Product Image Serializer ===== #
@@ -94,14 +96,24 @@ class QuantitySyncSerializer(serializers.Serializer):
 # ===== Option Value Override Serializer ===== #
 class OptionValueOverrideSerializer(serializers.Serializer):
     """
-    اطلاعاتی که ادمین می‌خواهد همان لحظه برای مقادیر اعمال کند.
+    اطلاعاتی که ادمین می‌خواهد برای مقادیر اعمال کند.
+    می‌تواند Override روی گلوبال باشد یا یک مقدار کاملاً جدید (Custom).
     """
-    global_value_id = serializers.IntegerField(help_text="ID مقدار در بانک ویژگی‌ها", required=False, allow_null=True)
+    # ===== تغییر: این فیلد نال‌پذیر است برای حالت Custom ===== #
+    global_value_id = serializers.IntegerField(
+        help_text="ID مقدار در بانک (اگر نال باشد، یعنی مقدار کاستوم است)", 
+        required=False, 
+        allow_null=True
+    )
+    
+    # ===== تغییر: اضافه شدن فیلدهای متنی برای Override یا Custom ===== #
+    label = serializers.CharField(required=False, help_text="عنوان نمایشی (در صورت Override یا Custom)")
+    value = serializers.CharField(required=False, help_text="کد سیستمی (در صورت Override یا Custom)")
+    
+    # ===== فیلدهای مالی ===== #
     price_impact = serializers.DecimalField(max_digits=14, decimal_places=0, required=False, default=0)
     is_default = serializers.BooleanField(required=False, default=False)
     is_active = serializers.BooleanField(required=False, default=True)
-    quantity_step = serializers.IntegerField(required=False, default=1, min_value=1)
-    is_step_ceiling = serializers.BooleanField(required=False, default=False)
 
 # ===== Option Attach With Price Serializer ===== #
 class OptionAttachWithPriceSerializer(serializers.Serializer):
@@ -121,16 +133,53 @@ class OptionValuePriceItemSerializer(serializers.Serializer):
     # ===== فیلدهای منطقی و نمایش ===== #
     is_default = serializers.BooleanField(required=False)
     order = serializers.IntegerField(required=False)
-    
-    # ===== تیراژ و شمارش===== #
-    quantity_step = serializers.IntegerField(required=False, min_value=1)
-    is_step_ceiling = serializers.BooleanField(required=False)
 
 # ===== Option Price Update Serializer =====
 class OptionPriceUpdateSerializer(serializers.Serializer):
     product_option_id = serializers.IntegerField(help_text="ID of the Local ProductOption")
     values = serializers.ListField(child=OptionValuePriceItemSerializer())
     
+
+# ===== Product Option Value Price Item Serializer ===== #
+class ProductOptionValueOutputSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر برای نمایش مقادیر انتخاب شده (Choices) در صفحه جزئیات محصول.
+    جایگزین دیکشنری دستی سرویس.
+    """
+    input_type = serializers.SerializerMethodField()
+    is_custom = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductOptionValue
+        fields = [
+            'id', 'label', 'value', 'price_impact', 
+            'is_default', 'is_custom', 'input_type', 'order'
+        ]
+
+    def get_input_type(self, obj):
+        """
+        لاجیک هوشمند برای پیدا کردن نوع ورودی:
+        ۱. اگر به گلوبال وصل است، از آن می‌خواند.
+        ۲. اگر کاستوم است، از ویژگی پدر (Option) می‌خواند.
+        """
+        if obj.global_source:
+            return obj.global_source.input_type
+
+    def get_is_custom(self, obj):
+        return obj.global_source is None
+
+
+class ProductOptionOutputSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر برای نمایش گروه‌های ویژگی (مانند: جنس کاغذ، روکش).
+    """
+    name = serializers.CharField(source='option.name', read_only=True)
+    label = serializers.CharField(source='option.label', read_only=True)
+    choices = ProductOptionValueOutputSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ProductOption
+        fields = ['id', 'name', 'label', 'is_required', 'choices', 'order']
 
 # ===== Image Reorder Serializer =====
 class ImageReorderSerializer(serializers.Serializer):
@@ -195,8 +244,8 @@ class ProductDetailSerializer(serializers.Serializer):
     images = ProductImageSerializer(source='product.product_image', many=True)
     
     # آپشن‌ها (از ساختار درختی که سرویس برمی‌گرداند)
-    options = serializers.ListField(source='structured_options')
-
+    options = ProductOptionOutputSerializer(source='product.options', many=True)
+    
     def get_sizes(self, obj):
         product = obj['product']
         return {

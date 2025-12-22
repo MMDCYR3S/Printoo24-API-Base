@@ -426,7 +426,7 @@ class ProductOption(models.Model):
     اینجا تعیین می‌کنیم ویژگی چه رفتاری در این محصول خاص دارد.
     """
     product = models.ForeignKey(Product, related_name='options', on_delete=models.CASCADE, null=True)
-    option = models.ForeignKey(Option, related_name='product_configs', on_delete=models.PROTECT)
+    option = models.ForeignKey(Option, related_name='product_configs', on_delete=models.CASCADE)
     
     # ===== تنظیمات نمایش (UI) ===== #
     is_required = models.BooleanField(_("اجباری؟"), default=False)
@@ -438,14 +438,8 @@ class ProductOption(models.Model):
         unique_together = ('product', 'option')
         ordering = ['order']
 
-    def clean(self):
-        """ Validation Logic """
-        if not self.has_pricing and self.base_price != 0:
-            raise ValidationError(_("وقتی ویژگی فاقد قیمت است، هزینه سربار باید ۰ باشد."))
-
     def __str__(self):
-        status = "($)" if self.has_pricing else "(Free)"
-        return f"{self.product.name} | {self.option.label} {status}"
+        return f"{self.product.name} | {self.option.label}"
 
 # ====== PRODUCT OPTION VALUE ====== #
 class ProductOptionValue(models.Model):
@@ -456,14 +450,14 @@ class ProductOptionValue(models.Model):
     product_option = models.ForeignKey(
         ProductOption, 
         related_name='choices', 
-        on_delete=models.PROTECT
+        on_delete=models.CASCADE
     )
     
     # ===== ارجاع به بانک (Snapshot Pattern) ===== #
     global_source = models.ForeignKey(
         OptionValue, 
         null=True, blank=True, 
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         verbose_name=_("کپی از الگوی گلوبال")
     )
 
@@ -496,12 +490,10 @@ class ProductOptionValue(models.Model):
         """ 
         Strict Data Integrity Rules 
         """
-        # ===== اگر قیمت ندارد، قوانین تیراژ باید غیرفعال باشد. ===== #
-        if not self.product_option.has_pricing and self.has_pricing:
-            raise ValidationError({
-                'has_pricing': _("ویژگی اصلی (گروه) غیرمالی است. نمی‌توانید برای این گزینه محاسبه قیمت را فعال کنید.")
-            })
-
+        # ===== اگر مقدار label و global_source خالی باشند ===== #
+        if not self.label and not self.global_source:
+             raise ValidationError("عنوان گزینه الزامی است...")
+        
         # ===== اگر قیمت ندارد، مبلغ باید صرفاً ۰ باشد. ===== #
         if not self.has_pricing and self.price_impact != 0:
              raise ValidationError({
@@ -513,14 +505,9 @@ class ProductOptionValue(models.Model):
              raise ValidationError(_("عنوان گزینه الزامی است (یا دستی وارد کنید یا از الگو انتخاب کنید)."))
 
     def save(self, *args, **kwargs):
-        # کپی خودکار از تمپلت اگر لیبل دستی وارد نشده باشد
         if self.global_source and not self.label:
             self.label = self.global_source.label
             self.value = self.global_source.value
-            
-        # ===== اگر قیمت ندارد، قیمت باید صرفاً ۰ باشد. ===== #
-        if not self.product_option.has_pricing:
-            self.has_pricing = False
         
         if not self.has_pricing:
             self.price_impact = 0
@@ -528,9 +515,7 @@ class ProductOptionValue(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        price_str = f"+{self.price_impact:,}" if self.has_pricing else "Free"
-        step_str = f"/{self.quantity_step}" if self.quantity_step > 1 else ""
-        return f"{self.label} ({price_str}{step_str})"
+        return f"{self.label}"
 
 # ===== Product Rating Model ===== #
 class ProductRating(models.Model):

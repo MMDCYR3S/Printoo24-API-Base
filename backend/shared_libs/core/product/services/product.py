@@ -38,11 +38,17 @@ class ProductService:
                 "is_required": prod_opt.is_required,
                 "choices": []
             }
+            
             for choice in prod_opt.choices.all():
+                
+                if choice.global_source:
+                     choice_input_type = choice.global_source.input_type
+                
                 option_data["choices"].append({
                     "id": choice.id,
                     "label": choice.label,
                     "value": choice.value,
+                    "input_type": choice_input_type,
                     "price_impact": choice.price_impact,
                     "is_default": choice.is_default,
                 })
@@ -187,43 +193,107 @@ class ProductService:
 
     # ===== Options Logic ===== #
     @transaction.atomic
-    def attach_option_from_global(self, product_id: int, option_id: int) -> ProductOption:
+    def attach_option_with_config(self, product_id: int, data: dict) -> ProductOption:
         product = Product.objects.get_by_id(product_id)
         if not product:
             raise ProductNotFoundException("محصول یافت نشد.")
-            
+
+        option_id = data['option_id']
         if product.options.filter(option_id=option_id).exists():
-            raise InvalidProductDataException("این ویژگی قبلاً به محصول اضافه شده است.")
+            raise InvalidProductDataException("این ویژگی قبلاً اضافه شده است.")
 
         try:
-            global_option = Option.objects.get(id=option_id)
+            global_option = Option.objects.prefetch_related('global_values').get(id=option_id)
         except Option.DoesNotExist:
             raise InvalidProductDataException("ویژگی گلوبال یافت نشد.")
 
-        # دریافت Max Order
         max_order = product.options.aggregate(max_o=Max('order'))['max_o'] or 0
         
+        # 1. ایجاد سرگروه آپشن
         product_option = ProductOption.objects.create(
             product=product,
             option=global_option,
             order=max_order + 1,
+            is_required=data.get('is_required', False),
         )
 
-        # کپی ولیوها (Template Pattern)
+        input_configs = data.get('values_config', [])
+        
+        # ===== [FIX] جداسازی مقادیر لینک‌دار و کاستوم ===== #
+        linked_configs_map = {}
+        custom_configs = []
+
+        for item in input_configs:
+            g_id = item.get('global_value_id')
+            if g_id:
+                linked_configs_map[g_id] = item
+            else:
+                # اگر ID نداشت، یعنی کاستوم است و باید جداگانه ساخته شود
+                custom_configs.append(item)
+
+        local_values_to_create = []
+        
+        # 2. پردازش مقادیر موجود در بانک (Global Values)
         global_values = global_option.global_values.all()
-        local_values = [
-            ProductOptionValue(
-                product_option=product_option,
-                global_source=g_val,
-                label=g_val.label,
-                value=g_val.value,
-                order=idx,
-                price_impact=0
-            )
-            for idx, g_val in enumerate(global_values)
-        ]
+        
+        for idx, g_val in enumerate(global_values):
+            price = 0
+            is_default = False
+            final_label = g_val.label
+            final_value = g_val.value
+            should_create = True 
             
-        ProductOptionValue.objects.bulk_create(local_values)
+            # اگر کانفیگ خاصی برای این آیتم گلوبال آمده
+            if g_val.id in linked_configs_map:
+                config = linked_configs_map[g_val.id]
+                
+                # اگر غیرفعال شده، نسازیم
+                if not config.get('is_active', True):
+                    should_create = False
+                
+                if should_create:
+                    price = config.get('price_impact', 0)
+                    is_default = config.get('is_default', False)
+                    # اعمال Override روی نام و مقدار
+                    if config.get('label'):
+                        final_label = config['label']
+                    if config.get('value'):
+                        final_value = config['value']
+
+            if should_create:
+                local_values_to_create.append(ProductOptionValue(
+                    product_option=product_option,
+                    global_source=g_val, # لینک دارد
+                    label=final_label,  
+                    value=final_value,
+                    order=idx,
+                    price_impact=price,
+                    is_default=is_default
+                ))
+            
+        # 3. [FIX] پردازش مقادیر کاستوم (این قسمت در کد شما حذف شده بود)
+        current_order_index = len(local_values_to_create)
+
+        for custom_item in custom_configs:
+            # برای کاستوم، لیبل اجباری است
+            if not custom_item.get('label'):
+                raise InvalidProductDataException("برای مقادیر سفارشی (Custom)، وارد کردن عنوان (Label) الزامی است.")
+
+            local_values_to_create.append(ProductOptionValue(
+                product_option=product_option,
+                global_source=None,
+                label=custom_item['label'],
+                value=custom_item.get('value', custom_item['label']),
+                order=current_order_index,
+                price_impact=custom_item.get('price_impact', 0),
+                is_default=custom_item.get('is_default', False)
+            ))
+            current_order_index += 1
+            
+        # 4. ذخیره یکجا
+        if local_values_to_create:
+            ProductOptionValue.objects.bulk_create(local_values_to_create)
+            
         return product_option
 
     @transaction.atomic
@@ -283,65 +353,6 @@ class ProductService:
 
         if to_update:
             ProductOptionValue.objects.bulk_update(to_update, fields_to_update)
-
-    @transaction.atomic
-    def attach_option_with_config(self, product_id: int, data: dict) -> ProductOption:
-        product = Product.objects.get_by_id(product_id)
-        if not product:
-            raise ProductNotFoundException("محصول یافت نشد.")
-
-        option_id = data['option_id']
-        if product.options.filter(option_id=option_id).exists():
-            raise InvalidProductDataException("این ویژگی قبلاً اضافه شده است.")
-
-        try:
-            global_option = Option.objects.prefetch_related('global_values').get(id=option_id)
-        except Option.DoesNotExist:
-            raise InvalidProductDataException("ویژگی گلوبال یافت نشد.")
-
-        max_order = product.options.aggregate(max_o=Max('order'))['max_o'] or 0
-        
-        product_option = ProductOption.objects.create(
-            product=product,
-            option=global_option,
-            order=max_order + 1,
-            is_required=data.get('is_required', False),
-        )
-
-        overrides_map = {
-            item.get('global_value_id'): item 
-            for item in data.get('values_config', [])
-            if item.get('global_value_id') is not None
-        }
-
-        local_values = []
-        global_values = global_option.global_values.all()
-        
-        for idx, g_val in enumerate(global_values):
-            price = 0
-            is_default = False
-            
-            if g_val.id in overrides_map:
-                config = overrides_map[g_val.id]
-                if not config.get('is_active', True):
-                    continue
-                price = config.get('price_impact', 0)
-                is_default = config.get('is_default', False)
-
-            local_values.append(ProductOptionValue(
-                product_option=product_option,
-                global_source=g_val,
-                label=g_val.label,
-                value=g_val.value,
-                order=idx,
-                price_impact=price,
-                is_default=is_default
-            ))
-            
-        if local_values:
-            ProductOptionValue.objects.bulk_create(local_values)
-            
-        return product_option
 
     def delete_product(self, product_id: int):
         product = Product.objects.get_by_id(product_id)
