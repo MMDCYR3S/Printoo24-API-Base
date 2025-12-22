@@ -244,9 +244,9 @@ class FinancialService:
 
         return invoice
     
-    def get_quotation_by_order(self, order: Order):
+    def get_quotation_by_order(self, order_id: int):
         """ دریافت پیش‌فاکتور مرتبط با سفارش """
-        return Quotation.objects.get_quotation_by_order(order.id)
+        return Quotation.objects.get_quotation_by_order(order_id)
 
     # ============ INTERNAL HELPERS ============ #
     def _apply_payment_to_invoice(self, invoice: Invoice, amount: Decimal, user: User = None):

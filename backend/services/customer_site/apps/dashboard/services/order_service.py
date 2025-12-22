@@ -38,7 +38,7 @@ class OrderDashboardService:
         """
         لیست تمام سفارشات با جزئیات لازم برای جدول داشبورد.
         """
-        return Order.objects.select_related('user__customer_profile', 'order_status')\
+        return Order.objects.select_related('user__customer_profile', 'current_status')\
             .prefetch_related('order_item_order')\
             .order_by('-created_at')
 
@@ -112,7 +112,7 @@ class OrderDashboardService:
             order = Order.objects.create(
                 user=user,
                 address=address,
-                order_status=initial_status,
+                current_status=initial_status,
                 total_price=final_total_price,
                 type="2"
             )

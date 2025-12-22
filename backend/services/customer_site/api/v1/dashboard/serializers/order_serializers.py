@@ -24,7 +24,7 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
 # ===== لیست سفارشات ===== #
 class OrderListSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
-    status_name = serializers.CharField(source='order_status.name')
+    status_name = serializers.CharField(source='current_status.name')
     items_count = serializers.IntegerField(source='order_item_order.count', read_only=True)
 
     class Meta:
@@ -38,9 +38,9 @@ class OrderItemOptionSnapshotSerializer(serializers.Serializer):
     ساختار ذخیره شده: {'option_name': '...', 'value_label': '...', 'price_impact': ...}
     """
     option_id = serializers.IntegerField(source="id")
-    name = serializers.CharField(source='title')
-    value_option = serializers.CharField(source='value')
-    price_impact = serializers.DecimalField(source='price', max_digits=14, decimal_places=0)
+    name = serializers.CharField(source='option_name')
+    value_option = serializers.CharField(source='value_label')
+    price_impact = serializers.DecimalField(max_digits=14, decimal_places=0)
 
 # ===== سطح ۳: ساختار کلی مشخصات آیتم (Specs) ===== #
 class OrderItemSpecsSerializer(serializers.Serializer):
@@ -97,7 +97,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         return f"{obj.address.province.name}, {obj.address.city.name}, {obj.address.address}"
 
     def get_status_info(self, obj):
-        return {'id': obj.order_status.id, 'name': obj.order_status.name}
+        return {'id': obj.current_status.id, 'name': obj.current_status.name}
 
 # ===== ایجاد سفارش (Input) ===== #
 class AdminOrderCreateSerializer(serializers.Serializer):

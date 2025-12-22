@@ -11,7 +11,7 @@ from core.users.services import WalletService, WalletTransactionService
 logger = logging.getLogger('userprofile.services.wallet')
 
 # ===== Wallet Service ===== #
-class WalletService:
+class WalletAppService:
     """
     سرویس مدیریت اطلاعات کیف پول کاربر.
     
@@ -37,7 +37,7 @@ class WalletService:
                 logger.warning(f"No wallet found for User ID: {self.user.id}")
                 return None
             
-            logger.debug(f"Wallet balance: {wallet.decimal}")
+            logger.debug(f"Wallet balance: {wallet}")
             return wallet
         except Exception as e:
             logger.exception(f"Error fetching wallet for User ID: {user_id}")

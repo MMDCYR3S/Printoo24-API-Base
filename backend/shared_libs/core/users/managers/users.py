@@ -16,12 +16,12 @@ class UserQuerySet(BaseQuerySet):
         return self.filter(
             is_superuser=False, 
             is_staff=False,
-            user_roles__role__is_customer=True 
+            user_role__role__is_customer=True 
         )
 
     def staff(self):
         """فیلتر کردن فقط پرسنل"""
-        return self.filter(user_roles__role__is_customer=False)
+        return self.filter(user_role__role__is_customer=False)
 
     # ===== بهینه‌سازی کوئری‌ها (Eager Loading) ===== #
     def with_full_profile(self):
@@ -30,7 +30,7 @@ class UserQuerySet(BaseQuerySet):
 
     def with_roles(self):
         """همراه با نقش‌ها و دسترسی‌ها (برای پرسنل)"""
-        return self.prefetch_related('user_roles__role', 'user_permissions')
+        return self.prefetch_related('user_role__role', 'user_permissions')
 
     # ===== عملیات بالک (Bulk) ===== #
     def bulk_toggle_active(self, is_active: bool):
@@ -102,6 +102,6 @@ class UserManager(BaseUserManager):
     def get_role_breakdown(self) -> List[Dict[str, Any]]:
         from django.db.models import F
         return self.get_queryset().values(
-            role_name=F('user_roles__role__name'),
-            role_slug=F('user_roles__role__slug')
+            role_name=F('user_role__role__name'),
+            role_slug=F('user_role__role__slug')
         ).annotate(count=Count('id')).order_by('-count')

@@ -2,4 +2,4 @@ from .product_detail_service import ShopProductDetailService
 from .product_list_service import ShopProductListService
 from .product_category_service import ShopCategoryService
 from .product_comment_service import FeedbackService
-from core.domain.catalog.product.calculators import ProductPriceCalculator
+from core.product.services import ProductPriceCalculator

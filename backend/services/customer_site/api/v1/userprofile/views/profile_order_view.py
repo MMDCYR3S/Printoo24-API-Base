@@ -85,13 +85,6 @@ class UserOrderDetailAPIView(APIView):
                             "id": 501,
                             "product_name": "کارت ویزیت لمینت",
                             "quantity": 1000,
-                            "design_files": [
-                                {
-                                    "id": 10,
-                                    "requirement_name": "طرح رو",
-                                    "file_url": "https://api.printoo.ir/media/orders/front_v1.jpg"
-                                }
-                            ],
                             "specs": {
                                 "dimensions": "9 x 5 cm",
                                 "material": "گلاسه ۳۰۰ گرم",

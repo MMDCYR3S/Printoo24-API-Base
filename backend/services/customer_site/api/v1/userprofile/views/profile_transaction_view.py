@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiExample
 
-from apps.userprofile.services import WalletService
+from apps.userprofile.services import WalletAppService
 from ..serializers import WalletSerializer, WalletTransactionSerializer
 
 # ===== Wallet Detail API View ===== #
@@ -26,7 +26,7 @@ class WalletDetailAPIView(APIView):
         ]
     )
     def get(self, request):
-        self.service = WalletService(user=request.user)
+        self.service = WalletAppService(user=request.user)
         wallet = self.service.get_wallet_balance(request.user.id)
         serializer = WalletSerializer(wallet)
         return Response(serializer.data)
@@ -68,7 +68,7 @@ class WalletHistoryAPIView(APIView):
         ]
     )
     def get(self, request):
-        self.service = WalletService(user=request.user)
+        self.service = WalletAppService(user=request.user)
         transactions = self.service.get_transaction_history(request.user.id)
         serializer = WalletTransactionSerializer(transactions, many=True)
         return Response(serializer.data)

@@ -58,7 +58,7 @@ class CheckoutService:
         # ===== ایجاد سفارش ===== #
         order = Order.objects.create_order(
             user=user,
-            order_status=initial_status,
+            current_status=initial_status,
             address=address,
             total_price=cart_item.price,
             base_price=cart_item.price,

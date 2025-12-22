@@ -1,5 +1,5 @@
 from .user_detail_service import ProfileDetailService
 from .user_order_service import UserOrderListService
 from .user_address_service import UserAddressService
-from .user_transaction_service import WalletService
+from .user_transaction_service import WalletAppService
 from .user_feedback_service import UserFeedbackService

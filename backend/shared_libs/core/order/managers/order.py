@@ -47,7 +47,7 @@ class OrderQuerySet(models.QuerySet):
         
         files_prefetch = Prefetch(
             'files',
-            queryset=OrderItemFile.objects.filter(is_latest=True).select_related('requirement__spec')
+            queryset=OrderItemFile.objects.filter(is_latest=True)
         )
         
         items_prefetch = Prefetch(
@@ -83,7 +83,7 @@ class OrderQuerySet(models.QuerySet):
                 queryset=OrderItem.objects.select_related('product').prefetch_related(
                     Prefetch(
                         'files', 
-                        queryset=OrderItemFile.objects.filter(is_latest=True).select_related('requirement__spec').order_by('-version')
+                        queryset=OrderItemFile.objects.filter(is_latest=True).order_by('-version')
                     )
                 )
             ),
@@ -169,6 +169,9 @@ class OrderQuerySet(models.QuerySet):
 class OrderManager(models.Manager):
     def get_queryset(self):
         return OrderQuerySet(self.model, using=self._db)
+    
+    def get_order_by_id(self, order_id):
+        return self.get_queryset().get_order_by_id(order_id)
 
     # ===== Proxy Methods ===== #
     def filter_by_access(self, user):
@@ -215,10 +218,10 @@ class OrderManager(models.Manager):
         return self.get_queryset().get_top_customers_by_revenue(limit)
 
     # ===== Create Logic (from Repo) ===== #
-    def create_order(self, user, order_status, address, total_price, order_type, order_code, base_price):
+    def create_order(self, user, current_status, address, total_price, order_type, order_code, base_price):
         return self.create(
             user=user,
-            current_status=order_status,
+            current_status=current_status,
             address=address,
             total_price=total_price,
             base_products_price=base_price,

@@ -114,6 +114,9 @@ class ProductManager(models.Manager):
     def get_all_active_products(self):
         return self.get_queryset().get_all_active()
     
+    def get_all(self):
+        return self.get_queryset().get_all()
+    
     def get_all_products(self):
         return self.get_queryset().get_all()
 
