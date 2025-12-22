@@ -1,8 +1,8 @@
 from core.users.models import *
-from .product import *
-from .order import *
-from .cart import Cart, CartItem, CartItemUpload
-from .notification import CustomerNotification
-from .core import ContactUs, PromotionalModal, SliderIndex
-from .financial import *
-from .logger import *
+from core.product.models import *
+from core.order.models import *
+from core.cart.models import *
+from core.notifications.models import *
+from core.home.models import *
+from core.financial.models import *
+from core.logger.models import *
