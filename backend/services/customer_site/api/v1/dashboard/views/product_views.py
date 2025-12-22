@@ -53,7 +53,8 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         **نکات ساختاری:**
         * `shell`: شامل نام، اسلاگ، دسته‌بندی و قیمت پایه است.
         * `pricing_config`: تنظیمات ستاپ و هزینه‌های جانبی که به ویژگی‌ها ربطی ندارد.
-        * `quantity_ids`: لیست IDهای تیراژهای مجاز برای این محصول.
+        * `quantities`: لیست IDهای تیراژهای مجاز برای این محصول.
+        * `sizes`: لیست سایزهای مجاز و موجود به همراه قیمت
         """,
         request=ProductCoreCreateSerializer,
         responses={201: OpenApiTypes.OBJECT},
@@ -82,7 +83,24 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                         "max_quantity": 50000,
                         "accepts_custom_dimensions": False
                     },
-                    "quantity_ids": [1, 2, 3, 4]
+                    "quantities": [
+                        {
+                            "id": 1,
+                            "price": 150000 
+                        },
+                        {
+                            "id": 2,
+                            "price": 280000
+                        },
+                        {
+                            "id": 3,
+                            "price": 600000
+                        }
+                    ],
+                    "sizes": [
+                        { "id": 1, "price_impact": 0 },
+                        { "id": 2, "price_impact": 5000 }
+                    ]
                 },
                 request_only=True,
             )
@@ -118,7 +136,24 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                     "pricing_config": {
                         "base_setup_price": 60000
                     },
-                    "quantity_ids": [1, 5]
+                    "quantities": [
+                        {
+                            "id": 1,
+                            "price": 150000 
+                        },
+                        {
+                            "id": 2,
+                            "price": 280000
+                        },
+                        {
+                            "id": 3,
+                            "price": 600000
+                        }
+                    ],
+                    "sizes": [
+                        { "id": 1, "price_impact": 0 },
+                        { "id": 2, "price_impact": 5000 }
+                    ]
                 },
                 request_only=True,
             )
@@ -129,7 +164,12 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         serializer = ProductCoreCreateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         
-        self.app_service.update_full_product_core(id, serializer.validated_data)
+        # ===== تغییر: پاس دادن request.user ===== #
+        self.app_service.update_full_product_core(
+            product_id=id, 
+            user=request.user,
+            data=serializer.validated_data
+        )
         return Response({'status': 'Product core updated'})
 
     # ========== Option and Pricing API ========== #

@@ -350,7 +350,7 @@ class OptionInputType(models.TextChoices):
     SELECT = 'select', _('لیست کشویی (Select)')
     RADIO = 'radio', _('رادیو باتن (Radio)')
     CHECKBOX = 'checkbox', _('چک‌باکس چندتایی (Checkbox)')
-    BOOLEAN = 'boolean', _('سوییچ / تیک (Boolean)')
+    MULTI_SELECT = 'multi_select', _('انتخاب چندگانه (Multi Select / Checkboxes)')
 
 # ====== Option Pricing Strategy Model ====== #
 class OptionPricingStrategy(models.TextChoices):
@@ -364,7 +364,6 @@ class OptionPricingStrategy(models.TextChoices):
     # ===== فرمول‌های وابسته به ابعاد ===== #
     PER_SQM = 'per_sqm', _('براساس متر مربع (Area * Rate)')
     PER_METER_PERIMETER = 'per_perimeter', _('براساس متر محیط (Perimeter * Rate)')
-    
     # ===== فرمول‌های وابسته به ورودی ===== #
     PER_UNIT_INPUT = 'per_unit', _('براساس عدد ورودی کاربر (Input * Rate)')
     
@@ -387,7 +386,7 @@ class Option(models.Model):
     objects = OptionManager()
 
     def __str__(self):
-        return f"{self.label} ({self.get_input_type_display()})"
+        return f"{self.label}"
     
     class Meta:
         verbose_name = _("بانک ویژگی")

@@ -40,7 +40,8 @@ class ProductDashboardService:
         # ===== تفکیک داده ها ===== #
         shell_data = data.get('shell')
         pricing_data = data.get('pricing_config', {})
-        quantity_ids = data.get('quantity_ids', [])
+        quantities_data = data.get('quantities', [])
+        sizes_data = data.get('sizes', [])
         
         # ===== ایجاد محصول ===== #
         product = self._domain_service.create_product_shell(user, shell_data)
@@ -49,14 +50,18 @@ class ProductDashboardService:
         if pricing_data:
             self._domain_service.update_pricing_config(product.id, pricing_data)
             
+        if sizes_data:
+            self._domain_service.sync_sizes(product.id, user, sizes_data)
+            
         # ===== هماهنگی بین وابستگی ها ===== #
-        self._domain_service.sync_quantities(product.id, user, quantity_ids)
+        if quantities_data:
+            self._domain_service.sync_quantities(product.id, user, quantities_data)
 
         return product
     
     # ===== ویرایش اطلاعات اولیه ===== #
     @transaction.atomic
-    def update_full_product_core(self, product_id: int, data: Dict[str, Any]):
+    def update_full_product_core(self, product_id: int, user, data: Dict[str, Any]):
         """ ویرایش تجمیعی اطلاعات پایه """
         shell_data = data.get('shell')
         
@@ -68,8 +73,11 @@ class ProductDashboardService:
         if 'pricing_config' in data:
             self._domain_service.update_pricing_config(product_id, data['pricing_config'])
 
-        if 'quantity_ids' in data:
-            self._domain_service.sync_quantities(product_id, data['quantity_ids'])
+        if 'quantities' in data:
+            self._domain_service.sync_quantities(product_id, user, data['quantities'])
+            
+        if 'sizes' in data:
+            self._domain_service.sync_sizes(product_id, user, data['sizes'])
     
         return self._domain_service.get_product_detail_by_id(product_id)
     

@@ -23,6 +23,33 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         fields = ['name', 'slug', 'parent_name']
         read_only_fields = ['id', 'slug']
 
+# ===== 1. اضافه کردن سریالایزر جدید برای کانفیگ تیراژ ===== #
+class ProductQuantityConfigSerializer(serializers.Serializer):
+    """
+    دریافت شناسه تیراژ و قیمت اختصاصی آن برای محصول
+    """
+    id = serializers.IntegerField(help_text="شناسه تیراژ (Quantity ID)")
+    price = serializers.DecimalField(
+        max_digits=14, 
+        decimal_places=0, 
+        default=0, 
+        help_text="قیمت نهایی برای این تیراژ (تومان)"
+    )
+
+# ===== Product Size Serializer ===== #
+class ProductSizeConfigSerializer(serializers.Serializer):
+    """
+    برای دریافت ID سایز و تاثیر قیمت آن در هنگام ساخت محصول
+    """
+    id = serializers.IntegerField(help_text="شناسه سایز")
+    price_impact = serializers.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        required=False, 
+        default=0,
+        help_text="مبلغ اضافه برای این سایز"
+    )
+
 # ===== Product  Serializer ===== #
 class ProductSerializer(serializers.ModelSerializer):
     detail_url = serializers.HyperlinkedIdentityField(
@@ -69,7 +96,7 @@ class OptionValueOverrideSerializer(serializers.Serializer):
     """
     اطلاعاتی که ادمین می‌خواهد همان لحظه برای مقادیر اعمال کند.
     """
-    global_value_id = serializers.IntegerField(help_text="ID مقدار در بانک ویژگی‌ها")
+    global_value_id = serializers.IntegerField(help_text="ID مقدار در بانک ویژگی‌ها", required=False, allow_null=True)
     price_impact = serializers.DecimalField(max_digits=14, decimal_places=0, required=False, default=0)
     is_default = serializers.BooleanField(required=False, default=False)
     is_active = serializers.BooleanField(required=False, default=True)
@@ -135,7 +162,9 @@ class ProductCoreCreateSerializer(serializers.Serializer):
     shell = ProductShellSerializer(required=True)
     pricing_config = ProductPricingConfigSerializer(required=True)
 
-    quantity_ids = serializers.ListField(child=serializers.IntegerField(), required=False)
+    quantities = ProductQuantityConfigSerializer(many=True, required=False)
+
+    sizes = ProductSizeConfigSerializer(many=True, required=False)
 
 
 # ===== API 2: Options Bulk ===== #
@@ -162,14 +191,36 @@ class ProductDetailSerializer(serializers.Serializer):
     
     # لیست‌ها
     quantities = serializers.SerializerMethodField()
+    sizes = serializers.SerializerMethodField()
     images = ProductImageSerializer(source='product.product_image', many=True)
     
     # آپشن‌ها (از ساختار درختی که سرویس برمی‌گرداند)
     options = serializers.ListField(source='structured_options')
 
+    def get_sizes(self, obj):
+        product = obj['product']
+        return {
+            'sizes': [
+                {
+                    'name': ps.size.name,
+                    'width': ps.size.width,
+                    'height': ps.size.height,
+                    'price': ps.price_impact
+                }
+                for ps in product.product_size.all()
+            ]
+        }
+    
+
     def get_quantities(self, obj):
         product = obj['product']
-        return [pq.quantity.value for pq in product.product_quantity.all()]
+        return [
+            {
+                "value": pq.quantity.value,
+                "price": pq.price,
+            }
+            for pq in product.product_quantity.all()
+        ]
 
 
 class OptionConfigUpdateSerializer(serializers.Serializer):

@@ -5,7 +5,7 @@ from core.models import Option, OptionValue
 class OptionValueSerializer(serializers.ModelSerializer):
     class Meta:
         model = OptionValue
-        fields = ['id', 'label', 'value']
+        fields = ['id', 'label', 'value', 'input_type']
         read_only_fields = ['id']
 
 # ===== Option Serializer (Nested) ===== #

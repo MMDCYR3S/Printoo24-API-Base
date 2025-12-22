@@ -8,7 +8,8 @@ from ..exceptions import (
 )
 from ..models import (
     Product, ProductPricingConfig, ProductQuantity, 
-    ProductOption, ProductOptionValue, Option
+    ProductOption, ProductOptionValue, Option, ProductSize,
+    ProductQuantity, Quantity, Size,
 )
 
 class ProductService:
@@ -58,6 +59,40 @@ class ProductService:
             "product": product,
             "structured_options": self._format_product_options(product)
         }
+
+    @transaction.atomic
+    def sync_sizes(self, product_id: int, user, size_configs: List[Dict]):
+        """
+        همگام‌سازی سایزهای محصول.
+        ورودی: لیستی از دیکشنری‌ها شامل id و price_impact
+        """
+
+        product = Product.objects.get_by_id(product_id)
+        if not product:
+            raise ProductNotFoundException("محصول یافت نشد.")
+
+        # ===== اعتبارسنجی وجود سایزها ===== #
+        size_ids = [item['id'] for item in size_configs]
+        valid_sizes_count = Size.objects.filter(id__in=size_ids).count()
+        if valid_sizes_count != len(set(size_ids)):
+             raise InvalidProductDataException("برخی از شناسه های سایز نامعتبر هستند.")
+
+        # ===== حذف سایزهای قبلی (Full Sync Strategy) ===== #
+        ProductSize.objects.filter(product=product).delete()
+
+        # ===== ایجاد سایزهای جدید ===== #
+        new_relations = [
+            ProductSize(
+                user=user, 
+                product=product, 
+                size_id=item['id'], 
+                price_impact=item.get('price_impact', 0)
+            )
+            for item in size_configs
+        ]
+        
+        if new_relations:
+            ProductSize.objects.bulk_create(new_relations)
 
     def get_products_by_category_ids(self, category_ids: List[int]):
         """
@@ -114,21 +149,37 @@ class ProductService:
         config.save()
         return config
 
-    # ===== Quantity Logic ===== #
+    # ===== Quantity Logic (Refactored) ===== #
     @transaction.atomic
-    def sync_quantities(self, product_id: int, user, quantity_ids: List[int]):
-        """ همگام‌سازی تیراژها """
+    def sync_quantities(self, product_id: int, user, quantity_configs: List[Dict]):
+        """ 
+        همگام‌سازی تیراژها با قیمت اختصاصی.
+        ورودی: لیستی از دیکشنری‌ها شامل {id, price}
+        """
+        # ===== دریافت محصول ===== #
         product = Product.objects.get_by_id(product_id)
         if not product:
             raise ProductNotFoundException("محصول یافت نشد.")
 
+        # ===== اعتبارسنجی وجود تیراژها ===== #
+        quantity_ids = [item['id'] for item in quantity_configs]
+        valid_count = Quantity.objects.filter(id__in=quantity_ids).count()
+        
+        if valid_count != len(set(quantity_ids)):
+             raise InvalidProductDataException("برخی از شناسه‌های تیراژ نامعتبر هستند.")
+
         # ===== حذف تیراژهای قبلی ===== #
         ProductQuantity.objects.filter(product=product).delete()
 
-        # ===== ایجاد تیراژهای جدید ===== #
+        # ===== ایجاد تیراژهای جدید با قیمت ===== #
         new_relations = [
-            ProductQuantity(user=user, product=product, quantity_id=qid, price=0)
-            for qid in quantity_ids
+            ProductQuantity(
+                user=user, 
+                product=product, 
+                quantity_id=item['id'], 
+                price=item.get('price', 0)
+            )
+            for item in quantity_configs
         ]
         
         if new_relations:
@@ -258,8 +309,9 @@ class ProductService:
         )
 
         overrides_map = {
-            item['global_value_id']: item 
+            item.get('global_value_id'): item 
             for item in data.get('values_config', [])
+            if item.get('global_value_id') is not None
         }
 
         local_values = []
