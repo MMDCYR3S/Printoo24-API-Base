@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 
 from core.financial.models import Invoice, Transaction, Quotation
 from core.models import User, Order
-
 from core.domain.infrastructure.logger import AuditLogDomainService
 
 # ========== FINANCIAL SERVICE ========== #

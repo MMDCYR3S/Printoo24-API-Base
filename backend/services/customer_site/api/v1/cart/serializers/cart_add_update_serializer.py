@@ -5,32 +5,30 @@ class SelectionsSerializer(serializers.Serializer):
     """
     سریالایزر پایه برای انتخاب‌های کاربر (مشترک بین افزودن و ویرایش).
     """
-    quantity = serializers.IntegerField(required=True, min_value=1, help_text="تعداد سفارش")
+    # ===== تیراژ - انتخاب از لیست یا وارد کردن دلخواه براساس نوع محصول ===== #
+    quantity = serializers.IntegerField(required=False, min_value=1, help_text="تعداد دلخواه (برای محصولات بدون تیراژ ثابت)")
+    quantity_id = serializers.IntegerField(required=False, help_text="شناسه تیراژ (برای محصولات با تیراژ ثابت)")
     
-    # سایز استاندارد (اختیاری)
+    # ===== انتخاب سایز براساس شناسه یا ابعاد دلخواه ===== #
     size_id = serializers.IntegerField(required=False, allow_null=True)
-    
-    # ابعاد دلخواه
     width = serializers.FloatField(required=False, min_value=0.1)
     height = serializers.FloatField(required=False, min_value=0.1)
     
-    # لیست ID مقادیر انتخاب شده (ProductOptionValue IDs)
-    option_value_ids = serializers.ListField(
-        child=serializers.IntegerField(), 
+    # ===== انتخاب ویژگی های مربوط به محصول ===== #
+    options = serializers.DictField(
         required=False, 
-        default=[]
+        default={},
+        help_text="دیکشنری انتخاب‌ها. کلید=ID آپشن، مقدار=مقدار انتخابی"
     )
-    
+    # ===== آیا کاربر فایل طراحی دارد یا خیر ===== #
     has_design = serializers.BooleanField(required=False, default=True)
-
     def validate(self, data):
         """
-        جلوگیری از تضاد ابعاد
+        اعتبارسنجی منطقی (Cross-field validation)
         """
-        # اگر سایز ID دارد، نباید طول/عرض داشته باشد
+        # ===== چک کردن سایز و ابعاد و تضاد آن ===== #
         if data.get('size_id') and (data.get('width') or data.get('height')):
             raise serializers.ValidationError("نمی‌توانید همزمان سایز استاندارد و ابعاد دلخواه را وارد کنید.")
-            
         return data
 
 # ======== Add To Cart Serializer ======== #
@@ -38,20 +36,22 @@ class AddToCartSerializer(serializers.Serializer):
     """
     ورودی متد POST /cart/add/
     """
-    product_slug = serializers.SlugField(required=True)
-    selections = SelectionsSerializer() 
+    product_id = serializers.IntegerField(required=True, help_text="شناسه محصول")
+    selections = SelectionsSerializer()
 
 # ======== Cart Item Update Serializer ======== #
 class CartItemUpdateSerializer(serializers.Serializer):
     """
     ورودی متد PATCH /cart/items/{id}/
-    دقیقاً همان فیلدهای Selections را دارد اما فلت (بدون تودرتو).
     """
     quantity = serializers.IntegerField(required=False, min_value=1)
+    quantity_id = serializers.IntegerField(required=False)
+    
     size_id = serializers.IntegerField(required=False, allow_null=True)
     width = serializers.FloatField(required=False, min_value=0.1)
     height = serializers.FloatField(required=False, min_value=0.1)
-    option_value_ids = serializers.ListField(child=serializers.IntegerField(), required=False, default=[])
+    
+    options = serializers.DictField(required=False, default={})
     has_design = serializers.BooleanField(required=False)
 
     def validate(self, data):

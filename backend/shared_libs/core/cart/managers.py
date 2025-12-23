@@ -47,6 +47,18 @@ class CartManager(models.Manager):
 class CartItemQuerySet(BaseQuerySet):
     """کوئری‌های مربوط به آیتم‌های سبد"""
     
+    def get_item_by_id(self, item_id, user):
+        """
+        یک آیتم خاص با شناسه یکسان را پیدا می‌کند.
+        """
+        try:
+            return self.select_related('cart', 'product').get(
+                id=item_id, 
+                cart__user=user
+            )
+        except self.model.DoesNotExist:
+            raise ItemNotFoundException("آیتمی با شناسه وارد شده یافت نشد.")
+
     def find_item_in_cart(self, cart, product, items: Dict):
         """
         یک آیتم خاص با مشخصات یکسان را در سبد خرید پیدا می‌کند.
@@ -54,13 +66,19 @@ class CartItemQuerySet(BaseQuerySet):
         try:
             return self.get(cart=cart, product=product, items=items)
         except self.model.DoesNotExist:
-            raise ItemNotFoundException("آیتم در سبد خرید پیدا نشد.")
+            pass
 
     def get_items_by_cart(self, cart):
         """
         تمام آیتم‌های یک سبد خرید را برمی‌گرداند.
         """
         return self.filter(cart=cart).prefetch_related('uploads', 'product')
+    
+    def get_items_with_product(self, cart):
+        """
+        دریافت آیتم‌ها به همراه اطلاعات محصول (برای نمایش در سبد).
+        """
+        return self.filter(cart=cart).select_related('product').prefetch_related('product__product_image')
 
     def get_item_details(self, item_id: int, user):
         """
@@ -76,6 +94,18 @@ class CartItemQuerySet(BaseQuerySet):
             )
         except self.model.DoesNotExist:
             return None
+        
+    def find_duplicate_item(self, cart, product, items_data):
+        """
+        جستجوی آیتم دقیقاً مشابه (برای جلوگیری از تکرار).
+        نکته: مقایسه JSONField در دیتابیس‌های مختلف متفاوت است. 
+        اینجا فرض بر تطابق دقیق دیکشنری JSON است.
+        """
+        return self.filter(
+            cart=cart, 
+            product=product, 
+            items=items_data
+        ).first()
 
 # ========== CART ITEM MANAGERS ========== #
 class CartItemManager(models.Manager):
@@ -91,8 +121,15 @@ class CartItemManager(models.Manager):
     def get_item_details(self, item_id: int, user):
         return self.get_queryset().get_item_details(item_id, user)
 
+            
+    def get_item_by_id(self, item_id, user):
+        return self.get_queryset().get_item_by_id(item_id, user)
+
     def delete_all_items_by_cart(self, cart):
         """
         تمام آیتم‌های مرتبط با یک سبد خرید را به صورت دسته‌جمعی حذف می‌کند.
         """
         self.filter(cart=cart).delete()
+        
+    def find_similar(self, cart, product, items_data):
+        return self.get_queryset().find_duplicate_item(cart, product, items_data)

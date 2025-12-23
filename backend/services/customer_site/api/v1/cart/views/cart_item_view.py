@@ -57,7 +57,7 @@ class CartItemDetailView(GenericAPIView):
         service = CartItemDetailService()
         
         try:
-            item = service.get_item_detail(item_id=item_id, user=request.user)
+            item = service.get_item_detail(item_id, request.user)
             serializer = self.get_serializer(item)
             return Response(serializer.data, status=status.HTTP_200_OK)
             

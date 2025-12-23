@@ -1,4 +1,3 @@
-import math
 import logging
 from decimal import Decimal, ROUND_HALF_UP
 from typing import List, Dict, Union, Optional, Tuple
@@ -15,8 +14,7 @@ logger = logging.getLogger('shop.services.pricing')
 
 class ProductPriceCalculator:
     """
-    سرویس محاسبه قیمت محصول.
-    منطق جدید: محاسبه هزینه یک "واحد مبنا" (مثلاً بسته ۵۰۰ تایی) و ضرب در تعداد واحدها.
+    سرویس محاسبه قیمت محصول (نسخه ایمن برای ویژگی‌های کاستوم).
     """
 
     def __init__(
@@ -39,50 +37,40 @@ class ProductPriceCalculator:
         self.selected_size_id = selected_size_id
         self.has_design = has_design
         
-        # محاسبات اولیه هندسی (مساحت و محیط یک عدد محصول تکی)
+        # محاسبات هندسی
         self.area_sqm_single = (self.width * self.height) / Decimal(10000)
         self.perimeter_m_single = (self.width + self.height) * Decimal(2) / Decimal(100)
         
         self.config = getattr(product, 'pricing_config', None)
         
-        # ===== محاسبه ضریب (Multiplier) ===== #
-        # مثال: price_per_unit = 500 (مبنا)
-        # quantity = 2000 (سفارش مشتری)
-        # multiplier = 4 (یعنی ۴ بسته ۵۰۰ تایی)
-        
+        # محاسبه ضریب
         self.price_per_unit = getattr(product, 'price_per_unit', 1)
         if self.price_per_unit < 1: self.price_per_unit = 1
             
         self.qty_multiplier = Decimal(self.quantity) / Decimal(self.price_per_unit)
-        
-        logger.info(f"Calc Init: Product={product.id}, Qty={quantity}, BaseUnit={self.price_per_unit}, Multiplier={self.qty_multiplier}")
 
     def calculate(self) -> Dict[str, Union[float, Dict]]:
         if self.quantity <= 0:
-            return {"final_price": 0.0, "details": {}}
+            return {"final_price": 0.0, "breakdown": {}}
 
-        # 1. محاسبه قیمت یک واحد مبنا (Base Price Per Block)
-        # این قیمت شامل قیمت خود محصول + قیمت سایز برای "یک بسته" است.
+        # 1. محاسبه قیمت پایه واحد
         base_unit_cost, base_cost_breakdown = self._calculate_base_unit_cost()
 
-        # 2. محاسبه هزینه آپشن‌ها برای یک واحد مبنا (Options Cost Per Block)
+        # 2. محاسبه هزینه آپشن‌ها (جایی که ارور می‌داد)
         options_unit_cost, options_breakdown = self._calculate_options_unit_cost(base_unit_cost)
 
-        # 3. محاسبه قیمت کل (ضرب در ضریب)
-        # (قیمت پایه واحد + قیمت آپشن واحد) * ضریب تعداد
+        # 3. جمع کل
         total_items_price = (base_unit_cost + options_unit_cost) * self.qty_multiplier
 
-        # 4. هزینه‌های سربار (Fees)
-        # نکته: هزینه‌های ستاپ معمولاً یکبار در کل سفارش حساب می‌شوند و ضرب نمی‌شوند.
+        # 4. سربار
         setup_cost = self.config.base_setup_price if self.config else Decimal(0)
         design_cost = Decimal(0)
         if self.config and self.config.design_service_available and not self.has_design:
             design_cost = self.config.design_fee
 
-        # ===== تجمیع نهایی ===== #
         total_raw = total_items_price + setup_cost + design_cost
 
-        # اعمال Modifier
+        # 5. مودیفایر
         if hasattr(self.product, 'price_modifier_percent') and self.product.price_modifier_percent != 0:
             modifier = (total_raw * self.product.price_modifier_percent) / 100
             total_raw += modifier
@@ -92,10 +80,10 @@ class ProductPriceCalculator:
         return {
             "final_price": float(final_price),
             "breakdown": {
-                "base_unit_cost": float(base_unit_cost), # قیمت یک بسته پایه
-                "options_unit_cost": float(options_unit_cost), # قیمت آپشن‌های یک بسته
-                "qty_multiplier": float(self.qty_multiplier), # ضریب (مثلا 4)
-                "total_items_price": float(total_items_price), # جمع کل قبل از سربار
+                "base_unit_cost": float(base_unit_cost),
+                "options_unit_cost": float(options_unit_cost),
+                "qty_multiplier": float(self.qty_multiplier),
+                "total_items_price": float(total_items_price),
                 "setup_fee": float(setup_cost),
                 "design_fee": float(design_cost),
                 "options_details": options_breakdown,
@@ -170,7 +158,7 @@ class ProductPriceCalculator:
 
     def _calculate_options_unit_cost(self, current_base_unit_cost: Decimal):
         """
-        محاسبه هزینه آپشن‌ها برای "یک واحد مبنا".
+        محاسبه هزینه آپشن‌ها (اصلاح شده برای جلوگیری از ارور NoneType)
         """
         total_option_cost = Decimal(0)
         details = []
@@ -185,63 +173,53 @@ class ProductPriceCalculator:
             if not val.has_pricing:
                 continue
 
+            # والد (ProductOption)
             parent_config = val.product_option
-            # دریافت استراتژی (با فرض اینکه در آپشن تعریف شده)
-            strategy = getattr(parent_config.option, 'pricing_strategy', STRAT_FIXED) 
             
-            # ریت: قیمتی که ادمین وارد کرده
+            # [FIXED] دریافت استراتژی به صورت ایمن
+            # اگر به بانک وصل بود، استراتژی را از آنجا بگیر، وگرنه پیش‌فرض FIXED
+            strategy = STRAT_FIXED
+            if parent_config.option:
+                strategy = getattr(parent_config.option, 'pricing_strategy', STRAT_FIXED)
+            
             rate = val.price_impact
-            
-            # هزینه ستاپ آپشن (یک بار در کل سفارش اعمال می‌شود، نه در هر بلوک)
-            # اما ما اینجا داریم هزینه واحد بلوک را حساب می‌کنیم. 
-            # ستاپ را باید جداگانه هندل کرد یا تقسیم بر تعداد بلوک کرد؟
-            # روش استاندارد: ستاپ آپشن معمولاً سربار کل است.
-            # برای سادگی فعلاً آن را به "اولین بلوک" اضافه می‌کنیم یا در جمع نهایی میاریم.
-            # طبق کد قبلی: base_opt_setup = parent_config.base_price
-            # چون ساختار را تغییر دادیم، ستاپ آپشن را اینجا نادیده می‌گیرم و فرض می‌کنم در rate لحاظ شده 
-            # یا باید در متد calculate اصلی به عنوان سربار جداگانه اضافه شود.
-            # (طبق لاجیک شما: همه چیز باید ضریب بخورد، پس ستاپ آپشن هم ضریب می‌خورد اگر اینجا باشد)
-            
             option_cost_per_block = Decimal(0)
 
-            # --- محاسبه قیمت برای یک واحد مبنا (Block) --- #
-            
+            # [LOGIC] محاسبه بر اساس استراتژی
             if strategy == STRAT_FIXED:
-                # مبلغ ثابت برای هر بسته
                 option_cost_per_block = rate
 
             elif strategy == STRAT_PER_SQM:
-                # نرخ * مساحت کلِ یک بسته
                 area_of_one_block = self.area_sqm_single * Decimal(self.price_per_unit)
                 option_cost_per_block = area_of_one_block * rate
 
             elif strategy == STRAT_PER_METER:
-                # نرخ * محیط کلِ یک بسته
                 perimeter_of_one_block = self.perimeter_m_single * Decimal(self.price_per_unit)
                 option_cost_per_block = perimeter_of_one_block * rate
 
             elif strategy == STRAT_PERCENT:
-                # درصدی از قیمت پایه همان بسته
                 option_cost_per_block = current_base_unit_cost * (rate / 100)
                 
             elif strategy == STRAT_INPUT:
-                # ورودی کاربر * نرخ * (شاید تعداد در بسته؟)
-                # معمولاً این ورودی برای "هر عدد" است یا "کل سفارش"؟
-                # فرض: ورودی کاربر (مثلا تعداد خط تا) برای کل سفارش است.
-                # پس اگر بخواهیم در ضریب ضرب شود، باید تقسیم بر ضریب کنیم؟
-                # ساده ترین حالت: rate برای هر بسته است.
-                input_key = str(parent_config.option.id)
-                user_val = int(self.user_input_data.get(input_key, 0))
-                option_cost_per_block = user_val * rate
+                # [FIXED] کلید دیکشنری باید ID خود ProductOption باشد نه Option
+                # چون برای کاستوم‌ها Option نداریم.
+                input_key = str(parent_config.id) 
+                user_val = float(self.user_input_data.get(input_key, 0))
+                option_cost_per_block = Decimal(user_val) * rate
             
             total_option_cost += option_cost_per_block
             
+            # [FIXED] دریافت نام ویژگی به صورت ایمن
+            option_label = parent_config.label
+            if not option_label and parent_config.option:
+                option_label = parent_config.option.label
+            if not option_label:
+                option_label = parent_config.name # Fallback نهایی
+
             details.append({
-                "option": parent_config.option.label,
+                "option": option_label, # اینجا قبلاً ارور می‌داد
                 "value": val.label,
-                "strategy": strategy,
-                "cost_per_block": float(option_cost_per_block),
-                "total_line_cost": float(option_cost_per_block * self.qty_multiplier)
+                "cost": float(option_cost_per_block)
             })
 
         return total_option_cost, details
