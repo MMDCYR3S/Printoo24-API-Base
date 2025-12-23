@@ -62,26 +62,18 @@ class ProductDetailView(RetrieveAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         slug = self.kwargs.get(self.lookup_field)
-        
-        # 1. فراخوانی سرویس اپلیکیشن
         service = ShopProductDetailService()
         
         try:
-            # دیتا شامل product object و دیکشنری options است
-            data = service.get_product_detail_for_display(slug=slug)
+            product_instance = service.get_product_detail_for_display(slug=slug)
             
-            if data is None:
+            if product_instance is None:
                 return Response({"detail": "محصول یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
-            
-            # 2. پاس دادن به سریالایزر
-            # نکته: context={'request': request} برای ساخت URL کامل عکس‌ها ضروری است
-            serializer = self.get_serializer(data, context={'request': request})
+            serializer = self.get_serializer(product_instance, context={'request': request})
             return Response(serializer.data)
-            
         except Exception as e:
-            # لاگ کردن خطا در پروداکشن ضروری است
             return Response(
-                {"detail": "خطایی در دریافت اطلاعات محصول رخ داد.", "error": str(e)}, 
+                {"detail": "خطای داخلی.", "error": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

@@ -4,7 +4,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.exceptions import ValidationError
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from ..serializers import RegisterSerializer, LoginSerializer, UserDetailSerializer
 from apps.accounts.services import AuthService
@@ -44,7 +44,19 @@ class RegisterAPIView(GenericAPIView):
 
 
 # ====== Login API View ====== #
-@extend_schema(tags=['Accounts'])
+@extend_schema(
+    tags=['Accounts'],
+    examples=[
+            OpenApiExample(
+                'Login Example',
+                value={
+                    "username": "admin",
+                    "password": "admin"
+                },
+                request_only=True
+            ),
+    ]
+)
 class LoginAPIView(GenericAPIView):
     """
     ورود کاربر به واسطه نام کاربری و رمز عبور

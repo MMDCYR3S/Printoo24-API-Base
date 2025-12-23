@@ -93,6 +93,7 @@ class ProductDashboardService:
                 self._domain_service.attach_option_with_config(product_id, opt_data)
                 results.append({'option_id': opt_data['option_id'], 'status': 'synced'})
             except Exception as e:
+                logger.error(f"Error syncing option {opt_data.get('option_id')}: {e}")
                 raise e
         return results
     

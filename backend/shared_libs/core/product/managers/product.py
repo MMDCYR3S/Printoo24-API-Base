@@ -15,6 +15,7 @@ class ProductQuerySet(BaseQuerySet):
     def _get_detail_queryset(self):
         """
         یک کوئری‌ست پایه و سنگین که تمام روابط مورد نیاز را بارگذاری می‌کند (Eager Loading).
+        این نسخه اصلاح شده برای مدیریت روابط اختیاری است.
         """
         # ===== ایمپورت محلی برای جلوگیری از خطا ===== #
         from core.product.models import (
@@ -30,20 +31,20 @@ class ProductQuerySet(BaseQuerySet):
             Prefetch('product_quantity', queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')),
             Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__width')),
             
-            # ===== بارگذاری ویژگی ها ===== #
+            # ===== بارگذاری ویژگی ها (بخش حساس) ===== #
             Prefetch(
                 'options', 
                 queryset=ProductOption.objects.select_related('option').prefetch_related(
                     Prefetch(
                         'choices', 
-                        queryset=ProductOptionValue.objects.order_by('order')
+                        queryset=ProductOptionValue.objects.select_related('global_source').order_by('order')
                     )
                 ).order_by('order')
             ),
             
             # ===== بارگذاری تصاویر و فایل های پیوست ===== #
             Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
-            Prefetch('product_attachment_product', queryset=ProductAttachment.objects.order_by('id')),
+            Prefetch('product_attachment_product', queryset=ProductAttachment.objects.select_related('attachment').order_by('id')),
         )
 
     def _get_optimized_queryset(self):

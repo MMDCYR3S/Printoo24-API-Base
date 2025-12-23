@@ -1,15 +1,9 @@
 from rest_framework import serializers
 from core.models import (
-    Product, 
-    ProductCategory, 
-    ProductQuantity, 
-    ProductSize,  
-    ProductOption,  
-    ProductOptionValue,
-    ProductImage,
-    ProductAttachment,
-    ProductComment,
-    ProductPricingConfig,
+    Product, ProductCategory, ProductQuantity, ProductSize, 
+    ProductOption, ProductOptionValue, ProductImage, 
+    ProductAttachment, ProductComment, ProductPricingConfig,
+    GuideType
 )
 
 # ==========================================
@@ -44,71 +38,83 @@ class ProductPricingConfigSerializer(serializers.ModelSerializer):
 # ==========================================
 
 class QuantityDetailSerializer(serializers.ModelSerializer):
+    """
+    نمایش تیراژ‌ها (Quantities) در صفحه محصول.
+    """
+    guide_text = serializers.CharField()
+    guide_type = serializers.CharField()
+
     class Meta:
         model = ProductQuantity
-        fields = ['id', 'quantity', 'price']
+        fields = ['id', 'quantity', 'price', 'guide_text', 'guide_type']
 
 class SizeDetailSerializer(serializers.ModelSerializer):
+    """
+    نمایش سایز‌ها (Sizes) در صفحه محصول.
+    """
     name = serializers.CharField(source='size.name', read_only=True)
     width = serializers.FloatField(source='size.width', read_only=True)
     height = serializers.FloatField(source='size.height', read_only=True)
+
+    guide_text = serializers.CharField()
+    guide_type = serializers.CharField()
     
     class Meta:
         model = ProductSize
-        fields = ['id', 'name', 'width', 'height', 'price_impact']
-        
+        fields = ['id', 'name', 'width', 'height', 'price_impact', 'guide_text', 'guide_type']
+    
 # ==========================================
 # 3. NEW OPTION SYSTEM SERIALIZERS (Dynamic)
 # ==========================================
 
 class ProductOptionValueSerializer(serializers.ModelSerializer):
     """
-    نمایش گزینه‌های قابل انتخاب (Choices) مثل: مات، براق، قرمز.
+    نمایش مقادیر (Choices) در صفحه محصول فروشگاه.
     """
-    description = serializers.SerializerMethodField()
+    is_custom = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductOptionValue
         fields = [
-            'id', 
-            'label', 
-            'value', 
-            'price_impact',   # مبلغی که به کاربر نمایش میدهیم (+5000)
-            'quantity_step',  # گام شمارش (هر 10 عدد)
-            'is_default',
-            'description'     # متن توضیحی تولید شده
+            'id', 'label', 'value', 'price_impact', 
+            'is_default', 'is_custom', 'order',
+            'guide_text', 'guide_type' # [NEW] راهنمای مقدار
         ]
 
-    def get_description(self, obj):
-        """تولید متن راهنما برای کاربر (مثلا: هر 100 عدد)"""
-        if obj.quantity_step > 1:
-            return f"قیمت محاسبه شده به ازای هر {obj.quantity_step} عدد می‌باشد."
-        return ""
+    def get_is_custom(self, obj):
+        return obj.global_source is None
 
 class ProductOptionSerializer(serializers.ModelSerializer):
     """
-    نمایش خود ویژگی (سوال) به همراه لیست گزینه‌ها.
+    نمایش ویژگی‌ها (Options) در صفحه محصول.
+    مدیریت کامل کاستوم/لینک‌دار + راهنما.
     """
-    name = serializers.CharField(source='option.name', read_only=True)
-    label = serializers.CharField(source='option.label', read_only=True)
-    type = serializers.CharField(source='option.input_type', read_only=True)
-    description = serializers.CharField(source='option.description', read_only=True)
+    name = serializers.SerializerMethodField()
+    label = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
     
-    # ===== Nested Choices ===== #
+    # لیست مقادیر
     choices = ProductOptionValueSerializer(many=True, read_only=True)
 
     class Meta:
         model = ProductOption
         fields = [
-            'id', 
-            'name', 
-            'label', 
-            'type', 
-            'is_required', 
-            'description', 
-            'has_pricing', 
-            'choices'
+            'id', 'name', 'label', 'type', 
+            'is_required', 'choices', 'order',
+            'guide_text', 'guide_type' # [NEW] راهنمای ویژگی
         ]
+
+    def get_name(self, obj):
+        if obj.name: return obj.name
+        return obj.option.name if obj.option else None
+
+    def get_label(self, obj):
+        if obj.label: return obj.label
+        return obj.option.label if obj.option else None
+
+    def get_type(self, obj):
+        if obj.input_type: return obj.input_type
+        return obj.option.input_type if obj.option else 'select'
 
 # ==========================================
 # 4. MEDIA & FILES SERIALIZERS
@@ -171,42 +177,50 @@ class ProductListSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(img.image.url) if request else img.image.url
         return None
 
+# ========== Product Detail Serializer ========== #
 class ProductDetailSerializer(serializers.Serializer):
     """
-    سریالایزر جامع محصول.
-    نکته: چون خروجی سرویس یک دیکشنری ترکیبی است، از ModelSerializer استفاده نمی‌کنیم.
+    سریالایزر نهایی صفحه محصول (ترکیب تمام اطلاعات).
     """
-    # 1. اطلاعات پایه محصول
     product_info = serializers.SerializerMethodField()
-    
-    # 2. تنظیمات قیمت (بسیار مهم)
     pricing_config = serializers.SerializerMethodField()
     
-    # 3. لیست‌های قدیمی (Legacy)
-    quantities = QuantityDetailSerializer(many=True)
-    sizes = SizeDetailSerializer(many=True)
-    options = serializers.JSONField() 
+    quantities = serializers.SerializerMethodField()
+    sizes = serializers.SerializerMethodField()
     
-    # 5. فایل‌ها و مدیا
-    images = ProductImageSerializer(many=True)
+    options = ProductOptionSerializer(many=True)
+    
+    images = ProductImageSerializer(source='product_image', many=True)
 
     def get_product_info(self, obj):
-        product = obj['product']
+        
+        product = obj
         return {
             "id": product.id,
             "name": product.name,
+            "parent_category": product.category.parent.name if product.category.parent else None,
+            "children_category": product.category.name if product.category else None,
             "slug": product.slug,
             "description": product.description,
             "price": product.price,
             "has_price": product.has_price,
-            "code": product.code
+            "code": product.code,
+            "guide_text": product.guide_text, # [NEW] راهنمای کلی محصول
+            "guide_type": product.guide_type
         }
 
     def get_pricing_config(self, obj):
-        product = obj['product']
-        if hasattr(product, 'pricing_config'):
-            return ProductPricingConfigSerializer(product.pricing_config).data
+        if hasattr(obj, 'pricing_config'):
+            return ProductPricingConfigSerializer(obj.pricing_config).data
         return None
+
+    def get_quantities(self, obj):
+        qs = obj.product_quantity.all().select_related('quantity')
+        return QuantityDetailSerializer(qs, many=True).data
+
+    def get_sizes(self, obj):
+        qs = obj.product_size.all().select_related('size')
+        return SizeDetailSerializer(qs, many=True).data
     
 # ===== Input Serializer (برای ثبت نظر) ===== #
 class SubmitReviewSerializer(serializers.Serializer):

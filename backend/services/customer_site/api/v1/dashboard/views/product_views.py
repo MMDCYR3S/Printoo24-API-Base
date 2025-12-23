@@ -22,8 +22,8 @@ from ..serializers import (
 @extend_schema(tags=['Dashboard-Product-Refactored'])
 class ProductDashboardViewSet(viewsets.ViewSet):
     """
-    مدیریت محصول با معماری ۳-مرحله‌ای (Core, Options, Media).
-    این ویو کنترل‌کننده اصلی منطق بیزنس محصولات در پنل ادمین است.
+    مدیریت جامع محصولات (نسخه ۳ لایه).
+    شامل تعریف هسته، تنظیمات قیمت، ویژگی‌ها و مدیا.
     """
     lookup_field = 'id'
     
@@ -31,9 +31,9 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         super().__init__(**kwargs)
         self.app_service = ProductDashboardService()
 
-    # ========== Core Product API Create ========== #
+    # ========== LIST ========== #
     def list(self, request):
-        """ نمایش لیست محصولات """
+        """ نمایش لیست خلاصه محصولات """
         try:
             products = self.app_service.get_all_products() 
             serializer = ProductSerializer(products, many=True, context={'request': request})
@@ -44,63 +44,99 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    # ========== CREATE CORE ========== #
     @extend_schema(
-        summary="مرحله ۱: ایجاد اطلاعات پایه محصول",
+        summary="مرحله ۱: ایجاد محصول (هسته + قیمت + تیراژ + سایز)",
         description="""
         **توضیحات:**
-        این اولین مرحله ساخت محصول است. در اینجا اطلاعات شناسنامه‌ای (Shell) و تنظیمات کلی (Config) دریافت می‌شود.
+        این متد قلب تعریف محصول است. شما می‌توانید همزمان:
+        1. اطلاعات شناسنامه‌ای (نام، کد، اسلاگ) را تعریف کنید.
+        2. استراتژی قیمت‌گذاری (تیراژدار یا متری/تعدادی) را مشخص کنید.
+        3. سایزها و تیراژهای مجاز را به همراه قیمت و راهنما (Guide) ثبت کنید.
         
-        **نکات ساختاری:**
-        * `shell`: شامل نام، اسلاگ، دسته‌بندی و قیمت پایه است.
-        * `pricing_config`: تنظیمات ستاپ و هزینه‌های جانبی که به ویژگی‌ها ربطی ندارد.
-        * `quantities`: لیست IDهای تیراژهای مجاز برای این محصول.
-        * `sizes`: لیست سایزهای مجاز و موجود به همراه قیمت
+        **نکات کلیدی:**
+        * اگر `has_quantity=True`: باید لیست `quantities` پر شود.
+        * اگر `has_quantity=False`: باید `price_per_unit` و `min_quantity` در کانفیگ تنظیم شود.
+        * فیلدهای `guide_text` و `guide_type` برای تمام بخش‌ها (محصول، سایز، تیراژ) قابل استفاده است.
         """,
         request=ProductCoreCreateSerializer,
         responses={201: OpenApiTypes.OBJECT},
         examples=[
             OpenApiExample(
-                'Create Product Core Example',
-                summary='نمونه ساخت محصول (تراکت تبلیغاتی)',
-                description='ایجاد یک محصول با قیمت پایه صفر (قیمت از ویژگی‌ها می‌آید) و هزینه طراحی.',
+                'Scenario 1: Offset Printing (With Quantity)',
+                summary='سناریو ۱: محصول چاپ افست (دارای تیراژ و سایز ثابت)',
+                description='مثال برای کارت ویزیت که فقط در تیراژهای ۱۰۰۰ و ۲۰۰۰ و سایزهای مشخص فروخته می‌شود.',
                 value={
                     "shell": {
-                        "name": "تراکت گلاسه ۱۳۵ گرم",
+                        "name": "کارت ویزیت لمینت براق",
                         "category": 1,
-                        "description": "تراکت تبلیغاتی با کیفیت چاپ افست",
+                        "description": "چاپ با کیفیت بالا روی مقوای ۳۰۰ گرم",
                         "has_price": True,
-                        "price": "0",
-                        "has_quantity": True,
-                        "price_per_unit": 1000,
-                        "is_active": True
+                        "price": "0",  # قیمت پایه صفر (قیمت از تیراژ می‌آید)
+                        "has_quantity": True, # فروش فقط بر اساس تیراژ
+                        "is_active": True,
+                        "guide_text": "زمان تحویل این محصول ۷ روز کاری است.",
+                        "guide_type": "warning"
                     },
                     "pricing_config": {
-                        "base_setup_price": 50000,
+                        "base_setup_price": 0,
                         "design_service_available": True,
-                        "design_fee": 150000,
-                        "allow_custom_quantity": False,
-                        "min_quantity": 1000,
-                        "max_quantity": 50000,
-                        "accepts_custom_dimensions": False
+                        "design_fee": 150000
                     },
                     "quantities": [
                         {
-                            "id": 1,
-                            "price": 150000 
+                            "id": 10,  # ID تیراژ ۱۰۰۰
+                            "price": 1500000,
+                            "guide_text": "پرفروش‌ترین",
+                            "guide_type": "tip"
                         },
                         {
-                            "id": 2,
-                            "price": 280000
-                        },
-                        {
-                            "id": 3,
-                            "price": 600000
+                            "id": 11,  # ID تیراژ ۲۰۰۰
+                            "price": 2800000, # تخفیف در تعداد بالا
+                            "guide_text": "",
+                            "guide_type": "info"
                         }
                     ],
                     "sizes": [
-                        { "id": 1, "price_impact": 0 },
-                        { "id": 2, "price_impact": 5000 }
+                        { 
+                            "id": 1, # سایز استاندارد (9x5)
+                            "price_impact": 0 
+                        },
+                        { 
+                            "id": 2, # سایز دورگرد (Add-on price)
+                            "price_impact": 50000,
+                            "guide_text": "قالب برش خاص دارد",
+                            "guide_type": "info"
+                        }
                     ]
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                'Scenario 2: Digital Printing (No Quantity)',
+                summary='سناریو ۲: چاپ دیجیتال/بنر (بدون تیراژ ثابت)',
+                description='مثال برای بنر که قیمت بر اساس متر محیط یا تعداد دلخواه کاربر محاسبه می‌شود.',
+                value={
+                    "shell": {
+                        "name": "بنر مناسبتی (محاسبه متری)",
+                        "category": 5,
+                        "has_price": True,
+                        "price": "120000", # قیمت پایه (مثلا متری ۱۲۰ هزار تومان)
+                        "has_quantity": False, # کاربر تعداد/متراژ را وارد می‌کند
+                        "price_per_unit": 1,
+                        "is_active": True
+                    },
+                    "pricing_config": {
+                        "base_setup_price": 50000, # هزینه حلقه و پانچ
+                        "allow_custom_quantity": True,
+                        "min_quantity": 1,
+                        "max_quantity": 100,
+                        "accepts_custom_dimensions": True, # کاربر طول و عرض وارد می‌کند
+                        "min_width": 100,
+                        "max_width": 300
+                    },
+                    "quantities": [], # خالی چون تیراژ ثابت ندارد
+                    "sizes": []       # خالی چون سایز دلخواه است
                 },
                 request_only=True,
             )
@@ -113,46 +149,29 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         
         product = self.app_service.create_full_product_core(request.user, serializer.validated_data)
         
-        # ===== نمایش پیام ===== #
         return Response({'id': product.id, 'message': 'اطلاعات پایه محصول با موفقیت ایجاد شدند.'}, status=status.HTTP_201_CREATED)
 
+    # ========== UPDATE CORE ========== #
     @extend_schema(
         summary="ویرایش اطلاعات پایه محصول",
         request=ProductCoreCreateSerializer,
         examples=[
-             OpenApiExample(
-                'Update Product Core Example',
-                summary='نمونه ویرایش نام و قیمت پایه',
+            OpenApiExample(
+                'Update Example',
+                summary='تغیر قیمت تیراژها و غیرفعال کردن محصول',
                 value={
                     "shell": {
-                        "name": "تراکت گلاسه ۱۳۵ گرم (ویرایش شده)",
-                        "category": 1,
-                        "has_price": True,
-                        "price": "1000",
-                        "has_quantity": True,
-                        "price_per_unit": 1000,
-                        "is_active": True
-                    },
-                    "pricing_config": {
-                        "base_setup_price": 60000
+                        "is_active": False, # غیرفعال کردن موقت
+                        "guide_text": "به علت نوسانات ارز، فروش متوقف است.",
+                        "guide_type": "danger"
                     },
                     "quantities": [
                         {
-                            "id": 1,
-                            "price": 150000 
-                        },
-                        {
-                            "id": 2,
-                            "price": 280000
-                        },
-                        {
-                            "id": 3,
-                            "price": 600000
+                            "id": 10,
+                            "price": 1750000, # افزایش قیمت
+                            "guide_text": "قیمت جدید",
+                            "guide_type": "warning"
                         }
-                    ],
-                    "sizes": [
-                        { "id": 1, "price_impact": 0 },
-                        { "id": 2, "price_impact": 5000 }
                     ]
                 },
                 request_only=True,
@@ -164,7 +183,6 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         serializer = ProductCoreCreateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         
-        # ===== تغییر: پاس دادن request.user ===== #
         self.app_service.update_full_product_core(
             product_id=id, 
             user=request.user,
@@ -172,60 +190,61 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         )
         return Response({'status': 'Product core updated'})
 
-    # ========== Option and Pricing API ========== #
+    # ========== OPTIONS ========== #
     @extend_schema(
         summary="مرحله ۲: همگام‌سازی ویژگی‌ها (Options)",
         description="""
-        **منطق:**
-        اتصال ویژگی‌های گلوبال به این محصول خاص.
+        **وظیفه:** اتصال ویژگی‌های محصول (رنگ، جنس، خدمات).
         
-        **ساختار دیتا:**
-        * `option_id`: شناسه ویژگی در بانک ویژگی‌ها.
-        * `values_config`: لیستی از مقادیری که می‌خواهید فعال کنید.
-        * `global_value_id`: شناسه مقدار در بانک مقادیر.
+        **قابلیت‌های کلیدی:**
+        1. **اتصال از بانک (Linked):** استفاده از `option_id` و `global_value_id`.
+        2. **اورراید (Override):** تغییر نام/قیمت یک مقدار گلوبال فقط برای این محصول.
+        3. **کاستوم (Custom):** افزودن یک مقدار کاملاً جدید که در بانک نیست (`global_value_id: null`).
+        4. **راهنما (Guide):** افزودن راهنما برای کل گروه ویژگی یا تک‌تک مقادیر.
         """,
         request=ProductOptionsBulkSerializer,
         examples=[
             OpenApiExample(
-                'Bulk Options Sync Example',
-                summary='اتصال جنس کاغذ و نوع روکش',
-                description='در اینجا ویژگی جنس کاغذ (ID:10) و روکش (ID:12) را به محصول متصل می‌کنیم.',
+                'Full Options Scenario',
+                summary='سناریو کامل: ویژگی متصل (بانک) + ویژگی کاملاً اختصاصی',
+                description="""
+                در این مثال:
+                1. ویژگی 'جنس کاغذ' (ID: 10) از بانک متصل می‌شود.
+                2. یک ویژگی کاملاً جدید به نام 'بسته‌بندی ویژه' (بدون اتصال به بانک) ساخته می‌شود.
+                """,
                 value={
                     "options": [
+                        # 1. ویژگی متصل به بانک (همراه با Override و Custom Value)
                         {
-                            "option_id": 10,
+                            "option_id": 10, 
                             "is_required": True,
-                            "has_pricing": True,
+                            "guide_text": "انتخاب جنس کاغذ",
                             "values_config": [
-                                {
-                                    "global_value_id": 101,
-                                    "price_impact": "5000",
-                                    "is_default": True,
-                                    "is_active": True
-                                },
-                                {
-                                    "global_value_id": 102,
-                                    "price_impact": "15000",
-                                    "is_default": False,
-                                    "is_active": True
-                                }
+                                { "global_value_id": 101, "price_impact": 0 }, # استفاده استاندارد
+                                { "global_value_id": None, "label": "کاغذ خاص", "price_impact": 50000 } # مقدار کاستوم برای ویژگی بانک
                             ]
                         },
                         {
-                            "option_id": 12,
+                            "option_id": None, # نال یعنی ویژگی جدید بساز
+                            "name": "special_packaging",
+                            "label": "نوع بسته‌بندی (اختصاصی)",
+                            "input_type": "radio", # تعیین نوع ورودی
                             "is_required": False,
-                            "has_pricing": True,
+                            "guide_text": "فقط برای هدایای تبلیغاتی",
+                            "guide_type": "tip",
                             "values_config": [
                                 {
-                                    "global_value_id": 201,
-                                    "price_impact": "20000",
-                                    "is_default": False
+                                    "global_value_id": None, # همه مقادیرش باید کاستوم باشند
+                                    "label": "جعبه چوبی",
+                                    "value": "wood_box",
+                                    "price_impact": 150000
                                 },
                                 {
-                                    "global_value_id": "null",
-                                    "label": "کاغذ مخصوص وارداتی",
-                                    "value": "imported_special",
-                                    "price_impact": 50000
+                                    "global_value_id": None,
+                                    "label": "کیسه پارچه‌ای",
+                                    "value": "fabric_bag",
+                                    "price_impact": 20000,
+                                    "is_default": True
                                 }
                             ]
                         }
@@ -247,37 +266,27 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         )
         return Response({'results': results}, status=status.HTTP_200_OK)
     
-    # ========== UPDATE Option Config ========== #
+    # ========== UPDATE OPTION CONFIG ========== #
     @extend_schema(
-        summary="ویرایش تنظیمات یک ویژگی خاص",
+        summary="ویرایش تنظیمات یک ویژگی خاص (تکی)",
         description="""
-        **تفاوت با متد قبلی:**
-        این متد برای زمانی است که ویژگی قبلاً وصل شده و فقط می‌خواهید قیمت‌ها یا تنظیمات `ProductOptionValue` را تغییر دهید.
-        
-        **نکته مهم:**
-        در لیست `values` باید `id` را بفرستید که مربوط به `ProductOptionValue` (جدول واسط) است، نه `GlobalOptionValue`.
+        اگر نخواهید همه آپشن‌ها را دوباره بفرستید و فقط بخواهید قیمت یا تنظیمات یکی را عوض کنید.
         """,
         request=OptionConfigUpdateSerializer,
         examples=[
             OpenApiExample(
-                'Update Specific Option Config',
-                summary='تغییر قیمت گلاسه برای این محصول',
+                'Update Single Option',
+                summary='تغییر قیمت گلاسه',
                 value={
                     "product_option_id": 450,
                     "is_required": True,
-                    "has_pricing": True,
+                    "guide_text": "قیمت‌ها بروز شد",
+                    "guide_type": "info",
                     "values": [
                         {
-                            "id": 1200, 
-                            "price_impact": "7500",
-                            "is_default": True,
-                            "order": 1
-                        },
-                        {
-                            "id": 1201,
-                            "price_impact": "18000",
-                            "is_default": False,
-                            "order": 2
+                            "id": 1200,
+                            "price_impact": "8000",
+                            "is_default": True
                         }
                     ]
                 }
@@ -286,40 +295,32 @@ class ProductDashboardViewSet(viewsets.ViewSet):
     )
     @action(detail=True, methods=['patch'], url_path='update-option-config')
     def update_option_config(self, request, id=None):
-        """
-        ویرایش تنظیمات ویژگی.
-        """
+        """ ویرایش تنظیمات ویژگی (تکی) """
         serializer = OptionConfigUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         data = serializer.validated_data
-        
         try:
             self.app_service.update_option_configuration(
-                product_id=id,
+                product_id=id, 
                 option_id=data['product_option_id'],
                 data=data
             )
             return Response({'status': 'ویژگی با موفقیت بروزرسانی شد.'}, status=status.HTTP_200_OK)
-            
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    # ========== Media Sync API ========== #
+    # ========== MEDIA SYNC ========== #
     @extend_schema(
         summary="مرحله ۳: اتصال فایل‌ها و تصاویر (Media)",
-        description="""
-        **وظیفه:**
-        اتصال فایل‌های آپلود شده (در مرحله قبل) به محصول و مرتب‌سازی تصاویر.
-        """,
         request=ProductMediaSyncSerializer,
         examples=[
             OpenApiExample(
-                'Media Link & Sort Example',
-                summary='لینک کردن قالب لایه باز و مرتب‌سازی عکس‌ها',
+                'Media Sync Example',
+                summary='مرتب‌سازی تصاویر و لینک فایل',
                 value={
-                    "attachment_ids_to_link": [15, 16],
-                    "attachment_ids_to_unlink": [10],
+                    "attachment_ids_to_link": [15],
+                    "attachment_ids_to_unlink": [],
                     "image_orders": [102, 105, 101]
                 },
                 request_only=True
@@ -339,14 +340,11 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         )
         return Response({'status': 'فایل های پیوست با موفقیت به روز شد'})
 
-    # ===== آپلود تصاویر ===== #
+    # ========== UPLOAD IMAGE ========== #
     @extend_schema(
         summary="آپلود تصویر (تکی)",
         request=ProductImageSerializer,
-        description="""
-        تصویر محصول را آپلود کنید. این متد تصویر را ذخیره کرده و یک ID برمی‌گرداند.
-        این ID باید در متد `sync-media` برای مرتب‌سازی استفاده شود.
-        """
+        description="تصویر را آپلود می‌کند و ID آن را برمی‌گرداند تا در `media-sync` استفاده شود."
     )
     @action(detail=True, methods=['post'], url_path='upload-image', parser_classes=[MultiPartParser, FormParser, JSONParser])
     def upload_image(self, request, id=None):
@@ -355,42 +353,31 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         if not file_obj:
             return Response({'image': 'File required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ===== آپلود تصاویر ===== #
         result = self.app_service.upload_product_image_async(
             product_id=id,
             user=request.user,
             file_obj=file_obj
         )
         
-        # ===== بررسی نتایج ===== #
         if result['status'] == 'processing':
             return Response(result, status=status.HTTP_202_ACCEPTED)
-        
-        elif result['status'] == 'completed':
-            return Response(result, status=status.HTTP_201_CREATED)
-            
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(result, status=status.HTTP_201_CREATED)
 
+    # ========== UPLOAD ATTACHMENT ========== #
     @extend_schema(
-        summary="آپلود فایل در کتابخانه (جهت استفاده در محصولات)",
+        summary="آپلود فایل در کتابخانه",
         request=AttachmentLibrarySerializer,
-        description="""
-        آپلود فایل‌های جانبی (مانند قالب‌های لایه باز یا راهنمای طراحی).
-        خروجی شامل ID فایل است که باید در متد `sync-media` در لیست `attachment_ids_to_link` قرار گیرد.
-        """
+        description="فایل‌های جانبی (قالب، راهنما) را آپلود می‌کند."
     )
     @action(detail=False, methods=['post'], url_path='upload-attachment', parser_classes=[MultiPartParser, FormParser])
     def upload_attachment(self, request):
-        """
-        آپلود فایل برای لینک کردن بعدی.
-        """
+        """ آپلود فایل برای لینک کردن بعدی """
         file_obj = request.FILES.get('file')
         name = request.data.get('name')
         
         if not file_obj or not name:
             return Response({'detail': 'File and name are required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # فراخوانی متد سرویس
         result = self.app_service.upload_attachment_library_async(
             user=request.user,
             file_obj=file_obj,
@@ -399,12 +386,9 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         
         if result['status'] == 'processing':
             return Response(result, status=status.HTTP_202_ACCEPTED)
-        elif result['status'] == 'completed':
-            return Response(result, status=status.HTTP_201_CREATED)
-            
-        return Response(result, status=status.HTTP_200_OK)
+        return Response(result, status=status.HTTP_201_CREATED)
 
-    # ===== GET: Retrieve Product Details ===== #
+    # ========== GET DETAIL ========== #
     @extend_schema(responses=ProductDetailSerializer)
     def retrieve(self, request, id=None):
         """ دریافت جزئیات کامل محصول """
@@ -415,20 +399,17 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
-    # ===== DELETE: Remove Product ===== #
+    # ========== DELETE ========== #
     def destroy(self, request, id=None):
         """ حذف محصول """
         self.app_service.delete_product(id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # ===== DELETE Option (Detach) ===== #
+    # ========== REMOVE OPTION ========== #
     @extend_schema(summary="حذف یک ویژگی از محصول")
     @action(detail=True, methods=['delete'], url_path='options/(?P<option_id>\d+)')
     def remove_option(self, request, id=None, option_id=None):
-        """ 
-        حذف ویژگی از محصول.
-        option_id: شناسه ProductOption (نه ویژگی گلوبال).
-        """
+        """ حذف ویژگی از محصول """
         try:
             self.app_service.remove_option_from_product(id, option_id)
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -445,7 +426,6 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 'is_active': serializers.BooleanField()
             }
         ),
-        responses={200: OpenApiTypes.OBJECT},
         examples=[
             OpenApiExample(
                 'Activate Products',
@@ -456,7 +436,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
     )
     @action(detail=False, methods=['patch'], url_path='bulk-status')
     def bulk_update_status(self, request):
-        """ تغییر وضعیت گروهی (Active/Inactive) """
+        """ تغییر وضعیت گروهی """
         product_ids = request.data.get('product_ids', [])
         is_active = request.data.get('is_active')
 
@@ -482,15 +462,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             fields={
                 'product_ids': serializers.ListField(child=serializers.IntegerField())
             }
-        ),
-        responses={200: OpenApiTypes.OBJECT},
-        examples=[
-             OpenApiExample(
-                'Bulk Delete Example',
-                value={'product_ids': [5, 6, 7]},
-                request_only=True
-            )
-        ]
+        )
     )
     @action(detail=False, methods=['delete'], url_path='bulk-delete')
     def bulk_delete(self, request):

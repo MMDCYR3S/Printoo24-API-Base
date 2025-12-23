@@ -1,15 +1,16 @@
 from rest_framework import serializers
 from core.models import (
-    Product,
-    ProductPricingConfig,
-    ProductCategory,
-    ProductImage,
-    Attachment, 
-    ProductAttachment,
-    ProductOption,
-    ProductOptionValue
+    Product, ProductPricingConfig, ProductCategory,
+    ProductImage, Attachment, ProductAttachment,
+    ProductOption, ProductOptionValue, GuideType,
+    OptionInputType
 )
 
+# ===== Guide Fields Mixin ===== #
+class GuideSerializerMixin(serializers.Serializer):
+    guide_text = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    guide_type = serializers.ChoiceField(choices=GuideType.choices, required=False, default=GuideType.INFO)
+    
 # ===== Product Image Serializer ===== #
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,7 +27,7 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'slug']
 
 # ===== 1. اضافه کردن سریالایزر جدید برای کانفیگ تیراژ ===== #
-class ProductQuantityConfigSerializer(serializers.Serializer):
+class ProductQuantityConfigSerializer(GuideSerializerMixin, serializers.Serializer):
     """
     دریافت شناسه تیراژ و قیمت اختصاصی آن برای محصول
     """
@@ -39,7 +40,7 @@ class ProductQuantityConfigSerializer(serializers.Serializer):
     )
 
 # ===== Product Size Serializer ===== #
-class ProductSizeConfigSerializer(serializers.Serializer):
+class ProductSizeConfigSerializer(GuideSerializerMixin, serializers.Serializer):
     """
     برای دریافت ID سایز و تاثیر قیمت آن در هنگام ساخت محصول
     """
@@ -71,14 +72,33 @@ class ProductSerializer(serializers.ModelSerializer):
 
 # =====Product Shell Serializer ===== #
 class ProductShellSerializer(serializers.ModelSerializer):
+    guide_text = serializers.CharField(required=False, allow_blank=True)
+    guide_type = serializers.ChoiceField(choices=GuideType.choices, required=False)
+    
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'slug', 'category', 'description', 
             'code', 'is_active', 'has_price', 'has_quantity', 
-            'price_per_unit', 'created_at'
+            'price', 'price_per_unit', 'created_at',
+            'guide_text', 'guide_type'
         ]
         read_only_fields = ['id', 'code', 'slug']
+        
+    def validate(self, data):
+        """
+        اعتبارسنجی قوانین بیزنس (has_quantity vs Custom Quantity)
+        """
+        has_quantity = data.get('has_quantity', True)
+        price_per_unit = data.get('price_per_unit', 1)
+        
+        if not has_quantity:
+            if price_per_unit < 1:
+                raise serializers.ValidationError({
+                    "price_per_unit": "وقتی تیراژ ثابت غیرفعال است، 'گام شمارش' باید حداقل ۱ باشد."
+                })
+        
+        return data
 
 # ===== Product Pricing Config Serializer ===== #
 class ProductPricingConfigSerializer(serializers.ModelSerializer):
@@ -100,30 +120,45 @@ class OptionValueOverrideSerializer(serializers.Serializer):
     می‌تواند Override روی گلوبال باشد یا یک مقدار کاملاً جدید (Custom).
     """
     # ===== تغییر: این فیلد نال‌پذیر است برای حالت Custom ===== #
-    global_value_id = serializers.IntegerField(
-        help_text="ID مقدار در بانک (اگر نال باشد، یعنی مقدار کاستوم است)", 
-        required=False, 
-        allow_null=True
-    )
-    
-    # ===== تغییر: اضافه شدن فیلدهای متنی برای Override یا Custom ===== #
-    label = serializers.CharField(required=False, help_text="عنوان نمایشی (در صورت Override یا Custom)")
-    value = serializers.CharField(required=False, help_text="کد سیستمی (در صورت Override یا Custom)")
-    
-    # ===== فیلدهای مالی ===== #
-    price_impact = serializers.DecimalField(max_digits=14, decimal_places=0, required=False, default=0)
-    is_default = serializers.BooleanField(required=False, default=False)
-    is_active = serializers.BooleanField(required=False, default=True)
+    global_value_id = serializers.IntegerField(required=False, allow_null=True)
+    label = serializers.CharField(required=False)
+    value = serializers.CharField(required=False)
+    price_impact = serializers.DecimalField(max_digits=14, decimal_places=0, default=0)
+    is_default = serializers.BooleanField(default=False)
+    is_active = serializers.BooleanField(default=True)
 
 # ===== Option Attach With Price Serializer ===== #
 class OptionAttachWithPriceSerializer(serializers.Serializer):
-    option_id = serializers.IntegerField(help_text="ID ویژگی گلوبال")
-    is_required = serializers.BooleanField(default=False)
-    values_config = serializers.ListField(
-        child=OptionValueOverrideSerializer(), 
+    option_id = serializers.IntegerField(
         required=False, 
-        allow_empty=True
+        allow_null=True,
+        help_text="اگر خالی باشد، یعنی ویژگی کاملاً اختصاصی (Custom) است."
     )
+    name = serializers.CharField(
+        required=False, 
+        help_text="نام سیستمی برای ویژگی کاستوم (مثلا special_cut)"
+    )
+    label = serializers.CharField(
+        required=False,
+        help_text="عنوان نمایشی ویژگی کاستوم (مثلا برش خاص)"
+    )
+    input_type = serializers.ChoiceField(
+        choices=OptionInputType.choices,
+        required=False,
+        default=OptionInputType.SELECT,
+        help_text="نوع ورودی (فقط برای ویژگی کاستوم)"
+    )
+
+    is_required = serializers.BooleanField(default=False)
+    values_config = serializers.ListField(child=OptionValueOverrideSerializer(), required=False)
+
+    def validate(self, data):
+        if not data.get('option_id'):
+            if not data.get('label') or not data.get('name'):
+                raise serializers.ValidationError(
+                    "برای ویژگی‌های سفارشی (بدون option_id)، وارد کردن 'name' و 'label' الزامی است."
+                )
+        return data
 
 class OptionValuePriceItemSerializer(serializers.Serializer):
     id = serializers.IntegerField(help_text="ID of ProductOptionValue")
@@ -146,40 +181,71 @@ class ProductOptionValueOutputSerializer(serializers.ModelSerializer):
     سریالایزر برای نمایش مقادیر انتخاب شده (Choices) در صفحه جزئیات محصول.
     جایگزین دیکشنری دستی سرویس.
     """
-    input_type = serializers.SerializerMethodField()
     is_custom = serializers.SerializerMethodField()
+    label = serializers.SerializerMethodField()
+    value = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductOptionValue
         fields = [
             'id', 'label', 'value', 'price_impact', 
-            'is_default', 'is_custom', 'input_type', 'order'
+            'is_default', 'is_custom', 'order'
         ]
-
-    def get_input_type(self, obj):
-        """
-        لاجیک هوشمند برای پیدا کردن نوع ورودی:
-        ۱. اگر به گلوبال وصل است، از آن می‌خواند.
-        ۲. اگر کاستوم است، از ویژگی پدر (Option) می‌خواند.
-        """
-        if obj.global_source:
-            return obj.global_source.input_type
 
     def get_is_custom(self, obj):
         return obj.global_source is None
-
+        
+    def get_label(self, obj):
+        if obj.label:
+            return obj.label
+        if obj.global_source:
+            return obj.global_source.label
+        return ""
+        
+    def get_value(self, obj):
+        if obj.value:
+            return obj.value
+        if obj.global_source:
+            return obj.global_source.value
+        return ""
 
 class ProductOptionOutputSerializer(serializers.ModelSerializer):
-    """
-    سریالایزر برای نمایش گروه‌های ویژگی (مانند: جنس کاغذ، روکش).
-    """
-    name = serializers.CharField(source='option.name', read_only=True)
-    label = serializers.CharField(source='option.label', read_only=True)
+    name = serializers.SerializerMethodField()
+    label = serializers.SerializerMethodField()
+    input_type = serializers.SerializerMethodField()
+    
     choices = ProductOptionValueOutputSerializer(many=True, read_only=True)
 
     class Meta:
         model = ProductOption
-        fields = ['id', 'name', 'label', 'is_required', 'choices', 'order']
+        fields = [
+            'id', 'name', 'label', 'input_type', 'is_required', 
+            'choices', 'order', 'guide_text', 'guide_type'
+        ]
+
+    def get_name(self, obj):
+        # ابتدا نام خود ProductOption را بررسی می‌کنیم
+        if obj.name:
+            return obj.name
+        # اگر نام وجود نداشت، بررسی می‌کنیم که آیا option مرتبط وجود دارد
+        if obj.option:
+            return obj.option.name
+        # اگر هیچ‌کدام وجود نداشت، مقدار پیش‌فرض برمی‌گردانیم
+        return ""
+
+    def get_label(self, obj):
+        if obj.label:
+            return obj.label
+        if obj.option:
+            return obj.option.label
+        return ""
+
+    def get_input_type(self, obj):
+        if obj.input_type:
+            return obj.input_type
+        if obj.option:
+            return obj.option.input_type
+        return OptionInputType.TEXT
 
 # ===== Image Reorder Serializer =====
 class ImageReorderSerializer(serializers.Serializer):
@@ -238,12 +304,10 @@ class ProductDetailSerializer(serializers.Serializer):
     shell = ProductShellSerializer(source='product')
     pricing_config = ProductPricingConfigSerializer(source='product.pricing_config')
     
-    # لیست‌ها
     quantities = serializers.SerializerMethodField()
     sizes = serializers.SerializerMethodField()
     images = ProductImageSerializer(source='product.product_image', many=True)
     
-    # آپشن‌ها (از ساختار درختی که سرویس برمی‌گرداند)
     options = ProductOptionOutputSerializer(source='product.options', many=True)
     
     def get_sizes(self, obj):
@@ -271,7 +335,7 @@ class ProductDetailSerializer(serializers.Serializer):
             for pq in product.product_quantity.all()
         ]
 
-
+# ===== Option Config Update Serializer ===== #
 class OptionConfigUpdateSerializer(serializers.Serializer):
     """
     سریالایزر برای ویرایش تنظیمات یک ویژگی متصل شده.

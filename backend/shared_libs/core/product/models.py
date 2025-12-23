@@ -23,6 +23,88 @@ from .managers import (
     ProductCommentManager
 )
 
+# ======== Guide Type ======== #
+class GuideType(models.TextChoices):
+    """
+    انواع پیام‌های راهنما برای نمایش به کاربر
+    """
+    INFO = 'info', _('اطلاعات')
+    WARNING = 'warning', _('هشدار')
+    TIP = 'tip', _('نکته)')
+    
+# ======== Has Guide Model ======== #
+class HasGuide(models.Model):
+    """
+    میکسین یکپارچه برای مدیریت راهنماها و هشدارها.
+    هر مدلی که نیاز به توضیحات اضافی برای کاربر دارد از این کلاس ارث‌بری می‌کند.
+    """
+    guide_text = models.TextField(
+        _("متن راهنما/هشدار"), 
+        blank=True, null=True, 
+        help_text=_("متنی که با کلیک روی آیکون مربوطه نمایش داده می‌شود.")
+    )
+    guide_type = models.CharField(
+        _("نوع پیام"),
+        max_length=20,
+        choices=GuideType.choices,
+        default=GuideType.INFO,
+        help_text=_("رنگ و آیکون نمایش داده شده را تعیین می‌کند.")
+    )
+
+    class Meta:
+        abstract = True
+
+    @property
+    def has_guide(self):
+        return bool(self.guide_text)
+
+# ======= OPTION INPUT TYPE MODEL ======= #
+class OptionInputType(models.TextChoices):
+    """
+    انواع ورودی برای رندر کردن در فرانت‌اند
+    """
+    TEXT = 'text', _('ورودی متنی (Text)')
+    TEXTAREA = 'textarea', _('ورودی متن بلند (Textarea)')
+    NUMBER = 'number', _('ورودی عددی (Number)')
+    SELECT = 'select', _('لیست کشویی (Select)')
+    RADIO = 'radio', _('رادیو باتن (Radio)')
+    CHECKBOX = 'checkbox', _('چک‌باکس چندتایی (Checkbox)')
+    MULTI_SELECT = 'multi_select', _('انتخاب چندگانه (Multi Select / Checkboxes)')
+
+# ======== OPTION ABSTRACT MODEL ======== #
+class BaseOptionDefinition(HasGuide, models.Model):
+    """
+    کلاس پایه برای تعریف 'صورت‌مسئله' ویژگی.
+    دارای input_type است تا مشکل نوع ورودی در ویژگی‌های کاستوم حل شود.
+    """
+    name = models.CharField(
+        _("نام سیستمی"), 
+        max_length=150, 
+        help_text=_("شناسه یکتا برای کدنویسی (مثال: paper_type)")
+    )
+    label = models.CharField(_("عنوان نمایشی"), max_length=150, null=True, blank=True)
+    # ===== نوع آپشن ===== #
+    input_type = models.CharField(
+        _("نوع ورودی"),
+        max_length=25,
+        choices=OptionInputType.choices,
+        default=OptionInputType.SELECT
+    )
+
+    class Meta:
+        abstract = True
+
+# ======== OPTION VALUE ABSTRACT MODEL ======== #
+class BaseOptionValueDefinition(HasGuide, models.Model):
+    """
+    کلاس پایه برای تعریف 'گزینه‌ها/مقادیر'.
+    """
+    label = models.CharField(_("عنوان مقدار"), max_length=150, null=True, blank=True)
+    value = models.CharField(_("کد سیستمی/مقدار"), max_length=150, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
 # ======== Product Code Generator ======== #
 def product_code_generator(category_slug, product_slug, year):
     """
@@ -91,7 +173,7 @@ class ProductCategory(MPTTModel):
         return self.get_descendants().filter(is_active=True)
     
 # ======== Product Model ======== #
-class Product(models.Model):
+class Product(HasGuide, models.Model):
     """
     مدل محصولات مربوط به وبسایت
     این مدل باید به صورت کاملا حرفه ای باشد 
@@ -230,7 +312,7 @@ class Size(models.Model):
         verbose_name_plural = _("سایزها")
 
 # ====== Product Size Model ====== #
-class ProductSize(models.Model):
+class ProductSize(HasGuide, models.Model):
     """ مدل واسط بین سایز و محصول"""
     user = models.ForeignKey("core.User", related_name='product_size', on_delete=models.PROTECT)
     product = models.ForeignKey(Product, related_name='product_size', on_delete=models.CASCADE)
@@ -271,7 +353,7 @@ class Quantity(models.Model):
         verbose_name_plural = _('تیراژ ها')
 
 # ====== Product Quantity Model ====== #
-class ProductQuantity(models.Model):
+class ProductQuantity(HasGuide, models.Model):
     """ کلاس واسط بین مدل محصول و تیراژ """
     user = models.ForeignKey('core.User', related_name='product_quantity_user', on_delete=models.PROTECT)
     product = models.ForeignKey(Product, related_name='product_quantity', on_delete=models.CASCADE)
@@ -326,7 +408,7 @@ class Attachment(models.Model):
 
 
 # ======= Product Attachment Model ======= #
-class ProductAttachment(models.Model):
+class ProductAttachment(HasGuide, models.Model):
     """ مدل واسط بین محصول و فایل """
     user = models.ForeignKey("core.User", related_name='product_attachment_user', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='product_attachment_product', on_delete=models.PROTECT)
@@ -338,19 +420,6 @@ class ProductAttachment(models.Model):
     
     def __str__(self):
         return f"{self.product.name} - {self.attachment.name}"
-
-# ======= Option Input Type Model ======= #
-class OptionInputType(models.TextChoices):
-    """
-    انواع ورودی برای رندر کردن در فرانت‌اند
-    """
-    TEXT = 'text', _('ورودی متنی (Text)')
-    TEXTAREA = 'textarea', _('ورودی متن بلند (Textarea)')
-    NUMBER = 'number', _('ورودی عددی (Number)')
-    SELECT = 'select', _('لیست کشویی (Select)')
-    RADIO = 'radio', _('رادیو باتن (Radio)')
-    CHECKBOX = 'checkbox', _('چک‌باکس چندتایی (Checkbox)')
-    MULTI_SELECT = 'multi_select', _('انتخاب چندگانه (Multi Select / Checkboxes)')
 
 # ====== Option Pricing Strategy Model ====== #
 class OptionPricingStrategy(models.TextChoices):
@@ -368,45 +437,28 @@ class OptionPricingStrategy(models.TextChoices):
     PER_UNIT_INPUT = 'per_unit', _('براساس عدد ورودی کاربر (Input * Rate)')
     
 # ====== Option Model ====== #
-class Option(models.Model):
+class Option(BaseOptionDefinition):
     """
-    تعریف نوع ویژگی در سطح کل سیستم.
-    (Master Data)
+    بانک ویژگی‌ها (ارث‌بری از BaseOptionDefinition + HasGuide).
     """
-    name = models.CharField(
-        _("نام سیستمی"), 
-        max_length=150, 
-        unique=True, 
-        help_text=_("شناسه یکتا برای کدنویسی (مثال: paper_type)")
-    )
-    label = models.CharField(_("عنوان نمایشی"), max_length=150, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     objects = OptionManager()
 
     def __str__(self):
-        return f"{self.label}"
+        return f"{self.label} ({self.get_input_type_display()})"
     
     class Meta:
         verbose_name = _("بانک ویژگی")
         verbose_name_plural = _("بانک ویژگی‌ها")
 
 # ====== Option Value Model ====== #
-class OptionValue(models.Model):
+class OptionValue(BaseOptionValueDefinition):
     """ 
-    بانک مقادیر پیش‌فرض (Template Library).
-    برای جلوگیری از تایپ تکراری توسط ادمین.
+    مقادیر پیش‌فرض در بانک (ارث‌بری از BaseOptionValueDefinition + HasGuide).
     """
     option = models.ForeignKey(Option, related_name='global_values', on_delete=models.PROTECT)
-    label = models.CharField(_("عنوان مقدار"), max_length=150, null=True, blank=True)
-    value = models.CharField(_("کد سیستمی"), max_length=150, null=True, blank=True)
-    input_type = models.CharField(
-        _("نوع ویژگی"),
-        max_length=25,
-        choices=OptionInputType.choices,
-        default=OptionInputType.TEXT
-    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -418,68 +470,60 @@ class OptionValue(models.Model):
     class Meta:
         verbose_name = _("الگوی مقدار ویژگی")
         verbose_name_plural = _("الگوهای مقادیر ویژگی")
-        
-# ====== Product Option Model ====== #
-class ProductOption(models.Model):
+
+# ====== PRODUCT OPTION MODEL ====== #
+class ProductOption(BaseOptionDefinition):
     """
     اتصال ویژگی به محصول.
-    اینجا تعیین می‌کنیم ویژگی چه رفتاری در این محصول خاص دارد.
+    خودش دارای input_type است (از BaseOptionDefinition).
     """
-    product = models.ForeignKey(Product, related_name='options', on_delete=models.CASCADE, null=True)
-    option = models.ForeignKey(Option, related_name='product_configs', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, related_name='options', on_delete=models.CASCADE)
+    option = models.ForeignKey(Option, related_name='product_configs', on_delete=models.PROTECT, null=True, blank=True)
     
-    # ===== تنظیمات نمایش (UI) ===== #
     is_required = models.BooleanField(_("اجباری؟"), default=False)
     order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
 
     class Meta:
         verbose_name = _("پیکربندی ویژگی محصول")
         verbose_name_plural = _("پیکربندی ویژگی‌های محصولات")
-        unique_together = ('product', 'option')
         ordering = ['order']
 
-    def __str__(self):
-        return f"{self.product.name} | {self.option.label}"
+    def save(self, *args, **kwargs):
+        # [LOGIC]: کپی اطلاعات از بانک (Snapshot) در صورت وجود لینک
+        if self.option:
+            if not self.name:
+                self.name = self.option.name
+            if not self.label:
+                self.label = self.option.label
+            if not self.input_type:
+                self.input_type = self.option.input_type
+        
+        super().save(*args, **kwargs)
 
-# ====== PRODUCT OPTION VALUE ====== #
-class ProductOptionValue(models.Model):
+    def __str__(self):
+        return f"{self.product.name} | {self.label}"
+
+# ====== PRODUCT OPTION VALUE MODEL ====== #
+class ProductOptionValue(BaseOptionValueDefinition):
     """
-    مقادیر قابل انتخاب (Choices).
-    شامل نرخ‌ها (Rates) و قوانین تیراژ.
+    مقادیر نهایی برای محصول (ارث‌بری از BaseOptionValueDefinition + HasGuide).
     """
-    product_option = models.ForeignKey(
-        ProductOption, 
-        related_name='choices', 
-        on_delete=models.CASCADE
-    )
+    product_option = models.ForeignKey(ProductOption, related_name='choices', on_delete=models.CASCADE)
     
-    # ===== ارجاع به بانک (Snapshot Pattern) ===== #
+    # اگر null باشد، یعنی مقدار کاستوم است.
     global_source = models.ForeignKey(
         OptionValue, 
         null=True, blank=True, 
         on_delete=models.SET_NULL,
-        verbose_name=_("کپی از الگوی گلوبال")
+        verbose_name=_("منبع گلوبال")
     )
 
-    # ===== مقادیر واقعی (Local Override) ===== #
-    label = models.CharField(_("عنوان نمایشی"), max_length=150, blank=True)
-    value = models.CharField(_("مقدار سیستمی"), max_length=150, blank=True)
+    # تنظیمات مالی
+    has_pricing = models.BooleanField(default=True)
+    price_impact = models.DecimalField(max_digits=14, decimal_places=0, default=0)
     
-    # ===== کنترل مالی دقیق (Granular Control) ===== #
-    has_pricing = models.BooleanField(
-        _("شامل هزینه می‌شود؟"),
-        default=True,
-        help_text=_("سطح ۲ کنترل: اگر خاموش باشد، قیمت این گزینه صفر لحاظ می‌شود.")
-    )
-
-    price_impact = models.DecimalField(
-        _("مبلغ / نرخ واحد"), 
-        max_digits=14, decimal_places=0, default=Decimal('0'),
-        help_text=_("اگر استراتژی ثابت است: کل مبلغ. اگر متری/تعدادی است: نرخ واحد.")
-    )
-    
-    is_default = models.BooleanField(_("پیش‌فرض"), default=False)
-    order = models.PositiveIntegerField(_("ترتیب"), default=0)
+    is_default = models.BooleanField(default=False)
+    order = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = _("گزینه انتخابی نهایی")
@@ -487,22 +531,11 @@ class ProductOptionValue(models.Model):
         ordering = ['order']
 
     def clean(self):
-        """ 
-        Strict Data Integrity Rules 
-        """
-        # ===== اگر مقدار label و global_source خالی باشند ===== #
-        if not self.label and not self.global_source:
-             raise ValidationError("عنوان گزینه الزامی است...")
+        if not self.global_source and not self.label:
+             raise ValidationError(_("برای مقادیر سفارشی، عنوان الزامی است."))
         
-        # ===== اگر قیمت ندارد، مبلغ باید صرفاً ۰ باشد. ===== #
         if not self.has_pricing and self.price_impact != 0:
-             raise ValidationError({
-                'price_impact': _("وقتی گزینه فاقد قیمت است، مبلغ باید ۰ باشد.")
-            })
-            
-        # ===== اگر لیبل دستی وارد نشده باشد، از الگو انتخاب کنید. ===== 
-        if not self.label and not self.global_source:
-             raise ValidationError(_("عنوان گزینه الزامی است (یا دستی وارد کنید یا از الگو انتخاب کنید)."))
+             raise ValidationError(_("وقتی گزینه فاقد قیمت است، مبلغ باید ۰ باشد."))
 
     def save(self, *args, **kwargs):
         if self.global_source and not self.label:
@@ -515,7 +548,7 @@ class ProductOptionValue(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.label}"
+        return f"{self.label} ({self.price_impact})"
 
 # ===== Product Rating Model ===== #
 class ProductRating(models.Model):

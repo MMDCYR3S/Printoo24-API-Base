@@ -19,52 +19,21 @@ class ShopProductDetailService:
         self._product_service = ProductService()
         logger.debug("ShopProductDetailService initialized")
         
-    def get_product_detail_for_display(self, slug: str) -> Optional[Dict[str, Any]]:
+    def get_product_detail_for_display(self, slug: str) -> Optional[object]:
         """
-        مورد استفاده: دریافت و آماده‌سازی جزئیات یک محصول برای نمایش در صفحه جزئیات.
+        دریافت آبجکت محصول با تمام ریلیشن‌های لود شده (Eager Loading).
+        خروجی: آبجکت Product یا None.
         """
-        logger.info(f"Fetching product details for slug: {slug}")
-        
         try:
-            # ===== دریافت جزئیات یک مصحول از سرویس ===== #
+            
             data = self._product_service.get_product_detail_by_slug(slug)
+            print(data)
             
-            if not data:
-                logger.warning(f"Product not found with slug: {slug}")
+            if not data or 'product' not in data:
                 return None
-            
-            logger.debug(f"Product found - ID: {data['product'].id}, Name: {data['product'].name}")
-        
-            # ===== دریافت ویژگی‌های یک محصول ===== #
-            product = data['product']
-            
-            # ===== ایجاد دیکشنری ===== #
-            result = {
-                'product': product,
                 
-                # ===== لیست جدید و هوشمند quantitie =====
-                'quantities': list(product.product_quantity.all()),
-                'sizes': list(product.product_size.all()),
-                
-                #===== لیست جدید و هوشمند آپشن‌ها===== #
-                'options': data['structured_options'],
-                
-                'images': list(product.product_image.all()),
-                
-                #   ===== نیازمندی‌های فایل (File Specs) ===== #
-                'file_requirements': list(product.file_upload_requirements.all())
-            }
-            
-            logger.info(
-                f"Product details successfully prepared for slug: {slug} - "
-                f"Product ID: {product.id}"
-            )
-            
-            return result
-            
+            return data['product']
+
         except Exception as e:
-            logger.error(
-                f"Error fetching product details for slug '{slug}': {str(e)}",
-                exc_info=True
-            )
-            raise
+            logger.error(f"Error fetching product: {e}")
+            return None

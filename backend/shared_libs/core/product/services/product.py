@@ -31,18 +31,18 @@ class ProductService:
         structured_options = []
         # ===== تبدیل ساختار آپشن‌ها ===== #
         for prod_opt in product.options.all():
+            if prod_opt.option:
+                     choice_input_type = prod_opt.option.input_type
             option_data = {
                 "id": prod_opt.id,
                 "name": prod_opt.option.name,
                 "label": prod_opt.option.label,
+                "input_type": choice_input_type,
                 "is_required": prod_opt.is_required,
                 "choices": []
             }
             
             for choice in prod_opt.choices.all():
-                
-                if choice.global_source:
-                     choice_input_type = choice.global_source.input_type
                 
                 option_data["choices"].append({
                     "id": choice.id,
@@ -62,8 +62,8 @@ class ProductService:
             raise ProductNotFoundException(f"محصول با شناسه {product_id} یافت نشد.")
         
         return {
-            "product": product,
-            "structured_options": self._format_product_options(product)
+            "product": product
+            # "structured_options": self._format_product_options(product)
         }
 
     @transaction.atomic
@@ -92,7 +92,9 @@ class ProductService:
                 user=user, 
                 product=product, 
                 size_id=item['id'], 
-                price_impact=item.get('price_impact', 0)
+                price_impact=item.get('price_impact', 0),
+                guide_text=item.get('guide_text', ''),
+                guide_type=item.get('guide_type', 'info')
             )
             for item in size_configs
         ]
@@ -113,7 +115,7 @@ class ProductService:
         
         return {
             "product": product,
-            "structured_options": self._format_product_options(product)
+            # "structured_options": self._format_product_options(product)
         }
 
     # ===== Write Operations (Shell) ===== #
@@ -183,7 +185,9 @@ class ProductService:
                 user=user, 
                 product=product, 
                 quantity_id=item['id'], 
-                price=item.get('price', 0)
+                price=item.get('price', 0),
+                guide_text=item.get('guide_text', ''),
+                guide_type=item.get('guide_type', 'info')
             )
             for item in quantity_configs
         ]
@@ -194,88 +198,101 @@ class ProductService:
     # ===== Options Logic ===== #
     @transaction.atomic
     def attach_option_with_config(self, product_id: int, data: dict) -> ProductOption:
+        """
+        اتصال یک بانک ویژگی یا ایجاد یک ویژگی با زیر ویژگی به محصول
+        """
         product = Product.objects.get_by_id(product_id)
         if not product:
             raise ProductNotFoundException("محصول یافت نشد.")
 
-        option_id = data['option_id']
-        if product.options.filter(option_id=option_id).exists():
-            raise InvalidProductDataException("این ویژگی قبلاً اضافه شده است.")
-
-        try:
-            global_option = Option.objects.prefetch_related('global_values').get(id=option_id)
-        except Option.DoesNotExist:
-            raise InvalidProductDataException("ویژگی گلوبال یافت نشد.")
+        option_id = data.get('option_id')
+        global_option = None
+        # ===== حالت ۱: اتصال به بانک (Linked) ===== #
+        if option_id:
+            if product.options.filter(option_id=option_id).exists():
+                raise InvalidProductDataException("این ویژگی قبلاً اضافه شده است.")
+            try:
+                global_option = Option.objects.prefetch_related('global_values').get(id=option_id)
+            except Option.DoesNotExist:
+                raise InvalidProductDataException("ویژگی گلوبال یافت نشد.")
 
         max_order = product.options.aggregate(max_o=Max('order'))['max_o'] or 0
+        # ===== فیلدهای ساخت یک ویژگی ===== #
+        create_kwargs = {
+            "product": product,
+            "option": global_option,
+            "order": max_order + 1,
+            "is_required": data.get('is_required', False),
+            "guide_text": data.get('guide_text', ''),
+            "guide_type": data.get('guide_type', 'info')
+        }
         
-        # 1. ایجاد سرگروه آپشن
-        product_option = ProductOption.objects.create(
-            product=product,
-            option=global_option,
-            order=max_order + 1,
-            is_required=data.get('is_required', False),
-        )
-
+        # ===== اگر ویژگی فقط مربوط به این محصول هست ===== #
+        if not global_option:
+            create_kwargs.update({
+                "name": data['name'],
+                "label": data['label'],
+                "input_type": data.get('input_type', 'select')
+            })
+        product_option = ProductOption.objects.create(**create_kwargs)
+        
+        # ===== پردازش مقادیر فیلدها ===== #
         input_configs = data.get('values_config', [])
+
+        linked_configs_map = {
+            item.get('global_value_id'): item 
+            for item in input_configs if item.get('global_value_id')
+        }
         
-        # ===== [FIX] جداسازی مقادیر لینک‌دار و کاستوم ===== #
-        linked_configs_map = {}
-        custom_configs = []
-
-        for item in input_configs:
-            g_id = item.get('global_value_id')
-            if g_id:
-                linked_configs_map[g_id] = item
-            else:
-                # اگر ID نداشت، یعنی کاستوم است و باید جداگانه ساخته شود
-                custom_configs.append(item)
-
+        custom_configs = [item for item in input_configs if not item.get('global_value_id')]
         local_values_to_create = []
+        current_display_order = 0
         
-        # 2. پردازش مقادیر موجود در بانک (Global Values)
-        global_values = global_option.global_values.all()
-        
-        for idx, g_val in enumerate(global_values):
-            price = 0
-            is_default = False
-            final_label = g_val.label
-            final_value = g_val.value
-            should_create = True 
+        # ===== اگر ویژگی ها بودند و از بانک ویژگی است ===== #
+        if global_option:
+            global_values = global_option.global_values.all()
+            for g_val in global_values:
+                price = 0
+                is_default = False
+                final_label = g_val.label
+                final_value = g_val.value
+                final_guide_text = ''
+                final_guide_type = 'info'
+                should_create = True 
             
-            # اگر کانفیگ خاصی برای این آیتم گلوبال آمده
-            if g_val.id in linked_configs_map:
-                config = linked_configs_map[g_val.id]
-                
-                # اگر غیرفعال شده، نسازیم
-                if not config.get('is_active', True):
-                    should_create = False
-                
-                if should_create:
-                    price = config.get('price_impact', 0)
-                    is_default = config.get('is_default', False)
-                    # اعمال Override روی نام و مقدار
-                    if config.get('label'):
-                        final_label = config['label']
-                    if config.get('value'):
-                        final_value = config['value']
+                # ===== اگر ویژگی باید ایجاد شود ===== #
+                if g_val.id in linked_configs_map:
+                    config = linked_configs_map[g_val.id]
+
+                    if not config.get('is_active', True):
+                        should_create = False
+                    
+                    if should_create:
+                        price = config.get('price_impact', 0)
+                        is_default = config.get('is_default', False)
+                        if config.get('label'):
+                            final_label = config['label']
+                        if config.get('value'):
+                            final_value = config['value']
+                        # ===== بخش کادر راهنام  ===== #
+                        final_guide_text = config.get('guide_text', '')
+                        final_guide_type = config.get('guide_type', 'info')
 
             if should_create:
                 local_values_to_create.append(ProductOptionValue(
                     product_option=product_option,
-                    global_source=g_val, # لینک دارد
+                    global_source=g_val,
                     label=final_label,  
                     value=final_value,
-                    order=idx,
+                    order=current_display_order,
                     price_impact=price,
-                    is_default=is_default
+                    is_default=is_default,
+                    guide_text=final_guide_text,
+                    guide_type=final_guide_type
                 ))
-            
-        # 3. [FIX] پردازش مقادیر کاستوم (این قسمت در کد شما حذف شده بود)
-        current_order_index = len(local_values_to_create)
+                current_display_order += 1
 
         for custom_item in custom_configs:
-            # برای کاستوم، لیبل اجباری است
             if not custom_item.get('label'):
                 raise InvalidProductDataException("برای مقادیر سفارشی (Custom)، وارد کردن عنوان (Label) الزامی است.")
 
@@ -284,13 +301,15 @@ class ProductService:
                 global_source=None,
                 label=custom_item['label'],
                 value=custom_item.get('value', custom_item['label']),
-                order=current_order_index,
+                order=current_display_order,
                 price_impact=custom_item.get('price_impact', 0),
-                is_default=custom_item.get('is_default', False)
+                is_default=custom_item.get('is_default', False),
+                guide_text=custom_item.get('guide_text', ''),
+                guide_type=custom_item.get('guide_type', 'info')
             ))
-            current_order_index += 1
+            current_display_order += 1
             
-        # 4. ذخیره یکجا
+        # ===== ذخیره ویژگی ها ===== #
         if local_values_to_create:
             ProductOptionValue.objects.bulk_create(local_values_to_create)
             
@@ -298,28 +317,22 @@ class ProductService:
 
     @transaction.atomic
     def update_product_option_config(self, product_id: int, product_option_id: int, data: dict):
+        """
+        [UPDATED] آپدیت تکی یک کانفیگ
+        """
         try:
             prod_opt = ProductOption.objects.get(id=product_option_id, product_id=product_id)
         except ProductOption.DoesNotExist:
-            raise InvalidProductDataException(f"این ویژگی متعلق به محصول نیست. ID: {product_option_id}")
+            raise InvalidProductDataException(f"ID نامعتبر: {product_option_id}")
         
-        if 'is_required' in data:
-            prod_opt.is_required = data['is_required']
+        if 'is_required' in data: prod_opt.is_required = data['is_required']
+        if 'guide_text' in data: prod_opt.guide_text = data['guide_text']
+        if 'guide_type' in data: prod_opt.guide_type = data['guide_type']
+        
         prod_opt.save()
 
+        # آپدیت مقادیر (Values)
         if 'values' in data and data['values']:
-            valid_ids = {v.id for v in prod_opt.choices.all()}
-            for val in data["values"]:
-                if val['id'] not in valid_ids:
-                    raise InvalidProductDataException("اين مقدار متعلق به ویژگی درخواست شده نیست.")
-            
-            defaults_requested = [v for v in data["values"] if v.get("is_default")]
-            if len(defaults_requested) > 1:
-                raise InvalidProductDataException("فقط یک مقدار می‌تواند پیش‌فرض باشد.")
-            if len(defaults_requested) == 1:
-                default_id = defaults_requested[0]['id']
-                prod_opt.choices.exclude(id=default_id).update(is_default=False)
-            
             self._update_option_values_pricing_logic(product_id, product_option_id, data['values'])
             
         return prod_opt
@@ -337,18 +350,18 @@ class ProductService:
         value_map = {v.id: v for v in current_values}
 
         to_update = []
-        fields_to_update = ['price_impact', 'is_default', 'order']
+        fields_to_update = ['price_impact', 'is_default', 'order', 'guide_text', 'guide_type']
 
         for item in updates:
             val_id = item.get('id')
             if val_id in value_map:
                 obj = value_map[val_id]
-                if 'price_impact' in item:
-                    obj.price_impact = item['price_impact']
-                if 'is_default' in item:
-                    obj.is_default = item['is_default']
-                if 'order' in item:
-                    obj.order = item['order']
+                if 'price_impact' in item: obj.price_impact = item['price_impact']
+                if 'is_default' in item: obj.is_default = item['is_default']
+                if 'order' in item: obj.order = item['order']
+                if 'guide_text' in item: obj.guide_text = item['guide_text']
+                if 'guide_type' in item: obj.guide_type = item['guide_type']
+                
                 to_update.append(obj)
 
         if to_update:
