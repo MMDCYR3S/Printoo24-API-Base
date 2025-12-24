@@ -83,12 +83,11 @@ class RoleAdminService:
 
     # ========== Helper Methods ========== #
     def _check_role_deletion_safety(self, roles):
-        system_codes = ['admin_internal', 'super_admin', 'customer', 'admin']
+        system_codes = ['admin', 'super_admin', 'customer', 'normal']
         
         for role in roles:
             if role.slug in system_codes:
                 raise ValidationError(f"نقش '{role.name}' سیستمی است و قابل حذف نیست.")
-            
             if role.role_user.exists():
                 user_count = role.role_user.count()
                 raise ValidationError(

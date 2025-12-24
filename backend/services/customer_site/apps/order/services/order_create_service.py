@@ -18,34 +18,38 @@ class CreateOrderFromCartService:
         self._wallet_service = WalletService()
         
     @transaction.atomic
-    def execute(self, user: User, address: Address, cart_item_id: int, order_type: str = "2") -> Order:
+    def execute(self, user: User, address: Address, cart_item_id: int, order_type: str = "1") -> Order:
         """
-        اجرای فرآیند تسویه حساب برای یک آیتم تکی از سبد خرید (Single Item Checkout).
+        اجرای فرآیند تسویه حساب برای یک آیتم تکی (Single Item Checkout).
         """
         logger.info(f"Start checkout for CartItem ID {cart_item_id} by User {user.id}")
-
-        if address is None:
+        # ===== چک کردن آدرس مشتری و در صورت نبود، خطا دادن ===== #
+        if not address:
             raise ValidationError("لطفاً آدرس ارسال سفارش را انتخاب کنید.")
 
         # ===== دریافت سبد خرید ===== # 
         cart = self._cart_domain.get_or_create_cart_for_user(user)
         if not cart:
             raise EmptyCartError("سبد خرید یافت نشد.")
-
-        cart_item = cart.cart_items.filter(id=cart_item_id).select_related('product').prefetch_related('uploads').first()
-        if not cart_item:
-            raise ItemNotFoundException("آیتم مورد نظر در سبد خرید شما یافت نشد.")
+        # ===== تلاش برای دریافت آیتم ===== #
+        try:
+            cart_item = self._cart_domain.get_cart_item_for_user(user, cart_item_id)
+        except Exception:
+            raise ItemNotFoundException("آیتم مورد نظر در سبد خرید یافت نشد.")
         
         # ===== محاسبه قیمت ===== #
         item_price = cart_item.price
-        
-        # ===== چک کردن کیف پول ===== #
+        # ===== دریافت کیف پول ===== #
         user_balance = self._wallet_service.get_user_balance(user)
+        # ===== چک کردن کیف پول ===== #
         if user_balance < item_price:
             logger.warning(f"Insufficient funds: User {user.id}, Need {item_price}, Has {user_balance}")
             raise InsufficientFundsError(f"موجودی کافی نیست. مبلغ سفارش: {item_price:,} تومان")
         
         try:
+            # ===== کسر مبلغ از کیف پول ===== #
+            self._wallet_service.debit(user=user, amount=item_price)
+            
             # ===== تسویه حساب ===== #
             order = self._checkout_domain.checkout_single_item(
                 user=user, 
@@ -53,9 +57,6 @@ class CreateOrderFromCartService:
                 address=address, 
                 order_type=order_type
             )
-            
-            # ===== کسر مبلغ از کیف پول ===== #
-            self._wallet_service.debit(user=user, amount=item_price)
             
             logger.info(f"Order {order.order_code} created successfully for CartItem {cart_item_id}.")
             return order
@@ -65,14 +66,12 @@ class CreateOrderFromCartService:
             raise e
 
     @transaction.atomic
-    def execute_bulk(self, user: User, address: Address, order_type: str = "2") -> List[Order]:
+    def execute_bulk(self, user: User, address: Address, order_type: str = "1") -> List[Order]:
         """
-        اجرای فرآیند تسویه حساب برای کل سبد خرید.
-        - هر آیتم سبد خرید -> یک سفارش مجزا
-        - کسر موجودی -> به صورت یکجا
+        اجرای فرآیند تسویه حساب برای کل سبد خرید (Bulk Checkout).
         """
         logger.info(f"Start BULK checkout for User {user.id}")
-
+        # ===== در صورت نبود آدرس، خطا ===== #
         if address is None:
             raise ValidationError("لطفاً آدرس ارسال سفارش را انتخاب کنید.")
         
@@ -80,8 +79,11 @@ class CreateOrderFromCartService:
         cart = self._cart_domain.get_or_create_cart_for_user(user)
         if not cart or not cart.cart_items.exists():
             raise EmptyCartError("سبد خرید شما خالی است.")
-        
+        # ===== دریافت آیتم ها ===== #
         cart_items = list(cart.cart_items.select_related('product').prefetch_related('uploads').all())
+        # ===== اگر آیتمی نبود ===== #
+        if not cart_items:
+            raise EmptyCartError("سبد خرید شما خالی است.")
         
         # ===== محاسبه قیمت ===== #
         total_price = sum(item.price for item in cart_items)

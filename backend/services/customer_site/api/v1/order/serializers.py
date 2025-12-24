@@ -42,36 +42,54 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
              'design_files',
              'pricing_breakdown'
          ]
-    
+        
     def get_specs(self, obj):
         """
-        ساختاردهی مجدد جزئیات فنی برای نمایش در فاکتور.
+        استخراج و فرمت‌دهی اطلاعات فنی از JSON Field (item.items)
         """
         raw_data = obj.items or {}
-        width = raw_data.get('width')
-        height = raw_data.get('height')
+        # ===== استخراج اطلاعات فنی ===== #
+        meta = raw_data.get('meta', {})
+        width = meta.get('width') or raw_data.get('width')
+        height = meta.get('height') or raw_data.get('height')
+        has_design = meta.get('has_design', raw_data.get('has_design', False))
+        # ===== دریافت ویژگی ها ===== #
+        raw_options = raw_data.get('options', [])
+        detailed_options = []
         
-        # استخراج آپشن‌ها با ساختار استاندارد
-        detailed_options = [
-            {
-                "id": opt.get('id'),
-                "option_name": opt.get('option_name', 'N/A'),
-                "value_label": opt.get('value_label', 'N/A'),
-                "price_impact": float(opt.get('price_impact', 0.0))
-            }
-            for opt in raw_data.get('options', [])
-        ]
-
+        for opt in raw_options:
+            label_display = "N/A"
+            price_impact = 0.0
+            # ===== اگر انتخاب تکی باشد ===== #
+            if opt.get('type') == 'selection':
+                val_data = opt.get('value', {})
+                label_display = val_data.get('label', 'N/A')
+                price_impact = val_data.get('price', 0.0)
+            # ===== اگر انتخاب چندتایی باشد ===== #
+            elif opt.get('type') == 'multi_selection':
+                vals = opt.get('values', [])
+                label_display = ", ".join([v.get('label', '') for v in vals])
+                price_impact = sum([v.get('price', 0.0) for v in vals])
+            # ===== اگر انتخاب عدد/متن باشد ===== #
+            elif opt.get('type') == 'raw':
+                label_display = str(opt.get('value', 'N/A'))
+                price_impact = opt.get('price', 0.0)
+            # ===== ایجاد مقادیر در لیست مورد نظر ===== #
+            detailed_options.append({
+                "option_name": opt.get('option_label', 'N/A'),
+                "value_label": label_display,
+                "price_impact": price_impact
+            })
+        # ===== بازگردانی لیست ===== #
         return {
-            "dimensions": f"{width or 'N/A'} x {height or 'N/A'} cm",
-            "has_design": raw_data.get('has_design', False),
-            "options": detailed_options,
-            "breakdown_present": bool(raw_data.get('price_breakdown'))
+            "dimensions": f"{width} x {height} cm" if width and height else "استاندارد",
+            "has_design": has_design,
+            "options": detailed_options
         }
     
     def get_pricing_breakdown(self, obj):
         raw_data = obj.items or {}
-        return raw_data.get('price_breakdown', {})
+        return raw_data.get('meta', {}).get('price_breakdown', {})
 
 # ===== Order Serializer (Main) ===== #
 class OrderSerializer(serializers.ModelSerializer):
@@ -86,7 +104,7 @@ class OrderSerializer(serializers.ModelSerializer):
     # ===== جزئیات آیتم (چون سفارشات فعلی تک آیتمی هستند) ===== #
     item_detail = serializers.SerializerMethodField()
     
-    # ===== ورودی‌ها (Write Only) ===== #
+    # ===== ورودی‌ها ===== #
     address_id = serializers.PrimaryKeyRelatedField(
         queryset=Address.objects.all(),
         source="address",
@@ -95,7 +113,6 @@ class OrderSerializer(serializers.ModelSerializer):
         help_text="شناسه آدرس انتخاب شده"
     )
     
-    # اضافه کردن فیلد type برای مستندات Swagger و اعتبارسنجی
     type = serializers.ChoiceField(
         choices=Order.ORDER_TYPE,
         default='2',
@@ -110,7 +127,6 @@ class OrderSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         request = self.context.get('request')
-        # فیلتر کردن آدرس‌ها فقط برای خود کاربر
         if request and hasattr(request, 'user'):
             self.fields['address_id'].queryset = Address.objects.filter(user=request.user)
 

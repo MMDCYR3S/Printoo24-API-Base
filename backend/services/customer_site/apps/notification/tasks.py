@@ -2,7 +2,7 @@ import logging
 from celery import shared_task
 from django.contrib.auth import get_user_model
 from core.models import Order, WalletTransaction
-from core.domain.communication.notification.services import NotificationDomainService
+from core.notifications.services import NotificationService
 
 logger = logging.getLogger('celery.notification')
 User = get_user_model()
@@ -21,7 +21,7 @@ def send_order_status_notification(order_id, old_status_id, new_status_id):
         message = f"وضعیت سفارش شما با شناسه {order.id} به «{new_status_name}» تغییر یافت."
         
         # ===== ساخت سرویس اعلان ===== #
-        service = NotificationDomainService()
+        service = NotificationService()
         service.send_notification(
             recipient=user,
             title=title,
@@ -65,7 +65,7 @@ def send_wallet_notification(transaction_id):
         else:
             return
 
-        service = NotificationDomainService()
+        service = NotificationService()
         service.send_notification(
             recipient=user,
             title=title,

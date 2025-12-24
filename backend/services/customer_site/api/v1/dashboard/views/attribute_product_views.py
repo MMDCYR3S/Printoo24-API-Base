@@ -6,10 +6,10 @@ from drf_spectacular.utils import extend_schema
 from core.models import (
     Attachment
 )
-from core.domain.catalog.product import (
-    SizeDomainService,
-    QuantityDomainService,
-    ProductMediaDomainService
+from core.product.services import (
+    SizeService,
+    QuantityService,
+    ProductMediaService
 )
 from ..serializers import (
     SizeSerializer,
@@ -27,7 +27,7 @@ class SizeViewSet(viewsets.ViewSet):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service = SizeDomainService()
+        self.service = SizeService()
 
     @extend_schema(responses=SizeSerializer(many=True))
     def list(self, request):
@@ -68,7 +68,7 @@ class QuantityViewSet(viewsets.ViewSet):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service = QuantityDomainService()
+        self.service = QuantityService()
 
     @extend_schema(responses=QuantitySerializer(many=True))
     def list(self, request):
@@ -113,7 +113,7 @@ class AttachmentLibraryViewSet(viewsets.ModelViewSet):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service = ProductMediaDomainService()
+        self.service = ProductMediaService()
 
     @extend_schema(summary="آپلود فایل جدید در کتابخانه")
     def create(self, request, *args, **kwargs):

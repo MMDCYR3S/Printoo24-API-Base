@@ -5,7 +5,7 @@ from django.utils.translation import gettext as _
 
 from core.order.models import Order, OrderPrintReport, OrderPrintItem, OrderPrintAttachment
 from core.models import User
-from core.domain.infrastructure.logger import AuditLogDomainService
+from core.logger.services import LoggerService
 
 # ========== PRINT SERVICE ========== #
 class PrintMaterialService:
@@ -13,7 +13,7 @@ class PrintMaterialService:
     سرویس مدیریت مصرف متریال در واحد چاپ.
     """
     def __init__(self):
-        self.audit_service = AuditLogDomainService()
+        self.audit_service = LoggerService()
 
     @transaction.atomic
     def register_usage_report(self, 

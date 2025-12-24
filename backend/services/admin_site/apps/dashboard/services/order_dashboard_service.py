@@ -1,10 +1,17 @@
+import logging
 from typing import List, Dict, Any
+from decimal import Decimal
+
+from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from core.models import User, Order, OrderItem, OrderStatus, Product, Address
-from core.domain.commerce.order import OrderRepository
-from core.domain.financial import FinancialDomainService
+from core.order.services import OrderService
+from core.financial.services import FinancialService
+
+# ========== LOGGER ========== #
+logger = logging.getLogger('dashboard.services.order_dashboard')
 
 # ========== ORDER DASHBOARD SERVICE ========== #
 class OrderDashboardService:
@@ -13,140 +20,109 @@ class OrderDashboardService:
     شامل: ثبت سفارش اختصاصی، ویرایش سفارش، لیست و حذف گروهی.
     """
     def __init__(self):
-        self.order_repo = OrderRepository()
-        self.financial_service = FinancialDomainService()
+        self.order_domain = OrderService()
+        # self.financial_service = FinancialService()
+        
+    # ========== READ OPERATIONS ========== #
+    def get_all_orders_queryset(self):
+        """ لیست سفارشات برای جدول (بهینه شده) """
+        return Order.objects.select_related('user', 'current_status')\
+            .prefetch_related('order_item_order')\
+            .order_by('-created_at')
+
+    def get_order_detail(self, order_id: int):
+        """ جزئیات کامل سفارش """
+        return self.order_domain.get_order_by_id(order_id)
         
     # ============ CREATE CUSTOM ORDER ============ #
     @transaction.atomic
     def create_custom_order(self, admin_user: User, data: Dict[str, Any]) -> Order:
         """
         ثبت سفارش اختصاصی توسط ادمین.
+        ادمین می‌تواند قیمت‌ها را دستی وارد کند یا بگذارد سیستم محاسبه کند.
         """
-        # ===== دریافت شناسه مشتری ===== #
-        customer_id = data.get('user_id')
-        if not customer_id:
-            raise ValidationError("شناسه مشتری الزامی است.")
-        # ===== اعتبارسنجی ===== #
-        try:
-            customer = User.objects.get(id=customer_id)
-        except User.DoesNotExist:
-            raise ValidationError("مشتری یافت نشد.")
-        # ===== دریافت آدرس و اعتبارسنجی ===== #
+        logger.info(f"Dashboard: Creating custom order by Admin {admin_user.id}")
+        # ===== استخراج داده اصلی ===== #
+        user_id = data.get('user_id')
         address_id = data.get('address_id')
-        if address_id:
-            address = Address.objects.get(id=address_id)
-        else:
-            raise ValidationError("آدرس الزامی است.")
-        # ===== دریافت وضعیت اولیه ===== #
-        initial_status = OrderStatus.objects.get(status_type='initial', group__code='admin')
-        # ===== ایجاد سفارش بدون قیمت ===== #
-        order = Order.objects.create(
-            user=customer,
-            address=address,
-            current_status=initial_status,
-            type="2",
-            description=data.get('description', ''),
-        )
-        # ===== دریافت و افزودن آیتم ها ===== #
         items_data = data.get('items', [])
-        total_price = 0
-        base_price = 0
-        
-        for item in items_data:
-            product_id = item.get('product_id')
-            product = None
-            if product_id:
-                product = Product.objects.get(id=product_id)
-            # ===== دریافت قسمت و تعداد ===== #
-            quantity = item.get('quantity', 1)
-            unit_price = item.get('price', 0)
-            # ===== قیمت گذاری ===== #
-            line_total = quantity
-            total_price += line_total
-            base_price += line_total
-            # ===== ساخت آیتم ===== #
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                quantity=quantity,
-                price=unit_price,
-                items=item.get('features', {}),
-                admin_note=item.get('note', '')
+        total_price_override = data.get('price')
+        # ===== اگر کاربر آدرس نداشت یا وجود نداشت ===== #
+        if not user_id or not address_id:
+            raise ValidationError("شناسه کاربر و آدرس الزامی است.")
+        # ===== در صورت نبود لیست آیتم ===== #
+        if not items_data:
+            raise ValidationError("لیست آیتم‌ها نمی‌تواند خالی باشد.")
+        # ===== دریافت آدرس و اعتبارسنجی ===== #
+        try:
+            order = self.order_domain.create_order_direct(
+                user_id=user_id,
+                address_id=address_id,
+                items_data=items_data,
+                total_price_override=total_price_override
             )
-        # ===== تعیین قیمت سفارش ===== #
-        order.total_price = total_price
-        order.base_products_price = base_price
-        order.save()
-        # ===== ایجاد فاکتور ===== #
-        # if data.get('generate_invoice', True):
-        #     self.financial_service.issue_invoice_from_order(order, admin_user)
+            # ===== اگر توضیحات وجود داشت ===== #
+            if 'description' in data:
+                    order.description = data['description']
+                    order.save(update_fields=['description'])
 
-        return order
+            logger.info(f"Custom Order {order.id} created successfully.")
+            return order
+
+        except Exception as e:
+            logger.error(f"Failed to create custom order: {e}")
+            raise e
     
     # ============ UPDATE ORDER ============ #
     @transaction.atomic
     def update_order_details(self, admin_user: User, order_id: int, data: Dict[str, Any]) -> Order:
         """
-        ویرایش جزئیات سفارش (مثلاً تغییر آدرس، تغییر قیمت توافقی).
-        توجه: آیتم‌ها معمولا جداگانه مدیریت می‌شوند.
+        ویرایش اطلاعات کلی سفارش (آدرس، نوع، قیمت کل، توضیحات).
         """
-        # ===== دریافت سفارش ===== #
-        order = self.order_repo.get_by_id(order_id)
-        if not order:
-            raise ValidationError("سفارش یافت نشد.")
-        # ===== دریافت آدرس ===== #
+        order = get_object_or_404(Order, pk=order_id)
+        # ===== آدرس ===== #
         if 'address_id' in data:
-            order.address_id = data['address_id']
+            address = get_object_or_404(Address, pk=data['address_id'])
+            if address.user_id != order.user_id:
+                logger.warning(f"Admin assigned address {address.id} to user {order.user_id} (Mismatch)")
+            order.address = address
+
+        # ===== نوع سفارش ===== #
+        if 'type' in data:
+            order.type = data['type']
+
         # ===== توضیحات ===== #
         if 'description' in data:
             order.description = data['description']
-        # ===== تغییر قیمت ===== #
-        if order.type == "2" and 'total_price' in data:
-            order.total_price = data['total_price']
-            # ===== بروزرسانی قیمت برای فاکتور ===== #
-            # if hasattr(order, 'invoice'):
-            #     invoice = order.invoice
-            #     if not invoice.is_paid:
-            #         invoice.final_amount = data['total_price']
-            #         invoice.save()
+
+        # ===== تغییر قیمت کل ===== #
+        if 'total_price' in data:
+            new_price = Decimal(str(data['total_price']))
+            order.total_price = new_price
 
         order.save()
+        logger.info(f"Order {order_id} updated by Admin {admin_user.id}")
         return order
-    
+
     # ========== DELETE ========== #
     def delete_order(self, order_id: int):
         """
         حذف یک سفارشات براساس شناسه آن
         """
-        order = self.order_repo.get_by_id(order_id)
         try:
-            self.order_repo.delete(order)
+            Order.objects.filter(pk=order_id).delete()
         except Exception as e:
             raise (f"خطا در حذف سفارش: {str(e)}")
     
     # ============ BULK ACTIONS ============ #
-    def bulk_delete_orders(self, admin_user: User, order_ids: List[int]):
+    def bulk_delete_orders(self, order_ids: List[int]):
         """
         حذف گروهی سفارشات (فقط سفارشات لغو شده یا پیش‌نویس).
         """
         # ===== دریافت سفارشات ===== #
-        orders = Order.objects.filter(id__in=order_ids)
-        deleted_count = 0
-
-        for order in orders:
-            # ===== اگر فاکتور داشت، پاک نکن ===== #
-            if hasattr(order, 'invoice') and order.invoice.status in ['PAID_FULL', 'PAID_PARTIAL']:
-                continue
-
-            if order.is_locked:
-                continue
-
-            order.delete()
-            deleted_count += 1
-            
-        return deleted_count
+        return self.order_domain.bulk_delete_orders(order_ids)
     
-    def bulk_change_status(self, admin_user: User, order_ids: List[int], new_status_id: int):
+    def bulk_change_status(self, order_ids: List[int], new_status_id: int):
         """
         تغییر وضعیت گروهی.
         برای این سیستم ممکن هست که این قسمت اصلا نیازی نباشه و به کار نیاد.

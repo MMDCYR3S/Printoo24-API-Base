@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes
 
-from core.domain.infrastructure.general import SliderDomainService
+from core.home.services import SliderService
 from core.models import PromotionalModal, SliderIndex
 from .serializers import SliderSerializer, PromotionalModalSerializer, ContactUsSerializer
 
@@ -19,7 +19,7 @@ class SliderViewSet(viewsets.ViewSet):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service = SliderDomainService()
+        self.service = SliderService()
 
     @extend_schema(
         summary="دریافت لیست اسلایدرها",

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema
 
-from core.domain.infrastructure.general import SliderDomainService
+from core.home.services import SliderService
 from ..serializers import SliderDashboardSerializer
 
 # ===== Slider Dashboard View Set ===== #
@@ -17,7 +17,7 @@ class SliderDashboardViewSet(viewsets.ModelViewSet):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service = SliderDomainService()
+        self.service = SliderService()
 
     def get_queryset(self):
         return self.service.get_all()

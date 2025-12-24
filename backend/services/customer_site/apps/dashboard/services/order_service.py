@@ -49,158 +49,17 @@ class OrderDashboardService:
         return self.order_domain.get_order_by_id(order_id) 
 
     # ===== ایجاد سفارش مستقیم (Direct Order) ===== #
-    @transaction.atomic
     def create_admin_order(self, user_id: int, address_id: int, items_data: List[Dict], total_price_override: float = None):
         """
-        ایجاد سفارش توسط ادمین.
-        - امکان قیمت‌دهی دستی برای کل سفارش (total_price_override).
-        - امکان قیمت‌دهی دستی برای هر آیتم (item_price).
+        فراخوانی سرویس دامین برای ایجاد سفارش.
         """
-        start_time = time.time()
-        logger.info(f"START: Creating admin order for User {user_id}")
-        
-        try:
-            user = get_object_or_404(User, pk=user_id)
-            address = get_object_or_404(Address, pk=address_id, user=user)
-            
-            temp_items = []
-            calculated_total = Decimal(0)
-            
-            # ===== پردازش اطلاعات ===== #
-            for item_data in items_data:
-                product_slug = item_data.get('product_slug')
-                selections = item_data.get('selections', item_data)
-                
-                product = get_object_or_404(Product, slug=product_slug)
-                quantity = selections.get('quantity', 1)
-                
-                snapshot_data, resolved_objects = self._prepare_item_snapshot(product, selections)
-                
-                if 'item_price' in item_data and item_data['item_price'] is not None:
-                    line_total = Decimal(str(item_data['item_price']))
-                else:
-                    base_price = product.price 
-                    line_total = base_price * quantity
-                
-                calculated_total += line_total
-                
-                specs_json = {
-                    'size_id': selections.get('size_id'),
-                    'option_value_ids': selections.get('option_value_ids'),
-                    'custom_width': selections.get('custom_width'),
-                    'custom_height': selections.get('custom_height'),
-                }
-
-                temp_items.append({
-                    'product': product,
-                    'quantity': quantity,
-                    'price': line_total,
-                    'specs': snapshot_data
-                })
-
-            # تعیین قیمت نهایی سفارش
-            # اگر ادمین قیمت کل را دستی وارد کرده باشد، آن را ست می‌کنیم
-            final_total_price = Decimal(str(total_price_override)) if total_price_override is not None else calculated_total
-
-            # وضعیت اولیه
-            initial_status = OrderStatus.objects.first()
-            if not initial_status:
-                # ساخت وضعیت اضطراری اگر دیتابیس خالی بود
-                initial_status = OrderStatus.objects.create(name="ثبت اولیه")
-
-            # ایجاد سفارش
-            order = Order.objects.create(
-                user=user,
-                address=address,
-                current_status=initial_status,
-                total_price=final_total_price,
-                type="2"
-            )
-            
-            # ذخیره آیتم‌ها
-            for t_item in temp_items:
-                OrderItem.objects.create(
-                    order=order,
-                    product=t_item['product'],
-                    quantity=t_item['quantity'],
-                    price=t_item['price'],
-                    items=t_item['specs']
-                )
-                logger.debug(f"Added item {t_item['product'].name} to Order {order.id}")
-
-            duration = time.time() - start_time
-            logger.info(f"SUCCESS: Order {order.id} created for User {user_id} with Total Price: {final_total_price}. Duration: {duration:.2f}s")
-            return order
-
-        except KeyError as e:
-            logger.error(f"FAILED: Missing key in items data: {str(e)}", exc_info=True)
-            raise ValidationError(f"اطلاعات ارسالی ناقص است. کلید {str(e)} یافت نشد.")
-        except Exception as e:
-            logger.error(f"FAILED: Create admin order failed. Error: {str(e)}", exc_info=True)
-            raise e
-
-    def _prepare_item_snapshot(self, product, selections):
-        """
-        تبدیل IDهای خام به داده‌های کامل (نام، ابعاد و...) برای ذخیره در JSON.
-        خروجی: (dict_for_json, dict_of_objects_for_calculator)
-        """
-        
-        # ===== سایز ===== #
-        size_id = selections.get('size_id')
-        width = 0
-        height = 0
-        size_name = "اختصاصی"
-        size_obj = None
-
-        if size_id:
-            try:
-                size_obj = ProductSize.objects.select_related('size').get(id=size_id, product=product)
-                width = size_obj.size.width
-                height = size_obj.size.height
-                size_name = size_obj.size.name
-            except ProductSize.DoesNotExist:
-                raise ValidationError("سایز نامعتبر است.")
-        else:
-            width = selections.get('custom_width', 0)
-            height = selections.get('custom_height', 0)
-            if not width or not height:
-                raise ValidationError("ابعاد مشخص نشده است.")
-
-        # ===== ویژگی ها ===== #
-        option_ids = selections.get('option_value_ids', [])
-        option_objs = []
-        options_snapshot = []
-        
-        if option_ids:
-            # ===== دریافت آپشن ها ===== #
-            option_objs = list(ProductOptionValue.objects.select_related('product_option__option').filter(
-                id__in=option_ids,
-                product_option__product=product
-            ))
-            
-            # ===== ساخت لیستی از آپشن‌ها برای نمایش ===== #
-            for opt in option_objs:
-                options_snapshot.append({
-                    'id': opt.id,
-                    'title': opt.product_option.option.label,
-                    'value': opt.label,
-                    'price': float(opt.price_impact)
-                })
-
-        snapshot = {
-            'width': float(width),
-            'height': float(height),
-            'size_name': size_name,
-            'has_design': selections.get('has_design', True),
-            'options': options_snapshot
-        }
-
-        resolved_objects = {
-            'size': size_obj,
-            'options': option_objs
-        }
-
-        return snapshot, resolved_objects
+        logger.info(f"Dashboard: Creating order for User {user_id}")
+        return self.order_domain.create_order_direct(
+            user_id=user_id,
+            address_id=address_id,
+            items_data=items_data,
+            total_price_override=total_price_override
+        )
 
     # ===== ویرایش سفارش (Update) ===== #
     @transaction.atomic
@@ -210,17 +69,16 @@ class OrderDashboardService:
         """
         logger.info(f"Updating Order {order_id}")
         order = get_object_or_404(Order, pk=order_id)
-        
+        # ===== ویرایش آدرس ===== #
         if 'address_id' in data:
             address = get_object_or_404(Address, pk=data['address_id'])
             if address.user_id != order.user_id:
                 raise ValidationError("این آدرس متعلق به کاربر سفارش‌دهنده نیست.")
             order.address = address
-            
+        # ===== ویرایش نوع ===== #
         if 'type' in data:
             order.type = data['type']
-            
-        # امکان ویرایش قیمت کل توسط ادمین
+        # ===== ویرایش قیمت کل ===== #
         if 'total_price' in data:
             order.total_price = Decimal(str(data['total_price']))
             
@@ -284,10 +142,8 @@ class OrderDashboardService:
         
         price_deduct = item.price
         item.delete()
-        
-        # کسر قیمت
+        # ===== کسر قیمت ===== #
         order.total_price -= price_deduct
-        # جلوگیری از قیمت منفی (محض احتیاط)
         if order.total_price < 0: order.total_price = 0
         
         order.save()
@@ -299,7 +155,7 @@ class OrderDashboardService:
         Order.objects.filter(pk=order_id).delete()
 
     # ===== آپلود فایل سفارش (Async) ===== #
-    def upload_order_file_async(self, order_item_id: int, requirement_id: int, file_obj):
+    def upload_order_file_async(self, order_item_id: int, file_obj):
         logger.info(f"START: Async Upload for OrderItem {order_item_id}")
         
         if not os.path.exists(self.temp_storage.location):
@@ -315,7 +171,6 @@ class OrderDashboardService:
             if upload_order_item_file_task:
                 upload_order_item_file_task.delay(
                     order_item_id=order_item_id,
-                    requirement_id=requirement_id,
                     temp_file_path=temp_path,
                     original_filename=original_name
                 )
@@ -342,7 +197,6 @@ class OrderDashboardService:
                     django_file = File(f, name=original_name)
                     instance = OrderItemFile.objects.create(
                         order_item=order_item,
-                        requirement=requirement,
                         file=django_file
                     )
                 

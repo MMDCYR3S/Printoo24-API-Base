@@ -6,23 +6,16 @@ from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 
 from apps.permissions import AppPermissionChecker
-from core.models import (
-    User, OrderCostReport, OrderCostSheet,
-    OrderCostCategory, OrderCostItem
+from core.models import User, Order
+from core.order.models import (
+    OrderCostReport, OrderCostSheet, OrderCostCategory, 
+    OrderCostItem, OrderCostAttachment
 )
-from core.domain.commerce.order import (
-    OrderCostDomainService, 
-    OrderCostReportRepository, 
-    OrderCostSheetRepository,
-    OrderCostCategoryRepository,
-    OrderCostAttachmentRepository,
-    OrderCostItemRepository,
-    OrderRepository,
-    OrderCostDomainService 
-)
-from core.domain.infrastructure.logger import AuditLogDomainService
 
-# ============ Financial Order App Service ============ #
+from core.order.services.cost import OrderCostService
+from core.logger.services import LoggerService
+
+# ============ FINANCIAL ORDER APP SERVICE ============ #
 class FinancialOrderAppService:
     """
     سرویس اپلیکیشن مدیریت هزینه‌های سفارش (Cost Accounting).
@@ -34,30 +27,23 @@ class FinancialOrderAppService:
     """
     
     def __init__(self):
-        # ===== سرویس دامنه ===== #
-        self._domain_service = OrderCostDomainService()
-        self.audit_service = AuditLogDomainService()
-        # ===== ریپازیتوری ها ===== #
-        self._report_repo = OrderCostReportRepository()
-        self._sheet_repo = OrderCostSheetRepository()
-        self._item_repo = OrderCostItemRepository()
-        self._category_repo = OrderCostCategoryRepository()
-        self._attachment_repo = OrderCostAttachmentRepository()
-        self._order_repo = OrderRepository()
+        self._domain_service = OrderCostService()
+        self.audit_service = LoggerService()
     
-    # ============ CATEGORY MANAGEMENT ============ #
+    # ============ CATEGORY LIST ============ #
     def get_all_categories(self, user: User) -> List[OrderCostCategory]:
         AppPermissionChecker.check_has_permission(user, 'view_ordercostcategory')
-        return self._category_repo.get_all_active()
+        return OrderCostCategory.objects.get_all_active()
 
+    # ============ CATEGORY CREATE ============ #
     @transaction.atomic
     def create_category(self, user: User, data: Dict[str, Any]) -> OrderCostCategory:
         AppPermissionChecker.check_has_permission(user, 'add_ordercostcategory')
         
-        if self._category_repo.get_by_slug(data.get('slug')):
+        if OrderCostCategory.objects.get_by_slug(data.get('slug')):
             raise ValidationError("کد دسته‌بندی (slug) تکراری است.")
-            
-        category = self._category_repo.create(data)
+        # ===== ایجاد دسته‌بندی ===== #
+        category = OrderCostCategory.objects.create(**data)
 
         # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
@@ -69,31 +55,36 @@ class FinancialOrderAppService:
         )
         return category
 
+    # ============ CATEGORY UPDATE ============ #
     @transaction.atomic
     def update_category(self, user: User, category_id: int, data: Dict[str, Any]) -> OrderCostCategory:
         AppPermissionChecker.check_has_permission(user, 'change_ordercostcategory')
-        
-        category = self._category_repo.get_by_id(category_id)
+        # ===== بررسی وجود دسته بندی ===== #
+        category = OrderCostCategory.objects.get_by_id(category_id)
         if not category:
             raise ValidationError("دسته‌بندی یافت نشد.")
 
         # ===== چک کردن اینکه آیا کد تکراری است ===== #
         new_slug = data.get('slug')
         if new_slug and new_slug != category.slug:
-            if self._category_repo.get_by_slug(new_slug):
+            if OrderCostCategory.objects.get_by_slug(new_slug):
                 raise ValidationError("کد دسته‌بندی تکراری است.")
-
-        updated_cat = self._category_repo.update(category, data)
+        # ===== بروزرسانی آیتم های مربوط به دسته بندی ===== #
+        for key, value in data.items():
+            setattr(category, key, value)
+        category.save()
 
         # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
             user=user,
-            obj=updated_cat,
+            obj=category,
             action='UPDATE_COST_CATEGORY',
             changes={'updated_fields': list(data.keys())},
-            description=_(f"ویرایش دسته‌بندی هزینه: {updated_cat.name}")
+            description=_(f"ویرایش دسته‌بندی هزینه: {category.title}")
         )
-        return updated_cat
+        return category
+    
+    # ========== CATEGORY DELETE ============ #
     @transaction.atomic
     def delete_category(self, user: User, category_id: int) -> None:
         AppPermissionChecker.check_has_permission(user, 'delete_ordercostcategory')
@@ -118,7 +109,7 @@ class FinancialOrderAppService:
             description=_(f"حذف دسته‌بندی هزینه")
         )
     
-    # ============ REPORT MANAGEMENT ============ #
+    # ============ REPORT CREATE ============ #
     @transaction.atomic
     def create_report_manually(self, user: User, order_id: int, data: Dict, items: List[Dict], attachments: List[UploadedFile] = []) -> OrderCostReport:
         """
@@ -130,15 +121,14 @@ class FinancialOrderAppService:
         # ===== بررسی قفل نبودن سند مالی ===== #
         self._domain_service._validate_sheet_is_modifiable(sheet)
         # ===== ایجاد هدر گزارش ===== #
-        report_data = {
-            "sheet": sheet,
-            "submitter": user,
-            "department": data.get("department", "finance"),
-            "title": data["title"],
-            "description": data.get("description", ""),
-            "is_approved": False
-        }
-        report = self._report_repo.create(report_data)
+        report = OrderCostReport.objects.create(
+            sheet=sheet,
+            submitter=user,
+            department=data.get("department", "finance"),
+            title=data["title"],
+            description=data.get("description", ""),
+            is_approved=False
+        )
         
         # ===== ایجاد آیتم‌ها و پیوست‌ها ===== #
         self._bulk_create_items(report, items)
@@ -156,35 +146,36 @@ class FinancialOrderAppService:
             changes={
                 'report_id': report.id,
                 'title': report.title,
-                'items_count': len(items),
-                'total_amount': sum(float(i.get('amount', 0)) for i in items)
+                'items_count': len(items)
             },
             description=_(f"ثبت گزارش هزینه جدید: {report.title}")
         )
-        
         return report
     
-    # ============ REPORT CRUD (Financial Edit) ============ #
+    # ============ REPORT UPDATE ============ #
     @transaction.atomic
     def update_report(self, user: User, report_id: int, data: Dict) -> OrderCostReport:
         AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
         # ===== بررسی قانون قفل نبودن سند مالی ===== #
         report = self._domain_service.validate_report_modification(report_id)
         # ===== تغییرات اصلی ===== #
-        updated_report = self._report_repo.update(report, data)
-        self._domain_service.recalculate_sheet_totals(updated_report.sheet)
+        for key, value in data.items():
+            setattr(report, key, value)
+        report.save()
+        self._domain_service.recalculate_sheet_totals(report.sheet)
 
         # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
             user=user,
-            obj=updated_report.sheet,
+            obj=report.sheet,
             action='UPDATE_COST_REPORT',
             changes={'report_id': report_id, 'updated_fields': list(data.keys())},
-            description=_(f"ویرایش هدر گزارش هزینه: {updated_report.title}")
+            description=_(f"ویرایش هدر گزارش هزینه: {report.title}")
         )
 
-        return updated_report
+        return report
 
+    # ============ REPORT DELETE ============ #
     @transaction.atomic
     def delete_report(self, user: User, report_id: int) -> None:
         AppPermissionChecker.check_has_permission(user, 'delete_ordercostreport')
@@ -192,20 +183,19 @@ class FinancialOrderAppService:
         report = self._domain_service.validate_report_modification(report_id)
         sheet = report.sheet
         report_title = report.title
-        total_value = report.total_amount
-
-        self._report_repo.delete(report)
+        # ===== حذف گزارش ===== #
+        report.delete()
         self._domain_service.recalculate_sheet_totals(sheet)
-
-        # ===== ثبت لاگ حذف ===== #
+        # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
             user=user,
             obj=sheet,
             action='DELETE_COST_REPORT',
-            changes={'deleted_report_id': report_id, 'title': report_title, 'value_removed': str(total_value)},
+            changes={'deleted_report_id': report_id, 'title': report_title},
             description=_(f"حذف گزارش هزینه")
         )
 
+    # ============ REPORT LIST ============ #
     def get_order_reports(self, user: User, order_id: int) -> List[OrderCostReport]:
         """ 
         مشاهده لیست تمام گزارش‌های هزینه یک سفارش خاص.
@@ -213,24 +203,25 @@ class FinancialOrderAppService:
         # ===== بررسی مجوز مشاهده ===== #
         AppPermissionChecker.check_has_permission(user, 'view_ordercostreport')
         
-        sheet = self._sheet_repo.get_by_order_id(order_id)
+        sheet = OrderCostSheet.objects.get_by_order_id(order_id)
         if not sheet:
             return []
             
-        return self._report_repo.get_reports_by_sheet(sheet.id)
+        return OrderCostReport.objects.get_reports_by_sheet(sheet.id)
 
+    # ============ REPORT DETAIL ============ #
     def get_report_detail(self, user: User, report_id: int) -> OrderCostReport:
         """ 
         مشاهده جزئیات یک گزارش هزینه خاص به همراه اقلام و پیوست‌ها.
         """
         # ===== بررسی مجوز مشاهده ===== #
         AppPermissionChecker.check_has_permission(user, 'view_ordercostreport')
-        
-        report = self._report_repo.get_report_detail(report_id)
+        report = OrderCostReport.objects.get_report_detail(report_id)
         if not report:
             raise ValidationError("گزارش هزینه مورد نظر یافت نشد.")
         return report
-
+    
+    # ============ REPORT APPROVE ============ #
     def approve_report(self, user: User, report_id: int) -> OrderCostReport:
         """ تایید یا رد گزارش هزینه """
         AppPermissionChecker.check_has_permission(user, 'approve_ordercostreport')
@@ -246,41 +237,42 @@ class FinancialOrderAppService:
     def add_item_to_report(self, user: User, report_id: int, data: Dict) -> OrderCostItem:
         AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
 
-        report = self._report_repo.get_by_id(report_id)
+        report = OrderCostReport.objects.get_by_id(report_id)
         if not report: raise ValidationError("گزارش یافت نشد.")
 
         # ===== اعتبارسنجی گزارش ===== #
         self._domain_service.validate_item_modification(report)
         # ===== آماده سازی ===== #
         if 'category_id' in data:
-            data['catalog_item'] = self._category_repo.get_by_id(data.pop('category_id'))
-        data['report'] = report
-        # ===== ایجاد ===== #
-        item = self._item_repo.create(data)
+            data['catalog_item'] = OrderCostCategory.objects.get_by_id(data.pop('category_id'))
+        # ===== ایجاد آیتم ===== #
+        item = OrderCostItem.objects.create(report=report, **data)
         self._domain_service.recalculate_sheet_totals(report.sheet)
-
-        # ===== ثبت لاگ آیتم ===== #
+        # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
             user=user,
             obj=report.sheet,
             action='ADD_COST_ITEM',
-            changes={'report_id': report_id, 'amount': str(item.amount), 'description': item.description},
+            changes={'report_id': report_id, 'amount': str(item.amount)},
             description=_(f"افزودن آیتم هزینه جدید")
         )
         return item
 
+    # =========== ITEM UPDATE ============ # 
     @transaction.atomic
     def update_report_item(self, user: User, item_id: int, data: Dict) -> OrderCostItem:
         AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
 
-        item = self._item_repo.get_by_id(item_id)
+        item = OrderCostItem.objects.get_by_id(item_id)
         if not item: raise ValidationError("آیتم یافت نشد.")
         self._domain_service.validate_item_modification(item.report)
         if 'category_id' in data:
-            data['catalog_item'] = self._category_repo.get_by_id(data.pop('category_id'))
+            data['catalog_item'] = OrderCostCategory.objects.get_by_id(data.pop('category_id'))
         # ===== آپدیت ===== #
         old_amount = item.amount
-        updated_item = self._item_repo.update(item, data)
+        for key, value in data.items():
+            setattr(item, key, value)
+        item.save()
         self._domain_service.recalculate_sheet_totals(item.report.sheet)
 
         # ===== ثبت لاگ ===== #
@@ -290,25 +282,26 @@ class FinancialOrderAppService:
             action='UPDATE_COST_ITEM',
             changes={
                 'item_id': item_id, 
-                'amount_change': f"{old_amount} -> {updated_item.amount}",
+                'amount_change': f"{old_amount} -> {item.amount}",
                 'updated_fields': list(data.keys())
             },
             description=_(f"ویرایش آیتم هزینه")
         )
-        return updated_item
+        return item
 
+    # ============ ITEM DELETE ============ #
     @transaction.atomic
     def delete_report_item(self, user: User, item_id: int) -> None:
         AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
 
-        item = self._item_repo.get_by_id(item_id)
+        item = OrderCostItem.objects.get_by_id(item_id)
         if not item: raise ValidationError("آیتم یافت نشد.")
         # ===== اعتبارسنجی ===== #
         self._domain_service.validate_item_modification(item.report)
         sheet = item.report.sheet
         deleted_amount = str(item.amount)
         # ===== حذف ===== #
-        self._item_repo.delete(item)
+        item.delete()
         # ===== محاسبه مجدد ===== #
         self._domain_service.recalculate_sheet_totals(sheet)
         
@@ -321,7 +314,7 @@ class FinancialOrderAppService:
             description=_(f"حذف آیتم هزینه")
         )
 
-    # ============ SHEET MANAGEMENT ============ #
+    # ============ SHEET CREATE ============ #
     @transaction.atomic
     def create_sheet(self, user: User, order_id: int) -> OrderCostSheet:
         """
@@ -329,13 +322,13 @@ class FinancialOrderAppService:
         """
         AppPermissionChecker.check_has_permission(user, 'add_ordercostsheet')
         # ===== بررسی تکراری نبودن ===== #
-        if self._sheet_repo.get_by_order_id(order_id):
+        if OrderCostSheet.objects.get_by_order_id(order_id):
             raise ValidationError("سند مالی برای این سفارش قبلاً ایجاد شده است.")
         # ===== بررسی وجود سفارش ===== #
-        if not self._order_repo.filter(id=order_id).exists():
+        if not Order.objects.filter(id=order_id).exists():
              raise ValidationError("سفارش مورد نظر یافت نشد.")
         # ===== ایجاد ===== #
-        sheet = self._sheet_repo.create({"order_id": order_id})
+        sheet = OrderCostSheet.objects.create(order_id=order_id)
 
         # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
@@ -346,6 +339,7 @@ class FinancialOrderAppService:
         )
         return sheet
 
+    # ============ SHEET UPDATE ============ #
     @transaction.atomic
     def update_sheet(self, user: User, sheet_id: int, data: Dict[str, Any]) -> OrderCostSheet:
         """
@@ -353,15 +347,17 @@ class FinancialOrderAppService:
         """
         AppPermissionChecker.check_has_permission(user, 'change_ordercostsheet')
         # ===== بازیابی سند ===== #
-        sheet = self._sheet_repo.get_by_id(sheet_id)
+        sheet = OrderCostSheet.objects.get_by_id(sheet_id)
         if not sheet:
             raise ValidationError("سند مالی یافت نشد.")
         # ===== ویرایش ===== #
-        updated_sheet = self._sheet_repo.update(sheet, data)
+        for key, value in data.items():
+            setattr(sheet, key, value)
+        sheet.save()
         # ===== محاسبه مجدد ===== #
-        self._domain_service.recalculate_sheet_totals(updated_sheet)
+        self._domain_service.recalculate_sheet_totals(sheet)
         
-        return updated_sheet
+        return sheet
 
     @transaction.atomic
     def delete_sheet(self, user: User, sheet_id: int) -> None:
@@ -371,16 +367,16 @@ class FinancialOrderAppService:
         """
         AppPermissionChecker.check_has_permission(user, 'delete_ordercostsheet')
         # ===== بازگیری سند ===== #
-        sheet = self._sheet_repo.get_by_id(sheet_id)
+        sheet = OrderCostSheet.objects.get_by_id(sheet_id)
         if not sheet:
             raise ValidationError("سند مالی یافت نشد.")
         # ===== بررسی تکراری ===== #
-        has_approved_reports = self._report_repo.filter(sheet=sheet, is_approved=True).exists()
+        has_approved_reports = sheet.reports.filter(status='approved').exists()
         if has_approved_reports:
              raise ValidationError("این سند دارای گزارش‌های تایید شده است و قابل حذف نیست. ابتدا گزارش‌ها را رد/حذف کنید.")
         # ===== حذف ===== #
         order_code = sheet.order.order_code if sheet.order else "Unknown"
-        self._sheet_repo.delete(sheet)
+        sheet.delete()
         # ===== ثبت لاگ حذف ===== #
         self.audit_service.record_log(
             user=user,
@@ -390,13 +386,14 @@ class FinancialOrderAppService:
             description=_(f"حذف سند مالی سفارش")
         )
     
+    # =========== SHEET GET =========== #
     def get_order_cost_sheet(self, user: User, order_id: int) -> OrderCostSheet:
         """ 
         مشاهده سند کل بهای تمام شده سفارش.
         """
         AppPermissionChecker.check_has_permission(user, 'view_ordercostsheet')
         
-        sheet = self._sheet_repo.get_by_order_id(order_id)
+        sheet = OrderCostSheet.objects.get_by_order_id(order_id)
         if not sheet:
             raise ValidationError("سند مالی برای این سفارش هنوز ایجاد نشده است.")
             
@@ -422,11 +419,11 @@ class FinancialOrderAppService:
 
     # ========== INTERNAL METHODS ========== #
     def _ensure_sheet_exists(self, order_id: int) -> OrderCostSheet:
-        sheet = self._sheet_repo.get_by_order_id(order_id)
+        sheet = OrderCostSheet.objects.get_by_order_id(order_id)
         if not sheet:
-            if not self._order_repo.filter(id=order_id).exists():
+            if not Order.objects.filter(id=order_id).exists():
                 raise ValidationError("سفارش یافت نشد.")
-            sheet = self._sheet_repo.create({"order_id": order_id})
+            sheet = OrderCostSheet.objects.create(order_id=order_id)
         return sheet
 
     def _bulk_create_items(self, report: OrderCostReport, items_data: List[Dict]):
@@ -435,7 +432,7 @@ class FinancialOrderAppService:
         for item_data in items_data:
             category = None
             if item_data.get('category_id'):
-                category = self._category_repo.get_by_id(item_data['category_id'])
+                category = OrderCostCategory.objects.get_by_id(item_data['category_id'])
             
             new_items.append(OrderCostItem(
                 report=report,
@@ -446,13 +443,10 @@ class FinancialOrderAppService:
             ))
         
         if new_items:
-            self._item_repo.bulk_create_items(new_items)
-
+            OrderCostItem.objects.bulk_create_items(new_items)
+    
     def _create_attachments(self, report: OrderCostReport, files: List[UploadedFile]):
         """Helper to create attachments"""
         attachments = []
         for file in files:
-            attachments.append(
-                self._attachment_repo.model(report=report, file=file, title=file.name)
-            )
-        self._attachment_repo.bulk_create_attachments(attachments)
+            OrderCostAttachment.objects.create(report=report, file=file, title=file.name)

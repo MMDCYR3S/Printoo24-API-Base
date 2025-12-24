@@ -11,16 +11,6 @@ class OrderFileSerializer(serializers.ModelSerializer):
         model = OrderItemFile
         fields = ['id', 'type_name', 'file_url', 'uploaded_at']
 
-# ===== آیتم سفارش (Nested) ===== #
-class OrderItemDetailSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name')
-    details = serializers.JSONField(source='items')
-    files = OrderFileSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = OrderItem
-        fields = ['id', 'product_name', 'quantity', 'price', 'details', 'files']
-
 # ===== لیست سفارشات ===== #
 class OrderListSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
@@ -68,11 +58,28 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
 
     def get_specifications(self, obj):
         """
-        تبدیل JSON خام (obj.items) به ساختار استاندارد سریالایزر.
+        تبدیل JSON ذخیره شده به فرمت خوانا برای فرانت ادمین.
         """
-        if not obj.items:
-            return None
-        return OrderItemSpecsSerializer(obj.items).data
+        raw_data = obj.items or {}
+        meta = raw_data.get('meta', {})
+        options = raw_data.get('options', [])
+        # ===== لیست ویژگی ها ===== #
+        readable_options = []
+        for opt in options:
+            val_data = opt.get('value', {})
+            val_label = val_data if isinstance(val_data, str) else val_data.get('label', 'N/A')
+            # ===== ایجاد در لیست ===== #
+            readable_options.append({
+                'name': opt.get('option_label', 'Unknown'),
+                'value': val_label
+            })
+            
+        return {
+            'width': meta.get('width'),
+            'height': meta.get('height'),
+            'has_design': meta.get('has_design'),
+            'options': readable_options
+        }
 
 # ===== سطح ۱: جزئیات سفارش ===== #
 class OrderDetailSerializer(serializers.ModelSerializer):

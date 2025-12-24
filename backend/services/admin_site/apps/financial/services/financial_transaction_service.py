@@ -4,9 +4,9 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from core.models import User, Transaction
-from core.domain.financial import FinancialDomainService, TransactionRepository
-from core.domain.infrastructure.logger.services import AuditLogDomainService
+from core.models import User, Transaction, Invoice, Invoice
+from core.financial.services import FinancialService
+from core.logger.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ========== Financial Transaction App Service ========== #
@@ -20,48 +20,59 @@ class FinancialTransactionAppService:
     """
     
     def __init__(self):
-        self._domain_service = FinancialDomainService()
-        self._trx_repo = TransactionRepository()
-        self.audit_service = AuditLogDomainService()
+        self._domain_service = FinancialService()
+        self.audit_service = LoggerService()
 
     # ============ LIST TRANSACTIONS ============ #
     def list_transactions(self, user: User, filters: Dict[str, Any] = None) -> List[Transaction]:
         AppPermissionChecker.check_has_permission(user, 'view_transaction')
-        return self._trx_repo.filter_transactions(filters).order_by('-created_at')
+        queryset = Transaction.objects.all().select_related('invoice', 'user').order_by('-created_at')
+        if filters:
+            if 'status' in filters:
+                queryset = queryset.filter(status=filters['status'])
+            if 'invoice_id' in filters:
+                queryset = queryset.filter(invoice_id=filters['invoice_id'])
+                
+        return queryset
 
     # ============ GET TRANSACTION DETAIL ============ #
     def get_transaction_detail(self, user: User, transaction_id: int) -> Transaction:
         AppPermissionChecker.check_has_permission(user, 'view_transaction')
-        trx = self._trx_repo.get_by_id(transaction_id)
-        if not trx: raise ValidationError("تراکنش یافت نشد.")
+        trx = Transaction.objects.get_by_id(transaction_id)
+        if not trx: 
+            raise ValidationError("تراکنش یافت نشد.")
         return trx
 
     # ============= REGISTER PAYMENT ============ #
     def register_manual_payment(self, user: User, invoice_id: int, data: Dict[str, Any]):
         """ 
-        ثبت فیش: فقط ایجاد رکورد (CRUD). 
+        ثبت فیش دستی: فقط ایجاد رکورد (CRUD). 
         هنوز اثر مالی ندارد (Pending است)، پس نیازی به Domain Service نیست.
         """
         AppPermissionChecker.check_has_permission(user, 'add_transaction')
-        
-        invoice = self._invoice_repo.get_by_id(invoice_id)
-        if not invoice: raise ValidationError("فاکتور یافت نشد.")
+        # ===== بررسی وجود فاکتور ===== #
+        try:
+            invoice = Invoice.objects.get(id=invoice_id)
+        except Invoice.DoesNotExist:
+            raise ValidationError("فاکتور یافت نشد.")
         
         # ===== ایجاد رکورد ===== #
-        trx_data = {
-            **data,
-            "invoice": invoice,
-            "created_by": user,
-            "status": "pending"
-        }
-        trx = self._trx_repo.create(trx_data)
+        allowed_fields = ['amount', 'method', 'receipt_image', 'tracking_code', 'payment_date', 'dest_account']
+        clean_data = {k: v for k, v in data.items() if k in allowed_fields}
+        
+        trx = Transaction.objects.create(
+            **clean_data,
+            invoice=invoice,
+            user=user,
+            status='pending'
+        )
 
         # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
             user=user,
             obj=trx,
             action='REGISTER_PAYMENT',
-            changes={'amount': str(trx.amount), 'invoice_id': invoice.id, 'method': trx.payment_method},
+            changes={'amount': str(trx.amount), 'invoice_id': invoice.id, 'method': trx.method},
             description=_(f"ثبت دستی فیش واریزی")
         )
         return trx
@@ -84,31 +95,39 @@ class FinancialTransactionAppService:
     def update_transaction(self, user: User, transaction_id: int, data: Dict[str, Any]):
         """ ویرایش جزئیات تراکنش (فقط در صورتی که پندینگ باشد) """
         AppPermissionChecker.check_has_permission(user, 'change_transaction')
-        
-        trx = self._trx_repo.get_by_id(transaction_id)
+        # ===== بررسی وجود ===== #
+        trx = Transaction.objects.get_by_id(transaction_id)
         if not trx: raise ValidationError("تراکنش یافت نشد.")
-        
+        # ===== بررسی وضعیت و در صورت اتمام، عدم دسترسی به تغییر ===== #
         if trx.status != 'pending':
             raise ValidationError("تراکنش‌های تعیین تکلیف شده قابل ویرایش نیستند.")
-        
-        updated_trx = self._trx_repo.update(trx, data)
+        # ====== آماده سازی فایل ها برای ایجاد رکورد ===== #
+        allowed_fields = ['amount', 'method', 'tracking_code', 'payment_date', 'dest_account']
+        for key in allowed_fields:
+            if key in data:
+                setattr(trx, key, data[key])
+        # ====== در صورت وجود عکس ===== #
+        if 'receipt_image' in data:
+            trx.receipt_image = data['receipt_image']
+            
+        trx.save()
         
         # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
             user=user,
-            obj=updated_trx,
+            obj=trx,
             action='UPDATE_TRANSACTION',
             changes={'updated_fields': list(data.keys())},
             description=_(f"ویرایش جزئیات تراکنش")
         )
             
-        return updated_trx
+        return trx
     
     # ============ DELETE TRANSACTION ============ #
     def delete_transaction(self, user: User, transaction_id: int):
         AppPermissionChecker.check_has_permission(user, 'delete_transaction')
         
-        trx = self._trx_repo.get_by_id(transaction_id)
+        trx = Transaction.objects.get_by_id(transaction_id)
         if not trx: raise ValidationError("تراکنش یافت نشد.")
         
         if trx.status != 'pending':
@@ -117,7 +136,7 @@ class FinancialTransactionAppService:
         amount = str(trx.amount)
         trx_id = trx.id
 
-        self._trx_repo.delete(trx)
+        trx.delete()
 
         # ===== ثبت لاگ حذف ===== #
         self.audit_service.record_log(

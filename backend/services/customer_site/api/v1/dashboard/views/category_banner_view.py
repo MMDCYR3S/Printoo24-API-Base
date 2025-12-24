@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from core.domain.catalog.category import ProductCategoryDomainService
+from core.product.services import ProductCategoryService
 from ..serializers.general_serializers import (
     ProductCategoryDashboardSerializer,
     ParentCategoryListSerializer,
@@ -26,7 +26,7 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
     # ===== تزریق وابستگی ===== #
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service = ProductCategoryDomainService()
+        self.service = ProductCategoryService()
 
     # ===== بازنویسی متد get_queryset ===== #
     def get_queryset(self):

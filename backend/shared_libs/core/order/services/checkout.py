@@ -25,24 +25,20 @@ class CheckoutService:
                 # ===== خواندن فایل های طراحی ===== #
                 try:
                     upload.file.open()
-                    new_file_content = ContentFile(upload.file.read())
+                    file_content = ContentFile(upload.file.read())
+                    file_name = upload.file.name.split('/')[-1]
                     upload.file.close()
+                    # ===== ایجاد فایل در سیستم ===== #
+                    OrderItemFile.objects.create(
+                        order_item=order_item,
+                        file=ContentFile(file_content.read(), name=file_name),
+                        version=1,
+                        is_latest=True
+                    )
                 except Exception as e:
-                    continue
+                    raise e
                 
-                new_file_content.name = upload.file.name.split('/')[-1]
-                
-                # ===== ایجاد رکورد فایل جدید برای آیتم سفارش ===== #
-                requirement = getattr(upload, 'requirement', None)
-
-                OrderItemFile.objects.create(
-                    order_item=order_item,
-                    requirement=requirement,
-                    file=new_file_content,
-                    version=1,
-                    is_latest=True
-                )
-    
+    # ========== CHECKOUT SINGLE ITEM ========== #
     @transaction.atomic
     def checkout_single_item(self, user: User, cart_item: CartItem, address: Address, order_type: str) -> Order:
         """
@@ -53,16 +49,19 @@ class CheckoutService:
         try:
             initial_status = OrderStatus.objects.get(internal_code="PENDING_INITIAL_ADMIN")
         except OrderStatus.DoesNotExist:
-            raise DjangoValidationError("خطای سیستمی: وضعیت اولیه سفارش مشخص نیست.")
+            # ===== اگر پیدا نشد، دریافت اولین وضعیت در سیستم ===== #
+            initial_status = OrderStatus.objects.first()
+            if not initial_status:
+                raise DjangoValidationError("خطای سیستمی: هیچ وضعیت سفارشی تعریف نشده است.")
         
         # ===== ایجاد سفارش ===== #
-        order = Order.objects.create_order(
+        order = Order.objects.create(
             user=user,
             current_status=initial_status,
             address=address,
             total_price=cart_item.price,
-            base_price=cart_item.price,
-            order_type=order_type,
+            base_products_price=cart_item.price, 
+            type=order_type,
             order_code=self._generate_order_code()
         )
         
@@ -73,20 +72,19 @@ class CheckoutService:
             quantity=cart_item.quantity,
             price=cart_item.price,
             items=cart_item.items,
+            status='pending'
         )
         
-        # ===== منطق تصویر محصول برای Quotation ===== #
-        product_image_obj = cart_item.product.product_image.filter(order=0).first()
-        if not product_image_obj:
-            product_image_obj = cart_item.product.product_image.first()
+        # ===== پیدا کردن نام مشتری ===== #
+        customer_name = user.username
+        if hasattr(user, 'customer_profile'):
+            customer_name = f"{user.customer_profile.first_name} {user.customer_profile.last_name}"
         
+        # ===== منطق تصویر محصول برای Quotation ===== #
+        product_image_obj = cart_item.product.product_image.order_by('order').first()
         final_image_file = product_image_obj.image if product_image_obj else None
         
-        # ===== ایجاد پیش فاکتور (Quotation) ===== #
-        customer_name = 'نامشخص'
-        if hasattr(user, 'customer_profile'):
-            customer_name = user.customer_profile.fullname()
-            
+        # ===== ایجاد پیش فاکتور برای سفارش ===== # 
         Quotation.objects.create(
             quotation_number=f"QUOT-{order.order_code}",
             converted_order=order,

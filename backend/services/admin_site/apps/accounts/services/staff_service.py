@@ -3,8 +3,9 @@ from typing import Dict, List, Any
 
 from django.utils.translation import gettext as _
 
-from core.domain.identity.users import UserAdminDomainService, UserRepository
-from core.domain.infrastructure.logger import AuditLogDomainService
+from core.models import User
+from core.users.services import UserAdminService
+from core.logger.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ===== Logger Initialization ===== #
@@ -14,14 +15,13 @@ logger = logging.getLogger('apps.users.services.staff_app_service')
 class StaffAppService:
     def __init__(self):
         # ===== اتصال به سرویس ===== #
-        self.domain_service = UserAdminDomainService()
-        self.repo = UserRepository()
-        self.audit_service = AuditLogDomainService()
+        self.domain_service = UserAdminService()
+        self.audit_service = LoggerService()
 
     def get_staff_list(self, requester):
         """ مشاهده لیست کارکنان """
         AppPermissionChecker.check_has_permission(requester, 'view_user')
-        return self.repo.get_all_staff()
+        return User.objects.get_all_staff()
 
     def create_staff(self, requester, data: Dict[str, Any]):
         """ ایجاد کارمند جدید """
@@ -74,7 +74,7 @@ class StaffAppService:
         """ حذف کارمند """
         AppPermissionChecker.check_has_permission(requester, 'delete_user')
         try:
-            target_user = self.repo.get_by_id(user_id)
+            target_user = User.objects.filter(id=user_id).first()
             target_username = target_user.username if target_user else "Unknown"
             
             self.domain_service.delete_single_staff(user_id)

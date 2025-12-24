@@ -7,8 +7,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 from apps.order.services import CreateOrderFromCartService
 from apps.order.exceptions import (
     EmptyCartError,
-    InsufficientFundsError,
-    OrderCreationError
+    InsufficientFundsError
 )
 from .serializers import OrderSerializer
 

@@ -41,7 +41,85 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     # ===== ایجاد سفارش دستی ===== #
-    @extend_schema(request=AdminOrderCreateSerializer, responses=OrderDetailSerializer)
+    @extend_schema(
+        summary="ایجاد سفارش دستی (توسط ادمین)",
+        description="""
+        این متد به ادمین اجازه می‌دهد بدون نیاز به سبد خرید، برای یک کاربر سفارش ثبت کند.
+        
+        **قابلیت‌ها:**
+        1. **Override قیمت:** ادمین می‌تواند قیمت کل سفارش (`price`) یا قیمت هر آیتم (`item_price`) را دستی وارد کند.
+        2. **محصولات متنوع:** پشتیبانی از محصولات با سایز استاندارد یا ابعاد دلخواه (متر مربعی).
+        3. **انعطاف‌پذیری:** ورودی `selections` دقیقاً مشابه ساختار سبد خرید است.
+        """,
+        request=AdminOrderCreateSerializer, 
+        responses={201: inline_serializer(name='OrderCreateSuccess', fields={'id': serializers.IntegerField(), 'message': serializers.CharField()})},
+        examples=[
+            OpenApiExample(
+                'Scenario 1: Standard Order',
+                summary='سناریو ۱: سفارش معمولی (کارت ویزیت)',
+                description='ثبت سفارش برای کارت ویزیت با تیراژ ۱۰۰۰ و سایز استاندارد.',
+                value={
+                    "user_id": 25,
+                    "address_id": 10,
+                    "items": [
+                        {
+                            "product_slug": "business-card-glossy",
+                            "selections": {
+                                "quantity": 1000,
+                                "size_id": 5,  # سایز استاندارد (مثلا ۹ در ۶)
+                                "has_design": True,
+                                "option_value_ids": [101, 205] # کاغذ گلاسه، روکش مات
+                            }
+                        }
+                    ]
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                'Scenario 2: Custom Size & Manual Price',
+                summary='سناریو ۲: سفارش بنر (متراژ دلخواه) + قیمت دستی',
+                description='ثبت سفارش بنر ۳ در ۱ متر. ادمین قیمت این آیتم را دستی ۵۰۰،۰۰۰ تومان تعیین می‌کند.',
+                value={
+                    "user_id": 25,
+                    "address_id": 10,
+                    "items": [
+                        {
+                            "product_slug": "banner-13oz",
+                            "item_price": 500000,  # قیمت دستی برای این آیتم
+                            "selections": {
+                                "quantity": 1,
+                                "custom_width": 300,  # ۳۰۰ سانتیمتر
+                                "custom_height": 100, # ۱۰۰ سانتیمتر
+                                "option_value_ids": [310] # پانچ: دارد
+                            }
+                        }
+                    ],
+                    "price": 550000 # قیمت کل سفارش (شامل هزینه ارسال یا خدمات اضافه)
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                'Scenario 3: Multi-Item Order',
+                summary='سناریو ۳: سفارش ترکیبی (چند قلم)',
+                description='یک سفارش شامل تراکت و سربرگ.',
+                value={
+                    "user_id": 40,
+                    "address_id": 12,
+                    "items": [
+                        {
+                            "product_slug": "flyer-a5",
+                            "selections": {"quantity": 2000, "size_id": 2}
+                        },
+                        {
+                            "product_slug": "letterhead-a4",
+                            "selections": {"quantity": 1000, "size_id": 1}
+                        }
+                    ]
+                },
+                request_only=True
+            )
+        ]
+    )
     def create(self, request):
         serializer = AdminOrderCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

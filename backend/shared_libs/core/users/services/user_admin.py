@@ -127,3 +127,12 @@ class UserAdminService:
         if not is_active:
             qs = qs.exclude(is_superuser=True)
         return qs.update(is_active=is_active)
+
+    @transaction.atomic
+    def bulk_delete_staff(self, user_ids: List[int]) -> Dict[str, int]:
+        users = User.objects.filter(id__in=user_ids)
+        # ===== کارکنانی که ابرکاربر نیستند ===== #
+        deletable_users = users.exclude(is_superuser=True)
+        count = deletable_users.count()
+        deletable_users.delete()
+        return {'deleted': count}

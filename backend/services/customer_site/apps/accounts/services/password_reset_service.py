@@ -10,7 +10,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from core.users.models import User
 from core.users.services.identity import UserIdentityService
-from core.domain.infrastructure.cache.cache_services import CacheService
+from core.infrastructure import CacheService
 
 from ..tasks import send_password_reset_email_task
 # ====== Logger Configuration ====== #

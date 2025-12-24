@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 
 from ..tasks import send_verification_email_task
-from core.domain.infrastructure.cache.cache_services import CacheService
+from core.infrastructure import CacheService
 from core.users.models import User
 from core.users.services.identity import UserIdentityService
 

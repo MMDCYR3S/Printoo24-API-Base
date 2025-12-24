@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.models import User
 from core.order.models import OrderCostSheet, OrderCostReport
-from core.domain.infrastructure.logger import AuditLogDomainService
+from core.logger.services import LoggerService
 
 # ========== COST SERVICE ========== #
 class OrderCostService:
@@ -12,7 +12,7 @@ class OrderCostService:
     سرویس دامنه مدیریت هزینه‌های سفارش.
     """
     def __init__(self):
-        self.audit_service = AuditLogDomainService()
+        self.audit_service = LoggerService()
 
     # ============ BUSINESS LOGIC & STATE TRANSITIONS ============ #
     @transaction.atomic
@@ -47,7 +47,7 @@ class OrderCostService:
         report.is_approved = True
         report.save()
 
-        # ===== بروزرسانی سبد مادر ===== #
+        # ===== بروزرسانی سند مادر ===== #
         self.recalculate_sheet_totals(report.sheet)
         
         return report

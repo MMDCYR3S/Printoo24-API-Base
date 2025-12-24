@@ -52,6 +52,8 @@ class OrderCostReportManager(models.Manager):
 
 # ========== COST ITEM MANAGERS ========== #
 class OrderCostItemManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset()
     
     def bulk_create_items(self, items: List):
         return self.bulk_create(items)
@@ -61,6 +63,8 @@ class OrderCostItemManager(models.Manager):
 
 # ========== COST ATTACHMENT MANAGERS ========== #
 class OrderCostAttachmentManager(models.Manager):
+    def model(self, **kwargs):
+        return self.model(**kwargs)
     
     def bulk_create_attachments(self, attachments: List):
         return self.bulk_create(attachments)

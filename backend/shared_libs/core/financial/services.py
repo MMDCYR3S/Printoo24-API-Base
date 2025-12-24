@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.financial.models import Invoice, Transaction, Quotation
 from core.models import User, Order
-from core.domain.infrastructure.logger import AuditLogDomainService
+from core.logger.services import LoggerService
 
 # ========== FINANCIAL SERVICE ========== #
 class FinancialService:
@@ -16,7 +16,7 @@ class FinancialService:
     سرویس دامنه متمرکز بر قوانین بیزنس (Business Rules Only).
     """
     def __init__(self):
-        self.audit_service = AuditLogDomainService()
+        self.audit_service = LoggerService()
     
     # =========== INVOICE LOGIC ============ #
     @transaction.atomic
@@ -193,7 +193,11 @@ class FinancialService:
         قانون بیزنس پیچیده: تبدیل موجودیت A به B.
         """
         # ===== اطلاعات ورودی ===== #
-        quotation = Quotation.objects.get_quotation_detail(quotation_id)
+        try:
+            # ===== اعتبارسنجی وجود پیش فاکتور ===== #
+            quotation = Quotation.objects.get(id=quotation_id)
+        except Quotation.DoesNotExist:
+            raise ValidationError("پیش‌فاکتور یافت نشد.")
         order = Order.objects.get(pk=order_id)
         
         if not quotation or not order:

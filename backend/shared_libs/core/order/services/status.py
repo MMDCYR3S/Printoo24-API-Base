@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from ..models import Order, OrderItem, OrderStatus, OrderStatusGroup
 from core.models import User
-from core.domain.infrastructure.logger import AuditLogDomainService
+from core.logger.services import LoggerService
 
 # ========== Order Status Flow Service ========== #
 class OrderStatusFlowService:
@@ -15,7 +15,7 @@ class OrderStatusFlowService:
     مسئول تضمین صحت تغییر وضعیت و ثبت تاریخچه است.
     """
     def __init__(self):
-        self.audit_service = AuditLogDomainService()
+        self.audit_service = LoggerService()
         
     @transaction.atomic
     def change_order_status(self, order: Order, new_status_code: str, user: User, description: str = None) -> Order:

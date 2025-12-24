@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 
 # ===== فراخوانی سرویس و مدل‌ها از Shared Libs ===== #
-from core.domain.infrastructure.general import ContentService
+from core.home.services import ContactService, ModalService, SliderService
 from core.models import ContactUs, PromotionalModal
 from ..serializers.general_serializers import (
     ContactUsSerializer,
@@ -32,7 +32,7 @@ class ContactUsViewSet(mixins.ListModelMixin,
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service = ContentService()
+        self.service = ContactService()
 
     def retrieve(self, request, *args, **kwargs):
         """
@@ -100,7 +100,7 @@ class PromotionalModalViewSet(viewsets.ModelViewSet):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service = ContentService()
+        self.service = ModalService()
 
     # ===== متد اختصاصی Create برای استفاده از Transaction سرویس ===== #
     def create(self, request, *args, **kwargs):

@@ -1,11 +1,12 @@
 import uuid
+from decimal import Decimal
 from typing import List, Dict
+
+from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Q
 
-from core.order.models import Order
-from core.models import User, Invoice
-
+from core.models import User, Invoice, Order, OrderStatus, Product, OrderItem, ProductSize, ProductOptionValue
 from ..exceptions import OrderNotFoundException
 
 # ========== ORDER SERVICE ========== #
@@ -33,6 +34,120 @@ class OrderService:
         user = User.objects.get(id=user_id) 
         return Order.objects.get_user_orders_summary(user)
     
+    @transaction.atomic
+    def create_order_direct(self, user_id: int, address_id: int, items_data: List[Dict], total_price_override: float = None) -> Order:
+        """
+        ایجاد مستقیم سفارش (توسط ادمین) بدون استفاده از سبد خرید.
+        """
+        # ===== دریافت مشتری ===== #
+        user = get_object_or_404(User, pk=user_id)
+        # ===== دریافت و اعتبارسنجی وضعیت اولیه ===== #
+        initial_status = OrderStatus.objects.filter(status_type='initial').first()
+        if not initial_status:
+            initial_status = OrderStatus.objects.first() or OrderStatus.objects.create(name="ثبت اولیه", internal_code="INITIAL_DRAFT")
+
+        # ===== محاسبه قیمت کل ===== #
+        calculated_total = Decimal(0)
+        prepared_items = []
+        # ===== استخراج و ایجاد آیتم ها ===== #
+        for item_data in items_data:
+            product_slug = item_data.get('product_slug')
+            selections = item_data.get('selections', item_data)
+            quantity = int(selections.get('quantity', 1))
+            
+            product = get_object_or_404(Product, slug=product_slug)
+            # ===== آماده سازی اطلاعات سفارش ===== #
+            specs_json = self._prepare_item_specs_json(product, selections)        
+    
+            # ===== محاسبه قیمت آیتم ===== #
+            if 'item_price' in item_data and item_data['item_price'] is not None:
+                line_price = Decimal(str(item_data['item_price']))
+            else:
+                line_price = product.price * quantity
+            
+            calculated_total += line_price
+            # ===== ایجاد آیتم در یک لیست ===== #
+            prepared_items.append({
+                'product': product,
+                'quantity': quantity,
+                'price': line_price,
+                'items': specs_json
+            })
+            # ===== به دست آوردن مبلغ کل ===== #
+            final_total = Decimal(str(total_price_override)) if total_price_override is not None else calculated_total
+            # ===== ایجاد سفارش ===== #
+            order = Order.objects.create(
+                user=user,
+                address_id=address_id,
+                current_status=initial_status,
+                total_price=final_total,
+                base_products_price=calculated_total,
+                type="2",
+                order_code=self._generate_order_code()
+            )
+
+            # ===== ایجاد آیتم ===== #
+            for p_item in prepared_items:
+                OrderItem.objects.create(
+                    order=order,
+                    product=p_item['product'],
+                    quantity=p_item['quantity'],
+                    price=p_item['price'],
+                    items=p_item['items'],
+                    status='approved'
+                )
+                
+            return order
+        
+    def _prepare_item_specs_json(self, product, selections) -> Dict:
+        """
+        تبدیل ورودی‌های خام (IDها) به ساختار استاندارد JSON برای فیلد items.
+        """
+        size_id = selections.get('size_id')
+        width = selections.get('custom_width', 0)
+        height = selections.get('custom_height', 0)
+        # ===== دریافت اطلاعات سایز ===== #
+        size_name = "Custom"
+        if size_id:
+            try:
+                ps = ProductSize.objects.get(product=product, id=size_id)
+                width = float(ps.size.width)
+                height = float(ps.size.height)
+                size_name = ps.size.name
+            except ProductSize.DoesNotExist:
+                pass
+        # ===== دریافت اطلاعات گزینه ===== #
+        option_ids = selections.get('option_value_ids', [])
+        options_list = []
+        # ===== ایجاد آیتم ===== #
+        if option_ids:
+            values = ProductOptionValue.objects.filter(id__in=option_ids).select_related('product_option__option')
+            for val in values:
+                opt_name = val.product_option.label
+                if not opt_name and val.product_option.option:
+                    opt_name = val.product_option.option.label
+                # ===== ایجاد لیست ویژگی ها ===== #
+                options_list.append({
+                    'option_id': val.product_option.id,
+                    'option_label': opt_name or "Unknown Option",
+                    'type': 'selection',
+                    'value': {
+                        'id': val.id,
+                        'label': val.label,
+                        'price': float(val.price_impact)
+                    }
+                })
+        # ===== بازگشت ===== #
+        return {
+            "options": options_list,
+            "meta": {
+                "width": float(width),
+                "height": float(height),
+                "size_id": size_id,
+                "has_design": selections.get('has_design', True)
+            }
+        }
+        
     @transaction.atomic
     def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, int]:
         """

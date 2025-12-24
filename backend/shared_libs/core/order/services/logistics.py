@@ -6,7 +6,7 @@ from django.utils.translation import gettext as _
 
 from core.order.models import OrderShipment
 from core.models import User
-from core.domain.infrastructure.logger import AuditLogDomainService
+from core.logger.services import LoggerService
 
 # ========== LOGISTIC SERVICE ========== #
 class LogisticsService:
@@ -15,7 +15,7 @@ class LogisticsService:
     """
     
     def __init__(self):
-        self.audit_service = AuditLogDomainService()
+        self.audit_service = LoggerService()
 
     def validate_shipment_modification(self, shipment: OrderShipment):
         if shipment.status == 'delivered':

@@ -3,23 +3,23 @@ from typing import Dict, List, Any
 
 from django.utils.translation import gettext_lazy as _
 
-from core.domain.identity.roles import RoleAdminDomainService, RoleRepository
-from core.domain.infrastructure.logger.services import AuditLogDomainService
+from core.models import Role
+from core.users.services import RoleAdminService
+from core.logger.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ===== Logger Initialization ===== #
 logger = logging.getLogger('apps.users.services.role_app_service')
 
-# ===== Role App Service ===== #
+# ========== ROLE APP SERVICE ========== #
 class RoleAppService:
     def __init__(self):
-        self.domain_service = RoleAdminDomainService()
-        self.repo = RoleRepository()
-        self.audit_service = AuditLogDomainService()
+        self.domain_service = RoleAdminService()
+        self.audit_service = LoggerService()
 
     def get_role_list(self, requester):
         AppPermissionChecker.check_has_permission(requester, 'view_role')
-        return self.repo.get_all_roles().prefetch_related('allowed_groups')
+        return Role.objects.get_all_roles().prefetch_related('allowed_groups')
 
     def create_role(self, requester, data: Dict[str, Any]):
         """
@@ -55,12 +55,13 @@ class RoleAppService:
         تابع بروزرسانی یک نقش
         """
         AppPermissionChecker.check_has_permission(requester, 'change_role')
-        
+        # ===== بررسی نوع دسترسی کاربر ===== #
         permission_ids = data.pop('permissions', None)
         allowed_groups_ids = data.pop('allowed_groups_ids', None)
         
         try:
             role = self.domain_service.update_role(role_id, data, permission_ids, allowed_groups_ids)
+            # ===== ثبت لاگ ===== #
             self.audit_service.record_log(
                 user=requester,
                 obj=role,

@@ -10,7 +10,7 @@ from ..serializers import (
     StaffListSerializer, StaffCreateSerializer, StaffUpdateSerializer,
     BulkIdsSerializer, BulkRoleChangeSerializer
 )
-from core.domain.identity.users.exceptions import UsernameAlreadyExistsException, EmailAlreadyExistsException
+from core.users.exceptions import UsernameAlreadyExistsException, EmailAlreadyExistsException
 
 # ========== STAFF MANAGEMENT VIEWS ========== #
 @extend_schema(tags=["Users-Staffs"])
