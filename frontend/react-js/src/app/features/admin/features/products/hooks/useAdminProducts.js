@@ -1,131 +1,139 @@
 // src/app/features/admin/products/hooks/useAdminProducts.js
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
 import toast from 'react-hot-toast';
 import { adminProductService } from '../../../services/adminProductService';
-// فرض بر این است که سرویس کتگوری دارید، اگر نه، این بخش را کامنت کنید
-import { adminCategoryService } from '../../../services/adminCategoryService'; 
+import { adminCategoryService } from '../../../services/adminCategoryService'; // مسیر سرویس کتگوری را چک کن
+
+// تابع نرمال‌سازی برای مقایسه دقیق متون فارسی
+const normalize = (text) => {
+  if (!text) return '';
+  return text.toString().trim()
+    .replace(/ي/g, 'ی').replace(/ك/g, 'ک')
+    .replace(/\s+/g, '') // حذف تمام فاصله‌ها برای مقایسه سخت‌گیرانه
+    .toLowerCase();
+};
 
 export const useAdminProducts = () => {
   const queryClient = useQueryClient();
   
-  // States
+  // --- States ---
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all'); // ID دسته یا 'all'
-  const [statusFilter, setStatusFilter] = useState('all'); // 'active', 'inactive', 'all'
-  const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'desc' });
+  const [categoryFilterId, setCategoryFilterId] = useState('all'); // ID دسته‌بندی
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // 1. دریافت دیتا
-  const { data: products = [], isLoading, refetch } = useQuery({
+  // --- Queries ---
+  // 1. دریافت محصولات
+  const { data: products = [], isLoading: pLoading, refetch } = useQuery({
     queryKey: ['admin-products'],
     queryFn: adminProductService.getAll,
-    staleTime: 1000 * 60 * 2, // 2 دقیقه دیتا تازه میماند
+    staleTime: 1000 * 60 * 2,
   });
 
-  // دریافت دسته‌بندی‌ها برای فیلتر (اختیاری)
-  const { data: categories = [] } = useQuery({
+  // 2. دریافت دسته‌بندی‌ها (حیاتی برای فیلتر)
+  const { data: categories = [], isLoading: cLoading } = useQuery({
     queryKey: ['admin-categories'],
-    queryFn: adminCategoryService?.getAll || (() => []), // Fallback
-    enabled: !!adminCategoryService,
+    queryFn: adminCategoryService.getAll,
   });
 
-  // 2. پردازش دیتا (Search -> Filter -> Sort)
+  // --- Processing Logic ---
   const processedProducts = useMemo(() => {
+    if (!products || !Array.isArray(products)) return [];
+
     let result = [...products];
 
-    // A. جستجو (Fuse.js)
-    if (searchQuery.trim()) {
-      const fuse = new Fuse(result, {
-        keys: ['name', 'code', 'slug'], 
-        threshold: 0.3,
-      });
-      result = fuse.search(searchQuery).map(r => r.item);
+    // 1. فیلتر دسته‌بندی (Mapping ID -> Name)
+    if (categoryFilterId !== 'all') {
+      // پیدا کردن نام دسته‌بندی از روی ID انتخاب شده
+      const selectedCat = categories.find(c => String(c.id) === String(categoryFilterId));
+      
+      if (selectedCat) {
+        const targetName = normalize(selectedCat.name);
+        result = result.filter(p => {
+          if (!p.category) return false;
+          // مقایسه نام نرمال شده محصول با نام نرمال شده دسته‌بندی
+          return normalize(p.category).includes(targetName);
+        });
+      }
     }
 
-    // B. فیلتر دسته‌بندی
-    if (categoryFilter !== 'all') {
-      result = result.filter(p => p.category === Number(categoryFilter));
-    }
-
-    // C. فیلتر وضعیت
+    // 2. فیلتر وضعیت
     if (statusFilter !== 'all') {
       const isActive = statusFilter === 'active';
       result = result.filter(p => p.is_active === isActive);
     }
 
-    // D. مرتب‌سازی (Sort)
+    // 3. جستجو (Fuzzy Search)
+    if (searchQuery.trim()) {
+      const fuse = new Fuse(result, {
+        keys: ['name', 'code', 'slug', 'category'],
+        threshold: 0.35,
+      });
+      result = fuse.search(searchQuery).map(r => r.item);
+    }
+
+    // 4. مرتب‌سازی
     result.sort((a, b) => {
       let aVal = a[sortConfig.key];
       let bVal = b[sortConfig.key];
 
-      // هندل کردن قیمت (رشته به عدد)
       if (sortConfig.key === 'price') {
         aVal = parseFloat(aVal) || 0;
         bVal = parseFloat(bVal) || 0;
       }
+      
+      if (sortConfig.key === 'created_at') {
+        aVal = new Date(aVal || 0).getTime();
+        bVal = new Date(bVal || 0).getTime();
+      }
 
-      if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
+      aVal = aVal ?? '';
+      bVal = bVal ?? '';
+
+      if (aVal === bVal) return 0;
+      const comparison = aVal > bVal ? 1 : -1;
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
     });
 
     return result;
-  }, [products, searchQuery, categoryFilter, statusFilter, sortConfig]);
+  }, [products, categories, searchQuery, categoryFilterId, statusFilter, sortConfig]);
 
-  // 3. صفحه‌بندی
-  const totalPages = Math.ceil(processedProducts.length / itemsPerPage);
+  // --- Pagination ---
+  const totalPages = Math.ceil(processedProducts.length / itemsPerPage) || 1;
   const paginatedProducts = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return processedProducts.slice(start, start + itemsPerPage);
-  }, [processedProducts, currentPage]);
+  }, [processedProducts, currentPage, itemsPerPage]);
 
-  // --- Mutations (Bulk Actions) ---
-
-  // حذف گروهی
+  // --- Mutations ---
   const bulkDeleteMutation = useMutation({
     mutationFn: adminProductService.bulkDelete,
-    onMutate: async (ids) => {
-      // Optimistic Update
-      await queryClient.cancelQueries(['admin-products']);
-      const previousData = queryClient.getQueryData(['admin-products']);
-      
-      queryClient.setQueryData(['admin-products'], (old) => 
-        old?.filter(p => !ids.includes(p.id))
-      );
-      
-      toast.success(`${ids.length} محصول حذف شدند`);
-      return { previousData };
+    onSuccess: () => {
+      queryClient.invalidateQueries(['admin-products']);
+      toast.success('محصولات انتخاب شده حذف شدند');
     },
-    onError: (err, variables, context) => {
-      queryClient.setQueryData(['admin-products'], context.previousData);
-      toast.error('خطا در حذف محصولات');
-    },
-    onSettled: () => queryClient.invalidateQueries(['admin-products']),
+    onError: () => toast.error('خطا در حذف محصولات')
   });
 
-  // تغییر وضعیت گروهی
   const bulkStatusMutation = useMutation({
     mutationFn: adminProductService.bulkStatus,
-    onMutate: async ({ product_ids, is_active }) => {
-      await queryClient.cancelQueries(['admin-products']);
-      const previousData = queryClient.getQueryData(['admin-products']);
-
-      queryClient.setQueryData(['admin-products'], (old) => 
-        old?.map(p => product_ids.includes(p.id) ? { ...p, is_active } : p)
-      );
-
-      toast.success(`وضعیت ${product_ids.length} محصول تغییر کرد`);
-      return { previousData };
+    onSuccess: () => {
+      queryClient.invalidateQueries(['admin-products']);
+      toast.success('وضعیت تغییر کرد');
     },
-    onError: (err, vars, context) => {
-      queryClient.setQueryData(['admin-products'], context.previousData);
-      toast.error('خطا در تغییر وضعیت');
-    },
-    onSettled: () => queryClient.invalidateQueries(['admin-products']),
+    onError: () => toast.error('خطا در تغییر وضعیت')
   });
+
+  // --- Stats Calculation ---
+  const stats = useMemo(() => ({
+    total: products.length,
+    active: products.filter(p => p.is_active).length,
+    inactive: products.filter(p => !p.is_active).length,
+  }), [products]);
 
   const handleSort = (key) => {
     setSortConfig(curr => ({
@@ -136,21 +144,22 @@ export const useAdminProducts = () => {
 
   return {
     products: paginatedProducts,
+    allProducts: products,
+    stats,
     totalItems: processedProducts.length,
     totalPages,
-    currentPage,
-    setCurrentPage,
-    // Filters
+    currentPage, setCurrentPage,
     searchQuery, setSearchQuery,
-    categoryFilter, setCategoryFilter,
+    
+    categoryFilterId, setCategoryFilterId, // دقت کن: اینجا ID ست میشه
     statusFilter, setStatusFilter,
-    categories, // برای پر کردن سلکت باکس
-    // Sort
+    categories,
+
     sortConfig, handleSort,
-    // Loading
-    isLoading, refetch,
-    // Mutations
+    isLoading: pLoading || cLoading,
+    refetch,
+    
     bulkDeleteMutation,
-    bulkStatusMutation,
+    bulkStatusMutation
   };
 };
