@@ -29,21 +29,7 @@ class LogisticsService:
         """ تولید شناسه یکتا برای لیبل """
         return f"{order_code}"
 
-    def _get_status_update_fields(self, shipment: OrderShipment, new_status_code: str) -> Dict[str, Any]:
-        """Internal Helper Logic"""
-        update_fields = {'status': new_status_code}
-        current_time = timezone.now()
-
-        if new_status_code == 'dispatched' and not shipment.dispatched_at:
-            update_fields['dispatched_at'] = current_time
-            
-        elif new_status_code == 'delivered' and not shipment.delivered_at:
-            update_fields['delivered_at'] = current_time
-            if not shipment.dispatched_at:
-                update_fields['dispatched_at'] = current_time
-
-        return update_fields
-
+    # ========== CHANGE STATUS ========== #
     @transaction.atomic
     def change_shipment_status(self, shipment: OrderShipment, new_status_code: str, user: User) -> OrderShipment:
         """
@@ -84,3 +70,20 @@ class LogisticsService:
         # ===== ذخیره ===== #
         shipment.save(update_fields=update_fields.keys())
         return shipment
+
+    # ========== HELPER FUNCTIONS ========== #
+    def _get_status_update_fields(self, shipment: OrderShipment, new_status_code: str) -> Dict[str, Any]:
+        """Internal Helper Logic"""
+        update_fields = {'status': new_status_code}
+        current_time = timezone.now()
+
+        if new_status_code == 'dispatched' and not shipment.dispatched_at:
+            update_fields['dispatched_at'] = current_time
+            
+        elif new_status_code == 'delivered' and not shipment.delivered_at:
+            update_fields['delivered_at'] = current_time
+            if not shipment.dispatched_at:
+                update_fields['dispatched_at'] = current_time
+
+        return update_fields
+    

@@ -1,24 +1,22 @@
 from rest_framework.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from core.domain.commerce.order import (
-    OrderItemRepository, OrderItemFileRepository
-)
-from core.models import User, OrderItemFile
-from core.domain.infrastructure.logger.services import AuditLogDomainService
+from core.models import User, OrderItem, OrderItemFile
+from core.logger.services import LoggerService
 from apps.permissions import AppPermissionChecker
 from apps.operations.tasks import process_uploaded_design_file
 
 class OrderFileAppService:
     def __init__(self):
-        self.item_repo = OrderItemRepository()
-        self.file_repo = OrderItemFileRepository()
-        self.audit_service = AuditLogDomainService()
+        self.audit_service = LoggerService()
 
-    def _check_designer_access(self, requester: User, item_id: int):
-        """ چک کردن دسترسی طراح به آیتم """
-        item = self.item_repo.get_by_id(item_id)
-        if not item:
+    def _check_designer_access(self, requester: User, item_id: int) -> OrderItem:
+        """ 
+        چک کردن دسترسی طراح به آیتم.
+        """
+        try:
+            item = OrderItem.objects.get(id=item_id)
+        except OrderItem.DoesNotExist:
             raise ValidationError("آیتم سفارش یافت نشد.")
         
         if requester.is_superuser:
@@ -26,37 +24,34 @@ class OrderFileAppService:
             
         return item
         
-    def upload_design_file(self, requester: User, item_id: int, file_data, requirement_id: int):
+    def upload_design_file(self, requester: User, item_id: int, file_data):
         """
-        آپلود فایل جدید.
+        آپلود فایل جدید و ورژن‌بندی.
         """
         AppPermissionChecker.check_has_permission(requester, 'change_orderitemfile')
         
         item = self._check_designer_access(requester, item_id)
         
-        requirement = item.product.file_upload_requirements.filter(id=requirement_id).first()
-        if not requirement:
-            raise ValidationError("این نوع فایل برای این محصول تعریف نشده است.")
-        
-        last_file = item.files.filter(requirement_id=requirement_id).order_by('-version').first()
+        last_file = OrderItemFile.objects.filter(order_item=item).order_by('-version').first()
         new_version = (last_file.version + 1) if last_file else 1
-
-        # ===== غیر فعال کردن فایل قبلی ===== #
+        
+      # ===== غیر فعال کردن فایل قبلی ===== #
         if last_file:
             last_file.is_latest = False
             last_file.save()
 
         # ===== ایجاد فایل جدید ===== #
-        new_file = self.file_repo.create({
-            "order_item": item,
-            "requirement": requirement,
-            "file": file_data,
-            "version": new_version,
-            "is_latest": True,
-            "admin_feedback": None
-        })
+        new_file = OrderItemFile.objects.create(
+            order_item=item,
+            file=file_data,
+            version=new_version,
+            is_latest=True,
+            admin_feedback=None
+        )
         
-        process_uploaded_design_file.delay(new_file.id)
+        # ===== پردازش و ارسال فایل ===== #
+        if process_uploaded_design_file:
+            process_uploaded_design_file.delay(new_file.id)
         
         # ===== ثبت لاگ آپلود ===== #
         self.audit_service.record_log(
@@ -66,7 +61,6 @@ class OrderFileAppService:
             changes={
                 'file_id': new_file.id,
                 'version': new_version,
-                'file_type': requirement.title,
                 'filename': str(file_data)
             },
             description=_(f"آپلود فایل طراحی نسخه {new_version}")
@@ -76,12 +70,13 @@ class OrderFileAppService:
         
     def review_design_file(self, requester: User, file_id: int, feedback: str = None):
         """
-        بررسی فایل توسط طراح یا QC.
+        بررسی فایل توسط طراح یا QC (ثبت بازخورد).
         """
         AppPermissionChecker.check_has_permission(requester, 'change_orderitemfile')
         
-        file_obj = self.file_repo.get_by_id(file_id)
-        if not file_obj:
+        try:
+            file_obj = OrderItemFile.objects.select_related('order_item').get(id=file_id)
+        except OrderItemFile.DoesNotExist:
             raise ValidationError("فایل یافت نشد.")
         
         self._check_designer_access(requester, file_obj.order_item.id)
@@ -102,40 +97,46 @@ class OrderFileAppService:
         
     def change_file_status(self, requester: User, file_id: int, new_status: str, feedback: str = None):
         """
-        تغییر وضعیت فایل (تایید / رد / نیازمند اصلاح)
+        تغییر وضعیت فایل (تایید / رد).
+        نکته: چون مدل فیلد status ندارد، این لاجیک روی OrderItem اعمال می‌شود
+        یا اینکه فرض کنیم فیلد status اضافه شده است.
+        
+        سناریو صحیح: اگر فایل رد شد، وضعیت آیتم می‌شود 'rejected' و فیدبک روی فایل ثبت می‌شود.
         """
         AppPermissionChecker.check_has_permission(requester, 'change_orderitemfile')
 
-        # ===== دریافت فایل ===== #
-        file_obj = self.file_repo.get_by_id(file_id)
-        if not file_obj:
+        try:
+            file_obj = OrderItemFile.objects.select_related('order_item').get(id=file_id)
+        except OrderItemFile.DoesNotExist:
             raise ValidationError("فایل یافت نشد.")
 
-        # ===== چک کردن اجازه دسترسی ===== #
         self._check_designer_access(requester, file_obj.order_item.id)
-
-        # ===== چک کردن وضعیت ===== #
-        if new_status not in dict(OrderItemFile.STATUS_CHOICES):
-            raise ValidationError("وضعیت نامعتبر است.")
-
-        old_status = file_obj.status
-        file_obj.status = new_status
-        if feedback:
-            file_obj.admin_feedback = feedback
+        
+        item = file_obj.order_item
+        old_status = item.status
+        # ===== بررسی وضعیت تایید شده یا رد شده ===== #
+        if new_status == 'rejected':
+            item.status = 'rejected'
+            file_obj.admin_feedback = feedback or "رد شده توسط QC"
+        elif new_status == 'approved':
+            item.status = 'approved'
+            file_obj.admin_feedback = feedback or "تایید شده"
+        
         file_obj.save()
+        item.save()
         
         # ===== ثبت لاگ تغییر وضعیت فایل ===== #
         self.audit_service.record_log(
             user=requester,
-            obj=file_obj.order_item,
+            obj=item,
             action='FILE_STATUS_CHANGE',
             changes={
                 'file_id': file_id,
-                'from': old_status,
-                'to': new_status,
+                'item_status_from': old_status,
+                'item_status_to': item.status,
                 'feedback': feedback
             },
-            description=_(f"تغییر وضعیت فایل به {new_status}")
+            description=_(f"تغییر وضعیت فایل/آیتم به {new_status}")
         )
         
         return file_obj
