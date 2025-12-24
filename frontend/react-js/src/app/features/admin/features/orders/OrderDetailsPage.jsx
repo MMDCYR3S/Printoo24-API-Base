@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useAdminOrderDetails } from '../../hooks/useAdminOrderDetails';
 import OrderStatusBadge from './components/OrderStatusBadge';
-import { formatPrice } from '../../../utils/formatPrice';
+import { formatPrice } from '../../utils/formatPrice';
 
 const OrderDetailsPage = () => {
   const navigate = useNavigate();
