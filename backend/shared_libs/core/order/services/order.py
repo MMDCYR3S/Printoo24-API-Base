@@ -54,7 +54,10 @@ class OrderService:
             product_slug = item_data.get('product_slug')
             selections = item_data.get('selections', item_data)
             quantity = int(selections.get('quantity', 1))
-            
+            # ===== دریافت نام آیتم ===== #
+            item_name = selections.get('name', item_data.get('name', None))
+            item_description = selections.get('description', item_data.get('description', None))
+            # ===== دریافت محصول ===== #
             product = get_object_or_404(Product, slug=product_slug)
             # ===== آماده سازی اطلاعات سفارش ===== #
             specs_json = self._prepare_item_specs_json(product, selections)        
@@ -71,7 +74,9 @@ class OrderService:
                 'product': product,
                 'quantity': quantity,
                 'price': line_price,
-                'items': specs_json
+                'items': specs_json,
+                'name': item_name,
+                'description': item_description
             })
             # ===== به دست آوردن مبلغ کل ===== #
             final_total = Decimal(str(total_price_override)) if total_price_override is not None else calculated_total

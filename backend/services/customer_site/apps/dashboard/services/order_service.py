@@ -14,10 +14,9 @@ from django.core.files import File
 from django.core.exceptions import ValidationError
 
 from core.models import (
-    User,Order, OrderItem, OrderStatus,
+    Order, OrderItem,
     Product, Address,
-    OrderItemFile, ProductOptionValue,
-    ProductSize, ProductOptionValue
+    OrderItemFile
 )
 from core.order.services import OrderService
 
@@ -99,8 +98,9 @@ class OrderDashboardService:
             selections = item_data.get('selections', item_data)
             product = get_object_or_404(Product, slug=product_slug)
             quantity = selections.get('quantity', 1)
-            
-            # قیمت دستی آیتم یا پیش‌فرض
+            # ===== افزودن نام و توضیحات ===== #
+            item_name = selections.get('name', item_data.get('name'))
+            item_description = selections.get('description', item_data.get('description'))
             if 'item_price' in item_data and item_data['item_price'] is not None:
                 line_total = Decimal(str(item_data['item_price']))
             else:
@@ -120,7 +120,9 @@ class OrderDashboardService:
                 product=product,
                 quantity=quantity,
                 price=line_total,
-                items=specs_json
+                items=specs_json,
+                name=item_name,
+                description=item_description
             )
             
             # آپدیت قیمت کل سفارش (جمع زدن با قیمت قبلی)

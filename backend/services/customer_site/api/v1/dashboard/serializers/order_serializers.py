@@ -54,7 +54,17 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_name', 'product_slug', 'quantity', 'price', 'specifications', 'files']
+        fields = [
+            'id', 
+            'product_name', 
+            'product_slug', 
+            'name',          
+            'description',   
+            'quantity', 
+            'price', 
+            'specifications', 
+            'files'
+        ]
 
     def get_specifications(self, obj):
         """

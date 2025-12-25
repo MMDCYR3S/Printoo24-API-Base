@@ -55,9 +55,9 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         responses={201: inline_serializer(name='OrderCreateSuccess', fields={'id': serializers.IntegerField(), 'message': serializers.CharField()})},
         examples=[
             OpenApiExample(
-                'Scenario 1: Standard Order',
-                summary='سناریو ۱: سفارش معمولی (کارت ویزیت)',
-                description='ثبت سفارش برای کارت ویزیت با تیراژ ۱۰۰۰ و سایز استاندارد.',
+                'Scenario 1: Standard Order with Name',
+                summary='سناریو ۱: سفارش با نام اختصاصی',
+                description='مثال ثبت سفارش برای "کارت ویزیت مدیریت"',
                 value={
                     "user_id": 25,
                     "address_id": 10,
@@ -65,10 +65,12 @@ class OrderDashboardViewSet(viewsets.ViewSet):
                         {
                             "product_slug": "business-card-glossy",
                             "selections": {
+                                "name": "کارت ویزیت آقای مدیرعامل",
+                                "description": "لطفاً رنگ سازمانی دقیق چک شود.",
                                 "quantity": 1000,
-                                "size_id": 5,  # سایز استاندارد (مثلا ۹ در ۶)
+                                "size_id": 5,
                                 "has_design": True,
-                                "option_value_ids": [101, 205] # کاغذ گلاسه، روکش مات
+                                "option_value_ids": [101, 205]
                             }
                         }
                     ]
