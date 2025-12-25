@@ -5,11 +5,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.utils.translation import gettext as _
 
 from core.models import User, Order, OrderStatus, OrderItem
-from core.domain.infrastructure.logger.services import AuditLogDomainService
-from core.domain.commerce.order import(
-    OrderRepository, OrderStatusFlowDomainService,
-    OrderStatusRepository
-)
+from core.logger.services import LoggerService
+from core.order.services.status import OrderStatusFlowService
 from apps.permissions import AppPermissionChecker
 
 logger = logging.getLogger('apps.operations.transition')
@@ -17,14 +14,15 @@ logger = logging.getLogger('apps.operations.transition')
 # ========== Order Transition App Service ========== #
 class OrderTransitionAppService:
     """
-    سرویس اپلیکیشن ساده‌سازی شده برای مدیریت تغییر وضعیت سفارش.
-    تمرکز فقط روی Order است.
+    سرویس اپلیکیشن ساده‌سازی شده برای مدیریت تغییر وضعیت سفارش (توسط دکمه‌های پنل).
+    مسئولیت:
+    1. چک کردن پرمیشن‌های اپلیکیشن.
+    2. چک کردن لاجیک‌های امنیتی (Guard Logic) مثل دسترسی نقش به مرحله.
+    3. فراخوانی سرویس دامین برای انجام تغییر وضعیت.
     """
     def __init__(self):
-        self.order_repo = OrderRepository()
-        self.status_repo = OrderStatusRepository()
-        self.flow_domain_service = OrderStatusFlowDomainService()
-        self.audit_service = AuditLogDomainService()
+        self.flow_domain_service = OrderStatusFlowService()
+        self.audit_service = LoggerService()
         
     def execute_transition(self, requester: User, new_status_code: str, order_id: int, description: str = None):
         """
@@ -37,12 +35,15 @@ class OrderTransitionAppService:
         AppPermissionChecker.check_has_permission(requester, 'change_orderstatus')
         
         # ===== دریافت سفارش ===== #
-        order = self.order_repo.get_by_id(order_id)
-        if not order:
-            raise ValidationError("سفارش یافت نشد.")
+        try:
+            order = Order.objects.get_order_by_id(order_id)
+            if not order:
+                raise ValidationError("سفارش یافت نشد.")
+        except Exception:
+            raise ValidationError("خطا در بازیابی سفارش.")
         
         # ===== دریافت وضعیت جدید ===== #
-        new_status = self.status_repo.get_status_by_code(new_status_code)
+        new_status = OrderStatus.objects.get_status_by_code(new_status_code)
         if not new_status:
             raise ValidationError(f"کد وضعیت نامعتبر است: {new_status_code}")
         
@@ -124,8 +125,6 @@ class OrderTransitionAppService:
         if not role.allowed_groups.filter(id=current_status.group_id).exists():
              raise PermissionDenied(f"شما دسترسی به ویرایش سفارش در مرحله '{current_status.group.name}' را ندارید.")
          
-         
-
     def _validate_transition_direction(self, current_status: OrderStatus, new_status: OrderStatus):
         """
         قانون حرکت: دنده عقب فقط با وضعیت 'رد شده' (Reject) مجاز است.
@@ -150,27 +149,14 @@ class OrderTransitionAppService:
         errors = []
         for item in items:
             product = item.product
-            required_specs = product.file_upload_requirements.filter(is_required=True)
             
             # ===== اگر آیتم تایید نشده بود، خطابده ===== #
             if not item.status == "approved":
                 errors.append(f"آیتم باید تایید شود.")
                 continue
-            
-            if not required_specs.exists():
-                continue
-
-            # فایل‌های آپلود شده برای این آیتم
             uploaded_files = item.files.filter(is_latest=True)
-            uploaded_req_ids = set(f.requirement_id for f in uploaded_files)
-            
-            missing = []
-            for req in required_specs:
-                if req.id not in uploaded_req_ids:
-                    missing.append(req.spec.name)
-            
-            if missing:
-                errors.append(f"آیتم {item.id} ({product.name}): کسری فایل [{', '.join(missing)}]")
-        
+
         if errors:
             raise ValidationError("\n".join(errors))
+
+        return uploaded_files

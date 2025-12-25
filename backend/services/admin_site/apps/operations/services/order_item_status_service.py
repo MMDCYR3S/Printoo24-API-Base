@@ -4,9 +4,9 @@ from datetime import datetime
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.utils.translation import gettext as _
 
-from core.models import User, OrderItem
-from core.domain.commerce.order import OrderItemRepository
-from core.domain.infrastructure.logger.services import AuditLogDomainService
+from core.models import User, OrderItem, OrderStatus
+from core.order.services import OrderStatusFlowService
+from core.logger.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ========== Logger ========== #
@@ -18,45 +18,56 @@ class OrderItemStatusAppService:
     سرویس مدیریت وضعیت فنی آیتم‌های سفارش (OrderItem Status).
     """
     def __init__(self):
-        self.item_repo = OrderItemRepository()
-        self.audit_service = AuditLogDomainService()
+        self.flow_service = OrderStatusFlowService()
+        self.audit_service = LoggerService()
 
-    def change_item_status(self, requester: User, item_id: int, new_status: str, admin_note: str = None):
+    def change_item_status(self, requester: User, item_id: int, new_status_code: str, admin_note: str = None):
         """
-        تغییر وضعیت آیتم توسط پرسنل (طراح/چاپخانه).
+        تغییر وضعیت آیتم توسط پرسنل.
+        مثال: طراح وضعیت آیتم را به "تایید شده" تغییر می‌دهد.
         """
         # ===== بررسی دسترسی ===== #
         AppPermissionChecker.check_has_permission(requester, 'change_orderitem')
         
         # ===== دریافت آیتم ===== #
-        item = self.item_repo.get_by_id(item_id)
-        if not item:
+        try:
+            item = OrderItem.objects.select_related('order__current_status__group').get(id=item_id)
+        except OrderItem.DoesNotExist:
             raise ValidationError(_("آیتم سفارش یافت نشد."))
         
         # ===== چک کردن اجازه دسترسی ===== #
-        self._validate_access(requester, item)
+        self._validate_access_scope(requester, item)
         
         # ===== اعتبارسنجی تغییر وضعیت ===== #
         valid_statuses = dict(OrderItem.STATUS_CHOICES).keys()
-        if new_status not in valid_statuses:
-            raise ValidationError(f"وضعیت '{new_status}' نامعتبر است.")
+        if new_status_code not in valid_statuses:
+            raise ValidationError(f"وضعیت '{new_status_code}' نامعتبر است.")
+        
+        old_status = item.status
         
         # ===== تغییر وضعیت ===== #
-        old_status = item.status
-        item.status = new_status
+        updated_item = self.flow_service.change_item_status(
+            item_id=item.id,
+            new_status_code=new_status_code,
+            user=requester,
+            description=f"تغییر وضعیت توسط {requester.username}"
+        )
 
         # ===== افزودن یادداشت ===== #
         if admin_note:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
-            new_note = f"[{timestamp} - {requester.username}]: {admin_note}"
-            if item.admin_note:
-                item.admin_note += f"\n{new_note}"
+            new_note_entry = f"[{timestamp} - {requester.username}]: {admin_note}"
+            
+            if updated_item.admin_note:
+                updated_item.admin_note += f"\n{new_note_entry}"
             else:
-                item.admin_note = new_note
+                updated_item.admin_note = new_note_entry
+                
+            updated_item.save(update_fields=['admin_note'])
         
         item.save(update_fields=['status', 'admin_note', 'updated_at'])
         
-        logger.info(f"Item #{item.id} status changed: {old_status} -> {new_status} by {requester.username}")
+        logger.info(f"Item #{item.id} status changed: {old_status} -> {new_status_code} by {requester.username}")
         
         # ===== ثبت لاگ سیستماتیک ===== #
         self.audit_service.record_log(
@@ -65,17 +76,17 @@ class OrderItemStatusAppService:
             action='ITEM_STATUS_CHANGE',
             changes={
                 'from': old_status,
-                'to': new_status,
+                'to': new_status_code,
                 'note_added': bool(admin_note),
                 'note_snippet': admin_note[:50] if admin_note else None
             },
-            description=_(f"تغییر وضعیت آیتم سفارش به {new_status}")
+            description=_(f"تغییر وضعیت آیتم سفارش به {new_status_code}")
         )
         
         return item
     
     # ========== VALIDATORS ========== #
-    def _validate_access(self, user: User, item: OrderItem):
+    def _validate_access_scope(self, user: User, item: OrderItem):
         """
         بررسی اینکه آیا کاربر اجازه تغییر وضعیت این آیتم خاص را دارد؟
         """

@@ -9,7 +9,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 
 from apps.operations.services import OrderTransitionAppService
-from core.domain.commerce.order import OrderStatusDomainService
+from core.order.services import OrderStatusService
 from apps.permissions import AppPermissionChecker
 from ..serializers import (
     OrderStatusListSerializer, OrderStatusInputSerializer,
@@ -25,7 +25,7 @@ class OrderStatusViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_service(self):
-        return OrderStatusDomainService()
+        return OrderStatusService()
 
     def check_object_permissions(self, action_name):
         """ اعمال AppPermissionChecker بر اساس نوع عملیات """

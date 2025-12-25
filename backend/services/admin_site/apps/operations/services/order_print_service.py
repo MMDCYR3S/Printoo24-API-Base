@@ -1,8 +1,8 @@
 from rest_framework.exceptions import ValidationError
 
-from core.models import User
-from core.domain.infrastructure.logger.services import AuditLogDomainService
-from core.domain.commerce.order import OrderRepository, OrderPrintDomainService
+from core.models import User, Order, OrderPrintReport
+from core.order.services import PrintMaterialService
+from core.logger.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ========== Order Print App Service ========== #
@@ -12,9 +12,8 @@ class OrderPrintAppService:
     مسئولیت: هماهنگی بین کاربر، سفارش و سرویس دامنه چاپ.
     """
     def __init__(self):
-        self.order_repo = OrderRepository()
-        self.domain_service = OrderPrintDomainService()
-        self.audit_service = AuditLogDomainService()
+        self.domain_service = PrintMaterialService()
+        self.audit_service = LoggerService()
 
     def create_print_usage(self, user: User, order_id: int, validated_data: dict, files_list=None):
         """
@@ -24,8 +23,9 @@ class OrderPrintAppService:
         AppPermissionChecker.check_has_permission(user, 'add_orderprintreport')
 
         # ===== دریافت اطلاعات مرتبط ===== #
-        order = self.order_repo.get_by_id(order_id)
-        if not order:
+        try:
+            order = Order.objects.get(id=order_id)
+        except Order.DoesNotExist:
             raise ValidationError("سفارش مورد نظر یافت نشد.")
 
         # ===== ایجاد گزارش ===== #
@@ -43,7 +43,7 @@ class OrderPrintAppService:
     def get_order_print_reports(self, user: User, order_id: int):
         """ لیست گزارشات مصرف یک سفارش """
         AppPermissionChecker.check_has_permission(user, 'view_orderprintreport')
-        return self.domain_service.report_repo.get_reports_by_order(order_id)
+        return OrderPrintReport.objects.get_reports_by_order(order_id)
 
     def update_print_usage(self, user: User, report_id: int, validated_data: dict, files_list=None):
         """ ویرایش گزارش مصرف """

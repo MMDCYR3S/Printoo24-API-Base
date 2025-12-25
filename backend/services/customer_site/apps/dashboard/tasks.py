@@ -6,8 +6,8 @@ from django.conf import settings
 from django.core.files import File
 from django.contrib.auth import get_user_model
 
-from core.domain.communication.email.email_services import EmailService 
-from core.domain.catalog.product import ProductMediaDomainService
+from core.infrastructure import EmailService 
+from core.product.services import ProductMediaService
 from core.models import (
     CartItem,
     CartItemUpload,
@@ -53,7 +53,7 @@ def send_contact_us_reply_task(user_email: str, user_name: str, reply_message: s
 def upload_product_image_task(self, product_id, user_id, temp_file_path, original_filename):
     """ تسک آپلود تصویر محصول """
     logger.info(f"[Image Task] Starting for Product {product_id}. File: {temp_file_path}")
-    media_service = ProductMediaDomainService()
+    media_service = ProductMediaService()
     
     try:
         user = User.objects.get(id=user_id)
@@ -81,7 +81,7 @@ def upload_product_image_task(self, product_id, user_id, temp_file_path, origina
 def upload_attachment_library_task(self, user_id, temp_file_path, original_filename, name_in_library):
     """ تسک آپلود فایل در کتابخانه """
     logger.info(f"[Attachment Task] Starting upload: {name_in_library}")
-    media_service = ProductMediaDomainService()
+    media_service = ProductMediaService()
     
     try:
         user = User.objects.get(id=user_id)

@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from django.core.exceptions import ValidationError
 
-from core.domain.commerce.order import OrderStatusGroupDomainService
+from core.order.services import OrderStatusGroupService
 from apps.permissions import AppPermissionChecker
 from ..serializers import OrderStatusGroupListSerializer, OrderStatusGroupInputSerializer
 
@@ -17,7 +17,7 @@ class OrderStatusGroupViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_service(self):
-        return OrderStatusGroupDomainService()
+        return OrderStatusGroupService()
 
     def check_object_permissions(self, action_name):
         """ اعمال AppPermissionChecker بر اساس نوع عملیات """

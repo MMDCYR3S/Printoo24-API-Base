@@ -2,8 +2,8 @@ import os
 import logging
 from celery import shared_task
 from core.models import OrderItemFile
-from core.domain.commerce.order import OrderItemFileRepository
 
+# ========== Logger ========== #
 logger = logging.getLogger('apps.operations.tasks')
 
 # ========== Task: Process Uploaded Design File ========== #
@@ -11,28 +11,35 @@ logger = logging.getLogger('apps.operations.tasks')
 def process_uploaded_design_file(self, file_id: int):
     """
     تسک پردازش فایل طراحی در پس‌زمینه.
-    1. فایل را ولیدیت می‌کند (سایز، فرمت).
-    2. متادیتای فایل (حجم، رزولوشن) را استخراج می‌کند.
-    3. وضعیت را به 'pending' تغییر می‌دهد.
+    1. فایل را از دیتابیس می‌خواند (بدون ریپازیتوری).
+    2. متادیتای فایل (حجم، رزولوشن) را استخراج می‌کند (شبیه‌سازی).
+    3. وضعیت را به‌روز می‌کند.
     """
+    file_obj = None
     try:
-        # ===== دریافت شناسه فایل ===== #
-        repo = OrderItemFileRepository()
-        file_obj = repo.get_by_id(file_id)
-        
-        if not file_obj or not file_obj.file:
-            error_msg = f"File ID {file_id} not found or has no physical file."
+        # ===== دریافت فایل با استفاده از منیجر ===== #
+        try:
+            file_obj = OrderItemFile.objects.get(id=file_id)
+        except OrderItemFile.DoesNotExist:
+            error_msg = f"File ID {file_id} not found."
             logger.error(error_msg)
             return error_msg
         
-        # ===== لاگ حجم فایل ===== #
+        if not file_obj.file:
+            error_msg = f"File ID {file_id} has no physical file associated."
+            logger.error(error_msg)
+            return error_msg
+        
+        # ===== پردازش فایل (Validation/Metadata Extraction) ===== #
         file_name = os.path.basename(file_obj.file.name)
         file_size = file_obj.file.size
+        
         logger.info(f"Processing file: {file_name} (Size: {file_size} bytes)")
         
-        # ===== تغییر وضعیت فایل و ذخیره سازی ===== #
-        file_obj.status = 'pending'
-        file_obj.is_processed = True
+        if hasattr(file_obj, 'is_processed'):
+            file_obj.is_processed = True
+        
+
         file_obj.save()
         
         success_msg = f"File {file_id} processed successfully."
@@ -41,12 +48,16 @@ def process_uploaded_design_file(self, file_id: int):
 
     except Exception as e:
         error_msg = f"System Error processing file ID {file_id}: {str(e)}"
-        logger.error(error_msg, exc_info=True) # exc_info=True باعث می‌شود Traceback کامل ذخیره شود
+        logger.error(error_msg, exc_info=True) 
 
+        # ===== مدیریت خطا ===== #
         if file_obj:
-            file_obj.admin_feedback = f"خطای سیستمی در پردازش فایل: {str(e)}"
-            file_obj.status = 'rejected'
+            file_obj.admin_feedback = f"System Error: {str(e)}"
+            
+            if hasattr(file_obj, 'status'):
+                file_obj.status = 'rejected'
+                
             file_obj.save()
-            logger.info(f"File ID {file_id} marked as REJECTED due to error.")
-        
+            logger.info(f"File ID {file_id} marked as FAILED due to error.")
+
         raise self.retry(exc=e, countdown=60)

@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from .order import Order
+from core.models import Order
 
 # ===== Ticket Type Model ===== #
 class TicketType(models.Model):
