@@ -175,7 +175,6 @@ class Order(models.Model):
     )
     total_price = models.DecimalField(_("مبلغ کل سفارش"), max_digits=18, decimal_places=0,default=0)
     base_products_price = models.DecimalField(_("مبلغ پایه اقلام"), max_digits=15, decimal_places=0, default=0)
-    description = models.TextField(_("توضیحات کلی مشتری"), blank=True, null=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
@@ -227,6 +226,7 @@ class OrderItem(models.Model):
         on_delete=models.CASCADE,
         null=True, blank=True
     )
+    name = models.CharField(_('نام'), max_length=255, blank=True, null=True)
     quantity = models.PositiveIntegerField(_('تعداد'), default=1)
     price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
     status = models.CharField(
@@ -236,6 +236,7 @@ class OrderItem(models.Model):
         db_index=True
     )
     items = models.JSONField(_("آیتم های اضافی"), blank=True, null=True)
+    description = models.TextField(_("توضیحات کلی مشتری"), blank=True, null=True)
     admin_note = models.TextField(_("یادداشت تولید"), blank=True, help_text="مخصوص اپراتور چاپ")
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)

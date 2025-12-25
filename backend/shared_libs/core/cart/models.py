@@ -25,9 +25,11 @@ class CartItem(models.Model):
     """ مدل آیتم سبد خرید """
     cart = models.ForeignKey(Cart, related_name='cart_items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, related_name='cart_items', on_delete=models.CASCADE)
+    name = models.CharField(_('نام'), max_length=255, blank=True, null=True)
     quantity = models.PositiveIntegerField(_('تعداد'), default=1)
     price = models.DecimalField(_('قیمت'), max_digits=14, decimal_places=2)
     items = models.JSONField(_('جزئیات سفارش'), blank=True, null=True)
+    description = models.TextField(_('توضیحات'), blank=True, null=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     

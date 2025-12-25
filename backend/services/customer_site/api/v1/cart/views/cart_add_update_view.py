@@ -40,13 +40,15 @@ class AddToCartView(GenericAPIView):
                 value={
                     "product_id": 105,
                     "selections": {
+                        "name": "کارت ویزیت علی بابا",
                         "quantity_id": 50,
                         "size_id": 5,
                         "has_design": True,
                         "options": {
                             "10": 101,
                             "12": 205
-                        }
+                        },
+                        "description": "توضیحات تکمیلی"
                     }
                 },
                 request_only=True
@@ -58,13 +60,15 @@ class AddToCartView(GenericAPIView):
                 value={
                     "product_id": 200,
                     "selections": {
+                        "name": "لیوان سرامیکی",
                         "quantity": 5,
                         "size_id": None,
                         "has_design": False,
                         "options": {
                             "15": "Happy Birthday Sarah",
                             "18": 302
-                        }
+                        },
+                        "description": "توضیحات تکمیلی"
                     }
                 },
                 request_only=True
@@ -76,13 +80,15 @@ class AddToCartView(GenericAPIView):
                 value={
                     "product_id": 300,
                     "selections": {
+                        "name": "بنر تبلیغاتی شرکت موز پروران",
                         "quantity": 1, 
                         "width": 300,
                         "height": 100,
                         "has_design": True,
                         "options": {
                             "20": 401
-                        }
+                        },
+                        "description": "توضیحات تکمیلی"
                     }
                 },
                 request_only=True

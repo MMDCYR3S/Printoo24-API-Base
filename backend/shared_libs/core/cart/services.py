@@ -184,12 +184,13 @@ class CartService:
         if size_id:
             try:
                 ps = ProductSize.objects.get(product=product, id=size_id)
-                return float(ps.size.width), float(ps.size.height)
+                return float(ps.size.width), float(ps.size.height), ps.size.name
             except ProductSize.DoesNotExist:
                 raise ValidationError(_("سایز انتخاب شده نامعتبر است."))
         if custom_width and custom_height:
-            return float(custom_width), float(custom_height)
-        return 0.0, 0.0
+            custom_label = f"{custom_width}x{custom_height}"
+            return float(custom_width), float(custom_height), custom_label
+        return 0.0, 0.0, None
 
     def _handle_quantity_logic(self, product: Product, quantity_input: int, selections: Dict) -> Tuple[int, Decimal]:
         """
@@ -210,6 +211,7 @@ class CartService:
                 pq = ProductQuantity.objects.select_related('quantity').get(product=product, id=qty_id)
                 final_quantity = quantity_input if quantity_input > 0 else 1
                 base_unit_price = Decimal(pq.price)
+                quantity_label = str(pq.quantity.value)
             # ===== خطا در صورت نبود تیراژ ===== #
             except ProductQuantity.DoesNotExist:
                 raise ValidationError(_("تیراژ انتخابی نامعتبر است."))
@@ -226,8 +228,9 @@ class CartService:
                     raise ValidationError(f"حداکثر تعداد سفارش {config.max_quantity} عدد است.")
             final_quantity = quantity_input
             base_unit_price = product.price
+            quantity_label = str(final_quantity)
             
-        return final_quantity, base_unit_price
+        return final_quantity, base_unit_price, quantity_label
 
     # ===== متد افزودن به سبد خرید. ===== #
     @transaction.atomic
@@ -240,13 +243,16 @@ class CartService:
             product = Product.objects.get(id=product_id, is_active=True)
         except Product.DoesNotExist:
             raise ValidationError(_("محصول یافت نشد یا غیرفعال است."))
+        # ===== دریافت نام سفارش و توضیحات ===== #
+        name = selections.get('name', None)
+        description = selections.get('description', None)
         # ===== استفاده از پردازشگر ویژگی ها ===== #
         processor = CartProcessor(product, selections)
         processor.process()
         # ===== دریافت تیراژ ===== #
-        final_quantity, base_unit_price = self._handle_quantity_logic(product, quantity_input, selections)
+        final_quantity, base_unit_price, quantity_label = self._handle_quantity_logic(product, quantity_input, selections)
         # ===== دریافت ابعاد ===== #
-        width, height = self._resolve_dimensions(product, selections)
+        width, height, size_label = self._resolve_dimensions(product, selections)
         # ===== محاسبه قیمت ===== #
         calculator = ProductPriceCalculator(
             product=product,
@@ -264,15 +270,22 @@ class CartService:
         cart_item_data = {
             "options": processor.final_options_data,
             "meta": {
-                "width": width,
-                "height": height,
-                "size_id": selections.get('size_id'),
-                "quantity_id": selections.get('quantity_id'),
+                "size_info": 
+                {
+                    "size_id": selections.get('size_id'),
+                    "size_name": size_label,
+                    "width": width,
+                    "height": height,
+                },
+                "quantity_info": {
+                    "quantity_id": selections.get('quantity_id'),
+                    "quantity_text": quantity_label,
+                    "quantity_price": float(base_unit_price),
+                },
                 "has_design": selections.get('has_design', True),
                 "price_breakdown": calc_result['breakdown']
             }
         }
-        
         # ===== انتخاب نوع سایز محصول ===== #
         if 'size_id' in selections:
             cart_item_data['size_id'] = selections['size_id'] 
@@ -291,12 +304,13 @@ class CartService:
             new_item = CartItem.objects.create(
                 cart=cart,
                 product=product,
+                name=name,
                 quantity=final_quantity,
                 price=final_price,
-                items=cart_item_data
+                items=cart_item_data,
+                description=description
             )
             return new_item
-        
         
     # ===== متد آپدیت اصلاح شده ===== #
     @transaction.atomic
@@ -311,6 +325,9 @@ class CartService:
             raise ItemNotFoundException("آیتم سبد خرید یافت نشد.")
         # ===== دریافت محصول ===== #
         product = current_item.product
+        # ===== استخراج نام و توضیحات جدید ===== #
+        new_name = selections.get('name', current_item.name)
+        new_description = selections.get('description', current_item.description)
         # ===== دریافت تیراژ فعلی ===== #
         final_quantity, base_unit_price = self._handle_quantity_logic(product, quantity_input, selections)
         # ===== استفاده از پردازشگر ویژگی ها ===== #
@@ -349,8 +366,10 @@ class CartService:
         duplicate_item = CartItem.objects.filter(
             cart=cart, 
             product=product, 
-            items=new_cart_item_data
+            items=new_cart_item_data,
+            name=new_name
         ).exclude(id=current_item.id).first()
+        
         if duplicate_item:
             duplicate_item.quantity += final_quantity
             duplicate_item.price += new_total_price
@@ -361,6 +380,8 @@ class CartService:
             current_item.quantity = final_quantity
             current_item.price = new_total_price
             current_item.items = new_cart_item_data
+            current_item.name = new_name
+            current_item.description = new_description
             current_item.save()
             return current_item
         

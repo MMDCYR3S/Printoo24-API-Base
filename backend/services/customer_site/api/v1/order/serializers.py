@@ -35,7 +35,9 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = [
              'id', 
-             'product_name', 
+             'product_name',
+             'name',
+             'description',
              'quantity', 
              'price', 
              'specs', 
@@ -149,7 +151,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_address(self, obj):
         if obj.address:
-            return str(obj.address) # یا استفاده از AddressSerializer برای جزئیات بیشتر
+            return str(obj.address)
         return "آدرس حذف شده"
 
     def get_item_detail(self, obj):

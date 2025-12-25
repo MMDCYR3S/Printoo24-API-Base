@@ -5,6 +5,19 @@ class SelectionsSerializer(serializers.Serializer):
     """
     سریالایزر پایه برای انتخاب‌های کاربر (مشترک بین افزودن و ویرایش).
     """
+    # ===== نام سفارش و توضیحات مربوطه ===== #
+    name = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        max_length=255, 
+        help_text="نام اختصاصی برای این آیتم (مثلاً: کارت ویزیت مدیریت)"
+    )
+    description = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        help_text="توضیحات تکمیلی مشتری برای چاپ"
+    )
+    
     # ===== تیراژ - انتخاب از لیست یا وارد کردن دلخواه براساس نوع محصول ===== #
     quantity = serializers.IntegerField(required=False, min_value=1, help_text="تعداد دلخواه (برای محصولات بدون تیراژ ثابت)")
     quantity_id = serializers.IntegerField(required=False, help_text="شناسه تیراژ (برای محصولات با تیراژ ثابت)")

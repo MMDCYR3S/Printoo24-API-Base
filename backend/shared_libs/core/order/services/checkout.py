@@ -62,7 +62,7 @@ class CheckoutService:
             total_price=cart_item.price,
             base_products_price=cart_item.price, 
             type=order_type,
-            order_code=self._generate_order_code()
+            order_code=self._generate_order_code(),
         )
         
         # ===== ایجاد آیتم سفارش ===== #
@@ -70,8 +70,10 @@ class CheckoutService:
             order=order,
             product=cart_item.product,
             quantity=cart_item.quantity,
+            name=cart_item.name,
             price=cart_item.price,
             items=cart_item.items,
+            description=cart_item.description,
             status='pending'
         )
         

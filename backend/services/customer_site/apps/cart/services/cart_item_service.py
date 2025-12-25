@@ -68,7 +68,7 @@ class CartItemDetailService:
     
     def __init__(self):
         # ===== تزریق وابستگی‌ها ===== #
-        self._item_repo = CartService()
+        self._domain_service = CartService()
         
     def get_item_detail(self, item_id: int, user: User) -> CartItem:
         """
@@ -87,7 +87,7 @@ class CartItemDetailService:
         logger_detail.info(f"Fetching details for CartItem ID: {item_id}, User ID: {user.id}")
         
         try:
-            item = self._item_repo.get_cart_item_for_user(user, item_id)
+            item = self._domain_service.get_cart_item_for_user(user, item_id)
 
             if not item:
                 logger_detail.warning(f"CartItem {item_id} not found or access denied for User ID: {user.id}")
