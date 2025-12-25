@@ -9,11 +9,10 @@ from django.contrib.auth import get_user_model
 from core.infrastructure import EmailService 
 from core.product.services import ProductMediaService
 from core.models import (
-    CartItem,
-    CartItemUpload,
     OrderItem,
     OrderItemFile
 )
+from apps.cart.models import CartItem, CartItemUpload
 
 User = get_user_model()
 logger = logging.getLogger('dashboard.tasks')

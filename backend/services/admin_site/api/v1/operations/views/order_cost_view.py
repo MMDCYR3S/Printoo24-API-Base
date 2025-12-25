@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
-from apps.operations.services import OrderCostAppService
+from apps.order.services import OrderCostAppService
 from ..serializers import (
     OrderCostReportSubmitSerializer, 
     OrderCostReportSerializer,

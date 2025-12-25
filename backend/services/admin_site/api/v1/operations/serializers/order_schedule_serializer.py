@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import OrderSchedule
+from apps.order.models import OrderSchedule
 
 # ========== SCHEDULE SERIALIZERS ========== #
 class OrderScheduleSerializer(serializers.ModelSerializer):

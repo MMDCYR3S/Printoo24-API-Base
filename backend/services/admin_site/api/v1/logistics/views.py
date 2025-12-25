@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from apps.logistics.services import WarehouseAppService
-from core.models import OrderShipment
+from apps.logistics.models import OrderShipment
 from .serializers import (
     CreateShipmentInputSerializer,
     UpdateShipmentInputSerializer,

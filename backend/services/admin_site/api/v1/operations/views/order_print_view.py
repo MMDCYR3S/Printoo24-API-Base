@@ -7,8 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes, extend_schema_view
 
-from core.models import OrderPrintReport
-from apps.operations.services import OrderPrintAppService
+from apps.order.models  import OrderPrintReport
+from apps.order.services import OrderPrintAppService
 from ..serializers import PrintReportCreateSerializer, PrintReportDetailSerializer, PrintReportUpdateSerializer
 
 # ========== Examples ========== #

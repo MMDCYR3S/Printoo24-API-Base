@@ -2,7 +2,7 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 from django.utils.translation import gettext_lazy as _
 
 from core.models import User, Order
-from core.logger.services import LoggerService
+from apps.support.services import LoggerService
 
 # ========== Order Detail App Service ========== # 
 class OrderDetailAppService:

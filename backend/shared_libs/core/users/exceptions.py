@@ -15,12 +15,3 @@ class UsernameNotFoundException(Exception):
     """استثنایی که زمانی رخ می‌دهد که نام کاربری پیدا نشود."""
     pass
 
-# ========== WALLET EXCEPTIONS ========== #
-class WalletNotFoundException(Exception):
-    """کیف پول یافت نشد"""
-    pass
-
-class InsufficientFundsException(Exception):
-    """موجودی کافی نیست"""
-    pass
-

@@ -3,8 +3,9 @@ from typing import Dict, Any, List
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from core.models import User, CustomerProfile, Wallet, Role, UserRole
+from core.models import User, CustomerProfile, Role, UserRole
 from core.users.services import CustomerService
+from apps.accounts.domain_services import Wallet
 
 # تعریف لاگر اختصاصی
 logger = logging.getLogger('dashboard.services.customer')

@@ -5,9 +5,11 @@ from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 
 from apps.permissions import AppPermissionChecker
-from core.models import User, Order, OrderShipment, OrderPackage, OrderCostSheet, OrderCostReport
-from core.order.services import LogisticsService
-from core.logger.services import LoggerService
+from core.models import User, Order
+from apps.order.models import OrderCostSheet
+from apps.logistics.models import OrderShipment, OrderPackage
+from apps.logistics.logistics import LogisticsService
+from apps.support.services import LoggerService
 
 # ========== Warehouse App Service ========== #
 class WarehouseAppService:

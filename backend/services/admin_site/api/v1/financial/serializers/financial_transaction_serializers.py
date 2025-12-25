@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Transaction
+from apps.financial.models import Transaction
 
 class TransactionDetailSerializer(serializers.ModelSerializer):
     """ خروجی کامل تراکنش """

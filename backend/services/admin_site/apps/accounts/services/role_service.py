@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.models import Role
 from core.users.services import RoleAdminService
-from core.logger.services import LoggerService
+from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ===== Logger Initialization ===== #

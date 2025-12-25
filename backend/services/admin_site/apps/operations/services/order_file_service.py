@@ -2,7 +2,7 @@ from rest_framework.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from core.models import User, OrderItem, OrderItemFile
-from core.logger.services import LoggerService
+from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
 from apps.operations.tasks import process_uploaded_design_file
 

@@ -1,7 +1,6 @@
 from .user_admin import UserAdminService
 from .role_admin import RoleAdminService
 from .identity import UserIdentityService
-from .wallet import WalletService, WalletTransactionService
 from .profiles import CustomerProfileService
 from .address import AddressService, GeoService
 from .customers import CustomerService

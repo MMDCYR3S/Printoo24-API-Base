@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from core.models import Order, WalletTransaction
+from core.models import Order
+from apps.accounts.models import WalletTransaction
 from .tasks import send_order_status_notification, send_wallet_notification
 
 # ========= Store Old Order Status ========= #

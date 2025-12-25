@@ -1,8 +1,9 @@
 import logging
 from celery import shared_task
 from django.contrib.auth import get_user_model
-from core.models import Order, WalletTransaction
-from core.notifications.services import NotificationService
+from core.models import Order
+from apps.accounts.models import WalletTransaction
+from apps.notification.domain_services import NotificationService
 
 logger = logging.getLogger('celery.notification')
 User = get_user_model()

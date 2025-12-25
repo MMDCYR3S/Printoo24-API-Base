@@ -1,5 +1,3 @@
-# در فایل: services/admin_site/apps/operations/api/v1/status_groups/views.py
-
 from rest_framework.generics import GenericAPIView
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -9,7 +7,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 
 from apps.operations.services import OrderTransitionAppService
-from core.order.services import OrderStatusService
+from apps.order.domain_services import OrderStatusService
 from apps.permissions import AppPermissionChecker
 from ..serializers import (
     OrderStatusListSerializer, OrderStatusInputSerializer,

@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Order, User
-from core.logger.services import LoggerService
+from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ========== Order List App Service ========== #

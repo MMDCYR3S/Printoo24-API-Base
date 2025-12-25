@@ -2,8 +2,9 @@ import logging
 from typing import List
 from rest_framework.exceptions import NotFound
 
-from core.models import User, CustomerNotification
-from core.notifications.services import NotificationService
+from core.models import User
+from apps.notification.models import CustomerNotification
+from apps.notification.domain_services import NotificationService
 
 # ===== تعریف لاگر اختصاصی ===== #
 logger = logging.getLogger('userprofile.services.notification')

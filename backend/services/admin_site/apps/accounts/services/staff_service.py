@@ -5,7 +5,7 @@ from django.utils.translation import gettext as _
 
 from core.models import User
 from core.users.services import UserAdminService
-from core.logger.services import LoggerService
+from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ===== Logger Initialization ===== #

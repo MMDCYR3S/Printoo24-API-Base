@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import CartItemUpload
+from apps.cart.models import CartItemUpload
 
 class CartItemFileUploadSerializer(serializers.ModelSerializer):
     """

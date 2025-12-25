@@ -5,8 +5,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.utils.translation import gettext as _
 
 from core.models import User, OrderItem, OrderStatus
-from core.order.services import OrderStatusFlowService
-from core.logger.services import LoggerService
+from apps.order.domain_services import OrderStatusFlowService
+from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ========== Logger ========== #

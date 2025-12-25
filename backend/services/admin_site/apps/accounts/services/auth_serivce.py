@@ -7,7 +7,7 @@ from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 
 
 from core.models import User
-from core.logger.services import LoggerService
+from apps.support.services import LoggerService
 
 # ===== Logger ===== #
 logger = logging.getLogger('apps.users.services.auth_app_service')

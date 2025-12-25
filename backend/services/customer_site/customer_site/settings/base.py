@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.shop",
     "apps.order",
+    "apps.home",
     "apps.cart",
     "apps.userprofile",
     "apps.notification",

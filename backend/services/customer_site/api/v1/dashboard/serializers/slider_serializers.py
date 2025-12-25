@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import SliderIndex
+from apps.home.models import SliderIndex
 
 # ===== Slider Dashboard Serializer ===== #
 class SliderDashboardSerializer(serializers.ModelSerializer):

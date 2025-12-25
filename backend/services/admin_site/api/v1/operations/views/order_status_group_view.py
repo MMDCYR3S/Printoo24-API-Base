@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from django.core.exceptions import ValidationError
 
-from core.order.services import OrderStatusGroupService
+from apps.order.domain_services import OrderStatusGroupService
 from apps.permissions import AppPermissionChecker
 from ..serializers import OrderStatusGroupListSerializer, OrderStatusGroupInputSerializer
 

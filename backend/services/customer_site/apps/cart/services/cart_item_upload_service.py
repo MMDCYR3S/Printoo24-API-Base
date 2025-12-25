@@ -5,8 +5,9 @@ from typing import Tuple
 from django.core.files.base import ContentFile
 from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 
-from core.models import User, CartItemUpload
-from core.cart.services import CartService
+from core.models import User
+from apps.cart.models import CartItemUpload
+from apps.cart.domain_services import CartService
 
 logger = logging.getLogger('cart.services.item_upload')
 

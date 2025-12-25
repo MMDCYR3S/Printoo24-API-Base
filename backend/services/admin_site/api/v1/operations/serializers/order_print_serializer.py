@@ -1,6 +1,6 @@
 import json
 from rest_framework import serializers
-from core.models import OrderPrintReport, OrderPrintItem, OrderPrintAttachment, OrderCostCategory
+from apps.order.models import OrderPrintReport, OrderPrintItem, OrderPrintAttachment
 
 # ========== Sub-Serializers ========== #
 class PrintItemInputSerializer(serializers.Serializer):

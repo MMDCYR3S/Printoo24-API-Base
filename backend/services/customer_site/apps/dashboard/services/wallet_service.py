@@ -4,8 +4,9 @@ from django.db.models import QuerySet
 from django.db import transaction
 from rest_framework.exceptions import NotFound, ValidationError
 
-from core.models import Wallet, User
-from core.users.services import WalletService, CustomerService
+from apps.accounts.models import Wallet
+from apps.accounts.domain_services import WalletService
+from core.users.services import CustomerService
 
 
 # ===== Logger ===== #

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Wallet, WalletTransaction
+from apps.accounts.models import Wallet, WalletTransaction
 
 # ===== سریالایزر لیست کیف پول ===== #
 class WalletListSerializer(serializers.ModelSerializer):

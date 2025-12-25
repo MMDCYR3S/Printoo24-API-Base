@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import CustomerNotification
+from apps.notification.models import CustomerNotification
 
 # ===== Notification Serializers ===== #
 class NotificationSerializer(serializers.ModelSerializer):

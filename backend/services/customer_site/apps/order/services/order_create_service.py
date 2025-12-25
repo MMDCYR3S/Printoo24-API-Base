@@ -4,10 +4,10 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError 
 
 from ..exceptions import EmptyCartError, InsufficientFundsError, ItemNotFoundException
-from core.models import User, Address, Order, CartItem
-from core.order.services import CheckoutService
-from core.users.services import WalletService
-from core.cart.services import CartService
+from core.models import User, Address, Order
+from apps.accounts.domain_services import WalletService
+from apps.order.domain_services import CheckoutService
+from apps.cart.domain_services import CartService
 
 logger = logging.getLogger('shop.services.order_creation')
 

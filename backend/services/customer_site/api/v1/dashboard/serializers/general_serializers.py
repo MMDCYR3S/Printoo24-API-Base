@@ -3,12 +3,13 @@ from drf_spectacular.utils import extend_schema_field
 
 from core.models import (
     ProductCategory,
-    ContactUs,
-    PromotionalModal,
     User,
-    Wallet,
-    WalletTransaction
 )
+from apps.accounts.models import (
+    Wallet,
+    WalletTransaction,
+)
+from apps.home.models import ContactUs, PromotionalModal
 
 # ===== سریالایزر مدیریت دسته‌بندی‌ها (داشبورد) ===== #
 class CategoryLinkSerializer(serializers.ModelSerializer):

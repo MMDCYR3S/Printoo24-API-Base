@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import SliderIndex, PromotionalModal, ContactUs
+from apps.home.models import SliderIndex, PromotionalModal, ContactUs
 
 # ===== Slider Serializer ===== #
 class SliderSerializer(serializers.ModelSerializer):

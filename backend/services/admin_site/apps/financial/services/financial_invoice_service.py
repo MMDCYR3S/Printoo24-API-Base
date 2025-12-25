@@ -5,8 +5,8 @@ from django.utils.translation import gettext as _
 from rest_framework.exceptions import ValidationError
 
 from core.models import User, Invoice, Order
-from core.financial.services import FinancialService
-from core.logger.services import LoggerService
+from apps.financial.domain_services import FinancialService
+from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 class FinancialInvoiceAppService:

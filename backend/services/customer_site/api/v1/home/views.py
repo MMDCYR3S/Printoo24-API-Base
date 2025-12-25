@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes
 
-from core.home.services import SliderService
-from core.models import PromotionalModal, SliderIndex
+from apps.home.services import SliderService
+from apps.home.models import PromotionalModal
 from .serializers import SliderSerializer, PromotionalModalSerializer, ContactUsSerializer
 
 # ===== Slider ViewSet (Customer Side) ===== #

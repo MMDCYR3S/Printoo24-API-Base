@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema
 
-from core.home.services import SliderService
+from apps.home.services import SliderService
 from ..serializers import SliderDashboardSerializer
 
 # ===== Slider Dashboard View Set ===== #

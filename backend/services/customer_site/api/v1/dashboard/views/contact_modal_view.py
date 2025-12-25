@@ -6,8 +6,8 @@ from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema
 
 # ===== فراخوانی سرویس و مدل‌ها از Shared Libs ===== #
-from core.home.services import ContactService, ModalService, SliderService
-from core.models import ContactUs, PromotionalModal
+from apps.home.services import ContactService, ModalService
+from apps.home.models import ContactUs, PromotionalModal
 from ..serializers.general_serializers import (
     ContactUsSerializer,
     PromotionalModalSerializer,

@@ -11,11 +11,10 @@ from core.models import (
     Product,
     ProductSize,
     ProductOptionValue,
-    Cart,
-    CartItem,
 )
-from core.cart.services import CartService
 from core.product.services import ProductService
+from apps.cart.models import Cart, CartItem
+from apps.cart.domain_services import CartService
 
 # ===== Logger ===== #
 logger = logging.getLogger("dashboard.services.cart_dashboard")

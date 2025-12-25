@@ -13,7 +13,6 @@ from core.models import (
     ProductImage,
     Option, OptionPricingStrategy, 
     ProductOption, ProductOptionValue,
-    FileUploadSpec, ProductFileUploadRequirement
 )
 
 User = get_user_model()
@@ -43,13 +42,12 @@ class Command(BaseCommand):
             # 6. ساخت تیراژها (USER اضافه شد)
             quantities = self.create_master_quantities(admin_user)
             
-            # 7. ساخت فایل اسپک‌ها (این مدل معمولا یوزر ندارد ولی اگر دارد اضافه کن)
-            file_specs = self.create_file_specs()
+
 
             # 8. ساخت محصولات اصلی
             self.create_products(
                 admin_user, categories, sizes, 
-                options_dict, file_specs, quantities
+                options_dict, quantities
             )
 
         self.stdout.write(self.style.SUCCESS('✅ Successfully created 30 realistic products.'))
@@ -123,19 +121,12 @@ class Command(BaseCommand):
             objs.append(q)
         return objs
 
-    def create_file_specs(self):
-        names = ['طرح رو (Front)', 'طرح پشت (Back)', 'فایل خط برش', 'فایل یووی']
-        specs = []
-        for n in names:
-            obj, _ = FileUploadSpec.objects.get_or_create(name=n)
-            specs.append(obj)
-        return specs
 
     # ==========================================
     # CORE PRODUCT CREATION
     # ==========================================
 
-    def create_products(self, user, categories, sizes, options_map, file_specs, quantities):
+    def create_products(self, user, categories, sizes, options_map, quantities):
         
         product_bases = [
             ('کارت ویزیت لاکچری', False), ('تراکت تبلیغاتی', False), 
@@ -232,11 +223,5 @@ class Command(BaseCommand):
                             quantity_step=1 if is_large_format else 1000, # پله‌ای برای کارت ویزیت
                             is_default=False
                         )
-
-            # 7. File Specs
-            for idx, spec in enumerate(random.sample(file_specs, k=2)):
-                ProductFileUploadRequirement.objects.create(
-                    product=product, spec=spec, is_required=True, sort_order=idx
-                )
 
             self.stdout.write(f" + Created: {product.name} (Large Format: {is_large_format})")

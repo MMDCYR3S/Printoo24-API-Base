@@ -7,8 +7,6 @@ from core.models import(
     User,
     UserRole,
     Role,
-    Wallet,
-    WalletTransaction,
     Address,
     City,
     Province,
@@ -93,8 +91,6 @@ class RoleAdmin(admin.ModelAdmin):
 
 custom_admin_site.register(User)
 custom_admin_site.register(UserRole)
-custom_admin_site.register(Wallet)
-custom_admin_site.register(WalletTransaction)
 custom_admin_site.register(Address)
 custom_admin_site.register(City)
 custom_admin_site.register(Province)

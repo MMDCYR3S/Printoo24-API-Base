@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from core.models import OrderShipment, OrderPackage, OrderCostSheet
+from apps.order.models import OrderCostSheet
+from apps.logistics.models import OrderPackage, OrderShipment
 from decimal import Decimal
 
 # ========== PACKAGE SERIALIZERS ========== #

@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 
 from apps.financial.services import FinancialOrderAppService
-from core.models import OrderCostCategory, OrderCostSheet, OrderCostReport
+from apps.order.models import OrderCostCategory, OrderCostSheet, OrderCostReport
 
 # Import Serializers (Assuming they are in serializers.py)
 from ..serializers import (

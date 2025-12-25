@@ -5,8 +5,8 @@ from django.utils.translation import gettext as _
 from django.db import transaction
 
 from core.models import Order, User, Quotation
-from core.financial.services import FinancialService
-from core.logger.services import LoggerService
+from apps.financial.domain_services import FinancialService
+from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
 # ========== FINANCIAL QUOTATION SERVICE ========== #

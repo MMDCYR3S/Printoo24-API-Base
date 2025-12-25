@@ -8,10 +8,3 @@ class CoreConfig(AppConfig):
     """
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'core'
-    
-    def ready(self):
-        """
-        این متد هنگام بالا آمدن اپلیکیشن اجرا می‌شود.
-        ایمپورت کردن سیگنال‌ها در اینجا ضروری است تا لیسنرها فعال شوند.
-        """
-        import core.signals

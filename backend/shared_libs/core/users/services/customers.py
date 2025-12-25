@@ -2,7 +2,7 @@ from typing import Dict, Any, List
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from ..models import User, CustomerProfile, UserRole, Role, Wallet
+from ..models import User, CustomerProfile, UserRole, Role
 
 class CustomerService:
     """
@@ -67,9 +67,6 @@ class CustomerService:
             customer_role = Role.objects.create(name="مشتری", slug="normal", type="normal", is_customer=True)
             
         UserRole.objects.create(user=user, role=customer_role)
-
-        # 5. ایجاد کیف پول (Wallet)
-        Wallet.objects.create(user=user, decimal=0)
 
         return user
 

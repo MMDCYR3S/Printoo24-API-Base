@@ -1,8 +1,9 @@
 from rest_framework import serializers
 from core.models import (
     Order, OrderItem, OrderItemFile, OrderStatus, OrderStatusGroup,
-    OrderShipment, OrderPackage, Invoice
+    Invoice
 )
+from apps.logistics.models import OrderPackage, OrderShipment
 from .order_cost_serializer import OrderCostSheetSerializer
 
 # ========== 1. Micro Serializers ========== #

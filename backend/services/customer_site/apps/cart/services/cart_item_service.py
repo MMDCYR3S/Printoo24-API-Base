@@ -1,8 +1,9 @@
 import logging
 from django.core.exceptions import ObjectDoesNotExist
 
-from core.models import User, CartItem
-from core.cart.services import CartService
+from core.models import User
+from apps.cart.models import CartItem
+from apps.cart.domain_services import CartService
 
 # ===== تعریف لاگرهای اختصاصی با پیشوند cart ===== #
 logger_list = logging.getLogger('cart.services.list')

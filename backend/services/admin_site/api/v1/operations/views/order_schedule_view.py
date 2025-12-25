@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 
-from apps.operations.services import OrderScheduleAppService
+from apps.order.services import OrderScheduleAppService
 from ..serializers import OrderScheduleSerializer
 
 # ========== SCHEDULE VIEW ========== #

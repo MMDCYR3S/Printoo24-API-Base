@@ -4,9 +4,10 @@ from django.db import transaction
 from rest_framework.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from core.models import User, Transaction, Invoice, Invoice
-from core.financial.services import FinancialService
-from core.logger.services import LoggerService
+from core.models import User, Invoice
+from apps.financial.domain_services import TransactionService
+from apps.support.services import LoggerService
+from apps.financial.models import Transaction
 from apps.permissions import AppPermissionChecker
 
 # ========== Financial Transaction App Service ========== #
@@ -20,7 +21,7 @@ class FinancialTransactionAppService:
     """
     
     def __init__(self):
-        self._domain_service = FinancialService()
+        self._domain_service = TransactionService()
         self.audit_service = LoggerService()
 
     # ============ LIST TRANSACTIONS ============ #

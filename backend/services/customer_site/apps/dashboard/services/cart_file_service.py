@@ -6,7 +6,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 from kombu.exceptions import OperationalError
 
-from core.models import CartItem, CartItemUpload
+from apps.cart.models import CartItem, CartItemUpload
 
 # ===== اصلاح مسیر ایمپورت ===== #
 try:

@@ -9,7 +9,7 @@ from ..serializers import (
     WalletAdjustmentSerializer,
     WalletTransactionSerializer
 )
-from core.models import Wallet
+from apps.accounts.models import Wallet
 
 # ===== Wallet View Set ===== #
 @extend_schema(tags=['Dashboard-Wallet'])

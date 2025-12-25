@@ -4,7 +4,6 @@ from rest_framework.exceptions import NotFound
 
 from core.models import Order, Quotation
 from core.order.services import OrderService
-from core.financial.services import FinancialService
 
 logger = logging.getLogger('userprofile.services.orders')
 
@@ -15,7 +14,6 @@ class UserOrderListService:
     
     def __init__(self):
         self._domain_service = OrderService()
-        self._quotation_repo = FinancialService()
 
     def get_user_orders(self, user_id: int) -> List[Order]:
         """
@@ -53,7 +51,7 @@ class UserOrderListService:
         """
         دریافت پیش‌فاکتور مربوط به یک سفارش خاص برای کاربر.
         """
-        quotation = self._quotation_repo.get_quotation_by_order(order_id)
+        quotation = Quotation.objects.get_quotation_by_order(order_id)
 
         if not quotation:
             logger.warning(f"Quotation not found for order {order_id}")
