@@ -5,7 +5,7 @@ from apps.accounts.models import Wallet, WalletTransaction
 class WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wallet
-        fields = ['decimal', 'updated_at']
+        fields = ['balance', 'updated_at']
 
 # ===== Wallet Transaction Serializer ===== #
 class WalletTransactionSerializer(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
         model = WalletTransaction
         fields = [
             'id',
-            'type', 
+            'transaction_type', 
             'type_display',
             'amount',
             'amount_after',

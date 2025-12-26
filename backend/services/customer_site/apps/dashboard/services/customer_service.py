@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 from core.models import User, CustomerProfile, Role, UserRole
 from core.users.services import CustomerService
-from apps.accounts.domain_services import Wallet
+from apps.accounts.models import Wallet
 
 # تعریف لاگر اختصاصی
 logger = logging.getLogger('dashboard.services.customer')

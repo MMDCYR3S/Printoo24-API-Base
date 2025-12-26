@@ -6,217 +6,152 @@ from django.db.models import Count, Sum, F, Prefetch
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 
-from core.models import (
-    User,
-    Product,
-    ProductSize,
-    ProductOptionValue,
-)
-from core.product.services import ProductService
+from core.models import User, Product
 from apps.cart.models import Cart, CartItem
-from apps.cart.domain_services import CartService
+
+
+from apps.cart.services.add_to_cart_service import AddToCartService
+from apps.cart.services.update_cart_service import CartItemUpdateService
+from apps.cart.services.delete_cart_service import CartItemDeleteService, CartClearService
 
 # ===== Logger ===== #
 logger = logging.getLogger("dashboard.services.cart_dashboard")
 
 # ===== Cart Dashboard Service ===== #
 class CartDashboardService:
-    def __init__(self):
-        self.domain_service = CartService()
-        self.product_service = ProductService()
+    """
+    سرویس مدیریت سبد خرید مخصوص پنل ادمین.
+    نقش: این سرویس به عنوان یک Wrapper/Adapter عمل می‌کند تا سرویس‌های اصلی
+    را با نیازهای پنل ادمین هماهنگ کند.
+    """
 
-    # ===== مدیریت سبد خرید (Cart Management) ===== #
-    
+    def get_all_carts_queryset(self):
+        """
+        دریافت لیست تمام سبدها برای جدول داشبورد.
+        """
+        return Cart.objects.select_related('user').prefetch_related(
+            'cart_items'
+        ).annotate(
+            items_count=Count('cart_items'),
+            total_amount=Sum(F('cart_items__price'))
+        ).order_by('-updated_at')
+
     def get_user_cart_details(self, user_id: int):
-        """ دریافت جزئیات کامل سبد خرید یک کاربر خاص """
+        """ دریافت جزئیات کامل سبد خرید برای نمایش در ادمین """
         logger.info(f"START: Get Cart Details for User ID {user_id}")
         
-        try:
-            user = get_object_or_404(User, pk=user_id)
-            cart = self.domain_service.get_or_create_cart_for_user(user)
-            
-            # ===== بهینه سازی ===== #
-            cart_queryset = Cart.objects.filter(id=cart.id).prefetch_related(
-                Prefetch(
-                    'cart_items',
-                    queryset=CartItem.objects.select_related('product').prefetch_related(
-                        'uploads__requirement__spec'
-                    )
-                )
-            ).first()
-            
-            logger.info(f"SUCCESS: Cart details retrieved for User {user_id}. Cart ID: {cart.id}")
-            
-            return {
-                'cart': cart_queryset,
-                'user': user
-            }
-        except Exception as e:
-            logger.error(f"FAILED: Get Cart Details for User {user_id}. Error: {str(e)}", exc_info=True)
-            raise e
-    def clear_user_cart(self, user_id: int):
-        """ خالی کردن سبد خرید کاربر """
-        logger.warning(f"START: Clearing Cart for User ID {user_id}")
-        try:
-            user = get_object_or_404(User, pk=user_id)
-            self.domain_service.clear_cart(user)
-            logger.info(f"SUCCESS: Cart cleared for User {user_id}")
-        except Exception as e:
-            logger.error(f"FAILED: Clear Cart for User {user_id}. Error: {str(e)}", exc_info=True)
-            raise e
-
-    # ===== مدیریت آیتم‌ها (Item Management) ===== #
-
-    @transaction.atomic
-    def add_item_to_user_cart_simple(self, user_id: int, data: Dict[str, Any]):
-        """
-        افزودن آیتم با فرمت ساده شده.
-        data: {product_slug, selections: {...}}
-        """
         user = get_object_or_404(User, pk=user_id)
-        # ===== دریافت محصول ===== #
-        try:
-            logger.info(f"START: Get cart of the user #{user_id}")
-            product = Product.objects.get(slug=data['product_slug'])
-        except Product.DoesNotExist:
-            logger.warning(f"Product not found: {data.get('product_slug')}")
-            raise ValidationError("محصول یافت نشد.")
         
-        selections = data['selections']
+        cart_queryset = Cart.objects.filter(user=user).prefetch_related(
+            Prefetch(
+                'cart_items',
+                queryset=CartItem.objects.select_related('product').prefetch_related(
+                    'uploads'
+                )
+            )
+        ).first()
         
-        # ===== اعتبارسنجی داده‌های ورودی کاربر و محصول ===== #
-        specs = self._prepare_specs_simple(product, selections)
-        
-        # ===== دریافت سبد خرید ===== #
-        cart_item = self.domain_service.add_complex_item(
-            user=user,
-            product=product,
-            quantity=selections['quantity'],
-            specs=specs
-        )
-        logger.info(f"SUCCESS: Item {cart_item.id} added to cart for User {user_id}. Price: {cart_item.price}")
-        return cart_item
-    
-    def _prepare_specs_simple(self, product, selections):
-        """
-        تبدیل ورودی ساده به ساختار specs مورد نیاز دامین.
-        """
-        
-        specs = {
-            'has_design': selections.get('has_design', True)
+        if not cart_queryset:
+             return {'cart': None, 'user': user}
+
+        return {
+            'cart': cart_queryset,
+            'user': user
         }
 
-        # ===== سایز ===== #
-        size_id = selections.get('size_id')
-        if size_id:
-            try:
-                size_obj = ProductSize.objects.get(id=size_id, product=product)
-                specs['size_obj'] = size_obj
-                specs['width'] = size_obj.size.width
-                specs['height'] = size_obj.size.height
-            except ProductSize.DoesNotExist:
-                raise ValidationError("سایز نامعتبر است.")
-        else:
-            # ===== ابعاد دلخواه ===== #
-            width = selections.get('custom_width')
-            height = selections.get('custom_height')
-            if not width or not height:
-                raise ValidationError("باید یا سایز استاندارد انتخاب کنید یا ابعاد دلخواه وارد کنید.")
+    # ===== Write Operations (Commands) ===== #
+    @transaction.atomic
+    def add_item_to_user_cart(self, user_id: int, data: Dict[str, Any]):
+        """
+        افزودن آیتم توسط ادمین.
+        ورودی data باید شبیه فرمت API باشد یا اینجا مپ شود.
+        """
+        logger.info(f"Admin adding item for User {user_id}")
+        user = get_object_or_404(User, pk=user_id)
+        
+        # 1. استخراج پروداکت
+        product_slug = data.get('product_slug')
+        if not product_slug:
+            raise ValidationError("شناسه محصول (Slug) الزامی است.")
             
-            specs['width'] = width
-            specs['height'] = height
-            specs['custom_dimensions'] = {'width': width, 'height': height}
+        product = get_object_or_404(Product, slug=product_slug)
 
-        # ===== گزینه‌های انتخابی ===== #
-        option_ids = selections.get('option_value_ids', [])
-        if option_ids:
-            options = list(ProductOptionValue.objects.filter(
-                id__in=option_ids,
-                product_option__product=product
-            ))
-            if len(options) != len(option_ids):
-                raise ValidationError("برخی از آپشن‌های انتخابی نامعتبر هستند.")
-            specs['option_objs'] = options
-        else:
-            specs['option_objs'] = []
-
-        return specs
+        selections = self._map_admin_data_to_selections(data)
+        
+        service = AddToCartService(user)
+        try:
+            cart_item = service.execute(
+                product_id=product.id,
+                selections=selections
+            )
+            logger.info(f"Item {cart_item.id} added via Admin.")
+            return cart_item
+        except Exception as e:
+            logger.error(f"Failed to add item via Admin: {e}")
+            raise e
 
     @transaction.atomic
     def update_cart_item(self, user_id: int, item_id: int, data: Dict[str, Any]):
-        """ ویرایش آیتم سبد خرید """
-        logger.info(f"START: Update Cart Item {item_id} for User {user_id}")
+        """ ویرایش آیتم توسط ادمین """
+        logger.info(f"Admin updating Item {item_id}")
+        user = get_object_or_404(User, pk=user_id)
         
-        if 'specs' in data:
-            user = get_object_or_404(User, pk=user_id)
-            # ===== چک کردن ویژگی هیا محصول ===== #
-            item = self.domain_service.get_by_id(item_id)
-            specs = self._prepare_specs_for_domain(item.product, data['specs'])
-            
-            logger.debug(f"Updating specs for item {item_id}")
-            
-            return self.domain_service.update_complex_item(
-                user=user,
-                item_id=item_id,
-                quantity=data.get('quantity', item.quantity),
-                specs=specs
-            )
-        else:
-            logger.debug(f"Updating quantity for item {item_id} to {data['quantity']}")
-            return self.domain_service.update_item_quantity(
-                item=self.domain_service.get_by_id(item_id),
-                new_quantity=data['quantity']
-            )
-            
-    def remove_item_from_cart(self, user_id: int, item_id: int):
-        """ حذف آیتم  """
-        logger.info(f"START: Remove Item {item_id} from Cart of User {user_id}")
+        selections = self._map_admin_data_to_selections(data)
+
+        service = CartItemUpdateService(user)
         try:
-            user = get_object_or_404(User, pk=user_id)
-            self.domain_service.remove_item(user, item_id)
-            logger.info(f"SUCCESS: Item {item_id} removed.")
+            updated_item = service.update(
+                cart_item_id=item_id,
+                raw_data=selections
+            )
+            return updated_item
         except Exception as e:
-            logger.error(f"FAILED: Remove Item {item_id}. Error: {str(e)}", exc_info=True)
+            logger.error(f"Failed to update item via Admin: {e}")
             raise e
 
-    # ===== متد کمکی (Helper) ===== #
-    def _prepare_specs_for_domain(self, product, raw_specs):
+    def remove_item_from_cart(self, user_id: int, item_id: int):
+        """ حذف آیتم """
+        user = get_object_or_404(User, pk=user_id)
+        service = CartItemDeleteService(user)
+        service.delete(item_id)
+
+    def clear_user_cart(self, user_id: int):
+        """ خالی کردن کل سبد """
+        user = get_object_or_404(User, pk=user_id)
+        service = CartClearService(user)
+        service.clear()
+
+    # ===== Helper Methods (Mapper) ===== #
+    def _map_admin_data_to_selections(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        تبدیل داده‌های خام (ID) به آبجکت‌های مورد نیاز دامین سرویس.
-        """
+        این متد حیاتی است!
+        داده‌های ورودی از فرم ادمین را به ساختار استاندارد selections
+        که CartProcessor انتظار دارد تبدیل می‌کند.
         
-        prepared = {
-            'width': raw_specs.get('width'),
-            'height': raw_specs.get('height'),
-            'has_design': raw_specs.get('has_design', True),
-            'custom_dimensions': raw_specs.get('custom_dimensions')
+        فرض بر این است که ادمین دیتا را این شکلی می‌فرستد:
+        {
+            'quantity': 1000,
+            'selections': {  <-- یا شاید فیلدها فلت باشند، اینجا نرمال‌سازی می‌کنیم
+                'size_id': 5,
+                'width': 10,
+                'options': {'12': 'PaperType', ...}
+            }
         }
-
-        # ===== سایز ===== #
-        if 'size_id' in raw_specs:
-            prepared['size_obj'] = get_object_or_404(
-                ProductSize, id=raw_specs['size_id'], product=product
-            )
-
-        # ===== آپشن‌ها ===== #
-        if 'option_value_ids' in raw_specs:
-            prepared['option_objs'] = list(ProductOptionValue.objects.filter(
-                id__in=raw_specs['option_value_ids'],
-                product_option__product=product
-            ))
-
-        return prepared
-    
-    def get_all_carts_queryset(self):
         """
-        دریافت کوئری‌ست تمام سبدهای خرید برای لیست داشبورد.
-        شامل اطلاعات کاربر و خلاصه وضعیت سبد (تعداد آیتم، جمع مبلغ).
-        """
-        return Cart.objects.select_related('user__customer_profile').prefetch_related(
-            'cart_items'
-        ).annotate(
-            # ===== تعداد آیتم های سبد خرید کاربر ===== #
-            items_count=Count('cart_items'),
-            # ===== قیمت کل آیتم های سبد خرید کاربر ===== #
-            total_amount=Sum(F('cart_items__price'))
-        ).order_by('-updated_at')
+        if 'selections' in data and isinstance(data['selections'], dict):
+            final_selections = data['selections'].copy()
+            if 'quantity' in data:
+                final_selections['quantity'] = data['quantity']
+            return final_selections
+
+        selections = {}
+
+        direct_fields = ['quantity', 'size_id', 'quantity_id', 'width', 'height', 'has_design', 'name', 'description']
+        for field in direct_fields:
+            if field in data:
+                selections[field] = data[field]
+
+        if 'options' in data:
+            selections['options'] = data['options']
+            
+        return selections

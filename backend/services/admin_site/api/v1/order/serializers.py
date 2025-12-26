@@ -78,7 +78,7 @@ class OrderDashboardDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'order_code', 'customer_name', 'total_price', 
             'status_name', 'type', 'items', 'address_detail', 
-            'description', 'created_at'
+            'created_at'
         ]
 
     def get_address_detail(self, obj):

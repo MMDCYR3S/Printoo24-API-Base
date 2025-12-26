@@ -3,7 +3,7 @@ import logging
 from rest_framework.exceptions import NotFound
 
 from core.models import User
-from apps.cart.domain_services import CartService
+from apps.cart.models import CartItem, Cart
 from ..exceptions import ItemNotFoundException
 
 # ===== تعریف لاگر اختصاصی برای سرویس‌های حذف ===== #
@@ -20,8 +20,6 @@ class CartItemDeleteService:
     
     def __init__(self, user: User):
         self.user = user
-        # ===== تزریق وابستگی‌ها ===== #
-        self._domain_service = CartService()
         
     def delete(self, item_id: int) -> None:
         """
@@ -37,8 +35,9 @@ class CartItemDeleteService:
 
         try:
             # ===== دریافت جزئیات آیتم با بررسی مالکیت کاربر ===== #
-            self._domain_service.remove_item(self.user, item_id)
-            logger.info("Item deleted successfully")
+            item = CartItem.objects.get_item_details(item_id, self.user)
+            item.delete()
+            logger.info("Item deleted")
         except ItemNotFoundException:
             logger.warning(f"Item {item_id} not found")
             raise NotFound("آیتم یافت نشد.")
@@ -53,9 +52,7 @@ class CartClearService:
     
     def __init__(self, user: User):
         self.user = user
-        # ===== تزریق وابستگی‌ها ===== #
-        self._domain_service = CartService()
-        
+
     def clear(self) -> None:
         """
         حذف تمام آیتم‌های سبد خرید کاربر.
@@ -64,8 +61,8 @@ class CartClearService:
         
     def clear(self) -> None:
         try:
-            logger.info(f"Clearing cart for user {self.user.id}")
-            self._domain_service.clear_cart(self.user)
+            cart = Cart.objects.get_cart_by_user(self.user)
+            CartItem.objects.delete_all_items_by_cart(cart)
         except Exception as e:
             logger.error(f"Error clearing cart for user {self.user.id}: {str(e)}")
             raise e

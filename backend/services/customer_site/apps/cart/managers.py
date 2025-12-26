@@ -121,7 +121,6 @@ class CartItemManager(models.Manager):
     def get_item_details(self, item_id: int, user):
         return self.get_queryset().get_item_details(item_id, user)
 
-            
     def get_item_by_id(self, item_id, user):
         return self.get_queryset().get_item_by_id(item_id, user)
 

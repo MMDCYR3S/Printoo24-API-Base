@@ -2,8 +2,7 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 
 from core.models import User
-from apps.cart.models import CartItem
-from apps.cart.domain_services import CartService
+from apps.cart.models import Cart, CartItem
 
 # ===== تعریف لاگرهای اختصاصی با پیشوند cart ===== #
 logger_list = logging.getLogger('cart.services.list')
@@ -17,11 +16,6 @@ class CartListService:
     این سرویس وظیفه دارد سبد خرید کاربر را بازیابی کرده (یا بسازد)
     و تمام آیتم‌های موجود در آن را برای نمایش در فرانت‌اند آماده کند.
     """
-    
-    def __init__(self
-        ):
-        # ===== تزریق وابستگی‌ها ===== #
-        self._domain_service = CartService()
         
     def get_user_cart_items(self, user: User) -> dict:
         """
@@ -37,11 +31,11 @@ class CartListService:
         
         try:
             # ===== دریافت یا ایجاد سبد خرید ===== #
-            cart = self._domain_service.get_or_create_cart_for_user(user)
+            cart = Cart.objects.get_or_create_cart(user)
             logger_list.debug(f"Cart retrieved/created for User ID: {user.id}, Cart ID: {cart.id}")
             
             # ===== دریافت آیتم‌های سبد خرید ===== #
-            items = self._domain_service.get_item_details(cart)
+            items = CartItem.objects.get_items_by_cart(cart)
             logger_list.info(f"Retrieved {items} items for Cart ID: {cart.id}")
             
             # ===== محاسبه مجموع قیمت کل سبد خرید ===== #
@@ -66,10 +60,6 @@ class CartItemDetailService:
     این سرویس برای زمانی استفاده می‌شود که کاربر می‌خواهد جزئیات یک محصول خاص
     در سبد خرید خود (مثل فایل‌های آپلود شده یا ویژگی‌های انتخابی) را مشاهده یا ویرایش کند.
     """
-    
-    def __init__(self):
-        # ===== تزریق وابستگی‌ها ===== #
-        self._domain_service = CartService()
         
     def get_item_detail(self, item_id: int, user: User) -> CartItem:
         """
@@ -88,7 +78,7 @@ class CartItemDetailService:
         logger_detail.info(f"Fetching details for CartItem ID: {item_id}, User ID: {user.id}")
         
         try:
-            item = self._domain_service.get_cart_item_for_user(user, item_id)
+            item = CartItem.objects.get_item_by_id(item_id, user)
 
             if not item:
                 logger_detail.warning(f"CartItem {item_id} not found or access denied for User ID: {user.id}")

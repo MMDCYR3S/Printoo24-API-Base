@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from .exceptions import WalletNotFoundException
@@ -71,15 +73,15 @@ class WalletTransactionManager(models.Manager):
     """
     مدیر تراکنش‌های کیف پول
     """
-    def create_transaction(self, user, trans_type: str, amount: float, amount_after: float):
+    def create_transaction(self, user, trans_type: str, amount: Decimal, amount_after: Decimal):
         """ایجاد تراکنش جدید"""
         return self.create(
             user=user,
-            type=trans_type,
+            transaction_type=trans_type,
             amount=amount,
             amount_after=amount_after
         )
 
     def get_history_by_user(self, user_id: int):
         """دریافت تاریخچه تراکنش‌ها به ترتیب نزولی"""
-        return self.filter(user_id=user_id).order_by('-created_at')
+        return self.filter(user_id=user_id)

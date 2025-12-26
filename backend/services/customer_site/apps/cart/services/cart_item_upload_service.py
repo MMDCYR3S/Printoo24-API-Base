@@ -6,8 +6,8 @@ from django.core.files.base import ContentFile
 from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 
 from core.models import User
+from apps.cart.models import CartItem
 from apps.cart.models import CartItemUpload
-from apps.cart.domain_services import CartService
 
 logger = logging.getLogger('cart.services.item_upload')
 
@@ -15,15 +15,13 @@ class CartItemUploadService:
     """
     سرویس آپلود فایل مستقیم برای یک آیتم در سبد خرید.
     """
-    def __init__(self):
-        self.item_repo = CartService()
 
     def upload_file(self, user: User, cart_item_id: int, requirement_id: int, file_obj) -> CartItemUpload:
         
         logger.info(f"Uploading file for CartItem: {cart_item_id}, Req: {requirement_id}")
 
         # 1. دریافت آیتم و بررسی مالکیت (Security)
-        cart_item = self.item_repo.get_item_details(cart_item_id, user)
+        cart_item = CartItem.objects.get_item_details(cart_item_id, user)
         if not cart_item:
             raise NotFound("آیتم مورد نظر در سبد خرید یافت نشد.")
 

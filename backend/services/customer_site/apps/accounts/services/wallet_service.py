@@ -3,8 +3,8 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from core.models import User
-from .models import Wallet, WalletTransaction
-from .exceptions import InsufficientFundsException, WalletNotFoundException
+from ..models import Wallet, WalletTransaction
+from ..exceptions import InsufficientFundsException, WalletNotFoundException
 
 # ======== Wallet Service ======== #
 class WalletService:
@@ -16,7 +16,7 @@ class WalletService:
         """ موجودی کیف پول کاربر را برمی‌گرداند. """
         try:
             wallet = Wallet.objects.get_by_user(user)
-            return wallet.decimal
+            return wallet.balance
         except WalletNotFoundException:
             return Decimal(0)
 
@@ -28,20 +28,17 @@ class WalletService:
         
         # ===== دریافت یا ایجاد کیف پول کاربر (با قفل) ===== #
         wallet = Wallet.objects.get_locked_wallet(user)
-    
-        # ===== افزودن مقدار ===== #
-        new_balance = wallet.decimal + amount
-        
+
         # ==== به‌روزرسانی کیف پول ===== #
-        wallet.decimal = new_balance
+        wallet.deposit(amount)
         wallet.save()
         
         # ===== ثبت تراکنش ===== #
         WalletTransaction.objects.create_transaction(
             user=user,
-            trans_type="1",
+            trans_type=WalletTransaction.TransactionType.DEPOSIT,
             amount=amount,
-            amount_after=new_balance
+            balance_after=wallet.balance
         )
         return wallet
     
@@ -59,24 +56,22 @@ class WalletService:
         wallet = Wallet.objects.get_locked_wallet(user)
 
         #  ===== بررسی مقدار ===== #
-        if wallet.decimal < amount:
-            raise InsufficientFundsException(f"موجودی کافی نیست. موجودی فعلی: {wallet.decimal}")
+        if wallet.balance < amount:
+            raise InsufficientFundsException(f"موجودی کافی نیست. موجودی فعلی: {wallet.balance}")
         
         # ===== تعیین مقدار جدید ===== #
-        new_balance = wallet.decimal - amount
-        
-        wallet.decimal = new_balance
+        wallet.withdraw(amount) 
         wallet.save()
         
         # ===== افزودن تراکنش ===== #
         WalletTransaction.objects.create_transaction(
             user=user,
-            trans_type="2",
+            trans_type=WalletTransaction.TransactionType.PAYMENT,
             amount=amount,
-            amount_after=new_balance,
+            balance_after=wallet.balance
         )
-        
         return wallet
+
 
 class WalletTransactionService:
     """ سرویس تراکنش‌های کیف پول """

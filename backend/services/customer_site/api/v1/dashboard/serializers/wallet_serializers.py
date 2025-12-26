@@ -9,7 +9,7 @@ class WalletListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Wallet
-        fields = ['id', 'user_id', 'username', 'full_name', 'decimal', 'updated_at']
+        fields = ['id', 'user_id', 'username', 'full_name', 'balance', 'updated_at']
 
     def get_full_name(self, obj):
         try:
@@ -27,4 +27,4 @@ class WalletAdjustmentSerializer(serializers.Serializer):
 class WalletTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = WalletTransaction
-        fields = ['id', 'type', 'amount', 'amount_after', 'created_at']
+        fields = ['id', 'transaction_type', 'amount', 'amount_after', 'created_at']

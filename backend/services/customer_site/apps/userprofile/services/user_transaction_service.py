@@ -5,7 +5,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from core.models import User
-from apps.accounts.domain_services import WalletService, WalletTransactionService
+from apps.accounts.services import WalletService, WalletTransactionService
 
 # ===== تعریف لاگر اختصاصی کیف پول با پیشوند userprofile ===== #
 logger = logging.getLogger('userprofile.services.wallet')

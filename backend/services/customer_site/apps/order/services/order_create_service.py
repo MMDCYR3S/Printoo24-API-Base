@@ -5,16 +5,15 @@ from rest_framework.exceptions import ValidationError
 
 from ..exceptions import EmptyCartError, InsufficientFundsError, ItemNotFoundException
 from core.models import User, Address, Order
-from apps.accounts.domain_services import WalletService
+from apps.cart.models import Cart, CartItem
+from apps.accounts.services import WalletService
 from apps.order.domain_services import CheckoutService
-from apps.cart.domain_services import CartService
 
 logger = logging.getLogger('shop.services.order_creation')
 
 class CreateOrderFromCartService:
     def __init__(self):
         self._checkout_domain = CheckoutService() 
-        self._cart_domain = CartService()
         self._wallet_service = WalletService()
         
     @transaction.atomic
@@ -28,12 +27,12 @@ class CreateOrderFromCartService:
             raise ValidationError("لطفاً آدرس ارسال سفارش را انتخاب کنید.")
 
         # ===== دریافت سبد خرید ===== # 
-        cart = self._cart_domain.get_or_create_cart_for_user(user)
+        cart = Cart.objects.get_or_create_cart(user)
         if not cart:
             raise EmptyCartError("سبد خرید یافت نشد.")
         # ===== تلاش برای دریافت آیتم ===== #
         try:
-            cart_item = self._cart_domain.get_cart_item_for_user(user, cart_item_id)
+            cart_item = CartItem.objects.get_item_details(user, cart_item_id)
         except Exception:
             raise ItemNotFoundException("آیتم مورد نظر در سبد خرید یافت نشد.")
         
@@ -76,7 +75,7 @@ class CreateOrderFromCartService:
             raise ValidationError("لطفاً آدرس ارسال سفارش را انتخاب کنید.")
         
         # ===== دریافت سبد خرید و آیتم ها ===== #
-        cart = self._cart_domain.get_or_create_cart_for_user(user)
+        cart = Cart.objects.get_or_create_cart(user)
         if not cart or not cart.cart_items.exists():
             raise EmptyCartError("سبد خرید شما خالی است.")
         # ===== دریافت آیتم ها ===== #

@@ -5,7 +5,7 @@ from django.db import transaction
 from rest_framework.exceptions import NotFound, ValidationError
 
 from apps.accounts.models import Wallet
-from apps.accounts.domain_services import WalletService
+from apps.accounts.services import WalletService
 from core.users.services import CustomerService
 
 
