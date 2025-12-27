@@ -27,22 +27,18 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
     سریالایزر نمایش تمام جزئیات یک آیتم سبد خرید
     """
     product = ProductSerializer(read_only=True)
-    quantity_name = serializers.CharField(source='product_quantity.product.name', read_only=True)
-    size_name = serializers.CharField(source='product_size.product.name', read_only=True, allow_null=True)
-    specs = serializers.JSONField(source='items.selections', read_only=True)
-    custom_width = serializers.FloatField(source='product_size.custom_width', allow_null=True)
-    custom_height = serializers.FloatField(source='product_size.custom_height', allow_null=True)
+    quantity_name = serializers.CharField(source='product.product_quantity.quantity.value', read_only=True)
+    size_name = serializers.CharField(source='product.product_size.size.name', read_only=True)
 
     class Meta:
         model = CartItem
         fields = [
             'id', 
-            'product', 
+            'product',
+            'name',
+            'description',
             'quantity_name', 
             'size_name',
-            'custom_width',
-            'custom_height',
-            'specs',
             'price', 
             'created_at'
         ]

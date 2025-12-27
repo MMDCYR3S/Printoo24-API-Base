@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from drf_spectacular.views import extend_schema
 
 from apps.cart.services import CartListService, CartItemDetailService
-from ..serializers import CartListSerializer, CartItemSerializer
+from ..serializers import CartListSerializer, CartItemSerializer, CartItemDetailSerializer
 
 # ======== Cart List View ======== #
 @extend_schema(tags=['Cart'])
@@ -35,7 +35,7 @@ class CartListView(GenericAPIView):
         serializer = self.get_serializer(cart)
         # ===== واکشی اطلاعات از سریالایزر بعد از تبدیل داده به JSON ===== #
         response_data = serializer.data
-        response_data['items'] = CartItemSerializer(items, many=True).data
+        response_data['items'] = CartItemDetailSerializer(items, many=True).data
         
         return Response(response_data, status=status.HTTP_200_OK)
 

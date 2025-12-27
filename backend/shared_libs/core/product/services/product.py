@@ -256,8 +256,8 @@ class ProductService:
                 is_default = False
                 final_label = g_val.label
                 final_value = g_val.value
-                final_guide_text = ''
-                final_guide_type = 'info'
+                final_guide_text = g_val.guide_text
+                final_guide_type = g_val.guide_type
                 should_create = True 
             
                 # ===== اگر ویژگی باید ایجاد شود ===== #
@@ -274,9 +274,9 @@ class ProductService:
                             final_label = config['label']
                         if config.get('value'):
                             final_value = config['value']
-                        # ===== بخش کادر راهنام  ===== #
+                        # ===== بخش کادر راهنما  ===== #
                         final_guide_text = config.get('guide_text', '')
-                        final_guide_type = config.get('guide_type', 'info')
+                        final_guide_type = config.get('guide_type', 'tip')
 
             if should_create:
                 local_values_to_create.append(ProductOptionValue(

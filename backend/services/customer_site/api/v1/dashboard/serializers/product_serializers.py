@@ -114,7 +114,7 @@ class QuantitySyncSerializer(serializers.Serializer):
     )
 
 # ===== Option Value Override Serializer ===== #
-class OptionValueOverrideSerializer(serializers.Serializer):
+class OptionValueOverrideSerializer(GuideSerializerMixin, serializers.Serializer):
     """
     اطلاعاتی که ادمین می‌خواهد برای مقادیر اعمال کند.
     می‌تواند Override روی گلوبال باشد یا یک مقدار کاملاً جدید (Custom).
@@ -148,7 +148,7 @@ class OptionAttachWithPriceSerializer(serializers.Serializer):
         default=OptionInputType.SELECT,
         help_text="نوع ورودی (فقط برای ویژگی کاستوم)"
     )
-
+    guide_text = serializers.CharField(required=False, allow_blank=True)
     is_required = serializers.BooleanField(default=False)
     values_config = serializers.ListField(child=OptionValueOverrideSerializer(), required=False)
 
@@ -189,7 +189,7 @@ class ProductOptionValueOutputSerializer(serializers.ModelSerializer):
         model = ProductOptionValue
         fields = [
             'id', 'label', 'value', 'price_impact', 
-            'is_default', 'is_custom', 'order'
+            'is_default', 'is_custom', 'guide_text', 'guide_type', 'order'
         ]
 
     def get_is_custom(self, obj):
@@ -342,7 +342,6 @@ class OptionConfigUpdateSerializer(serializers.Serializer):
     """
     # ===== اضافه شده: دریافت ID در بدنه ===== #
     product_option_id = serializers.IntegerField(help_text="ID of the Local ProductOption (جدول واسط)")
-    
     
     is_required = serializers.BooleanField(required=False)
     

@@ -33,18 +33,16 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR("لطفا ابتدا دستور seed_categories را اجرا کنید."))
                 return
 
-            # 3. ساخت سایزهای استاندارد (USER اضافه شد)
+            # 3. ساخت سایزهای استاندارد
             sizes = self.create_master_sizes(admin_user) 
             
-            # 5. ساخت آپشن‌ها (USER اضافه شد)
+            # 4. ساخت آپشن‌های (ویژگی‌های) مرجع
             options_dict = self.create_master_options(admin_user)
             
-            # 6. ساخت تیراژها (USER اضافه شد)
+            # 5. ساخت تیراژهای مرجع
             quantities = self.create_master_quantities(admin_user)
             
-
-
-            # 8. ساخت محصولات اصلی
+            # 6. ساخت محصولات اصلی
             self.create_products(
                 admin_user, categories, sizes, 
                 options_dict, quantities
@@ -59,7 +57,8 @@ class Command(BaseCommand):
     def get_or_create_superuser(self):
         user = User.objects.filter(is_superuser=True).first()
         if not user:
-            user = User.objects.create_superuser('admin_seeder', 'admin@seed.com', 'admin123')
+            # اگر وجود نداشت یکی بساز
+            user = User.objects.create_superuser('admin', 'admin@printoo24.ir', 'admin')
         return user
 
     def create_master_sizes(self, user):
@@ -74,7 +73,6 @@ class Command(BaseCommand):
         ]
         objs = []
         for name, w, h in data:
-            # اینجا user را به defaults اضافه کردیم
             s, _ = Size.objects.get_or_create(
                 name=name, 
                 defaults={'user': user, 'width': w, 'height': h}
@@ -99,13 +97,10 @@ class Command(BaseCommand):
                 defaults={
                     'label': name, 
                     'input_type': input_type
+                    # توجه: مدل Option فیلد user ندارد (طبق کد ارسالی شما)
+                    # اگر دارد، اینجا اضافه کنید: 'user': user
                 }
             )
-            
-            # اگر برای OptionValue هم در مدل User گذاشتی، اینجا هم باید اضافه کنی:
-            # for val in values:
-            #     OptionValue.objects.get_or_create(..., defaults={'user': user})
-
             result_map[name] = {'obj': opt, 'values': values}
             
         return result_map
@@ -116,7 +111,7 @@ class Command(BaseCommand):
         for v in values:
             q, _ = Quantity.objects.get_or_create(
                 value=v,
-                defaults={'user': user} # <--- اضافه شد
+                defaults={'user': user}
             )
             objs.append(q)
         return objs
@@ -128,100 +123,121 @@ class Command(BaseCommand):
 
     def create_products(self, user, categories, sizes, options_map, quantities):
         
+        # قالب: (نام، آیا لارج فرمت است؟، گام شمارش)
         product_bases = [
-            ('کارت ویزیت لاکچری', False), ('تراکت تبلیغاتی', False), 
-            ('بنر مناسبتی', True), ('استیکر شیشه‌ای', True), 
-            ('سربرگ اداری', False), ('پاکت نامه ملخی', False)
+            ('کارت ویزیت لاکچری', False, 1000), 
+            ('تراکت تبلیغاتی', False, 1000), 
+            ('بنر مناسبتی', True, 1), 
+            ('استیکر شیشه‌ای', True, 1), 
+            ('سربرگ اداری', False, 1000), 
+            ('پاکت نامه ملخی', False, 1000)
         ]
 
-        # عکس‌های تستی (مطمئن شو در مدیا هستند)
-        image_pool = [f'pro/{i}.jpg' for i in range(1, 8)]
+        # عکس‌های تستی (فرض بر این است که فایل‌ها وجود دارند)
+        # برای جلوگیری از ارور فایل، از یک لیست ساده استفاده می‌کنیم
+        image_pool = [f'products/sample_{i}.jpg' for i in range(1, 4)]
 
         for i in range(1, 31):
-            base_name, is_large_format = random.choice(product_bases)
+            base_name, is_large_format, unit_step = random.choice(product_bases)
             cat = random.choice(categories)
-            prod_name = f"{base_name} - کد {random.randint(1000, 9999)}"
+            prod_name = f"{base_name} - نمونه {random.randint(100, 999)}"
 
             # 1. Product
             product = Product.objects.create(
                 user=user,
-                category=cat, # کاربر حذف شد (طبق مدل جدید)
+                category=cat,
                 name=prod_name,
-                price=Decimal(random.choice([0, 50000, 100000])), # قیمت پایه (مثلا هزینه برش)
-                description=f"محصول تستی شماره {i} با کیفیت تضمینی.",
-                is_active=True
+                has_price=True, # پیش‌فرض را True می‌گیریم
+                price=Decimal(random.choice([50000, 100000, 250000])), # قیمت پایه محصول
+                price_per_unit=unit_step, # اصلاح شده: تنظیم گام شمارش
+                description=f"توضیحات محصول تستی {prod_name} با کیفیت چاپ عالی.",
+                is_active=True,
+                has_quantity=not is_large_format # اگر لارج فرمت نیست، معمولا تیراژ بسته‌ای دارد
             )
 
             # 2. Pricing Config
             ProductPricingConfig.objects.create(
                 product=product,
-                allow_custom_quantity=is_large_format,
+                # تنظیمات تیراژ
+                allow_custom_quantity=is_large_format, # برای بنر، تیراژ دلخواه (عدد) داریم
                 min_quantity=1 if is_large_format else 1000,
                 max_quantity=100000,
+                
+                # تنظیمات ابعاد (اصلاح شده)
                 accepts_custom_dimensions=is_large_format,
+                min_width=10.0 if is_large_format else 0,
+                max_width=500.0 if is_large_format else 0,
+                
+                # تنظیمات مالی
                 base_setup_price=Decimal(50000),
                 design_service_available=True,
                 design_fee=Decimal(150000)
             )
 
-            # 3. Images
-            selected_imgs = random.sample(image_pool, k=random.randint(1, 3))
-            for idx, img_path in enumerate(selected_imgs):
-                ProductImage.objects.create(
-                    user=user,
-                    product=product, image=img_path, order=idx
-                )
+            # 3. Images (اختیاری)
+            # فقط رکورد دیتابیس می‌سازیم، فایل واقعی آپلود نمی‌شود تا سرعت بالا باشد
+            # ProductImage.objects.create(...) 
 
-            # 4. Sizes & Quantities (Legacy support)
-            # حتی در سیستم جدید، این‌ها برای محصولات استاندارد استفاده می‌شوند
+            # 4. Sizes & Quantities (Legacy support / Standard Products)
             if not is_large_format:
+                # اتصال ۲ سایز رندوم
                 for s in random.sample(sizes, k=2):
-                    ProductSize.objects.create(user=user, product=product, size=s, price_impact=0)
+                    ProductSize.objects.create(
+                        user=user, 
+                        product=product, 
+                        size=s, 
+                        price_impact=Decimal(random.choice([0, 10000]))
+                    )
                 
+                # اتصال همه تیراژها
                 for q in quantities:
-                    ProductQuantity.objects.create(user=user, product=product, quantity=q, price=0)
+                    ProductQuantity.objects.create(
+                        user=user, 
+                        product=product, 
+                        quantity=q, 
+                        price=random.randint(100000, 5000000) # قیمت کل بسته
+                    )
 
-            # 6. OPTIONS (The New Complex Part)
+            # 6. OPTIONS (اصلاح شده)
             # انتخاب چند آپشن برای این محصول
-            selected_option_keys = random.sample(list(options_map.keys()), k=2)
+            selected_option_keys = random.sample(list(options_map.keys()), k=random.randint(1, 3))
             
-            for opt_key in selected_option_keys:
+            for idx, opt_key in enumerate(selected_option_keys):
                 opt_data = options_map[opt_key]
                 opt_obj = opt_data['obj']
                 possible_values = opt_data['values']
 
                 # الف) ساخت ProductOption (کانفیگ والد)
-                # استراتژی قیمت را تصادفی انتخاب می‌کنیم تا تست کامل شود
-                strategy = random.choice([
-                    OptionPricingStrategy.FIXED, 
-                    OptionPricingStrategy.PERCENTAGE,
-                    OptionPricingStrategy.PER_SQM if is_large_format else OptionPricingStrategy.FIXED
-                ])
-
+                # اصلاح: فیلدهای pricing_strategy و base_price از اینجا حذف شدند چون در مدل نبودند
                 prod_opt = ProductOption.objects.create(
                     product=product,
                     option=opt_obj,
                     is_required=random.choice([True, False]),
-                    has_pricing=True,
-                    pricing_strategy=strategy,
-                    base_price=Decimal(random.choice([0, 10000]))
+                    order=idx
+                    # name, label, input_type به صورت خودکار در save کپی می‌شوند
                 )
 
                 # ب) ساخت مقادیر (ProductOptionValue)
-                # اگر آپشن متنی یا عددی باشد، مقدار پیش‌فرض ندارد
                 if opt_obj.input_type in ['text', 'number', 'textarea']:
-                    # برای اینپوت‌ها معمولا یک ولیو دامی یا خالی می‌سازیم اگر نیاز به قیمت باشد
+                    # برای اینپوت‌ها مقدار پیش‌فرض نمی‌سازیم
                     pass 
                 else:
-                    # برای سلکت/رادیو
-                    for val_label in possible_values:
+                    # برای سلکت/رادیو/چک‌باکس
+                    for val_idx, val_label in enumerate(possible_values):
                         ProductOptionValue.objects.create(
                             product_option=prod_opt,
                             label=val_label,
-                            value=val_label, # در سناریوی واقعی می‌تواند کد باشد
+                            value=val_label, 
+                            
+                            # تنظیمات قیمت
+                            has_pricing=True,
                             price_impact=Decimal(random.randint(5000, 50000)),
-                            quantity_step=1 if is_large_format else 1000, # پله‌ای برای کارت ویزیت
-                            is_default=False
+                            
+                            # سایر تنظیمات
+                            is_default=(val_idx == 0),
+                            order=val_idx
+                            # اصلاح: quantity_step حذف شد
+                            # اصلاح: user حذف شد (ProductOptionValue یوزر ندارد)
                         )
 
             self.stdout.write(f" + Created: {product.name} (Large Format: {is_large_format})")

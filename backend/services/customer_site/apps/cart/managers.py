@@ -130,5 +130,5 @@ class CartItemManager(models.Manager):
         """
         self.filter(cart=cart).delete()
         
-    def find_similar(self, cart, product, items_data):
+    def find_duplicate_item(self, cart, product, items_data):
         return self.get_queryset().find_duplicate_item(cart, product, items_data)
