@@ -69,11 +69,11 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 value={
                     "shell": {
                         "name": "کارت ویزیت لمینت براق",
-                        "category": 1,
-                        "description": "چاپ با کیفیت بالا روی مقوای ۳۰۰ گرم",
+                        "category_id": 1,
+                        "description": "...",
                         "has_price": True,
-                        "price": "0",  # قیمت پایه صفر (قیمت از تیراژ می‌آید)
-                        "has_quantity": True, # فروش فقط بر اساس تیراژ
+                        "price": "0",
+                        "has_quantity": True,
                         "is_active": True,
                         "guide_text": "زمان تحویل این محصول ۷ روز کاری است.",
                         "guide_type": "warning"
@@ -119,7 +119,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 value={
                     "shell": {
                         "name": "بنر مناسبتی (محاسبه متری)",
-                        "category": 5,
+                        "category_id": 1,
                         "has_price": True,
                         "price": "120000", # قیمت پایه (مثلا متری ۱۲۰ هزار تومان)
                         "has_quantity": False, # کاربر تعداد/متراژ را وارد می‌کند

@@ -2,7 +2,7 @@ from typing import Dict, Any, List, Optional
 from django.db import transaction
 from django.db.models import QuerySet
 
-from ..models import ProductCategory
+from ..models import ProductCategory, Product
 from ..exceptions import ProductCategoryNotFoundException
 
 # ========== CATEGORY SERVICE ========== #
@@ -26,7 +26,7 @@ class ProductCategoryService:
 
     def get_all_active_categories(self):
         """ دریافت تمامی دسته‌های فعال """
-        return self.service.get_all_active_categories()
+        return ProductCategory.objects.get_all_active_categories()
 
     def get_category_by_slug(self, slug: str) -> Optional[ProductCategory]:
         """
@@ -86,3 +86,15 @@ class ProductCategoryService:
     @transaction.atomic
     def bulk_delete(self, ids: List[int]) -> tuple:
         return ProductCategory.objects.bulk_delete_categories(ids)
+
+    def get_products_by_category_ids(self, category_ids: List[int]) -> QuerySet[Product]:
+        """
+        دریافت محصولات بر اساس لیستی از شناسه‌های دسته‌بندی.
+        * اصلاح شده برای ساختار M2M *
+        """
+        return Product.objects.filter(
+            is_active=True,
+            categories__id__in=category_ids
+        ).select_related(
+            'pricing_config'
+        ).distinct()

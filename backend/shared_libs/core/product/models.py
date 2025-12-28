@@ -172,6 +172,47 @@ class ProductCategory(MPTTModel):
         """گرفتن زیرمجموعه‌های فعال"""
         return self.get_descendants().filter(is_active=True)
     
+# ======== Product Category Relation ======== #
+class ProductCategoryRelation(models.Model):
+    """
+    جدول واسط صریح برای مدیریت رابطه محصول و دسته‌بندی.
+    این جدول به ما اجازه می‌دهد فراداده‌هایی مثل 'is_primary' داشته باشیم.
+    """
+    product = models.ForeignKey(
+        'Product', 
+        on_delete=models.CASCADE, 
+        related_name='category_relations',
+        verbose_name=_("محصول")
+    )
+    category = models.ForeignKey(
+        'ProductCategory', 
+        on_delete=models.PROTECT, 
+        related_name='product_relations',
+        verbose_name=_("دسته‌بندی")
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("رابطه محصول-دسته")
+        verbose_name_plural = _("روابط محصول-دسته")
+        unique_together = ('product', 'category')
+
+    def save(self, *args, **kwargs):
+        """
+        تضمین یکپارچگی داده‌ها (Data Integrity):
+        اگر این رکورد به عنوان Primary ست شود، بقیه رکوردهای این محصول باید False شوند.
+        """
+        if self.is_primary:
+            ProductCategoryRelation.objects.filter(
+                product=self.product,
+                is_primary=True
+            ).exclude(pk=self.pk).update(is_primary=False)
+            
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.product.name} -> {self.category.name}"
+    
 # ======== Product Model ======== #
 class Product(HasGuide, models.Model):
     """
@@ -186,11 +227,12 @@ class Product(HasGuide, models.Model):
         on_delete=models.PROTECT,
     )
     name = models.CharField(_('نام'), max_length=150)
-    category = models.ForeignKey(
+    categories = models.ManyToManyField(
         'ProductCategory',
-        verbose_name=_('دسته بندی'),
-        on_delete=models.PROTECT,
+        through='ProductCategoryRelation', 
         related_name='products',
+        verbose_name=_('دسته‌بندی‌ها'),
+        blank=True
     )
     slug = models.SlugField(_('اسلاگ'), unique=True, blank=True, null=True)
     has_price = models.BooleanField(_('دارای قیمت'), default=True)
@@ -237,14 +279,29 @@ class Product(HasGuide, models.Model):
     def save(self, *args, **kwargs):
         """ ذخیره اسلاگ محصول به صورت خودکار """
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = slugify(self.name, allow_unicode=True)
+        if self.slug in Product.objects.filter(slug=self.slug).exclude(pk=self.pk):
+            raise ValidationError('محصول با این نام قبلا ساخته شده است.')
             
         if not self.code:
             year = timezone.now().year
-            category_slug = self.category.slug if self.category else 'UNKNOWN'
+            
+            category_slug = 'PENDING'
             self.code = product_code_generator(category_slug, self.slug, year)
+            
         super().save(*args, **kwargs)
     
+    # def get_primary_category(self):
+    #     """
+    #     یک متد کمکی برای دریافت دسته‌بندی اصلی جهت استفاده در لاجیک‌ها.
+    #     """
+    #     rel = self.category_relations.filter(is_primary=True).select_related('category').first()
+    #     if rel:
+    #         return rel.category
+
+    #     rel = self.category_relations.select_related('category').first()
+    #     return rel.category if rel else None
+
     def __str__(self):
         return f"{self.name} - {self.code}"
 

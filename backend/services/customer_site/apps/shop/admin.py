@@ -16,6 +16,7 @@ from core.models import (
     Option,
     OptionValue,
     ProductPricingConfig,
+    ProductCategoryRelation,
 )
 
 admin.site.register(Product)
@@ -32,3 +33,4 @@ admin.site.register(Option)
 admin.site.register(OptionValue)
 admin.site.register(ProductPricingConfig)
 admin.site.register(ProductOptionValue)
+admin.site.register(ProductCategoryRelation)

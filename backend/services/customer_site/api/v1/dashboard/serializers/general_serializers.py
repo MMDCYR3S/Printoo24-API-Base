@@ -89,8 +89,9 @@ class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
         بازگرداندن فرزندان به صورت بازگشتی.
         اگر فرزندی وجود داشته باشد، همین سریالایزر را برای آن‌ها صدا می‌زنیم.
         """
-        if obj.get_children().exists():
-            return ProductCategoryDashboardSerializer(obj.get_children(), many=True).data
+        children = obj.get_children()
+        if children.exists():
+            return ProductCategoryDashboardSerializer(children, many=True, context=self.context).data
         return []
 
 # ===== سریالایزر تماس با ما ===== #

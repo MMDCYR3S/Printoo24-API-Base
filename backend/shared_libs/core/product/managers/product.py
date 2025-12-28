@@ -20,17 +20,20 @@ class ProductQuerySet(BaseQuerySet):
         # ===== ایمپورت محلی برای جلوگیری از خطا ===== #
         from core.product.models import (
             ProductQuantity, ProductSize, ProductOption, 
-            ProductOptionValue, ProductImage, ProductAttachment
+            ProductOptionValue, ProductImage, ProductAttachment,
+            ProductCategoryRelation
         )
 
         return self.select_related(
-            'category',
             'pricing_config'
         ).prefetch_related(
             # ===== بارگذاری مقادیر ثابت ===== #
+            Prefetch(
+                'category_relations',
+                queryset=ProductCategoryRelation.objects.select_related('category')
+            ),
             Prefetch('product_quantity', queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')),
             Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__width')),
-            
             # ===== بارگذاری ویژگی ها (بخش حساس) ===== #
             Prefetch(
                 'options', 
@@ -53,9 +56,9 @@ class ProductQuerySet(BaseQuerySet):
         """
         from ..models import ProductQuantity, ProductImage
         return self.select_related(
-            'category',
             'pricing_config'
         ).prefetch_related(
+            'categories',
             Prefetch(
                 'product_quantity', 
                 queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')
@@ -66,18 +69,21 @@ class ProductQuerySet(BaseQuerySet):
     # ===== Read Methods ===== #
     def get_all_active(self):
         """دریافت لیست تمام محصولات فعال"""
-        return self.filter(is_active=True).select_related('category')
+        return self.filter(is_active=True).prefetch_related('categories')
     
     def get_all(self):
         """دریافت تمام محصولات"""
-        return self.select_related('category').order_by('-created_at')
+        return self.prefetch_related('categories').order_by('-created_at')
 
     def get_by_category_ids(self, category_ids: list):
         """دریافت محصولات فعال بر اساس لیست دسته‌بندی‌ها"""
         return self.filter(
-            category_id__in=category_ids, 
+            categories__id__in=category_ids, 
             is_active=True
-        ).select_related('category').prefetch_related('product_image').order_by('-created_at')
+        ).prefetch_related(
+            'categories', 
+            'product_image'
+        ).distinct().order_by('-created_at')
 
     def get_detail_by_slug(self, slug: str):
         """دریافت جزئیات کامل با اسلاگ"""
@@ -128,7 +134,6 @@ class ProductManager(models.Manager):
         return self.get_queryset().get_detail_by_slug(slug)
     
     def get_product_detail_by_id(self, id: int):
-        # اینجا اکسپشن DoesNotExist مدل رایز می‌شود اگر نباشد
         return self.get_queryset().get_detail_by_id(id)
 
     def get_by_id(self, pk: int):
