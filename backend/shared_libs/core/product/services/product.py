@@ -9,7 +9,7 @@ from ..exceptions import (
 from ..models import (
     Product, ProductPricingConfig, ProductQuantity, 
     ProductOption, ProductOptionValue, Option, ProductSize,
-    ProductQuantity, Quantity, Size,
+    ProductQuantity, Quantity, Size, ProductCategory,
 )
 
 class ProductService:
@@ -124,8 +124,17 @@ class ProductService:
         """
         ایجاد محصول اولیه.
         """
+        category_id = data.pop('category_id', None)
+        category_ids = data.pop('category_ids', [])
+        
+        if category_id:
+            category_ids.append(category_id)
+        
         data['user'] = user
         product = Product.objects.create(**data)
+        
+        if category_ids:
+            self.assign_categories(product, category_ids)
         
         # ===== ایجاد پیکربندی قیمت ===== #
         ProductPricingConfig.objects.create(product=product)
@@ -138,11 +147,41 @@ class ProductService:
         if not product:
             raise ProductNotFoundException("محصول یافت نشد.")
         
+        category_id = data.pop('category_id', None)
+        category_ids = data.pop('category_ids', None)
+        
         # جایگزین: self._repo.update_product
         for key, value in data.items():
             setattr(product, key, value)
         product.save()
+        
+        if category_ids is not None:
+             self.assign_categories(product, category_ids)
+        elif category_id is not None:
+             self.assign_categories(product, [category_id])
+        
         return product
+
+    # ===== Assign Categories ===== #
+    def assign_categories(self, product: Product, category_ids: List[int]):
+        """
+        متد کمکی برای مدیریت اتصال دسته‌بندی‌ها.
+        سیگنال‌های تعریف شده در مدل، خودکار کد محصول را آپدیت می‌کنند.
+        """
+        if not category_ids:
+            product.categories.clear()
+            return
+        
+        # ===== اعتبارسنجی وجود دسته‌بندی‌ها ===== #
+        selected_categories = ProductCategory.objects.filter(id__in=category_ids)
+        
+        if not selected_categories.exists():
+            return
+        
+        # ===== فقط دسته بندی فرزند سطح پایین انتخاب خواهد شد. ===== #
+        target_category = sorted(selected_categories, key=lambda x: x.level, reverse=True)[0]
+        
+        product.categories.set([target_category.id])
 
     # ===== Pricing Config ===== #
     @transaction.atomic

@@ -20,7 +20,6 @@ from apps.shop.services import (
     ShopCategoryService,
     FeedbackService,
 )
-from core.models import Product
 
 # ======= Product List View ======= #
 @extend_schema(
@@ -34,6 +33,7 @@ class ProductListView(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
     filterset_class = ProductFilter
+    lookup_field = 'slug'
     
     def get_queryset(self):
         """
@@ -45,8 +45,12 @@ class ProductListView(ListAPIView):
         queryset = service.get_base_queryset()
         
         # ===== ایجاد فیلترینگ پیش فرض برای جلوگیری از تکرار داده ها ===== #
+        queryset = queryset.prefetch_related(
+            'categories',
+            'product_image'
+        )
         filterset = self.filterset_class(self.request.GET, queryset=queryset)
-        
+
         return filterset.qs.distinct()
 
 # ======= Product Detail View ======= #
@@ -69,11 +73,12 @@ class ProductDetailView(RetrieveAPIView):
             
             if product_instance is None:
                 return Response({"detail": "محصول یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+            
             serializer = self.get_serializer(product_instance, context={'request': request})
             return Response(serializer.data)
         except Exception as e:
             return Response(
-                {"detail": "خطای داخلی.", "error": str(e)}, 
+                {"detail": "خطای داخلی سرور.", "error": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -91,7 +96,7 @@ class CategoryViewSet(ViewSet):
         tree_data = service.get_category_tree_structure()
         return Response(tree_data)
 
-    @extend_schema(summary="دریافت اطلاعات صفحه لندینگ یک دسته")
+    @extend_schema(summary="دریافت اطلاعات صفحه لندینگ یک دسته خاص")
     def retrieve(self, request, pk=None): 
         slug = pk 
         service = ShopCategoryService(request=request)
@@ -118,11 +123,7 @@ class CategoryBannerViewSet(ViewSet):
         GET /api/v1/shop/categories-landing/
         """
         service = ShopCategoryService(request=request)
-        
-        # فراخوانی متد جدید که لیست برمی‌گرداند
         data_list = service.get_all_categories_with_products()
-        
-        # نکته مهم: چون خروجی یک لیست است، many=True را اضافه می‌کنیم
         serializer = CategoryLandingPageSerializer(data_list, many=True, context={'request': request})
         
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -59,8 +59,7 @@ class ShopCategoryService:
         category = self._domain_service.get_category_by_slug(slug)
         if not category:
             return None
-
-        # descendants = category.get_descendants(include_self=True)
+        
         descendant_ids = self._domain_service.get_category_descendants_ids(slug)
 
         products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)[:7]
@@ -106,7 +105,7 @@ class ShopCategoryService:
         logger.info("Fetching all root categories with products")
 
         # ===== دریافت کوئری‌ست دسته‌بندی‌ها ===== #
-        root_categories = self._domain_service.get_all_active_categories().filter(parent__isnull=True)
+        root_categories = self._domain_service.get_all_active_categories()
         
         result_list = []
 
@@ -118,13 +117,12 @@ class ShopCategoryService:
             # ===== دریافت کوئری‌ست محصولات ===== #
             products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)[:7]
 
-            # ====== ساخت دیکشنری برای هر دسته‌بندی
+            # ===== ساخت دیکشنری برای هر دسته‌بندی ===== #
             category_data = {
                 "category_info": {
                     "id": category.id,
                     "name": category.name,
                     "slug": category.slug,
-                    "description": category.description,
                     "banners": {
                         "wide": self._get_image_url(category.banner_wide),
                         "box": self._get_image_url(category.banner_box),
@@ -133,8 +131,8 @@ class ShopCategoryService:
                 "sub_categories": [
                     {
                         "name": child.name, 
-                        "slug": child.slug, 
-                        "thumbnail": self._get_image_url(child.banner_box)
+                        "slug": child.slug,
+                        "link": self._generate_product_filter_url(child.slug)
                     } 
                     for child in category.get_children() if child.is_active
                 ],
@@ -146,23 +144,29 @@ class ShopCategoryService:
 
     # ===== Get Image URL ===== #
     def _get_image_url(self, image_field):
-        if not image_field: return None
+        """تولید آدرس کامل تصویر"""
+        if not image_field: 
+            return None
         try:
-            return self.request.build_absolute_uri(image_field.url)
-        except Exception:
+            if self.request:
+                return self.request.build_absolute_uri(image_field.url)
             return image_field.url
+        except Exception as e:
+            logger.warning(f"Error generating image URL: {e}")
+            return None
 
-    def _generate_product_filter_url(self, slug: str) -> str:
-        """لینک فیلتر محصولات"""
+    def _generate_product_filter_url(self, slug: str) -> Optional[str]:
+        """لینک لیست محصولات فیلتر شده بر اساس دسته"""
         if not self.request: return None
         try:
             base_url = reverse("api:v1:shop:product-list", request=self.request)
             return f"{base_url}?category={slug}"
         except NoReverseMatch:
+            logger.error("Reverse match failed for product-list")
             return None
 
-    def _generate_category_landing_url(self, slug: str) -> str:
-        """لینک صفحه لندینگ دسته"""
+    def _generate_category_landing_url(self, slug: str) -> Optional[str]:
+        """لینک صفحه اختصاصی دسته"""
         if not self.request: return None
         try:
             return reverse("api:v1:shop:category-landing", kwargs={'slug': slug}, request=self.request)

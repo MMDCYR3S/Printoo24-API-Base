@@ -59,8 +59,9 @@ class ProductSerializer(serializers.ModelSerializer):
         view_name='api:v1:dashboard:products-detail', 
         lookup_field='id'
     )
-    category = serializers.CharField(source="category.name", read_only=True)
+    category = serializers.SerializerMethodField()
     images = ProductImageSerializer(source='product_image', many=True)
+    
     class Meta:
         model = Product
         fields = [
@@ -70,15 +71,21 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'code', 'slug', 'detail_url']
 
+    def get_category(self, obj):
+        cat = obj.categories.first()
+        return cat.name if cat else "Uncategorized"
+
 # =====Product Shell Serializer ===== #
 class ProductShellSerializer(serializers.ModelSerializer):
+    category_id = serializers.IntegerField(write_only=True, required=True, help_text="شناسه دسته‌بندی (زیرمجموعه)")
+    category_info = serializers.SerializerMethodField(read_only=True)
     guide_text = serializers.CharField(required=False, allow_blank=True)
     guide_type = serializers.ChoiceField(choices=GuideType.choices, required=False)
     
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'slug', 'category', 'description', 
+            'id', 'name', 'slug', 'category_id', 'category_info', 'description', 
             'code', 'is_active', 'has_price', 'has_quantity', 
             'price', 'price_per_unit', 'created_at',
             'guide_text', 'guide_type'
@@ -86,19 +93,19 @@ class ProductShellSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'code', 'slug']
         
     def validate(self, data):
-        """
-        اعتبارسنجی قوانین بیزنس (has_quantity vs Custom Quantity)
-        """
+        """ اعتبارسنجی قوانین بیزینس """
         has_quantity = data.get('has_quantity', True)
         price_per_unit = data.get('price_per_unit', 1)
         
-        if not has_quantity:
-            if price_per_unit < 1:
-                raise serializers.ValidationError({
-                    "price_per_unit": "وقتی تیراژ ثابت غیرفعال است، 'گام شمارش' باید حداقل ۱ باشد."
-                })
-        
+        if not has_quantity and price_per_unit < 1:
+            raise serializers.ValidationError({"price_per_unit": "گام شمارش باید حداقل ۱ باشد."})
         return data
+
+    def get_category_info(self, obj):
+        cat = obj.categories.first()
+        if cat:
+            return {"id": cat.id, "name": cat.name, "slug": cat.slug}
+        return None
 
 # ===== Product Pricing Config Serializer ===== #
 class ProductPricingConfigSerializer(serializers.ModelSerializer):
