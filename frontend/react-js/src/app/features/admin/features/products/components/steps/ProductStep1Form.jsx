@@ -1,17 +1,18 @@
 // src/app/features/admin/products/components/steps/ProductStep1Form.jsx
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
-  Info, Box, DollarSign, Layers, ListPlus, Trash2, 
+  Info, Box, Layers, ListPlus, Trash2, 
   Wand2, Calculator, Ruler, Hash, AlertTriangle, 
-  Check, Save // ✅ این دو تا اضافه شدند
+  Check, Save 
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useQuery } from '@tanstack/react-query';
 import { ProductStep1Schema } from '../../schemas/productSchemas';
-// مطمئن شو مسیر سرویس کتگوری درست است
-import { adminCategoryService } from '../../../../services/adminCategoryService'; 
+import { adminCategoryService } from '../../../../services/adminCategoryService';
+// ✅ 1. اضافه شدن سرویس محصولات برای گرفتن سایزها
+import { adminProductService } from '../../../../services/adminProductService';
 
 // --- Helper Components ---
 const SectionHeader = ({ icon: Icon, title, subtitle }) => (
@@ -32,11 +33,22 @@ const FormError = ({ message }) => (
 
 const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   
-  // 1. دریافت واقعی لیست دسته‌بندی‌ها از سرور
+  // دریافت لیست دسته‌بندی‌ها
   const { data: categories = [] } = useQuery({
     queryKey: ['admin-categories-list'],
-    queryFn: () => adminCategoryService.getAll(), // متد سرویس کتگوری که قبلا ساختی
-    staleTime: 1000 * 60 * 10, // 10 دقیقه کش
+    queryFn: () => adminCategoryService.getAll(),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  // ✅ 2. دریافت لیست سایزهای استاندارد (Master Data)
+  const { data: standardSizes = [] } = useQuery({
+    queryKey: ['admin-standard-sizes'],
+    // فرض بر این است که متد getStandardSizes را در سرویس اضافه کرده‌اید
+    // اگر نه، موقتاً از یک آرایه خالی یا متد getAll استفاده کنید تا ارور ندهد
+    queryFn: async () => {
+        try { return await adminProductService.getStandardSizes(); } catch { return []; }
+    },
+    staleTime: 1000 * 60 * 30, 
   });
 
   const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm({
@@ -65,10 +77,9 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   const generateSlug = () => {
     const name = watch('shell.name');
     if(name) {
-       const slug = name.trim()
-         .toLowerCase()
-         .replace(/\s+/g, '-')      // فاصله به خط تیره
-         .replace(/[^\w\u0600-\u06FF-]/g, ''); // حذف کاراکترهای خاص (نگه داشتن فارسی و انگلیسی)
+       const slug = name.trim().toLowerCase()
+         .replace(/\s+/g, '-')
+         .replace(/[^\w\u0600-\u06FF-]/g, '');
        setValue('shell.slug', slug, { shouldValidate: true });
     }
   };
@@ -85,7 +96,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
         <SectionHeader icon={Box} title="شناسنامه محصول" subtitle="اطلاعات اصلی جهت نمایش در فروشگاه" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Name */}
           <div className="form-control">
             <label className="label text-sm font-bold text-slate-600">نام محصول <span className="text-error">*</span></label>
             <input 
@@ -96,7 +106,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             <FormError message={errors.shell?.name?.message} />
           </div>
 
-          {/* Category (Dynamic) */}
           <div className="form-control">
             <label className="label text-sm font-bold text-slate-600">دسته‌بندی <span className="text-error">*</span></label>
             <select 
@@ -111,7 +120,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             <FormError message={errors.shell?.category?.message} />
           </div>
 
-          {/* Slug */}
           <div className="form-control">
             <label className="label text-sm font-bold text-slate-600">لینک یکتا (Slug)</label>
             <div className="join w-full dir-ltr">
@@ -126,7 +134,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             </div>
           </div>
 
-          {/* Code */}
           <div className="form-control">
             <label className="label text-sm font-bold text-slate-600">کد محصول (SKU)</label>
             <input 
@@ -136,7 +143,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             />
           </div>
 
-          {/* Description */}
           <div className="form-control md:col-span-2">
             <label className="label text-sm font-bold text-slate-600">توضیحات کوتاه</label>
             <textarea 
@@ -241,7 +247,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
 
       {/* === CARD 3: Dynamic Tables === */}
       
-      {/* A. QUANTITIES TABLE */}
+      {/* A. QUANTITIES TABLE (Without Change) */}
       {hasQuantity && (
           <div className="card bg-white shadow-sm border border-slate-200 p-6 rounded-2xl animate-in fade-in slide-in-from-bottom-4">
              <div className="flex justify-between items-center mb-4">
@@ -293,46 +299,90 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
           </div>
       )}
 
-      {/* B. SIZES TABLE */}
+      {/* ✅ B. SIZES TABLE (اصلاح شده: انتخاب آیدی به جای تایپ نام) */}
       <div className="card bg-white shadow-sm border border-slate-200 p-6 rounded-2xl">
          <div className="flex justify-between items-center mb-4">
-            <SectionHeader icon={Ruler} title="سایزهای استاندارد" subtitle="ابعاد قابل سفارش توسط مشتری" />
-            <button type="button" onClick={() => appendSize({ name: '', width: 0, height: 0, price_impact: 0 })} className="btn btn-sm btn-secondary btn-outline gap-2 rounded-lg">
+            <SectionHeader icon={Ruler} title="سایزهای استاندارد" subtitle="انتخاب سایزهای مجاز برای این محصول" />
+            <button 
+                type="button" 
+                // ✅ مقدار پیش‌فرض باید شامل ID باشد نه name/width
+                onClick={() => appendSize({ id: "", price_impact: 0 })} 
+                className="btn btn-sm btn-secondary btn-outline gap-2 rounded-lg"
+            >
                <ListPlus size={16}/> افزودن سایز
             </button>
          </div>
 
          {sizeFields.length === 0 ? (
              <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                <p className="text-slate-400 text-sm">هیچ سایز استانداردی تعریف نشده است. (سایز آزاد)</p>
+                <p className="text-slate-400 text-sm">هیچ سایزی انتخاب نشده است.</p>
              </div>
          ) : (
             <div className="overflow-x-auto">
                <table className="table table-sm w-full">
                   <thead>
                      <tr className="bg-slate-50 text-slate-500">
-                        <th>نام سایز</th>
-                        <th>عرض (cm)</th>
-                        <th>ارتفاع (cm)</th>
-                        <th>افزایش قیمت</th>
+                        <th className="w-1/2">انتخاب سایز استاندارد</th>
+                        <th>افزایش قیمت (IQD)</th>
+                        <th>توضیحات (اختیاری)</th>
                         <th className="w-10"></th>
                      </tr>
                   </thead>
                   <tbody>
-                     {sizeFields.map((field, index) => (
-                        <tr key={field.id} className="group hover:bg-slate-50">
-                           <td>
-                              <input {...register(`sizes.${index}.name`)} className="input input-bordered input-sm w-full font-bold" placeholder="A4" />
-                              <FormError message={errors.sizes?.[index]?.name?.message} />
-                           </td>
-                           <td><input type="number" step="0.1" {...register(`sizes.${index}.width`)} className="input input-bordered input-sm w-full font-mono dir-ltr" /></td>
-                           <td><input type="number" step="0.1" {...register(`sizes.${index}.height`)} className="input input-bordered input-sm w-full font-mono dir-ltr" /></td>
-                           <td><input type="number" {...register(`sizes.${index}.price_impact`)} className="input input-bordered input-sm w-full font-mono text-emerald-600" /></td>
-                           <td>
-                              <button type="button" onClick={() => removeSize(index)} className="btn btn-ghost btn-xs text-error opacity-50 group-hover:opacity-100"><Trash2 size={16}/></button>
-                           </td>
-                        </tr>
-                     ))}
+                     {sizeFields.map((field, index) => {
+                        // پیدا کردن سایز انتخاب شده برای نمایش ابعاد (فقط نمایشی)
+                        const selectedSizeId = watch(`sizes.${index}.id`);
+                        const selectedSizeInfo = standardSizes.find(s => String(s.id) === String(selectedSizeId));
+
+                        return (
+                           <tr key={field.id} className="group hover:bg-slate-50">
+                              <td>
+                                 <div className="flex flex-col">
+                                    <select 
+                                       {...register(`sizes.${index}.id`)} 
+                                       className="select select-bordered select-sm w-full font-bold text-slate-700"
+                                    >
+                                       <option value="">انتخاب کنید...</option>
+                                       {standardSizes.map(size => (
+                                          <option key={size.id} value={size.id}>
+                                             {size.name}
+                                          </option>
+                                       ))}
+                                    </select>
+                                    
+                                    {/* نمایش ابعاد فقط برای اطلاع کاربر */}
+                                    {selectedSizeInfo && (
+                                       <span className="text-[10px] text-slate-400 mt-1 font-mono dir-ltr pl-1">
+                                          ابعاد: {selectedSizeInfo.width} × {selectedSizeInfo.height} cm
+                                       </span>
+                                    )}
+                                    <FormError message={errors.sizes?.[index]?.id?.message} />
+                                 </div>
+                              </td>
+                              <td>
+                                 <input 
+                                    type="number"
+                                    {...register(`sizes.${index}.price_impact`)}
+                                    className="input input-bordered input-sm w-full font-mono text-emerald-600"
+                                    placeholder="+0"
+                                 />
+                              </td>
+                              <td>
+                                 <input 
+                                    type="text"
+                                    {...register(`sizes.${index}.guide_text`)}
+                                    className="input input-bordered input-sm w-full"
+                                    placeholder="مثلاً: قالب خاص"
+                                 />
+                              </td>
+                              <td>
+                                 <button type="button" onClick={() => removeSize(index)} className="btn btn-ghost btn-xs text-error opacity-50 group-hover:opacity-100">
+                                    <Trash2 size={16}/>
+                                 </button>
+                              </td>
+                           </tr>
+                        );
+                     })}
                   </tbody>
                </table>
             </div>

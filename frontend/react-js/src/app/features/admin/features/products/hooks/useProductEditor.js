@@ -1,8 +1,9 @@
+// src/app/features/admin/products/hooks/useProductEditor.js
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { adminProductService } from '../../../services/adminProductService';
+import { adminProductService } from '../services/adminProductService';
 
 export const useProductEditor = () => {
   const { id } = useParams(); // اگر ID باشد یعنی حالت ویرایش
@@ -18,7 +19,7 @@ export const useProductEditor = () => {
     queryKey: ['admin-product', id],
     queryFn: () => adminProductService.getById(id),
     enabled: isEditMode,
-    staleTime: 0, // همیشه دیتای تازه بگیر برای ادیت
+    staleTime: 0, 
   });
 
   // 2. میوتیشن مرحله ۱ (ساخت/ویرایش هسته)
@@ -29,24 +30,33 @@ export const useProductEditor = () => {
         : adminProductService.create(data);
     },
     onSuccess: (data) => {
-      const productId = isEditMode ? id : data.shell.id; // گرفتن آیدی محصول ساخته شده
+      // 🛠️ اصلاح مهم: سرور در حالت ساخت، مستقیم {id: 76} برمی‌گرداند
+      const newProductId = data.id || data.shell?.id; 
+      const targetId = isEditMode ? id : newProductId;
+
+      if (!targetId) {
+        console.error("Create Response:", data);
+        toast.error("خطا در دریافت شناسه محصول جدید");
+        return;
+      }
+
       toast.success(isEditMode ? 'اطلاعات پایه بروز شد' : 'محصول با موفقیت ایجاد شد');
       
-      // اگر محصول جدید بود، ریدایرکت کن به صفحه ویرایش همین محصول (برای ادامه مراحل)
+      // اگر محصول جدید بود، ریدایرکت کن به صفحه ویرایش همین محصول
       if (!isEditMode) {
-         navigate(`/dashboard/products/edit/${productId}`, { replace: true });
-         // بعد از نویگیت، تب را ببر روی آپشن‌ها
+         navigate(`/admin/products/edit/${targetId}`, { replace: true });
+         // بعد از نویگیت، با کمی تاخیر تب را ببر روی آپشن‌ها
          setTimeout(() => setActiveTab('options'), 100);
       } else {
-         // در حالت ویرایش، فقط دیتای کش را آپدیت کن
          queryClient.invalidateQueries(['admin-product', id]);
-         // برو مرحله بعد (اختیاری)
          setActiveTab('options');
       }
     },
     onError: (err) => {
       console.error(err);
-      toast.error('خطا در ذخیره اطلاعات پایه. لطفا ورودی‌ها را چک کنید.');
+      // نمایش خطای سرور اگر موجود باشد
+      const serverMsg = err.response?.data?.message || err.response?.data?.detail;
+      toast.error(serverMsg || 'خطا در ذخیره اطلاعات پایه.');
     }
   });
 
@@ -73,7 +83,7 @@ export const useProductEditor = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(['admin-product', id]);
       toast.success('تصاویر و فایل‌ها مرتب‌سازی شدند');
-      navigate('/dashboard/products'); // بازگشت به لیست
+      navigate('/admin/products'); // بازگشت به لیست
     }
   });
 
@@ -94,7 +104,7 @@ export const useProductEditor = () => {
     saveStep2: step2Mutation.mutate,
     isSavingStep2: step2Mutation.isPending,
 
-    uploadImage: uploadImageMutation.mutateAsync, // Async برای اینکه منتظر آپلود بمونیم
+    uploadImage: uploadImageMutation.mutateAsync, 
     isUploading: uploadImageMutation.isPending,
 
     saveStep3: step3Mutation.mutate,

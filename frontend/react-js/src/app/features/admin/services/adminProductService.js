@@ -9,6 +9,12 @@ export const adminProductService = {
     const { data } = await apiClient.get(BASE_URL);
     return data;
   },
+  
+  getStandardSizes: async () => {
+    // اگر اندپوینت متفاوتی دارید اینجا تغییر دهید
+    const { data } = await apiClient.get('/dashboard/sizes/'); 
+    return data;
+  },
 
   // --- مرحله ۱: ایجاد و ویرایش هسته محصول ---
   create: async (data) => {

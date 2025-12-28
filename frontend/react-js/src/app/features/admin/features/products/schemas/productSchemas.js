@@ -34,10 +34,7 @@ const QuantityTierSchema = z.object({
 });
 
 const SizeSchema = z.object({
-  id: z.number().optional(),
-  name: z.string().min(1, 'نام سایز الزامی است'), // مثلا A4
-  width: z.coerce.number(),
-  height: z.coerce.number(),
+  id: z.coerce.number().min(1, 'انتخاب سایز الزامی است'), // شناسه سایز از دیتابیس
   price_impact: z.coerce.number().default(0), // افزایش قیمت برای این سایز
   guide_text: z.string().optional(),
 });
@@ -49,7 +46,6 @@ export const ProductStep1Schema = z.object({
   quantities: z.array(QuantityTierSchema).optional(),
   sizes: z.array(SizeSchema).optional(),
 }).refine((data) => {
-  // ولیدیشن ترکیبی: اگر has_quantity روشن است، باید آرایه quantities پر باشد
   if (data.shell.has_quantity && (!data.quantities || data.quantities.length === 0)) {
     return false;
   }
