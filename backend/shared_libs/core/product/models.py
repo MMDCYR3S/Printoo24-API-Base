@@ -415,7 +415,7 @@ class ProductQuantity(HasGuide, models.Model):
     user = models.ForeignKey('core.User', related_name='product_quantity_user', on_delete=models.PROTECT)
     product = models.ForeignKey(Product, related_name='product_quantity', on_delete=models.CASCADE)
     quantity = models.ForeignKey(Quantity, related_name='quantity_product', on_delete=models.PROTECT)
-    price = models.IntegerField(_('قیمت'), default=0)
+    # price = models.IntegerField(_('قیمت'), default=0)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     

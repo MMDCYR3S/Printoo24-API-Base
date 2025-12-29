@@ -85,14 +85,12 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                     },
                     "quantities": [
                         {
-                            "id": 10,  # ID تیراژ ۱۰۰۰
-                            "price": 1500000,
+                            "id": 10,
                             "guide_text": "پرفروش‌ترین",
                             "guide_type": "tip"
                         },
                         {
-                            "id": 11,  # ID تیراژ ۲۰۰۰
-                            "price": 2800000, # تخفیف در تعداد بالا
+                            "id": 11,
                             "guide_text": "",
                             "guide_type": "info"
                         }
@@ -168,7 +166,6 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                     "quantities": [
                         {
                             "id": 10,
-                            "price": 1750000, # افزایش قیمت
                             "guide_text": "قیمت جدید",
                             "guide_type": "warning"
                         }

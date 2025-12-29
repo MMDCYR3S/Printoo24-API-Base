@@ -37,7 +37,7 @@ class QuantityDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductQuantity
-        fields = ['id', 'quantity', 'price', 'guide_text', 'guide_type']
+        fields = ['id', 'quantity', 'guide_text', 'guide_type']
 
 class SizeDetailSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='size.name', read_only=True)
