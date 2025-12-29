@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   UploadCloud, Image as ImageIcon, X, Star, 
-  ArrowLeft, ArrowRight, FileText, Download 
+  ArrowLeft, ArrowRight, FileText, Download , CheckCircle2
 } from 'lucide-react';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';

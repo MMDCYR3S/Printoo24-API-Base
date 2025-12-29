@@ -109,7 +109,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
           <div className="form-control">
             <label className="label text-sm font-bold text-slate-600">دسته‌بندی <span className="text-error">*</span></label>
             <select 
-              {...register('shell.category')} 
+              {...register('shell.category_id')} 
               className="select select-bordered w-full rounded-xl font-medium"
             >
               <option value="">انتخاب کنید...</option>

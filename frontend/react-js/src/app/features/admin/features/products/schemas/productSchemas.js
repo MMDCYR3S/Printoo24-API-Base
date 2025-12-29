@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 const ShellSchema = z.object({
   name: z.string().min(3, 'نام محصول باید حداقل ۳ کاراکتر باشد'),
-  category: z.coerce.number().min(1, 'انتخاب دسته‌بندی الزامی است'),
+  category_id: z.coerce.number().min(1, 'انتخاب دسته‌بندی الزامی است'),
   slug: z.string().optional(), // معمولاً اتوماتیک ساخته می‌شود
   code: z.string().optional(),
   description: z.string().optional(),
