@@ -79,8 +79,8 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductShellSerializer(serializers.ModelSerializer):
     category_id = serializers.IntegerField(write_only=True, required=True, help_text="شناسه دسته‌بندی (زیرمجموعه)")
     category_info = serializers.SerializerMethodField(read_only=True)
-    guide_text = serializers.CharField(required=False, allow_blank=True)
-    guide_type = serializers.ChoiceField(choices=GuideType.choices, required=False)
+    guide_text = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    guide_type = serializers.ChoiceField(choices=GuideType.choices, required=False, allow_null=True)
     
     class Meta:
         model = Product
@@ -300,7 +300,7 @@ class ProductOptionsBulkSerializer(serializers.Serializer):
 class ProductMediaSyncSerializer(serializers.Serializer):
     attachment_ids_to_link = serializers.ListField(child=serializers.IntegerField(), required=False)
     attachment_ids_to_unlink = serializers.ListField(child=serializers.IntegerField(), required=False)
-    image_orders = serializers.ListField(child=serializers.IntegerField(), required=False)
+    image_orders = serializers.ListField(child=serializers.IntegerField(), required=False, allow_null=True)
 
 # ===== Product Detail Serializer ===== #
 class ProductDetailSerializer(serializers.Serializer):
