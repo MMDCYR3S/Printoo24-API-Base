@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # ====== Customer Backend ====== #
+  customer_site:
+    build:
+      context: .
+      dockerfile: backend/services/customer_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_customer_site
+    command: python manage.py runserver 0.0.0.0:9010
+    volumes:
+      - ./backend/services/customer_site:/app/src
+      - ./backend/shared_libs:/app/shared_libs
+      - ./backend/services/customer_site/media:/app/media
+    ports:
+      - "9010:9010"
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+    env_file:
+      - ./env/.env.dev
+    networks:
+      - shared_data_net
+      - customer_net
+
+  # ====== Celery Workers(Customer Site) ====== #
+  celery_worker_customer:
+    build:
+      context: .
+      dockerfile: backend/services/customer_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_celery_customer
+    command: celery -A customer_site.celery worker -l info
+    volumes:
+      - ./backend/services/customer_site:/app/src
+      - ./backend/shared_libs:/app/shared_libs
+      - ./backend/services/customer_site/media:/app/media
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+    env_file:
+      - ./env/.env.dev
+    networks:
+      - shared_data_net
+
+  # ====== Frontend (React) ====== #
+  frontend:
+    build:
+      context: ./frontend/react-js
+      dockerfile: Dockerfile
+    container_name: printoo_frontend
+    ports:
+     - "5173:5173"
+    volumes:
+      - ./frontend/react-js:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    # ===== نکته: وابستگی سرویس در فایل‌های دیگر کار نمی‌کند ===== #
+    # depends_on را حذف کردم چون داکر نمی‌تواند سرویس فایل دیگر را چک کند
+    networks: 
+      - customer_net
+
+networks:
+  customer_net:
+    driver: bridge
+  # ===== تعریف شبکه به عنوان خارجی ===== #
+  shared_data_net:
+    external: true
+    name: printoo_shared_data_network

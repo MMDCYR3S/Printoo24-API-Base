@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # ====== Admin Backend ====== #
+  admin_site:
+    build:
+      context: .
+      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_admin_site
+    command: python manage.py runserver 0.0.0.0:8010
+    volumes:
+      - ./backend/services/admin_site:/app/src
+      - ./backend/shared_libs:/app/shared_libs
+    ports:
+      - "8010:8010"
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+    env_file:
+      - ./env/.env.dev
+    # ===== اتصال به شبکه خارجی ===== #
+    networks:
+      - shared_data_net
+      - admin_net
+
+  # ====== Celery Workers(Admin Site) ====== #
+  celery_worker_admin:
+    build:
+      context: .
+      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
+    container_name: printoo_celery_admin
+    command: celery -A admin_site.celery worker -l info
+    volumes:
+      - ./backend/services/admin_site:/app/src
+      - ./backend/shared_libs:/app/shared_libs
+    environment:
+      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+    env_file:
+      - ./env/.env.dev
+    networks:
+      - shared_data_net
+
+networks:
+  admin_net:
+    driver: bridge
+  # ===== تعریف شبکه به عنوان خارجی ===== #
+  shared_data_net:
+    external: true
+    name: printoo_shared_data_network
