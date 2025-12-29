@@ -10,7 +10,7 @@ from rest_framework.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 
-# ===== سرویس های دامنه ===== #
+# ===== سرویس های دامنه ===== #x
 from core.product.services import ProductService, ProductMediaService
 
 try:
