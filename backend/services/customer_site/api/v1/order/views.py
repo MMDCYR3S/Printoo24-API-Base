@@ -1,44 +1,42 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiTypes
 
 from apps.order.services import CreateOrderFromCartService
-from apps.order.exceptions import (
-    EmptyCartError,
-    InsufficientFundsError
-)
+from apps.order.exceptions import EmptyCartError, InsufficientFundsError
 from .serializers import OrderSerializer
 
-# ========== Create Order View ========== #
+# ========================================== #
+# ===== 1. Single Item Checkout View ======= #
+# ========================================== #
 @extend_schema(tags=["Order"])
 class CreateOrderView(GenericAPIView):
     """
-    POST /api/v1/orders/checkout/
-    Converts the user's cart into a final order.
+    تبدیل یک آیتم خاص سبد خرید به سفارش نهایی.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = OrderSerializer
 
-
     @extend_schema(
-        summary="ثبت سفارش نهایی",
+        summary="ثبت سفارش نهایی (تکی)",
         description="""
-        این متد یک آیتم خاص از سبد خرید (که احتمالاً فایل‌هایش آپلود شده) را می‌گیرد و تبدیل به سفارش می‌کند.
+        این متد برای نهایی کردن خرید یک آیتم خاص استفاده می‌شود.
         
-        **مراحل:**
-        1. اعتبارسنجی آدرس و نوع سفارش.
-        2. بررسی موجودی کیف پول (اگر پرداخت آنی باشد).
-        3. کسر از کیف پول و ایجاد سفارش.
-        4. بازگرداندن اطلاعات کامل سفارش ایجاد شده برای نمایش فاکتور.
+        **نکات مهم برای فرانت‌‌اند:**
+        1. **کاربر مهمان (Guest):** ارسال `first_name`, `last_name`, `phone_number` و تمام فیلدهای آدرس (`province_id`, `city_id`, `address_text`) **اجباری** است.
+        2. **کاربر لاگین شده (Auth):**
+            * حالت الف) انتخاب از لیست آدرس‌ها: فقط `address_id` ارسال شود.
+            * حالت ب) ثبت آدرس جدید: فیلدهای آدرس (`province_id`, ...) ارسال شود (address_id نال باشد).
+        3. **نوع سفارش:** برای مهمان به صورت خودکار روی حالت **اختصاصی (2)** تنظیم می‌شود.
         """,
         parameters=[
             OpenApiParameter(
                 name='item_id',
                 type=OpenApiTypes.INT,
                 location=OpenApiParameter.PATH,
-                description='شناسه آیتم موجود در سبد خرید (Cart Item ID)',
+                description='شناسه آیتم سبد خرید (CartItem ID) که باید تبدیل به سفارش شود.',
                 required=True
             )
         ],
@@ -49,31 +47,67 @@ class CreateOrderView(GenericAPIView):
             402: OpenApiTypes.OBJECT
         },
         examples=[
-            # ===== مثال درخواست ===== #
+            # ===== EXAMPLE 1: GUEST USER ===== #
             OpenApiExample(
-                'Checkout Request',
-                summary='درخواست ثبت سفارش',
-                description='ارسال شناسه آدرس و نوع سفارش.',
+                'Scenario: Guest User (Full Info)',
+                summary='سناریو ۱: کاربر مهمان (Guest)',
+                description='کاربر لاگین نکرده است، پس باید تمام مشخصات هویتی و آدرس را دستی وارد کند.',
                 value={
-                    "address_id": 15,
-                    "type": "2" 
+                    "type": "2",
+                    "first_name": "امیر",
+                    "last_name": "رضایی",
+                    "phone_number": "09121234567",
+                    "company_name": "شرکت چاپ نمونه",
+                    "province_id": 8,
+                    "city_id": 124,
+                    "address_text": "خیابان آزادی، کوچه مهر، پلاک ۱۰، واحد ۴",
+                    "postal_code": "1234567890"
                 },
                 request_only=True
             ),
-            # ===== مثال پاسخ موفق ===== #
+            # ===== EXAMPLE 2: AUTH USER (SAVED ADDRESS) ===== #
             OpenApiExample(
-                'Order Created Response',
-                summary='پاسخ موفق (فاکتور)',
-                description='خروجی شامل جزئیات فنی (Specs) برای نمایش به کاربر است.',
+                'Scenario: Auth User (Saved Address)',
+                summary='سناریو ۲: کاربر عضو (آدرس ذخیره شده)',
+                description='کاربر لاگین است و یکی از آدرس‌های پروفایل خود را (address_id) انتخاب کرده است.',
+                value={
+                    "type": "1",
+                    "address_id": 15
+                },
+                request_only=True
+            ),
+            # ===== EXAMPLE 3: AUTH USER (NEW ADDRESS) ===== #
+            OpenApiExample(
+                'Scenario: Auth User (New Address)',
+                summary='سناریو ۳: کاربر عضو (آدرس جدید)',
+                description='کاربر لاگین است اما می‌خواهد سفارش به آدرس جدیدی ارسال شود (همزمان پروفایل هم آپدیت می‌شود).',
+                value={
+                    "type": "1",
+                    "first_name": "امیر",
+                    "last_name": "رضایی",
+                    "phone_number": "09129998877",
+                    "province_id": 5,
+                    "city_id": 40,
+                    "address_text": "اصفهان، میدان نقش جهان...",
+                    "postal_code": "8181818181"
+                },
+                request_only=True
+            ),
+            # ===== EXAMPLE 4: SUCCESS RESPONSE ===== #
+            OpenApiExample(
+                'Success Response (Invoice)',
+                summary='پاسخ موفق (فاکتور نهایی)',
+                description='خروجی سفارش ثبت شده شامل وضعیت، قیمت نهایی و جزئیات فنی محصول.',
                 value={
                     "id": 2055,
-                    "order_code": "ORD-1402-859",
-                    "user": "ali_rezaei",
-                    "status": "آغازین",
+                    "order_code": "ORD-859123",
+                    "status": "در انتظار بررسی",
                     "type_display": "سفارش اختصاصی",
                     "total_price": "2500000",
-                    "address": "تهران، خیابان آزادی...",
-                    "created_at": "2024-03-15T10:00:00Z",
+                    "recipient_name": "امیر رضایی",
+                    "recipient_phone": "09121234567",
+                    "full_address": "تهران - تهران - خیابان آزادی، کوچه مهر، پلاک ۱۰ - کدپستی: 1234567890",
+                    "created_at": "2024-03-20T14:30:00Z",
                     "item_detail": {
                         "id": 501,
                         "product_name": "کارت ویزیت لمینت مات",
@@ -83,26 +117,15 @@ class CreateOrderView(GenericAPIView):
                             "dimensions": "9 x 6 cm",
                             "has_design": True,
                             "options": [
-                                {
-                                    "id": 10,
-                                    "option_name": "نوع کاغذ",
-                                    "value_label": "گلاسه ۳۰۰ گرم",
-                                    "price_impact": 500000.0
-                                },
-                                {
-                                    "id": 12,
-                                    "option_name": "گوشه",
-                                    "value_label": "گرد",
-                                    "price_impact": 100000.0
-                                }
-                            ],
-                            "breakdown_present": True
+                                {"option_name": "گوشه", "value_label": "گرد", "price_impact": 100000},
+                                {"option_name": "جنس کاغذ", "value_label": "ایندربرد ۳۰۰ گرم", "price_impact": 0}
+                            ]
                         },
                         "design_files": [
                             {
                                 "id": 88,
-                                "requirement_name": "طرح رو",
-                                "file_url": "https://api.printoo.ir/media/..."
+                                "requirement_name": "فایل چاپی (PDF)",
+                                "file_url": "https://api.printoo.ir/media/orders/..."
                             }
                         ]
                     }
@@ -110,125 +133,142 @@ class CreateOrderView(GenericAPIView):
                 response_only=True,
                 status_codes=[201]
             ),
-            # ===== مثال خطای موجودی ===== #
-            OpenApiExample(
-                'Insufficient Funds',
-                summary='خطای کمبود موجودی (402)',
-                value={"error": "موجودی کیف پول کافی نیست. لطفاً حساب خود را شارژ کنید."},
-                response_only=True,
-                status_codes=[402]
-            )
         ]
     )
     def post(self, request, item_id, *args, **kwargs):
+        # ... (کد لاجیک ویو که در پاسخ قبلی نهایی شد) ...
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        address_instance = serializer.validated_data.get('address')
-        order_type = request.data.get('type', '2')
+        data = serializer.validated_data
+        
+        checkout_data = {
+            'first_name': data.get('first_name'),
+            'last_name': data.get('last_name'),
+            'phone_number': data.get('phone_number'),
+            'company_name': data.get('company_name'),
+            'address_id': data.get('address_id'),
+            'province_id': data.get('province_id'),
+            'province_name': data.get('province_name'),
+            'city_id': data.get('city_id'),
+            'city_name': data.get('city_name'),
+            'address_text': data.get('address_text'),
+            'postal_code': data.get('postal_code'),
+        }
+
+        order_type = data.get('type', '1')
+        user = request.user if request.user.is_authenticated else None
 
         try:
             service = CreateOrderFromCartService()
-            
-            # ===== اجرای سرویس ===== #
             created_order = service.execute(
-                user=request.user, 
-                address=address_instance,
-                order_type=order_type,
-                cart_item_id=item_id
+                checkout_data=checkout_data,
+                cart_item_id=item_id,
+                user=user,
+                order_type=order_type
             )
-            
-            # ===== نمایش خروجی ===== #
-            output_serializer = self.get_serializer(
-                created_order, 
-                many=False,
-                context={'request': request}
-            )
-            
+            output_serializer = self.get_serializer(created_order)
             return Response(output_serializer.data, status=status.HTTP_201_CREATED)
         
-        except EmptyCartError as e:
+        except (EmptyCartError, ValueError) as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-            
         except InsufficientFundsError as e:
             return Response({"error": str(e)}, status=status.HTTP_402_PAYMENT_REQUIRED)
-            
         except Exception as e:
-            return Response(
-                {"error": "An error occurred while placing the order.", "detail": str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({"error": "System Error", "detail": str(e)}, status=500)
 
+
+# ========================================== #
+# ===== 2. Bulk Checkout View ============== #
+# ========================================== #
 @extend_schema(tags=["Order"])
 class BulkCreateOrderView(GenericAPIView):
     """
-    POST /api/v1/orders/checkout/bulk/
-    Converts ALL items in the user's cart into separate orders.
+    تسویه حساب گروهی (کل سبد خرید).
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = OrderSerializer
     
     @extend_schema(
-        summary="ثبت سفارش کل سبد خرید (Bulk Checkout)",
-        description="""
-        تمام آیتم‌های موجود در سبد خرید را به سفارش‌های جداگانه تبدیل می‌کند.
-        مبلغ کل محاسبه شده و به صورت یکجا از کیف پول کسر می‌گردد.
-        """,
-        request=OrderSerializer, # ورودی فقط آدرس و نوع سفارش است
-        responses={
-            201: OrderSerializer(many=True), # خروجی لیستی از سفارش‌هاست
-            400: OpenApiTypes.OBJECT,
-            402: OpenApiTypes.OBJECT
-        },
+        summary="ثبت سفارش گروهی (Bulk Checkout)",
+        description="تمام آیتم‌های سبد خرید را تبدیل به سفارش‌های مجزا می‌کند اما با یک تراکنش مالی واحد.",
+        request=OrderSerializer,
+        responses={201: OrderSerializer(many=True)},
         examples=[
             OpenApiExample(
-                'Bulk Checkout Request',
-                value={"address_id": 15, "type": "2"},
+                'Bulk Request (Guest)',
+                summary='درخواست گروهی (مهمان)',
+                value={
+                    "type": "2",
+                    "first_name": "سارا",
+                    "last_name": "محمدی",
+                    "phone_number": "0935...",
+                    "province_id": 1,
+                    "city_id": 2,
+                    "address_text": "خیابان ولیعصر...",
+                    "postal_code": "1111111111"
+                },
                 request_only=True
             ),
-             OpenApiExample(
-                'Insufficient Funds',
-                summary='خطای کمبود موجودی',
-                value={"error": "موجودی کافی نیست. مبلغ کل سفارشات: 5,000,000 تومان"},
-                response_only=True,
-                status_codes=[402]
+            OpenApiExample(
+                'Bulk Response',
+                summary='پاسخ موفق (لیست سفارشات)',
+                value=[
+                    {
+                        "id": 2055,
+                        "order_code": "ORD-101",
+                        "status": "در انتظار بررسی",
+                        "total_price": "100000",
+                        "full_address": "تهران - تهران - خیابان ولیعصر...",
+                        "item_detail": {"product_name": "تراکت A5", "quantity": 2000}
+                    },
+                    {
+                        "id": 2056,
+                        "order_code": "ORD-102",
+                        "status": "در انتظار بررسی",
+                        "total_price": "500000",
+                        "full_address": "تهران - تهران - خیابان ولیعصر...",
+                        "item_detail": {"product_name": "کارت ویزیت", "quantity": 1000}
+                    }
+                ],
+                response_only=True
             )
         ]
     )
     def post(self, request, *args, **kwargs):
-        # اعتبارسنجی ورودی (آدرس و نوع سفارش)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
         
-        address_instance = serializer.validated_data.get('address')
-        order_type = request.data.get('type', '2')
+        checkout_data = {
+            'first_name': data.get('first_name'),
+            'last_name': data.get('last_name'),
+            'phone_number': data.get('phone_number'),
+            'company_name': data.get('company_name'),
+            'address_id': data.get('address_id'),
+            'province_id': data.get('province_id'),
+            'province_name': data.get('province_name'),
+            'city_id': data.get('city_id'),
+            'city_name': data.get('city_name'),
+            'address_text': data.get('address_text'),
+            'postal_code': data.get('postal_code'),
+        }
+
+        order_type = data.get('type', '1')
+        user = request.user if request.user.is_authenticated else None
 
         try:
             service = CreateOrderFromCartService()
-            
-            # ===== اجرای سرویس Bulk ===== #
-            created_orders_list = service.execute_bulk(
-                user=request.user, 
-                address=address_instance,
+            created_orders = service.execute_bulk(
+                checkout_data=checkout_data,
+                user=user,
                 order_type=order_type
             )
-            
-            # ===== نمایش خروجی (لیست) ===== #
-            output_serializer = self.get_serializer(
-                created_orders_list, 
-                many=True, # نکته مهم: many=True
-                context={'request': request}
-            )
-            
+            output_serializer = self.get_serializer(created_orders, many=True)
             return Response(output_serializer.data, status=status.HTTP_201_CREATED)
         
-        except EmptyCartError as e:
+        except (EmptyCartError, ValueError) as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-            
         except InsufficientFundsError as e:
             return Response({"error": str(e)}, status=status.HTTP_402_PAYMENT_REQUIRED)
-            
         except Exception as e:
-            return Response(
-                {"error": "An error occurred during bulk checkout.", "detail": str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({"error": "System Error", "detail": str(e)}, status=500)

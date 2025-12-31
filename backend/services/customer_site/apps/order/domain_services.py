@@ -41,29 +41,51 @@ class CheckoutService:
                 
     # ========== CHECKOUT SINGLE ITEM ========== #
     @transaction.atomic
-    def checkout_single_item(self, user: User, cart_item: CartItem, address: Address, order_type: str) -> Order:
+    def checkout_single_item(
+        self, 
+        cart_item: CartItem, 
+        # ===== داده‌های هویتی و آدرس ===== #
+        recipient_name: str,
+        recipient_phone: str,
+        full_address_text: str,
+        company_name: str = None,
+        address_object: Address = None,
+        user: User = None,
+        order_type: str = "1"
+    ) -> Order:
         """
-        تبدیل یک CartItem مشخص به یک Order مجزا. (منطق جدید)
+        ایجاد سفارش.
+        قانون دامنه: اگر user نال باشد، order_type باید حتما '2' (اختصاصی) باشد.
         """
         
+        # ===== اگر کاربر مهمان بود، سفارش اختصاصی شود ===== #
+        final_order_type = order_type
+        if user is None:
+            final_order_type = "2"
+            
         # ===== دریافت وضعیت اولیه (باید از طریق کد سیستمی باشد) ===== #
         try:
             initial_status = OrderStatus.objects.get(internal_code="PENDING_INITIAL_ADMIN")
         except OrderStatus.DoesNotExist:
-            # ===== اگر پیدا نشد، دریافت اولین وضعیت در سیستم ===== #
             initial_status = OrderStatus.objects.first()
-            if not initial_status:
-                raise DjangoValidationError("خطای سیستمی: هیچ وضعیت سفارشی تعریف نشده است.")
-        
-        # ===== ایجاد سفارش ===== #
+            
+            
+        #‌ ===== ایجاد سفارش ===== #
         order = Order.objects.create(
             user=user,
             current_status=initial_status,
-            address=address,
             total_price=cart_item.price,
             base_products_price=cart_item.price, 
-            type=order_type,
+            type=final_order_type,
             order_code=self._generate_order_code(),
+            
+            #‌ ===== نام و اطلاعات کاربر ===== #
+            recipient_name=recipient_name,
+            recipient_phone=recipient_phone,
+            company_name=company_name,
+            #‌ ===== آدرس کاربر ===== #
+            full_address=full_address_text,
+            address_obj=address_object
         )
         
         # ===== ایجاد آیتم سفارش ===== #
@@ -91,7 +113,7 @@ class CheckoutService:
         Quotation.objects.create(
             quotation_number=f"QUOT-{order.order_code}",
             converted_order=order,
-            customer_name=customer_name,
+            customer_name=recipient_name,
             product_name=cart_item.product.name if cart_item.product else "محصول حذف شده",
             product_image=final_image_file,
             product_snapshot=cart_item.items,

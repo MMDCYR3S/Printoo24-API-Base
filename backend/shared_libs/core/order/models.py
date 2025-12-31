@@ -142,9 +142,29 @@ class Order(models.Model):
     user = models.ForeignKey(
         "core.User",
         verbose_name=_("مشتری"),
-        on_delete=models.PROTECT
+        on_delete=models.PROTECT,
+        null=True, blank=True,
+        help_text=_("در صورت نال بودن، سفارش به عنوان مهمان ثبت شده است.")
     )
     order_code = models.CharField(_("کد پیگیری"), max_length=50, unique=True, db_index=True, null=True, blank=True)
+    # ===== اطلاعات مشتری ===== #
+    recipient_name = models.CharField(_("نام گیرنده"), max_length=255, null=True, blank=True, help_text="نام و نام خانوادگی در لحظه ثبت سفارش")
+    recipient_phone = models.CharField(_("شماره تماس گیرنده"), max_length=11, null=True, blank=True)
+    company_name = models.CharField(_("نام شرکت"), max_length=150, blank=True, null=True)
+    # ===== آدرس به صورت متنی ===== #
+    full_address = models.TextField(
+        _("آدرس کامل پستی"), null=True, blank=True,
+        help_text=_("شامل: استان، شهر، کدپستی و آدرس دقیق")
+    )
+    # ===== نوع و وضعیت سفارش ===== #
+    address = models.ForeignKey(
+        "core.Address",
+        verbose_name=_("آدرس"),
+        on_delete=models.PROTECT,
+        related_name="address_order",
+        blank=True,
+        null=True
+    )
     type = models.CharField(_("نوع سفارش"), max_length=150, choices=ORDER_TYPE, default="2")
     current_status = models.ForeignKey(
         OrderStatus,
@@ -153,14 +173,6 @@ class Order(models.Model):
         related_name="orders",
         null=True,
         blank=True
-    )
-    address = models.ForeignKey(
-        "core.Address",
-        verbose_name=_("آدرس"),
-        on_delete=models.PROTECT,
-        related_name="address_order",
-        blank=True,
-        null=True
     )
     total_price = models.DecimalField(_("مبلغ کل سفارش"), max_digits=18, decimal_places=0,default=0)
     base_products_price = models.DecimalField(_("مبلغ پایه اقلام"), max_digits=15, decimal_places=0, default=0)
