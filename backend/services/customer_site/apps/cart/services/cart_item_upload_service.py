@@ -1,5 +1,4 @@
 import logging
-from django.core.files.base import ContentFile
 from django.db.models import Q
 from rest_framework.exceptions import ValidationError, NotFound
 
@@ -23,43 +22,23 @@ class CartItemUploadService:
         
         logger.info(f"Uploading file for Item {cart_item_id}")
 
-        # 1. اعتبارسنجی ورودی هویتی
+        # ==== اعتبارسنجی ===== #
         if not user and not session_key:
-             raise ValidationError("شناسه کاربر یا نشست مهمان الزامی است.")
+             raise ValidationError("نشست کاربر معتبر نیست. لطفاً صفحه را رفرش کنید.")
 
-        # 2. یافتن ایمن آیتم (Security Check)
+        # ===== یافتن ایمن سبد خرید و آیتم ===== #
         query = Q(id=cart_item_id)
         if user and user.is_authenticated:
             query &= Q(cart__user=user)
         else:
-            # برای مهمان: آیتم باید مال این سشن باشد و کاربری نداشته باشد
             query &= Q(cart__session_key=session_key, cart__user__isnull=True)
 
         try:
             cart_item = CartItem.objects.get(query)
         except CartItem.DoesNotExist:
-            raise NotFound("آیتم مورد نظر در سبد خرید یافت نشد.")
+            raise NotFound("آیتم مورد نظر در سبد خرید یافت نشد (یا دسترسی ندارید).")
 
-        # 3. بررسی ابعاد و الزامات فنی (Validation Logic)
-        # این قسمت از روی JSON ذخیره شده در آیتم خوانده می‌شود
-        config = cart_item.items or {}
-        meta = config.get('meta', {})
-        
-        # اگر سایز مشخص است، می‌توان اینجا چک کرد (اختیاری)
-        # مثال: چک کردن نسبت ابعاد یا حجم فایل
-        # فعلا فقط لاگ می‌کنیم چون اعتبارسنجی دقیق فایل معمولاً پیچیده است
-        logger.debug(f"Processing upload for config: {meta}")
-
-        # 4. پاکسازی فایل‌های قبلی (استراتژی تک‌فایلی)
-        # اگر می‌خواهید چند فایل باشد، این خط را حذف کنید.
-        # اما معمولاً برای هر ردیف آپلود (مثلاً طرح رو)، یک فایل نهایی داریم.
-        # اگر سیستم شما چند فایلی است (مثلاً طرح رو و پشت)، باید requirement_id هم بگیرید.
-        # فرض فعلی: هر آیتم سبد فعلاً یک فایل کلی می‌گیرد (یا لیست فایل‌ها Append می‌شود).
-        
-        # اگر می‌خواهید فایل‌های قبلی پاک شود (Replace Strategy):
-        # CartItemUpload.objects.filter(cart_item=cart_item).delete()
-
-        # 5. ذخیره فایل
+        # ===== ایجاد عکس آیتم ===== #
         upload_instance = CartItemUpload.objects.create(
             cart_item=cart_item,
             file=file_obj
@@ -67,4 +46,3 @@ class CartItemUploadService:
         
         logger.info(f"File uploaded successfully: {upload_instance.id}")
         return upload_instance
-    

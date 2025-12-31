@@ -136,10 +136,10 @@ class CreateOrderView(GenericAPIView):
         ]
     )
     def post(self, request, item_id, *args, **kwargs):
-        # ... (کد لاجیک ویو که در پاسخ قبلی نهایی شد) ...
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        
         
         checkout_data = {
             'first_name': data.get('first_name'),
@@ -156,7 +156,9 @@ class CreateOrderView(GenericAPIView):
         }
 
         order_type = data.get('type', '1')
+        # ===== تشخیص کاربر ===== #
         user = request.user if request.user.is_authenticated else None
+        session_key = request.session.session_key
 
         try:
             service = CreateOrderFromCartService()
@@ -164,7 +166,7 @@ class CreateOrderView(GenericAPIView):
                 checkout_data=checkout_data,
                 cart_item_id=item_id,
                 user=user,
-                order_type=order_type
+                session_key=session_key,
             )
             output_serializer = self.get_serializer(created_order)
             return Response(output_serializer.data, status=status.HTTP_201_CREATED)
@@ -239,6 +241,7 @@ class BulkCreateOrderView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         
+        # ===== آماده سازی اطلاعات ===== #
         checkout_data = {
             'first_name': data.get('first_name'),
             'last_name': data.get('last_name'),
@@ -254,13 +257,16 @@ class BulkCreateOrderView(GenericAPIView):
         }
 
         order_type = data.get('type', '1')
+        # ===== تشخیص کاربر ===== #
         user = request.user if request.user.is_authenticated else None
+        session_key = request.session.session_key
 
         try:
             service = CreateOrderFromCartService()
             created_orders = service.execute_bulk(
                 checkout_data=checkout_data,
                 user=user,
+                session_key=session_key,
                 order_type=order_type
             )
             output_serializer = self.get_serializer(created_orders, many=True)

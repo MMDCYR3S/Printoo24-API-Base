@@ -1,5 +1,6 @@
 import logging
 
+from django.db.models import Q
 from rest_framework.exceptions import NotFound
 
 from core.models import User
@@ -12,57 +13,78 @@ logger = logging.getLogger('cart.services.delete')
 # ====== Cart Item Delete Service ====== #
 class CartItemDeleteService:
     """
-    سرویس مدیریت حذف تکی آیتم‌های سبد خرید.
-    
-    این سرویس وظیفه دارد درخواست حذف یک آیتم را دریافت کرده،
-    مالکیت کاربر بر آن آیتم را بررسی کند و سپس اقدام به حذف نماید.
+    سرویس حذف تکی آیتم (پشتیبانی از Guest و Auth).
     """
     
-    def __init__(self, user: User):
-        self.user = user
+    def __init__(self, user: User = None, session_key: str = None):
+        self.user = user if (user and user.is_authenticated) else None
+        self.session_key = session_key
+
+        if not self.user and not self.session_key:
+            raise NotFound("نشست کاربری نامعتبر است.")
         
     def delete(self, item_id: int) -> None:
         """
-        حذف یک آیتم مشخص از سبد خرید.
-
-        Args:
-            item_id (int): شناسه آیتم سبد خرید.
-
-        Raises:
-            NotFound: اگر آیتم یافت نشود یا متعلق به کاربر نباشد.
+        حذف آیتم با بررسی مالکیت.
         """
-        logger.info(f"Request to delete CartItem ID: {item_id} for User ID: {self.user.id}")
-
-        try:
-            # ===== دریافت جزئیات آیتم با بررسی مالکیت کاربر ===== #
-            item = CartItem.objects.get_item_details(item_id, self.user)
-            item.delete()
-            logger.info("Item deleted")
-        except ItemNotFoundException:
-            logger.warning(f"Item {item_id} not found")
-            raise NotFound("آیتم یافت نشد.")
+        # ===== لاگ برای چک کردن ===== #
+        user_log = self.user.id if self.user else f"Guest-{self.session_key}"
+        logger.info(f"Request delete Item {item_id} for {user_log}")
         
-# ====== Cart Clear Service ====== #
+        # ===== دریافت آیتم کاربر ===== #
+        query = Q(id=item_id)
+        if self.user:
+            query &= Q(cart__user=self.user)
+        else:
+            query &= Q(cart__session_key=self.session_key, cart__user__isnull=True)
+        
+        try:
+            # ===== دریافت آیتم ===== #
+            item = CartItem.objects.get(query)
+            item.delete()
+            logger.info(f"Item {item_id} deleted successfully.")
+        
+        # ===== اگر آیتم یافت نشد ===== #
+        except CartItem.DoesNotExist:
+            logger.warning(f"Item {item_id} not found or access denied.")
+            raise NotFound("آیتم یافت نشد یا متعلق به شما نیست.")
+        
 class CartClearService:
     """
-    سرویس مدیریت پاکسازی کامل سبد خرید.
-    
-    این سرویس تمام آیتم‌های موجود در سبد خرید کاربر را به یکباره حذف می‌کند.
+    سرویس پاکسازی کل سبد خرید (پشتیبانی از Guest و Auth).
     """
     
-    def __init__(self, user: User):
-        self.user = user
-
-    def clear(self) -> None:
-        """
-        حذف تمام آیتم‌های سبد خرید کاربر.
-        """
-        logger.info(f"Request to clear entire cart for User ID: {self.user.id}")
+    def __init__(self, user: User = None, session_key: str = None):
+        # ===== تشخیص کاربر ===== #
+        self.user = user if (user and user.is_authenticated) else None
+        self.session_key = session_key
         
+        # ===== اگر کاربری وجود نداشت ===== #    
+        if not self.user and not self.session_key:
+             raise NotFound("نشست کاربری نامعتبر است.")
+         
     def clear(self) -> None:
+        """
+        پاک کردن تمام آیتم‌های سبد خرید.
+        """
+        user_log = self.user.id if self.user else f"Guest-{self.session_key}"
+        logger.info(f"Request clear cart for {user_log}")
+        
         try:
-            cart = Cart.objects.get_cart_by_user(self.user)
-            CartItem.objects.delete_all_items_by_cart(cart)
+            # ===== دریافت سبد خرید ===== #
+            if self.user:
+                cart = Cart.objects.filter(user=self.user).first()
+            else:
+                cart = Cart.objects.filter(session_key=self.session_key, user__isnull=True).first()
+
+            if cart:
+                # ===== پاک کردن تمام آیتم‌های سبد خرید ===== #
+                count, _ = cart.cart_items.all().delete()
+                logger.info(f"Cart {cart.id} cleared. Removed {count} items.")
+            else:
+                logger.info("Cart not found (already empty).")
+                
         except Exception as e:
-            logger.error(f"Error clearing cart for user {self.user.id}: {str(e)}")
+            logger.error(f"Error clearing cart: {str(e)}")
             raise e
+        

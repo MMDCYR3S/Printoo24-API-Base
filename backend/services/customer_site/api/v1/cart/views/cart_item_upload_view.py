@@ -2,43 +2,64 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from rest_framework.parsers import MultiPartParser, FormParser
-from drf_spectacular.utils import extend_schema, OpenApiTypes
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample
 
 from ..serializers import CartItemFileUploadSerializer
 from apps.cart.services import CartItemUploadService
 
-# ===== Cart Item File Upload View ===== #
 @extend_schema(tags=["Cart"])
 class CartItemFileUploadView(GenericAPIView):
     """
     POST /api/v1/cart/items/{item_id}/upload/
+    آپلود فایل برای آیتم سبد خرید.
     """
     permission_classes = [AllowAny]
     serializer_class = CartItemFileUploadSerializer
-    parser_classes = (MultiPartParser, FormParser)
+    # ===== 
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
 
     @extend_schema(
         summary="آپلود فایل طراحی",
-        description="ارسال فایل بصورت multipart/form-data. هدر X-Guest-Token برای مهمان الزامی است.",
+        description="""
+        فایل را به صورت `multipart/form-data` ارسال کنید.
+        سیستم به طور خودکار کاربر لاگین شده یا مهمان (از طریق کوکی Session) را شناسایی می‌کند.
+        """,
         request=CartItemFileUploadSerializer,
-        responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT},
+        responses={
+            201: OpenApiTypes.OBJECT, 
+            400: OpenApiTypes.OBJECT,
+            404: OpenApiTypes.OBJECT
+        },
+        examples=[
+            OpenApiExample(
+                'Upload Success',
+                summary='نمونه پاسخ موفق',
+                value={
+                    "message": "فایل با موفقیت آپلود شد.",
+                    "upload_id": 15,
+                    "file_name": "design.pdf"
+                },
+                response_only=True,
+                status_codes=[201]
+            )
+        ]
     )
     def post(self, request, item_id):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # ===== دریافت دیتا ===== #
-        requirement_id = serializer.validated_data.get('requirement_id') 
+        requirement_id = serializer.validated_data.get('requirement_id')
         file_obj = serializer.validated_data['file']
         
-        # ===== استخراج شناسه کاربر و مهمان ===== #
+        # ===== تشخیص هویت (User یا Session) ===== #
         user = request.user if request.user.is_authenticated else None
-        session_key = request.headers.get('X-Guest-Token')
+
+        session_key = request.session.session_key
+        
+        service = CartItemUploadService()
         
         try:
-            # ===== اجرا سرویس ===== #
-            service = CartItemUploadService()
             upload_instance = service.upload_file(
                 cart_item_id=item_id,
                 file_obj=file_obj,
@@ -49,8 +70,11 @@ class CartItemFileUploadView(GenericAPIView):
             return Response({
                 "message": "فایل با موفقیت آپلود شد.",
                 "upload_id": upload_instance.id,
-                "file_name": upload_instance.file.name
+                "file_name": upload_instance.file.name,
+                "requirement_id": requirement_id
             }, status=status.HTTP_201_CREATED)
             
+        except NotFound as e:
+            return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

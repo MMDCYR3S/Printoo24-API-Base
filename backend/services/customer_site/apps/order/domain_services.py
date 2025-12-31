@@ -85,7 +85,7 @@ class CheckoutService:
             company_name=company_name,
             #‌ ===== آدرس کاربر ===== #
             full_address=full_address_text,
-            address_obj=address_object
+            address=address_object
         )
         
         # ===== ایجاد آیتم سفارش ===== #
@@ -99,11 +99,6 @@ class CheckoutService:
             description=cart_item.description,
             status='pending'
         )
-        
-        # ===== پیدا کردن نام مشتری ===== #
-        customer_name = user.username
-        if hasattr(user, 'customer_profile'):
-            customer_name = f"{user.customer_profile.first_name} {user.customer_profile.last_name}"
         
         # ===== منطق تصویر محصول برای Quotation ===== #
         product_image_obj = cart_item.product.product_image.order_by('order').first()

@@ -1,4 +1,6 @@
 import logging
+
+from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 
 from core.models import User
@@ -11,84 +13,73 @@ logger_detail = logging.getLogger('cart.services.detail')
 # ===== Cart List Service ===== #
 class CartListService:
     """
-    سرویس مدیریت نمایش لیست آیتم‌های سبد خرید کاربر.
-    
-    این سرویس وظیفه دارد سبد خرید کاربر را بازیابی کرده (یا بسازد)
-    و تمام آیتم‌های موجود در آن را برای نمایش در فرانت‌اند آماده کند.
+    سرویس مدیریت نمایش لیست آیتم‌های سبد خرید (Guest + User).
     """
-        
-    def get_user_cart_items(self, user: User) -> dict:
-        """
-        دریافت سبد خرید و لیست آیتم‌های آن.
 
-        Args:
-            user (User): کاربر درخواست دهنده.
-
-        Returns:
-            dict: دیکشنری شامل آبجکت سبد خرید و لیست کوئری‌ست آیتم‌ها.
+    def get_cart_details(self, user: User = None, session_key: str = None) -> dict:
         """
-        logger_list.info(f"Fetching cart list for User ID: {user.id}")
+        دریافت سبد خرید و آیتم‌ها بر اساس کاربر یا سشن.
+        """
+        identifier = f"User:{user.id}" if user else f"Session:{session_key}"
+        logger_list.info(f"Fetching cart list for {identifier}")
         
-        try:
-            # ===== دریافت یا ایجاد سبد خرید ===== #
-            cart = Cart.objects.get_or_create_cart(user)
-            logger_list.debug(f"Cart retrieved/created for User ID: {user.id}, Cart ID: {cart.id}")
-            
-            # ===== دریافت آیتم‌های سبد خرید ===== #
-            items = CartItem.objects.get_items_by_cart(cart)
-            logger_list.info(f"Retrieved {items} items for Cart ID: {cart.id}")
-            
-            # ===== محاسبه مجموع قیمت کل سبد خرید ===== #
-            total_price = sum(item.price for item in items)
-            
+        cart = None
+        if user and user.is_authenticated:
+            cart = Cart.objects.filter(user=user).first()
+        elif session_key:
+            cart = Cart.objects.filter(session_key=session_key, user__isnull=True).first()
+
+        # ===== اگر کاربر یا سشن وجود نداشته باشد، سپس بازگشت خالی ===== #
+        if not cart:
             return {
-                "cart": cart,
-                "items": items,
-                "summary": {
-                    "total_price": total_price
-                }
+                "cart": None,
+                "items": [],
+                "summary": {"total_price": 0}
+            }            
+        # ===== دریافت آیتم‌ها ===== #
+        items = CartItem.objects.filter(cart=cart).select_related('product').prefetch_related('uploads')
+        
+        # ===== محاسبه جمع قیمت ===== #
+        total_price = sum(item.price for item in items)
+        
+        # ===== بازگشت ===== #
+        return {
+            "cart": cart,
+            "items": items,
+            "summary": {
+                "total_price": total_price
             }
-        except Exception as e:
-            logger_list.exception(f"Error fetching cart list for User ID: {user.id}")
-            raise e
+        }
 
 # ======= Cart Item Detail Service ======= #
 class CartItemDetailService:
     """
-    سرویس مدیریت نمایش جزئیات یک آیتم خاص در سبد خرید.
-    
-    این سرویس برای زمانی استفاده می‌شود که کاربر می‌خواهد جزئیات یک محصول خاص
-    در سبد خرید خود (مثل فایل‌های آپلود شده یا ویژگی‌های انتخابی) را مشاهده یا ویرایش کند.
+    سرویس نمایش جزئیات یک آیتم خاص با بررسی مالکیت (Guest + User).
     """
         
-    def get_item_detail(self, item_id: int, user: User) -> CartItem:
+    def get_item_detail(self, item_id: int, user: User = None, session_key: str = None) -> CartItem:
         """
-        دریافت جزئیات یک آیتم مشخص با بررسی مالکیت.
-
-        Args:
-            item_id (int): شناسه آیتم سبد خرید.
-            user (User): کاربر درخواست دهنده (جهت احراز مالکیت).
-
-        Returns:
-            CartItem: آبجکت آیتم پیدا شده.
-
-        Raises:
-            ObjectDoesNotExist: اگر آیتم پیدا نشود یا متعلق به کاربر نباشد.
+        دریافت جزئیات آیتم با بررسی دقیق دسترسی.
         """
-        logger_detail.info(f"Fetching details for CartItem ID: {item_id}, User ID: {user.id}")
+        logger_detail.info(f"Fetching item {item_id}")
         
+        # ===== اگر کاربر یا سشن وجود نداشته باشد ===== #
+        if not user and not session_key:
+             raise ObjectDoesNotExist("شناسه معتبری برای یافتن آیتم وجود ندارد.")
+        
+        # ===== دریافت آیتم ===== # 
+        query = Q(id=item_id)
+        if user and user.is_authenticated:
+            query &= Q(cart__user=user)
+        else:
+            query &= Q(cart__session_key=session_key, cart__user__isnull=True)
+         
+        # ===== دریافت ===== #
         try:
-            item = CartItem.objects.get_item_by_id(item_id, user)
-
-            if not item:
-                logger_detail.warning(f"CartItem {item_id} not found or access denied for User ID: {user.id}")
-                raise ObjectDoesNotExist("آیتم مورد نظر یافت نشد یا متعلق به شما نیست.")
-            
-            logger_detail.debug(f"CartItem {item_id} details retrieved successfully.")
+            item = CartItem.objects.select_related('product').prefetch_related('uploads').get(query)
             return item
             
-        except ObjectDoesNotExist as e:
-            raise e
-        except Exception as e:
-            logger_detail.exception(f"Unexpected error retrieving CartItem {item_id} for User ID: {user.id}")
-            raise e
+        except CartItem.DoesNotExist:
+            logger_detail.warning(f"Access denied or not found: Item {item_id}")
+            raise ObjectDoesNotExist("آیتم مورد نظر یافت نشد.")
+         

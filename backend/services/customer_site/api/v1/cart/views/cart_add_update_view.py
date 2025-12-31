@@ -7,6 +7,14 @@ from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParamete
 from ..serializers import AddToCartSerializer, CartItemUpdateSerializer
 from apps.cart.services import AddToCartService, CartItemUpdateService
 
+def get_session_key(request):
+    """
+    اگر کاربر سشن ندارد، برایش می‌سازیم و کلیدش را برمی‌گردانیم.
+    """
+    if not request.session.exists(request.session.session_key):
+        request.session.create()
+    return request.session.session_key
+
 # ===== Add To Cart View ===== #
 @extend_schema(tags=["Cart"])
 class AddToCartView(GenericAPIView):
@@ -107,21 +115,21 @@ class AddToCartView(GenericAPIView):
         
         # ===== استخراج شناسه کاربر و مهمان ===== #
         user = request.user if request.user.is_authenticated else None
-        session_key = request.headers.get('X-Guest-Token')
+        session_key = None
+        if not user:
+            session_key = get_session_key(request)
 
         try:
-            # ===== اجرا سرویس ===== #
+            # ===== اجرای سرویس ===== #
             service = AddToCartService(user=user, session_key=session_key)
             cart_item = service.execute(
                 product_id=data["product_id"],
                 selections=data["selections"]
             )
-            
             return Response({"id": cart_item.id, "message": "Item added"}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
 # ===== Cart Item Update View ===== #
 @extend_schema(tags=["Cart"])
@@ -176,19 +184,21 @@ class CartItemUpdateView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # ===== استخراج شناسه کاربر و مهمان ===== #
         user = request.user if request.user.is_authenticated else None
-        session_key = request.headers.get('X-Guest-Token')
+        
+        # ===== استخراج شناسه کاربر و مهمان ===== #
+        session_key = None
+        if not user:
+            session_key = get_session_key(request)
 
         try:
-            # ===== اجرا سرویس ===== #
+            # ===== اجرای سرویس ===== #
             service = CartItemUpdateService(user=user, session_key=session_key)
             updated_item = service.update(
                 cart_item_id=item_id,
                 raw_data=serializer.validated_data
             )
-            
-            return Response({"id": updated_item.id, "message": "Item updated"}, status=status.HTTP_200_OK)
+            return Response({"id": updated_item.id, "message": "Updated"}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

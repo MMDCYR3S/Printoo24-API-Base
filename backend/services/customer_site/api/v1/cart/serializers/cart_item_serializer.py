@@ -1,34 +1,33 @@
 from rest_framework import serializers
-from core.models import Product, ProductOption
-from apps.cart.models import Cart, CartItem
+from core.models import Product
+from apps.cart.models import Cart, CartItem, CartItemUpload
 
-# ======== Product Serializer ======== #
+# ===== Product Summary ===== #
 class ProductSerializer(serializers.ModelSerializer):
-    """
-    سریالایزر برای نمایش یک محصول
-    """
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug']
+        fields = ['id', 'name', 'slug', 'has_quantity']
 
-# ======== Option Serializer ======== #
-class OptionSerializer(serializers.ModelSerializer):
-    """
-    سریالایزر برای نمایش ویژگی های یک محصول
-    """
-    option_value_name = serializers.CharField(source='option_value.name')
+# ===== Uploaded Files Serializer ===== #
+class CartItemUploadSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
     class Meta:
-        model = ProductOption
-        fields = ['id', 'option_value_name', 'price_impact']
+        model = CartItemUpload
+        fields = ['id', 'file_url', 'uploaded_at']
+    
+    def get_file_url(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri(obj.file.url) if request else obj.file.url
 
-# ======== Cart Item Detail Serializer ======== #
+# ===== Cart Item Detail Serializer ===== #
 class CartItemDetailSerializer(serializers.ModelSerializer):
     """
-    سریالایزر نمایش تمام جزئیات یک آیتم سبد خرید
+    سریالایزر هوشمند که داده‌های JSON ذخیره شده در آیتم را پارس می‌کند.
     """
     product = ProductSerializer(read_only=True)
-    quantity_name = serializers.CharField(source='product.product_quantity.quantity.value', read_only=True)
-    size_name = serializers.CharField(source='product.product_size.size.name', read_only=True)
+    uploads = CartItemUploadSerializer(many=True, read_only=True)
+    # ===== ریز جزئیات آیتم و محصول انتخابی ===== #
+    specs = serializers.SerializerMethodField(help_text="مشخصات فنی (سایز، متریال و ...)")
 
     class Meta:
         model = CartItem
@@ -37,17 +36,31 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
             'product',
             'name',
             'description',
-            'quantity_name', 
-            'size_name',
-            'price', 
+            'quantity',
+            'price',
+            'specs',
+            'uploads',
             'created_at'
         ]
 
-# ======== Cart List Serializer ======== #
+    def get_specs(self, obj):
+        """
+        استخراج داده‌های قابل نمایش از فیلد JSON `items`
+        """
+        raw = obj.items or {}
+        meta = raw.get('meta', {})
+        
+        # تلاش برای ساخت یک دیکشنری تمیز
+        return {
+            "size_label": meta.get('size_info', {}).get('size_name') or "سایز اختصاصی",
+            "quantity_label": meta.get('quantity_info', {}).get('quantity_text') or str(obj.quantity),
+            "dimensions": f"{meta.get('size_info', {}).get('width')}x{meta.get('size_info', {}).get('height')}",
+            "options": raw.get('options', []), # لیست آپشن‌های انتخاب شده
+            "has_design": meta.get('has_design', True)
+        }
+
+# ===== Cart List Serializer ===== #
 class CartListSerializer(serializers.ModelSerializer):
-    """
-    سریالایزر نمایش لیست آیتم‌های سبد خرید کاربر.
-    """
     items = CartItemDetailSerializer(many=True, read_only=True)
     total_price = serializers.SerializerMethodField()
 
@@ -56,5 +69,4 @@ class CartListSerializer(serializers.ModelSerializer):
         fields = ['id', 'items', 'total_price', 'updated_at']
 
     def get_total_price(self, obj):
-        items = getattr(obj, 'prefetched_items', obj.cart_items.all())
-        return sum(item.price for item in items)
+        return sum(item.price for item in obj.cart_items.all())

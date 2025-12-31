@@ -30,7 +30,7 @@ class AddToCartService:
         
     @transaction.atomic
     def execute(self, product_id: int, selections: Dict[str, Any]) -> CartItem:
-        logger.info(f"Start adding product {product_id} for user {self.user.id}")
+        logger.info(f"Start adding product {product_id} for user")
 
         try:
             # ===== دریافت محصول ===== #

@@ -152,8 +152,7 @@ class OrderSerializer(serializers.ModelSerializer):
         ]
 
     def get_item_detail(self, obj):
-        # چون در ویو از prefetch استفاده می‌کنیم، اینجا کوئری اضافه نمی‌زند
-        item = obj.orderitem_set.first() # دقت کنید related_name پیش فرض یا ست شده را چک کنید
+        item = obj.order_item_order.first()
         if item:
             return OrderItemDetailSerializer(item, context=self.context).data
         return None
