@@ -141,13 +141,25 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     def get_category(self, obj):
         """
-        چون is_primary نداریم و قانون این بود که محصول به یک زیردسته وصل شود،
-        اولین دسته‌بندی موجود در لیست M2M را برمی‌گردانیم.
+        بازگرداندن نام والد و فرزند به صورت دیکشنری مسطح (مانند Detail).
         """
-        cat = obj.categories.first()
-        if cat:
-            return CategorySerializer(cat).data
-        return None
+        assigned_cat = obj.categories.first()
+        
+        parent_name = None
+        category_name = None
+        
+        if assigned_cat:
+            category_name = assigned_cat.name
+
+            if assigned_cat.parent:
+                parent_name = assigned_cat.parent.name
+            else:
+                parent_name = assigned_cat.name
+        # ===== بازگشت اطلاعات ===== #
+        return {
+            "parent_category": parent_name,
+            "children_category": category_name
+        }
 
     def get_thumbnail(self, obj):
         img = obj.product_image.first()
