@@ -1,4 +1,4 @@
-// src/app/components/layout/Header.jsx
+// src/app/layouts/Header.jsx
 import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -13,13 +13,11 @@ import {
 } from 'lucide-react';
 import MegaMenu from '../components/layout/MegaMenu';
 
-
 const Header = ({ onOpenDrawer }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const closeTimeoutRef = useRef(null);
 
-  // مدیریت هوشمند hover برای مگامنو
   const handleMouseEnter = () => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
@@ -39,17 +37,10 @@ const Header = ({ onOpenDrawer }) => {
 
   return (
     <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-2xl shadow-lg">
-      
-      {/* هدر اصلی */}
       <div className="container mx-auto px-4 relative">
-        
-        {/* ردیف اصلی */}
         <div className="h-14 py-3 flex items-center justify-between gap-3">
           
-          {/* بخش راست: لوگو و منو موبایل */}
           <div className="flex items-center gap-3">
-            
-            {/* دکمه منو موبایل */}
             <button 
               onClick={onOpenDrawer} 
               className="lg:hidden btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary transition-all"
@@ -58,19 +49,15 @@ const Header = ({ onOpenDrawer }) => {
               <Menu size={26} strokeWidth={2.5} />
             </button>
 
-            {/* لوگو */}
-            <Link 
-              to="/" 
-              className="flex items-center group"
-            >
+            {/* اصلاح ۱: استفاده از span به جای a برای جلوگیری از خطای nesting */}
+            <Link to="/" className="flex items-center group">
               <span className="text-2xl md:text-3xl font-black text-neutral">24</span>
-              <a href='/' className="text-2xl md:text-3xl font-black bg-gradient-to-l from-primary to-secondary bg-clip-text text-transparent transition-transform">
+              <span className="text-2xl md:text-3xl font-black bg-gradient-to-l from-primary to-secondary bg-clip-text text-transparent transition-transform">
                 Printoo
-              </a>
+              </span>
             </Link>
           </div>
 
-          {/* بخش وسط: جستجو */}
           <div className="flex-1 max-w-xl hidden md:block">
             <div className={`
               relative flex items-center rounded-full border-2 transition-all duration-300
@@ -91,12 +78,9 @@ const Header = ({ onOpenDrawer }) => {
             </div>
           </div>
 
-          {/* بخش چپ: ابزارها */}
           <div className="flex items-center gap-2">
             
-
-
-            {/* کیف پول / اعتبار */}
+            {/* کیف پول */}
             <div 
               onClick={handleCreditClick}
               className="tooltip tooltip-bottom cursor-pointer"
@@ -129,8 +113,8 @@ const Header = ({ onOpenDrawer }) => {
               </button>
             </div>
 
-            {/* پروفایل کاربر */}
-            <div className="dropdown dropdown-end" Link to="/profile">
+            {/* اصلاح ۲: حذف پراپ‌های اضافه Link و to از div */}
+            <div className="dropdown dropdown-end">
               <div 
                 tabIndex={0} 
                 role="button" 
@@ -163,11 +147,10 @@ const Header = ({ onOpenDrawer }) => {
           </div>
         </div>
 
-        {/* نوار دسته‌بندی - فقط دسکتاپ */}
+        {/* نوار دسته‌بندی */}
         <div className="hidden lg:block border-t border-base-200">
           <div className="flex items-center gap-1 py-2">
             
-            {/* دکمه دسته‌بندی با مگامنو */}
             <div className="relative">
               <button 
                 onMouseEnter={handleMouseEnter}
@@ -189,7 +172,6 @@ const Header = ({ onOpenDrawer }) => {
               </button>
             </div>
 
-            {/* لینک‌های سریع */}
             <div className="flex items-center gap-1 mr-2">
               {[
                 { label: '🔥 پرفروش‌ها', to: '/bestsellers' },
@@ -207,7 +189,6 @@ const Header = ({ onOpenDrawer }) => {
               ))}
             </div>
 
-            {/* شماره تماس پشتیبانی */}
             <div className="mr-auto flex items-center gap-2 text-sm text-base-content/60">
               <span>📞</span>
               <span className="font-bold dir-ltr">0770-000-0000</span>
@@ -216,7 +197,6 @@ const Header = ({ onOpenDrawer }) => {
           </div>
         </div>
 
-        {/* مگامنو */}
         <div 
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}

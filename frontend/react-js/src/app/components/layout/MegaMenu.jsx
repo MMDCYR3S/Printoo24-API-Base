@@ -1,13 +1,15 @@
 // src/app/components/layout/MegaMenu.jsx
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // useNavigate اضافه شد
 import { ChevronLeft, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { categoryService } from '../../services/categoryService';
 
-const MegaMenu = ({ isOpen }) => {
+// prop onClose اضافه شد تا وقتی کلیک شد منو بسته شود
+const MegaMenu = ({ isOpen, onClose }) => {
   const [activeId, setActiveId] = useState(null);
   const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
+  const navigate = useNavigate(); // هوک برای نویگیشن دستی
 
   useEffect(() => {
     if (isOpen && !hasOpenedOnce) setHasOpenedOnce(true);
@@ -28,9 +30,19 @@ const MegaMenu = ({ isOpen }) => {
 
   const activeCategory = categories?.find(c => c.id === activeId) || categories?.[0];
 
+  // هندلر برای کلیک روی دسته مادر در سایدبار
+  const handleParentClick = (slug) => {
+    navigate(`/shop?category=${slug}`);
+    if (onClose) onClose();
+  };
+
   return (
     // ارتفاع کمتر (450px) برای جمع‌وجور شدن کل منو
-    <div className="w-full bg-white shadow-xl rounded-b-xl border-t border-base-200 overflow-hidden flex h-[70vh]">
+    <div className={`
+      absolute top-full right-0 left-0 bg-white shadow-xl rounded-b-xl border-t border-base-200 overflow-hidden flex h-[70vh] z-50 transition-all duration-300
+      ${isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}
+    `}>
+      {/* نکته: کلاس‌های انیمیشن بالا رو اضافه کردم که روی صفحه ظاهر بشه، چون تو کد قبلی فقط div خالی بود */}
       
       {isLoading ? (
         <MegaMenuSkeleton />
@@ -43,6 +55,7 @@ const MegaMenu = ({ isOpen }) => {
                 <li key={cat.id}>
                   <button
                     onMouseEnter={() => setActiveId(cat.id)}
+                    onClick={() => handleParentClick(cat.slug)} // قابلیت کلیک روی دسته مادر
                     className={`
                       w-full flex items-center justify-between px-3 py-2.5 rounded-md text-xs md:text-sm transition-all duration-200
                       ${activeId === cat.id 
@@ -72,7 +85,8 @@ const MegaMenu = ({ isOpen }) => {
                     {activeCategory.name}
                   </h3>
                   <Link 
-                    to={`/category/${activeCategory.slug}`} 
+                    to={`/shop?category=${activeCategory.slug}`} // اصلاح لینک
+                    onClick={onClose} // بستن منو
                     className="text-xs font-bold text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors flex items-center gap-1"
                   >
                     مشاهده همه
@@ -80,18 +94,17 @@ const MegaMenu = ({ isOpen }) => {
                   </Link>
                 </div>
 
-                {/* نکته کلیدی: گرید ۶ یا ۷ ستونه برای کوچک شدن عکس‌ها 
-                   gap-3 برای نزدیک‌تر شدن آیتم‌ها
-                */}
+                {/* گرید دست نخورده باقی ماند */}
                 {activeCategory.children?.length > 0 ? (
                   <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
                     {activeCategory.children.map((sub) => (
                       <Link 
                         key={sub.id} 
-                        to={`/category/${activeCategory.slug}/${sub.slug}`}
+                        to={`/shop?category=${sub.slug}`} // اصلاح لینک زیر دسته
+                        onClick={onClose} // بستن منو
                         className="group flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
                       >
-                        {/* کانتینر تصویر: سایز عکس الان توسط تعداد ستون‌ها کنترل میشه و ریزتره */}
+                        {/* کانتینر تصویر */}
                         <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-white border border-gray-100 group-hover:border-primary/30 shadow-sm transition-all">
                           {sub.thumbnail ? (
                             <img 
@@ -106,7 +119,7 @@ const MegaMenu = ({ isOpen }) => {
                           )}
                         </div>
                         
-                        {/* متن: فونت ریزتر برای تناسب با عکس */}
+                        {/* متن */}
                         <span className="text-xs font-medium text-center text-gray-600 group-hover:text-primary line-clamp-2 h-8 leading-4 flex items-center justify-center">
                           {sub.name}
                         </span>
@@ -136,7 +149,7 @@ const MegaMenuSkeleton = () => (
             <div className="h-6 w-32 bg-gray-200 rounded"></div>
             <div className="grid grid-cols-6 gap-3">
                 {[...Array(18)].map((_,i) => (
-                   <div key={i} className="aspect-square bg-gray-100 rounded-lg"></div>
+                    <div key={i} className="aspect-square bg-gray-100 rounded-lg"></div>
                 ))}
             </div>
         </div>

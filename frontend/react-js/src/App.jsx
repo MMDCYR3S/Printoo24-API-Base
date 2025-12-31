@@ -6,12 +6,13 @@ import { Toaster } from 'react-hot-toast';
 
 // Layouts
 import AdminLayout from './app/features/admin/layout/AdminLayout';
-import AdminGuard from './app/features/auth/AdminGuard'; // مسیر گارد رو چک کن
+import AdminGuard from './app/features/auth/AdminGuard';
 import AuthLayout from './app/features/auth/AuthLayout';
 import MainLayout from './app/layouts/MainLayout';
 
 // Public & User Pages
 import HomePage from './app/pages/Home';
+import ShopPage from './app/features/shop/ShopPage'; // <--- 1. ایمپورت صفحه فروشگاه
 import LoginPage from './app/features/auth/LoginPage';
 import RegisterPage from './app/features/auth/RegisterPage';
 import VerifyPage from './app/features/auth/VerifyPage';
@@ -23,33 +24,28 @@ import AddressPage from './app/features/profile/AddressPage';
 
 // Admin Pages
 import AdminDashboard from './app/features/admin/features/dashboard/AdminDashboard';
-
-// Admin > Products
 import ProductListPage from './app/features/admin/features/products/ProductListPage';
 import ProductEditorPage from './app/features/admin/features/products/ProductEditorPage';
-import ProductDetailPage from './app/features/admin/features/products/ProductDetailPage'; // ✅ New
-import ProductSizesPage from './app/features/admin/features/products/ProductSizesPage';
+import ProductDetailPage from './app/features/admin/features/products/ProductDetailPage';
 import ProductQuantitiesPage from './app/features/admin/features/products/ProductQuantitiesPage';
-
-// Admin > Categories
-import CategoryListPage from './app/features/admin/features/categories/CategoryListPage';
-import CategoryUpsertPage from './app/features/admin/features/categories/CategoryUpsertPage';
-import CategoryDetailPage from './app/features/admin/features/categories/CategoryDetailPage';
-import SubCategoryPage from './app/features/admin/features/categories/SubCategoryPage';
-
-// Admin > Orders
-import OrderListPage from './app/features/admin/features/orders/OrderListPage';
+import ProductSizesPage from './app/features/admin/features/products/ProductSizesPage';
 import OrderCreatePage from './app/features/admin/features/orders/OrderCreatePage';
-import AdminOrderDetailsPage from './app/features/admin/features/orders/OrderDetailsPage'; // اسم رو اصلاح کردم تا با کاربر قاطی نشه
-
-// Admin > Users & Others
+import AdminOrderListPage from './app/features/admin/features/orders/OrderListPage';
+import AdminOrderDetailsPage from './app/features/admin/features/orders/OrderDetailsPage';
 import UserListPage from './app/features/admin/features/users/UsersListPage';
+import ProvincesPage from './app/features/admin/features/locations/ProvincesPage';
+import CitiesPage from './app/features/admin/features/locations/CitiesPage';
 import MessageListPage from './app/features/admin/features/messages/MessageListPage';
 import SliderSettingsPage from './app/features/admin/features/settings/SliderSettingsPage';
 import ModalSettingsPage from './app/features/admin/features/settings/ModalSettingsPage';
-import ProvincesPage from './app/features/admin/features/locations/ProvincesPage';
-import CitiesPage from './app/features/admin/features/locations/CitiesPage';
 
+// Admin Categories
+import CategoryListPage from './app/features/admin/features/categories/CategoryListPage';
+import CategoryUpsertPage from './app/features/admin/features/categories/CategoryUpsertPage';
+import SubCategoryPage from './app/features/admin/features/categories/SubCategoryPage';
+
+
+// ایجاد کلاینت React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -66,41 +62,29 @@ function App() {
         <Toaster position="top-center" reverseOrder={false} />
         
         <Routes>
-          {/* --- Auth Routes --- */}
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/verify" element={<VerifyPage />} />
-          </Route>
-
-          {/* --- Admin Panel (Protected) --- */}
+          
+          {/* --- Admin Routes (Protected) --- */}
           <Route path="/admin" element={<AdminGuard />}>
             <Route element={<AdminLayout />}>
-              
               <Route index element={<AdminDashboard />} />
               
-              {/* Products Management */}
-              <Route path="products">
-                <Route index element={<ProductListPage />} />
-                <Route path="create" element={<ProductEditorPage />} />
-                <Route path="edit/:id" element={<ProductEditorPage />} />
-                <Route path=":id" element={<ProductDetailPage />} /> {/* ✅ Detail Route */}
-                <Route path="sizes" element={<ProductSizesPage />} />
-                <Route path="quantities" element={<ProductQuantitiesPage />} />
-              </Route>
+              {/* Products */}
+              <Route path="products" element={<ProductListPage />} />
+              <Route path="products/new" element={<ProductEditorPage />} />
+              <Route path="products/:id/edit" element={<ProductEditorPage />} />
+              <Route path="products/:id" element={<ProductDetailPage />} />
+              <Route path="products/:id/quantities" element={<ProductQuantitiesPage />} />
+              <Route path="products/:id/sizes" element={<ProductSizesPage />} />
 
-              {/* Categories Management */}
-              <Route path="categories">
-                <Route index element={<CategoryListPage />} />
-                <Route path="create" element={<CategoryUpsertPage />} />
-                <Route path="edit/:id" element={<CategoryUpsertPage />} />
-                <Route path=":id" element={<CategoryDetailPage />} />
-                <Route path="sub" element={<SubCategoryPage />} />
-              </Route>
+              {/* Categories */}
+              <Route path="categories" element={<CategoryListPage />} />
+              <Route path="categories/new" element={<CategoryUpsertPage />} />
+              <Route path="categories/:id/edit" element={<CategoryUpsertPage />} />
+              <Route path="categories/:id/subs" element={<SubCategoryPage />} />
 
-              {/* Orders Management */}
+              {/* Orders */}
               <Route path="orders">
-                <Route index element={<OrderListPage />} />
+                <Route index element={<AdminOrderListPage />} />
                 <Route path="create" element={<OrderCreatePage />} />
                 <Route path=":id" element={<AdminOrderDetailsPage />} />
               </Route>
@@ -114,13 +98,22 @@ function App() {
               <Route path="messages" element={<MessageListPage />} />
               <Route path="settings/sliders" element={<SliderSettingsPage />} />
               <Route path="settings/modals" element={<ModalSettingsPage />} />
-
             </Route>
+          </Route>
+
+          {/* --- Auth Routes --- */}
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify" element={<VerifyPage />} />
           </Route>
 
           {/* --- Public / User Panel --- */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
+            
+            {/* 2. روت جدید فروشگاه */}
+            <Route path="/shop" element={<ShopPage />} /> 
             
             {/* User Profile */}
             <Route path="profile">
