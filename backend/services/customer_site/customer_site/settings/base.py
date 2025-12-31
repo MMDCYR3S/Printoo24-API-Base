@@ -24,7 +24,7 @@ env = environ.Env(
 
     DEBUG=(bool, True)
 )
-env_file = os.path.join(BASE_DIR, 'env\\.env.dev')
+env_file = os.path.join(BASE_DIR, 'env/.env.dev')
 environ.Env.read_env(env_file)
 
 # Quick-start development settings - unsuitable for production
@@ -36,7 +36,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition

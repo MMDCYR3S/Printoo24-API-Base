@@ -131,7 +131,7 @@ class PromotionalModalViewSet(viewsets.ModelViewSet):
         """
         این اندپوینت توسط صفحه اصلی سایت صدا زده می‌شود.
         """
-        modal = self.service.modal_repo.get_active_modal()
+        modal = self.service.get_active_modal_for_display()
         
         if not modal:
             return Response(status=status.HTTP_204_NO_CONTENT)

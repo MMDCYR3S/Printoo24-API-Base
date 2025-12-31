@@ -127,8 +127,7 @@ class Command(BaseCommand):
                 
                 for q in quantities:
                     ProductQuantity.objects.create(
-                        user=user, product=product, quantity=q, 
-                        price=random.randint(100000, 2000000)
+                        user=user, product=product, quantity=q
                     )
 
             # 5. اتصال آپشن‌ها
