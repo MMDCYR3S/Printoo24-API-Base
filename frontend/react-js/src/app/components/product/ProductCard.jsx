@@ -1,19 +1,21 @@
 // src/app/components/product/ProductCard.jsx
+import { Link } from 'react-router-dom';
 import { Eye } from 'lucide-react';
 
 const ProductCard = ({ product }) => {
-  // فرمت قیمت
   const formattedPrice = new Intl.NumberFormat('fa-IQ').format(parseFloat(product.price) || 0);
 
-  // استخراج نام دسته‌ها طبق جیسون جدید
-  // اگر parent_category نال بود، مقدار پیش‌فرض "محصولات" را نشان می‌دهیم
+  // استخراج نام دسته‌ها
   const parentCategory = product.category?.parent_category || 'محصولات';
   const childCategory = product.category?.children_category;
 
   return (
-    <div className="group bg-white rounded-[24px] p-2 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+    <Link 
+      to={`/product/${product.slug}`} 
+      className="group bg-white rounded-[24px] p-2 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col block"
+    >
       
-      {/* ۱. بخش تصویر (نسبت ۱۶:۹ یا همان aspect-video) */}
+      {/* بخش تصویر */}
       <div className="relative aspect-video rounded-2xl bg-slate-50 overflow-hidden isolate">
         {product.thumbnail ? (
           <img 
@@ -38,20 +40,19 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      {/* ۲. بخش اطلاعات (تمیز و فشرده) */}
+      {/* بخش اطلاعات */}
       <div className="pt-3 px-2 flex flex-col gap-1.5 flex-1">
         
-        {/* مسیر دسته‌بندی: والد > فرزند */}
+        {/* مسیر دسته‌بندی */}
         <div className="text-[10px] text-gray-400 font-medium flex items-center gap-1 truncate" dir="rtl">
-           <span className="hover:text-primary transition-colors cursor-pointer">
+           <span className="hover:text-primary transition-colors">
              {parentCategory}
            </span>
            
-           {/* فقط اگر زیردسته وجود داشت، فلش و نامش رو نشون بده */}
            {childCategory && (
              <>
                <span className="text-[8px] opacity-60">❮</span>
-               <span className="text-gray-500 hover:text-primary transition-colors cursor-pointer">
+               <span className="text-gray-500 hover:text-primary transition-colors">
                  {childCategory}
                </span>
              </>
@@ -70,7 +71,7 @@ const ProductCard = ({ product }) => {
         </div>
 
       </div>
-    </div>
+    </Link>
   );
 };
 

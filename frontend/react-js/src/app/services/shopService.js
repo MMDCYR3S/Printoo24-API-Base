@@ -24,5 +24,11 @@ export const shopService = {
   getProductDetail: async (slug) => {
     const response = await apiClient.get(`/shop/detail/${slug}/`);
     return response.data;
+  },
+
+  // دریافت جزئیات محصول
+  getProductDetail: async (slug) => {
+    const response = await apiClient.get(`/shop/detail/${slug}/`);
+    return response.data;
   }
 };

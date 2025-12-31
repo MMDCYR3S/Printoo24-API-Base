@@ -4,45 +4,58 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
-// Layouts
+// --- Layouts & Guards ---
+import MainLayout from './app/layouts/MainLayout';
+import AuthLayout from './app/features/auth/AuthLayout';
 import AdminLayout from './app/features/admin/layout/AdminLayout';
 import AdminGuard from './app/features/auth/AdminGuard';
-import AuthLayout from './app/features/auth/AuthLayout';
-import MainLayout from './app/layouts/MainLayout';
 
-// Public & User Pages
+// --- Public Pages ---
 import HomePage from './app/pages/Home';
-import ShopPage from './app/features/shop/ShopPage'; // <--- 1. ایمپورت صفحه فروشگاه
+import ShopPage from './app/features/shop/ShopPage';
+import PublicProductDetailPage from './app/features/shop/ProductDetailPage'; // نام مستعار برای جلوگیری از تداخل
+
+// --- Auth Pages ---
 import LoginPage from './app/features/auth/LoginPage';
 import RegisterPage from './app/features/auth/RegisterPage';
 import VerifyPage from './app/features/auth/VerifyPage';
+
+// --- Profile Pages ---
 import ProfileDashboard from './app/features/profile/ProfileDashboard';
-import WalletPage from './app/features/profile/WalletPage';
 import MyOrdersPage from './app/features/profile/MyOrdersPage';
 import OrderDetailPage from './app/features/profile/OrderDetailPage';
+import WalletPage from './app/features/profile/WalletPage';
 import AddressPage from './app/features/profile/AddressPage';
 
-// Admin Pages
+// --- Admin Pages ---
 import AdminDashboard from './app/features/admin/features/dashboard/AdminDashboard';
+
+// Admin > Products
 import ProductListPage from './app/features/admin/features/products/ProductListPage';
 import ProductEditorPage from './app/features/admin/features/products/ProductEditorPage';
-import ProductDetailPage from './app/features/admin/features/products/ProductDetailPage';
+import AdminProductDetailPage from './app/features/admin/features/products/ProductDetailPage'; // تغییر نام برای جلوگیری از تداخل
 import ProductQuantitiesPage from './app/features/admin/features/products/ProductQuantitiesPage';
 import ProductSizesPage from './app/features/admin/features/products/ProductSizesPage';
-import OrderCreatePage from './app/features/admin/features/orders/OrderCreatePage';
-import AdminOrderListPage from './app/features/admin/features/orders/OrderListPage';
-import AdminOrderDetailsPage from './app/features/admin/features/orders/OrderDetailsPage';
-import UserListPage from './app/features/admin/features/users/UsersListPage';
-import ProvincesPage from './app/features/admin/features/locations/ProvincesPage';
-import CitiesPage from './app/features/admin/features/locations/CitiesPage';
-import MessageListPage from './app/features/admin/features/messages/MessageListPage';
-import SliderSettingsPage from './app/features/admin/features/settings/SliderSettingsPage';
-import ModalSettingsPage from './app/features/admin/features/settings/ModalSettingsPage';
 
-// Admin Categories
+// Admin > Categories
 import CategoryListPage from './app/features/admin/features/categories/CategoryListPage';
 import CategoryUpsertPage from './app/features/admin/features/categories/CategoryUpsertPage';
 import SubCategoryPage from './app/features/admin/features/categories/SubCategoryPage';
+
+// Admin > Orders
+import OrderCreatePage from './app/features/admin/features/orders/OrderCreatePage';
+import AdminOrderListPage from './app/features/admin/features/orders/OrderListPage';
+import AdminOrderDetailsPage from './app/features/admin/features/orders/OrderDetailsPage';
+
+// Admin > Users & Locations
+import UserListPage from './app/features/admin/features/users/UsersListPage';
+import ProvincesPage from './app/features/admin/features/locations/ProvincesPage';
+import CitiesPage from './app/features/admin/features/locations/CitiesPage';
+
+// Admin > Messages & Settings
+import MessageListPage from './app/features/admin/features/messages/MessageListPage';
+import SliderSettingsPage from './app/features/admin/features/settings/SliderSettingsPage';
+import ModalSettingsPage from './app/features/admin/features/settings/ModalSettingsPage';
 
 
 // ایجاد کلاینت React Query
@@ -63,7 +76,9 @@ function App() {
         
         <Routes>
           
-          {/* --- Admin Routes (Protected) --- */}
+          {/* =========================================
+              ADMIN ROUTES (Protected)
+             ========================================= */}
           <Route path="/admin" element={<AdminGuard />}>
             <Route element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
@@ -72,7 +87,7 @@ function App() {
               <Route path="products" element={<ProductListPage />} />
               <Route path="products/new" element={<ProductEditorPage />} />
               <Route path="products/:id/edit" element={<ProductEditorPage />} />
-              <Route path="products/:id" element={<ProductDetailPage />} />
+              <Route path="products/:id" element={<AdminProductDetailPage />} /> {/* استفاده از کامپوننت ادمین */}
               <Route path="products/:id/quantities" element={<ProductQuantitiesPage />} />
               <Route path="products/:id/sizes" element={<ProductSizesPage />} />
 
@@ -101,19 +116,24 @@ function App() {
             </Route>
           </Route>
 
-          {/* --- Auth Routes --- */}
+          {/* =========================================
+              AUTH ROUTES
+             ========================================= */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/verify" element={<VerifyPage />} />
           </Route>
 
-          {/* --- Public / User Panel --- */}
+          {/* =========================================
+              PUBLIC / USER PANEL ROUTES
+             ========================================= */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
             
-            {/* 2. روت جدید فروشگاه */}
-            <Route path="/shop" element={<ShopPage />} /> 
+            {/* Shop & Product Pages */}
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/product/:slug" element={<PublicProductDetailPage />} /> {/* استفاده از کامپوننت پابلیک */}
             
             {/* User Profile */}
             <Route path="profile">
