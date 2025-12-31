@@ -65,22 +65,28 @@ PRINTING_CATEGORIES_MAP = {
 }
 
 class Command(BaseCommand):
-    help = 'Seeds categories with SAFE English slugs and Persian names.'
+    help = 'Seeds categories with images from media/pro/'
 
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.HTTP_INFO(">>> شروع عملیات ایجاد دسته‌بندی‌ها..."))
 
         User = get_user_model()
-        # ساخت یا دریافت ادمین
         if not User.objects.filter(is_superuser=True).exists():
-             User.objects.create_superuser('admin', 'admin@printoo.ir', 'admin123')
+             User.objects.create_superuser('admin123', 'admin@printoo.ir', 'admin123')
         
         admin_user = User.objects.filter(is_superuser=True).first()
 
-        # مسیر عکس‌ها (اختیاری)
-        source_dir = os.path.join(settings.MEDIA_ROOT, 'seed_images')
-        os.makedirs(source_dir, exist_ok=True)
-        available_images = [f for f in os.listdir(source_dir) if f.endswith(('.jpg', '.png', '.jpeg'))]
+        # ===== تنظیمات مسیر تصاویر ===== #
+        # تصاویر باید در پوشه media/pro باشند (1.jpg تا 8.jpg)
+        source_dir = os.path.join(settings.MEDIA_ROOT, 'pro')
+        
+        # لیست فایل‌های موجود را بررسی می‌کنیم
+        available_images = []
+        if os.path.exists(source_dir):
+            available_images = [f"{i}.jpg" for i in range(1, 9) if os.path.exists(os.path.join(source_dir, f"{i}.jpg"))]
+        
+        if not available_images:
+            self.stdout.write(self.style.WARNING(f"⚠️ هشداری: تصویری در مسیر {source_dir} یافت نشد."))
 
         count_created = 0
         count_updated = 0
@@ -139,20 +145,25 @@ class Command(BaseCommand):
     def _assign_random_image(self, category_obj, source_dir, image_list, is_box_only=False):
         """ذخیره عکس تصادفی برای دسته‌بندی"""
         try:
-            selected_img_name = random.choice(image_list)
-            img_path = os.path.join(source_dir, selected_img_name)
-
-            with open(img_path, 'rb') as f:
-                django_file = File(f)
-                
-                if not is_box_only and not category_obj.banner_wide:
-                    new_name = f"wide_{category_obj.slug}_{random.randint(100,999)}.jpg"
+            # ===== انتخاب عکس برای بنر عریض ===== #
+            if not is_box_only and not category_obj.banner_wide:
+                img_name = random.choice(image_list)
+                img_path = os.path.join(source_dir, img_name)
+                with open(img_path, 'rb') as f:
+                    django_file = File(f)
+                    # نام فایل مقصد را تغییر می‌دهیم تا تکراری نشود
+                    new_name = f"wide_{category_obj.slug}_{random.randint(1000,9999)}.jpg"
                     category_obj.banner_wide.save(new_name, django_file, save=False)
 
-                if not category_obj.banner_box:
-                    f.seek(0)
-                    new_name = f"box_{category_obj.slug}_{random.randint(100,999)}.jpg"
+            # ===== انتخاب عکس برای بنر باکس ===== #
+            if not category_obj.banner_box:
+                img_name = random.choice(image_list) # ممکن است با بالایی متفاوت باشد
+                img_path = os.path.join(source_dir, img_name)
+                with open(img_path, 'rb') as f:
+                    django_file = File(f)
+                    new_name = f"box_{category_obj.slug}_{random.randint(1000,9999)}.jpg"
                     category_obj.banner_box.save(new_name, django_file, save=False)
                     
-        except Exception:
-            pass # اگر عکس نبود مهم نیست، ادامه بده
+        except Exception as e:
+            # لاگ کردن خطا در صورت نیاز
+            print(f"Error assigning image to category: {e}")

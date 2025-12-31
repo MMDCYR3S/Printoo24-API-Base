@@ -44,7 +44,7 @@ class CartProcessor:
         width, height, size_label = self._resolve_dimensions()
         
         # ===== دریافت و اعتبارسنجی تیراژ ===== #
-        final_qty, base_unit_price, qty_label = self._handle_quantity_logic()
+        final_qty, qty_label = self._handle_quantity_logic()
         self.result_quantity = final_qty
         # ===== انجام عملیات محاسبه ===== #
         calculator = ProductPriceCalculator(
@@ -73,7 +73,6 @@ class CartProcessor:
                 "quantity_info": {
                     "quantity_id": self.selections.get('quantity_id'),
                     "quantity_text": qty_label,
-                    "base_unit_price": float(base_unit_price),
                 },
                 "has_design": self.selections.get('has_design', True),
                 "price_breakdown": calc_result['breakdown']
@@ -129,10 +128,9 @@ class CartProcessor:
         return 0.0, 0.0, None
 
     # ========== QUANTITY LOGIC ========== #
-    def _handle_quantity_logic(self) -> Tuple[int, Decimal, str]:
+    def _handle_quantity_logic(self) -> Tuple[int, str]:
         """مدیریت منطق تیراژ (بسته‌ای یا عددی)"""
         final_quantity = self.quantity_input
-        base_unit_price = Decimal(0)
         quantity_label = str(final_quantity)
 
         if self.product.has_quantity:
@@ -142,7 +140,6 @@ class CartProcessor:
             try:
                 pq = ProductQuantity.objects.select_related('quantity').get(product=self.product, id=qty_id)
                 final_quantity = self.quantity_input if self.quantity_input > 0 else 1
-                base_unit_price = Decimal(pq.price)
                 quantity_label = str(pq.quantity.value)
             except ProductQuantity.DoesNotExist:
                 raise ValidationError(_("تیراژ انتخابی نامعتبر است."))
@@ -157,9 +154,7 @@ class CartProcessor:
                 if self.quantity_input > config.max_quantity:
                     raise ValidationError(f"حداکثر تعداد سفارش {config.max_quantity} عدد است.")
             
-            base_unit_price = self.product.price
-            
-        return final_quantity, base_unit_price, quantity_label
+        return final_quantity, quantity_label
 
     # ========== INPUT TYPE LOGIC ========== #
     def _handle_input_type(self, prod_opt: ProductOption, user_input: Any) -> Dict:
