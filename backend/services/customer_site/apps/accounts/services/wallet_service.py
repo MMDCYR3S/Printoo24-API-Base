@@ -36,9 +36,9 @@ class WalletService:
         # ===== ثبت تراکنش ===== #
         WalletTransaction.objects.create_transaction(
             user=user,
-            trans_type=WalletTransaction.TransactionType.DEPOSIT,
+            trans_type="2",
             amount=amount,
-            balance_after=wallet.balance
+            amount_after=wallet.balance
         )
         return wallet
     
@@ -66,9 +66,9 @@ class WalletService:
         # ===== افزودن تراکنش ===== #
         WalletTransaction.objects.create_transaction(
             user=user,
-            trans_type=WalletTransaction.TransactionType.PAYMENT,
+            trans_type="6",
             amount=amount,
-            balance_after=wallet.balance
+            amount_after=wallet.balance
         )
         return wallet
 
