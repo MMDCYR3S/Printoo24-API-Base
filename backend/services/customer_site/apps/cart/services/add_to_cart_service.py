@@ -20,8 +20,13 @@ class AddToCartService:
     3. مدیریت تکراری بودن آیتم (Merge)
     4. ذخیره نهایی
     """
-    def __init__(self, user: User):
-        self.user = user
+    def __init__(self, user: User = None, session_key: str = None):
+        self.user = user if (user and user.is_authenticated) else None
+        self.session_key = session_key
+        
+        # گارد: حداقل یکی باید باشد
+        if not self.user and not self.session_key:
+             raise ValidationError("شناسه کاربر یا شناسه مهمان الزامی است.")
         
     @transaction.atomic
     def execute(self, product_id: int, selections: Dict[str, Any]) -> CartItem:
@@ -40,7 +45,7 @@ class AddToCartService:
         processor = CartProcessor(product, selections, quantity_input).process()
 
         # ===== دریافت یا ایجاد سبد خرید ===== #
-        cart = Cart.objects.get_or_create_cart(self.user)
+        cart = self._get_or_create_cart()
 
         # ===== چک کردن تکراری بودن آیتم ===== #
         existing_item = CartItem.objects.find_duplicate_item(
@@ -70,3 +75,12 @@ class AddToCartService:
                 description=processor.result_description
             )
             return new_item
+
+    def _get_or_create_cart(self) -> Cart:
+        """ یافتن سبد خرید بر اساس اولویت: کاربر لاگین > سشن مهمان """
+        if self.user:
+            cart, _ = Cart.objects.get_or_create(user=self.user)
+            return cart
+        else:
+            cart, _ = Cart.objects.get_or_create(session_key=self.session_key, user=None)
+            return cart

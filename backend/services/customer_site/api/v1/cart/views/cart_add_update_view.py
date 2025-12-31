@@ -1,14 +1,10 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes, OpenApiParameter
+from rest_framework.permissions import AllowAny
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiTypes
 
-from ..serializers import (
-    AddToCartSerializer,
-    CartItemUpdateSerializer,
-    CartItemSerializer
-)
+from ..serializers import AddToCartSerializer, CartItemUpdateSerializer
 from apps.cart.services import AddToCartService, CartItemUpdateService
 
 # ===== Add To Cart View ===== #
@@ -16,9 +12,8 @@ from apps.cart.services import AddToCartService, CartItemUpdateService
 class AddToCartView(GenericAPIView):
     """
     POST /api/v1/cart/add/
-    افزودن محصول به سبد خرید.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = AddToCartSerializer
     
     @extend_schema(
@@ -26,12 +21,22 @@ class AddToCartView(GenericAPIView):
         description="""
         این متد محصول را با تمام تنظیمات (تعداد، سایز، آپشن‌ها) به سبد اضافه می‌کند.
         
-        **نکات کلیدی:**
-        1. **تیراژ:** اگر محصول تیراژ ثابت دارد، `quantity_id` بفرستید. اگر متری/تعدادی است، `quantity` بفرستید.
-        2. **آپشن‌ها:** فیلد `options` یک دیکشنری است که کلید آن ID ویژگی است و مقدار آن می‌تواند ID گزینه یا متن باشد.
+        **نکات مهم:**
+        1. برای **کاربر مهمان**، ارسال هدر `X-Guest-Token` (یک رشته یکتا مثل UUID) الزامی است.
+        2. اگر محصول تیراژ ثابت دارد، `quantity_id` بفرستید.
         """,
+        # ===== اضافه کردن پارامتر هدر به سواگر ===== #
+        parameters=[
+            OpenApiParameter(
+                name='X-Guest-Token',
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.HEADER,
+                description='شناسه یکتا برای کاربر مهمان (اگر لاگین نیست)',
+                required=False
+            )
+        ],
         request=AddToCartSerializer,
-        responses={201: CartItemSerializer, 400: OpenApiTypes.OBJECT},
+        responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT},
         examples=[
             OpenApiExample(
                 'Scenario 1: Fixed Quantity (Business Card)',
@@ -96,48 +101,52 @@ class AddToCartView(GenericAPIView):
         ]
     )
     def post(self, request, *args, **kwargs):
-        """ ایجاد آیتم سبد خرید براساس اطلاعات ارسالی. """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         
+        # ===== استخراج شناسه کاربر و مهمان ===== #
+        user = request.user if request.user.is_authenticated else None
+        session_key = request.headers.get('X-Guest-Token')
+
         try:
-            # ===== فراخوانی سرویس ===== #
-            service = AddToCartService(user=request.user)
-            
-            # ===== اجرای سرویس ===== #
+            # ===== اجرا سرویس ===== #
+            service = AddToCartService(user=user, session_key=session_key)
             cart_item = service.execute(
                 product_id=data["product_id"],
                 selections=data["selections"]
             )
-            # ===== بازگشت ===== #
-            response_serializer = CartItemSerializer(cart_item, context={'request': request})
-            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+            
+            return Response({"id": cart_item.id, "message": "Item added"}, status=status.HTTP_201_CREATED)
+
         except Exception as e:
-            # مدیریت خطای تمیز برای فرانت
-            return Response(
-                {'detail': str(e)}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 # ===== Cart Item Update View ===== #
 @extend_schema(tags=["Cart"])
 class CartItemUpdateView(GenericAPIView):
     """
     PATCH /api/v1/cart/items/{item_id}/
-    ویرایش آیتم سبد خرید.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = CartItemUpdateSerializer
 
-    @extend_schema(
+    extend_schema(
         summary="ویرایش آیتم (تعداد یا آپشن‌ها)",
         description="""
         هر فیلدی که ارسال شود، جایگزین مقدار قبلی می‌شود.
-        اگر آپشن‌ها تغییر کنند، ممکن است قیمت کاملاً تغییر کند.
+        اگر آپشن‌ها تغییر کنند، قیمت مجدداً محاسبه می‌شود.
         """,
         parameters=[
-            OpenApiParameter("item_id", OpenApiTypes.INT, OpenApiParameter.PATH, description="شناسه آیتم")
+            OpenApiParameter("item_id", OpenApiTypes.INT, OpenApiParameter.PATH, description="شناسه آیتم"),
+            OpenApiParameter(
+                name='X-Guest-Token',
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.HEADER,
+                description='شناسه یکتا برای کاربر مهمان',
+                required=False
+            )
         ],
         examples=[
             OpenApiExample(
@@ -167,18 +176,19 @@ class CartItemUpdateView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
+        # ===== استخراج شناسه کاربر و مهمان ===== #
+        user = request.user if request.user.is_authenticated else None
+        session_key = request.headers.get('X-Guest-Token')
+
         try:
-            # ===== فراخوانی سرویس ===== #
-            service = CartItemUpdateService(user=request.user)
-            # ===== اجرای سرویس ===== #
+            # ===== اجرا سرویس ===== #
+            service = CartItemUpdateService(user=user, session_key=session_key)
             updated_item = service.update(
                 cart_item_id=item_id,
                 raw_data=serializer.validated_data
             )
-            # ===== بازگشت ===== #
-            return Response(
-                CartItemSerializer(updated_item, context={'request': request}).data,
-                status=status.HTTP_200_OK
-            )
+            
+            return Response({"id": updated_item.id, "message": "Item updated"}, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

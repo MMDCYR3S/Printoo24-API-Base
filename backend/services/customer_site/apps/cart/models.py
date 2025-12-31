@@ -7,7 +7,21 @@ from .managers import CartManager, CartItemManager
 # ===== Cart Model ===== #
 class Cart(models.Model):
     """ مدل سبد خرید """
-    user = models.ForeignKey("core.User", verbose_name=_("کاربر"), on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        "core.User", 
+        verbose_name=_("کاربر"), 
+        on_delete=models.CASCADE,
+        null=True, blank=True
+    )
+    
+    # ===== بخش ثبت اطلاعات کاربر ===== #
+    session_key = models.CharField(
+        _("شناسه نشست"), 
+        max_length=40, 
+        null=True, blank=True, 
+        db_index=True,
+        help_text="شناسه یکتا برای کاربران مهمان (معمولاً Session ID جنگو یا UUID)"
+    )
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
@@ -20,6 +34,12 @@ class Cart(models.Model):
         db_table = 'customer_carts'
         verbose_name = _('سبد خرید')
         verbose_name_plural = _('سبدهای خرید')
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(user__isnull=False) | models.Q(session_key__isnull=False),
+                name='cart_user_or_session_required'
+            )
+        ]
         
 # ====== Cart Item Model ====== #
 class CartItem(models.Model):
