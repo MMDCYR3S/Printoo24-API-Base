@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { adminProductService } from '../services/adminProductService';
+import { adminProductService } from '../../../services/adminProductService';
 
 export const useProductEditor = () => {
   const { id } = useParams(); // اگر ID باشد یعنی حالت ویرایش

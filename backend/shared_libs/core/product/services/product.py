@@ -224,7 +224,6 @@ class ProductService:
                 user=user, 
                 product=product, 
                 quantity_id=item['id'], 
-                price=item.get('price', 0),
                 guide_text=item.get('guide_text', ''),
                 guide_type=item.get('guide_type', 'info')
             )
@@ -377,14 +376,7 @@ class ProductService:
         return prod_opt
 
     @transaction.atomic
-    def _update_option_values_pricing_logic(self, product_id: int, product_option_id: int, updates: list[dict]):
-        """
-        لاجیک آپدیت ولیوها (قبلاً در ریپازیتوری بود، الان پرایوت متد سرویس شده)
-        """
-        exists = ProductOption.objects.filter(id=product_option_id, product_id=product_id).exists()
-        if not exists:
-            raise InvalidProductDataException("این آپشن متعلق به محصول درخواست شده نیست.")
-
+    def _update_option_values_pricing_logic(self, product_id: int, product_option_id: int, updates: List[Dict]):
         current_values = ProductOptionValue.objects.filter(product_option_id=product_option_id)
         value_map = {v.id: v for v in current_values}
 
@@ -395,13 +387,15 @@ class ProductService:
             val_id = item.get('id')
             if val_id in value_map:
                 obj = value_map[val_id]
-                if 'price_impact' in item: obj.price_impact = item['price_impact']
-                if 'is_default' in item: obj.is_default = item['is_default']
-                if 'order' in item: obj.order = item['order']
-                if 'guide_text' in item: obj.guide_text = item['guide_text']
-                if 'guide_type' in item: obj.guide_type = item['guide_type']
+                has_change = False
+
+                for field in fields_to_update:
+                    if field in item and getattr(obj, field) != item[field]:
+                        setattr(obj, field, item[field])
+                        has_change = True
                 
-                to_update.append(obj)
+                if has_change:
+                    to_update.append(obj)
 
         if to_update:
             ProductOptionValue.objects.bulk_update(to_update, fields_to_update)

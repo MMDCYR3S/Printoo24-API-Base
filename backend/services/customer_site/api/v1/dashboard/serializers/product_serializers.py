@@ -26,18 +26,13 @@ class ProductCategorySerializer(serializers.ModelSerializer):
         fields = ['name', 'slug', 'parent_name']
         read_only_fields = ['id', 'slug']
 
-# ===== 1. اضافه کردن سریالایزر جدید برای کانفیگ تیراژ ===== #
+# ===== 1. اصلاح شده: حذف قیمت از کانفیگ تیراژ ===== #
 class ProductQuantityConfigSerializer(GuideSerializerMixin, serializers.Serializer):
     """
-    دریافت شناسه تیراژ و قیمت اختصاصی آن برای محصول
+    دریافت شناسه تیراژ برای محصول.
+    نکته: قیمت از این بخش حذف شد چون محاسبات بر اساس Price Per Unit انجام می‌شود.
     """
     id = serializers.IntegerField(help_text="شناسه تیراژ (Quantity ID)")
-    price = serializers.DecimalField(
-        max_digits=14, 
-        decimal_places=0, 
-        default=0, 
-        help_text="قیمت نهایی برای این تیراژ (تومان)"
-    )
 
 # ===== Product Size Serializer ===== #
 class ProductSizeConfigSerializer(GuideSerializerMixin, serializers.Serializer):
@@ -47,7 +42,7 @@ class ProductSizeConfigSerializer(GuideSerializerMixin, serializers.Serializer):
     id = serializers.IntegerField(help_text="شناسه سایز")
     price_impact = serializers.DecimalField(
         max_digits=12, 
-        decimal_places=2, 
+        decimal_places=0, # اصلاح جزئی: معمولاً قیمت تومان اعشار ندارد، اما اگر نیاز دارید 2 بگذارید
         required=False, 
         default=0,
         help_text="مبلغ اضافه برای این سایز"
@@ -79,8 +74,8 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductShellSerializer(serializers.ModelSerializer):
     category_id = serializers.IntegerField(write_only=True, required=True, help_text="شناسه دسته‌بندی (زیرمجموعه)")
     category_info = serializers.SerializerMethodField(read_only=True)
-    guide_text = serializers.CharField(required=False, allow_blank=True)
-    guide_type = serializers.ChoiceField(choices=GuideType.choices, required=False)
+    guide_text = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    guide_type = serializers.ChoiceField(choices=GuideType.choices, required=False, allow_null=True)
     
     class Meta:
         model = Product
@@ -126,7 +121,6 @@ class OptionValueOverrideSerializer(GuideSerializerMixin, serializers.Serializer
     اطلاعاتی که ادمین می‌خواهد برای مقادیر اعمال کند.
     می‌تواند Override روی گلوبال باشد یا یک مقدار کاملاً جدید (Custom).
     """
-    # ===== تغییر: این فیلد نال‌پذیر است برای حالت Custom ===== #
     global_value_id = serializers.IntegerField(required=False, allow_null=True)
     label = serializers.CharField(required=False)
     value = serializers.CharField(required=False)
@@ -186,7 +180,6 @@ class OptionPriceUpdateSerializer(serializers.Serializer):
 class ProductOptionValueOutputSerializer(serializers.ModelSerializer):
     """
     سریالایزر برای نمایش مقادیر انتخاب شده (Choices) در صفحه جزئیات محصول.
-    جایگزین دیکشنری دستی سرویس.
     """
     is_custom = serializers.SerializerMethodField()
     label = serializers.SerializerMethodField()
@@ -231,13 +224,10 @@ class ProductOptionOutputSerializer(serializers.ModelSerializer):
         ]
 
     def get_name(self, obj):
-        # ابتدا نام خود ProductOption را بررسی می‌کنیم
         if obj.name:
             return obj.name
-        # اگر نام وجود نداشت، بررسی می‌کنیم که آیا option مرتبط وجود دارد
         if obj.option:
             return obj.option.name
-        # اگر هیچ‌کدام وجود نداشت، مقدار پیش‌فرض برمی‌گردانیم
         return ""
 
     def get_label(self, obj):
@@ -300,14 +290,10 @@ class ProductOptionsBulkSerializer(serializers.Serializer):
 class ProductMediaSyncSerializer(serializers.Serializer):
     attachment_ids_to_link = serializers.ListField(child=serializers.IntegerField(), required=False)
     attachment_ids_to_unlink = serializers.ListField(child=serializers.IntegerField(), required=False)
-    image_orders = serializers.ListField(child=serializers.IntegerField(), required=False)
+    image_orders = serializers.ListField(child=serializers.IntegerField(), required=False, allow_null=True)
 
 # ===== Product Detail Serializer ===== #
 class ProductDetailSerializer(serializers.Serializer):
-    """
-    سریالایزر نمایش کامل محصول در داشبورد.
-    ترکیبی از Shell, Config, Options, Images.
-    """
     shell = ProductShellSerializer(source='product')
     pricing_config = ProductPricingConfigSerializer(source='product.pricing_config')
     
@@ -336,8 +322,7 @@ class ProductDetailSerializer(serializers.Serializer):
         product = obj['product']
         return [
             {
-                "value": pq.quantity.value,
-                "price": pq.price,
+                "value": pq.quantity.value
             }
             for pq in product.product_quantity.all()
         ]
@@ -347,7 +332,6 @@ class OptionConfigUpdateSerializer(serializers.Serializer):
     """
     سریالایزر برای ویرایش تنظیمات یک ویژگی متصل شده.
     """
-    # ===== اضافه شده: دریافت ID در بدنه ===== #
     product_option_id = serializers.IntegerField(help_text="ID of the Local ProductOption (جدول واسط)")
     
     is_required = serializers.BooleanField(required=False)
@@ -358,4 +342,3 @@ class OptionConfigUpdateSerializer(serializers.Serializer):
         required=False,
         allow_empty=True
     )
-    

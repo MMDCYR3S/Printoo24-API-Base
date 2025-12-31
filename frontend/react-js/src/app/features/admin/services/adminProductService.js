@@ -4,19 +4,25 @@ import apiClient from '../../../services/apiClient';
 const BASE_URL = '/dashboard/products/';
 
 export const adminProductService = {
-  // ✅ 1. متد لیست‌گیری (این پاک شده بود!)
+  // ✅ 1. متد لیست‌گیری
+// لیست محصولات
   getAll: async () => {
     const { data } = await apiClient.get(BASE_URL);
     return data;
   },
-  
+
   getStandardSizes: async () => {
-    // اگر اندپوینت متفاوتی دارید اینجا تغییر دهید
-    const { data } = await apiClient.get('/dashboard/sizes/'); 
+    const { data } = await apiClient.get('/dashboard/sizes/');
     return data;
   },
 
-  // --- مرحله ۱: ایجاد و ویرایش هسته محصول ---
+  // ✅ لیست مقادیر تیراژ (Master Data)
+  getQuantitiesList: async () => {
+    const { data } = await apiClient.get('/dashboard/quantities/');
+    return data;
+  },
+
+  // --- CRUD ---
   create: async (data) => {
     const response = await apiClient.post(BASE_URL, data);
     return response.data;
@@ -30,11 +36,6 @@ export const adminProductService = {
   update: async (id, data) => {
     const response = await apiClient.put(`${BASE_URL}${id}/`, data);
     return response.data;
-  },
-
-  delete: async (id) => {
-    await apiClient.delete(`${BASE_URL}${id}/`);
-    return id;
   },
 
   // --- مرحله ۲: مدیریت آپشن‌ها (ویژگی‌ها) ---
@@ -61,12 +62,20 @@ export const adminProductService = {
     return response.data;
   },
 
+  // ✅ اضافه شده برای ویدیو و داکیومنت (طبق خواسته شما برای فایل‌های غیر تصویری)
+  uploadAttachment: async (id, formData) => {
+    const response = await apiClient.post(`${BASE_URL}${id}/upload-attachment/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
   syncMedia: async (id, payload) => {
     const response = await apiClient.post(`${BASE_URL}${id}/media-sync/`, payload);
     return response.data;
   },
 
-  // --- عملیات گروهی ---
+  // --- عملیات گروهی (دست‌نخورده) ---
   bulkDelete: async (product_ids) => {
     const response = await apiClient.delete(`${BASE_URL}bulk-delete/`, {
       data: product_ids 

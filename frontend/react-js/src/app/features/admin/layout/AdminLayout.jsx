@@ -77,7 +77,7 @@ const AdminLayout = () => {
         <AdminHeader />
         
         {/* اسکرول فقط توی این ناحیه انجام میشه */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
+        <main className="flex-1 overflow-y-auto px-4 scroll-smooth">
           <Outlet />
         </main>
       </div>
