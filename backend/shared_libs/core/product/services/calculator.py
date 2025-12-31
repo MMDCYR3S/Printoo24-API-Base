@@ -129,10 +129,6 @@ class ProductPriceCalculator:
                 product=self.product,
                 quantity__value=self.quantity
             ).first()
-            
-            if pq and pq.price > 0:
-                unit_price = Decimal(pq.price)
-                price_source = f"Tiered Price (Qty {self.quantity})"
         except ProductQuantity.DoesNotExist:
             pass
             
