@@ -13,7 +13,7 @@ import AdminGuard from './app/features/auth/AdminGuard';
 // --- Public Pages ---
 import HomePage from './app/pages/Home';
 import ShopPage from './app/features/shop/ShopPage';
-import PublicProductDetailPage from './app/features/shop/ProductDetailPage'; // نام مستعار برای جلوگیری از تداخل
+import PublicProductDetailPage from './app/features/shop/ProductDetailPage';
 
 // --- Auth Pages ---
 import LoginPage from './app/features/auth/LoginPage';
@@ -33,7 +33,7 @@ import AdminDashboard from './app/features/admin/features/dashboard/AdminDashboa
 // Admin > Products
 import ProductListPage from './app/features/admin/features/products/ProductListPage';
 import ProductEditorPage from './app/features/admin/features/products/ProductEditorPage';
-import AdminProductDetailPage from './app/features/admin/features/products/ProductDetailPage'; // تغییر نام برای جلوگیری از تداخل
+import AdminProductDetailPage from './app/features/admin/features/products/ProductDetailPage';
 import ProductQuantitiesPage from './app/features/admin/features/products/ProductQuantitiesPage';
 import ProductSizesPage from './app/features/admin/features/products/ProductSizesPage';
 
@@ -57,8 +57,6 @@ import MessageListPage from './app/features/admin/features/messages/MessageListP
 import SliderSettingsPage from './app/features/admin/features/settings/SliderSettingsPage';
 import ModalSettingsPage from './app/features/admin/features/settings/ModalSettingsPage';
 
-
-// ایجاد کلاینت React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -83,13 +81,22 @@ function App() {
             <Route element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               
-              {/* Products */}
+              {/* === Products (اصلاح شده و نهایی) === */}
               <Route path="products" element={<ProductListPage />} />
-              <Route path="products/new" element={<ProductEditorPage />} />
-              <Route path="products/:id/edit" element={<ProductEditorPage />} />
-              <Route path="products/:id" element={<AdminProductDetailPage />} /> {/* استفاده از کامپوننت ادمین */}
+              
+              {/* 1. اولویت اول: ساخت محصول جدید */}
+              <Route path="products/create" element={<ProductEditorPage />} /> 
+              <Route path="products/new" element={<Navigate to="create" replace />} />
+              
+              {/* 2. اولویت دوم: ویرایش محصول (اصلاح آدرس برای هماهنگی با دکمه‌ها) */}
+              {/* قبلاً :id/edit بود که با دکمه‌های شما فرق داشت */}
+              <Route path="products/edit/:id" element={<ProductEditorPage />} />
+              
               <Route path="products/:id/quantities" element={<ProductQuantitiesPage />} />
               <Route path="products/:id/sizes" element={<ProductSizesPage />} />
+              
+              {/* 3. اولویت آخر: جزئیات محصول (مسیر متغیر) */}
+              <Route path="products/:id" element={<AdminProductDetailPage />} />
 
               {/* Categories */}
               <Route path="categories" element={<CategoryListPage />} />
@@ -116,26 +123,19 @@ function App() {
             </Route>
           </Route>
 
-          {/* =========================================
-              AUTH ROUTES
-             ========================================= */}
+          {/* AUTH ROUTES */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/verify" element={<VerifyPage />} />
           </Route>
 
-          {/* =========================================
-              PUBLIC / USER PANEL ROUTES
-             ========================================= */}
+          {/* PUBLIC ROUTES */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
-            
-            {/* Shop & Product Pages */}
             <Route path="/shop" element={<ShopPage />} />
-            <Route path="/product/:slug" element={<PublicProductDetailPage />} /> {/* استفاده از کامپوننت پابلیک */}
+            <Route path="/product/:slug" element={<PublicProductDetailPage />} />
             
-            {/* User Profile */}
             <Route path="profile">
               <Route index element={<ProfileDashboard />} />
               <Route path="orders" element={<MyOrdersPage />} />
@@ -145,7 +145,6 @@ function App() {
             </Route>
           </Route>
 
-          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>

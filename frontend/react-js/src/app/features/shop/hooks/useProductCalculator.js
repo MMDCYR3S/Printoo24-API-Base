@@ -2,87 +2,100 @@
 import { useState, useEffect, useMemo } from 'react';
 
 export const useProductCalculator = (productData) => {
-  // استیت‌های فرم
+  // --- State ---
   const [quantityType, setQuantityType] = useState('fixed'); // 'fixed' | 'custom'
-  const [selectedQuantityId, setSelectedQuantityId] = useState(null); // برای تیراژ
-  const [customQuantity, setCustomQuantity] = useState(1); // برای تعداد دستی
+  const [selectedQuantityId, setSelectedQuantityId] = useState(''); 
+  const [customQuantity, setCustomQuantity] = useState(1);
 
   const [sizeType, setSizeType] = useState('fixed'); // 'fixed' | 'custom'
-  const [selectedSizeId, setSelectedSizeId] = useState(null);
+  const [selectedSizeId, setSelectedSizeId] = useState('');
   const [customDimensions, setCustomDimensions] = useState({ width: '', height: '' });
 
-  const [selectedOptions, setSelectedOptions] = useState({}); // { optionId: choiceId }
+  // برای آپشن‌ها: { [optionId]: choiceId }
+  const [selectedOptions, setSelectedOptions] = useState({});
 
-  // ۱. تعیین نوع ورودی تعداد (تیراژ یا دستی)
+  // --- Initialization ---
   useEffect(() => {
-    if (productData) {
-      if (productData.quantities && productData.quantities.length > 0) {
-        setQuantityType('fixed');
-        setSelectedQuantityId(productData.quantities[0].id); // پیش‌فرض اولی
-      } else {
-        setQuantityType('custom');
-        setCustomQuantity(productData.pricing_config?.min_quantity || 1);
-      }
+    if (!productData) return;
 
-      // تنظیم پیش‌فرض سایز
-      if (productData.sizes && productData.sizes.length > 0) {
-        setSelectedSizeId(productData.sizes[0].id);
-      }
+    // 1. تنظیم اولیه تیراژ
+    if (productData.quantities?.length > 0) {
+      setQuantityType('fixed');
+      // اولین گزینه را پیش‌فرض انتخاب کن
+      setSelectedQuantityId(productData.quantities[0].id);
+    } else {
+      setQuantityType('custom');
+      setCustomQuantity(productData.pricing_config?.min_quantity || 1);
     }
-  }, [productData]);
 
-  // ۲. محاسبه قیمت لحظه‌ای
+    // 2. تنظیم اولیه سایز
+    if (productData.sizes?.length > 0) {
+      setSizeType('fixed');
+      setSelectedSizeId(productData.sizes[0].id);
+    } else if (productData.pricing_config?.accepts_custom_dimensions) {
+      setSizeType('custom');
+    }
+
+    // 3. تنظیم اولیه آپشن‌های اجباری (Default Options)
+    if (productData.options?.length > 0) {
+      const initialOptions = {};
+      productData.options.forEach(opt => {
+        const defaultChoice = opt.choices?.find(c => c.is_default);
+        if (defaultChoice) {
+          initialOptions[opt.id] = defaultChoice.id;
+        } else if (opt.is_required && opt.choices?.length > 0) {
+          // اگر دیفالت نداشت ولی اجباری بود، اولی رو انتخاب کن
+          initialOptions[opt.id] = opt.choices[0].id;
+        }
+      });
+      setSelectedOptions(initialOptions);
+    }
+  }, [productData?.product_info?.id]);
+
+  // --- Calculation Logic ---
   const pricing = useMemo(() => {
-    if (!productData) return { unitPrice: 0, totalPrice: 0, extraCosts: 0 };
+    // مقادیر اولیه
+    const result = { baseUnitPrice: 0, extraCosts: 0, finalUnitPrice: 0, finalQuantity: 1, totalPrice: 0 };
+    if (!productData) return result;
 
-    let baseUnitPrice = parseFloat(productData.product_info.price) || 0;
-    let extraCosts = 0; // هزینه‌های اضافه شده به واحد
+    const basePrice = parseFloat(productData.product_info?.price) || 0;
+    let extra = 0;
 
     // الف) محاسبه تاثیر سایز
     if (sizeType === 'fixed' && selectedSizeId) {
-      const size = productData.sizes.find(s => s.id === parseInt(selectedSizeId));
-      if (size && size.price_impact) {
-        extraCosts += parseFloat(size.price_impact);
-      }
+      const size = productData.sizes?.find(s => s.id == selectedSizeId);
+      if (size?.price_impact) extra += parseFloat(size.price_impact);
     }
-    // (برای سایز دلخواه اگر فرمولی دارید اینجا اضافه می‌شود، فعلا پایه در نظر گرفته شده)
 
     // ب) محاسبه تاثیر آپشن‌ها
-    if (productData.options) {
-        productData.options.forEach(opt => {
-            const choiceId = selectedOptions[opt.id];
-            if (choiceId) {
-                const choice = opt.choices.find(c => c.id === parseInt(choiceId));
-                if (choice && choice.price_impact) {
-                    extraCosts += parseFloat(choice.price_impact);
-                }
-            } else if (opt.choices) {
-                // اگر انتخابی نکرده، چک کنیم پیش‌فرضی دارد؟ (معمولا در UI هندل میشه)
-                const defaultChoice = opt.choices.find(c => c.is_default);
-                if(defaultChoice) {
-                   // اینجا می‌توانیم لاجیک پیش‌فرض را هندل کنیم ولی بهتر است در UI ست شود
-                }
-            }
-        });
+    if (productData.options?.length > 0) {
+      productData.options.forEach(opt => {
+        const choiceId = selectedOptions[opt.id];
+        if (choiceId) {
+          const choice = opt.choices?.find(c => c.id == choiceId);
+          if (choice?.price_impact) extra += parseFloat(choice.price_impact);
+        }
+      });
     }
-
-    const finalUnitPrice = baseUnitPrice + extraCosts;
 
     // ج) تعیین تعداد نهایی
-    let finalQuantity = 1;
+    let qty = 1;
     if (quantityType === 'fixed') {
-      const qtyObj = productData.quantities?.find(q => q.id === parseInt(selectedQuantityId));
-      finalQuantity = qtyObj ? qtyObj.value : 1; // فرض بر اینکه آبجکت تیراژ فیلد value دارد
+      const qObj = productData.quantities?.find(q => q.id == selectedQuantityId);
+      // طبق جیسون شما کلید quantity است
+      qty = qObj?.quantity ? parseInt(qObj.quantity) : 1;
     } else {
-      finalQuantity = parseInt(customQuantity) || 1;
+      qty = parseInt(customQuantity) || 1;
     }
 
+    const unitPrice = basePrice + extra;
+
     return {
-      baseUnitPrice,
-      extraCosts,
-      finalUnitPrice,
-      finalQuantity,
-      totalPrice: finalUnitPrice * finalQuantity
+      baseUnitPrice: basePrice,
+      extraCosts: extra,
+      finalUnitPrice: unitPrice,
+      finalQuantity: qty,
+      totalPrice: unitPrice * qty
     };
   }, [productData, quantityType, selectedQuantityId, customQuantity, sizeType, selectedSizeId, selectedOptions]);
 
