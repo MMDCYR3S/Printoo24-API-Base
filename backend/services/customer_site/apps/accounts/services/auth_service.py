@@ -7,9 +7,8 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from core.users.models import User
 from core.users.services import UserIdentityService
-from .verify_service import VerificationService
+# from .verify_service import VerificationService
 
 # ====== Logger Configuration ====== #
 logger = logging.getLogger('accounts.services.auth')
@@ -21,9 +20,10 @@ class AuthService:
     سرویس اپلیکیشن احراز هویت (Application Layer).
     وظیفه: هماهنگی بین سرویس دامین (ثبت نام) و سرویس‌های جانبی (ایمیل، توکن).
     """
+
     def __init__(self):
         self._identity_service = UserIdentityService()
-        self._verify_service = VerificationService()
+        # self._verify_service = VerificationService()
         logger.debug("AuthService initialized with UserIdentityService")
     
     def _generate_tokens(self, user) -> Dict[str, str]:
@@ -47,12 +47,13 @@ class AuthService:
         try:
             # ===== ایجاد یوزر ===== # 
             user = self._identity_service.register_new_customer(data)
+            self._identity_service.verify_user(user)
             
             logger.info(f"User created in DB - ID: {user.id}")
             
             # ===== ارسال کد تأیید ===== #
-            logger.info(f"Sending verification code to: {email}")
-            self._verify_service.send_verification_code(user.email)
+            # logger.info(f"Sending verification code to: {email}")
+            # self._verify_service.send_verification_code(user.email)
             
             # ===== تولید توکن ===== #
             tokens = self._generate_tokens(user)

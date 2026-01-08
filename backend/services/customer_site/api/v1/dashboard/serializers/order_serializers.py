@@ -13,13 +13,14 @@ class OrderFileSerializer(serializers.ModelSerializer):
 
 # ===== لیست سفارشات ===== #
 class OrderListSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username')
-    status_name = serializers.CharField(source='current_status.name')
+    username = serializers.CharField(source='user.username', allow_null=True)
+    status_name = serializers.CharField(source='current_status.name', allow_null=True)
     items_count = serializers.IntegerField(source='order_item_order.count', read_only=True)
+    type_name = serializers.CharField(source='get_type_display', allow_null=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'username', 'status_name', 'total_price', 'items_count', 'created_at']
+        fields = ['id', 'username', 'recipient_name', 'recipient_phone', 'status_name', 'type_name', 'total_price', 'items_count', 'created_at']
 
 # ===== سطح ۴: ساختار آپشن در سفارش (از JSON خوانده می‌شود) ===== #
 class OrderItemOptionSnapshotSerializer(serializers.Serializer):

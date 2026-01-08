@@ -65,7 +65,7 @@ class CheckoutService:
             
         # ===== دریافت وضعیت اولیه (باید از طریق کد سیستمی باشد) ===== #
         try:
-            initial_status = OrderStatus.objects.get(internal_code="PENDING_INITIAL_ADMIN")
+            initial_status = OrderStatus.objects.get(internal_code="PENDING_PROGRESS_ADMIN")
         except OrderStatus.DoesNotExist:
             initial_status = OrderStatus.objects.first()
             

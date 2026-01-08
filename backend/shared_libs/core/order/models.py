@@ -31,6 +31,11 @@ class OrderStatusGroup(models.Model):
     code = models.SlugField(_('کد سیستمی'), max_length=50, unique=True, help_text="شناسه یکتا برای لاجیک سیستم (مثلا: design)")
     description = models.TextField(blank=True)
     
+    is_system = models.BooleanField(
+        _('سیستمی'), 
+        default=False,
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     
     objects = OrderStatusGroupManager()
@@ -63,6 +68,12 @@ class OrderStatus(models.Model):
     
     name = models.CharField(_('عنوان نمایشی'), max_length=150)
     internal_code = models.SlugField(_('کد سیستمی'), max_length=150, unique=True, null=True, blank=True)
+
+    is_system = models.BooleanField(
+        _('سیستمی'), 
+        default=False, 
+        editable=False
+    )
 
     status_type = models.CharField(
         _('نوع وضعیت'), 
