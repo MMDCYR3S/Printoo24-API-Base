@@ -13,10 +13,8 @@ from apps.accounts.services import AuthService
 @extend_schema(tags=['Accounts'])
 class RegisterAPIView(GenericAPIView):
     """
-    ویوی ثبت نام کاربر
-    با بهره گیری از ریپازیتوری و سرویس های مرتبط با کاربر، این ویو
-    نقش یک انتقال دهنده و همچنین هماهنگ کننده را بازی می کندو فقط از
-    متدهای مورد نظر برای ایجاد کاربر بهره می برد.
+    ثبت نام مستقیم کاربر.
+    کاربر بلافاصله پس از ثبت نام، توکن دریافت کرده و لاگین می‌شود.
     """
     
     permission_classes = [AllowAny]
@@ -30,18 +28,27 @@ class RegisterAPIView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # ====== ایجاد کاربر و ارسال ایمیل تایید ====== #
-        registration_service = AuthService()
+        # ====== ایجاد سرویس ====== #
+        auth_service = AuthService()
         
-        # ====== ثبت نام کاربر با استفاده از سریالایزر و ریپازیتوری مورد نظر ====== #
-        registered_user = registration_service.register_customer(serializer.validated_data)
-        
-        return Response({
-                "message" : "ثبت نام با موفقیت انجام شد.",
-                "username" : registered_user["user"].username,
-                "token":  registered_user["tokens"]
+        try:
+            # ===== فراخوانی سرویس ثبت نام ===== #
+            result = auth_service.register_customer(serializer.validated_data)
+            
+            # ===== دریافت اطلاعات کاربر ===== #
+            user_instance = result["user"]
+            tokens = result["tokens"]
+            user_data = UserDetailSerializer(user_instance).data
+            
+            # ===== بازگشت اطلاعات کاربر و توکن ===== #
+            return Response({
+                "message": "ثبت نام با موفقیت انجام شد.",
+                "user": user_data,
+                "tokens": tokens
             }, status=status.HTTP_201_CREATED)
-
+            
+        except ValidationError as e:
+            return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
 # ====== Login API View ====== #
 @extend_schema(
