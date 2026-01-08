@@ -15,7 +15,7 @@ def store_old_order_status(sender, instance, **kwargs):
     if instance.pk:
         try:
             old_order = Order.objects.get(pk=instance.pk)
-            instance._old_status_id = old_order.order_status_id
+            instance._old_status_id = old_order.current_status_id
         except Order.DoesNotExist:
             instance._old_status_id = None
     else:
@@ -31,12 +31,12 @@ def trigger_order_notification(sender, instance, created, **kwargs):
     """
     # ===== بررسی وجود داشتن سفارش ===== #
     if not created and hasattr(instance, '_old_status_id'):
-        if instance._old_status_id != instance.order_status_id:
+        if instance._old_status_id != instance.current_status_id:
             # ===== ارسال اعلان ===== #
             send_order_status_notification.delay(
                 order_id=instance.id,
                 old_status_id=instance._old_status_id,
-                new_status_id=instance.order_status_id
+                new_status_id=instance.current_status_id
             )
 
 # ===== Trigger Wallet Notification ===== #
