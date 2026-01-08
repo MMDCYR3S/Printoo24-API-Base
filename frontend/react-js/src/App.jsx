@@ -92,8 +92,8 @@ function App() {
               {/* قبلاً :id/edit بود که با دکمه‌های شما فرق داشت */}
               <Route path="products/edit/:id" element={<ProductEditorPage />} />
               
-              <Route path="products/:id/quantities" element={<ProductQuantitiesPage />} />
-              <Route path="products/:id/sizes" element={<ProductSizesPage />} />
+              <Route path="products/quantities" element={<ProductQuantitiesPage />} />
+              <Route path="products/sizes" element={<ProductSizesPage />} />
               
               {/* 3. اولویت آخر: جزئیات محصول (مسیر متغیر) */}
               <Route path="products/:id" element={<AdminProductDetailPage />} />
