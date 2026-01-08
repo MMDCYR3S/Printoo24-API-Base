@@ -10,66 +10,71 @@ from ..serializers import (
     OrderListSerializer, 
     OrderDetailSerializer, 
     AdminOrderCreateSerializer,
-    AdminOrderUpdateSerializer
+    AdminOrderUpdateSerializer,
+    OrderStatusUpdateSerializer
 )
 
 # ===== Order Dashboard ViewSet ===== #
 @extend_schema(tags=['Dashboard-Order'])
 class OrderDashboardViewSet(viewsets.ViewSet):
     """
-    مدیریت سفارشات (Order Management) برای ادمین.
+    مدیریت پیشرفته سفارشات توسط ادمین.
+    شامل: لیست، جزئیات، ایجاد دستی، ویرایش کامل، تغییر وضعیت و مدیریت فایل‌ها.
     """
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.service = OrderDashboardService()
 
-    # ===== لیست سفارشات ===== #
-    @extend_schema(responses=OrderListSerializer(many=True))
+    # ===== LIST ===== #
+    @extend_schema(
+        summary="لیست سفارشات",
+        description="قابلیت فیلتر بر اساس search (نام، موبایل، کد)، status_id و تاریخ.",
+        responses=OrderListSerializer(many=True)
+    )
     def list(self, request):
-        queryset = self.service.get_all_orders_queryset()
+        filters = {
+            'search': request.query_params.get('search'),
+            'status_id': request.query_params.get('status_id'),
+            'date_from': request.query_params.get('date_from'),
+            'date_to': request.query_params.get('date_to'),
+        }
+        queryset = self.service.get_orders_list(filters)
+        
         serializer = OrderListSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    # ===== جزئیات سفارش ===== #
+    # ===== RETRIEVE ===== #
     @extend_schema(responses=OrderDetailSerializer)
     def retrieve(self, request, pk=None):
-        order = self.service.get_order_detail(pk)
-        if not order:
+        try:
+            order = self.service.get_order_detail(pk)
+            serializer = OrderDetailSerializer(order)
+            return Response(serializer.data)
+        except Exception:
             return Response({'detail': 'سفارش یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = OrderDetailSerializer(order)
-        return Response(serializer.data)
 
-    # ===== ایجاد سفارش دستی ===== #
+    # ===== CREATE ===== #
+    # ===== CREATE ===== #
     @extend_schema(
-        summary="ایجاد سفارش دستی (توسط ادمین)",
-        description="""
-        این متد به ادمین اجازه می‌دهد بدون نیاز به سبد خرید، برای یک کاربر سفارش ثبت کند.
-        
-        **قابلیت‌ها:**
-        1. **Override قیمت:** ادمین می‌تواند قیمت کل سفارش (`price`) یا قیمت هر آیتم (`item_price`) را دستی وارد کند.
-        2. **محصولات متنوع:** پشتیبانی از محصولات با سایز استاندارد یا ابعاد دلخواه (متر مربعی).
-        3. **انعطاف‌پذیری:** ورودی `selections` دقیقاً مشابه ساختار سبد خرید است.
-        """,
-        request=AdminOrderCreateSerializer, 
-        responses={201: inline_serializer(name='OrderCreateSuccess', fields={'id': serializers.IntegerField(), 'message': serializers.CharField()})},
+        summary="ایجاد سفارش دستی",
+        description="ثبت سفارش برای کاربر یا مهمان. امکان تعیین سایز استاندارد (ID) یا دلخواه.",
+        request=AdminOrderCreateSerializer,
+        responses={201: inline_serializer(name='OrderCreateResp', fields={'id': serializers.IntegerField()})},
         examples=[
             OpenApiExample(
-                'Scenario 1: Standard Order with Name',
-                summary='سناریو ۱: سفارش با نام اختصاصی',
-                description='مثال ثبت سفارش برای "کارت ویزیت مدیریت"',
+                '1. Standard Size (With Address ID)',
+                summary='سفارش با سایز استاندارد + آدرس ذخیره شده',
+                description='استفاده از size_id برای محصولاتی مثل کارت ویزیت.',
                 value={
-                    "user_id": 25,
-                    "address_id": 10,
+                    "user_id": 101,
+                    "address_id": 5,
                     "items": [
                         {
-                            "product_slug": "business-card-glossy",
+                            "product_slug": "business-card-gl",
+                            "quantity": 1000,
                             "selections": {
-                                "name": "کارت ویزیت آقای مدیرعامل",
-                                "description": "لطفاً رنگ سازمانی دقیق چک شود.",
-                                "quantity": 1000,
-                                "size_id": 5,
-                                "has_design": True,
-                                "option_value_ids": [101, 205]
+                                "size_id": 12,  # ID از جدول ProductSize
+                                "option_value_ids": [55]
                             }
                         }
                     ]
@@ -77,43 +82,24 @@ class OrderDashboardViewSet(viewsets.ViewSet):
                 request_only=True
             ),
             OpenApiExample(
-                'Scenario 2: Custom Size & Manual Price',
-                summary='سناریو ۲: سفارش بنر (متراژ دلخواه) + قیمت دستی',
-                description='ثبت سفارش بنر ۳ در ۱ متر. ادمین قیمت این آیتم را دستی ۵۰۰،۰۰۰ تومان تعیین می‌کند.',
+                '2. Custom Size (Guest + Full Address)',
+                summary='سفارش با سایز دلخواه + کاربر مهمان',
+                description='استفاده از custom_width/height برای محصولاتی مثل بنر.',
                 value={
-                    "user_id": 25,
-                    "address_id": 10,
+                    "user_id": None,
+                    "recipient_name": "علی رضایی",
+                    "recipient_phone": "09120000000",
+                    "full_address": "شیراز، خیابان زند، پلاک ۱",
                     "items": [
                         {
-                            "product_slug": "banner-13oz",
-                            "item_price": 500000,  # قیمت دستی برای این آیتم
+                            "product_slug": "banner-flex",
+                            "item_price": 850000, # قیمت توافقی
                             "selections": {
                                 "quantity": 1,
-                                "custom_width": 300,  # ۳۰۰ سانتیمتر
-                                "custom_height": 100, # ۱۰۰ سانتیمتر
-                                "option_value_ids": [310] # پانچ: دارد
+                                "custom_width": 350.5,
+                                "custom_height": 120,
+                                "name": "بنر سردر مغازه"
                             }
-                        }
-                    ],
-                    "price": 550000 # قیمت کل سفارش (شامل هزینه ارسال یا خدمات اضافه)
-                },
-                request_only=True
-            ),
-            OpenApiExample(
-                'Scenario 3: Multi-Item Order',
-                summary='سناریو ۳: سفارش ترکیبی (چند قلم)',
-                description='یک سفارش شامل تراکت و سربرگ.',
-                value={
-                    "user_id": 40,
-                    "address_id": 12,
-                    "items": [
-                        {
-                            "product_slug": "flyer-a5",
-                            "selections": {"quantity": 2000, "size_id": 2}
-                        },
-                        {
-                            "product_slug": "letterhead-a4",
-                            "selections": {"quantity": 1000, "size_id": 1}
                         }
                     ]
                 },
@@ -125,102 +111,126 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         serializer = AdminOrderCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
+        valid_data = serializer.validated_data
+        
         try:
             order = self.service.create_admin_order(
-                user_id=serializer.validated_data['user_id'],
-                address_id=serializer.validated_data['address_id'],
-                items_data=serializer.validated_data['items'],
-                total_price_override=serializer.validated_data.get('price')
+                # =====  ===== #
+                user_id=valid_data.get('user_id'),
+                items_data=valid_data['items'],
+                total_price_override=valid_data.get('price'),
+                # ===== آدرس ===== #
+                address_id=valid_data.get('address_id'),
+                full_address=valid_data.get('full_address'),
+                # ===== اطلاعات پایه ===== #
+                recipient_name=valid_data.get('recipient_name'),
+                recipient_phone=valid_data.get('recipient_phone'),
+                company_name=valid_data.get('company_name')
             )
-            return Response({'id': order.id, 'message': 'سفارش با موفقیت ثبت شد.'}, status=status.HTTP_201_CREATED)
+            return Response({'id': order.id, 'message': 'سفارش ثبت شد.'}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    # ===== ویرایش سفارش (Partial) ===== #
-    @extend_schema(request=AdminOrderUpdateSerializer)
-    def partial_update(self, request, pk=None):
-        """ تغییر آدرس یا نوع سفارش (بدون تغییر وضعیت) """
-        serializer = AdminOrderUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        self.service.update_order_details(pk, serializer.validated_data)
-        return Response({'status': 'Order updated'})
-
-    # ===== حذف سفارش ===== #
-    def destroy(self, request, pk=None):
-        self.service.delete_order(pk)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # ===== حذف آیتم از سفارش ===== #
-    @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>\d+)')
-    def remove_item(self, request, pk=None, item_id=None):
-        self.service.remove_item_from_order(pk, item_id)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # ===== اصلاحیه: اکشن درست ===== #
-    @action(detail=True, methods=['post'], url_path='items/(?P<item_id>\d+)/upload', parser_classes=[MultiPartParser, JSONParser])
-    def upload_file_for_item(self, request, pk=None, item_id=None):
-        """
-        آپلود فایل برای یک آیتم خاص از سفارش.
-        pk: Order ID
-        item_id: OrderItem ID
-        """
-        file_obj = request.FILES.get('file')
-        req_id = request.data.get('requirement_id')
-        
-        if not file_obj or not req_id:
-             return Response({'detail': 'File and requirement_id required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # ===== بررسی وجود فایل از قبل و جایگزینی ===== #
-        
-        # ===== فراخوانی سرویس ===== #
-        result = self.service.upload_order_file_async(
-            order_item_id=item_id,
-            requirement_id=req_id,
-            file_obj=file_obj
-        )
-        
-        if result['status'] == 'processing':
-            return Response(result, status=status.HTTP_202_ACCEPTED)
-        
-        return Response(result, status=status.HTTP_201_CREATED)
-    
-    # ========== BULK ACTIONS ========== #
+    # ===== UPDATE ===== #
     @extend_schema(
-        summary="حذف گروهی سفارشات",
-        description="""
-        حذف چندین سفارش به صورت همزمان.
-        **نکته مهم:** فقط سفارشاتی که در وضعیت‌های اولیه (مثل Pending یا Canceled) هستند قابل حذف می‌باشند.
-        سفارشاتی که فاکتور نهایی یا پرداختی دارند حذف نمی‌شوند.
-        """,
-        request=inline_serializer(
-            name='OrderBulkDelete',
-            fields={
-                'order_ids': serializers.ListField(child=serializers.IntegerField())
-            }
-        ),
-        responses={200: OpenApiTypes.OBJECT},
+        summary="ویرایش سفارش و آیتم‌ها",
+        request=AdminOrderUpdateSerializer,
         examples=[
             OpenApiExample(
-                'Delete Draft Orders',
-                value={'order_ids': [101, 102, 105]},
+                'Update Item & Add New',
+                summary='ویرایش تعداد آیتم + افزودن آیتم جدید',
+                value={
+                    "items": [
+                        {
+                            "id": 505, 
+                            "quantity": 2000, # تغییر تیراژ
+                            "selections": {
+                                "size_id": 14 # تغییر سایز آیتم موجود!
+                            }
+                        },
+                        {
+                            "product_slug": "glue-binding", # آیتم جدید (خدمات)
+                            "selections": {
+                                "quantity": 2000,
+                                "description": "صحافی آیتم بالا"
+                            }
+                        }
+                    ],
+                    "total_price": 5000000 # قیمت کل جدید (دستی)
+                },
                 request_only=True
             )
         ]
     )
+    def partial_update(self, request, pk=None):
+        serializer = AdminOrderUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            updated_order = self.service.update_full_order(pk, serializer.validated_data)
+            return Response(OrderDetailSerializer(updated_order).data)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ===== DESTROY ===== #
+    def destroy(self, request, pk=None):
+        self.service.delete_order(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # ===== REMOVE ITEM ===== #
+    @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>\d+)')
+    def remove_item(self, request, pk=None, item_id=None):
+        """ حذف تکی آیتم """
+        self.service.remove_item_from_order(pk, item_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # ===== اصلاحیه: اکشن درست ===== #
+    @action(detail=True, methods=['post'], url_path='items/(?P<item_id>\d+)/upload', parser_classes=[MultiPartParser])
+    def upload_file(self, request, pk=None, item_id=None):
+        """ آپلود فایل برای آیتم """
+        # ===== دریافت فایل ها از 
+        file_obj = request.FILES.get('file')
+        # ===== بررسی وجود فایل ===== #
+        if not file_obj:
+             return Response({'detail': 'File required'}, status=status.HTTP_400_BAD_REQUEST)
+        # ===== آپلود ===== #
+        try:
+            result = self.service.upload_order_file_async(item_id, file_obj)
+            status_code = status.HTTP_202_ACCEPTED if result.get('status') == 'processing' else status.HTTP_201_CREATED
+            return Response(result, status=status_code)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # ========== BULK ACTIONS ========== #
+    # @extend_schema(
+    #     summary="حذف گروهی سفارشات",
+    #     description="""
+    #     حذف چندین سفارش به صورت همزمان.
+    #     **نکته مهم:** فقط سفارشاتی که در وضعیت‌های اولیه (مثل Pending یا Canceled) هستند قابل حذف می‌باشند.
+    #     سفارشاتی که فاکتور نهایی یا پرداختی دارند حذف نمی‌شوند.
+    #     """,
+    #     request=inline_serializer(
+    #         name='OrderBulkDelete',
+    #         fields={
+    #             'order_ids': serializers.ListField(child=serializers.IntegerField())
+    #         }
+    #     ),
+    #     responses={200: OpenApiTypes.OBJECT},
+    #     examples=[
+    #         OpenApiExample(
+    #             'Delete Draft Orders',
+    #             value={'order_ids': [101, 102, 105]},
+    #             request_only=True
+    #         )
+    #     ]
+    # )
+    # ===== BULK DELETE ===== #
+    @extend_schema(request=inline_serializer(name='BulkDel', fields={'ids': serializers.ListField()}))
     @action(detail=False, methods=['delete'], url_path='bulk-delete')
     def bulk_delete(self, request):
-        """ حذف گروهی سفارشات """
-        order_ids = request.data.get('order_ids', [])
-
-        if not order_ids:
-            return Response(
-                {'error': 'order_ids is required.'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            result = self.service.bulk_delete_orders(order_ids)
-            return Response(result, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        ids = request.data.get('ids', [])
+        if not ids:
+             return Response({'detail': 'ids required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        result = self.service.bulk_delete_orders(ids)
+        return Response(result)

@@ -312,7 +312,7 @@ class OrderItemFile(models.Model):
     def filename(self):
         """ نام خالص فایل بدون مسیر """
         number = randint(0000, 9999)
-        return os.path.basename(f"file_v{self.version}_r{self.requirement.spec.name}_{number}")
+        return os.path.basename(f"file_v{self.version}_{number}")
 
     @property
     def is_rejected(self):
