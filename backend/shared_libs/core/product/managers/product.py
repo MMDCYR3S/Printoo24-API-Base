@@ -20,7 +20,7 @@ class ProductQuerySet(BaseQuerySet):
         # ===== ایمپورت محلی برای جلوگیری از خطا ===== #
         from core.product.models import (
             ProductQuantity, ProductSize, ProductOption, 
-            ProductOptionValue, ProductImage, ProductAttachment,
+            ProductOptionValue, ProductImage, Attachment,
             ProductCategoryRelation
         )
 
@@ -47,7 +47,7 @@ class ProductQuerySet(BaseQuerySet):
             
             # ===== بارگذاری تصاویر و فایل های پیوست ===== #
             Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
-            Prefetch('product_attachment_product', queryset=ProductAttachment.objects.select_related('attachment').order_by('id')),
+            Prefetch('product_attachment')
         )
 
     def _get_optimized_queryset(self):

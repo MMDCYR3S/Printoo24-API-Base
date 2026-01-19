@@ -2,8 +2,7 @@ from rest_framework import serializers
 from core.models import (
     Product, ProductCategory, ProductQuantity, ProductSize, 
     ProductOption, ProductOptionValue, ProductImage, 
-    ProductAttachment, ProductComment, ProductPricingConfig,
-    GuideType
+    ProductComment, ProductPricingConfig, Attachment ,GuideType
 )
 
 # ==========================================
@@ -108,20 +107,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.image.url) if request else obj.image.url
         return None
 
-class ProductAttachmentSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='attachment.name')
-    file = serializers.FileField(source='attachment.file')
-    file_url = serializers.SerializerMethodField()
 
-    class Meta:
-        model = ProductAttachment
-        fields = ['id', 'name', 'file', 'file_url']
-        
-    def get_file_url(self, obj):
-        request = self.context.get('request')
-        if obj.attachment.file:
-            return request.build_absolute_uri(obj.attachment.file.url) if request else obj.attachment.file.url
-        return None
 
 # ==========================================
 # 5. MAIN PRODUCT SERIALIZERS (REFACTORED for M2M)
@@ -168,6 +154,18 @@ class ProductListSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(img.image.url) if request else img.image.url
         return None
 
+#‌ ========== ATTACHMENT SERAILZIER ========== #
+class AttachmentSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر مربوط به فایل‌های پیوست
+    """
+
+    class Meta:
+        model = Attachment
+        fields = ['id', 'name', 'file', 'created_at']
+        
+
+#‌ ========== PRODUCT DETAIL SERIALIEZER ========== #
 class ProductDetailSerializer(serializers.Serializer):
     """
     سریالایزر نهایی صفحه محصول (ترکیب تمام اطلاعات).
@@ -181,7 +179,7 @@ class ProductDetailSerializer(serializers.Serializer):
     options = ProductOptionSerializer(many=True)
     images = ProductImageSerializer(source='product_image', many=True)
     # اضافه کردن فایل‌های پیوست اگر نیاز است
-    attachments = ProductAttachmentSerializer(source='product_attachment_product', many=True, read_only=True)
+    attachments = AttachmentSerializer(source='product_attachment', many=True, read_only=True)
 
     def get_product_info(self, obj):
         product = obj

@@ -77,7 +77,7 @@ def upload_product_image_task(self, product_id, user_id, temp_file_path, origina
 
 # ===== Task: Upload Attachment to Library ===== #
 @shared_task(name='upload_attachment_library_task', bind=True, max_retries=3)
-def upload_attachment_library_task(self, user_id, temp_file_path, original_filename, name_in_library):
+def upload_attachment_library_task(self, user_id, product_id, temp_file_path, original_filename, name_in_library):
     """ تسک آپلود فایل در کتابخانه """
     logger.info(f"[Attachment Task] Starting upload: {name_in_library}")
     media_service = ProductMediaService()
@@ -88,7 +88,7 @@ def upload_attachment_library_task(self, user_id, temp_file_path, original_filen
         if os.path.exists(temp_file_path):
             with open(temp_file_path, 'rb') as f:
                 django_file = File(f, name=original_filename)
-                instance = media_service.upload_attachment_to_library(user, django_file, name_in_library)
+                instance = media_service.upload_attachment_to_library(user, django_file, product_id, name_in_library)
             
             os.remove(temp_file_path)
             logger.info(f"[Attachment Task] Success: Attachment {instance.id} created.")

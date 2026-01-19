@@ -99,28 +99,11 @@ class ProductDashboardService:
     
     # ===== تصاویر و فایل های پیوست ===== #
     @transaction.atomic
-    def sync_media_assets(self, product_id: int, user, data: Dict[str, Any]):
+    def sync_media_assets(self):
         """
         مدیریت لینک پیوست‌ها و ترتیب تصاویر.
         """
-        attachment_ids = data.get('attachment_ids_to_link', [])
-        attachment_ids_to_unlink = data.get('attachment_ids_to_unlink', [])
-        image_orders = data.get('image_orders', [])
-
-        # ===== لینک فایل‌ها ===== #
-        for att_id in attachment_ids:
-            try:
-                self.media_service.attach_file_to_product(product_id, att_id, user)
-            except ValidationError:
-                continue
-
-        # ===== حذف فایل‌ها ===== #
-        for att_id in attachment_ids_to_unlink:
-            self.media_service.detach_file_from_product(product_id, att_id)
-
-        # ===== ترتیب تصاویر ===== #
-        if image_orders:
-            self.media_service.reorder_images(product_id, image_orders)
+        return
 
     # ===== متد کمکی ذخیره موقت ===== #
     def _save_temp_file(self, file_obj) -> str:
@@ -169,17 +152,19 @@ class ProductDashboardService:
                 raise sync_error
 
     # ===== آپلود پیوست (با Fallback) ===== #
-    def upload_attachment_library_async(self, user, file_obj, name):
+    def upload_attachment_library_async(self, user, file_obj, product_id: int, name: str = None):
         """
         آپلود فایل در کتابخانه با مکانیزم Async + Sync Fallback.
         """
+        # ===== ذخیره فایل به صورت موقت ===== #
         temp_path = self._save_temp_file(file_obj)
         original_name = file_obj.name
-
+        #‌ ===== تلاش برای آپلود از طریق Celery ===== #
         try:
             logger.info(f"Attempting async attachment upload: {name}")
             upload_attachment_library_task.delay(
                 user_id=user.id,
+                product_id=product_id,
                 temp_file_path=temp_path,
                 original_filename=original_name,
                 name_in_library=name
@@ -189,11 +174,11 @@ class ProductDashboardService:
         except (OperationalError, Exception) as e:
             logger.error(f"Celery failed for attachment: {str(e)}. Switching to Sync mode.")
             
-            # === FALLBACK === #
+            # === تلاش برای باز کردن فایل و ارسال مستقیم === #
             try:
                 with open(temp_path, 'rb') as f:
                     django_file = File(f, name=original_name)
-                    instance = self.media_service.upload_attachment_to_library(user, django_file, name)
+                    instance = self.media_service.upload_attachment_to_library(user, django_file, product_id, name)
                 
                 os.remove(temp_path)
                 return {"status": "completed", "id": instance.id}

@@ -1,8 +1,7 @@
 from .product import ProductManager, ProductQuerySet
 from .media import (
     ProductImageManager, ProductImageQuerySet,
-    AttachmentManager, AttachmentQuerySet,
-    ProductAttachmentManager, ProductAttachmentQuerySet
+    AttachmentManager, AttachmentQuerySet
 )
 from .options import (
     OptionManager, OptionQuerySet,
