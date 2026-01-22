@@ -371,6 +371,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         """ آپلود فایل برای لینک کردن بعدی """
         file_obj = request.FILES.get('file')
         name = request.data.get('name')
+        product_id = request.data.get('product_id')
         
         if not file_obj or not name:
             return Response({'detail': 'File and name are required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -378,6 +379,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         result = self.app_service.upload_attachment_library_async(
             user=request.user,
             file_obj=file_obj,
+            product_id=product_id,
             name=name
         )
         

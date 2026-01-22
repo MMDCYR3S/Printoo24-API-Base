@@ -12,8 +12,7 @@ from mptt.models import MPTTModel, TreeForeignKey
 from .managers import (
     ProductManager, 
     ProductImageManager, 
-    AttachmentManager, 
-    ProductAttachmentManager,
+    AttachmentManager,
     OptionManager,
     OptionValueManager,
     SizeManager,
@@ -448,8 +447,9 @@ class ProductImage(models.Model):
 class Attachment(models.Model):
     """ مدل فایل های پیوست """
     user = models.ForeignKey("core.User", related_name='user_attachments', on_delete=models.PROTECT)
-    name = models.CharField(_('نام'), max_length=150)
+    name = models.CharField(_('نام'), max_length=150, null=True, blank=True)
     file = models.FileField(_('فایل'), upload_to='products/attachments/')
+    product = models.ForeignKey(Product, verbose_name=_("محصولات"), on_delete=models.CASCADE, related_name="product_attachment")
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
@@ -461,21 +461,6 @@ class Attachment(models.Model):
     class Meta:
         verbose_name = _('فایل محصول')
         verbose_name_plural = _('فایل های محصولات')
-
-
-# ======= Product Attachment Model ======= #
-class ProductAttachment(HasGuide, models.Model):
-    """ مدل واسط بین محصول و فایل """
-    user = models.ForeignKey("core.User", related_name='product_attachment_user', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, related_name='product_attachment_product', on_delete=models.PROTECT)
-    attachment = models.ForeignKey(Attachment, related_name='product_attachment_file', on_delete=models.PROTECT)
-    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
-    
-    objects = ProductAttachmentManager()
-    
-    def __str__(self):
-        return f"{self.product.name} - {self.attachment.name}"
 
 # ====== Option Pricing Strategy Model ====== #
 class OptionPricingStrategy(models.TextChoices):

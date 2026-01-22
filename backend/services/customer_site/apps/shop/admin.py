@@ -10,7 +10,6 @@ from core.models import (
     Size,
     ProductQuantity,
     Quantity,
-    ProductAttachment,
     Attachment,   
     ProductOption,
     Option,
@@ -26,7 +25,6 @@ admin.site.register(ProductSize)
 admin.site.register(Size)
 admin.site.register(ProductQuantity)
 admin.site.register(Quantity)
-admin.site.register(ProductAttachment)
 admin.site.register(Attachment)
 admin.site.register(ProductOption)
 admin.site.register(Option)
