@@ -27,7 +27,6 @@ class OrderDashboardViewSet(viewsets.ViewSet):
     @extend_schema(responses=OrderListSerializer(many=True))
     def list(self, request):
         queryset = self.service.get_all_orders_queryset()
-        # اینجا باید Paginate کنید
         serializer = OrderListSerializer(queryset, many=True)
         return Response(serializer.data)
 

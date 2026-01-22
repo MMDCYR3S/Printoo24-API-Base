@@ -1,11 +1,15 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
+from django.core.exceptions import PermissionDenied
 from django.dispatch import receiver
 from django.utils import timezone
+
 from .models import(
     ProductCategoryRelation, Product,
-    product_code_generator
+    product_code_generator, OrderStatus,
+    OrderStatusGroup
 )   
 
+# =========== GENERATE CORE ON RELATION CREATION =========== #
 @receiver(post_save, sender=ProductCategoryRelation)
 def generate_code_on_relation_creation(sender, instance, created, **kwargs):
     """
@@ -27,4 +31,14 @@ def generate_code_on_relation_creation(sender, instance, created, **kwargs):
         
         # ===== ذخیره کد ===== #
         Product.objects.filter(pk=product.pk).update(code=new_code)
+        
+# =========== PREVENT SYSTEM DATA DELETION =========== #
+@receiver(pre_delete, sender=OrderStatus)
+@receiver(pre_delete, sender=OrderStatusGroup)
+def prevent_system_data_deletion(sender, instance, **kwargs):
+    """
+    جلوگیری از حذف رکوردهای سیستمی حیاتی.
+    """
+    if instance.is_system:
+        raise PermissionDenied(f"حذف رکورد سیستمی '{instance}' مجاز نیست.")
     

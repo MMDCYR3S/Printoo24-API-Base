@@ -1,7 +1,7 @@
 from django.urls import path, include
 from .views import (
     RegisterAPIView, 
-    VerifyEmailApiView,
+    # VerifyEmailApiView,
     LoginAPIView,
     PasswordResetConfirmAPIView,
     PasswordResetRequestAPIView,
@@ -14,7 +14,7 @@ app_name = "accounts"
 urlpatterns = [
     # ===== Register URLs ===== # 
     path('register/', RegisterAPIView.as_view(), name='register'),
-    path("verify/", VerifyEmailApiView.as_view(), name="verify-email"),
+    # path("verify/", VerifyEmailApiView.as_view(), name="verify-email"),
     # ===== Login URLs ===== #
     path('login/', LoginAPIView.as_view(), name='login'),
     # ===== Token URLs ===== #
