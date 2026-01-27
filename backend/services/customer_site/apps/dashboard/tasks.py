@@ -7,7 +7,7 @@ from django.core.files import File
 from django.contrib.auth import get_user_model
 
 from core.infrastructure import EmailService 
-from core.product.services import ProductMediaService
+from shared_libs.core.product.services import ProductMediaService
 from core.models import (
     OrderItem,
     OrderItemFile

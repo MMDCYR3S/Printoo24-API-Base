@@ -309,12 +309,12 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== MEDIA SYNC ========== #
     @extend_schema(
-        summary="از این قسمت استفاده نکن و این قسمت به زودی حذف میشه",
+        summary="مرحله ۳: اتصال فایل‌ها و تصاویر (Media)",
         request=ProductMediaSyncSerializer,
         examples=[
             OpenApiExample(
                 'Media Sync Example',
-                summary='مرتب‌سازی تصاویر و لینک فایل - توجه: منسوخ شده و به زودی حذف میشه',
+                summary='مرتب‌سازی تصاویر و لینک فایل',
                 value={
                     "attachment_ids_to_link": [15],
                     "attachment_ids_to_unlink": [],
@@ -339,7 +339,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== UPLOAD IMAGE ========== #
     @extend_schema(
-                summary="مرحله ۳: افزودن عکس محصولات (Media)",
+        summary="آپلود تصویر (تکی)",
         request=ProductImageSerializer,
         description="تصویر را آپلود می‌کند و ID آن را برمی‌گرداند تا در `media-sync` استفاده شود."
     )
@@ -362,31 +362,30 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== UPLOAD ATTACHMENT ========== #
     @extend_schema(
-        summary="مرحله ۳: افزودن فایل های پیوست محصول (Media)",
+        summary="آپلود فایل در کتابخانه",
         request=AttachmentLibrarySerializer,
         description="فایل‌های جانبی (قالب، راهنما) را آپلود می‌کند."
     )
-    @action(detail=False, methods=['post'], url_path='upload-attachment', parser_classes=[MultiPartParser, FormParser, JSONParser])
+    @action(detail=False, methods=['post'], url_path='upload-attachment', parser_classes=[MultiPartParser, FormParser])
     def upload_attachment(self, request):
         """ آپلود فایل برای لینک کردن بعدی """
-        try:
-            file_obj = request.FILES.get('file')
-            name = request.data.get('name')
-            product_id = request.data.get('product_id')
-            print(f"PRODUCT ID {product_id}")
-            print(F"NAME {name}")
-            print(F"FILE_OBJ {file_obj}")
-            result = self.app_service.upload_attachment_library_async(
-                user=request.user,
-                file_obj=file_obj,
-                product_id=product_id,
-                name=name
-            )
-            if result['status'] == 'در حال پردازش':
-                return Response(result, status=status.HTTP_202_ACCEPTED)
-            return Response(result, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"detail": f"خطا: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        file_obj = request.FILES.get('file')
+        name = request.data.get('name')
+        product_id = request.data.get('product_id')
+        
+        if not file_obj or not name:
+            return Response({'detail': 'File and name are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = self.app_service.upload_attachment_library_async(
+            user=request.user,
+            file_obj=file_obj,
+            product_id=product_id,
+            name=name
+        )
+        
+        if result['status'] == 'processing':
+            return Response(result, status=status.HTTP_202_ACCEPTED)
+        return Response(result, status=status.HTTP_201_CREATED)
 
     # ========== GET DETAIL ========== #
     @extend_schema(responses=ProductDetailSerializer)

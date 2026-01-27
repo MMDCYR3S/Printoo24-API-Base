@@ -50,4 +50,4 @@ class ProductMediaService:
         product = Product.objects.get_by_id(product_id)
         if not product:
             raise ValidationError("محصول یافت نشد.")
-        return Attachment.objects.create_attachment(user=user, name=name, file=file, product=product)
+        return Attachment.objects.create_attachment(user, name, file, product)

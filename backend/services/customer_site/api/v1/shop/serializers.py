@@ -159,11 +159,17 @@ class AttachmentSerializer(serializers.ModelSerializer):
     """
     سریالایزر مربوط به فایل‌های پیوست
     """
-
+    file_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = Attachment
-        fields = ['id', 'name', 'file', 'created_at']
+        fields = ['id', 'name', 'file', 'file_url', 'created_at']
         
+    def get_file_url(self, obj):
+        request = self.context.get('request')
+        if obj.attachment.file:
+            return request.build_absolute_uri(obj.attachment.file.url) if request else obj.attachment.file.url
+        return None
 
 #‌ ========== PRODUCT DETAIL SERIALIEZER ========== #
 class ProductDetailSerializer(serializers.Serializer):
