@@ -91,6 +91,7 @@ class RoleAdmin(admin.ModelAdmin):
 
 custom_admin_site.register(User)
 custom_admin_site.register(UserRole)
+custom_admin_site.register(Role)
 custom_admin_site.register(Address)
 custom_admin_site.register(City)
 custom_admin_site.register(Province)

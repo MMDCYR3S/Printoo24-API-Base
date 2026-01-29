@@ -49,6 +49,7 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name')
     product_slug = serializers.CharField(source='product.slug')
     
+    
     specifications = serializers.SerializerMethodField()
     
     files = OrderFileSerializer(many=True, read_only=True)
@@ -97,11 +98,17 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     user_info = serializers.SerializerMethodField()
     items = OrderItemDetailSerializer(source='order_item_order', many=True)
     address_detail = serializers.SerializerMethodField()
-    status_info = serializers.SerializerMethodField()
+    current_status= serializers.CharField(source='current_status.name', read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'user_info', 'items', 'address_detail', 'status_info', 'total_price', 'created_at']
+        fields = [
+            'id', 'user_info',
+            "recipient_name", 'recipient_phone',
+            'company_name', 'address_detail',
+            'current_status', 'total_price',
+            'created_at', 'items'
+        ]
 
     def get_user_info(self, obj):
         return {
@@ -112,10 +119,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         
     def get_address_detail(self, obj):
         if not obj.address: return None
-        return f"{obj.address.province.name}, {obj.address.city.name}, {obj.address.address}"
-
-    def get_status_info(self, obj):
-        return {'id': obj.current_status.id, 'name': obj.current_status.name}
+        return f"{obj.address.province.name} - {obj.address.city.name} - {obj.address.address}"
 
 # ===== ایجاد سفارش (Input) ===== #
 class AdminOrderCreateSerializer(serializers.Serializer):

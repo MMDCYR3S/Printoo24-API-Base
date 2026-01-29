@@ -82,11 +82,10 @@ class OrderStatusViewSet(viewsets.ViewSet):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # ========== Order Transition View ========== # 
-@extend_schema(tags=['Admin - Order Transition'])
+@extend_schema(tags=['Admin - Order Status Transition'])
 class OrderTransitionView(GenericAPIView):
     """
     تغییر وضعیت سفارش (سطح کل سفارش).
-    مناسب برای تیم‌های کوچک/متوسط که فرآیند خطی دارند.
     """
     permission_classes = [IsAuthenticated]
     serializer_class = OrderTransitionSerializer

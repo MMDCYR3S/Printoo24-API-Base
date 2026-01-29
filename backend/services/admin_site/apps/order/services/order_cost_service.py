@@ -7,7 +7,7 @@ from core.models import (
     User, Order
 )
 from apps.order.models import *
-from apps.order.domain_services import OrderCostService
+from apps.order.domain_services import OrderCostService, OrderCostType
 from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
 
@@ -25,7 +25,7 @@ class OrderCostAppService:
         self.audit_service = LoggerService()
         
     # ========== SUBMIT REPORT ========== #
-    def submit_department_report(self, requester: User, order_id: int, validated_data: dict, files_list=None):
+    def submit_department_report(self, requester: User, order_id: int, validated_data: dict, cost_type_id: int = None, files_list=None):
         """
         ارسال گزارش هزینه توسط پرسنل (انبار، چاپ، طراحی).
         این متد گزارش و آیتم‌هایش را می‌سازد.
@@ -33,6 +33,12 @@ class OrderCostAppService:
         # ===== بررسی مجوز کلی ===== #
         AppPermissionChecker.check_has_permission(requester, 'add_ordercostreport')
 
+        # ===== دریافت نوع هزینه ===== #
+        if cost_type_id:
+            cost_type = OrderCostType.objects.get(id=cost_type_id)
+        print(cost_type)
+        print(cost_type_id)
+    
         # ===== دریافت سفارش ===== #
         try:
             order = Order.objects.get(pk=order_id)
@@ -49,7 +55,7 @@ class OrderCostAppService:
         report = OrderCostReport.objects.create(
             sheet=sheet,
             submitter=requester,
-            department=validated_data['department'],
+            cost_type=cost_type,
             title=validated_data['title'],
             description=validated_data.get('description', ""),
             is_approved=False
@@ -59,8 +65,8 @@ class OrderCostAppService:
         new_items = []
         for item_data in items_data:
             category = None
-            if item_data.get('category_id'):
-                category = OrderCostCategory.objects.get_by_id(item_data['category_id'])
+            if item_data.get('catalog_id'):
+                category = OrderCostCategory.objects.get_by_id(item_data['catalog_id'])
                 
             new_items.append(OrderCostItem(
                 report=report,
@@ -80,11 +86,11 @@ class OrderCostAppService:
             obj=report.sheet,
             action='SUBMIT_COST_REPORT',
             changes={
-                'department': validated_data['department'],
+                'cost_type':  cost_type.title if cost_type else 'سایر',
                 'report_title': validated_data['title'],
                 'items_count': len(new_items)
             },
-            description=_(f"ثبت گزارش هزینه توسط واحد {validated_data['department']}")
+            description=_(f"ثبت گزارش هزینه توسط واحد  {cost_type.title if cost_type else 'عمومی'}")
         )
         
         return report

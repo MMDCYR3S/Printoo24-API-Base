@@ -5,20 +5,21 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes, OpenApiExample
 
+from apps.order.models import OrderCostType
 from apps.order.services import OrderCostAppService
 from ..serializers import (
     OrderCostReportSubmitSerializer, 
     OrderCostReportSerializer,
+    OrderCostTypeListSerializer
 )
 
-# ========================================== #
-# ========== 1. SUBMIT REPORT VIEW ========= #
-# ========================================== #
-
+# ================================== #
+# ========= SUBMIT REPORT VIEW ========= #
+# ================================== #
 @extend_schema(
-    tags=['Order - Costs (Operations)'],
+    tags=['Order - Costs'],
     summary="ارسال گزارش هزینه (توسط انبار/چاپ/طراحی)",
     description="""
     این اندپوینت اصلی برای ثبت هزینه‌هاست.
@@ -29,11 +30,62 @@ from ..serializers import (
         OpenApiParameter("id", OpenApiTypes.INT, location=OpenApiParameter.PATH, description="Order ID"),
     ],
     request=OrderCostReportSubmitSerializer,
-    responses={201: OrderCostReportSerializer}
+    responses={201: OrderCostReportSerializer},
+    examples=[
+        # ===== مثال ۱: هزینه‌های چاپ ===== #
+        OpenApiExample(
+            'Print Costs Example',
+            description='نمونه ثبت هزینه برای بخش چاپ (شامل مواد مصرفی و خدمات)',
+            value={
+                "title": "گزارش هزینه چاپ (اپراتور ۱)",
+                "description": "مصرفی چاپخانه برای سفارش بنر",
+                "cost_type_id": 1, # فرض: ID مربوط به چاپ در دیتابیس
+                "items": [
+                    {
+                        # استفاده از آیتم کاتالوگ (مواد اولیه)
+                        "catalog_id": 15, 
+                        "amount": 150000,
+                        "description": "مصرف کاغذ ۳۰۰ گرم"
+                    },
+                    {
+                        # استفاده از آیتم دستی (خدمات)
+                        "custom_title": "اجاره دستگاه چاپ دیجیتال",
+                        "amount": 50000,
+                        "description": "۱ ساعت کارکرد دستگاه"
+                    }
+                ],
+                # "attachments": [] # اگر فایلی هست در multipart ارسال می‌شود
+            }
+        ),
+        # ===== مثال ۲: هزینه‌های حمل و نقل / انبار ===== #
+        OpenApiExample(
+            'Logistics Costs Example',
+            description='نمونه ثبت هزینه برای بخش لجستیک و انبار (بسته‌بندی و ارسال)',
+            value={
+                "title": "هزینه ارسال و بسته‌بندی سفارش",
+                "description": "ارسال به آدرس مشتری در تهران",
+                "cost_type_id": 4, # فرض: ID مربوط به حمل و نقل
+                "items": [
+                    {
+                        # هزینه بسته بندی
+                        "catalog_id": 22,
+                        "amount": 50000,
+                        "description": "کارتن ۵ لایه + شلفون"
+                    },
+                    {
+                        # هزینه پیک/باربری
+                        "custom_title": "کرایه پیک موتوری",
+                        "amount": 120000,
+                        "description": "ارسال فوری داخل شهری"
+                    }
+                ]
+            }
+        ),
+    ]
 )
 class OrderCostReportSubmitView(GenericAPIView):
     """
-    جایگزین ویوهای قدیمی CreateSheet و AddItems.
+    ساخت گزارش هزینه
     """
     permission_classes = [IsAuthenticated]
     serializer_class = OrderCostReportSubmitSerializer
@@ -54,6 +106,7 @@ class OrderCostReportSubmitView(GenericAPIView):
         # ===== 2. Validate Input ===== #
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
+        cost_type_id = serializer.validated_data.get('cost_type_id')
         
         try:
             service = OrderCostAppService()
@@ -63,6 +116,7 @@ class OrderCostReportSubmitView(GenericAPIView):
             report = service.submit_department_report(
                 requester=request.user,
                 order_id=pk,
+                cost_type_id=cost_type_id,
                 validated_data=serializer.validated_data,
                 files_list=files
             )
@@ -75,3 +129,15 @@ class OrderCostReportSubmitView(GenericAPIView):
             
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+# ========== ORDER COST TYPE VIEW ========== #
+@extend_schema(tags=["Order - Costs"])
+class OrderCostTypeView(GenericAPIView):
+    """ نمایش لیست نوع هزینه ها """
+    serializer_class = OrderCostTypeListSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        cost_types = OrderCostType.objects.all()
+        serializer = self.get_serializer(cost_types, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -260,7 +260,7 @@ class OrderItem(models.Model):
         verbose_name_plural = _('اقلام سفارش')
 
     def __str__(self):
-        return f"{self.product.name} (x{self.quantity})"
+        return f"{self.product.name if self.product else 'بدون محصول'} (x{self.quantity})"
 
     # ===== Properties ===== #
     @property

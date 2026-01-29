@@ -3,9 +3,11 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from slugify import slugify
 
 from .managers import *
 
+# ========== ORDER COST MODELS ========== #
 class OrderCostCategory(models.Model):
     """
     دسته‌بندی هزینه‌ها برای گزارش‌گیری دقیق.
@@ -36,6 +38,27 @@ class OrderCostCategory(models.Model):
 
     def __str__(self):
         return self.title
+    
+# ========== Order Cost Type ========== #
+class OrderCostType(models.Model):
+    """ نوع هزینه سفارش """
+    title = models.CharField(max_length=100, verbose_name=_("عنوان"))
+    slug = models.SlugField(max_length=100, unique=True, verbose_name=_("اسلاگ"), blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    
+    class Meta:
+        db_table = "admin_order_cost_type"
+        verbose_name = _("نوع هزینه سفارش")
+        verbose_name_plural = _("نوع هزینه سفارش")
+        
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        return super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.title} - {self.slug}"
 
 # ========== Order Cost Sheet ========== #
 class OrderCostSheet(models.Model):
@@ -93,16 +116,6 @@ class OrderCostReport(models.Model):
     گزارش هزینه ارسالی از سمت دپارتمان‌ها.
     این موجودیت توسط اپراتورها پر می‌شود و به تایید مدیر مالی می‌رسد.
     """
-    
-    DEPARTMENT_CHOICES = [
-        ('design', _('واحد طراحی')),
-        ('production', _('واحد تولید/چاپ')),
-        ('warehouse', _('انبار')),
-        ('logistics', _('لجستیک و ارسال')),
-        ('outsourcing', _('برون‌سپاری')),
-        ('management', _('مدیریت (سربار)')),
-    ]
-
     sheet = models.ForeignKey(
         OrderCostSheet, 
         on_delete=models.CASCADE, 
@@ -117,7 +130,11 @@ class OrderCostReport(models.Model):
     )
     
     title = models.CharField(_("عنوان گزارش"), max_length=200, help_text="مثلا: هزینه کاغذ مصرفی بخش افست")
-    department = models.CharField(_("دپارتمان"), max_length=20, choices=DEPARTMENT_CHOICES)
+    cost_type = models.ForeignKey(
+        OrderCostType, verbose_name=_("نوع هزینه"),
+        on_delete=models.CASCADE,
+        blank=True, null=True
+    )
 
     is_approved = models.BooleanField(_("تایید شده"), default=False)
     
@@ -203,102 +220,6 @@ class OrderCostAttachment(models.Model):
         db_table = 'admin_order_cost_attachments'
         verbose_name = _('پیوست هزینه')
         verbose_name_plural = _('پیوست‌های هزینه')
-
-# ==========================================
-# ========== Print Material Models =========
-# ==========================================
-
-class OrderPrintReport(models.Model):
-    """
-    هدر گزارش مصرف متریال چاپ.
-    مثلا: "مصرف کاغذ و زینک برای سفارش شماره ۱۰۰"
-    """
-    order = models.ForeignKey(
-        'core.Order', 
-        related_name='print_reports', 
-        on_delete=models.CASCADE,
-        verbose_name=_("سفارش مرتبط")
-    )
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.PROTECT,
-        verbose_name=_("ثبت کننده (اپراتور)")
-    )
-    title = models.CharField(_("عنوان گزارش"), max_length=200)
-    description = models.TextField(_("توضیحات فنی"), blank=True, null=True)
-    # ===== زمان مصرف ===== #
-    created_at = models.DateTimeField(_("تاریخ ثبت"), auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    objects = OrderPrintReportManager()
-
-    class Meta:
-        db_table = 'admin_order_print_reports'
-        verbose_name = _('گزارش مصرف چاپ')
-        verbose_name_plural = _('گزارشات مصرف چاپ')
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.title} - {self.order.order_code}"
-
-
-class OrderPrintItem(models.Model):
-    """
-    اقلام مصرفی چاپ (به صورت استاتیک).
-    """
-
-    report = models.ForeignKey(
-        OrderPrintReport, 
-        related_name='items', 
-        on_delete=models.CASCADE,
-        verbose_name=_("گزارش مرتبط")
-    )
-    
-    # ===== نوع مواد اولیه ===== #
-    material_type = models.ForeignKey(
-        OrderCostCategory, 
-        related_name='print_items', 
-        on_delete=models.PROTECT,
-        verbose_name=_("نوع مواد اولیه")
-    )
-    custom_title = models.CharField(_("عنوان"), max_length=255, blank=True, null=True)
-    price = models.DecimalField(_("قیمت"), max_digits=12, decimal_places=2)
-    description = models.CharField(_("توضیحات"), max_length=255, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
-    
-    objects = OrderPrintItemManager()
-
-    class Meta:
-        db_table = 'admin_order_print_items'
-        verbose_name = _('قلم متریال')
-        verbose_name_plural = _('اقلام متریال')
-
-    def __str__(self):
-        return f"{self.get_material_type_display()}"
-
-
-class OrderPrintAttachment(models.Model):
-    """
-    فایل‌های پیوست مربوط به متریال چاپ.
-    مثال: عکس فرم چاپی، عکس پالت کاغذ مصرفی.
-    """
-    report = models.ForeignKey(
-        OrderPrintReport, 
-        related_name='attachments', 
-        on_delete=models.CASCADE,
-        verbose_name=_("گزارش چاپ")
-    )
-    file = models.FileField(_("فایل/عکس"), upload_to='orders/print_logs/%Y/%m/')
-    title = models.CharField(_("عنوان"), max_length=100, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    objects = OrderPrintAttachmentManager()
-
-    class Meta:
-        db_table = 'admin_order_print_attachments'
-        verbose_name = _('پیوست چاپ')
-        verbose_name_plural = _('پیوست‌های چاپ')
 
 # ========== ORDER SCHEDULE ========== #
 class OrderSchedule(models.Model):

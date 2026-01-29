@@ -31,11 +31,12 @@ class OrderCostReportDetailSerializer(serializers.ModelSerializer):
     """ جزئیات کامل یک گزارش هزینه برای مشاهده """
     items = OrderCostItemSerializer(many=True, read_only=True)
     submitter_name = serializers.CharField(source='submitter.username', read_only=True)
+    cost_type_display = serializers.CharField(source='cost_type.title', read_only=True)
     
     class Meta:
         model = OrderCostReport
         fields = [
-            'id', 'sheet', 'title', 'department', 
+            'id', 'sheet', 'title', 'cost_type', 'cost_type_display',
             'submitter_name', 'created_at', 
             'is_approved', 'items', 'description'
         ]
@@ -43,10 +44,11 @@ class OrderCostReportDetailSerializer(serializers.ModelSerializer):
 class OrderCostReportListSerializer(serializers.ModelSerializer):
     """ لیست خلاصه گزارشات """
     submitter_name = serializers.CharField(source='submitter.username', read_only=True)
+    cost_type_display = serializers.CharField(source='cost_type.title', read_only=True)
     
     class Meta:
         model = OrderCostReport
-        fields = ['id', 'title', 'department', 'submitter_name', 'is_approved', 'created_at']
+        fields = ['id', 'title', 'cost_type', 'cost_type_display', 'submitter_name', 'is_approved', 'created_at']
 
 class CostItemInputSerializer(serializers.Serializer):
     """ ورودی ایجاد/ویرایش آیتم """
@@ -59,7 +61,7 @@ class CreateReportInputSerializer(serializers.Serializer):
     """ ورودی ایجاد دستی گزارش """
     order_id = serializers.IntegerField(required=True)
     title = serializers.CharField(max_length=200)
-    department = serializers.CharField(required=False, default='management')
+    cost_type = serializers.IntegerField(required=False, allow_null=True)
     description = serializers.CharField(required=False, allow_blank=True)
     items = serializers.ListField(child=CostItemInputSerializer(), min_length=1)
 
@@ -67,7 +69,7 @@ class UpdateReportInputSerializer(serializers.ModelSerializer):
     """ ورودی ویرایش هدر گزارش """
     class Meta:
         model = OrderCostReport
-        fields = ['title', 'department', 'description']
+        fields = ['title', 'cost_type', 'description']
 
 # ========================================== #
 # ========== 3. Cost Sheet Serializers ===== #

@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 from core.models import (
     Order, OrderItem,
     Product, Address,
-    OrderItemFile
+    OrderItemFile, User
 )
 from core.order.services import OrderService
 
@@ -39,7 +39,7 @@ class OrderDashboardService:
         """
         return Order.objects.select_related('user__customer_profile', 'current_status')\
             .prefetch_related('order_item_order')\
-            .order_by('-created_at')
+            .order_by('-created_at').filter(type="1")
 
     def get_order_detail(self, order_id: int):
         """
@@ -48,16 +48,32 @@ class OrderDashboardService:
         return self.order_domain.get_order_by_id(order_id) 
 
     # ===== ایجاد سفارش مستقیم (Direct Order) ===== #
-    def create_admin_order(self, user_id: int, address_id: int, items_data: List[Dict], total_price_override: float = None):
+    def create_admin_order(self,
+                           user_id: int, address_id: int, 
+                           items_data: List[Dict],
+                           total_price_override: float = None):
         """
         فراخوانی سرویس دامین برای ایجاد سفارش.
         """
         logger.info(f"Dashboard: Creating order for User {user_id}")
+        
+        user = User.objects.get(id=user_id)
+        if user.customer_profile is not None:
+            recipient_name = user.customer_profile.fullname() if user.customer_profile.fullname() else user.username
+        recipient_phone = user.customer_profile.phone_number
+        
+        address = Address.objects.get(id=address_id)
+        full_address = f"{address.province.name} - {address.city.name} - {address.address}"
+        
         return self.order_domain.create_order_direct(
             user_id=user_id,
             address_id=address_id,
+            recipient_name=recipient_name,
+            recipient_phone=recipient_phone,
+            full_address=full_address,
             items_data=items_data,
-            total_price_override=total_price_override
+            total_price_override=total_price_override,
+            type="1"
         )
 
     # ===== ویرایش سفارش (Update) ===== #

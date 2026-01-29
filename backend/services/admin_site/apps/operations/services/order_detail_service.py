@@ -1,7 +1,10 @@
 from rest_framework.exceptions import PermissionDenied, NotFound
 from django.utils.translation import gettext_lazy as _
+from django.db.models import Prefetch
 
-from core.models import User, Order
+from core.models import User, Order, OrderItem, OrderItemFile
+from apps.order.models import OrderCostSheet, OrderCostReport, OrderCostItem
+from apps.logistics.models import OrderShipment
 from apps.support.services import LoggerService
 
 # ========== Order Detail App Service ========== # 
@@ -11,6 +14,63 @@ class OrderDetailAppService:
     """
     def __init__(self):
         self.audit_service = LoggerService()
+        
+    def _get_full_order_data(self, order_id: int):
+        """
+        متد خصوصی برای ساخت کوئری سنگین و دریافت سوپر-دیتا.
+        این متد جایگزین متد منیجر قبلی می‌شود.
+        """
+        # ===== ساخت کوئری پایه ===== #
+        # نکته: در سرویس self به آبجکت سرویس اشاره دارد، پس با Order.objects شروع می‌کنیم
+        queryset = Order.objects.filter(id=order_id)
+        
+        # ===== اعمال اولوک‌ها ===== #
+        queryset = queryset.select_related(
+            'user', 
+            'current_status__group', 
+            'address__city',
+            'address__province', 
+            'cost_sheet'
+        )
+
+        # ===== اعمال پرچ‌ها ===== #
+        queryset = queryset.prefetch_related(
+            # ===== آیتم‌ها ===== #
+            Prefetch(
+                'order_item_order',
+                queryset=OrderItem.objects.select_related('product').prefetch_related(
+                    Prefetch(
+                        'files', 
+                        queryset=OrderItemFile.objects.filter(is_latest=True).order_by('-version')
+                    )
+                )
+            ),
+            
+            # ===== سند مالی ===== #
+            Prefetch(
+                'cost_sheet',
+                queryset=OrderCostSheet.objects.prefetch_related(
+                    Prefetch(
+                        'reports',
+                        queryset=OrderCostReport.objects.select_related('submitter').prefetch_related(
+                            Prefetch(
+                                'items',
+                                queryset=OrderCostItem.objects.select_related('catalog_item')
+                            ),
+                            'attachments'
+                        ).order_by('-created_at')
+                    )
+                )
+            ),
+
+            # ===== مرسوله ===== #
+            Prefetch(
+                'shipments',
+                queryset=OrderShipment.objects.select_related('destination_address').prefetch_related('packages')
+            )
+        )
+        
+        return queryset.first()
 
     def get_order_detail(self, requester: User, order_id: int):
         """
@@ -18,7 +78,7 @@ class OrderDetailAppService:
         خروجی: (Order Object, Role Slug)
         """
         # ===== دریافت سفارش ===== #
-        order = Order.objects.get_full_order_detail_for_admin(order_id)
+        order = self._get_full_order_data(order_id)
         
         if not order:
             raise NotFound("سفارش مورد نظر یافت نشد.")

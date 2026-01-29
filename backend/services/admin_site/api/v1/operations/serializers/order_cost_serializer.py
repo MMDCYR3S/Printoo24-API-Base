@@ -2,7 +2,7 @@ import json
 from rest_framework import serializers
 from apps.order.models import (
     OrderCostSheet, OrderCostReport, OrderCostItem, 
-    OrderCostAttachment
+    OrderCostAttachment, OrderCostType
 )
 
 # ========== 1. Base / Read Serializers ========== #
@@ -28,12 +28,12 @@ class OrderCostReportSerializer(serializers.ModelSerializer):
     items = OrderCostItemSerializer(many=True, read_only=True)
     attachments = OrderCostAttachmentSerializer(many=True, read_only=True)
     submitter_name = serializers.CharField(source='submitter.username', read_only=True)
-    department_display = serializers.CharField(source='get_department_display', read_only=True)
+    cost_type_display = serializers.CharField(source='cost_type.title', read_only=True)
 
     class Meta:
         model = OrderCostReport
         fields = [
-            'id', 'title', 'department', 'department_display',
+            'id', 'title', 'cost_type_display', 'cost_type',
             'is_approved', 'submitter_name', 'created_at',
             'items', 'attachments'
         ]
@@ -58,13 +58,13 @@ class OrderCostSheetSerializer(serializers.ModelSerializer):
 # ========== 2. Write / Input Serializers ========== #
 class OrderCostItemInputSerializer(serializers.Serializer):
     """ اعتبارسنجی ورودی هر قلم هزینه در هنگام ثبت گزارش """
-    category_id = serializers.IntegerField(required=False, allow_null=True)
+    catalog_id = serializers.IntegerField(required=False, allow_null=True)
     custom_title = serializers.CharField(required=False, allow_blank=True)
     amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=True)
     description = serializers.CharField(required=False, allow_blank=True)
 
     def validate(self, data):
-        if not data.get('category_id') and not data.get('custom_title'):
+        if not data.get('catalog_id') and not data.get('custom_title'):
             raise serializers.ValidationError("وارد کردن 'عنوان دستی' یا انتخاب 'دسته‌بندی' الزامی است.")
         return data
 
@@ -73,7 +73,7 @@ class OrderCostReportSubmitSerializer(serializers.Serializer):
     ورودی اصلی برای ثبت گزارش توسط واحدها (انبار، چاپ و...).
     جایگزین متد قدیمی Add Items.
     """
-    department = serializers.ChoiceField(choices=OrderCostReport.DEPARTMENT_CHOICES)
+    cost_type_id = serializers.IntegerField(required=False, allow_null=True)
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(required=False, allow_blank=True)
     # ===== اقلام ===== #
@@ -82,3 +82,10 @@ class OrderCostReportSubmitSerializer(serializers.Serializer):
     attachments = serializers.ListField(
         child=serializers.FileField(), required=False, write_only=True
     )
+
+# ========== Order Cost Type List Serializer ========== #
+class OrderCostTypeListSerializer(serializers.ModelSerializer):
+    """ لیست نوع هزینه ها """
+    class Meta:
+        model = OrderCostType
+        fields = ['id', 'title']

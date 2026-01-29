@@ -136,8 +136,6 @@ class OrderTransitionAppService:
             return
 
         is_backward = new_status.sort_order < current_status.sort_order
-        if is_backward and new_status.status_type != 'reject':
-             raise ValidationError(f"بازگشت به عقب ({new_status.name}) فقط در صورت 'رد کردن' سفارش مجاز است.")
 
     def _validate_all_order_files(self, order: Order):
         """
