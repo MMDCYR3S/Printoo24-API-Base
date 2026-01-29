@@ -196,7 +196,7 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
         return Response(OrderCostItemSerializer(item).data, status=status.HTTP_201_CREATED)
     
     @extend_schema(request=CostItemInputSerializer, responses=OrderCostItemSerializer)
-    @action(detail=True, methods=['patch'], url_path='items/(?P<item_id>\d+)')
+    @action(detail=True, methods=['patch'], url_path='item/(?P<item_id>\d+)')
     def update_item(self, request, pk=None, item_id=None):
         """ ویرایش یک قلم خاص از گزارش """
         serializer = CostItemInputSerializer(data=request.data, partial=True)

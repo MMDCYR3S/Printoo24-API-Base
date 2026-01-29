@@ -88,7 +88,7 @@ class BaseOrderDetailSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Order
-        fields = ['id', 'order_code', 'created_at', 'status', 'customer_info', 'type']
+        fields = ['id', 'order_code', 'recipient_name', 'recipient_phone', 'company_name', 'full_address', 'created_at', 'status', 'customer_info', 'type']
 
     def get_customer_info(self, obj):
         if not obj.user: return {"name": "Deleted User"}

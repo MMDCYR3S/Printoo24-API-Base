@@ -59,6 +59,9 @@ class OrderCostItemManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset()
     
+    def get_by_id(self, pk: int):
+        return self.get(pk=pk)
+    
     def bulk_create_items(self, items: List):
         return self.bulk_create(items)
         

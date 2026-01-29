@@ -66,7 +66,7 @@ class OrderDetailAppService:
             # ===== مرسوله ===== #
             Prefetch(
                 'shipments',
-                queryset=OrderShipment.objects.select_related('destination_address').prefetch_related('packages')
+                queryset=OrderShipment.objects.select_related('order').prefetch_related('packages')
             )
         )
         

@@ -1,6 +1,8 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .models import OrderCostReport, OrderCostItem
+from apps.logistics.models import OrderShipment
+from core.models import Order
 
 
 # ========== محاسبه قیمت سند مالی ========== #
@@ -28,3 +30,19 @@ def update_sheet_on_item_change(sender, instance, created, **kwargs):
     """
     if instance.report and instance.report.sheet:
         instance.report.sheet.recalculate_totals()
+
+# ========== بخش مربوط به ایجاد زمان تحویل سفارش ========== #
+@receiver(post_save, sender=Order)
+def create_shipment_informations(sender, instance,  created, **kwargs):
+    """
+    ایجاد یک بخش برای بسته‌بندی و تحویل و حمل‌ونقل برای سفارش
+    """
+    if created:
+        OrderShipment.objects.create(
+            order=instance,
+            destination_address=instance.full_address,
+            tracking_code=instance.order_code,
+            status="processing"
+        )
+
+

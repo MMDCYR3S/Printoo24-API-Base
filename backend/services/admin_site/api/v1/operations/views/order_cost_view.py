@@ -111,7 +111,6 @@ class OrderCostReportSubmitView(GenericAPIView):
         try:
             service = OrderCostAppService()
             files = request.FILES.getlist('attachments')
-            
             # ===== 3. Call Service ===== #
             report = service.submit_department_report(
                 requester=request.user,

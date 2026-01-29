@@ -17,7 +17,7 @@ class OrderService:
     """
 
     def _generate_order_code(self) -> str:
-        return uuid.uuid4().hex[:8].upper()
+        return f"ORD-{uuid.uuid4().hex[:8].upper()}"
 
     def get_order_by_id(self, order_id: int):
         return Order.objects.get_order_by_id(order_id)

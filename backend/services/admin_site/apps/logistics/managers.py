@@ -12,10 +12,7 @@ class ShipmentQuerySet(BaseQuerySet):
     """
     def get_shipment_with_details(self, shipment_id: int):
         """ دریافت یک مرسوله با تمام جزئیات مربوطه (آدرس، متد، بسته‌ها) """
-        return self.select_related(
-            'destination_address__city', 
-            'destination_address__province'
-        ).prefetch_related('packages').filter(id=shipment_id).first()
+        return self.prefetch_related('packages').filter(id=shipment_id).first()
     
     def get_by_id(self, pk: int):
         return self.filter(pk=pk).first()

@@ -24,8 +24,14 @@ class OrderCostService:
         """
         # ===== بررسی وجود ===== #
         report = OrderCostReport.objects.get_report_detail(report_id)
+        
         if not report:
             raise ValidationError("گزارش یافت نشد.")
+        
+        # ===== دریافت سفارش مربوطه ===== #
+        order = report.sheet.order
+        if not order:
+            raise ValidationError("سفارش مرتبط با این گزارش یافت نشد.")
 
         self._validate_sheet_is_modifiable(report.sheet)
         
@@ -48,6 +54,12 @@ class OrderCostService:
         # ===== تغییر وضعیت ===== #
         report.is_approved = True
         report.save()
+
+        # ===== تغییر وضعیت در صورت تایید تمامی گزارش‌ها ===== #
+        has_pending_reports = order.cost_sheet.reports.filter(is_approved=False).exists()
+
+        if not has_pending_reports:
+            self._advance_order_status(order, approver)
 
         # ===== بروزرسانی سند مادر ===== #
         self.recalculate_sheet_totals(report.sheet)
@@ -155,6 +167,40 @@ class OrderCostService:
         """Internal helper"""
         if sheet.is_locked:
             raise ValidationError("سند مالی این سفارش قفل شده است و امکان تغییر وجود ندارد.")
+        
+    # ========== CHANGE ORDER STATUS ========== #
+    def _advance_order_status(self, order: Order, user: User):
+        """
+        جابجایی خودکار وضعیت سفارش به مرحله بعد بر اساس sort_order
+        """
+        current_status = order.current_status
+        
+        if not current_status:
+            return
+        
+        # ===== دریافت وضعیت بعدی ===== #
+        next_status = OrderStatus.objects.filter(
+            sort_order__gt=current_status.sort_order
+        ).order_by('sort_order').first()
+
+        # ===== اگر وضعیت بعدی بود، اون رو به وضعیت فعلی تغییر بده ===== #
+        if next_status:
+            old_status_name = current_status.name
+            order.current_status = next_status
+            order.save(update_fields=['current_status', 'updated_at'])
+
+        self.audit_service.record_log(
+            user=user,
+            obj=order,
+            action='AUTO_STATUS',
+            changes={
+                'from_status': old_status_name,
+                'to_status': next_status.name,
+                'reason': 'All cost reports approved'
+            },
+            description=_(f"تغییر خودکار وضعیت از {old_status_name} به {next_status.name} به دلیل تکمیل گزارش‌های هزینه")
+        )
+
 
 # ========== ORDER SCHEDULE SERVICE ========== #
 class OrderScheduleService:
@@ -408,4 +454,3 @@ class OrderStatusService:
             raise ValidationError("امکان حذف نیست. حداقل یک سفارش فعال از این وضعیت استفاده می‌کند.")
             
         status_obj.delete()
-

@@ -13,7 +13,7 @@ class CoreConfig(AppConfig):
     
     def ready(self):
         import core.signals
-        # post_migrate.connect(create_initial_statuses, sender=self)
+#         post_migrate.connect(create_initial_statuses, sender=self)
         
         
 # def create_initial_statuses(sender, **kwargs):
