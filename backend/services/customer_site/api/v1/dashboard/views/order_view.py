@@ -10,8 +10,7 @@ from ..serializers import (
     OrderListSerializer, 
     OrderDetailSerializer, 
     AdminOrderCreateSerializer,
-    AdminOrderUpdateSerializer,
-    OrderStatusUpdateSerializer
+    AdminOrderUpdateSerializer
 )
 
 # ===== Order Dashboard ViewSet ===== #
