@@ -1,9 +1,8 @@
 from rest_framework import serializers
 from core.models import (
     Product, ProductPricingConfig, ProductCategory,
-    ProductImage, Attachment, ProductAttachment,
-    ProductOption, ProductOptionValue, GuideType,
-    OptionInputType
+    ProductImage, Attachment, ProductOption,
+    ProductOptionValue, GuideType, OptionInputType
 )
 
 # ===== Guide Fields Mixin ===== #
@@ -255,19 +254,13 @@ class ImageReorderSerializer(serializers.Serializer):
 class AttachmentLibrarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Attachment
-        fields = ['id', 'name', 'file', 'created_at']
+        fields = ['id', 'product', 'name', 'file', 'created_at']
         read_only_fields = ['id', 'created_at']
 
 # ===== Product Attachment Link Serializer ===== #
 class ProductAttachmentLinkSerializer(serializers.Serializer):
     attachment_id = serializers.IntegerField(help_text="ID فایل از کتابخانه")
 
-class ProductAttachmentListSerializer(serializers.ModelSerializer):
-    file_info = AttachmentLibrarySerializer(source='attachment', read_only=True)
-    
-    class Meta:
-        model = ProductAttachment
-        fields = ['id', 'file_info', 'created_at']
 
 # ===== API 1: Core Create/Update ===== #
 class ProductCoreCreateSerializer(serializers.Serializer):
@@ -300,6 +293,8 @@ class ProductDetailSerializer(serializers.Serializer):
     quantities = serializers.SerializerMethodField()
     sizes = serializers.SerializerMethodField()
     images = ProductImageSerializer(source='product.product_image', many=True)
+    
+    attachments = AttachmentLibrarySerializer(source='product.product_attachment', many=True)
     
     options = ProductOptionOutputSerializer(source='product.options', many=True)
     

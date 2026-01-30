@@ -102,6 +102,15 @@ class ShipmentViewSet(viewsets.ViewSet):
             new_status_code=serializer.validated_data['new_status_code']
         )
         return Response(ShipmentOutputSerializer(shipment).data)
+    
+    @action(detail=True, methods=["post"], url_path="approve-status")
+    def change_status(self, request, pk=None):
+        service = WarehouseAppService()
+        shipment = service.approve_shipment_status(
+            user=request.user,
+            shipment_id=pk
+        )
+        return Response({"success": "سفارش با موفقیت تحویل داده شد"}, status=status.HTTP_200_OK)
 
     @extend_schema(
         summary="افزودن یک بسته جدید به مرسوله موجود",

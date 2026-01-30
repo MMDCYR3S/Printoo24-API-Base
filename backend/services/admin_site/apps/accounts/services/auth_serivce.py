@@ -90,7 +90,7 @@ class AuthAppService:
         تزریق Role, Email, Username به توکن JWT
         """
         refresh = RefreshToken.for_user(user)
-        
+        user_role_rel = None
         # ===== اگر نقش کاربر دریافت نشده است===== #
         if not user_role_rel:
             user_role_rel = user.user_role.select_related("role").first()

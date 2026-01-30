@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.models import Product
+from core.models import Product 
 from core.site import custom_admin_site
 from apps.order.models import *
 

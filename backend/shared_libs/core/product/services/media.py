@@ -2,7 +2,8 @@ from typing import List
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from ..models import Product, ProductImage, Attachment, ProductAttachment
+from ..models import Product, ProductImage, Attachment
+from core.models import User
 
 # ========== MEDIA SERVICE ========== #
 class ProductMediaService:
@@ -46,29 +47,13 @@ class ProductMediaService:
             ProductImage.objects.bulk_update_orders(to_update)
 
     # ===== مدیریت فایل‌های پیوست =====
-    def upload_attachment_to_library(self, user, file, name: str):
-        return Attachment.objects.create_attachment(file, name, user)
-
-    # ===== مدیریت فایل‌های پیوست ===== #
-    @transaction.atomic
-    def attach_file_to_product(self, product_id: int, attachment_id: int, user):
+    def upload_attachment_to_library(self, user: User, file, product_id: int, name: str = None):
         product = Product.objects.get_by_id(product_id)
         if not product:
             raise ValidationError("محصول یافت نشد.")
-
-        attachment = Attachment.objects.get_by_id(attachment_id)
-        if not attachment:
-            raise ValidationError("فایل پیوست یافت نشد.")
-
-        # ===== بررسی اینکه فایل قبلا به محصول اضافه شده است ===== #
-        if ProductAttachment.objects.is_attached(product, attachment):
-            raise ValidationError("این فایل قبلاً به محصول اضافه شده است.")
-
-        return ProductAttachment.objects.link_attachment(product, attachment, user)
-
-    def detach_file_from_product(self, product_id: int, attachment_id: int):
-        product = Product.objects.get_by_id(product_id)
-        attachment = Attachment.objects.get_by_id(attachment_id)
-        
-        if product and attachment:
-            ProductAttachment.objects.unlink_attachment(product, attachment)
+        return Attachment.objects.create_attachment(
+            user=user, 
+            file=file, 
+            product=product, 
+            name=name
+        )

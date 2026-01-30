@@ -309,7 +309,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== MEDIA SYNC ========== #
     @extend_schema(
-        summary="مرحله ۳: اتصال فایل‌ها و تصاویر (Media)",
+        summary="نکته مهم: این قسمت بعد از اعمال تغییرات حذف میشه.",
         request=ProductMediaSyncSerializer,
         examples=[
             OpenApiExample(
@@ -339,7 +339,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== UPLOAD IMAGE ========== #
     @extend_schema(
-        summary="آپلود تصویر (تکی)",
+        summary="مرحله 3: آپلود عکس محصول",
         request=ProductImageSerializer,
         description="تصویر را آپلود می‌کند و ID آن را برمی‌گرداند تا در `media-sync` استفاده شود."
     )
@@ -362,15 +362,26 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== UPLOAD ATTACHMENT ========== #
     @extend_schema(
-        summary="آپلود فایل در کتابخانه",
+        summary="مرحله 4: آپلود فایل‌های پیوست",
         request=AttachmentLibrarySerializer,
-        description="فایل‌های جانبی (قالب، راهنما) را آپلود می‌کند."
+        description="""
+        نکته:
+        اطلاعاتی که باید پست کنی اینها هستند:
+        {
+            "name": "exmaple",
+            "file": file,
+            "product_id": 5
+        }
+        در قسمت فایل هم باید فایل رو آپلود کنی.
+        نام می‌تونه خالی باشه و اجباری نیست.
+        """
     )
     @action(detail=False, methods=['post'], url_path='upload-attachment', parser_classes=[MultiPartParser, FormParser])
     def upload_attachment(self, request):
         """ آپلود فایل برای لینک کردن بعدی """
         file_obj = request.FILES.get('file')
         name = request.data.get('name')
+        product_id = request.data.get('product_id')
         
         if not file_obj or not name:
             return Response({'detail': 'File and name are required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -378,6 +389,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         result = self.app_service.upload_attachment_library_async(
             user=request.user,
             file_obj=file_obj,
+            product_id=product_id,
             name=name
         )
         

@@ -51,7 +51,6 @@ class OrderTransitionAppService:
             # ===== اعتبارسنجی‌ها (Guards) ===== #
             self._validate_role_scope(requester, order.current_status)
             self._validate_transition_direction(order.current_status, new_status)
-            self._validate_all_order_files(order)
             
             # ===== اجرای تغییر وضعیت (Delegation to Domain) ===== #
             return self.flow_domain_service.change_order_status(
@@ -102,9 +101,6 @@ class OrderTransitionAppService:
 
         if item.status and item.status.group.code not in role.allowed_status_groups:
              raise PermissionDenied(f"شما اجازه تغییر وضعیت آیتم در مرحله '{item.status.group.name}' را ندارید.")
-        if role.is_task_based:
-            if item.assigned_to and item.assigned_to != user:
-                raise PermissionDenied(f"این آیتم توسط همکار شما ({item.assigned_to.username}) قفل شده است.")
         
     def _validate_role_scope(self, user: User, current_status: OrderStatus):
         """
@@ -136,8 +132,6 @@ class OrderTransitionAppService:
             return
 
         is_backward = new_status.sort_order < current_status.sort_order
-        if is_backward and new_status.status_type != 'reject':
-             raise ValidationError(f"بازگشت به عقب ({new_status.name}) فقط در صورت 'رد کردن' سفارش مجاز است.")
 
     def _validate_all_order_files(self, order: Order):
         """

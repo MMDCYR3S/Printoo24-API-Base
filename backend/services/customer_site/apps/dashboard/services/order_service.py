@@ -1,12 +1,12 @@
 import os
 import logging
 import uuid
+import time
 from typing import Dict, List
 from decimal import Decimal
 from kombu.exceptions import OperationalError
 
 from django.db import transaction
-from django.db.models import Q
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import FileSystemStorage
@@ -15,7 +15,8 @@ from django.core.exceptions import ValidationError
 
 from core.models import (
     Order, OrderItem,
-    OrderItemFile
+    Product, Address,
+    OrderItemFile, User
 )
 from core.order.services import OrderService
 
@@ -31,35 +32,6 @@ class OrderDashboardService:
         self.order_domain = OrderService()
         self.temp_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_order_uploads'))
 
-    # ===== LIST ORDERS ===== #
-    def get_orders_list(self, filters: Dict = None):
-        """
-        دریافت لیست سفارشات با قابلیت فیلترینگ پیشرفته برای داشبورد.
-        """
-        queryset = Order.objects.select_related(
-            'user__customer_profile', 
-            'current_status', 
-            'current_status__group'
-        ).prefetch_related('order_item_order').order_by('-created_at')
-        
-        if filters:
-            # ===== فیلتر جستجو (کد، نام کاربر، موبایل) ===== #
-            if search := filters.get('search'):
-                queryset = queryset.filter(
-                    Q(order_code__icontains=search) |
-                    Q(user__username__icontains=search) |
-                    Q(user__customer_profile__last_name__icontains=search) |
-                    Q(recipient_phone__icontains=search)
-                )
-            
-            # ===== فیلتر بازه زمانی ===== #
-            if date_from := filters.get('date_from'):
-                queryset = queryset.filter(created_at__gte=date_from)
-            if date_to := filters.get('date_to'):
-                queryset = queryset.filter(created_at__lte=date_to)
-
-        return queryset
-
     # ===== لیست و جزئیات ===== #
     def get_all_orders_queryset(self):
         """
@@ -67,7 +39,7 @@ class OrderDashboardService:
         """
         return Order.objects.select_related('user__customer_profile', 'current_status')\
             .prefetch_related('order_item_order')\
-            .order_by('-created_at')
+            .order_by('-created_at').filter(type="1")
 
     def get_order_detail(self, order_id: int):
         """
@@ -76,84 +48,124 @@ class OrderDashboardService:
         return self.order_domain.get_order_by_id(order_id) 
 
     # ===== ایجاد سفارش مستقیم (Direct Order) ===== #
-    def create_admin_order(self, items_data: List[Dict], user_id: int = None, 
-                           address_id: int = None, full_address: str = None, 
-                           total_price_override: float = None,
-                           recipient_name: str = None,
-                           recipient_phone: str = None,
-                           company_name: str = None):
+    def create_admin_order(self,
+                           user_id: int, address_id: int, 
+                           items_data: List[Dict],
+                           total_price_override: float = None):
         """
-        ایجاد سفارش جدید از پنل ادمین.
+        فراخوانی سرویس دامین برای ایجاد سفارش.
         """
+        logger.info(f"Dashboard: Creating order for User {user_id}")
         
-        user_log = f"User {user_id}" if user_id else "GUEST"
-        logger.info(f"Dashboard: Creating order for {user_log}")
+        user = User.objects.get(id=user_id)
+        if user.customer_profile is not None:
+            recipient_name = user.customer_profile.fullname() if user.customer_profile.fullname() else user.username
+        recipient_phone = user.customer_profile.phone_number
+        
+        address = Address.objects.get(id=address_id)
+        full_address = f"{address.province.name} - {address.city.name} - {address.address}"
         
         return self.order_domain.create_order_direct(
             user_id=user_id,
-            items_data=items_data,
             address_id=address_id,
-            full_address=full_address,
-            total_price_override=total_price_override,
             recipient_name=recipient_name,
             recipient_phone=recipient_phone,
-            company_name=company_name
+            full_address=full_address,
+            items_data=items_data,
+            total_price_override=total_price_override,
+            type="1"
         )
 
-    # ===== Update Operations ===== #
+    # ===== ویرایش سفارش (Update) ===== #
     @transaction.atomic
-    def update_full_order(self, order_id: int, data: Dict):
+    def update_order_details(self, order_id: int, data: Dict):
         """
-        ویرایش اطلاعات عمومی (آدرس، نوع، قیمت کل).
+        ویرایش اطلاعات کلی سفارش (آدرس، نوع، قیمت کل دستی).
         """
-        logger.info(f"Updating Full Order {order_id}")
-        order = self.order_domain.get_order_by_id(order_id)
-        
-        self.order_domain.update_order_fields(order, data)
-        
-        # ===== ویرایش آیتم ها ===== #
-        if 'items' in data and isinstance(data['items'], list):
-           for item_data in data['items']:
-                if 'id' in item_data and item_data['id']:
-                    try:
-                        item = OrderItem.objects.get(pk=item_data['id'], order=order)
-                        self.order_domain.update_existing_item(item, item_data)
-                    except OrderItem.DoesNotExist:
-                        pass
-                elif 'product_slug' in item_data:
-                    self.order_domain.add_item_to_order(order, item_data)
-                    
+        logger.info(f"Updating Order {order_id}")
+        order = get_object_or_404(Order, pk=order_id)
+        # ===== ویرایش آدرس ===== #
+        if 'address_id' in data:
+            address = get_object_or_404(Address, pk=data['address_id'])
+            if address.user_id != order.user_id:
+                raise ValidationError("این آدرس متعلق به کاربر سفارش‌دهنده نیست.")
+            order.address = address
+        # ===== ویرایش نوع ===== #
+        if 'type' in data:
+            order.type = data['type']
         # ===== ویرایش قیمت کل ===== #
-        if 'total_price' in data and data['total_price'] is not None:
+        if 'total_price' in data:
             order.total_price = Decimal(str(data['total_price']))
-            order.save(update_fields=['total_price'])
-        
-        # ===== ویرایش سفارش ===== #
-        logger.info(f"Order {order_id} updated successfully.")
+            
+        order.save()
+        logger.info(f"Order {order_id} updated successfully")
         return order
 
-    # ===== ORDER ITEM OPERATIONS ===== #
+    # ===== مدیریت آیتم‌های سفارش (Add/Remove Item) ===== #
+    
+    @transaction.atomic
     def add_item_to_order(self, order_id: int, item_data: Dict):
-        """
-        افزودن آیتم. تمام منطق محاسباتی به دامین منتقل شد.
-        """
-        order = self.order_domain.get_order_by_id(order_id)
-        item = self.order_domain.add_item_to_order(order, item_data)
-        logger.info(f"Item added to Order {order_id}")
-        return item
+        """ افزودن آیتم جدید به سفارش موجود """
+        logger.info(f"Adding item to Order {order_id}")
+        order = get_object_or_404(Order, pk=order_id)
+        
+        try:
+            product_slug = item_data.get('product_slug')
+            selections = item_data.get('selections', item_data)
+            product = get_object_or_404(Product, slug=product_slug)
+            quantity = selections.get('quantity', 1)
+            # ===== افزودن نام و توضیحات ===== #
+            item_name = selections.get('name', item_data.get('name'))
+            item_description = selections.get('description', item_data.get('description'))
+            if 'item_price' in item_data and item_data['item_price'] is not None:
+                line_total = Decimal(str(item_data['item_price']))
+            else:
+                line_total = product.price * quantity # ساده
 
-    # ========== REMOVE ITEM ========== #
+            specs_json = {
+                'size_id': selections.get('size_id'),
+                'custom_width': selections.get('custom_width'),
+                'custom_height': selections.get('custom_height'),
+                'option_value_ids': selections.get('option_value_ids'),
+                'has_design': selections.get('has_design', True)
+            }
+
+            # ایجاد آیتم
+            item = OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=quantity,
+                price=line_total,
+                items=specs_json,
+                name=item_name,
+                description=item_description
+            )
+            
+            # آپدیت قیمت کل سفارش (جمع زدن با قیمت قبلی)
+            order.total_price += line_total
+            order.save()
+            
+            logger.info(f"Item {item.id} added to Order {order.id}. New Total: {order.total_price}")
+            return item
+            
+        except Exception as e:
+            logger.error(f"Failed to add item to order {order_id}: {str(e)}", exc_info=True)
+            raise e
+
     def remove_item_from_order(self, order_id: int, item_id: int):
-        """
-        حذف آیتم و محاسبه مجدد قیمت.
-        """
-        order = self.order_domain.get_order_by_id(order_id)
+        """ حذف آیتم از سفارش و کسر قیمت """
+        logger.info(f"Removing Item {item_id} from Order {order_id}")
+        order = get_object_or_404(Order, pk=order_id)
         item = get_object_or_404(OrderItem, pk=item_id, order=order)
         
+        price_deduct = item.price
         item.delete()
-
-        self.order_domain.recalculate_order_totals(order)
-        logger.info(f"Item {item_id} removed from Order {order_id}")
+        # ===== کسر قیمت ===== #
+        order.total_price -= price_deduct
+        if order.total_price < 0: order.total_price = 0
+        
+        order.save()
+        logger.info(f"Item removed. New Total: {order.total_price}")
 
     def delete_order(self, order_id: int):
         """ حذف کل سفارش """

@@ -1,10 +1,7 @@
 import os
 from random import randint
 
-from django.utils import timezone
 from django.db import models
-from django.core.exceptions import ValidationError
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from core.product.models import Product
@@ -137,7 +134,19 @@ class OrderStatus(models.Model):
                             raw_input = raw_input.rsplit(f"_{t_upper}", 1)[0]
                             break
                     self.internal_code = f"{raw_input}_{type_suffix}_{group_suffix}"
-                    
+        
+        # ===== اگر وضعیت جدید بود ===== #
+        if not self.pk:
+            last_status = OrderStatus.objects.aggregate(max_order=models.Max('sort_order'))
+            max_order = last_status['max_order']
+            # ===== اگر وضعیت نداشتیم ===== #
+            if max_order is None:
+                self.sort_order = 0
+            else:
+                self.sort_order = max_order + 1
+
+        super().save(*args, **kwargs)
+
         super().save(*args, **kwargs)
                 
 # ======================= #
@@ -199,7 +208,7 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.order_code} | {self.user}"
-    
+
     # ===== Properties ===== #
     @property
     def items_count(self):
@@ -260,7 +269,7 @@ class OrderItem(models.Model):
         verbose_name_plural = _('اقلام سفارش')
 
     def __str__(self):
-        return f"{self.product.name} (x{self.quantity})"
+        return f"{self.product.name if self.product else 'بدون محصول'} (x{self.quantity})"
 
     # ===== Properties ===== #
     @property

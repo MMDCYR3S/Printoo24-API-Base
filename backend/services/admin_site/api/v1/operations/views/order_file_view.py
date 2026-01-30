@@ -44,35 +44,3 @@ class OrderItemUploadView(GenericAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"detail": "خطای سیستمی در آپلود فایل.", "error": str(e)}, status=500)
-
-# ========== Order Item Status Update View ========== #
-@extend_schema(tags=['Order-Item-Status'])
-class OrderItemStatusUpdateView(GenericAPIView):
-    """
-    تغییر وضعیت فنی یک قلم سفارش (Item).
-    مخصوص طراح، ناظر چاپ و QC.
-    """
-    permission_classes = [IsAuthenticated]
-    serializer_class = OrderItemStatusUpdateSerializer
-
-    def put(self, request, pk):
-        """ pk: شناسه آیتم (OrderItem ID) """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        try:
-            service = OrderItemStatusAppService()
-            updated_item = service.change_item_status(
-                requester=request.user,
-                item_id=pk,
-                new_status=serializer.validated_data['new_status'],
-                admin_note=serializer.validated_data.get('admin_note')
-            )
-            
-            return Response(
-                BaseOrderItemSerializer(updated_item).data, 
-                status=status.HTTP_200_OK
-            )
-            
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)

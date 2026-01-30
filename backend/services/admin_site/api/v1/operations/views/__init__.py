@@ -4,5 +4,4 @@ from .order_file_view import *
 from .order_status_group_view import *
 from .order_status_view import *
 from .order_cost_view import *
-from .order_print_view import *
 from .order_schedule_view import *

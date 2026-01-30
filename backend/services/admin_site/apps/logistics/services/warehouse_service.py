@@ -157,6 +157,17 @@ class WarehouseAppService:
             raise NotFound("مرسوله یافت نشد.")
         # ===== بررسی توسط سرویس دامنه و بروزرسانی وضعیت ===== #
         return self._logistic_domain.change_shipment_status(shipment, new_status_code, user)
+    
+    @transaction.atomic
+    def approve_shipment_status(self, user: User, shipment_id: int) -> OrderShipment:
+        """ تایید مرسوله """
+        AppPermissionChecker.check_has_permission(user, 'change_ordershipment')
+        # ===== بررسی وجود ===== #
+        shipment = OrderShipment.objects.get_by_id(shipment_id)
+        if not shipment:
+            raise NotFound("مرسوله یافت نشد.")
+        # ===== بررسی توسط سرویس دامنه و بروزرسانی وضعیت ===== #
+        return self._logistic_domain.approve_shipment(shipment, user)
 
     # ========== ADD PACKAGE TO SHIPMENT ========== #
     @transaction.atomic

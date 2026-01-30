@@ -37,7 +37,7 @@ class LogisticsService:
         """
         # ===== بررسی وضعیت ===== #
         if shipment.status == 'delivered':
-             raise ValidationError("مرسوله تحویل شده و وضعیت آن نهایی است.")
+            raise ValidationError("مرسوله تحویل شده و وضعیت آن نهایی است.")
 
         old_status = shipment.status
         if old_status == new_status_code:
@@ -61,6 +61,45 @@ class LogisticsService:
                 'tracking_code': shipment.tracking_code
             },
             description=_(f"تغییر وضعیت مرسوله به {new_status_code}")
+        )
+
+        # ===== به روز کردن فیلدهای مربوط ===== #
+        for field, value in update_fields.items():
+            setattr(shipment, field, value)
+        
+        # ===== ذخیره ===== #
+        shipment.save(update_fields=update_fields.keys())
+        return shipment
+    
+    
+    def approve_shipment(self, shipment: OrderShipment, user: User) -> OrderShipment:
+        """
+        تایید تحویل به مشتری
+        """
+        if shipment.status == 'delivered':
+            raise ValidationError("مرسوله تحویل شده و وضعیت آن نهایی است.")
+        
+        old_status = shipment.status
+        approve_status = "delivered"
+        
+        # ===== محاسبه زمان تحویل مشتری ===== #
+        update_fields = self._get_status_update_fields(shipment, approve_status)
+        
+        if not update_fields:
+            return shipment
+        
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=shipment,
+            action='SHIPMENT_APPROVE',
+            changes={
+                'field': 'status',
+                'from': old_status,
+                'to': approve_status,
+                'tracking_code': shipment.tracking_code
+            },
+            description=_(f"تایید مرسوله: {approve_status}")
         )
 
         # ===== به روز کردن فیلدهای مربوط ===== #

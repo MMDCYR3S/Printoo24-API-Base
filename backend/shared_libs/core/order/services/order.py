@@ -1,11 +1,11 @@
 import uuid
 from decimal import Decimal
-from typing import List, Dict
+from typing import List, Dict, Any
 
 from django.shortcuts import get_object_or_404
 from django.db import transaction
-from django.db.models import Q, Sum
-from django.core.exceptions import ValidationError
+from django.db.models import Q
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 from core.models import User, Invoice, Order, OrderStatus, Product, OrderItem, ProductSize, ProductOptionValue, Address
 from ..exceptions import OrderNotFoundException
@@ -16,25 +16,8 @@ class OrderService:
     سرویس دامنه مدیریت سفارشات (Checkout, Operations)
     """
 
-    def _resolve_address_data(self, address_id: int = None, manual_full_address: str = None):
-        """
-        منطق تصمیم‌گیری آدرس:
-        ۱. اگر ID باشد: آبجکت آدرس را می‌گیرد و متن آن را هم استخراج می‌کند (Snapshot).
-        ۲. اگر ID نباشد: آبجکت آدرس None می‌شود و متن دستی استفاده می‌شود.
-        """
-        final_address_obj = None
-        final_address_text = manual_full_address
-        
-        if address_id:
-            # ===== دریافت آدرس و ذخیره آن در آدرس کل ===== #
-            address_obj = get_object_or_404(Address, pk=address_id)
-            final_address_obj = address_obj
-            final_address_text = f"{address_obj.province.name}، {address_obj.city.name}، {address_obj.address} - کدپستی: {address_obj.postal_code}"
-        
-        return final_address_obj, final_address_text
-
     def _generate_order_code(self) -> str:
-        return uuid.uuid4().hex[:8].upper()
+        return f"ORD-{uuid.uuid4().hex[:8].upper()}"
 
     def get_order_by_id(self, order_id: int):
         return Order.objects.get_order_by_id(order_id)
@@ -52,129 +35,160 @@ class OrderService:
         user = User.objects.get(id=user_id) 
         return Order.objects.get_user_orders_summary(user)
     
-    # ========== CREATE ORDER DIRECT ========== #
+    # ===== CUSTOM ORDER CREATION ===== #
     @transaction.atomic
-    def create_order_direct(self, items_data: List[Dict], user_id: int = None ,
-                            address_id: int = None, full_address: str = None, 
-                            total_price_override: float = None,
-                            recipient_name: str = None,
-                            recipient_phone: str = None,
-                            company_name: str = None) -> Order:
-        """ ساخت سفارش """
-
+    def create_order_direct(self,
+                                        items_data: List[Dict[str, Any]],
+                                        user_id: int = None,
+                                        address_id: int = None,
+                                        recipient_name: str = None,
+                                        recipient_phone: str = None,
+                                        company_name: str = None,
+                                        full_address: str = None,
+                                        total_price_override: float = None,
+                                        type: str = "2"
+                                        ) -> Order:
+        """
+        ایجاد مستقیم سفارش (توسط ادمین) بدون استفاده از سبد خرید.
+        """
         # ===== دریافت مشتری ===== #
-        user = None
         if user_id:
-            user = get_object_or_404(User, pk=user_id)
-
-        # ===== حل و فصل آدرس ===== #
-        addr_obj, addr_text = self._resolve_address_data(address_id, full_address)
-
+            user = User.objects.get(pk=user_id)
+        else:
+            user = None
+        
+        # ===== اعتبارسنجی ===== #
+        if address_id:
+            address = Address.objects.get(pk=address_id)
+        else: 
+            address = None
+            
         # ===== دریافت و اعتبارسنجی وضعیت اولیه ===== #
-        initial_status = OrderStatus.objects.filter(status_type='progress').first()
+        initial_status = OrderStatus.objects.filter(status_type='initial').first()
         if not initial_status:
-            initial_status = OrderStatus.objects.first()
+            initial_status = OrderStatus.objects.first() or OrderStatus.objects.create(
+                name="ثبت اولیه", 
+                internal_code="INITIAL_DRAFT",
+                status_type='initial'
+            )
+            
+        # ===== محاسبه قیمت کل ===== #
+        calculated_total = Decimal(0)
+        prepared_items = []
+        # ===== استخراج و ایجاد آیتم ها ===== #
+        for item_data in items_data:
+            product_slug = item_data.get('product_slug')
+            selections = item_data.get('selections', {}) 
+            quantity = int(selections.get('quantity', 1))
+            
+            # ===== دریافت نام آیتم ===== #
+            product = None
+            item_name = selections.get('name', item_data.get('name'))
+            item_description = selections.get('description', item_data.get('description'))
+            # ===== دریافت محصول ===== #
+            if product_slug:
+                try:
+                    product = Product.objects.get(slug=product_slug)
+                except ObjectDoesNotExist:
+                    raise ValidationError(f"محصولی با شناسه {product_slug} یافت نشد.")
+                
+                if not item_name:
+                        item_name = product.name
+                unit_price = product.price
+            else:
+                if not item_name:
+                    raise ValidationError("برای آیتم‌های بدون محصول، وارد کردن `name` الزامی است")
+                pass
+            # ===== آماده سازی اطلاعات سفارش ===== #
+            specs_json = {}
+            
+            if product:
+                 specs_json = self._prepare_item_specs_json(product, selections)
+            elif isinstance(selections, dict):
+                safe_selections = selections.copy() if isinstance(selections, dict) else {}
+                # ===== فیلدهای ثابت ===== #
+                safe_selections.pop('quantity', None)
+                safe_selections.pop('name', None)
+                safe_selections.pop('description', None)
+                safe_selections.pop('item_price', None)
+                
+                specs_json = safe_selections
 
-        # ===== ایجاد هدر سفارش ===== #
+            line_price = None
+
+            # ===== محاسبه قیمت آیتم ===== #
+            if 'item_price' in item_data and item_data['item_price'] is not None:
+                line_price = Decimal(str(item_data['item_price']))
+            elif 'price' in item_data and item_data['price'] is not None:
+                # ===== قیمت دستی آیتم ===== #
+                line_price = Decimal(str(item_data['price']))
+            elif product:
+                # ===== در صورت بودن محصول و قیمت ===== #
+                line_price = product.price * quantity
+            else:
+                # ===== نبود محصول و قیمت ===== #
+                raise ValidationError(f"برای آیتم '{item_name}' قیمت مشخص نشده است.")
+            
+            calculated_total += line_price
+            # ===== ایجاد آیتم در یک لیست ===== #
+            prepared_items.append({
+                'product': product,
+                'quantity': quantity,
+                'price': line_price,
+                'items': specs_json,
+                'name': item_name,
+                'description': item_description
+            })
+        # ===== به دست آوردن مبلغ کل ===== #
+        final_total = Decimal(str(total_price_override)) if total_price_override is not None else calculated_total
+        # ===== ایجاد سفارش ===== #
         order = Order.objects.create(
             user=user,
-            order_code=self._generate_order_code(),
-            current_status=initial_status,
-            type="2",
-            # ===== آدرس ===== #
-            address=addr_obj,
-            full_address=addr_text,
-            # ===== اطلاعات دریافت کننده ===== #
+            address_id=address_id,
             recipient_name=recipient_name,
             recipient_phone=recipient_phone,
-            company_name=company_name
+            company_name=company_name,
+            full_address=full_address,
+            current_status=initial_status,
+            total_price=final_total,
+            base_products_price=calculated_total,
+            type=type,
+            order_code=self._generate_order_code()
         )
-        
-        # ===== افزودن آیتم‌ها ===== #
-        for item_data in items_data:
-            self.add_item_to_order(order, item_data)
-            
-        # ===== اعمال قیمت دستی (Override) ===== #
-        if total_price_override is not None:
-            order.total_price = Decimal(str(total_price_override))
-            order.save(update_fields=['total_price'])
-
-        return order
-
-    # ========== UPDATE ORDER FIELDS ========== #
-    def update_order_fields(self, order: Order, data: Dict) -> Order:
-        """
-        ویرایش فیلدهای اصلی سفارش (بدون تغییر وضعیت).
-        """
-        # ===== لاجیک آدرس در آپدیت ===== #
-        if 'address_id' in data or 'full_address' in data:
-            new_addr_id = data.get('address_id') or order.address_id
-            
-            passed_id = data.get('address_id')
-            passed_text = data.get('full_address')
-            
-            if passed_id:
-                addr_obj, addr_text = self._resolve_address_data(address_id=passed_id)
-                order.address = addr_obj
-                order.full_address = addr_text
+        # ===== ایجاد آیتم ===== #
+        OrderItem.objects.bulk_create([
+            OrderItem(
+                order=order,
+                product=item['product'],
+                quantity=item['quantity'],
+                price=item['price'],
+                items=item['items'],
+                name=item['name'],
+                description=item['description'],
+                status='approved'
+            )
+            for item in prepared_items
+        ])
                 
-            elif passed_text is not None: 
-                order.address = None
-                order.full_address = passed_text
-        
-        # ===== فیلدهای اطلاعاتی ===== #
-        if 'recipient_name' in data:
-            order.recipient_name = data['recipient_name']
-        if 'recipient_phone' in data:
-            order.recipient_phone = data['recipient_phone']
-        if 'company_name' in data:
-            order.company_name = data['company_name']
-        if 'order_code' in data:
-             order.order_code = data['order_code']
-             
-        # ===== تغییر نوع سفارش ===== #
-        if 'type' in data:
-            order.type = data['type']
-            
-        order.save()
         return order
         
-    # ========== CHANGE ORDER STATUS ========== #
-    def change_order_status(self, order: Order, new_status_id: int) -> Order:
+    def _prepare_item_specs_json(self, product, selections) -> Dict:
         """
-        تغییر وضعیت سفارش.
-        """
-        new_status = get_object_or_404(OrderStatus, pk=new_status_id)
-
-        order.current_status = new_status
-        order.save(update_fields=['current_status', 'updated_at'])
-        return order
-        
-    def _prepare_item_specs_json(self, product: Product, selections: Dict) -> Dict:
-        """
-        تبدیل ورودی‌ها به JSON استاندارد با در نظر گرفتن مدل‌های Size و ProductSize.
+        تبدیل ورودی‌های خام (IDها) به ساختار استاندارد JSON برای فیلد items.
         """
         size_id = selections.get('size_id')
         width = selections.get('custom_width', 0)
         height = selections.get('custom_height', 0)
-        
-        resolved_size_name = "Custom Size"
         # ===== دریافت اطلاعات سایز ===== #
+        size_name = "Custom"
         if size_id:
             try:
-                ps = ProductSize.objects.select_related('size').get(id=size_id, product=product)
+                ps = ProductSize.objects.get(product=product, id=size_id)
                 width = float(ps.size.width)
                 height = float(ps.size.height)
-                resolved_size_name = ps.size.name
+                size_name = ps.size.name
             except ProductSize.DoesNotExist:
                 pass
-            
-        # ===== سایز دلخواه ===== #
-        elif width and height:
-            resolved_size_name = f"{width}x{height}"
-            if hasattr(product, 'pricing_config') and not product.pricing_config.accepts_custom_dimensions:
-                 raise ValidationError(f"محصول {product.name} ابعاد دلخواه نمی‌پذیرد.")
-            
         # ===== دریافت اطلاعات گزینه ===== #
         option_ids = selections.get('option_value_ids', [])
         options_list = []
@@ -200,103 +214,13 @@ class OrderService:
         return {
             "options": options_list,
             "meta": {
-                "size_id": size_id,
-                "size_name": resolved_size_name,
                 "width": float(width),
                 "height": float(height),
+                "size_id": size_id,
                 "has_design": selections.get('has_design', True)
-            },
+            }
         }
-    
-    # ========== ADD ORDER ITEM ========== #
-    @transaction.atomic
-    def add_item_to_order(self, order: Order, item_data: Dict) -> OrderItem:
-        """
-        منطق مرکزی افزودن آیتم به سفارش (استفاده شده در ایجاد و ویرایش).
-        """
-        product_slug = item_data.get('product_slug')
-        selections = item_data.get('selections', item_data)
-        quantity = int(selections.get('quantity', 1))
         
-        product = get_object_or_404(Product, slug=product_slug)
-        
-        # ===== محاسبه قیمت آیتم ===== #
-        if 'item_price' in item_data and item_data['item_price'] is not None:
-            line_price = Decimal(str(item_data['item_price']))
-        else:
-            line_price = product.price * quantity
-            
-        # ===== ساخت JSON مشخصات ===== #
-        specs_json = self._prepare_item_specs_json(product, selections)
-
-        # ===== ایجاد رکورد ===== #
-        item = OrderItem.objects.create(
-            order=order,
-            product=product,
-            quantity=quantity,
-            price=line_price,
-            status='approved',
-            items=specs_json,
-            name=selections.get('name', item_data.get('name', product.name)),
-            description=selections.get('description', item_data.get('description'))
-        )
-        
-        # ===== بروزرسانی قیمت کل سفارش ===== #
-        self.recalculate_order_totals(order)
-        return item
-    
-    # ========== UPDATE EXISTING ITEM ========== #
-    @transaction.atomic
-    def update_existing_item(self, item: OrderItem, data: Dict) -> OrderItem:
-        """
-        ویرایش کامل یک آیتم موجود.
-        شامل: تغییر تعداد، تغییر قیمت دستی، تغییر توضیحات و حتی تغییر ویژگی‌ها.
-        """
-        # ===== آپدیت فیلدهای متنی ساده ===== #
-        if 'name' in data:
-            item.name = data['name']
-        if 'description' in data:
-            item.description = data['description']
-        if 'admin_note' in data:
-            item.admin_note = data['admin_note']
-            
-        # ===== آپدیت تعداد ===== #
-        quantity_changed = False
-        if 'quantity' in data:
-            new_qty = int(data['quantity'])
-            if item.quantity != new_qty:
-                item.quantity = new_qty
-                quantity_changed = True
-                
-        # ===== آپدیت انتخابات کاربر ===== #
-        if 'selections' in data:
-            new_specs = self._prepare_item_specs_json(item.product, data['selections'])
-            item.items = new_specs
-            
-        # ===== محاسبه قیمت ===== #
-        if 'item_price' in data and data['item_price'] is not None:
-            item.price = Decimal(str(data['item_price']))
-        elif quantity_changed:
-            item.price = item.product.price * item.quantity
-
-        item.save()
-        
-        # ===== محاسبه قیمت کل سفارش ===== #
-        self.recalculate_order_totals(item.order)
-        
-        return item
-
-    # ========== RECALCULATE ORDER TOTALS ========== #
-    def recalculate_order_totals(self, order: Order):
-        """
-        محاسبه مجدد قیمت کل سفارش بر اساس آیتم‌ها.
-        """
-        total = order.order_item_order.aggregate(sum=Sum('price'))['sum'] or 0
-        order.base_products_price = total
-        order.total_price = total
-        order.save(update_fields=['total_price', 'base_products_price'])
-
-    # ========== BULK DELETE ========== #    
     @transaction.atomic
     def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, int]:
         """

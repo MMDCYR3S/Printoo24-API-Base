@@ -51,37 +51,12 @@ class AttachmentManager(models.Manager):
     def get_queryset(self):
         return AttachmentQuerySet(self.model, using=self._db)
 
-    def create_attachment(self, file, name: str, user):
+    def create_attachment(self, *, user, file, product, name: str):
         """ آپلود فایل در کتابخانه """
-        return self.create(user=user, file=file, name=name)
+        return self.create(user=user, file=file, name=name, product=product)
     
     def get_by_id(self, attachment_id: int):
         return self.filter(id=attachment_id).first()
     
     def delete_attachment(self, attachment_id: int):
         self.filter(id=attachment_id).delete()
-
-# ========== PRODUCT ATTACHMENT QUERYSET ========== #
-class ProductAttachmentQuerySet(BaseQuerySet):
-    """کوئری‌های مربوط به لینک محصول-فایل"""
-    
-    def is_attached(self, product, attachment) -> bool:
-        return self.filter(product=product, attachment=attachment).exists()
-
-# ========== PRODUCT ATTACHMENT MANAGERS ========== #
-class ProductAttachmentManager(models.Manager):
-    def get_queryset(self):
-        return ProductAttachmentQuerySet(self.model, using=self._db)
-
-    def link_attachment(self, product, attachment, user):
-        return self.create(
-            product=product,
-            attachment=attachment,
-            user=user
-        )
-
-    def unlink_attachment(self, product, attachment):
-        self.filter(product=product, attachment=attachment).delete()
-        
-    def is_attached(self, product, attachment) -> bool:
-        return self.get_queryset().is_attached(product, attachment)

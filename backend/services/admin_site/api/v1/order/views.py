@@ -9,11 +9,12 @@ from apps.order.services import OrderDashboardService
 from .serializers import (
     CreateCustomOrderSerializer, 
     OrderDashboardListSerializer, 
-    OrderDashboardDetailSerializer
+    OrderDashboardDetailSerializer,
+    OrderDashboardUpdateSerializer
 )
 
 # ========== ORDER VIEW SET ========== #
-@extend_schema(tags=['Dashboard-Order'])
+@extend_schema(tags=['Admin-Order'])
 class OrderDashboardViewSet(viewsets.ViewSet):
     """
     مدیریت سفارشات اختصاصی و سیستمی (پنل ادمین).
@@ -73,6 +74,39 @@ class OrderDashboardViewSet(viewsets.ViewSet):
                         }
                     ]
                 }
+            ),
+            OpenApiExample(
+                'Single Response',
+                summary='سفارش اختصاصی(بدون محصول)',
+                value={
+                    "recipient_name": "محمد باقری",
+                    "recipient_phone": "09137514625",
+                    "company_name": "شرکت صحابی",
+                    "full_address": "اصفهان - خیابان آزادی - جنب مترو",
+                    "price": 2210000,
+                    "items": [
+                        {
+                            "name": "طراحی لوگو اختصاصی",
+                            "description": "سفارش اختصاصی",
+                            "item_price": 500000,
+                            "quantity": 12,
+                            "description": "طبق گفتگوی تلفنی",
+                            "selections": {
+                                "paper_type": "گلاسه ۳۰۰ گرم",
+                                "coating": "UV",
+                                "special_request": {
+                                    "value" : "دور بر سیمی",
+                                    "price": 20000
+                                },
+                                "color": [
+                                    "آبی",
+                                    "قرمز",
+                                    "مشکی"
+                                ]
+                            }
+                        }
+                    ]
+                }
             )
         ]
     )
@@ -95,11 +129,13 @@ class OrderDashboardViewSet(viewsets.ViewSet):
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # ========== PARTIAL UPDATE ========== #
-    @extend_schema(summary="ویرایش جزئیات سفارش")
+    @extend_schema(summary="ویرایش جزئیات سفارش", request=OrderDashboardUpdateSerializer)
     def partial_update(self, request, pk=None):
-        # می‌توانید یک سریالایزر جداگانه برای آپدیت بسازید
+        serializer = OrderDashboardUpdateSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
         try:
-            self.service.update_order_details(request.user, pk, request.data)
+            self.service.update_order_details(request.user, pk, data=data)
             return Response({'status': 'Order updated'})
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

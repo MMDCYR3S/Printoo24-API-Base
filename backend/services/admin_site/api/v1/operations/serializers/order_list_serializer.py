@@ -26,6 +26,9 @@ class OrderListSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             'id', 
+            'recipient_name',
+            'recipient_phone',
+            'company_name',
             'order_code', 
             'created_at', 
             'customer_name', 
@@ -44,7 +47,7 @@ class OrderListSerializer(serializers.ModelSerializer):
             full_name = f"{profile.first_name} {profile.last_name}".strip()
             if full_name:
                 return full_name
-        return obj.user.username
+        return obj.recipient_name
 
     def get_customer_company(self, obj: Order):
         """ نام شرکت مشتری """

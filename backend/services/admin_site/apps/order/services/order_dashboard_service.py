@@ -27,7 +27,7 @@ class OrderDashboardService:
         """ لیست سفارشات برای جدول (بهینه شده) """
         return Order.objects.select_related('user', 'current_status')\
             .prefetch_related('order_item_order')\
-            .order_by('-created_at')
+            .order_by('-created_at').filter(type="2")
 
     def get_order_detail(self, order_id: int):
         """ جزئیات کامل سفارش """
@@ -44,11 +44,17 @@ class OrderDashboardService:
         # ===== استخراج داده اصلی ===== #
         user_id = data.get('user_id')
         address_id = data.get('address_id')
+        recipient_name = data.get('recipient_name')
+        recipient_phone = data.get('recipient_phone')
+        company_name = data.get('company_name')
+        full_address = data.get('full_address')
         items_data = data.get('items', [])
         total_price_override = data.get('price')
         # ===== اگر کاربر آدرس نداشت یا وجود نداشت ===== #
-        if not user_id or not address_id:
-            raise ValidationError("شناسه کاربر و آدرس الزامی است.")
+        if not user_id and not recipient_name:
+                raise ValidationError("یا شناسه کاربر را از بین مشتریان انتخاب کنید و یا یک نام برای اون انتخاب کنید.")
+        if not address_id and not full_address:
+            raise ValidationError("باید آدرس را انتخاب یا وارد کنید")
         # ===== در صورت نبود لیست آیتم ===== #
         if not items_data:
             raise ValidationError("لیست آیتم‌ها نمی‌تواند خالی باشد.")
@@ -57,13 +63,13 @@ class OrderDashboardService:
             order = self.order_domain.create_order_direct(
                 user_id=user_id,
                 address_id=address_id,
+                recipient_name=recipient_name,
+                recipient_phone=recipient_phone,
+                company_name=company_name,
+                full_address=full_address,
                 items_data=items_data,
                 total_price_override=total_price_override
             )
-            # ===== اگر توضیحات وجود داشت ===== #
-            if 'description' in data:
-                    order.description = data['description']
-                    order.save(update_fields=['description'])
 
             logger.info(f"Custom Order {order.id} created successfully.")
             return order
@@ -80,19 +86,12 @@ class OrderDashboardService:
         """
         order = get_object_or_404(Order, pk=order_id)
         # ===== آدرس ===== #
-        if 'address_id' in data:
-            address = get_object_or_404(Address, pk=data['address_id'])
-            if address.user_id != order.user_id:
-                logger.warning(f"Admin assigned address {address.id} to user {order.user_id} (Mismatch)")
-            order.address = address
+        if 'full_address' in data:
+            order.full_address = data['full_address']
 
         # ===== نوع سفارش ===== #
         if 'type' in data:
             order.type = data['type']
-
-        # ===== توضیحات ===== #
-        if 'description' in data:
-            order.description = data['description']
 
         # ===== تغییر قیمت کل ===== #
         if 'total_price' in data:

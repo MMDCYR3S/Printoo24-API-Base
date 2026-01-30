@@ -43,11 +43,7 @@ class OrderShipment(models.Model):
     )
 
     # ===== اطلاعات ارسال ===== #
-    destination_address = models.ForeignKey(
-        "core.Address", 
-        on_delete=models.PROTECT,
-        verbose_name=_("آدرس مقصد")
-    )
+    destination_address = models.TextField(_("آدرس مورد نظر"), blank=True, null=True)
     
     # ===== اطلاعات تحویل ===== #
     tracking_code = models.CharField(_("کد رهگیری پستی"), max_length=100, blank=True, null=True)

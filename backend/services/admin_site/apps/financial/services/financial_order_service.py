@@ -10,7 +10,7 @@ from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
 from apps.order.models import (
     OrderCostReport, OrderCostSheet, OrderCostCategory, 
-    OrderCostItem, OrderCostAttachment
+    OrderCostItem, OrderCostAttachment, OrderCostType
 )
 from apps.order.domain_services import OrderCostService
 
@@ -119,11 +119,15 @@ class FinancialOrderAppService:
         sheet = self._ensure_sheet_exists(order_id)
         # ===== بررسی قفل نبودن سند مالی ===== #
         self._domain_service._validate_sheet_is_modifiable(sheet)
+        if data.get("cost_type"):
+            cost_type = OrderCostType.objects.get(id=data.get("cost_type"))
+        else:
+            pass
         # ===== ایجاد هدر گزارش ===== #
         report = OrderCostReport.objects.create(
             sheet=sheet,
             submitter=user,
-            department=data.get("department", "finance"),
+            cost_type=cost_type if cost_type else None,
             title=data["title"],
             description=data.get("description", ""),
             is_approved=False
