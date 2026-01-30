@@ -309,7 +309,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== MEDIA SYNC ========== #
     @extend_schema(
-        summary="مرحله ۳: اتصال فایل‌ها و تصاویر (Media)",
+        summary="نکته مهم: این قسمت بعد از اعمال تغییرات حذف میشه.",
         request=ProductMediaSyncSerializer,
         examples=[
             OpenApiExample(
@@ -339,7 +339,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== UPLOAD IMAGE ========== #
     @extend_schema(
-        summary="آپلود تصویر (تکی)",
+        summary="مرحله 3: آپلود عکس محصول",
         request=ProductImageSerializer,
         description="تصویر را آپلود می‌کند و ID آن را برمی‌گرداند تا در `media-sync` استفاده شود."
     )
@@ -362,9 +362,19 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== UPLOAD ATTACHMENT ========== #
     @extend_schema(
-        summary="آپلود فایل در کتابخانه",
+        summary="مرحله 4: آپلود فایل‌های پیوست",
         request=AttachmentLibrarySerializer,
-        description="فایل‌های جانبی (قالب، راهنما) را آپلود می‌کند."
+        description="""
+        نکته:
+        اطلاعاتی که باید پست کنی اینها هستند:
+        {
+            "name": "exmaple",
+            "file": file,
+            "product_id": 5
+        }
+        در قسمت فایل هم باید فایل رو آپلود کنی.
+        نام می‌تونه خالی باشه و اجباری نیست.
+        """
     )
     @action(detail=False, methods=['post'], url_path='upload-attachment', parser_classes=[MultiPartParser, FormParser])
     def upload_attachment(self, request):

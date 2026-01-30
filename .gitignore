@@ -179,3 +179,11 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+media/
+
+# کل پوشه cart_uploads و محتویاتش
+cart_uploads/
+
+# فایل‌های تصویری با الگوی box_*.jpg
+box_*.jpg

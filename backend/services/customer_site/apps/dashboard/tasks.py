@@ -7,7 +7,7 @@ from django.core.files import File
 from django.contrib.auth import get_user_model
 
 from core.infrastructure import EmailService 
-from shared_libs.core.product.services import ProductMediaService
+from core.product.services import ProductMediaService
 from core.models import (
     OrderItem,
     OrderItemFile
@@ -81,10 +81,9 @@ def upload_attachment_library_task(self, user_id, product_id, temp_file_path, or
     """ تسک آپلود فایل در کتابخانه """
     logger.info(f"[Attachment Task] Starting upload: {name_in_library}")
     media_service = ProductMediaService()
-    
     try:
         user = User.objects.get(id=user_id)
-        
+
         if os.path.exists(temp_file_path):
             with open(temp_file_path, 'rb') as f:
                 django_file = File(f, name=original_filename)

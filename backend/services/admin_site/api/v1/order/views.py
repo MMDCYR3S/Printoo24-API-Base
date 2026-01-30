@@ -79,15 +79,31 @@ class OrderDashboardViewSet(viewsets.ViewSet):
                 'Single Response',
                 summary='سفارش اختصاصی(بدون محصول)',
                 value={
-                    "user_id": 10,
-                    "address_id": 5,
+                    "recipient_name": "محمد باقری",
+                    "recipient_phone": "09137514625",
+                    "company_name": "شرکت صحابی",
+                    "full_address": "اصفهان - خیابان آزادی - جنب مترو",
+                    "price": 2210000,
                     "items": [
                         {
                             "name": "طراحی لوگو اختصاصی",
                             "description": "سفارش اختصاصی",
                             "item_price": 500000,
-                            "quantity": 1,
-                            "description": "طبق گفتگوی تلفنی"
+                            "quantity": 12,
+                            "description": "طبق گفتگوی تلفنی",
+                            "selections": {
+                                "paper_type": "گلاسه ۳۰۰ گرم",
+                                "coating": "UV",
+                                "special_request": {
+                                    "value" : "دور بر سیمی",
+                                    "price": 20000
+                                },
+                                "color": [
+                                    "آبی",
+                                    "قرمز",
+                                    "مشکی"
+                                ]
+                            }
                         }
                     ]
                 }

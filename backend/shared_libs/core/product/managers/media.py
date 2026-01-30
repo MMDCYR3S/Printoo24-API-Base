@@ -51,7 +51,7 @@ class AttachmentManager(models.Manager):
     def get_queryset(self):
         return AttachmentQuerySet(self.model, using=self._db)
 
-    def create_attachment(self, file, name: str, user, product):
+    def create_attachment(self, *, user, file, product, name: str):
         """ آپلود فایل در کتابخانه """
         return self.create(user=user, file=file, name=name, product=product)
     

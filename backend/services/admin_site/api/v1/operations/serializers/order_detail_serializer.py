@@ -35,12 +35,11 @@ class PackageSerializer(serializers.ModelSerializer):
         fields = ['box_number', 'weight_grams', 'label_code', 'content_summary']
 
 class ShipmentSerializer(serializers.ModelSerializer):
-    method_name = serializers.CharField(source='delivery_method.title', read_only=True)
     packages = PackageSerializer(many=True, read_only=True)
     
     class Meta:
         model = OrderShipment
-        fields = ['id', 'method_name', 'tracking_code', 'status', 'delivery_method', 'packages', 'expected_delivery_date']
+        fields = ['id', 'tracking_code', 'status', 'delivery_method', 'packages', 'expected_delivery_date']
 
 class InvoiceSimpleSerializer(serializers.ModelSerializer):
     status_name = serializers.CharField(source='status.name', read_only=True)

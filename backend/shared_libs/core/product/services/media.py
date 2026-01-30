@@ -3,6 +3,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from ..models import Product, ProductImage, Attachment
+from core.models import User
 
 # ========== MEDIA SERVICE ========== #
 class ProductMediaService:
@@ -46,8 +47,13 @@ class ProductMediaService:
             ProductImage.objects.bulk_update_orders(to_update)
 
     # ===== مدیریت فایل‌های پیوست =====
-    def upload_attachment_to_library(self, user, file, product_id: int, name: str = None):
+    def upload_attachment_to_library(self, user: User, file, product_id: int, name: str = None):
         product = Product.objects.get_by_id(product_id)
         if not product:
             raise ValidationError("محصول یافت نشد.")
-        return Attachment.objects.create_attachment(user, name, file, product)
+        return Attachment.objects.create_attachment(
+            user=user, 
+            file=file, 
+            product=product, 
+            name=name
+        )
