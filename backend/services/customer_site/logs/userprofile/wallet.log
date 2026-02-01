@@ -1,0 +1,78 @@
+INFO 2025-11-27 16:12:45,071 user_transaction_service 19 139696629872320 Fetching wallet balance for User ID: 6
+ERROR 2025-11-27 16:12:45,075 user_transaction_service 19 139696629872320 Error fetching wallet for User ID: 6
+Traceback (most recent call last):
+  File "/usr/src/app/apps/userprofile/services/user_transaction_service.py", line 36, in get_wallet_balance
+    logger.debug(f"Wallet found for User ID: {user_id}. Balance: {wallet.balance}")
+                                                                  ^^^^^^^^^^^^^^
+AttributeError: 'Wallet' object has no attribute 'balance'
+INFO 2025-11-27 16:13:54,400 user_transaction_service 26 140022100522688 Fetching wallet balance for User ID: 6
+DEBUG 2025-11-27 16:13:54,404 user_transaction_service 26 140022100522688 Wallet found for User ID: 6. Balance: 5000.00
+INFO 2025-11-27 16:14:25,349 user_transaction_service 26 140022100522688 Fetching transaction history for User ID: 6
+INFO 2025-11-27 16:14:25,357 user_transaction_service 26 140022100522688 Retrieved 2 transactions for User ID: 6
+INFO 2025-12-17 13:02:34,804 user_transaction_service 8 140478087415488 Fetching wallet balance for User ID: 2
+DEBUG 2025-12-17 13:02:34,839 user_transaction_service 8 140478087415488 Wallet balance: 18352664.00
+INFO 2025-12-17 13:03:11,590 user_transaction_service 8 140478079022784 Fetching wallet balance for User ID: 2
+DEBUG 2025-12-17 13:03:11,614 user_transaction_service 8 140478079022784 Wallet balance: 18352664.00
+INFO 2025-12-22 10:58:58,269 user_transaction_service 470 139730816595648 Fetching transaction history for User ID: 2
+INFO 2025-12-22 10:58:58,291 user_transaction_service 470 139730816595648 Retrieved 3 transactions for User ID: 2
+INFO 2025-12-22 10:59:08,437 user_transaction_service 470 139730816595648 Fetching wallet balance for User ID: 2
+ERROR 2025-12-22 10:59:08,440 user_transaction_service 470 139730816595648 Error fetching wallet for User ID: 2
+Traceback (most recent call last):
+  File "/app/src/apps/userprofile/services/user_transaction_service.py", line 40, in get_wallet_balance
+    logger.debug(f"Wallet balance: {wallet.decimal}")
+                                    ^^^^^^^^^^^^^^
+AttributeError: 'decimal.Decimal' object has no attribute 'decimal'
+INFO 2025-12-22 10:59:52,280 user_transaction_service 473 140268380616384 Fetching wallet balance for User ID: 2
+DEBUG 2025-12-22 10:59:52,283 user_transaction_service 473 140268380616384 Wallet balance: 18352664.00
+INFO 2025-12-22 11:00:44,381 user_transaction_service 478 140011337938624 Fetching wallet balance for User ID: 2
+DEBUG 2025-12-22 11:00:44,383 user_transaction_service 478 140011337938624 Wallet balance: 18352664.00
+INFO 2025-12-25 14:48:27,120 user_transaction_service 244 140086367745728 Fetching transaction history for User ID: 2
+ERROR 2025-12-25 14:48:27,128 user_transaction_service 244 140086367745728 Error fetching transactions for User ID: 2
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: relation "customer_wallet_transaction_wallettransaction" does not exist
+LINE 1: SELECT COUNT(*) AS "__count" FROM "customer_wallet_transacti...
+                                          ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/src/apps/userprofile/services/user_transaction_service.py", line 54, in get_transaction_history
+    logger.info(f"Retrieved {history.count()} transactions for User ID: {user_id}")
+                             ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 606, in count
+    return self.query.get_count(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 644, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 626, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "/usr/local/lib/python3.11/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/usr/local/lib/python3.11/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: relation "customer_wallet_transaction_wallettransaction" does not exist
+LINE 1: SELECT COUNT(*) AS "__count" FROM "customer_wallet_transacti...
+                                          ^
+
+INFO 2025-12-25 15:14:04,481 user_transaction_service 32 140395971344064 Fetching transaction history for User ID: 1
+INFO 2025-12-25 15:14:04,488 user_transaction_service 32 140395971344064 Retrieved 0 transactions for User ID: 1

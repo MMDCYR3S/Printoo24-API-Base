@@ -1,0 +1,17 @@
+INFO 2025-12-02 16:43:23,391 update_cart_service 639 140526527428288 Update Item 1 for User 2
+INFO 2025-12-02 16:43:36,157 update_cart_service 639 140526527428288 Update Item 1 for User 2
+INFO 2025-12-02 16:43:42,520 update_cart_service 639 140526527428288 Update Item 1 for User 2
+INFO 2025-12-02 16:43:57,352 update_cart_service 639 140526527428288 Update Item 1 for User 2
+INFO 2025-12-02 16:44:30,342 update_cart_service 639 140526527428288 Update Item 1 for User 2
+INFO 2025-12-02 16:44:38,735 update_cart_service 639 140526527428288 Update Item 1 for User 2
+INFO 2025-12-02 16:44:49,193 update_cart_service 639 140526527428288 Update Item 1 for User 2
+INFO 2025-12-02 16:44:49,233 update_cart_service 639 140526527428288 Item 1 updated.
+INFO 2025-12-02 16:45:33,106 update_cart_service 639 140526527428288 Update Item 1 for User 2
+INFO 2025-12-02 16:45:33,138 update_cart_service 639 140526527428288 Item 1 updated.
+INFO 2025-12-24 06:49:01,498 update_cart_service 7 140251297212096 Update Item 16 for User 2
+ERROR 2025-12-24 06:49:01,520 update_cart_service 7 140251297212096 Update cart item failed: ["برای این محصول انتخاب 'تیراژ' (بسته) الزامی است."]
+INFO 2025-12-24 06:49:47,242 update_cart_service 7 140251297212096 Update Item 16 for User 2
+INFO 2025-12-24 06:49:47,264 update_cart_service 7 140251297212096 Item 16 updated/merged.
+INFO 2025-12-31 19:31:53,925 update_cart_service 340 140621775886016 Updating Item 4 (User: None, Session: ev1mfznph36cvv3okuqnu81qcus3p31c)
+INFO 2025-12-31 19:32:28,498 update_cart_service 340 140621775886016 Updating Item 4 (User: None, Session: ev1mfznph36cvv3okuqnu81qcus3p31c)
+INFO 2025-12-31 19:32:28,533 update_cart_service 340 140621775886016 In-place update executed

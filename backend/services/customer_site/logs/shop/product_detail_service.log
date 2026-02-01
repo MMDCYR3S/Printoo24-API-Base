@@ -1,0 +1,385 @@
+DEBUG 2025-11-16 17:16:03,789 product_detail_service 150 140231386855104 ShopProductDetailService initialized
+INFO 2025-11-16 17:16:03,790 product_detail_service 150 140231386855104 Fetching product details for slug: khrt-wyzyt
+DEBUG 2025-11-16 17:16:03,834 product_detail_service 150 140231386855104 Product found - ID: 1, Name: کارت ویزیت
+DEBUG 2025-11-16 17:16:03,835 product_detail_service 150 140231386855104 Product attributes loaded - Quantities: 2, Sizes: 2, Materials: 2, Options: 4, Images: 2, Attachments: 2
+DEBUG 2025-11-16 17:16:03,836 product_detail_service 150 140231386855104 Grouping 4 options by type
+DEBUG 2025-11-16 17:16:03,837 product_detail_service 150 140231386855104 Options grouped successfully - Categories: ['تعداد برگ', 'تعداد وجه'], Distribution: [('تعداد برگ', 2), ('تعداد وجه', 2)]
+DEBUG 2025-11-16 17:16:03,838 product_detail_service 150 140231386855104 Options grouped into 2 categories
+INFO 2025-11-16 17:16:03,839 product_detail_service 150 140231386855104 Product details successfully prepared for slug: khrt-wyzyt - Product ID: 1
+DEBUG 2025-11-18 15:22:08,555 product_detail_service 58 140075992086208 ShopProductDetailService initialized
+INFO 2025-11-18 15:22:08,571 product_detail_service 58 140075992086208 Fetching product details for slug: khrt-wyzyt
+DEBUG 2025-11-18 15:22:08,634 product_detail_service 58 140075992086208 Product found - ID: 1, Name: کارت ویزیت
+DEBUG 2025-11-18 15:22:08,635 product_detail_service 58 140075992086208 Product attributes loaded - Quantities: 2, Sizes: 2, Materials: 2, Options: 4, Images: 2, Attachments: 2
+DEBUG 2025-11-18 15:22:08,636 product_detail_service 58 140075992086208 Grouping 4 options by type
+DEBUG 2025-11-18 15:22:08,637 product_detail_service 58 140075992086208 Options grouped successfully - Categories: ['تعداد برگ', 'تعداد وجه'], Distribution: [('تعداد برگ', 2), ('تعداد وجه', 2)]
+DEBUG 2025-11-18 15:22:08,638 product_detail_service 58 140075992086208 Options grouped into 2 categories
+INFO 2025-11-18 15:22:08,638 product_detail_service 58 140075992086208 Product details successfully prepared for slug: khrt-wyzyt - Product ID: 1
+DEBUG 2025-11-29 14:15:41,184 product_detail_service 498 139635891107520 ShopProductDetailService initialized
+INFO 2025-11-29 14:15:41,199 product_detail_service 498 139635891107520 Fetching product details for slug: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:15:41,225 product_detail_service 498 139635891107520 Product found - ID: 1, Name: کارت ویزیت گلاسه براق
+INFO 2025-11-29 14:15:41,225 product_detail_service 498 139635891107520 Product details successfully prepared for slug: khrt-wyzyt-glsh-brq - Product ID: 1
+DEBUG 2025-11-29 14:16:06,190 product_detail_service 498 139635891107520 ShopProductDetailService initialized
+INFO 2025-11-29 14:16:06,191 product_detail_service 498 139635891107520 Fetching product details for slug: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:16:06,211 product_detail_service 498 139635891107520 Product found - ID: 1, Name: کارت ویزیت گلاسه براق
+INFO 2025-11-29 14:16:06,212 product_detail_service 498 139635891107520 Product details successfully prepared for slug: khrt-wyzyt-glsh-brq - Product ID: 1
+DEBUG 2025-11-29 14:18:10,422 product_detail_service 498 139635853342400 ShopProductDetailService initialized
+INFO 2025-11-29 14:18:10,423 product_detail_service 498 139635853342400 Fetching product details for slug: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:18:10,450 product_detail_service 498 139635853342400 Product found - ID: 1, Name: کارت ویزیت گلاسه براق
+INFO 2025-11-29 14:18:10,451 product_detail_service 498 139635853342400 Product details successfully prepared for slug: khrt-wyzyt-glsh-brq - Product ID: 1
+DEBUG 2025-11-29 14:40:15,445 product_detail_service 517 139762111338176 ShopProductDetailService initialized
+INFO 2025-11-29 14:40:15,445 product_detail_service 517 139762111338176 Fetching product details for slug: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:40:15,468 product_detail_service 517 139762111338176 Product found - ID: 1, Name: کارت ویزیت گلاسه براق
+INFO 2025-11-29 14:40:15,469 product_detail_service 517 139762111338176 Product details successfully prepared for slug: khrt-wyzyt-glsh-brq - Product ID: 1
+DEBUG 2025-12-01 10:34:32,390 product_detail_service 278 139858763839168 ShopProductDetailService initialized
+INFO 2025-12-01 10:34:32,408 product_detail_service 278 139858763839168 Fetching product details for slug: large-format-banner
+DEBUG 2025-12-01 10:34:32,468 product_detail_service 278 139858763839168 Product found - ID: 7, Name: چاپ بنر عریض
+INFO 2025-12-01 10:34:32,469 product_detail_service 278 139858763839168 Product details successfully prepared for slug: large-format-banner - Product ID: 7
+DEBUG 2025-12-01 10:36:08,441 product_detail_service 281 139898491410112 ShopProductDetailService initialized
+INFO 2025-12-01 10:36:08,442 product_detail_service 281 139898491410112 Fetching product details for slug: glossy-business-card
+DEBUG 2025-12-01 10:36:08,576 product_detail_service 281 139898491410112 Product found - ID: 6, Name: کارت ویزیت گلاسه
+INFO 2025-12-01 10:36:08,590 product_detail_service 281 139898491410112 Product details successfully prepared for slug: glossy-business-card - Product ID: 6
+DEBUG 2025-12-01 10:39:14,955 product_detail_service 281 139898491410112 ShopProductDetailService initialized
+INFO 2025-12-01 10:39:14,956 product_detail_service 281 139898491410112 Fetching product details for slug: glossy-business-card
+DEBUG 2025-12-01 10:39:15,005 product_detail_service 281 139898491410112 Product found - ID: 6, Name: کارت ویزیت گلاسه
+INFO 2025-12-01 10:39:15,006 product_detail_service 281 139898491410112 Product details successfully prepared for slug: glossy-business-card - Product ID: 6
+DEBUG 2025-12-01 13:00:35,153 product_detail_service 479 140318989084352 ShopProductDetailService initialized
+INFO 2025-12-01 13:00:35,161 product_detail_service 479 140318989084352 Fetching product details for slug: brchsb-mwl-mdl-480
+DEBUG 2025-12-01 13:00:35,213 product_detail_service 479 140318989084352 Product found - ID: 7, Name: برچسب اموال - مدل 480
+INFO 2025-12-01 13:00:35,216 product_detail_service 479 140318989084352 Product details successfully prepared for slug: brchsb-mwl-mdl-480 - Product ID: 7
+DEBUG 2025-12-02 15:35:02,104 product_detail_service 524 140419563427520 ShopProductDetailService initialized
+INFO 2025-12-02 15:35:02,117 product_detail_service 524 140419563427520 Fetching product details for slug: stykhr-shyshhy-khd-9316
+ERROR 2025-12-02 15:35:02,119 product_detail_service 524 140419563427520 Error fetching product details for slug 'stykhr-shyshhy-khd-9316': Cannot resolve keyword 'sort_order' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 39, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 74, in get_product_detail_by_slug
+    Prefetch('file_upload_requirements', queryset=Product.file_upload_requirements.rel.model.objects.select_related('spec').order_by('sort_order'))
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1727, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2305, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'sort_order' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+DEBUG 2025-12-02 15:37:03,911 product_detail_service 529 140403393337024 ShopProductDetailService initialized
+INFO 2025-12-02 15:37:03,912 product_detail_service 529 140403393337024 Fetching product details for slug: stykhr-shyshhy-khd-9316
+ERROR 2025-12-02 15:37:03,961 product_detail_service 529 140403393337024 Error fetching product details for slug 'stykhr-shyshhy-khd-9316': Cannot resolve keyword 'product' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 39, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 76, in get_product_detail_by_slug
+    ).get(slug=slug, is_active=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1956, in _fetch_all
+    self._prefetch_related_objects()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1330, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 2408, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 2572, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/related_descriptors.py", line 796, in get_prefetch_querysets
+    queryset = _filter_prefetch_queryset(queryset, self.field.name, instances)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/related_descriptors.py", line 119, in _filter_prefetch_queryset
+    queryset.query.add_q(predicate, reuse_all=True)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1526, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1333, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'product' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+DEBUG 2025-12-02 15:43:52,033 product_detail_service 536 139675777013440 ShopProductDetailService initialized
+INFO 2025-12-02 15:43:52,035 product_detail_service 536 139675777013440 Fetching product details for slug: stykhr-shyshhy-khd-9316
+ERROR 2025-12-02 15:43:52,037 product_detail_service 536 139675777013440 Error fetching product details for slug 'stykhr-shyshhy-khd-9316': Cannot resolve keyword 'sort_order' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 39, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 84, in get_product_detail_by_slug
+    Prefetch('file_upload_requirements', queryset=Product.file_upload_requirements.rel.model.objects.select_related('spec').order_by('sort_order'))
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1727, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2305, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'sort_order' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+DEBUG 2025-12-02 15:44:08,038 product_detail_service 539 140674481690304 ShopProductDetailService initialized
+INFO 2025-12-02 15:44:08,039 product_detail_service 539 140674481690304 Fetching product details for slug: stykhr-shyshhy-khd-9316
+ERROR 2025-12-02 15:44:08,104 product_detail_service 539 140674481690304 Error fetching product details for slug 'stykhr-shyshhy-khd-9316': Cannot resolve keyword 'product' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 39, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 86, in get_product_detail_by_slug
+    ).get(slug=slug, is_active=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1956, in _fetch_all
+    self._prefetch_related_objects()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1330, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 2408, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 2572, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/related_descriptors.py", line 796, in get_prefetch_querysets
+    queryset = _filter_prefetch_queryset(queryset, self.field.name, instances)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/related_descriptors.py", line 119, in _filter_prefetch_queryset
+    queryset.query.add_q(predicate, reuse_all=True)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1526, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1333, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'product' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+DEBUG 2025-12-02 15:46:51,719 product_detail_service 544 140001214109376 ShopProductDetailService initialized
+INFO 2025-12-02 15:46:51,720 product_detail_service 544 140001214109376 Fetching product details for slug: stykhr-shyshhy-khd-9316
+DEBUG 2025-12-02 15:46:51,786 product_detail_service 544 140001214109376 Product found - ID: 11, Name: استیکر شیشه‌ای - کد 9316
+INFO 2025-12-02 15:46:51,787 product_detail_service 544 140001214109376 Product details successfully prepared for slug: stykhr-shyshhy-khd-9316 - Product ID: 11
+DEBUG 2025-12-02 15:47:23,893 product_detail_service 547 139997030291136 ShopProductDetailService initialized
+INFO 2025-12-02 15:47:23,895 product_detail_service 547 139997030291136 Fetching product details for slug: stykhr-shyshhy-khd-9316
+DEBUG 2025-12-02 15:47:23,946 product_detail_service 547 139997030291136 Product found - ID: 11, Name: استیکر شیشه‌ای - کد 9316
+INFO 2025-12-02 15:47:23,947 product_detail_service 547 139997030291136 Product details successfully prepared for slug: stykhr-shyshhy-khd-9316 - Product ID: 11
+DEBUG 2025-12-02 15:47:44,927 product_detail_service 550 139785482008256 ShopProductDetailService initialized
+INFO 2025-12-02 15:47:44,928 product_detail_service 550 139785482008256 Fetching product details for slug: stykhr-shyshhy-khd-9316
+DEBUG 2025-12-02 15:47:44,998 product_detail_service 550 139785482008256 Product found - ID: 11, Name: استیکر شیشه‌ای - کد 9316
+INFO 2025-12-02 15:47:45,000 product_detail_service 550 139785482008256 Product details successfully prepared for slug: stykhr-shyshhy-khd-9316 - Product ID: 11
+DEBUG 2025-12-02 16:34:50,959 product_detail_service 615 140662818375360 ShopProductDetailService initialized
+INFO 2025-12-02 16:34:50,960 product_detail_service 615 140662818375360 Fetching product details for slug: trkht-tblygty-khd-6158
+DEBUG 2025-12-02 16:34:51,057 product_detail_service 615 140662818375360 Product found - ID: 24, Name: تراکت تبلیغاتی - کد 6158
+INFO 2025-12-02 16:34:51,058 product_detail_service 615 140662818375360 Product details successfully prepared for slug: trkht-tblygty-khd-6158 - Product ID: 24
+DEBUG 2025-12-02 16:41:23,746 product_detail_service 639 140526555752128 ShopProductDetailService initialized
+INFO 2025-12-02 16:41:23,748 product_detail_service 639 140526555752128 Fetching product details for slug: trkht-tblygty-khd-6158
+DEBUG 2025-12-02 16:41:23,833 product_detail_service 639 140526555752128 Product found - ID: 24, Name: تراکت تبلیغاتی - کد 6158
+INFO 2025-12-02 16:41:23,839 product_detail_service 639 140526555752128 Product details successfully prepared for slug: trkht-tblygty-khd-6158 - Product ID: 24
+DEBUG 2025-12-04 08:52:51,599 product_detail_service 117 140669011269312 ShopProductDetailService initialized
+INFO 2025-12-04 08:52:51,609 product_detail_service 117 140669011269312 Fetching product details for slug: khrt-wyzyt-lmynt-mt
+ERROR 2025-12-04 08:52:51,618 product_detail_service 117 140669011269312 Error fetching product details for slug 'khrt-wyzyt-lmynt-mt': محصولی با اسلاگ 'khrt-wyzyt-lmynt-mt' یافت نشد.
+Traceback (most recent call last):
+  File "/app/shared_libs/core/domain/product/repositories.py", line 84, in get_product_detail_by_slug
+    ).get(slug=slug, is_active=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.models.product.Product.DoesNotExist: Product matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 42, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 87, in get_product_detail_by_slug
+    raise ProductNotFoundException(f"محصولی با اسلاگ '{slug}' یافت نشد.")
+core.domain.product.exceptions.ProductNotFoundException: محصولی با اسلاگ 'khrt-wyzyt-lmynt-mt' یافت نشد.
+DEBUG 2025-12-04 08:53:15,231 product_detail_service 117 140669011269312 ShopProductDetailService initialized
+INFO 2025-12-04 08:53:15,251 product_detail_service 117 140669011269312 Fetching product details for slug: khrt-wyzyt-lmynt-mt
+ERROR 2025-12-04 08:53:15,270 product_detail_service 117 140669011269312 Error fetching product details for slug 'khrt-wyzyt-lmynt-mt': محصولی با اسلاگ 'khrt-wyzyt-lmynt-mt' یافت نشد.
+Traceback (most recent call last):
+  File "/app/shared_libs/core/domain/product/repositories.py", line 84, in get_product_detail_by_slug
+    ).get(slug=slug, is_active=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.models.product.Product.DoesNotExist: Product matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 42, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 87, in get_product_detail_by_slug
+    raise ProductNotFoundException(f"محصولی با اسلاگ '{slug}' یافت نشد.")
+core.domain.product.exceptions.ProductNotFoundException: محصولی با اسلاگ 'khrt-wyzyt-lmynt-mt' یافت نشد.
+DEBUG 2025-12-04 09:05:18,850 product_detail_service 202 140213403948736 ShopProductDetailService initialized
+INFO 2025-12-04 09:05:18,851 product_detail_service 202 140213403948736 Fetching product details for slug: khrt-wyzyt-lmynt-mt
+DEBUG 2025-12-04 09:05:18,881 product_detail_service 202 140213403948736 Product found - ID: 39, Name: کارت ویزیت لمینت مات
+INFO 2025-12-04 09:05:18,882 product_detail_service 202 140213403948736 Product details successfully prepared for slug: khrt-wyzyt-lmynt-mt - Product ID: 39
+DEBUG 2025-12-06 10:55:39,944 product_detail_service 1697 140575210903232 ShopProductDetailService initialized
+INFO 2025-12-06 10:55:39,967 product_detail_service 1697 140575210903232 Fetching product details for slug: trkht-tblygty-khd-7848
+DEBUG 2025-12-06 10:55:40,091 product_detail_service 1697 140575210903232 Product found - ID: 7, Name: تراکت تبلیغاتی - کد 7848
+INFO 2025-12-06 10:55:40,092 product_detail_service 1697 140575210903232 Product details successfully prepared for slug: trkht-tblygty-khd-7848 - Product ID: 7
+DEBUG 2025-12-06 17:11:05,785 product_detail_service 234 140255086937792 ShopProductDetailService initialized
+INFO 2025-12-06 17:11:05,805 product_detail_service 234 140255086937792 Fetching product details for slug: trkht-tblygty-khd-7848
+DEBUG 2025-12-06 17:11:06,172 product_detail_service 234 140255086937792 Product found - ID: 7, Name: تراکت تبلیغاتی - کد 7848
+INFO 2025-12-06 17:11:06,174 product_detail_service 234 140255086937792 Product details successfully prepared for slug: trkht-tblygty-khd-7848 - Product ID: 7
+DEBUG 2025-12-09 09:25:05,320 product_detail_service 40 140642221196992 ShopProductDetailService initialized
+INFO 2025-12-09 09:25:05,335 product_detail_service 40 140642221196992 Fetching product details for slug: trkht-tblygty-khd-6158
+DEBUG 2025-12-09 09:25:05,389 product_detail_service 40 140642221196992 Product found - ID: 24, Name: تراکت تبلیغاتی - کد 6158
+INFO 2025-12-09 09:25:05,389 product_detail_service 40 140642221196992 Product details successfully prepared for slug: trkht-tblygty-khd-6158 - Product ID: 24
+DEBUG 2025-12-09 10:20:42,205 product_detail_service 7 140341085898432 ShopProductDetailService initialized
+INFO 2025-12-09 10:20:42,216 product_detail_service 7 140341085898432 Fetching product details for slug: khrt-wyzyt-lkhchry-khd-2013
+DEBUG 2025-12-09 10:20:42,273 product_detail_service 7 140341085898432 Product found - ID: 6, Name: کارت ویزیت لاکچری - کد 2013
+INFO 2025-12-09 10:20:42,274 product_detail_service 7 140341085898432 Product details successfully prepared for slug: khrt-wyzyt-lkhchry-khd-2013 - Product ID: 6
+DEBUG 2025-12-15 19:23:01,422 product_detail_service 7 140514531903168 ShopProductDetailService initialized
+INFO 2025-12-15 19:23:01,456 product_detail_service 7 140514531903168 Fetching product details for slug: stykhr-shyshhy-khd-6514
+DEBUG 2025-12-15 19:23:01,538 product_detail_service 7 140514531903168 Product found - ID: 24, Name: استیکر شیشه‌ای - کد 6514
+INFO 2025-12-15 19:23:01,539 product_detail_service 7 140514531903168 Product details successfully prepared for slug: stykhr-shyshhy-khd-6514 - Product ID: 24
+DEBUG 2025-12-15 19:23:26,737 product_detail_service 7 140514531903168 ShopProductDetailService initialized
+INFO 2025-12-15 19:23:26,738 product_detail_service 7 140514531903168 Fetching product details for slug: khrt-wyzyt-lkhchry-khd-4891
+DEBUG 2025-12-15 19:23:26,821 product_detail_service 7 140514531903168 Product found - ID: 28, Name: کارت ویزیت لاکچری - کد 4891
+INFO 2025-12-15 19:23:26,822 product_detail_service 7 140514531903168 Product details successfully prepared for slug: khrt-wyzyt-lkhchry-khd-4891 - Product ID: 28
+DEBUG 2025-12-23 11:16:37,072 product_detail_service 504 139895131600576 ShopProductDetailService initialized
+INFO 2025-12-23 11:16:37,082 product_detail_service 504 139895131600576 Fetching product details for slug: trkht-glsh-135-grm
+ERROR 2025-12-23 11:16:37,125 product_detail_service 504 139895131600576 Error fetching product details for slug 'trkht-glsh-135-grm': 'NoneType' object has no attribute 'name'
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/product/services/product.py", line 118, in get_product_detail_by_slug
+    "structured_options": self._format_product_options(product)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/product/services/product.py", line 38, in _format_product_options
+    "name": prod_opt.option.name,
+            ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:24:03,295 product_detail_service 525 139803664316096 ShopProductDetailService initialized
+ERROR 2025-12-23 11:24:03,331 product_detail_service 525 139803664316096 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:24:22,071 product_detail_service 525 139803664316096 ShopProductDetailService initialized
+ERROR 2025-12-23 11:24:22,097 product_detail_service 525 139803664316096 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:25:20,692 product_detail_service 525 139803664316096 ShopProductDetailService initialized
+ERROR 2025-12-23 11:25:20,718 product_detail_service 525 139803664316096 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:25:31,121 product_detail_service 525 139803664316096 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:26:13,973 product_detail_service 528 140065325971136 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:26:35,633 product_detail_service 531 140066399712960 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:26:52,771 product_detail_service 534 140105787373248 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:26:54,639 product_detail_service 534 140105787373248 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:27:08,423 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:27:43,512 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:27:43,537 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:27:53,754 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:27:53,781 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:28:11,506 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:28:11,534 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:28:31,311 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:28:58,475 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:28:58,482 product_detail_service 537 140055610914496 Error fetching product: محصول با اسلاگ 'trkht-glsh-3563' یافت نشد.
+DEBUG 2025-12-23 11:29:09,419 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:29:09,463 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:29:19,241 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:29:19,249 product_detail_service 537 140055610914496 Error fetching product: محصول با اسلاگ '3563-TRKHT-TBLYGTY-TRKH-2025' یافت نشد.
+DEBUG 2025-12-23 11:29:26,586 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:29:26,611 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:30:19,320 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:31:15,612 product_detail_service 544 139633719506624 ShopProductDetailService initialized
+ERROR 2025-12-23 11:31:15,640 product_detail_service 544 139633719506624 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:31:38,443 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:31:38,471 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:31:56,499 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:31:56,523 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:31:57,545 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:31:57,579 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:32:09,266 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:32:09,289 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:32:10,124 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:32:10,147 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:32:43,300 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:32:43,324 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:33:19,976 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:33:20,003 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:36:29,057 product_detail_service 562 139913715513024 ShopProductDetailService initialized
+ERROR 2025-12-23 11:36:29,088 product_detail_service 562 139913715513024 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:37:39,016 product_detail_service 562 139913715513024 ShopProductDetailService initialized
+ERROR 2025-12-23 11:37:39,040 product_detail_service 562 139913715513024 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:39:41,938 product_detail_service 574 140271068116672 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:40:32,395 product_detail_service 574 140271068116672 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:40:38,827 product_detail_service 574 140271068116672 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:43:49,154 product_detail_service 574 140271057626816 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:44:58,440 product_detail_service 641 140378138212032 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:45:34,790 product_detail_service 641 140378036491968 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:38:32,563 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:39:34,708 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:41:24,329 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:43:11,510 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:43:47,123 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:44:13,991 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:44:42,018 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:47:32,380 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 07:53:39,397 product_detail_service 259 140110386427584 ShopProductDetailService initialized
+DEBUG 2025-12-25 06:57:52,334 product_detail_service 102 140573163910848 ShopProductDetailService initialized
+DEBUG 2025-12-27 07:13:28,502 product_detail_service 8 140644843689664 ShopProductDetailService initialized
+DEBUG 2025-12-28 11:12:52,815 product_detail_service 123 140411846956736 ShopProductDetailService initialized
+DEBUG 2025-12-28 11:50:13,375 product_detail_service 237 140063085336256 ShopProductDetailService initialized
+DEBUG 2025-12-28 12:05:17,302 product_detail_service 358 139685266626240 ShopProductDetailService initialized
+DEBUG 2025-12-31 17:28:34,913 product_detail_service 7 140243676337856 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:14:50,167 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:14:50,181 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:07,811 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:07,813 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:13,346 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:13,347 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:19,011 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:19,024 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:20,764 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:20,765 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:23,874 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:23,875 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:19:35,798 product_detail_service 20 140076368697024 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:20:45,497 product_detail_service 20 140076368697024 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:23:32,605 product_detail_service 20 140076368697024 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:28:14,594 product_detail_service 33 139684978267840 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:42:33,061 product_detail_service 37 140540170639040 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:42:45,072 product_detail_service 40 140016248592064 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:53:09,491 product_detail_service 60 140663195694784 ShopProductDetailService initialized
+DEBUG 2026-01-28 12:58:12,395 product_detail_service 75 140183487895232 ShopProductDetailService initialized
+DEBUG 2026-01-30 18:54:25,285 product_detail_service 7 127435621439168 ShopProductDetailService initialized
+DEBUG 2026-01-30 18:54:41,551 product_detail_service 7 127435219654336 ShopProductDetailService initialized
+DEBUG 2026-01-30 18:54:42,739 product_detail_service 7 127435613046464 ShopProductDetailService initialized
+DEBUG 2026-01-30 18:54:55,420 product_detail_service 7 127435613046464 ShopProductDetailService initialized

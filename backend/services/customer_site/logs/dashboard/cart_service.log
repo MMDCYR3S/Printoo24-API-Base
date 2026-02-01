@@ -1,0 +1,34 @@
+INFO 2025-12-22 10:05:16,606 cart_service 295 140132862654144 START: Get cart of the user #1
+INFO 2025-12-22 10:06:21,625 cart_service 295 140132862654144 START: Get cart of the user #1
+INFO 2025-12-22 10:08:59,099 cart_service 295 140132862654144 START: Get cart of the user #1
+INFO 2025-12-22 10:10:05,737 cart_service 295 140132862654144 START: Get cart of the user #1
+INFO 2025-12-22 10:11:04,789 cart_service 295 140132862654144 START: Get cart of the user #1
+INFO 2025-12-22 10:11:36,015 cart_service 295 140132862654144 START: Get cart of the user #1
+INFO 2025-12-22 10:19:49,189 cart_service 360 139993158776512 START: Get cart of the user #1
+INFO 2025-12-22 10:19:49,224 cart_service 360 139993158776512 SUCCESS: Item 8 added to cart for User 1. Price: 456884000.0
+INFO 2025-12-22 10:19:49,228 cart_service 360 139993158776512 START: Get Cart Details for User ID 1
+INFO 2025-12-22 10:19:49,240 cart_service 360 139993158776512 SUCCESS: Cart details retrieved for User 1. Cart ID: 1
+INFO 2025-12-22 10:21:39,183 cart_service 360 139993158776512 START: Get cart of the user #1
+INFO 2025-12-22 10:21:39,208 cart_service 360 139993158776512 SUCCESS: Item 9 added to cart for User 1. Price: 506834.0
+INFO 2025-12-22 10:21:39,213 cart_service 360 139993158776512 START: Get Cart Details for User ID 1
+INFO 2025-12-22 10:21:39,223 cart_service 360 139993158776512 SUCCESS: Cart details retrieved for User 1. Cart ID: 1
+INFO 2025-12-22 10:26:18,901 cart_service 368 139975227078336 START: Get cart of the user #1
+INFO 2025-12-22 10:26:18,930 cart_service 368 139975227078336 SUCCESS: Item 10 added to cart for User 1. Price: 506834.0
+INFO 2025-12-22 10:26:18,934 cart_service 368 139975227078336 START: Get Cart Details for User ID 1
+INFO 2025-12-22 10:26:18,942 cart_service 368 139975227078336 SUCCESS: Cart details retrieved for User 1. Cart ID: 1
+INFO 2025-12-22 10:28:09,813 cart_service 379 140296408004288 START: Get cart of the user #1
+INFO 2025-12-22 10:28:09,852 cart_service 379 140296408004288 SUCCESS: Item 11 added to cart for User 1. Price: 506834.0
+INFO 2025-12-22 10:28:09,859 cart_service 379 140296408004288 START: Get Cart Details for User ID 1
+INFO 2025-12-22 10:28:09,877 cart_service 379 140296408004288 SUCCESS: Cart details retrieved for User 1. Cart ID: 1
+INFO 2025-12-22 10:29:25,028 cart_service 379 140296408004288 START: Get cart of the user #1
+INFO 2025-12-22 10:29:25,064 cart_service 379 140296408004288 SUCCESS: Item 12 added to cart for User 1. Price: 476834.0
+INFO 2025-12-22 10:29:25,075 cart_service 379 140296408004288 START: Get Cart Details for User ID 1
+INFO 2025-12-22 10:29:25,091 cart_service 379 140296408004288 SUCCESS: Cart details retrieved for User 1. Cart ID: 1
+INFO 2025-12-22 10:29:39,099 cart_service 379 140296408004288 START: Get cart of the user #1
+INFO 2025-12-22 10:29:39,124 cart_service 379 140296408004288 SUCCESS: Item 13 added to cart for User 1. Price: 324556.0
+INFO 2025-12-22 10:29:39,128 cart_service 379 140296408004288 START: Get Cart Details for User ID 1
+INFO 2025-12-22 10:29:39,140 cart_service 379 140296408004288 SUCCESS: Cart details retrieved for User 1. Cart ID: 1
+INFO 2025-12-22 10:31:44,312 cart_service 394 140057175389888 START: Get cart of the user #1
+INFO 2025-12-22 10:31:44,342 cart_service 394 140057175389888 SUCCESS: Item 14 added to cart for User 1. Price: 324556.0
+INFO 2025-12-22 10:31:44,346 cart_service 394 140057175389888 START: Get Cart Details for User ID 1
+INFO 2025-12-22 10:31:44,354 cart_service 394 140057175389888 SUCCESS: Cart details retrieved for User 1. Cart ID: 1

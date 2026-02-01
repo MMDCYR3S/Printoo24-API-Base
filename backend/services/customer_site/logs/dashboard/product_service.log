@@ -1,0 +1,101 @@
+INFO 2025-12-04 09:13:54,649 product_service 274 139926593246912 Attempting async upload for product 39
+INFO 2025-12-04 09:14:16,203 product_service 274 139926593246912 Attempting async upload for product 39
+INFO 2025-12-04 09:14:17,517 product_service 274 139926593246912 Attempting async upload for product 39
+INFO 2025-12-04 09:36:38,568 product_service 9 139741772273344 Attempting async upload for product 39
+INFO 2025-12-04 09:36:54,251 product_service 9 139741772273344 Attempting async upload for product 39
+INFO 2025-12-04 09:38:54,995 product_service 9 139741391484608 Attempting async attachment upload: file_attach_01
+INFO 2025-12-04 09:39:00,871 product_service 9 139741391484608 Attempting async attachment upload: file_attach_02
+INFO 2025-12-04 14:13:40,265 product_service 420 140588583392960 Updating option config [62, 63] for product 39
+ERROR 2025-12-04 14:13:40,267 product_service 420 140588583392960 Failed to update option config: ProductDomainService.update_product_option_config() got an unexpected keyword argument 'product_option_id'
+INFO 2025-12-04 14:16:29,961 product_service 433 140363672229568 Updating option config [62, 63] for product 39
+ERROR 2025-12-04 14:16:29,962 product_service 433 140363672229568 Failed to update option config: Field 'id' expected a number but got [62, 63].
+INFO 2025-12-04 15:44:56,760 product_service 438 139813186606784 Updating option config [62, 63] for product 39
+ERROR 2025-12-04 15:44:56,762 product_service 438 139813186606784 Failed to update option config: 'QuerySet' object has no attribute 'save'
+INFO 2025-12-04 15:45:55,807 product_service 445 139747775387328 Updating option config [62, 63] for product 39
+ERROR 2025-12-04 15:45:55,809 product_service 445 139747775387328 Failed to update option config: 'QuerySet' object has no attribute 'save'
+INFO 2025-12-04 15:49:26,147 product_service 454 140229326575296 Updating option config [62, 63] for product 39
+ERROR 2025-12-04 15:49:26,227 product_service 454 140229326575296 Failed to update option config: Field 'id' expected a number but got [62, 63].
+INFO 2025-12-04 15:51:29,291 product_service 461 139971113686720 Updating option config [62, 63] for product 39
+ERROR 2025-12-04 15:51:29,294 product_service 461 139971113686720 Failed to update option config: 'QuerySet' object has no attribute 'save'
+INFO 2025-12-04 16:03:43,509 product_service 483 139807369107136 Updating option config [62, 63] for product 39
+ERROR 2025-12-04 16:03:43,510 product_service 483 139807369107136 Failed to update option config: ProductDomainService.update_product_option_config() got an unexpected keyword argument 'product_option_ids'
+INFO 2025-12-04 16:04:05,765 product_service 486 140332083705536 Updating option config [62, 63] for product 39
+ERROR 2025-12-04 16:04:05,766 product_service 486 140332083705536 Failed to update option config: Field 'id' expected a number but got [62, 63].
+INFO 2025-12-04 16:10:42,571 product_service 489 139863890495168 Updating option config 62 for product 39
+ERROR 2025-12-04 16:10:42,577 product_service 489 139863890495168 Failed to update option config: Field 'id' expected a number but got [62].
+INFO 2025-12-04 16:11:10,593 product_service 493 140462984959680 Updating option config 62 for product 39
+INFO 2025-12-04 16:11:10,614 product_service 493 140462984959680 Option config updated successfully
+INFO 2025-12-04 16:11:43,285 product_service 493 140462984959680 Updating option config 63 for product 39
+INFO 2025-12-04 16:11:43,306 product_service 493 140462984959680 Option config updated successfully
+INFO 2025-12-05 07:19:21,144 product_service 138 140634927302336 Updating option config 63 for product 39
+ERROR 2025-12-05 07:19:21,165 product_service 138 140634927302336 Failed to update option config: ProductDomainService.update_product_option_config() got an unexpected keyword argument 'option_id'
+INFO 2025-12-05 07:21:16,944 product_service 202 140644783920832 Updating option config 63 for product 39
+ERROR 2025-12-05 07:21:16,944 product_service 202 140644783920832 Failed to update option config: ProductDomainService.update_product_option_config() got an unexpected keyword argument 'product_option_id'
+INFO 2025-12-05 07:21:56,827 product_service 205 140049476916928 Updating option config 63 for product 39
+ERROR 2025-12-05 07:21:56,843 product_service 205 140049476916928 Failed to update option config: این ویژگی متعلق به محصول نیست. ID: 63
+INFO 2025-12-05 07:22:08,419 product_service 205 140049476916928 Updating option config 63 for product 39
+ERROR 2025-12-05 07:22:08,424 product_service 205 140049476916928 Failed to update option config: این ویژگی متعلق به محصول نیست. ID: 63
+INFO 2025-12-05 07:22:12,936 product_service 205 140049476916928 Updating option config 63 for product 39
+ERROR 2025-12-05 07:22:12,949 product_service 205 140049476916928 Failed to update option config: این ویژگی متعلق به محصول نیست. ID: 63
+INFO 2025-12-05 07:22:19,019 product_service 205 140049476916928 Updating option config 62 for product 39
+INFO 2025-12-05 07:22:19,041 product_service 205 140049476916928 Option config updated successfully
+INFO 2025-12-05 07:22:57,824 product_service 208 140578195150528 Updating option config 62 for product 39
+INFO 2025-12-05 07:22:57,848 product_service 208 140578195150528 Option config updated successfully
+INFO 2025-12-05 07:23:02,913 product_service 208 140578195150528 Updating option config 62 for product 39
+INFO 2025-12-05 07:23:02,923 product_service 208 140578195150528 Option config updated successfully
+INFO 2025-12-05 07:23:56,715 product_service 208 140577962190528 Updating option config 62 for product 39
+INFO 2025-12-05 07:23:56,728 product_service 208 140577962190528 Option config updated successfully
+INFO 2025-12-05 07:30:10,719 product_service 228 139840699143872 Updating option config 62 for product 39
+ERROR 2025-12-05 07:30:10,725 product_service 228 139840699143872 Failed to update option config: list indices must be integers or slices, not str
+INFO 2025-12-05 07:30:20,716 product_service 228 139840699143872 Updating option config 62 for product 39
+ERROR 2025-12-05 07:30:20,730 product_service 228 139840699143872 Failed to update option config: list indices must be integers or slices, not str
+INFO 2025-12-05 07:31:32,498 product_service 231 140029998569152 Updating option config 62 for product 39
+INFO 2025-12-05 07:31:32,514 product_service 231 140029998569152 Option config updated successfully
+INFO 2025-12-05 07:34:42,627 product_service 246 139650003015360 Updating option config 62 for product 39
+ERROR 2025-12-05 07:34:42,632 product_service 246 139650003015360 Failed to update option config: 'ProductOption' object has no attribute 'values'
+INFO 2025-12-05 07:35:24,326 product_service 249 140182192035520 Updating option config 62 for product 39
+ERROR 2025-12-05 07:35:24,333 product_service 249 140182192035520 Failed to update option config: 'ProductOption' object has no attribute 'global_values'
+INFO 2025-12-05 07:36:30,401 product_service 252 139835832702656 Updating option config 62 for product 39
+ERROR 2025-12-05 07:36:30,409 product_service 252 139835832702656 Failed to update option config: 'Option' object has no attribute 'all'
+INFO 2025-12-05 07:37:25,868 product_service 255 140104703317696 Updating option config 62 for product 39
+ERROR 2025-12-05 07:37:25,879 product_service 255 140104703317696 Failed to update option config: اين مقدار متعلق به ویژگی درخواست شده نیست.
+INFO 2025-12-05 07:37:33,708 product_service 255 140104703317696 Updating option config 62 for product 39
+ERROR 2025-12-05 07:37:33,719 product_service 255 140104703317696 Failed to update option config: اين مقدار متعلق به ویژگی درخواست شده نیست.
+INFO 2025-12-05 07:37:41,095 product_service 255 140104703317696 Updating option config 62 for product 39
+INFO 2025-12-05 07:37:41,117 product_service 255 140104703317696 Option config updated successfully
+INFO 2025-12-05 07:37:57,010 product_service 255 140104703317696 Updating option config 62 for product 39
+INFO 2025-12-05 07:37:57,034 product_service 255 140104703317696 Option config updated successfully
+INFO 2025-12-05 07:39:09,682 product_service 255 140104703317696 Updating option config 62 for product 39
+INFO 2025-12-05 07:39:09,703 product_service 255 140104703317696 Option config updated successfully
+INFO 2025-12-05 07:47:35,654 product_service 282 140529383765696 Updating option config 62 for product 39
+INFO 2025-12-05 07:47:35,672 product_service 282 140529383765696 Option config updated successfully
+INFO 2025-12-05 07:47:44,993 product_service 282 140529383765696 Updating option config 62 for product 39
+INFO 2025-12-05 07:47:45,015 product_service 282 140529383765696 Option config updated successfully
+ERROR 2025-12-27 07:59:36,431 product_service 254 140636874512064 Error syncing option None: 'option_id'
+INFO 2026-01-24 07:27:50,555 product_service 7 139860258035392 Attempting async attachment upload: name1
+INFO 2026-01-24 07:29:10,088 product_service 7 139860258035392 Attempting async attachment upload: آموزش موز
+INFO 2026-01-24 07:30:01,238 product_service 7 139860258035392 Attempting async attachment upload: PDF آموزشی
+INFO 2026-01-30 19:08:05,877 product_service 248 134723036944064 Attempting async attachment upload: moz
+ERROR 2026-01-30 19:08:05,881 product_service 248 134723036944064 Celery failed for attachment: 'NoneType' object has no attribute 'delay'. Switching to Sync mode.
+ERROR 2026-01-30 19:08:05,901 product_service 248 134723036944064 Sync attachment upload failed: Cannot assign "<File: AI-5TO9.pdf>": "Attachment.user" must be a "User" instance.
+INFO 2026-01-30 19:09:12,279 product_service 248 134723036944064 Attempting async attachment upload: moz
+ERROR 2026-01-30 19:09:12,280 product_service 248 134723036944064 Celery failed for attachment: 'NoneType' object has no attribute 'delay'. Switching to Sync mode.
+ERROR 2026-01-30 19:09:12,305 product_service 248 134723036944064 Sync attachment upload failed: Cannot assign "<File: AI-5TO9.pdf>": "Attachment.user" must be a "User" instance.
+INFO 2026-01-30 19:10:01,374 product_service 248 134723036944064 Attempting async attachment upload: moz
+ERROR 2026-01-30 19:10:01,375 product_service 248 134723036944064 Celery failed for attachment: 'NoneType' object has no attribute 'delay'. Switching to Sync mode.
+ERROR 2026-01-30 19:10:01,394 product_service 248 134723036944064 Sync attachment upload failed: Cannot assign "<File: AI-5TO9.pdf>": "Attachment.user" must be a "User" instance.
+INFO 2026-01-30 19:13:06,025 product_service 251 129839516522176 Attempting async attachment upload: moz
+INFO 2026-01-30 19:13:17,455 product_service 251 129839516522176 Attempting async attachment upload: moz
+INFO 2026-01-30 19:17:49,742 product_service 254 129366185121472 Attempting async attachment upload: moz
+INFO 2026-01-30 19:19:36,772 product_service 259 124557118838464 Attempting async attachment upload: moz
+INFO 2026-01-30 19:19:55,748 product_service 262 134399380330176 Attempting async attachment upload: moz
+INFO 2026-01-30 19:23:34,023 product_service 269 125509709240000 Attempting async attachment upload: moz
+INFO 2026-01-30 19:27:29,786 product_service 276 137561339238080 Attempting async attachment upload: moz
+INFO 2026-01-30 19:27:34,358 product_service 276 137561339238080 Attempting async attachment upload: moz
+INFO 2026-01-30 19:27:50,450 product_service 276 137561339238080 Attempting async attachment upload: moz
+INFO 2026-01-30 19:27:55,110 product_service 276 137561339238080 Attempting async attachment upload: moz
+INFO 2026-01-30 19:28:02,480 product_service 276 137561339238080 Attempting async attachment upload: moz
+INFO 2026-01-30 19:28:13,999 product_service 276 137561339238080 Attempting async attachment upload: moz
+INFO 2026-01-30 19:28:23,611 product_service 276 137561339238080 Attempting async attachment upload: moz
+INFO 2026-01-30 19:28:31,705 product_service 276 137561339238080 Attempting async attachment upload: moz
+INFO 2026-01-30 19:36:45,633 product_service 297 130994780935872 Attempting async attachment upload: moz

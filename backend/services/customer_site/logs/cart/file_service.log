@@ -1,0 +1,12 @@
+DEBUG 2025-11-29 14:40:51,818 cart_file_service 517 139762094003904 Moved file 5a0abe43-5247-4c00-a344-d5ce616c076b.tif to /app/src/media/cart_uploads/1/5a0abe43-5247-4c00-a344-d5ce616c076b.tif
+ERROR 2025-11-29 14:40:56,946 cart_file_service 517 139762094003904 Temp file missing: /app/src/media/uploads/temp/5a0abe43-5247-4c00-a344-d5ce616c076b.tif
+DEBUG 2025-11-29 14:41:16,445 cart_file_service 517 139762094003904 Moved file 7eefd348-2ae1-4bd1-8d53-f30b45739a0f.tif to /app/src/media/cart_uploads/1/7eefd348-2ae1-4bd1-8d53-f30b45739a0f.tif
+ERROR 2025-11-29 14:41:25,797 cart_file_service 517 139762094003904 Temp file missing: /app/src/media/uploads/temp/7eefd348-2ae1-4bd1-8d53-f30b45739a0f.tif
+DEBUG 2025-11-29 14:41:34,923 cart_file_service 517 139762094003904 Moved file 402d500d-ae5f-414a-9687-a4756ea32927.tif to /app/src/media/cart_uploads/1/402d500d-ae5f-414a-9687-a4756ea32927.tif
+DEBUG 2025-11-29 15:22:45,433 cart_file_service 546 140175272310464 Moved file 31d0d4fb-a85e-4a23-9459-011bf10ac473.tif to /app/src/media/cart_uploads/1/31d0d4fb-a85e-4a23-9459-011bf10ac473.tif
+ERROR 2025-12-01 10:50:12,439 cart_file_service 303 139621350663872 Temp file missing during finalize: /app/src/media/uploads/temp/uuid-file-name-from-upload-endpoint.jpg
+DEBUG 2025-12-01 10:53:22,419 cart_file_service 303 139620993976000 Finalized file for req 1: cart_uploads/6/bb4ff417-5330-48a6-ab15-1976f977e772.tif
+DEBUG 2025-12-01 10:53:22,435 cart_file_service 303 139620993976000 Finalized file for req 2: cart_uploads/6/276e167c-65e1-4f33-9e79-63bda2fd340e.tif
+ERROR 2025-12-01 10:55:26,373 cart_file_service 303 139620975593152 Temp file missing during finalize: /app/src/media/uploads/temp/bb4ff417-5330-48a6-ab15-1976f977e772.tif
+DEBUG 2025-12-01 11:06:23,416 cart_file_service 342 140072842163904 Finalized file for req 1: cart_uploads/6/99b983d3-9622-4bcd-9f4d-9be07fc7c1f5.tif
+DEBUG 2025-12-01 11:06:23,431 cart_file_service 342 140072842163904 Finalized file for req 2: cart_uploads/6/2f04b314-700a-4c14-a43e-4b1712f13793.tif

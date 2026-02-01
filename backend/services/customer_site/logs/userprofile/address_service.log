@@ -1,0 +1,12 @@
+INFO 2025-11-27 16:15:20,038 user_address_service 26 140022100522688 Fetching addresses for User ID: 6
+INFO 2025-11-27 16:15:40,546 user_address_service 26 140022100522688 Editing Address ID: 1 for User ID: 6
+INFO 2025-11-27 16:15:40,564 user_address_service 26 140022100522688 Address ID: 1 updated successfully.
+INFO 2025-11-29 14:18:28,574 user_address_service 498 139635853342400 Fetching addresses for User ID: 1
+INFO 2025-11-29 14:21:30,608 user_address_service 498 139635853342400 Fetching addresses for User ID: 1
+INFO 2025-11-29 14:21:42,573 user_address_service 498 139635853342400 Editing Address ID: 1 for User ID: 1
+INFO 2025-11-29 14:21:42,582 user_address_service 498 139635853342400 Address ID: 1 updated successfully.
+INFO 2025-11-29 14:21:59,929 user_address_service 498 139635853342400 Removing Address ID: 1 for User ID: 1
+INFO 2025-11-29 14:21:59,942 user_address_service 498 139635853342400 Address ID: 1 deleted successfully.
+INFO 2025-12-17 13:02:34,838 user_address_service 8 140478070630080 Fetching addresses for User ID: 2
+INFO 2025-12-17 13:03:11,613 user_address_service 8 140478070630080 Fetching addresses for User ID: 2
+INFO 2025-12-22 11:09:16,014 user_address_service 491 140490700748480 Fetching addresses for User ID: 2

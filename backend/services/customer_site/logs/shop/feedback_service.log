@@ -1,0 +1,18 @@
+INFO 2025-11-30 06:43:51,728 product_comment_service 151 140575889159872 Fetching feedbacks for Product Slug: khrt-wyzyt-fntzy
+INFO 2025-11-30 06:45:45,184 product_comment_service 151 140575889159872 Start submit_review for User ID: 1, Product Slug: khrt-wyzyt-fntzy
+WARNING 2025-11-30 06:45:45,187 product_comment_service 151 140575889159872 Product not found for slug: khrt-wyzyt-fntzy
+INFO 2025-11-30 06:46:03,896 product_comment_service 151 140575889159872 Start submit_review for User ID: 1, Product Slug: chp-bnr-tslyt-tblygty
+DEBUG 2025-11-30 06:46:03,901 product_comment_service 151 140575889159872 Attempting to add rating: 5 for Product ID: 5
+ERROR 2025-11-30 06:46:03,904 product_comment_service 151 140575889159872 Failed to add rating for User ID: 1. Error: relation "core_productrating" does not exist
+LINE 1: ...eated_at", "core_productrating"."updated_at" FROM "core_prod...
+                                                             ^
+
+INFO 2025-11-30 06:46:49,880 product_comment_service 151 140575889159872 Start submit_review for User ID: 1, Product Slug: chp-bnr-tslyt-tblygty
+DEBUG 2025-11-30 06:46:49,884 product_comment_service 151 140575889159872 Attempting to add rating: 5 for Product ID: 5
+INFO 2025-11-30 06:46:49,900 product_comment_service 151 140575889159872 Rating 5 added successfully for User ID: 1
+DEBUG 2025-11-30 06:46:49,901 product_comment_service 151 140575889159872 Attempting to add comment for Product ID: 5
+ERROR 2025-11-30 06:46:49,909 product_comment_service 151 140575889159872 Failed to add comment for User ID: 1. Error: برای ثبت نظر، ابتدا باید این محصول را خریداری کرده باشید.
+INFO 2025-11-30 06:47:02,972 product_comment_service 151 140575889159872 Fetching feedbacks for Product Slug: khrt-wyzyt-khtn-lmn
+INFO 2025-11-30 06:47:06,053 product_comment_service 151 140575889159872 Fetching feedbacks for Product Slug: khrt-wyzyt-khtn-lmn
+INFO 2025-11-30 06:47:21,210 product_comment_service 151 140575889159872 Fetching feedbacks for Product Slug: chp-bnr-tslyt-tblygty
+INFO 2025-11-30 06:47:36,576 product_comment_service 151 140575889159872 Fetching feedbacks for Product Slug: chp-bnr-tslyt-tblygty

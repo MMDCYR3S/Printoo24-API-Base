@@ -10,7 +10,8 @@ from .views import (
     OrderCostReportSubmitView,
     OrderScheduleManageView,
     OrderCostTypeView,
-    OrderStatusTransactionListView
+    OrderStatusTransactionListView,
+    OrderApproveView
 )
 
 router = DefaultRouter()
@@ -26,6 +27,7 @@ urlpatterns = [
     # path('items/upload/<int:item_id>/', OrderItemUploadView.as_view(), name='admin-item-upload'),
 
     # ===== Status Transition ===== #
+    path('orders/<int:pk>/approve/', OrderApproveView.as_view(), name='order-approve'),
     path('transition/<int:pk>/', OrderTransitionView.as_view(), name='admin-order-transition'),
     path('order/status/list/', OrderStatusTransactionListView.as_view(), name='order-status-list'),
 

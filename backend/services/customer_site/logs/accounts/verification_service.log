@@ -1,0 +1,235 @@
+DEBUG 2025-11-15 13:56:10,658 verify_service 112 139690947638976 VerificationService initialized
+DEBUG 2025-11-16 17:15:45,020 verify_service 150 140231386855104 VerificationService initialized
+DEBUG 2025-11-18 15:21:21,596 verify_service 58 140075992086208 VerificationService initialized
+DEBUG 2025-11-18 15:27:29,258 verify_service 58 140075992086208 VerificationService initialized
+DEBUG 2025-11-18 15:29:21,090 verify_service 58 140075983693504 VerificationService initialized
+DEBUG 2025-11-18 15:35:25,118 verify_service 106 140429010925248 VerificationService initialized
+DEBUG 2025-11-18 15:44:58,800 verify_service 135 140192520337088 VerificationService initialized
+DEBUG 2025-11-19 12:58:05,076 verify_service 114 140159255312064 VerificationService initialized
+DEBUG 2025-11-19 13:25:25,921 verify_service 142 140036389467840 VerificationService initialized
+DEBUG 2025-11-19 13:26:25,663 verify_service 142 140036389467840 VerificationService initialized
+DEBUG 2025-11-19 13:50:25,775 verify_service 266 140215649826496 VerificationService initialized
+DEBUG 2025-11-19 13:56:14,162 verify_service 266 140215381391040 VerificationService initialized
+DEBUG 2025-11-19 15:40:35,230 verify_service 569 140505940752064 VerificationService initialized
+DEBUG 2025-11-19 16:01:22,296 verify_service 612 140500628666048 VerificationService initialized
+DEBUG 2025-11-19 16:11:18,276 verify_service 654 139917629847232 VerificationService initialized
+DEBUG 2025-11-19 16:16:49,049 verify_service 668 140525504034496 VerificationService initialized
+DEBUG 2025-11-19 16:23:56,745 verify_service 683 139691716245184 VerificationService initialized
+DEBUG 2025-11-20 08:40:03,264 verify_service 18 140622925129408 VerificationService initialized
+DEBUG 2025-11-20 08:49:35,511 verify_service 57 140493868496576 VerificationService initialized
+DEBUG 2025-11-20 09:05:23,419 verify_service 78 140658635437760 VerificationService initialized
+DEBUG 2025-11-20 09:12:42,157 verify_service 105 140120013403840 VerificationService initialized
+DEBUG 2025-11-20 09:22:27,897 verify_service 142 140481084257984 VerificationService initialized
+DEBUG 2025-11-20 09:41:56,993 verify_service 186 139898416789184 VerificationService initialized
+DEBUG 2025-11-20 09:52:37,053 verify_service 253 139803534292672 VerificationService initialized
+DEBUG 2025-11-20 09:53:30,492 verify_service 253 139803534292672 VerificationService initialized
+DEBUG 2025-11-20 09:54:02,867 verify_service 257 139793315919552 VerificationService initialized
+DEBUG 2025-11-20 09:54:06,319 verify_service 257 139793315919552 VerificationService initialized
+DEBUG 2025-11-20 09:54:56,577 verify_service 262 140099148838592 VerificationService initialized
+DEBUG 2025-11-20 10:09:58,303 verify_service 262 140099148838592 VerificationService initialized
+DEBUG 2025-11-20 10:40:54,015 verify_service 298 140700100323008 VerificationService initialized
+DEBUG 2025-11-21 09:57:01,325 verify_service 123 140486544189120 VerificationService initialized
+DEBUG 2025-11-21 09:57:30,053 verify_service 123 140486552581824 VerificationService initialized
+DEBUG 2025-11-21 11:35:47,563 verify_service 469 140274089064128 VerificationService initialized
+DEBUG 2025-11-26 12:09:17,793 verify_service 19 139767854397120 VerificationService initialized
+DEBUG 2025-11-26 12:28:11,570 verify_service 141 140038298924736 VerificationService initialized
+DEBUG 2025-11-26 12:33:30,217 verify_service 228 140439406507712 VerificationService initialized
+DEBUG 2025-11-26 13:17:53,229 verify_service 254 140134997554880 VerificationService initialized
+DEBUG 2025-11-26 13:48:01,528 verify_service 260 140003059586752 VerificationService initialized
+DEBUG 2025-11-26 14:27:05,733 verify_service 298 140466742884032 VerificationService initialized
+DEBUG 2025-11-26 14:34:18,342 verify_service 301 139684290393792 VerificationService initialized
+DEBUG 2025-11-26 15:25:33,647 verify_service 316 140655125853888 VerificationService initialized
+DEBUG 2025-11-26 16:09:54,185 verify_service 327 140288997717696 VerificationService initialized
+DEBUG 2025-11-26 16:41:19,450 verify_service 330 140435748193984 VerificationService initialized
+DEBUG 2025-11-27 16:12:34,833 verify_service 19 139696629872320 VerificationService initialized
+DEBUG 2025-11-27 16:44:33,669 verify_service 26 140022061024960 VerificationService initialized
+DEBUG 2025-11-29 14:02:36,743 verify_service 336 140060800317120 VerificationService initialized
+DEBUG 2025-11-29 14:03:13,164 verify_service 336 140060800317120 VerificationService initialized
+DEBUG 2025-11-29 14:30:12,713 verify_service 517 139762128123584 VerificationService initialized
+DEBUG 2025-11-29 14:36:59,495 verify_service 517 139762210961088 VerificationService initialized
+DEBUG 2025-11-29 15:22:15,590 verify_service 546 140175272310464 VerificationService initialized
+DEBUG 2025-11-30 06:45:18,227 verify_service 151 140575889159872 VerificationService initialized
+DEBUG 2025-11-30 21:58:46,347 verify_service 113 140577062087552 VerificationService initialized
+DEBUG 2025-11-30 21:58:47,695 verify_service 113 140577062087552 VerificationService initialized
+DEBUG 2025-11-30 21:58:48,900 verify_service 113 140577062087552 VerificationService initialized
+DEBUG 2025-11-30 21:58:50,226 verify_service 113 140577062087552 VerificationService initialized
+DEBUG 2025-11-30 22:04:29,691 verify_service 126 140383735032704 VerificationService initialized
+DEBUG 2025-11-30 22:04:30,813 verify_service 126 140383735032704 VerificationService initialized
+DEBUG 2025-11-30 22:04:31,955 verify_service 126 140383735032704 VerificationService initialized
+DEBUG 2025-11-30 22:06:08,364 verify_service 118 140305682831040 VerificationService initialized
+DEBUG 2025-11-30 22:06:23,835 verify_service 118 140305682831040 VerificationService initialized
+DEBUG 2025-11-30 22:07:26,917 verify_service 136 139967036820352 VerificationService initialized
+DEBUG 2025-11-30 22:07:28,181 verify_service 136 139967036820352 VerificationService initialized
+DEBUG 2025-11-30 22:07:29,384 verify_service 136 139967036820352 VerificationService initialized
+DEBUG 2025-11-30 22:07:30,607 verify_service 136 139967036820352 VerificationService initialized
+DEBUG 2025-11-30 22:08:11,253 verify_service 128 140043339409088 VerificationService initialized
+DEBUG 2025-11-30 22:15:50,539 verify_service 149 140144008140480 VerificationService initialized
+INFO 2025-11-30 22:15:51,218 verify_service 149 140144008140480 Sending verification code to email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:15:51,219 verify_service 149 140144008140480 Verification code generated: 34****
+DEBUG 2025-11-30 22:15:51,221 verify_service 149 140144008140480 Verification code created for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:15:51,222 verify_service 149 140144008140480 Generated verification cache key for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:15:51,223 verify_service 149 140144008140480 Verification code cached - Email: amingholami121381@gmail.com, Timeout: 300.0s
+DEBUG 2025-11-30 22:15:51,224 verify_service 149 140144008140480 Triggering verification email task for: amingholami121381@gmail.com
+INFO 2025-11-30 22:15:51,293 verify_service 149 140144008140480 Verification email task queued successfully for: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:16:46,039 verify_service 149 140144008140480 VerificationService initialized
+INFO 2025-11-30 22:16:46,677 verify_service 149 140144008140480 Sending verification code to email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:16:46,679 verify_service 149 140144008140480 Verification code generated: 44****
+DEBUG 2025-11-30 22:16:46,680 verify_service 149 140144008140480 Verification code created for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:16:46,682 verify_service 149 140144008140480 Generated verification cache key for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:16:46,684 verify_service 149 140144008140480 Verification code cached - Email: amingholami121381@gmail.com, Timeout: 300.0s
+DEBUG 2025-11-30 22:16:46,685 verify_service 149 140144008140480 Triggering verification email task for: amingholami121381@gmail.com
+INFO 2025-11-30 22:16:46,688 verify_service 149 140144008140480 Verification email task queued successfully for: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:17:58,051 verify_service 149 140143776233152 VerificationService initialized
+DEBUG 2025-11-30 22:17:58,053 verify_service 149 140143776233152 VerificationService initialized
+INFO 2025-11-30 22:17:58,055 verify_service 149 140143776233152 Verification code check requested for email: amingholami121381@gmail.com
+ERROR 2025-11-30 22:17:58,056 verify_service 149 140143776233152 Unexpected error during code verification - Email: amingholami121381@gmail.com, Error: cannot access local variable 'cache_code' where it is not associated with a value
+Traceback (most recent call last):
+  File "/app/src/apps/accounts/services/verify_service.py", line 136, in verify_code
+    if not hmac.compare_digest(cache_code, str(code)):
+                               ^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'cache_code' where it is not associated with a value
+DEBUG 2025-11-30 22:20:19,748 verify_service 149 140143995553472 VerificationService initialized
+DEBUG 2025-11-30 22:20:19,750 verify_service 149 140143995553472 VerificationService initialized
+INFO 2025-11-30 22:20:19,751 verify_service 149 140143995553472 Verification code check requested for email: amingholami121381@gmail.com
+ERROR 2025-11-30 22:20:19,752 verify_service 149 140143995553472 Unexpected error during code verification - Email: amingholami121381@gmail.com, Error: cannot access local variable 'cache_code' where it is not associated with a value
+Traceback (most recent call last):
+  File "/app/src/apps/accounts/services/verify_service.py", line 136, in verify_code
+    if not hmac.compare_digest(cache_code, str(code)):
+                               ^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'cache_code' where it is not associated with a value
+DEBUG 2025-11-30 22:21:43,294 verify_service 221 140168396774272 VerificationService initialized
+DEBUG 2025-11-30 22:21:44,556 verify_service 221 140168396774272 VerificationService initialized
+DEBUG 2025-11-30 22:21:45,807 verify_service 221 140168396774272 VerificationService initialized
+DEBUG 2025-11-30 22:21:47,240 verify_service 221 140168396774272 VerificationService initialized
+DEBUG 2025-11-30 22:24:56,057 verify_service 232 140119167362752 VerificationService initialized
+INFO 2025-11-30 22:24:56,657 verify_service 232 140119167362752 Sending verification code to email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:24:56,662 verify_service 232 140119167362752 Verification code generated: 39****
+DEBUG 2025-11-30 22:24:56,664 verify_service 232 140119167362752 Verification code created for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:24:56,667 verify_service 232 140119167362752 Generated verification cache key for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:24:56,670 verify_service 232 140119167362752 Verification code cached - Email: amingholami121381@gmail.com, Timeout: 300.0s
+DEBUG 2025-11-30 22:24:56,672 verify_service 232 140119167362752 Triggering verification email task for: amingholami121381@gmail.com
+INFO 2025-11-30 22:24:56,746 verify_service 232 140119167362752 Verification email task queued successfully for: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:25:13,963 verify_service 232 140119167362752 VerificationService initialized
+DEBUG 2025-11-30 22:25:13,965 verify_service 232 140119167362752 VerificationService initialized
+INFO 2025-11-30 22:25:13,966 verify_service 232 140119167362752 Verification code check requested for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:25:13,980 verify_service 232 140119167362752 User found for verification - User ID: 6, Email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:25:13,981 verify_service 232 140119167362752 Generated verification cache key for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:25:13,983 verify_service 232 140119167362752 Verification code matched for user: amingholami121381@gmail.com
+INFO 2025-11-30 22:25:13,984 verify_service 232 140119167362752 Activating user account - User ID: 6, Email: amingholami121381@gmail.com
+ERROR 2025-11-30 22:25:13,985 verify_service 232 140119167362752 Unexpected error during code verification - Email: amingholami121381@gmail.com, Error: 'UserDomainService' object has no attribute 'set_user_as_verified'
+Traceback (most recent call last):
+  File "/app/src/apps/accounts/services/verify_service.py", line 194, in verify_code
+    verified_user = self._user_service.set_user_as_verified(user)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'UserDomainService' object has no attribute 'set_user_as_verified'
+DEBUG 2025-11-30 22:26:17,048 verify_service 244 139889279497920 VerificationService initialized
+DEBUG 2025-11-30 22:26:17,051 verify_service 244 139889279497920 VerificationService initialized
+INFO 2025-11-30 22:26:17,052 verify_service 244 139889279497920 Verification code check requested for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:26:17,075 verify_service 244 139889279497920 User found for verification - User ID: 6, Email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:26:17,079 verify_service 244 139889279497920 Generated verification cache key for email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:26:17,082 verify_service 244 139889279497920 Verification code matched for user: amingholami121381@gmail.com
+INFO 2025-11-30 22:26:17,084 verify_service 244 139889279497920 Activating user account - User ID: 6, Email: amingholami121381@gmail.com
+DEBUG 2025-11-30 22:26:17,096 verify_service 244 139889279497920 Verification code cache deleted for email: amingholami121381@gmail.com
+INFO 2025-11-30 22:26:17,097 verify_service 244 139889279497920 User account verified successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-11-30 22:29:04,383 verify_service 244 139889268131520 VerificationService initialized
+DEBUG 2025-12-01 10:06:50,925 verify_service 136 139663612311232 VerificationService initialized
+DEBUG 2025-12-01 10:40:00,600 verify_service 281 139898462037696 VerificationService initialized
+DEBUG 2025-12-01 12:02:02,632 verify_service 403 140686481422016 VerificationService initialized
+DEBUG 2025-12-01 16:41:28,722 verify_service 1481 140146812032704 VerificationService initialized
+DEBUG 2025-12-01 16:41:36,126 verify_service 1481 140146812032704 VerificationService initialized
+DEBUG 2025-12-01 17:01:23,627 verify_service 1546 140476075206336 VerificationService initialized
+DEBUG 2025-12-01 17:01:32,395 verify_service 1546 140476075206336 VerificationService initialized
+DEBUG 2025-12-01 17:16:38,333 verify_service 1615 140558413760192 VerificationService initialized
+DEBUG 2025-12-01 17:23:08,395 verify_service 7 140663970760384 VerificationService initialized
+DEBUG 2025-12-02 16:34:09,539 verify_service 615 140662827816640 VerificationService initialized
+DEBUG 2025-12-02 17:23:33,003 verify_service 746 140268952262336 VerificationService initialized
+DEBUG 2025-12-02 17:54:44,922 verify_service 857 140324549859008 VerificationService initialized
+DEBUG 2025-12-02 18:21:33,280 verify_service 907 139961105905344 VerificationService initialized
+DEBUG 2025-12-02 18:25:04,086 verify_service 914 140127133234880 VerificationService initialized
+DEBUG 2025-12-03 18:50:31,915 verify_service 154 140195034994368 VerificationService initialized
+DEBUG 2025-12-04 08:47:37,429 verify_service 117 140668989241024 VerificationService initialized
+DEBUG 2025-12-04 09:36:13,448 verify_service 9 139741772273344 VerificationService initialized
+DEBUG 2025-12-04 11:15:59,771 verify_service 117 139878763329216 VerificationService initialized
+DEBUG 2025-12-04 11:54:52,791 verify_service 82 140583483119296 VerificationService initialized
+DEBUG 2025-12-04 12:26:13,756 verify_service 377 140475226912448 VerificationService initialized
+DEBUG 2025-12-04 13:14:29,824 verify_service 402 140396610094784 VerificationService initialized
+DEBUG 2025-12-04 13:31:05,288 verify_service 402 140396601702080 VerificationService initialized
+DEBUG 2025-12-04 14:13:29,537 verify_service 420 140588583392960 VerificationService initialized
+DEBUG 2025-12-04 15:44:50,097 verify_service 438 139813186606784 VerificationService initialized
+DEBUG 2025-12-04 16:12:22,351 verify_service 493 140462974469824 VerificationService initialized
+DEBUG 2025-12-04 16:26:28,097 verify_service 646 140647402215104 VerificationService initialized
+DEBUG 2025-12-05 07:18:44,417 verify_service 138 140634927302336 VerificationService initialized
+DEBUG 2025-12-05 07:49:54,270 verify_service 282 140529383765696 VerificationService initialized
+DEBUG 2025-12-05 08:13:16,078 verify_service 426 140680915580608 VerificationService initialized
+DEBUG 2025-12-05 08:44:07,137 verify_service 759 140619095901888 VerificationService initialized
+DEBUG 2025-12-05 08:50:06,845 verify_service 834 140245703235264 VerificationService initialized
+DEBUG 2025-12-05 09:26:42,182 verify_service 176 140574582806208 VerificationService initialized
+DEBUG 2025-12-05 09:38:54,342 verify_service 266 140620931962560 VerificationService initialized
+DEBUG 2025-12-05 10:10:09,233 verify_service 561 139981624612544 VerificationService initialized
+DEBUG 2025-12-05 10:40:38,159 verify_service 617 139923994703552 VerificationService initialized
+DEBUG 2025-12-06 08:26:54,558 verify_service 281 139995325134528 VerificationService initialized
+DEBUG 2025-12-09 16:13:25,276 verify_service 26 140340787058368 VerificationService initialized
+DEBUG 2025-12-09 16:43:31,082 verify_service 199 140540332119744 VerificationService initialized
+DEBUG 2025-12-09 17:10:56,942 verify_service 258 140432928577216 VerificationService initialized
+DEBUG 2025-12-09 17:14:04,562 verify_service 268 140646824277696 VerificationService initialized
+DEBUG 2025-12-09 19:09:26,391 verify_service 308 140238184945344 VerificationService initialized
+DEBUG 2025-12-09 19:24:58,880 verify_service 314 139786971154112 VerificationService initialized
+DEBUG 2025-12-13 15:52:36,540 verify_service 1093 140000210622144 VerificationService initialized
+DEBUG 2025-12-13 15:53:37,081 verify_service 1093 139999802541760 VerificationService initialized
+DEBUG 2025-12-15 19:22:08,028 verify_service 7 140514542393024 VerificationService initialized
+DEBUG 2025-12-16 14:01:24,691 verify_service 475 139777476122304 VerificationService initialized
+DEBUG 2025-12-16 14:02:20,362 verify_service 475 139777476122304 VerificationService initialized
+DEBUG 2025-12-16 14:05:53,805 verify_service 543 139818481915584 VerificationService initialized
+DEBUG 2025-12-17 10:46:57,178 verify_service 7 140674123077312 VerificationService initialized
+DEBUG 2025-12-17 10:49:28,271 verify_service 75 139882683078336 VerificationService initialized
+DEBUG 2025-12-17 10:50:32,321 verify_service 80 140378924644032 VerificationService initialized
+DEBUG 2025-12-17 10:51:01,482 verify_service 83 139715541112512 VerificationService initialized
+DEBUG 2025-12-17 10:52:58,727 verify_service 86 140421472712384 VerificationService initialized
+DEBUG 2025-12-17 11:00:41,923 verify_service 129 140154031478464 VerificationService initialized
+DEBUG 2025-12-17 12:03:05,108 verify_service 169 139842551977664 VerificationService initialized
+DEBUG 2025-12-17 12:26:13,323 verify_service 273 140604924401344 VerificationService initialized
+DEBUG 2025-12-17 12:53:19,959 verify_service 8 140478708180672 VerificationService initialized
+DEBUG 2025-12-17 21:06:34,672 verify_service 11 140497072068288 VerificationService initialized
+DEBUG 2025-12-18 07:57:55,097 verify_service 9 140512560584384 VerificationService initialized
+DEBUG 2025-12-18 08:11:08,382 verify_service 9 140512560584384 VerificationService initialized
+DEBUG 2025-12-18 12:20:57,603 verify_service 85 139966984394432 VerificationService initialized
+DEBUG 2025-12-18 13:59:52,734 verify_service 430 140719619741376 VerificationService initialized
+DEBUG 2025-12-18 15:18:50,846 verify_service 685 140607296108224 VerificationService initialized
+DEBUG 2025-12-20 11:40:30,242 verify_service 501 139798831425216 VerificationService initialized
+INFO 2025-12-20 11:40:30,925 verify_service 501 139798831425216 Sending verification code to email: amingholami121381@gmail.com
+DEBUG 2025-12-20 11:40:30,926 verify_service 501 139798831425216 Verification code generated: 34****
+DEBUG 2025-12-20 11:40:30,927 verify_service 501 139798831425216 Verification code created for email: amingholami121381@gmail.com
+DEBUG 2025-12-20 11:40:30,928 verify_service 501 139798831425216 Generated verification cache key for email: amingholami121381@gmail.com
+DEBUG 2025-12-20 11:40:30,929 verify_service 501 139798831425216 Verification code cached - Email: amingholami121381@gmail.com, Timeout: 300.0s
+DEBUG 2025-12-20 11:40:30,930 verify_service 501 139798831425216 Triggering verification email task for: amingholami121381@gmail.com
+INFO 2025-12-20 11:40:30,980 verify_service 501 139798831425216 Verification email task queued successfully for: amingholami121381@gmail.com
+DEBUG 2025-12-20 11:46:36,064 verify_service 571 140064093013696 VerificationService initialized
+DEBUG 2025-12-20 12:12:58,695 verify_service 644 140269202699968 VerificationService initialized
+INFO 2025-12-20 12:12:59,445 verify_service 644 140269202699968 Initiating verification code send for: amingholami121381@gmail.com
+DEBUG 2025-12-20 12:12:59,446 verify_service 644 140269202699968 Generated verification cache key for email: amingholami121381@gmail.com
+DEBUG 2025-12-20 12:12:59,448 verify_service 644 140269202699968 Verification code cached - Email: amingholami121381@gmail.com, Timeout: 300.0s
+INFO 2025-12-20 12:12:59,449 verify_service 644 140269202699968 DEBUG MODE - Verification Code for amingholami121381@gmail.com: 421619
+INFO 2025-12-20 12:12:59,519 verify_service 644 140269202699968 Verification code sent/queued for: amingholami121381@gmail.com
+DEBUG 2025-12-22 10:02:51,348 verify_service 295 140132862654144 VerificationService initialized
+DEBUG 2025-12-22 11:10:30,187 verify_service 557 140640062011072 VerificationService initialized
+DEBUG 2025-12-22 12:33:57,034 verify_service 600 140024686311104 VerificationService initialized
+DEBUG 2025-12-22 20:07:02,919 verify_service 7 139835054487232 VerificationService initialized
+DEBUG 2025-12-23 09:32:07,412 verify_service 201 139626635327168 VerificationService initialized
+DEBUG 2025-12-23 10:54:36,089 verify_service 353 140716881737408 VerificationService initialized
+DEBUG 2025-12-23 11:42:20,039 verify_service 574 140271057626816 VerificationService initialized
+DEBUG 2025-12-23 20:35:09,368 verify_service 991 140312766838464 VerificationService initialized
+DEBUG 2025-12-24 06:35:58,795 verify_service 7 140251297212096 VerificationService initialized
+DEBUG 2025-12-24 07:52:11,865 verify_service 259 140110386427584 VerificationService initialized
+DEBUG 2025-12-25 06:54:26,571 verify_service 33 140088071681728 VerificationService initialized
+DEBUG 2025-12-25 07:49:30,304 verify_service 291 140049396004544 VerificationService initialized
+DEBUG 2025-12-25 14:48:10,220 verify_service 244 140086367745728 VerificationService initialized
+DEBUG 2025-12-25 15:12:55,822 verify_service 32 140395971344064 VerificationService initialized
+DEBUG 2025-12-25 15:13:46,052 verify_service 32 140395971344064 VerificationService initialized
+DEBUG 2025-12-27 07:07:07,416 verify_service 8 140644843689664 VerificationService initialized
+DEBUG 2025-12-28 11:08:57,274 verify_service 56 140431117686464 VerificationService initialized
+DEBUG 2025-12-28 11:17:24,077 verify_service 147 140027641370304 VerificationService initialized
+DEBUG 2025-12-29 13:44:30,481 verify_service 9 139654159570624 VerificationService initialized
+DEBUG 2025-12-29 13:52:17,027 verify_service 79 139913323345600 VerificationService initialized
+DEBUG 2025-12-29 19:02:09,549 verify_service 101 139993099179712 VerificationService initialized
+DEBUG 2025-12-31 20:33:04,903 verify_service 437 140680480409280 VerificationService initialized
+DEBUG 2026-01-08 06:27:34,184 verify_service 7 139645492917952 VerificationService initialized
