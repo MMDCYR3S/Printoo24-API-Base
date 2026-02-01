@@ -49,7 +49,7 @@ def send_contact_us_reply_task(user_email: str, user_name: str, reply_message: s
 
 # ===== Task: Upload Product Image ===== #
 @shared_task(name='upload_product_image_task', bind=True, max_retries=3)
-def upload_product_image_task(self, product_id, user_id, temp_file_path, original_filename):
+def upload_product_image_task(self, product_id, user_id, temp_file_path, original_filename, order=0):
     """ تسک آپلود تصویر محصول """
     logger.info(f"[Image Task] Starting for Product {product_id}. File: {temp_file_path}")
     media_service = ProductMediaService()
@@ -60,7 +60,7 @@ def upload_product_image_task(self, product_id, user_id, temp_file_path, origina
         if os.path.exists(temp_file_path):
             with open(temp_file_path, 'rb') as f:
                 django_file = File(f, name=original_filename)
-                instance = media_service.upload_product_image(product_id, user, django_file)
+                instance = media_service.upload_product_image(product_id, user, django_file, order)
             
             # ===== حذف فایل موقت ===== #
             os.remove(temp_file_path)

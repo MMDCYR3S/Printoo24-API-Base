@@ -5,6 +5,12 @@ from core.models import (
     ProductOptionValue, GuideType, OptionInputType
 )
 
+# ===== Upload Image Product ===== #
+class ProductImageOrderSerializer(serializers.Serializer):
+    """ سریالایزر برای تنظیم order عکس‌ها """
+    image_id = serializers.IntegerField()
+    order = serializers.IntegerField()
+
 # ===== Guide Fields Mixin ===== #
 class GuideSerializerMixin(serializers.Serializer):
     guide_text = serializers.CharField(required=False, allow_blank=True, allow_null=True)
@@ -14,7 +20,7 @@ class GuideSerializerMixin(serializers.Serializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields = ['id', 'image', 'order', 'created_at']
+        fields = ['id', 'product', 'user', 'image', 'order', 'created_at']
         read_only_fields = ['id', 'order', 'created_at']
 
 # ===== Product Category Serializer ===== #

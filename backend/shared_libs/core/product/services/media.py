@@ -13,12 +13,12 @@ class ProductMediaService:
 
     # ===== مدیریت تصاویر ===== #
     @transaction.atomic
-    def upload_product_image(self, product_id: int, user, image_file):
+    def upload_product_image(self, product_id: int, user, image_file, order=0):
         product = Product.objects.get_by_id(product_id)
         if not product:
             raise ValidationError("محصول یافت نشد.")
             
-        return ProductImage.objects.add_image(product, image_file, user)
+        return ProductImage.objects.add_image(product, image_file, user, order=order)
 
     @transaction.atomic
     def delete_product_image(self, product_id: int, image_id: int):

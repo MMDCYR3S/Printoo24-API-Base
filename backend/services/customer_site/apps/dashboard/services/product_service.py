@@ -117,7 +117,7 @@ class ProductDashboardService:
         return self.temp_storage.path(saved_path)
 
     # ===== آپلود تصویر (با Fallback) ===== #
-    def upload_product_image_async(self, product_id, user, file_obj):
+    def upload_product_image_async(self, product_id, user, file_obj, order=0):
         """
         آپلود تصویر محصول با مکانیزم Async + Sync Fallback.
         """
@@ -132,7 +132,8 @@ class ProductDashboardService:
                 product_id=product_id,
                 user_id=user.id,
                 temp_file_path=temp_path,
-                original_filename=original_name
+                original_filename=original_name,
+                order=order
             )
             return {"status": "processing", "detail": "Image upload queued"}
 
@@ -143,7 +144,7 @@ class ProductDashboardService:
             try:
                 with open(temp_path, 'rb') as f:
                     django_file = File(f, name=original_name)
-                    instance = self.media_service.upload_product_image(product_id, user, django_file)
+                    instance = self.media_service.upload_product_image(product_id, user, django_file, order=order)
                 
                 # ===== حذف فایل موقت ===== #
                 os.remove(temp_path)

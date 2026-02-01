@@ -18,6 +18,9 @@ from core.models import (
     ProductCategoryRelation,
 )
 
+class ProductImageAdmin(admin.ModelAdmin):
+    list_filter = ("product", "user")
+
 admin.site.register(Product)
 admin.site.register(ProductCategory)
 admin.site.register(ProductImage)

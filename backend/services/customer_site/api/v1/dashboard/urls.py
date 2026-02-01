@@ -21,6 +21,7 @@ from .views import (
     FinancialDashboardStatsView,
     CityDashboardViewSet,
     ProvinceDashboardViewSet,
+    ProductImageViewSet,
 )
 
 router = DefaultRouter()
@@ -34,6 +35,7 @@ router.register(r'quantities', QuantityViewSet, basename='quantities')
 router.register(r'options', OptionViewSet, basename='options')
 router.register(r'products', ProductDashboardViewSet, basename='products')
 router.register(r'attachments', AttachmentLibraryViewSet, basename='attachments')
+router.register(r'images', ProductImageViewSet, basename='images')
 router.register(r'cart', CartDashboardViewSet, basename='cart')
 router.register(r'cart-files', CartFileUploadViewSet, basename='cart-files')
 router.register(r'orders', OrderDashboardViewSet, basename='orders')

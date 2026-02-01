@@ -1,10 +1,11 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from core.models import (
-    Attachment
+    Attachment,
+    ProductImage
 )
 from core.product.services import (
     SizeService,
@@ -15,6 +16,7 @@ from ..serializers import (
     SizeSerializer,
     QuantitySerializer,
     AttachmentLibrarySerializer,
+    ProductImageSerializer
 )
 
 # ===== Size ViewSet ===== #
@@ -102,7 +104,7 @@ class QuantityViewSet(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # ===== Attachment Library ViewSet ===== #
-@extend_schema(tags=['Dashboard-Attachment'])
+@extend_schema(tags=['Dashboard-ProductAttachment'])
 class AttachmentLibraryViewSet(viewsets.ModelViewSet):
     """
     مدیریت کتابخانه فایل‌های پیوست (مثل قالب‌ها، راهنماها).
@@ -129,4 +131,101 @@ class AttachmentLibraryViewSet(viewsets.ModelViewSet):
             name=name
         )
         return Response(AttachmentLibrarySerializer(instance).data, status=status.HTTP_201_CREATED)
+
+# ===== Product Image ViewSet ===== #
+@extend_schema(tags=['Dashboard-ProductImage'])
+class ProductImageViewSet(viewsets.ModelViewSet):
+    """
+    مدیریت کتابخانه فایل‌های پیوست (مثل قالب‌ها، راهنماها).
+    """
+    queryset = ProductImage.objects.all().order_by('-created_at')
+    serializer_class = ProductImageSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = ProductMediaService()
+
+    @extend_schema(\
+        summary="آپلود فایل جدید در کتابخانه",
+        examples=[
+            OpenApiExample(
+                'Upload Product Image',
+                summary='آپلود تصاویر محصولات',
+                value={
+                    "user": 2, 
+                    "product_id": 5,
+                    "file": "image.png",
+                    "order": 2
+                },
+            )
+        ]
+    )
+    def create(self, request, *args, **kwargs):
+        file_obj = request.FILES.get('file')
+        order = request.data.get('order')
+        product_id = request.data.get('product_id')
+        
+        if not file_obj:
+            return Response({'detail': 'فایل و نام الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        instance = self.service.upload_product_image(
+            product_id=product_id,
+            user=request.user,
+            image_file=file_obj,
+            order=order
+        )
+        return Response(ProductImageSerializer(instance).data, status=status.HTTP_201_CREATED)
     
+    @extend_schema(
+        summary="آپدیت کامل تصویر محصول",
+        examples=[
+            OpenApiExample(
+                'Update Product Image',
+                summary='آپدیت تصویر محصول',
+                value={
+                    "order": 3,
+                    "file": "new_image.png"
+                },
+            )
+        ]
+    )
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        order = request.data.get('order')
+        file_obj = request.FILES.get('file')
+
+        if order is not None:
+            instance.order = int(order)
+
+        if file_obj:
+            instance.image = file_obj
+        
+        instance.save()
+        return Response(ProductImageSerializer(instance).data, status=status.HTTP_200_OK)
+    
+    @extend_schema(
+        summary="آپدیت جزئی تصویر محصول",
+        examples=[
+            OpenApiExample(
+                'Partial Update Product Image',
+                summary='آپدیت جزئی تصویر محصول',
+                value={
+                    "order": 1
+                },
+            )
+        ]
+    )
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        order = request.data.get('order')
+        file_obj = request.FILES.get('file')
+
+        if order is not None:
+            instance.order = int(order)
+        
+        if file_obj:
+            instance.image = file_obj
+        
+        instance.save()
+        return Response(ProductImageSerializer(instance).data, status=status.HTTP_200_OK)
