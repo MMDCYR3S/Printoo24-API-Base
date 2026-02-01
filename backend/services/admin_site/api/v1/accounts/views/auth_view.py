@@ -3,13 +3,25 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenRefreshView 
-from drf_spectacular.views import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.accounts.services import AuthAppService
 from ..serializers import LoginSerializer, RefreshTokenSerializer
 
 # ===== Staff Login View ===== #
-@extend_schema(tags=['Accounts'])
+@extend_schema(
+    tags=['Accounts - Authentication'],
+    examples=[
+        OpenApiExample(
+            'Login Example',
+            value={
+                "username": "admin",
+                "password": "admin"
+            },
+            request_only=True
+        ),
+    ]
+)
 class StaffLoginView(GenericAPIView):
     """
     ورود پرسنل به پنل مدیریت.
@@ -29,7 +41,7 @@ class StaffLoginView(GenericAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # ===== Staff Logout View ===== #
-@extend_schema(tags=['Accounts'])
+@extend_schema(tags=['Accounts - Authentication'])
 class StaffLogoutView(GenericAPIView):
     """
     خروج (Blacklist کردن Refresh Token).

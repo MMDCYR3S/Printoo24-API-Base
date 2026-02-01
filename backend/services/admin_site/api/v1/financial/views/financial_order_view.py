@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.financial.services import FinancialOrderAppService
 from apps.order.models import OrderCostCategory, OrderCostSheet, OrderCostReport
@@ -73,7 +73,40 @@ class FinancialOrderCostViewSet(BaseFinancialViewSet):
     queryset = OrderCostSheet.objects.all() 
     serializer_class = OrderCostSheetSerializer
 
-    @extend_schema(request=CreateSheetInputSerializer)
+    @extend_schema(
+        request=CreateReportInputSerializer, 
+        responses={201: OrderCostReportDetailSerializer},
+        examples=[
+            OpenApiExample(
+                name='Cost Report Creation', # نام مثال در سواگر
+                description='یک نمونه کامل برای ارسال گزارش هزینه شامل آیتم‌ها و فایل‌های پیوست',
+                value={
+                    "order_id": 10,
+                    "title": "هزینه چاپ و کاغذ بخش افست",
+                    "cost_type": 5,
+                    "description": "خرید اقلام لازم برای سفارش شماره ۴۵۱۲",
+                    "items": [
+                        {
+                            "catalog_id": 12,
+                            "custom_title": "کاغذ کوتد 150 گرم",
+                            "amount": "5500000",
+                            "description": "50 بسته"
+                        },
+                        {
+                            "catalog_id": 18,
+                            "custom_title": "زینک قرمز",
+                            "amount": "850000",
+                            "description": "۲ عدد شیت"
+                        }
+                    ],
+                    "attachments": [
+                        "File_1",
+                        "File_2"
+                    ]
+                }
+            )
+        ]
+    )
     def create(self, request):
         """ ایجاد دستی سند برای یک سفارش """
         serializer = CreateSheetInputSerializer(data=request.data)
@@ -123,7 +156,7 @@ class FinancialOrderCostViewSet(BaseFinancialViewSet):
         return Response(OrderCostReportListSerializer(reports, many=True).data)
 
 
-# ===== 3. Report Management ViewSet ===== #
+# ===== REPORT MANAGEMENT VIEWSET ===== #
 @extend_schema(tags=['Financial - Report Management'])
 class FinancialReportActionViewSet(BaseFinancialViewSet):
     """
@@ -131,30 +164,46 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
     """
     permission_classes = [IsAuthenticated]
     queryset = OrderCostReport.objects.all()
-    
-    @extend_schema(request=CreateReportInputSerializer, responses=OrderCostReportDetailSerializer)
+
+    # ========== LIST ========== #
+    def list(self, request):
+        """ مشاهده لیست گزارشات """
+        reports = self.service.get_all_reports()
+        serializer = OrderCostReportListSerializer(reports, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # ========== CREATE ========== #
+    @extend_schema(
+        request=CreateReportInputSerializer, 
+        responses={201: OrderCostReportDetailSerializer},
+        description="ایجاد گزارش هزینه جدید همراه با لیست آیتم‌ها و پیوست‌ها"
+    )
     def create(self, request):
         """ ایجاد گزارش جدید + آیتم‌ها """
         serializer = CreateReportInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         data = serializer.validated_data
-        items = data.pop('items')
+        items = data.pop('items', None)
+        attachments = data.pop('attachments', None)
         order_id = data.pop('order_id')
         
         report = self.service.create_report_manually(
             request.user, 
             order_id=order_id,
             data=data,
-            items=items
+            items=items,
+            attachments=attachments
         )
         return Response(OrderCostReportDetailSerializer(report).data, status=status.HTTP_201_CREATED)
 
+    # ========== RETRIEVE ========== #
     def retrieve(self, request, pk=None):
         """ مشاهده جزئیات گزارش """
         report = self.service.get_report_detail(request.user, report_id=pk)
         return Response(OrderCostReportDetailSerializer(report).data)
 
+    # ========== UPDATE ========== #
     @extend_schema(request=UpdateReportInputSerializer)
     def partial_update(self, request, pk=None):
         """ ویرایش هدر گزارش """
@@ -164,11 +213,12 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
         report = self.service.update_report(request.user, pk, serializer.validated_data)
         return Response(OrderCostReportDetailSerializer(report).data)
 
+    # ========== DELETE ========== #
     def destroy(self, request, pk=None):
         self.service.delete_report(request.user, pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # ========== CUSTOM ACTIONS =========== #
+    # ========== APPROVE ACTION =========== #
     @extend_schema(request=ApproveReportInputSerializer)
     @action(detail=True, methods=['post'], url_path='decide')
     def decide(self, request, pk=None):
@@ -184,7 +234,7 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
             )
         return Response(status=status.HTTP_200_OK)
 
-    # ========== CUSTOM ACTIONS =========== #
+    # ========== ADD ITEM ACTIONS =========== #
     @extend_schema(request=CostItemInputSerializer, responses=OrderCostItemSerializer)
     @action(detail=True, methods=['post'], url_path='items')
     def add_item(self, request, pk=None):
@@ -195,6 +245,7 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
         item = self.service.add_item_to_report(request.user, pk, serializer.validated_data)
         return Response(OrderCostItemSerializer(item).data, status=status.HTTP_201_CREATED)
     
+    # ========== UPDATE ITEM ACTION ========== #
     @extend_schema(request=CostItemInputSerializer, responses=OrderCostItemSerializer)
     @action(detail=True, methods=['patch'], url_path='item/(?P<item_id>\d+)')
     def update_item(self, request, pk=None, item_id=None):
@@ -205,6 +256,7 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
         item = self.service.update_report_item(request.user, item_id, serializer.validated_data)
         return Response(OrderCostItemSerializer(item).data)
 
+    # ========== DELETE ITEM ACTION ========== #
     @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>\d+)')
     def delete_item(self, request, pk=None, item_id=None):
         """ حذف یک قلم خاص """

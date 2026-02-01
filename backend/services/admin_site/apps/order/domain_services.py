@@ -422,6 +422,9 @@ class OrderStatusService:
     سرویس دامنه برای مدیریت وضعیت‌های سفارش (Status CRUD).
     """
 
+    def get_all_status(self):
+        return OrderStatus.objects.get_all_statuses_with_details()
+
     @transaction.atomic
     def create_status(self, data: Dict[str, Any]) -> OrderStatus:
         code = data.get('internal_code')

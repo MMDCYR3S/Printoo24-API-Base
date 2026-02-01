@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 
 from apps.logistics.models import OrderShipment
-from core.models import User
+from core.models import User, Order, OrderStatus
 from apps.support.services import LoggerService
 
 # ========== LOGISTIC SERVICE ========== #
@@ -101,6 +101,12 @@ class LogisticsService:
             },
             description=_(f"تایید مرسوله: {approve_status}")
         )
+
+        order = Order.objects.get_order_by_id(shipment.order.id)
+        order_status = OrderStatus.objects.get_status_by_code("DELIVERED")
+        if order.current_status.internal_code not in ["delivered", 'deliver']:
+            order.current_status = order_status
+            order.save()
 
         # ===== به روز کردن فیلدهای مربوط ===== #
         for field, value in update_fields.items():

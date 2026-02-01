@@ -14,7 +14,7 @@ from .serializers import (
 )
 
 # ========== ORDER VIEW SET ========== #
-@extend_schema(tags=['Admin-Order'])
+@extend_schema(tags=['Admin - Order Management'])
 class OrderDashboardViewSet(viewsets.ViewSet):
     """
     مدیریت سفارشات اختصاصی و سیستمی (پنل ادمین).

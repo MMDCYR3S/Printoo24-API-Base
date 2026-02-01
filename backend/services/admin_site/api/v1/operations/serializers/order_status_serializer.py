@@ -9,11 +9,11 @@ class OrderStatusGroupMinimalSerializer(serializers.ModelSerializer):
 
 class OrderStatusListSerializer(serializers.ModelSerializer):
     """ سریالایزر نمایش وضعیت‌های سفارش. """
-    group = OrderStatusGroupMinimalSerializer(read_only=True)
+    # group = OrderStatusGroupMinimalSerializer(read_only=True)
 
     class Meta:
         model = OrderStatus
-        fields = ['id', 'name', 'internal_code', 'group', 'description', 'created_at']
+        fields = ['id', 'name', 'internal_code', 'description', 'created_at']
 
 class OrderStatusInputSerializer(serializers.ModelSerializer):
     """ سریالایزر ورودی برای ایجاد و ویرایش وضعیت سفارش. """

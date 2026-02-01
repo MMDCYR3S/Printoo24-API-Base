@@ -77,10 +77,15 @@ class OrderCostReportSubmitSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(required=False, allow_blank=True)
     # ===== اقلام ===== #
-    items = serializers.ListField(child=OrderCostItemInputSerializer(), allow_empty=False)
+    items = serializers.ListField(
+        child=OrderCostItemInputSerializer(),
+        required=False, allow_empty=True,
+        allow_null=True
+    )
     # ===== پیوست ها ===== #
     attachments = serializers.ListField(
-        child=serializers.FileField(), required=False, write_only=True
+        child=serializers.FileField(),
+        required=False, write_only=True
     )
 
 # ========== Order Cost Type List Serializer ========== #

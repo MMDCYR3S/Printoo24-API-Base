@@ -20,7 +20,8 @@ class OrderListSerializer(serializers.ModelSerializer):
     customer_company = serializers.SerializerMethodField()
     
     # ===== وضعیت کل سفارش ===== #
-    current_status = OrderStatusSerializer(read_only=True)
+    current_status_display = serializers.CharField(source="current_status.name", read_only=True)
+    # current_status = OrderStatusSerializer(read_only=True)
 
     class Meta:
         model = Order
@@ -34,7 +35,7 @@ class OrderListSerializer(serializers.ModelSerializer):
             'customer_name', 
             'customer_company',
             'total_price', 
-            'current_status', 
+            'current_status_display', 
             'items_count', 
             'is_locked'
         ]

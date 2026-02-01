@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.order.models import OrderCostSheet, OrderCostReport, OrderCostItem, OrderCostCategory
+from apps.order.models import OrderCostSheet, OrderCostReport, OrderCostItem, OrderCostCategory, OrderCostAttachment
 
 # ========================================== #
 # ========== 1. Cost Catalog Serializers === #
@@ -19,6 +19,11 @@ class CostCatalogInputSerializer(serializers.Serializer):
 # ========================================== #
 # ========== 2. Cost Report Serializers ==== #
 # ========================================== #
+class OrderCostAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderCostAttachment
+        fields = ["report", "title", "file", "created_at"]
+
 class OrderCostItemSerializer(serializers.ModelSerializer):
     catalog_title = serializers.CharField(source='catalog_item.title', read_only=True)
     catalog_id = serializers.IntegerField(source='catalog_item.id', read_only=True)
@@ -30,6 +35,7 @@ class OrderCostItemSerializer(serializers.ModelSerializer):
 class OrderCostReportDetailSerializer(serializers.ModelSerializer):
     """ جزئیات کامل یک گزارش هزینه برای مشاهده """
     items = OrderCostItemSerializer(many=True, read_only=True)
+    attachments = OrderCostAttachmentSerializer(many=True, read_only=True)
     submitter_name = serializers.CharField(source='submitter.username', read_only=True)
     cost_type_display = serializers.CharField(source='cost_type.title', read_only=True)
     
@@ -38,17 +44,23 @@ class OrderCostReportDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'sheet', 'title', 'cost_type', 'cost_type_display',
             'submitter_name', 'created_at', 
-            'is_approved', 'items', 'description'
+            'is_approved', 'items', 'attachments', 'description'
         ]
 
 class OrderCostReportListSerializer(serializers.ModelSerializer):
     """ لیست خلاصه گزارشات """
     submitter_name = serializers.CharField(source='submitter.username', read_only=True)
     cost_type_display = serializers.CharField(source='cost_type.title', read_only=True)
+    order_id = serializers.IntegerField(source="sheet.order.id", read_only=True)
+    order_code = serializers.CharField(source="sheet.order.order_code", read_only=True)
     
     class Meta:
         model = OrderCostReport
-        fields = ['id', 'title', 'cost_type', 'cost_type_display', 'submitter_name', 'is_approved', 'created_at']
+        fields = [
+            'id', 'order_id', 'order_code',
+            'title', 'cost_type', 'cost_type_display',
+            'submitter_name', 'is_approved', 'created_at'
+        ]
 
 class CostItemInputSerializer(serializers.Serializer):
     """ ورودی ایجاد/ویرایش آیتم """
@@ -59,11 +71,41 @@ class CostItemInputSerializer(serializers.Serializer):
 
 class CreateReportInputSerializer(serializers.Serializer):
     """ ورودی ایجاد دستی گزارش """
-    order_id = serializers.IntegerField(required=True)
-    title = serializers.CharField(max_length=200)
-    cost_type = serializers.IntegerField(required=False, allow_null=True)
-    description = serializers.CharField(required=False, allow_blank=True)
-    items = serializers.ListField(child=CostItemInputSerializer(), min_length=1)
+    order_id = serializers.IntegerField(
+        required=True, 
+        help_text="شناسه سفارش (Order ID)"
+    )
+    
+    title = serializers.CharField(
+        max_length=200, 
+        help_text="عنوان گزارش هزینه"
+    )
+    
+    cost_type = serializers.IntegerField(
+        required=False, 
+        allow_null=True,
+        help_text="شناسه نوع هزینه (Cost Type ID)"
+    )
+    
+    description = serializers.CharField(
+        required=False, 
+        allow_blank=True,
+        help_text="توضیحات کلی گزارش"
+    )
+    # ===== آیتم‌ها ===== #
+    items = serializers.ListField(
+        child=CostItemInputSerializer(), 
+        required=False, 
+        allow_null=True,
+        help_text="لیست آیتم‌های هزینه"
+    )
+    # ===== پیوست ها ===== #
+    attachments = serializers.ListField(
+        child=serializers.FileField(),
+        required=False, write_only=True,
+        allow_null=True,
+        help_text="لیست عکس‌هایی که آپلود میشه."
+    )
 
 class UpdateReportInputSerializer(serializers.ModelSerializer):
     """ ورودی ویرایش هدر گزارش """

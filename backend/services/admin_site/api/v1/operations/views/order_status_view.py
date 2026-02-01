@@ -11,7 +11,7 @@ from apps.order.domain_services import OrderStatusService
 from apps.permissions import AppPermissionChecker
 from ..serializers import (
     OrderStatusListSerializer, OrderStatusInputSerializer,
-    OrderTransitionSerializer, OrderStatusSerializer
+    OrderTransitionSerializer
 )
 
 # ========== Order Status ViewSet ========== #
@@ -37,7 +37,7 @@ class OrderStatusViewSet(viewsets.ViewSet):
         self.check_object_permissions('view')
         
         service = self.get_service()
-        queryset = service.repo.get_all_statuses_with_details()
+        queryset = service.get_all_status()
         serializer = OrderStatusListSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -118,3 +118,29 @@ class OrderTransitionView(GenericAPIView):
         
         except Exception as e:
             return Response({"detail": f"خطای سیستمی رخ داده است.{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# ========== ORDER STATUS LIST ========== #
+@extend_schema(tags=['Admin - Order Status Transition'])
+class OrderStatusTransactionListView(GenericAPIView):
+    """
+    نمایش داده‌های مربوط به وضعیت سفارشات
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderStatusListSerializer
+    
+    
+    def check_object_permissions(self, action_name):
+        """ اعمال AppPermissionChecker بر اساس نوع عملیات """
+        AppPermissionChecker.check_has_permission(
+            self.request.user, 
+            f'change_orderstatus' if action_name == 'update' else f'{action_name}_orderstatus'
+        )
+
+    def get(self, request):
+        """ نمایش لیست وضعیت‌های سفارش همراه با گروه مرتبط. """
+        self.check_object_permissions('view')
+        
+        service = OrderStatusService()
+        queryset = service.get_all_status()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

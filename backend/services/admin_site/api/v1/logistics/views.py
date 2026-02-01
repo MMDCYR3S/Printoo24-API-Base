@@ -103,8 +103,9 @@ class ShipmentViewSet(viewsets.ViewSet):
         )
         return Response(ShipmentOutputSerializer(shipment).data)
     
+    # ========== APPROVE STATUS ========== #
     @action(detail=True, methods=["post"], url_path="approve-status")
-    def change_status(self, request, pk=None):
+    def approve_status(self, request, pk=None):
         service = WarehouseAppService()
         shipment = service.approve_shipment_status(
             user=request.user,
