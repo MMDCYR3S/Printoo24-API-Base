@@ -1,0 +1,866 @@
+DEBUG 2025-11-15 13:56:10,659 auth_service 112 139690947638976 AuthService initialized
+INFO 2025-11-15 13:56:10,659 auth_service 112 139690947638976 Login attempt - Username: admin
+DEBUG 2025-11-15 13:56:11,109 auth_service 112 139690947638976 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-15 13:56:11,110 auth_service 112 139690947638976 Generating authentication tokens for user: admin
+INFO 2025-11-15 13:56:11,145 auth_service 112 139690947638976 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-16 17:15:45,021 auth_service 150 140231386855104 AuthService initialized
+INFO 2025-11-16 17:15:45,022 auth_service 150 140231386855104 Login attempt - Username: admin
+DEBUG 2025-11-16 17:15:45,529 auth_service 150 140231386855104 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-16 17:15:45,530 auth_service 150 140231386855104 Generating authentication tokens for user: admin
+INFO 2025-11-16 17:15:45,565 auth_service 150 140231386855104 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:21:21,597 auth_service 58 140075992086208 AuthService initialized
+INFO 2025-11-18 15:21:21,599 auth_service 58 140075992086208 Login attempt - Username: admin
+DEBUG 2025-11-18 15:21:22,138 auth_service 58 140075992086208 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:21:22,139 auth_service 58 140075992086208 Generating authentication tokens for user: admin
+INFO 2025-11-18 15:21:22,197 auth_service 58 140075992086208 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:27:29,259 auth_service 58 140075992086208 AuthService initialized
+INFO 2025-11-18 15:27:29,260 auth_service 58 140075992086208 Login attempt - Username: admin
+DEBUG 2025-11-18 15:27:29,682 auth_service 58 140075992086208 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:27:29,683 auth_service 58 140075992086208 Generating authentication tokens for user: admin
+INFO 2025-11-18 15:27:29,693 auth_service 58 140075992086208 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:29:21,091 auth_service 58 140075983693504 AuthService initialized
+INFO 2025-11-18 15:29:21,091 auth_service 58 140075983693504 Login attempt - Username: admin
+DEBUG 2025-11-18 15:29:21,628 auth_service 58 140075983693504 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:29:21,629 auth_service 58 140075983693504 Generating authentication tokens for user: admin
+INFO 2025-11-18 15:29:21,644 auth_service 58 140075983693504 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:35:25,120 auth_service 106 140429010925248 AuthService initialized
+INFO 2025-11-18 15:35:25,121 auth_service 106 140429010925248 Login attempt - Username: admin
+DEBUG 2025-11-18 15:35:25,646 auth_service 106 140429010925248 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:35:25,648 auth_service 106 140429010925248 Generating authentication tokens for user: admin
+INFO 2025-11-18 15:35:25,659 auth_service 106 140429010925248 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:44:58,801 auth_service 135 140192520337088 AuthService initialized
+INFO 2025-11-18 15:44:58,802 auth_service 135 140192520337088 Login attempt - Username: admin
+DEBUG 2025-11-18 15:44:59,217 auth_service 135 140192520337088 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:44:59,218 auth_service 135 140192520337088 Generating authentication tokens for user: admin
+INFO 2025-11-18 15:44:59,235 auth_service 135 140192520337088 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 12:58:05,077 auth_service 114 140159255312064 AuthService initialized
+INFO 2025-11-19 12:58:05,096 auth_service 114 140159255312064 Login attempt - Username: admin
+DEBUG 2025-11-19 12:58:05,685 auth_service 114 140159255312064 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 12:58:05,686 auth_service 114 140159255312064 Generating authentication tokens for user: admin
+INFO 2025-11-19 12:58:05,739 auth_service 114 140159255312064 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:25:25,922 auth_service 142 140036389467840 AuthService initialized
+INFO 2025-11-19 13:25:25,923 auth_service 142 140036389467840 Login attempt - Username: admin
+DEBUG 2025-11-19 13:25:26,477 auth_service 142 140036389467840 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:25:26,478 auth_service 142 140036389467840 Generating authentication tokens for user: admin
+INFO 2025-11-19 13:25:26,500 auth_service 142 140036389467840 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:26:25,664 auth_service 142 140036389467840 AuthService initialized
+INFO 2025-11-19 13:26:25,665 auth_service 142 140036389467840 Login attempt - Username: admin
+DEBUG 2025-11-19 13:26:26,143 auth_service 142 140036389467840 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:26:26,144 auth_service 142 140036389467840 Generating authentication tokens for user: admin
+INFO 2025-11-19 13:26:26,160 auth_service 142 140036389467840 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:50:25,776 auth_service 266 140215649826496 AuthService initialized
+INFO 2025-11-19 13:50:25,777 auth_service 266 140215649826496 Login attempt - Username: admin
+DEBUG 2025-11-19 13:50:26,364 auth_service 266 140215649826496 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:50:26,365 auth_service 266 140215649826496 Generating authentication tokens for user: admin
+INFO 2025-11-19 13:50:26,390 auth_service 266 140215649826496 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:56:14,163 auth_service 266 140215381391040 AuthService initialized
+INFO 2025-11-19 13:56:14,163 auth_service 266 140215381391040 Login attempt - Username: admin
+DEBUG 2025-11-19 13:56:14,664 auth_service 266 140215381391040 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:56:14,664 auth_service 266 140215381391040 Generating authentication tokens for user: admin
+INFO 2025-11-19 13:56:14,687 auth_service 266 140215381391040 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 15:40:35,231 auth_service 569 140505940752064 AuthService initialized
+INFO 2025-11-19 15:40:35,232 auth_service 569 140505940752064 Login attempt - Username: admin
+DEBUG 2025-11-19 15:40:35,827 auth_service 569 140505940752064 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 15:40:35,828 auth_service 569 140505940752064 Generating authentication tokens for user: admin
+INFO 2025-11-19 15:40:35,865 auth_service 569 140505940752064 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:01:22,298 auth_service 612 140500628666048 AuthService initialized
+INFO 2025-11-19 16:01:22,298 auth_service 612 140500628666048 Login attempt - Username: admin
+DEBUG 2025-11-19 16:01:22,895 auth_service 612 140500628666048 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:01:22,896 auth_service 612 140500628666048 Generating authentication tokens for user: admin
+INFO 2025-11-19 16:01:22,930 auth_service 612 140500628666048 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:11:18,277 auth_service 654 139917629847232 AuthService initialized
+INFO 2025-11-19 16:11:18,278 auth_service 654 139917629847232 Login attempt - Username: admin
+DEBUG 2025-11-19 16:11:18,697 auth_service 654 139917629847232 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:11:18,699 auth_service 654 139917629847232 Generating authentication tokens for user: admin
+INFO 2025-11-19 16:11:18,715 auth_service 654 139917629847232 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:16:49,050 auth_service 668 140525504034496 AuthService initialized
+INFO 2025-11-19 16:16:49,051 auth_service 668 140525504034496 Login attempt - Username: admin
+DEBUG 2025-11-19 16:16:49,625 auth_service 668 140525504034496 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:16:49,626 auth_service 668 140525504034496 Generating authentication tokens for user: admin
+INFO 2025-11-19 16:16:49,643 auth_service 668 140525504034496 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:23:56,746 auth_service 683 139691716245184 AuthService initialized
+INFO 2025-11-19 16:23:56,747 auth_service 683 139691716245184 Login attempt - Username: admin
+DEBUG 2025-11-19 16:23:57,215 auth_service 683 139691716245184 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:23:57,216 auth_service 683 139691716245184 Generating authentication tokens for user: admin
+INFO 2025-11-19 16:23:57,247 auth_service 683 139691716245184 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 08:40:03,279 auth_service 18 140622925129408 AuthService initialized
+INFO 2025-11-20 08:40:03,294 auth_service 18 140622925129408 Login attempt - Username: admin
+DEBUG 2025-11-20 08:40:03,741 auth_service 18 140622925129408 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 08:40:03,742 auth_service 18 140622925129408 Generating authentication tokens for user: admin
+INFO 2025-11-20 08:40:03,769 auth_service 18 140622925129408 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 08:49:35,512 auth_service 57 140493868496576 AuthService initialized
+INFO 2025-11-20 08:49:35,512 auth_service 57 140493868496576 Login attempt - Username: admin
+DEBUG 2025-11-20 08:49:35,937 auth_service 57 140493868496576 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 08:49:35,938 auth_service 57 140493868496576 Generating authentication tokens for user: admin
+INFO 2025-11-20 08:49:35,954 auth_service 57 140493868496576 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:05:23,420 auth_service 78 140658635437760 AuthService initialized
+INFO 2025-11-20 09:05:23,421 auth_service 78 140658635437760 Login attempt - Username: admin
+DEBUG 2025-11-20 09:05:23,875 auth_service 78 140658635437760 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:05:23,876 auth_service 78 140658635437760 Generating authentication tokens for user: admin
+INFO 2025-11-20 09:05:23,896 auth_service 78 140658635437760 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:12:42,158 auth_service 105 140120013403840 AuthService initialized
+INFO 2025-11-20 09:12:42,159 auth_service 105 140120013403840 Login attempt - Username: admin
+DEBUG 2025-11-20 09:12:42,596 auth_service 105 140120013403840 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:12:42,597 auth_service 105 140120013403840 Generating authentication tokens for user: admin
+INFO 2025-11-20 09:12:42,613 auth_service 105 140120013403840 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:22:27,898 auth_service 142 140481084257984 AuthService initialized
+INFO 2025-11-20 09:22:27,899 auth_service 142 140481084257984 Login attempt - Username: admin
+DEBUG 2025-11-20 09:22:28,312 auth_service 142 140481084257984 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:22:28,314 auth_service 142 140481084257984 Generating authentication tokens for user: admin
+INFO 2025-11-20 09:22:28,333 auth_service 142 140481084257984 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:41:56,994 auth_service 186 139898416789184 AuthService initialized
+INFO 2025-11-20 09:41:56,995 auth_service 186 139898416789184 Login attempt - Username: admin
+DEBUG 2025-11-20 09:41:57,436 auth_service 186 139898416789184 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:41:57,437 auth_service 186 139898416789184 Generating authentication tokens for user: admin
+INFO 2025-11-20 09:41:57,467 auth_service 186 139898416789184 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:52:37,055 auth_service 253 139803534292672 AuthService initialized
+INFO 2025-11-20 09:52:37,056 auth_service 253 139803534292672 Login attempt - Username: admin
+DEBUG 2025-11-20 09:52:40,417 auth_service 253 139803534292672 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:52:40,418 auth_service 253 139803534292672 Generating authentication tokens for user: admin
+DEBUG 2025-11-20 09:53:30,493 auth_service 253 139803534292672 AuthService initialized
+INFO 2025-11-20 09:53:30,493 auth_service 253 139803534292672 Login attempt - Username: admin
+DEBUG 2025-11-20 09:53:30,925 auth_service 253 139803534292672 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:53:30,926 auth_service 253 139803534292672 Generating authentication tokens for user: admin
+DEBUG 2025-11-20 09:54:02,868 auth_service 257 139793315919552 AuthService initialized
+INFO 2025-11-20 09:54:02,869 auth_service 257 139793315919552 Login attempt - Username: admin
+DEBUG 2025-11-20 09:54:03,400 auth_service 257 139793315919552 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:54:03,402 auth_service 257 139793315919552 Generating authentication tokens for user: admin
+DEBUG 2025-11-20 09:54:06,321 auth_service 257 139793315919552 AuthService initialized
+INFO 2025-11-20 09:54:06,322 auth_service 257 139793315919552 Login attempt - Username: admin
+DEBUG 2025-11-20 09:54:06,843 auth_service 257 139793315919552 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:54:06,844 auth_service 257 139793315919552 Generating authentication tokens for user: admin
+DEBUG 2025-11-20 09:54:56,579 auth_service 262 140099148838592 AuthService initialized
+INFO 2025-11-20 09:54:56,580 auth_service 262 140099148838592 Login attempt - Username: admin
+DEBUG 2025-11-20 09:54:57,121 auth_service 262 140099148838592 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:54:57,122 auth_service 262 140099148838592 Generating authentication tokens for user: admin
+INFO 2025-11-20 09:54:57,152 auth_service 262 140099148838592 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 10:09:58,304 auth_service 262 140099148838592 AuthService initialized
+INFO 2025-11-20 10:09:58,305 auth_service 262 140099148838592 Login attempt - Username: admin
+DEBUG 2025-11-20 10:09:58,774 auth_service 262 140099148838592 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 10:09:58,775 auth_service 262 140099148838592 Generating authentication tokens for user: admin
+INFO 2025-11-20 10:09:58,797 auth_service 262 140099148838592 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 10:40:54,015 auth_service 298 140700100323008 AuthService initialized
+INFO 2025-11-20 10:40:54,016 auth_service 298 140700100323008 Login attempt - Username: admin
+DEBUG 2025-11-20 10:40:54,439 auth_service 298 140700100323008 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-20 10:40:54,439 auth_service 298 140700100323008 Generating authentication tokens for user: admin
+INFO 2025-11-20 10:40:54,456 auth_service 298 140700100323008 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-21 09:57:01,342 auth_service 123 140486544189120 AuthService initialized
+INFO 2025-11-21 09:57:01,355 auth_service 123 140486544189120 Login attempt - Username: admin
+DEBUG 2025-11-21 09:57:01,783 auth_service 123 140486544189120 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-21 09:57:01,784 auth_service 123 140486544189120 Generating authentication tokens for user: admin
+INFO 2025-11-21 09:57:01,845 auth_service 123 140486544189120 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-21 09:57:30,056 auth_service 123 140486552581824 AuthService initialized
+INFO 2025-11-21 09:57:30,057 auth_service 123 140486552581824 Login attempt - Username: admin
+DEBUG 2025-11-21 09:57:30,729 auth_service 123 140486552581824 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-21 09:57:30,736 auth_service 123 140486552581824 Generating authentication tokens for user: admin
+INFO 2025-11-21 09:57:30,745 auth_service 123 140486552581824 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-21 11:35:47,564 auth_service 469 140274089064128 AuthService initialized
+INFO 2025-11-21 11:35:47,564 auth_service 469 140274089064128 Login attempt - Username: admin
+DEBUG 2025-11-21 11:35:48,139 auth_service 469 140274089064128 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-21 11:35:48,140 auth_service 469 140274089064128 Generating authentication tokens for user: admin
+INFO 2025-11-21 11:35:48,244 auth_service 469 140274089064128 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 12:09:17,804 auth_service 19 139767854397120 AuthService initialized
+INFO 2025-11-26 12:09:17,822 auth_service 19 139767854397120 Login attempt - Username: admin
+DEBUG 2025-11-26 12:09:18,442 auth_service 19 139767854397120 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 12:09:18,443 auth_service 19 139767854397120 Generating authentication tokens for user: admin
+INFO 2025-11-26 12:09:18,524 auth_service 19 139767854397120 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 12:28:11,571 auth_service 141 140038298924736 AuthService initialized
+INFO 2025-11-26 12:28:11,572 auth_service 141 140038298924736 Login attempt - Username: admin
+DEBUG 2025-11-26 12:28:12,190 auth_service 141 140038298924736 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 12:28:12,190 auth_service 141 140038298924736 Generating authentication tokens for user: admin
+INFO 2025-11-26 12:28:12,217 auth_service 141 140038298924736 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 12:33:30,220 auth_service 228 140439406507712 AuthService initialized
+INFO 2025-11-26 12:33:30,221 auth_service 228 140439406507712 Login attempt - Username: admin
+DEBUG 2025-11-26 12:33:31,089 auth_service 228 140439406507712 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 12:33:31,090 auth_service 228 140439406507712 Generating authentication tokens for user: admin
+INFO 2025-11-26 12:33:31,118 auth_service 228 140439406507712 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 13:17:53,231 auth_service 254 140134997554880 AuthService initialized
+INFO 2025-11-26 13:17:53,231 auth_service 254 140134997554880 Login attempt - Username: admin
+DEBUG 2025-11-26 13:17:53,958 auth_service 254 140134997554880 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 13:17:53,959 auth_service 254 140134997554880 Generating authentication tokens for user: admin
+INFO 2025-11-26 13:17:53,979 auth_service 254 140134997554880 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 13:48:01,530 auth_service 260 140003059586752 AuthService initialized
+INFO 2025-11-26 13:48:01,531 auth_service 260 140003059586752 Login attempt - Username: admin
+DEBUG 2025-11-26 13:48:02,213 auth_service 260 140003059586752 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 13:48:02,214 auth_service 260 140003059586752 Generating authentication tokens for user: admin
+INFO 2025-11-26 13:48:02,248 auth_service 260 140003059586752 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 14:27:05,734 auth_service 298 140466742884032 AuthService initialized
+INFO 2025-11-26 14:27:05,736 auth_service 298 140466742884032 Login attempt - Username: admin
+DEBUG 2025-11-26 14:27:06,430 auth_service 298 140466742884032 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 14:27:06,432 auth_service 298 140466742884032 Generating authentication tokens for user: admin
+INFO 2025-11-26 14:27:06,459 auth_service 298 140466742884032 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 14:34:18,343 auth_service 301 139684290393792 AuthService initialized
+INFO 2025-11-26 14:34:18,345 auth_service 301 139684290393792 Login attempt - Username: admin
+DEBUG 2025-11-26 14:34:19,121 auth_service 301 139684290393792 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 14:34:19,122 auth_service 301 139684290393792 Generating authentication tokens for user: admin
+INFO 2025-11-26 14:34:19,137 auth_service 301 139684290393792 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 15:25:33,648 auth_service 316 140655125853888 AuthService initialized
+INFO 2025-11-26 15:25:33,649 auth_service 316 140655125853888 Login attempt - Username: admin
+DEBUG 2025-11-26 15:25:34,379 auth_service 316 140655125853888 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 15:25:34,382 auth_service 316 140655125853888 Generating authentication tokens for user: admin
+INFO 2025-11-26 15:25:34,408 auth_service 316 140655125853888 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 16:09:54,186 auth_service 327 140288997717696 AuthService initialized
+INFO 2025-11-26 16:09:54,190 auth_service 327 140288997717696 Login attempt - Username: admin
+DEBUG 2025-11-26 16:09:54,915 auth_service 327 140288997717696 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 16:09:54,916 auth_service 327 140288997717696 Generating authentication tokens for user: admin
+INFO 2025-11-26 16:09:54,962 auth_service 327 140288997717696 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 16:41:19,451 auth_service 330 140435748193984 AuthService initialized
+INFO 2025-11-26 16:41:19,452 auth_service 330 140435748193984 Login attempt - Username: admin
+DEBUG 2025-11-26 16:41:20,142 auth_service 330 140435748193984 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-26 16:41:20,143 auth_service 330 140435748193984 Generating authentication tokens for user: admin
+INFO 2025-11-26 16:41:20,152 auth_service 330 140435748193984 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-27 16:12:34,846 auth_service 19 139696629872320 AuthService initialized
+INFO 2025-11-27 16:12:34,852 auth_service 19 139696629872320 Login attempt - Username: admin
+DEBUG 2025-11-27 16:12:35,391 auth_service 19 139696629872320 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-27 16:12:35,392 auth_service 19 139696629872320 Generating authentication tokens for user: admin
+INFO 2025-11-27 16:12:35,444 auth_service 19 139696629872320 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-27 16:44:33,670 auth_service 26 140022061024960 AuthService initialized
+INFO 2025-11-27 16:44:33,671 auth_service 26 140022061024960 Login attempt - Username: admin
+DEBUG 2025-11-27 16:44:34,139 auth_service 26 140022061024960 User authenticated successfully - User ID: 6, Username: admin
+DEBUG 2025-11-27 16:44:34,140 auth_service 26 140022061024960 Generating authentication tokens for user: admin
+INFO 2025-11-27 16:44:34,148 auth_service 26 140022061024960 User logged in successfully - User ID: 6, Username: admin
+DEBUG 2025-11-29 14:02:36,757 auth_service 336 140060800317120 AuthService initialized
+INFO 2025-11-29 14:02:36,762 auth_service 336 140060800317120 Login attempt - Username: admin
+WARNING 2025-11-29 14:02:37,336 auth_service 336 140060800317120 Failed login attempt - Invalid credentials for username: admin
+DEBUG 2025-11-29 14:03:13,164 auth_service 336 140060800317120 AuthService initialized
+INFO 2025-11-29 14:03:13,165 auth_service 336 140060800317120 Login attempt - Username: admin
+DEBUG 2025-11-29 14:03:13,729 auth_service 336 140060800317120 User authenticated successfully - User ID: 1, Username: admin
+DEBUG 2025-11-29 14:03:13,729 auth_service 336 140060800317120 Generating authentication tokens for user: admin
+INFO 2025-11-29 14:03:13,768 auth_service 336 140060800317120 User logged in successfully - User ID: 1, Username: admin
+DEBUG 2025-11-29 14:30:12,714 auth_service 517 139762128123584 AuthService initialized
+INFO 2025-11-29 14:30:12,720 auth_service 517 139762128123584 Login attempt - Username: admin
+DEBUG 2025-11-29 14:30:13,506 auth_service 517 139762128123584 User authenticated successfully - User ID: 1, Username: admin
+DEBUG 2025-11-29 14:30:13,507 auth_service 517 139762128123584 Generating authentication tokens for user: admin
+INFO 2025-11-29 14:30:13,519 auth_service 517 139762128123584 User logged in successfully - User ID: 1, Username: admin
+DEBUG 2025-11-29 14:36:59,496 auth_service 517 139762210961088 AuthService initialized
+INFO 2025-11-29 14:36:59,496 auth_service 517 139762210961088 Login attempt - Username: admin
+DEBUG 2025-11-29 14:36:59,939 auth_service 517 139762210961088 User authenticated successfully - User ID: 1, Username: admin
+DEBUG 2025-11-29 14:36:59,939 auth_service 517 139762210961088 Generating authentication tokens for user: admin
+INFO 2025-11-29 14:36:59,946 auth_service 517 139762210961088 User logged in successfully - User ID: 1, Username: admin
+DEBUG 2025-11-29 15:22:15,591 auth_service 546 140175272310464 AuthService initialized
+INFO 2025-11-29 15:22:15,591 auth_service 546 140175272310464 Login attempt - Username: admin
+DEBUG 2025-11-29 15:22:16,163 auth_service 546 140175272310464 User authenticated successfully - User ID: 1, Username: admin
+DEBUG 2025-11-29 15:22:16,164 auth_service 546 140175272310464 Generating authentication tokens for user: admin
+INFO 2025-11-29 15:22:16,184 auth_service 546 140175272310464 User logged in successfully - User ID: 1, Username: admin
+DEBUG 2025-11-30 06:45:18,229 auth_service 151 140575889159872 AuthService initialized
+INFO 2025-11-30 06:45:18,229 auth_service 151 140575889159872 Login attempt - Username: admin
+DEBUG 2025-11-30 06:45:18,660 auth_service 151 140575889159872 User authenticated successfully - User ID: 1, Username: admin
+DEBUG 2025-11-30 06:45:18,661 auth_service 151 140575889159872 Generating authentication tokens for user: admin
+INFO 2025-11-30 06:45:18,687 auth_service 151 140575889159872 User logged in successfully - User ID: 1, Username: admin
+DEBUG 2025-11-30 21:58:46,358 auth_service 113 140577062087552 AuthService initialized
+INFO 2025-11-30 21:58:46,377 auth_service 113 140577062087552 Login attempt - Username: newuser
+WARNING 2025-11-30 21:58:47,029 auth_service 113 140577062087552 Failed login attempt - Invalid credentials for username: newuser
+DEBUG 2025-11-30 21:58:47,696 auth_service 113 140577062087552 AuthService initialized
+INFO 2025-11-30 21:58:47,697 auth_service 113 140577062087552 Login attempt - Username: newuser
+WARNING 2025-11-30 21:58:48,281 auth_service 113 140577062087552 Failed login attempt - Invalid credentials for username: newuser
+DEBUG 2025-11-30 21:58:48,901 auth_service 113 140577062087552 AuthService initialized
+INFO 2025-11-30 21:58:48,902 auth_service 113 140577062087552 Login attempt - Username: newuser
+DEBUG 2025-11-30 21:58:49,492 auth_service 113 140577062087552 User authenticated successfully - User ID: 3, Username: newuser
+DEBUG 2025-11-30 21:58:49,493 auth_service 113 140577062087552 Generating authentication tokens for user: newuser
+INFO 2025-11-30 21:58:49,509 auth_service 113 140577062087552 User logged in successfully - User ID: 3, Username: newuser
+DEBUG 2025-11-30 21:58:50,227 auth_service 113 140577062087552 AuthService initialized
+INFO 2025-11-30 21:58:50,228 auth_service 113 140577062087552 Registering new customer: newuser@example.com
+DEBUG 2025-11-30 22:04:29,692 auth_service 126 140383735032704 AuthService initialized
+INFO 2025-11-30 22:04:29,692 auth_service 126 140383735032704 Login attempt - Username: newuser
+WARNING 2025-11-30 22:04:30,252 auth_service 126 140383735032704 Failed login attempt - Invalid credentials for username: newuser
+DEBUG 2025-11-30 22:04:30,814 auth_service 126 140383735032704 AuthService initialized
+INFO 2025-11-30 22:04:30,815 auth_service 126 140383735032704 Login attempt - Username: newuser
+WARNING 2025-11-30 22:04:31,388 auth_service 126 140383735032704 Failed login attempt - Invalid credentials for username: newuser
+DEBUG 2025-11-30 22:04:31,956 auth_service 126 140383735032704 AuthService initialized
+INFO 2025-11-30 22:04:31,958 auth_service 126 140383735032704 Login attempt - Username: newuser
+DEBUG 2025-11-30 22:04:32,514 auth_service 126 140383735032704 User authenticated successfully - User ID: 3, Username: newuser
+DEBUG 2025-11-30 22:04:32,515 auth_service 126 140383735032704 Generating authentication tokens for user: newuser
+INFO 2025-11-30 22:04:32,524 auth_service 126 140383735032704 User logged in successfully - User ID: 3, Username: newuser
+DEBUG 2025-11-30 22:06:08,366 auth_service 118 140305682831040 AuthService initialized
+INFO 2025-11-30 22:06:08,367 auth_service 118 140305682831040 Registering new customer: amingholami06@gmail.com
+ERROR 2025-11-30 22:06:08,370 auth_service 118 140305682831040 Unexpected error during user registration - Username: mamad, Error: کاربری با ایمیل 'amingholami06@gmail.com' یافت نشد.
+Traceback (most recent call last):
+  File "/app/shared_libs/core/domain/users/repositories.py", line 35, in get_by_email
+    return self.model.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.models.user.User.DoesNotExist: User matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/accounts/services/auth_service.py", line 49, in register_customer
+    user = self._user_domain_service.register_new_user(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/users/services.py", line 45, in register_new_user
+    if self._repo.get_by_email(data.get("email")):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/users/repositories.py", line 37, in get_by_email
+    raise EmailNotFoundException(f"کاربری با ایمیل '{email}' یافت نشد.")
+core.domain.users.exceptions.EmailNotFoundException: کاربری با ایمیل 'amingholami06@gmail.com' یافت نشد.
+DEBUG 2025-11-30 22:06:23,836 auth_service 118 140305682831040 AuthService initialized
+INFO 2025-11-30 22:06:23,837 auth_service 118 140305682831040 Registering new customer: amingholami121381@gmail.com
+ERROR 2025-11-30 22:06:23,839 auth_service 118 140305682831040 Unexpected error during user registration - Username: mamad, Error: کاربری با ایمیل 'amingholami121381@gmail.com' یافت نشد.
+Traceback (most recent call last):
+  File "/app/shared_libs/core/domain/users/repositories.py", line 35, in get_by_email
+    return self.model.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.models.user.User.DoesNotExist: User matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/accounts/services/auth_service.py", line 49, in register_customer
+    user = self._user_domain_service.register_new_user(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/users/services.py", line 45, in register_new_user
+    if self._repo.get_by_email(data.get("email")):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/users/repositories.py", line 37, in get_by_email
+    raise EmailNotFoundException(f"کاربری با ایمیل '{email}' یافت نشد.")
+core.domain.users.exceptions.EmailNotFoundException: کاربری با ایمیل 'amingholami121381@gmail.com' یافت نشد.
+DEBUG 2025-11-30 22:07:26,918 auth_service 136 139967036820352 AuthService initialized
+INFO 2025-11-30 22:07:26,920 auth_service 136 139967036820352 Login attempt - Username: newuser
+WARNING 2025-11-30 22:07:27,510 auth_service 136 139967036820352 Failed login attempt - Invalid credentials for username: newuser
+DEBUG 2025-11-30 22:07:28,182 auth_service 136 139967036820352 AuthService initialized
+INFO 2025-11-30 22:07:28,183 auth_service 136 139967036820352 Login attempt - Username: newuser
+WARNING 2025-11-30 22:07:28,779 auth_service 136 139967036820352 Failed login attempt - Invalid credentials for username: newuser
+DEBUG 2025-11-30 22:07:29,385 auth_service 136 139967036820352 AuthService initialized
+INFO 2025-11-30 22:07:29,386 auth_service 136 139967036820352 Login attempt - Username: newuser
+DEBUG 2025-11-30 22:07:29,934 auth_service 136 139967036820352 User authenticated successfully - User ID: 3, Username: newuser
+DEBUG 2025-11-30 22:07:29,935 auth_service 136 139967036820352 Generating authentication tokens for user: newuser
+INFO 2025-11-30 22:07:29,945 auth_service 136 139967036820352 User logged in successfully - User ID: 3, Username: newuser
+DEBUG 2025-11-30 22:07:30,608 auth_service 136 139967036820352 AuthService initialized
+INFO 2025-11-30 22:07:30,609 auth_service 136 139967036820352 Registering new customer: newuser@example.com
+ERROR 2025-11-30 22:07:30,611 auth_service 136 139967036820352 Unexpected error during user registration - Username: newuser, Error: کاربری با ایمیل 'newuser@example.com' یافت نشد.
+Traceback (most recent call last):
+  File "/app/shared_libs/core/domain/users/repositories.py", line 35, in get_by_email
+    return self.model.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.models.user.User.DoesNotExist: User matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/accounts/services/auth_service.py", line 49, in register_customer
+    user = self._user_domain_service.register_new_user(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/users/services.py", line 45, in register_new_user
+    if self._repo.get_by_email(data.get("email")):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/users/repositories.py", line 37, in get_by_email
+    raise EmailNotFoundException(f"کاربری با ایمیل '{email}' یافت نشد.")
+core.domain.users.exceptions.EmailNotFoundException: کاربری با ایمیل 'newuser@example.com' یافت نشد.
+DEBUG 2025-11-30 22:08:11,255 auth_service 128 140043339409088 AuthService initialized
+INFO 2025-11-30 22:08:11,256 auth_service 128 140043339409088 Registering new customer: amingholami121381@gmail.com
+ERROR 2025-11-30 22:08:11,258 auth_service 128 140043339409088 Unexpected error during user registration - Username: mamad1234, Error: کاربری با ایمیل 'amingholami121381@gmail.com' یافت نشد.
+Traceback (most recent call last):
+  File "/app/shared_libs/core/domain/users/repositories.py", line 35, in get_by_email
+    return self.model.objects.get(email=email)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.models.user.User.DoesNotExist: User matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/accounts/services/auth_service.py", line 49, in register_customer
+    user = self._user_domain_service.register_new_user(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/users/services.py", line 45, in register_new_user
+    if self._repo.get_by_email(data.get("email")):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/users/repositories.py", line 37, in get_by_email
+    raise EmailNotFoundException(f"کاربری با ایمیل '{email}' یافت نشد.")
+core.domain.users.exceptions.EmailNotFoundException: کاربری با ایمیل 'amingholami121381@gmail.com' یافت نشد.
+DEBUG 2025-11-30 22:15:50,542 auth_service 149 140144008140480 AuthService initialized
+INFO 2025-11-30 22:15:50,543 auth_service 149 140144008140480 Registering new customer: amingholami121381@gmail.com
+INFO 2025-11-30 22:15:51,214 auth_service 149 140144008140480 User created successfully - User ID: 4, Username: mamad1234
+INFO 2025-11-30 22:15:51,216 auth_service 149 140144008140480 Sending verification code to email: amingholami121381@gmail.com
+INFO 2025-11-30 22:15:51,294 auth_service 149 140144008140480 Verification code sent successfully to amingholami121381@gmail.com
+INFO 2025-11-30 22:15:51,294 auth_service 149 140144008140480 User registration completed successfully - User ID: 4, Username: mamad1234
+DEBUG 2025-11-30 22:16:46,041 auth_service 149 140144008140480 AuthService initialized
+INFO 2025-11-30 22:16:46,042 auth_service 149 140144008140480 Registering new customer: amingholami121381@gmail.com
+INFO 2025-11-30 22:16:46,673 auth_service 149 140144008140480 User created successfully - User ID: 5, Username: mamad1234
+INFO 2025-11-30 22:16:46,675 auth_service 149 140144008140480 Sending verification code to email: amingholami121381@gmail.com
+INFO 2025-11-30 22:16:46,702 auth_service 149 140144008140480 Verification code sent successfully to amingholami121381@gmail.com
+INFO 2025-11-30 22:16:46,703 auth_service 149 140144008140480 User registration completed successfully - User ID: 5, Username: mamad1234
+DEBUG 2025-11-30 22:17:58,052 auth_service 149 140143776233152 AuthService initialized
+DEBUG 2025-11-30 22:20:19,749 auth_service 149 140143995553472 AuthService initialized
+DEBUG 2025-11-30 22:21:43,295 auth_service 221 140168396774272 AuthService initialized
+INFO 2025-11-30 22:21:43,296 auth_service 221 140168396774272 Login attempt - Username: newuser
+WARNING 2025-11-30 22:21:43,938 auth_service 221 140168396774272 Failed login attempt - Invalid credentials for username: newuser
+DEBUG 2025-11-30 22:21:44,557 auth_service 221 140168396774272 AuthService initialized
+INFO 2025-11-30 22:21:44,558 auth_service 221 140168396774272 Login attempt - Username: newuser
+WARNING 2025-11-30 22:21:45,183 auth_service 221 140168396774272 Failed login attempt - Invalid credentials for username: newuser
+DEBUG 2025-11-30 22:21:45,808 auth_service 221 140168396774272 AuthService initialized
+INFO 2025-11-30 22:21:45,809 auth_service 221 140168396774272 Login attempt - Username: newuser
+DEBUG 2025-11-30 22:21:46,539 auth_service 221 140168396774272 User authenticated successfully - User ID: 3, Username: newuser
+DEBUG 2025-11-30 22:21:46,541 auth_service 221 140168396774272 Generating authentication tokens for user: newuser
+INFO 2025-11-30 22:21:46,556 auth_service 221 140168396774272 User logged in successfully - User ID: 3, Username: newuser
+DEBUG 2025-11-30 22:21:47,241 auth_service 221 140168396774272 AuthService initialized
+INFO 2025-11-30 22:21:47,243 auth_service 221 140168396774272 Registering new customer: newuser@example.com
+INFO 2025-11-30 22:21:47,837 auth_service 221 140168396774272 User created successfully - User ID: 5, Username: newuser
+INFO 2025-11-30 22:21:47,838 auth_service 221 140168396774272 Sending verification code to email: newuser@example.com
+INFO 2025-11-30 22:21:47,839 auth_service 221 140168396774272 Verification code sent successfully to newuser@example.com
+INFO 2025-11-30 22:21:47,841 auth_service 221 140168396774272 User registration completed successfully - User ID: 5, Username: newuser
+DEBUG 2025-11-30 22:24:56,058 auth_service 232 140119167362752 AuthService initialized
+INFO 2025-11-30 22:24:56,059 auth_service 232 140119167362752 Registering new customer: amingholami121381@gmail.com
+INFO 2025-11-30 22:24:56,655 auth_service 232 140119167362752 User created successfully - User ID: 6, Username: mamad1234
+INFO 2025-11-30 22:24:56,656 auth_service 232 140119167362752 Sending verification code to email: amingholami121381@gmail.com
+INFO 2025-11-30 22:24:56,748 auth_service 232 140119167362752 Verification code sent successfully to amingholami121381@gmail.com
+INFO 2025-11-30 22:24:56,749 auth_service 232 140119167362752 User registration completed successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-11-30 22:25:13,964 auth_service 232 140119167362752 AuthService initialized
+DEBUG 2025-11-30 22:26:17,050 auth_service 244 139889279497920 AuthService initialized
+DEBUG 2025-11-30 22:29:04,384 auth_service 244 139889268131520 AuthService initialized
+INFO 2025-11-30 22:29:04,385 auth_service 244 139889268131520 Login attempt - Username: mamad1234
+DEBUG 2025-11-30 22:29:04,997 auth_service 244 139889268131520 User authenticated successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-11-30 22:29:04,998 auth_service 244 139889268131520 Generating authentication tokens for user: mamad1234
+INFO 2025-11-30 22:29:05,016 auth_service 244 139889268131520 User logged in successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-12-01 10:06:50,950 auth_service 136 139663612311232 AuthService initialized
+INFO 2025-12-01 10:06:50,962 auth_service 136 139663612311232 Login attempt - Username: mamad1234
+DEBUG 2025-12-01 10:06:51,517 auth_service 136 139663612311232 User authenticated successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-12-01 10:06:51,546 auth_service 136 139663612311232 Generating authentication tokens for user: mamad1234
+INFO 2025-12-01 10:06:51,576 auth_service 136 139663612311232 User logged in successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-12-01 10:40:00,601 auth_service 281 139898462037696 AuthService initialized
+INFO 2025-12-01 10:40:00,602 auth_service 281 139898462037696 Login attempt - Username: mamad1234
+DEBUG 2025-12-01 10:40:01,189 auth_service 281 139898462037696 User authenticated successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-12-01 10:40:01,190 auth_service 281 139898462037696 Generating authentication tokens for user: mamad1234
+INFO 2025-12-01 10:40:01,203 auth_service 281 139898462037696 User logged in successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-12-01 12:02:02,633 auth_service 403 140686481422016 AuthService initialized
+INFO 2025-12-01 12:02:02,634 auth_service 403 140686481422016 Login attempt - Username: mamad1234
+DEBUG 2025-12-01 12:02:03,377 auth_service 403 140686481422016 User authenticated successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-12-01 12:02:03,378 auth_service 403 140686481422016 Generating authentication tokens for user: mamad1234
+INFO 2025-12-01 12:02:03,413 auth_service 403 140686481422016 User logged in successfully - User ID: 6, Username: mamad1234
+DEBUG 2025-12-01 16:41:28,739 auth_service 1481 140146812032704 AuthService initialized
+INFO 2025-12-01 16:41:28,751 auth_service 1481 140146812032704 Login attempt - Username: admin
+WARNING 2025-12-01 16:41:29,231 auth_service 1481 140146812032704 Failed login attempt - Invalid credentials for username: admin
+DEBUG 2025-12-01 16:41:36,127 auth_service 1481 140146812032704 AuthService initialized
+INFO 2025-12-01 16:41:36,129 auth_service 1481 140146812032704 Login attempt - Username: admin@admin.com
+DEBUG 2025-12-01 16:41:36,640 auth_service 1481 140146812032704 User authenticated successfully - User ID: 2, Username: admin@admin.com
+DEBUG 2025-12-01 16:41:36,641 auth_service 1481 140146812032704 Generating authentication tokens for user: admin@admin.com
+INFO 2025-12-01 16:41:36,666 auth_service 1481 140146812032704 User logged in successfully - User ID: 2, Username: admin@admin.com
+DEBUG 2025-12-01 17:01:23,628 auth_service 1546 140476075206336 AuthService initialized
+INFO 2025-12-01 17:01:23,630 auth_service 1546 140476075206336 Login attempt - Username: admin
+WARNING 2025-12-01 17:01:24,214 auth_service 1546 140476075206336 Failed login attempt - Invalid credentials for username: admin
+DEBUG 2025-12-01 17:01:32,397 auth_service 1546 140476075206336 AuthService initialized
+INFO 2025-12-01 17:01:32,398 auth_service 1546 140476075206336 Login attempt - Username: admin@admin.com
+DEBUG 2025-12-01 17:01:33,083 auth_service 1546 140476075206336 User authenticated successfully - User ID: 2, Username: admin@admin.com
+DEBUG 2025-12-01 17:01:33,084 auth_service 1546 140476075206336 Generating authentication tokens for user: admin@admin.com
+INFO 2025-12-01 17:01:33,091 auth_service 1546 140476075206336 User logged in successfully - User ID: 2, Username: admin@admin.com
+DEBUG 2025-12-01 17:16:38,334 auth_service 1615 140558413760192 AuthService initialized
+INFO 2025-12-01 17:16:38,335 auth_service 1615 140558413760192 Login attempt - Username: admin@admin.com
+DEBUG 2025-12-01 17:16:38,894 auth_service 1615 140558413760192 User authenticated successfully - User ID: 2, Username: admin@admin.com
+DEBUG 2025-12-01 17:16:38,896 auth_service 1615 140558413760192 Generating authentication tokens for user: admin@admin.com
+INFO 2025-12-01 17:16:38,912 auth_service 1615 140558413760192 User logged in successfully - User ID: 2, Username: admin@admin.com
+DEBUG 2025-12-01 17:23:08,396 auth_service 7 140663970760384 AuthService initialized
+INFO 2025-12-01 17:23:08,397 auth_service 7 140663970760384 Login attempt - Username: admin@admin.com
+DEBUG 2025-12-01 17:23:08,965 auth_service 7 140663970760384 User authenticated successfully - User ID: 2, Username: admin@admin.com
+DEBUG 2025-12-01 17:23:08,966 auth_service 7 140663970760384 Generating authentication tokens for user: admin@admin.com
+INFO 2025-12-01 17:23:08,992 auth_service 7 140663970760384 User logged in successfully - User ID: 2, Username: admin@admin.com
+DEBUG 2025-12-02 16:34:09,558 auth_service 615 140662827816640 AuthService initialized
+INFO 2025-12-02 16:34:09,570 auth_service 615 140662827816640 Login attempt - Username: admin
+DEBUG 2025-12-02 16:34:10,231 auth_service 615 140662827816640 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-02 16:34:10,233 auth_service 615 140662827816640 Generating authentication tokens for user: admin
+INFO 2025-12-02 16:34:10,277 auth_service 615 140662827816640 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-02 17:23:33,004 auth_service 746 140268952262336 AuthService initialized
+INFO 2025-12-02 17:23:33,004 auth_service 746 140268952262336 Login attempt - Username: admin
+DEBUG 2025-12-02 17:23:33,661 auth_service 746 140268952262336 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-02 17:23:33,662 auth_service 746 140268952262336 Generating authentication tokens for user: admin
+INFO 2025-12-02 17:23:33,678 auth_service 746 140268952262336 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-02 17:54:44,923 auth_service 857 140324549859008 AuthService initialized
+INFO 2025-12-02 17:54:44,923 auth_service 857 140324549859008 Login attempt - Username: admin
+DEBUG 2025-12-02 17:54:45,635 auth_service 857 140324549859008 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-02 17:54:45,637 auth_service 857 140324549859008 Generating authentication tokens for user: admin
+INFO 2025-12-02 17:54:45,654 auth_service 857 140324549859008 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-02 18:21:33,281 auth_service 907 139961105905344 AuthService initialized
+INFO 2025-12-02 18:21:33,282 auth_service 907 139961105905344 Login attempt - Username: admin
+DEBUG 2025-12-02 18:21:33,898 auth_service 907 139961105905344 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-02 18:21:33,913 auth_service 907 139961105905344 Generating authentication tokens for user: admin
+INFO 2025-12-02 18:21:33,956 auth_service 907 139961105905344 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-02 18:25:04,087 auth_service 914 140127133234880 AuthService initialized
+INFO 2025-12-02 18:25:04,088 auth_service 914 140127133234880 Login attempt - Username: admin
+DEBUG 2025-12-02 18:25:04,802 auth_service 914 140127133234880 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-02 18:25:04,802 auth_service 914 140127133234880 Generating authentication tokens for user: admin
+INFO 2025-12-02 18:25:04,819 auth_service 914 140127133234880 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-03 18:50:31,930 auth_service 154 140195034994368 AuthService initialized
+INFO 2025-12-03 18:50:31,941 auth_service 154 140195034994368 Login attempt - Username: admin
+DEBUG 2025-12-03 18:50:32,514 auth_service 154 140195034994368 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-03 18:50:32,515 auth_service 154 140195034994368 Generating authentication tokens for user: admin
+INFO 2025-12-03 18:50:32,557 auth_service 154 140195034994368 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 08:47:37,444 auth_service 117 140668989241024 AuthService initialized
+INFO 2025-12-04 08:47:37,454 auth_service 117 140668989241024 Login attempt - Username: admin
+DEBUG 2025-12-04 08:47:38,092 auth_service 117 140668989241024 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 08:47:38,093 auth_service 117 140668989241024 Generating authentication tokens for user: admin
+INFO 2025-12-04 08:47:38,156 auth_service 117 140668989241024 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 09:36:13,449 auth_service 9 139741772273344 AuthService initialized
+INFO 2025-12-04 09:36:13,449 auth_service 9 139741772273344 Login attempt - Username: admin
+DEBUG 2025-12-04 09:36:13,988 auth_service 9 139741772273344 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 09:36:13,990 auth_service 9 139741772273344 Generating authentication tokens for user: admin
+INFO 2025-12-04 09:36:13,996 auth_service 9 139741772273344 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 11:15:59,772 auth_service 117 139878763329216 AuthService initialized
+INFO 2025-12-04 11:15:59,773 auth_service 117 139878763329216 Login attempt - Username: admin
+DEBUG 2025-12-04 11:16:00,424 auth_service 117 139878763329216 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 11:16:00,425 auth_service 117 139878763329216 Generating authentication tokens for user: admin
+INFO 2025-12-04 11:16:00,435 auth_service 117 139878763329216 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 11:54:52,793 auth_service 82 140583483119296 AuthService initialized
+INFO 2025-12-04 11:54:52,794 auth_service 82 140583483119296 Login attempt - Username: admin
+DEBUG 2025-12-04 11:54:53,514 auth_service 82 140583483119296 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 11:54:53,515 auth_service 82 140583483119296 Generating authentication tokens for user: admin
+INFO 2025-12-04 11:54:53,528 auth_service 82 140583483119296 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 12:26:13,757 auth_service 377 140475226912448 AuthService initialized
+INFO 2025-12-04 12:26:13,758 auth_service 377 140475226912448 Login attempt - Username: admin
+DEBUG 2025-12-04 12:26:14,386 auth_service 377 140475226912448 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 12:26:14,387 auth_service 377 140475226912448 Generating authentication tokens for user: admin
+INFO 2025-12-04 12:26:14,401 auth_service 377 140475226912448 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 13:14:29,826 auth_service 402 140396610094784 AuthService initialized
+INFO 2025-12-04 13:14:29,827 auth_service 402 140396610094784 Login attempt - Username: admin
+DEBUG 2025-12-04 13:14:30,835 auth_service 402 140396610094784 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 13:14:30,836 auth_service 402 140396610094784 Generating authentication tokens for user: admin
+INFO 2025-12-04 13:14:30,849 auth_service 402 140396610094784 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 13:31:05,290 auth_service 402 140396601702080 AuthService initialized
+INFO 2025-12-04 13:31:05,291 auth_service 402 140396601702080 Login attempt - Username: admin
+DEBUG 2025-12-04 13:31:06,319 auth_service 402 140396601702080 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 13:31:06,320 auth_service 402 140396601702080 Generating authentication tokens for user: admin
+INFO 2025-12-04 13:31:06,338 auth_service 402 140396601702080 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 14:13:29,538 auth_service 420 140588583392960 AuthService initialized
+INFO 2025-12-04 14:13:29,539 auth_service 420 140588583392960 Login attempt - Username: admin
+DEBUG 2025-12-04 14:13:33,034 auth_service 420 140588583392960 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 14:13:33,035 auth_service 420 140588583392960 Generating authentication tokens for user: admin
+INFO 2025-12-04 14:13:33,053 auth_service 420 140588583392960 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 15:44:50,105 auth_service 438 139813186606784 AuthService initialized
+INFO 2025-12-04 15:44:50,115 auth_service 438 139813186606784 Login attempt - Username: admin
+DEBUG 2025-12-04 15:44:50,636 auth_service 438 139813186606784 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 15:44:50,637 auth_service 438 139813186606784 Generating authentication tokens for user: admin
+INFO 2025-12-04 15:44:50,666 auth_service 438 139813186606784 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 16:12:22,353 auth_service 493 140462974469824 AuthService initialized
+INFO 2025-12-04 16:12:22,354 auth_service 493 140462974469824 Login attempt - Username: admin
+DEBUG 2025-12-04 16:12:22,948 auth_service 493 140462974469824 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 16:12:22,949 auth_service 493 140462974469824 Generating authentication tokens for user: admin
+INFO 2025-12-04 16:12:22,966 auth_service 493 140462974469824 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 16:26:28,098 auth_service 646 140647402215104 AuthService initialized
+INFO 2025-12-04 16:26:28,099 auth_service 646 140647402215104 Login attempt - Username: admin
+DEBUG 2025-12-04 16:26:28,699 auth_service 646 140647402215104 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-04 16:26:28,700 auth_service 646 140647402215104 Generating authentication tokens for user: admin
+INFO 2025-12-04 16:26:28,705 auth_service 646 140647402215104 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 07:18:44,434 auth_service 138 140634927302336 AuthService initialized
+INFO 2025-12-05 07:18:44,454 auth_service 138 140634927302336 Login attempt - Username: admin
+DEBUG 2025-12-05 07:18:45,117 auth_service 138 140634927302336 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 07:18:45,118 auth_service 138 140634927302336 Generating authentication tokens for user: admin
+INFO 2025-12-05 07:18:45,149 auth_service 138 140634927302336 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 07:49:54,272 auth_service 282 140529383765696 AuthService initialized
+INFO 2025-12-05 07:49:54,273 auth_service 282 140529383765696 Login attempt - Username: admin
+DEBUG 2025-12-05 07:49:54,907 auth_service 282 140529383765696 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 07:49:54,908 auth_service 282 140529383765696 Generating authentication tokens for user: admin
+INFO 2025-12-05 07:49:54,942 auth_service 282 140529383765696 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 08:13:16,081 auth_service 426 140680915580608 AuthService initialized
+INFO 2025-12-05 08:13:16,084 auth_service 426 140680915580608 Login attempt - Username: admin
+DEBUG 2025-12-05 08:13:16,785 auth_service 426 140680915580608 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 08:13:16,785 auth_service 426 140680915580608 Generating authentication tokens for user: admin
+INFO 2025-12-05 08:13:16,811 auth_service 426 140680915580608 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 08:44:07,138 auth_service 759 140619095901888 AuthService initialized
+INFO 2025-12-05 08:44:07,139 auth_service 759 140619095901888 Login attempt - Username: admin
+DEBUG 2025-12-05 08:44:12,401 auth_service 759 140619095901888 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 08:44:12,402 auth_service 759 140619095901888 Generating authentication tokens for user: admin
+INFO 2025-12-05 08:44:12,425 auth_service 759 140619095901888 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 08:50:06,846 auth_service 834 140245703235264 AuthService initialized
+INFO 2025-12-05 08:50:06,846 auth_service 834 140245703235264 Login attempt - Username: admin
+DEBUG 2025-12-05 08:50:07,564 auth_service 834 140245703235264 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 08:50:07,565 auth_service 834 140245703235264 Generating authentication tokens for user: admin
+INFO 2025-12-05 08:50:07,589 auth_service 834 140245703235264 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 09:26:42,183 auth_service 176 140574582806208 AuthService initialized
+INFO 2025-12-05 09:26:42,184 auth_service 176 140574582806208 Login attempt - Username: admin
+DEBUG 2025-12-05 09:26:42,848 auth_service 176 140574582806208 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 09:26:42,849 auth_service 176 140574582806208 Generating authentication tokens for user: admin
+INFO 2025-12-05 09:26:42,867 auth_service 176 140574582806208 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 09:38:54,343 auth_service 266 140620931962560 AuthService initialized
+INFO 2025-12-05 09:38:54,344 auth_service 266 140620931962560 Login attempt - Username: admin
+DEBUG 2025-12-05 09:38:55,000 auth_service 266 140620931962560 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 09:38:55,001 auth_service 266 140620931962560 Generating authentication tokens for user: admin
+INFO 2025-12-05 09:38:55,015 auth_service 266 140620931962560 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 10:10:09,234 auth_service 561 139981624612544 AuthService initialized
+INFO 2025-12-05 10:10:09,235 auth_service 561 139981624612544 Login attempt - Username: admin
+DEBUG 2025-12-05 10:10:09,912 auth_service 561 139981624612544 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 10:10:09,913 auth_service 561 139981624612544 Generating authentication tokens for user: admin
+INFO 2025-12-05 10:10:09,922 auth_service 561 139981624612544 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 10:40:38,160 auth_service 617 139923994703552 AuthService initialized
+INFO 2025-12-05 10:40:38,161 auth_service 617 139923994703552 Login attempt - Username: admin
+DEBUG 2025-12-05 10:40:38,915 auth_service 617 139923994703552 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-05 10:40:38,916 auth_service 617 139923994703552 Generating authentication tokens for user: admin
+INFO 2025-12-05 10:40:38,932 auth_service 617 139923994703552 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-06 08:26:54,564 auth_service 281 139995325134528 AuthService initialized
+INFO 2025-12-06 08:26:54,579 auth_service 281 139995325134528 Login attempt - Username: admin
+DEBUG 2025-12-06 08:26:55,259 auth_service 281 139995325134528 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-06 08:26:55,260 auth_service 281 139995325134528 Generating authentication tokens for user: admin
+INFO 2025-12-06 08:26:55,312 auth_service 281 139995325134528 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 16:13:25,293 auth_service 26 140340787058368 AuthService initialized
+INFO 2025-12-09 16:13:25,309 auth_service 26 140340787058368 Login attempt - Username: admin
+DEBUG 2025-12-09 16:13:25,897 auth_service 26 140340787058368 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 16:13:25,898 auth_service 26 140340787058368 Generating authentication tokens for user: admin
+INFO 2025-12-09 16:13:25,938 auth_service 26 140340787058368 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 16:43:31,083 auth_service 199 140540332119744 AuthService initialized
+INFO 2025-12-09 16:43:31,084 auth_service 199 140540332119744 Login attempt - Username: admin
+DEBUG 2025-12-09 16:43:31,770 auth_service 199 140540332119744 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 16:43:31,771 auth_service 199 140540332119744 Generating authentication tokens for user: admin
+INFO 2025-12-09 16:43:31,778 auth_service 199 140540332119744 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 17:10:56,943 auth_service 258 140432928577216 AuthService initialized
+INFO 2025-12-09 17:10:56,944 auth_service 258 140432928577216 Login attempt - Username: admin
+DEBUG 2025-12-09 17:10:57,639 auth_service 258 140432928577216 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 17:10:57,640 auth_service 258 140432928577216 Generating authentication tokens for user: admin
+INFO 2025-12-09 17:10:57,647 auth_service 258 140432928577216 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 17:14:04,562 auth_service 268 140646824277696 AuthService initialized
+INFO 2025-12-09 17:14:04,564 auth_service 268 140646824277696 Login attempt - Username: admin
+DEBUG 2025-12-09 17:14:05,261 auth_service 268 140646824277696 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 17:14:05,262 auth_service 268 140646824277696 Generating authentication tokens for user: admin
+INFO 2025-12-09 17:14:05,270 auth_service 268 140646824277696 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 19:09:26,408 auth_service 308 140238184945344 AuthService initialized
+INFO 2025-12-09 19:09:26,424 auth_service 308 140238184945344 Login attempt - Username: admin
+DEBUG 2025-12-09 19:09:27,220 auth_service 308 140238184945344 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 19:09:27,221 auth_service 308 140238184945344 Generating authentication tokens for user: admin
+INFO 2025-12-09 19:09:27,262 auth_service 308 140238184945344 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 19:24:58,881 auth_service 314 139786971154112 AuthService initialized
+INFO 2025-12-09 19:24:58,882 auth_service 314 139786971154112 Login attempt - Username: admin
+DEBUG 2025-12-09 19:24:59,560 auth_service 314 139786971154112 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-09 19:24:59,560 auth_service 314 139786971154112 Generating authentication tokens for user: admin
+INFO 2025-12-09 19:24:59,575 auth_service 314 139786971154112 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-13 15:52:36,549 auth_service 1093 140000210622144 AuthService initialized
+INFO 2025-12-13 15:52:36,553 auth_service 1093 140000210622144 Login attempt - Username: admin-seeder
+WARNING 2025-12-13 15:52:37,199 auth_service 1093 140000210622144 Failed login attempt - Invalid credentials for username: admin-seeder
+DEBUG 2025-12-13 15:53:37,083 auth_service 1093 139999802541760 AuthService initialized
+INFO 2025-12-13 15:53:37,084 auth_service 1093 139999802541760 Login attempt - Username: admin_seeder
+DEBUG 2025-12-13 15:53:37,813 auth_service 1093 139999802541760 User authenticated successfully - User ID: 1, Username: admin_seeder
+DEBUG 2025-12-13 15:53:37,814 auth_service 1093 139999802541760 Generating authentication tokens for user: admin_seeder
+INFO 2025-12-13 15:53:37,841 auth_service 1093 139999802541760 User logged in successfully - User ID: 1, Username: admin_seeder
+DEBUG 2025-12-15 19:22:08,045 auth_service 7 140514542393024 AuthService initialized
+INFO 2025-12-15 19:22:08,063 auth_service 7 140514542393024 Login attempt - Username: admin_seeder
+DEBUG 2025-12-15 19:22:08,710 auth_service 7 140514542393024 User authenticated successfully - User ID: 1, Username: admin_seeder
+DEBUG 2025-12-15 19:22:08,711 auth_service 7 140514542393024 Generating authentication tokens for user: admin_seeder
+INFO 2025-12-15 19:22:08,740 auth_service 7 140514542393024 User logged in successfully - User ID: 1, Username: admin_seeder
+DEBUG 2025-12-16 14:01:24,711 auth_service 475 139777476122304 AuthService initialized
+INFO 2025-12-16 14:01:24,728 auth_service 475 139777476122304 Login attempt - Username: admin
+DEBUG 2025-12-16 14:01:25,389 auth_service 475 139777476122304 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-16 14:01:25,390 auth_service 475 139777476122304 Generating authentication tokens for user: admin
+INFO 2025-12-16 14:01:25,416 auth_service 475 139777476122304 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-16 14:02:20,363 auth_service 475 139777476122304 AuthService initialized
+INFO 2025-12-16 14:02:20,364 auth_service 475 139777476122304 Login attempt - Username: admin
+DEBUG 2025-12-16 14:02:21,067 auth_service 475 139777476122304 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-16 14:02:21,068 auth_service 475 139777476122304 Generating authentication tokens for user: admin
+INFO 2025-12-16 14:02:21,075 auth_service 475 139777476122304 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-16 14:05:53,807 auth_service 543 139818481915584 AuthService initialized
+INFO 2025-12-16 14:05:53,808 auth_service 543 139818481915584 Login attempt - Username: admin_seeder
+DEBUG 2025-12-16 14:05:54,431 auth_service 543 139818481915584 User authenticated successfully - User ID: 1, Username: admin_seeder
+DEBUG 2025-12-16 14:05:54,434 auth_service 543 139818481915584 Generating authentication tokens for user: admin_seeder
+INFO 2025-12-16 14:05:54,450 auth_service 543 139818481915584 User logged in successfully - User ID: 1, Username: admin_seeder
+DEBUG 2025-12-17 10:46:57,189 auth_service 7 140674123077312 AuthService initialized
+INFO 2025-12-17 10:46:57,211 auth_service 7 140674123077312 Login attempt - Username: admin
+DEBUG 2025-12-17 10:46:57,781 auth_service 7 140674123077312 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 10:46:57,783 auth_service 7 140674123077312 Generating authentication tokens for user: admin
+INFO 2025-12-17 10:46:57,818 auth_service 7 140674123077312 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 10:49:28,272 auth_service 75 139882683078336 AuthService initialized
+INFO 2025-12-17 10:49:28,272 auth_service 75 139882683078336 Login attempt - Username: admin
+DEBUG 2025-12-17 10:49:28,852 auth_service 75 139882683078336 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 10:49:28,853 auth_service 75 139882683078336 Generating authentication tokens for user: admin
+INFO 2025-12-17 10:49:28,873 auth_service 75 139882683078336 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 10:50:32,322 auth_service 80 140378924644032 AuthService initialized
+INFO 2025-12-17 10:50:32,323 auth_service 80 140378924644032 Login attempt - Username: admin
+DEBUG 2025-12-17 10:50:32,940 auth_service 80 140378924644032 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 10:50:32,941 auth_service 80 140378924644032 Generating authentication tokens for user: admin
+INFO 2025-12-17 10:50:32,959 auth_service 80 140378924644032 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 10:51:01,483 auth_service 83 139715541112512 AuthService initialized
+INFO 2025-12-17 10:51:01,483 auth_service 83 139715541112512 Login attempt - Username: admin
+DEBUG 2025-12-17 10:51:02,205 auth_service 83 139715541112512 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 10:51:02,206 auth_service 83 139715541112512 Generating authentication tokens for user: admin
+INFO 2025-12-17 10:51:02,225 auth_service 83 139715541112512 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 10:52:58,728 auth_service 86 140421472712384 AuthService initialized
+INFO 2025-12-17 10:52:58,728 auth_service 86 140421472712384 Login attempt - Username: admin
+DEBUG 2025-12-17 10:52:59,370 auth_service 86 140421472712384 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 10:52:59,371 auth_service 86 140421472712384 Generating authentication tokens for user: admin
+INFO 2025-12-17 10:52:59,390 auth_service 86 140421472712384 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 11:00:41,924 auth_service 129 140154031478464 AuthService initialized
+INFO 2025-12-17 11:00:41,925 auth_service 129 140154031478464 Login attempt - Username: admin
+DEBUG 2025-12-17 11:00:49,373 auth_service 129 140154031478464 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 11:00:49,374 auth_service 129 140154031478464 Generating authentication tokens for user: admin
+INFO 2025-12-17 11:00:49,384 auth_service 129 140154031478464 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 12:03:05,115 auth_service 169 139842551977664 AuthService initialized
+INFO 2025-12-17 12:03:05,133 auth_service 169 139842551977664 Login attempt - Username: admin
+DEBUG 2025-12-17 12:03:05,771 auth_service 169 139842551977664 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 12:03:05,772 auth_service 169 139842551977664 Generating authentication tokens for user: admin
+INFO 2025-12-17 12:03:05,802 auth_service 169 139842551977664 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 12:26:13,324 auth_service 273 140604924401344 AuthService initialized
+INFO 2025-12-17 12:26:13,324 auth_service 273 140604924401344 Login attempt - Username: admin
+DEBUG 2025-12-17 12:26:13,908 auth_service 273 140604924401344 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 12:26:13,910 auth_service 273 140604924401344 Generating authentication tokens for user: admin
+INFO 2025-12-17 12:26:13,929 auth_service 273 140604924401344 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 12:53:19,960 auth_service 8 140478708180672 AuthService initialized
+INFO 2025-12-17 12:53:19,961 auth_service 8 140478708180672 Login attempt - Username: admin
+DEBUG 2025-12-17 12:53:20,803 auth_service 8 140478708180672 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 12:53:20,807 auth_service 8 140478708180672 Generating authentication tokens for user: admin
+INFO 2025-12-17 12:53:20,845 auth_service 8 140478708180672 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 21:06:34,684 auth_service 11 140497072068288 AuthService initialized
+INFO 2025-12-17 21:06:34,694 auth_service 11 140497072068288 Login attempt - Username: admin
+DEBUG 2025-12-17 21:06:35,573 auth_service 11 140497072068288 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-17 21:06:35,573 auth_service 11 140497072068288 Generating authentication tokens for user: admin
+INFO 2025-12-17 21:06:35,606 auth_service 11 140497072068288 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 07:57:55,114 auth_service 9 140512560584384 AuthService initialized
+INFO 2025-12-18 07:57:55,124 auth_service 9 140512560584384 Login attempt - Username: admin
+DEBUG 2025-12-18 07:57:55,726 auth_service 9 140512560584384 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 07:57:55,737 auth_service 9 140512560584384 Generating authentication tokens for user: admin
+INFO 2025-12-18 07:57:55,772 auth_service 9 140512560584384 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 08:11:08,383 auth_service 9 140512560584384 AuthService initialized
+INFO 2025-12-18 08:11:08,384 auth_service 9 140512560584384 Login attempt - Username: admin
+DEBUG 2025-12-18 08:11:09,049 auth_service 9 140512560584384 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 08:11:09,050 auth_service 9 140512560584384 Generating authentication tokens for user: admin
+INFO 2025-12-18 08:11:09,065 auth_service 9 140512560584384 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 12:20:57,605 auth_service 85 139966984394432 AuthService initialized
+INFO 2025-12-18 12:20:57,606 auth_service 85 139966984394432 Login attempt - Username: admin
+DEBUG 2025-12-18 12:20:58,227 auth_service 85 139966984394432 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 12:20:58,227 auth_service 85 139966984394432 Generating authentication tokens for user: admin
+INFO 2025-12-18 12:20:58,261 auth_service 85 139966984394432 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 13:59:52,735 auth_service 430 140719619741376 AuthService initialized
+INFO 2025-12-18 13:59:52,735 auth_service 430 140719619741376 Login attempt - Username: admin
+DEBUG 2025-12-18 13:59:53,330 auth_service 430 140719619741376 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 13:59:53,331 auth_service 430 140719619741376 Generating authentication tokens for user: admin
+INFO 2025-12-18 13:59:53,383 auth_service 430 140719619741376 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 15:18:50,848 auth_service 685 140607296108224 AuthService initialized
+INFO 2025-12-18 15:18:50,849 auth_service 685 140607296108224 Login attempt - Username: admin
+DEBUG 2025-12-18 15:18:51,491 auth_service 685 140607296108224 User authenticated successfully - User ID: 2, Username: admin
+DEBUG 2025-12-18 15:18:51,494 auth_service 685 140607296108224 Generating authentication tokens for user: admin
+INFO 2025-12-18 15:18:51,509 auth_service 685 140607296108224 User logged in successfully - User ID: 2, Username: admin
+DEBUG 2025-12-20 11:40:30,252 auth_service 501 139798831425216 AuthService initialized with UserIdentityService
+INFO 2025-12-20 11:40:30,265 auth_service 501 139798831425216 Starting registration process for: amingholami121381@gmail.com
+INFO 2025-12-20 11:40:30,923 auth_service 501 139798831425216 User created in DB - ID: 9
+INFO 2025-12-20 11:40:30,924 auth_service 501 139798831425216 Sending verification code to: amingholami121381@gmail.com
+DEBUG 2025-12-20 11:46:36,065 auth_service 571 140064093013696 AuthService initialized with UserIdentityService
+INFO 2025-12-20 11:46:36,066 auth_service 571 140064093013696 Login attempt for: admin_seeder
+INFO 2025-12-20 11:46:36,880 auth_service 571 140064093013696 User logged in: 1
+DEBUG 2025-12-20 12:12:58,696 auth_service 644 140269202699968 AuthService initialized with UserIdentityService
+INFO 2025-12-20 12:12:58,697 auth_service 644 140269202699968 Starting registration process for: amingholami121381@gmail.com
+INFO 2025-12-20 12:12:59,442 auth_service 644 140269202699968 User created in DB - ID: 10
+INFO 2025-12-20 12:12:59,443 auth_service 644 140269202699968 Sending verification code to: amingholami121381@gmail.com
+DEBUG 2025-12-22 10:02:51,357 auth_service 295 140132862654144 AuthService initialized with UserIdentityService
+INFO 2025-12-22 10:02:51,373 auth_service 295 140132862654144 Login attempt for: admin
+INFO 2025-12-22 10:02:52,094 auth_service 295 140132862654144 User logged in: 2
+DEBUG 2025-12-22 11:10:30,188 auth_service 557 140640062011072 AuthService initialized with UserIdentityService
+INFO 2025-12-22 11:10:30,189 auth_service 557 140640062011072 Login attempt for: admin
+INFO 2025-12-22 11:10:30,851 auth_service 557 140640062011072 User logged in: 2
+DEBUG 2025-12-22 12:33:57,047 auth_service 600 140024686311104 AuthService initialized with UserIdentityService
+INFO 2025-12-22 12:33:57,048 auth_service 600 140024686311104 Login attempt for: admin
+INFO 2025-12-22 12:33:57,617 auth_service 600 140024686311104 User logged in: 2
+DEBUG 2025-12-22 20:07:02,937 auth_service 7 139835054487232 AuthService initialized with UserIdentityService
+INFO 2025-12-22 20:07:02,949 auth_service 7 139835054487232 Login attempt for: admin
+INFO 2025-12-22 20:07:03,757 auth_service 7 139835054487232 User logged in: 2
+DEBUG 2025-12-23 09:32:07,420 auth_service 201 139626635327168 AuthService initialized with UserIdentityService
+INFO 2025-12-23 09:32:07,432 auth_service 201 139626635327168 Login attempt for: admin
+INFO 2025-12-23 09:32:08,118 auth_service 201 139626635327168 User logged in: 2
+DEBUG 2025-12-23 10:54:36,090 auth_service 353 140716881737408 AuthService initialized with UserIdentityService
+INFO 2025-12-23 10:54:36,091 auth_service 353 140716881737408 Login attempt for: admin
+INFO 2025-12-23 10:54:36,739 auth_service 353 140716881737408 User logged in: 2
+DEBUG 2025-12-23 11:42:20,040 auth_service 574 140271057626816 AuthService initialized with UserIdentityService
+INFO 2025-12-23 11:42:20,041 auth_service 574 140271057626816 Login attempt for: admin
+INFO 2025-12-23 11:42:20,725 auth_service 574 140271057626816 User logged in: 2
+DEBUG 2025-12-23 20:35:09,382 auth_service 991 140312766838464 AuthService initialized with UserIdentityService
+INFO 2025-12-23 20:35:09,394 auth_service 991 140312766838464 Login attempt for: admin
+INFO 2025-12-23 20:35:10,093 auth_service 991 140312766838464 User logged in: 2
+DEBUG 2025-12-24 06:35:58,812 auth_service 7 140251297212096 AuthService initialized with UserIdentityService
+INFO 2025-12-24 06:35:58,825 auth_service 7 140251297212096 Login attempt for: admin
+INFO 2025-12-24 06:35:59,544 auth_service 7 140251297212096 User logged in: 2
+DEBUG 2025-12-24 07:52:11,866 auth_service 259 140110386427584 AuthService initialized with UserIdentityService
+INFO 2025-12-24 07:52:11,867 auth_service 259 140110386427584 Login attempt for: admin
+INFO 2025-12-24 07:52:12,520 auth_service 259 140110386427584 User logged in: 2
+DEBUG 2025-12-25 06:54:26,585 auth_service 33 140088071681728 AuthService initialized with UserIdentityService
+INFO 2025-12-25 06:54:26,596 auth_service 33 140088071681728 Login attempt for: admin
+INFO 2025-12-25 06:54:27,386 auth_service 33 140088071681728 User logged in: 2
+DEBUG 2025-12-25 07:49:30,316 auth_service 291 140049396004544 AuthService initialized with UserIdentityService
+INFO 2025-12-25 07:49:30,333 auth_service 291 140049396004544 Login attempt for: admin
+INFO 2025-12-25 07:49:31,053 auth_service 291 140049396004544 User logged in: 2
+DEBUG 2025-12-25 14:48:10,221 auth_service 244 140086367745728 AuthService initialized with UserIdentityService
+INFO 2025-12-25 14:48:10,223 auth_service 244 140086367745728 Login attempt for: admin
+INFO 2025-12-25 14:48:11,062 auth_service 244 140086367745728 User logged in: 2
+DEBUG 2025-12-25 15:12:55,823 auth_service 32 140395971344064 AuthService initialized with UserIdentityService
+INFO 2025-12-25 15:12:55,824 auth_service 32 140395971344064 Login attempt for: admin
+WARNING 2025-12-25 15:12:56,744 auth_service 32 140395971344064 Invalid credentials for: admin
+DEBUG 2025-12-25 15:13:46,054 auth_service 32 140395971344064 AuthService initialized with UserIdentityService
+INFO 2025-12-25 15:13:46,056 auth_service 32 140395971344064 Login attempt for: admin
+INFO 2025-12-25 15:13:46,924 auth_service 32 140395971344064 User logged in: 1
+DEBUG 2025-12-27 07:07:07,431 auth_service 8 140644843689664 AuthService initialized with UserIdentityService
+INFO 2025-12-27 07:07:07,441 auth_service 8 140644843689664 Login attempt for: admin
+INFO 2025-12-27 07:07:08,047 auth_service 8 140644843689664 User logged in: 1
+DEBUG 2025-12-28 11:08:57,293 auth_service 56 140431117686464 AuthService initialized with UserIdentityService
+INFO 2025-12-28 11:08:57,310 auth_service 56 140431117686464 Login attempt for: admin
+INFO 2025-12-28 11:08:57,921 auth_service 56 140431117686464 User logged in: 1
+DEBUG 2025-12-28 11:17:24,078 auth_service 147 140027641370304 AuthService initialized with UserIdentityService
+INFO 2025-12-28 11:17:24,079 auth_service 147 140027641370304 Login attempt for: admin
+INFO 2025-12-28 11:17:24,758 auth_service 147 140027641370304 User logged in: 1
+DEBUG 2025-12-29 13:44:30,486 auth_service 9 139654159570624 AuthService initialized with UserIdentityService
+INFO 2025-12-29 13:44:30,505 auth_service 9 139654159570624 Login attempt for: admin
+INFO 2025-12-29 13:44:31,370 auth_service 9 139654159570624 User logged in: 1
+DEBUG 2025-12-29 13:52:17,060 auth_service 79 139913323345600 AuthService initialized with UserIdentityService
+INFO 2025-12-29 13:52:17,063 auth_service 79 139913323345600 Login attempt for: admin
+INFO 2025-12-29 13:52:18,714 auth_service 79 139913323345600 User logged in: 1
+DEBUG 2025-12-29 19:02:09,571 auth_service 101 139993099179712 AuthService initialized with UserIdentityService
+INFO 2025-12-29 19:02:09,585 auth_service 101 139993099179712 Login attempt for: admin
+INFO 2025-12-29 19:02:10,494 auth_service 101 139993099179712 User logged in: 1
+DEBUG 2025-12-31 20:33:09,779 auth_service 437 140680480409280 AuthService initialized with UserIdentityService
+INFO 2025-12-31 20:33:09,786 auth_service 437 140680480409280 Login attempt for: admin
+INFO 2025-12-31 20:33:10,666 auth_service 437 140680480409280 User logged in: 1
+DEBUG 2026-01-08 06:27:34,201 auth_service 7 139645492917952 AuthService initialized with UserIdentityService
+INFO 2026-01-08 06:27:34,209 auth_service 7 139645492917952 Login attempt for: admin
+INFO 2026-01-08 06:27:34,701 auth_service 7 139645492917952 User logged in: 1
+DEBUG 2026-01-08 10:13:50,468 auth_service 173 139749458351808 AuthService initialized with UserIdentityService
+INFO 2026-01-08 10:13:50,486 auth_service 173 139749458351808 Login attempt for: admin
+INFO 2026-01-08 10:13:51,042 auth_service 173 139749458351808 User logged in: 1
+DEBUG 2026-01-08 10:14:35,069 auth_service 173 139749458351808 AuthService initialized with UserIdentityService
+INFO 2026-01-08 10:14:35,071 auth_service 173 139749458351808 Starting registration process for: user@gmail.com
+INFO 2026-01-08 10:14:35,530 auth_service 173 139749458351808 User created in DB - ID: 2
+DEBUG 2026-01-08 10:14:56,967 auth_service 173 139749458351808 AuthService initialized with UserIdentityService
+INFO 2026-01-08 10:14:56,968 auth_service 173 139749458351808 Login attempt for: testuser
+INFO 2026-01-08 10:14:57,440 auth_service 173 139749458351808 User logged in: 2
+DEBUG 2026-01-08 10:18:56,546 auth_service 237 140200440403648 AuthService initialized with UserIdentityService
+INFO 2026-01-08 10:18:56,561 auth_service 237 140200440403648 Login attempt for: admin
+INFO 2026-01-08 10:18:57,038 auth_service 237 140200440403648 User logged in: 1
+DEBUG 2026-01-08 11:23:27,748 auth_service 262 139764541945536 AuthService initialized with UserIdentityService
+INFO 2026-01-08 11:23:27,749 auth_service 262 139764541945536 Login attempt for: admin
+INFO 2026-01-08 11:23:28,454 auth_service 262 139764541945536 User logged in: 1
+DEBUG 2026-01-08 11:49:25,416 auth_service 347 139962074961600 AuthService initialized with UserIdentityService
+INFO 2026-01-08 11:49:25,418 auth_service 347 139962074961600 Login attempt for: admin
+INFO 2026-01-08 11:49:26,027 auth_service 347 139962074961600 User logged in: 1
+DEBUG 2026-01-08 12:02:01,081 auth_service 424 140624097613504 AuthService initialized with UserIdentityService
+INFO 2026-01-08 12:02:01,083 auth_service 424 140624097613504 Login attempt for: admin
+INFO 2026-01-08 12:02:01,616 auth_service 424 140624097613504 User logged in: 1
+DEBUG 2026-01-08 12:39:47,591 auth_service 524 140150420010688 AuthService initialized with UserIdentityService
+INFO 2026-01-08 12:39:47,592 auth_service 524 140150420010688 Login attempt for: admin
+INFO 2026-01-08 12:39:48,088 auth_service 524 140150420010688 User logged in: 1
+DEBUG 2026-01-08 16:45:54,527 auth_service 7 140332253742784 AuthService initialized with UserIdentityService
+INFO 2026-01-08 16:45:54,528 auth_service 7 140332253742784 Login attempt for: admin
+INFO 2026-01-08 16:45:54,993 auth_service 7 140332253742784 User logged in: 1
+DEBUG 2026-01-09 09:14:00,234 auth_service 9 140182942631616 AuthService initialized with UserIdentityService
+INFO 2026-01-09 09:14:00,253 auth_service 9 140182942631616 Login attempt for: admin
+INFO 2026-01-09 09:14:00,966 auth_service 9 140182942631616 User logged in: 1
+DEBUG 2026-01-09 09:48:58,666 auth_service 40 140016240199360 AuthService initialized with UserIdentityService
+INFO 2026-01-09 09:48:58,667 auth_service 40 140016240199360 Login attempt for: admin
+INFO 2026-01-09 09:48:59,266 auth_service 40 140016240199360 User logged in: 1
+DEBUG 2026-01-24 07:25:56,159 auth_service 7 139860258035392 AuthService initialized with UserIdentityService
+INFO 2026-01-24 07:25:56,177 auth_service 7 139860258035392 Login attempt for: admin
+INFO 2026-01-24 07:25:56,659 auth_service 7 139860258035392 User logged in: 1
+DEBUG 2026-01-28 12:52:01,281 auth_service 9 140414947419840 AuthService initialized with UserIdentityService
+INFO 2026-01-28 12:52:01,300 auth_service 9 140414947419840 Login attempt for: admin
+INFO 2026-01-28 12:52:02,046 auth_service 9 140414947419840 User logged in: 1
+DEBUG 2026-01-30 18:52:02,348 auth_service 7 127435621439168 AuthService initialized with UserIdentityService
+INFO 2026-01-30 18:52:02,351 auth_service 7 127435621439168 Login attempt for: admin
+INFO 2026-01-30 18:52:02,535 auth_service 7 127435621439168 User logged in: 1
+DEBUG 2026-01-30 18:53:21,020 auth_service 7 127435613046464 AuthService initialized with UserIdentityService
+INFO 2026-01-30 18:53:21,021 auth_service 7 127435613046464 Login attempt for: admin
+INFO 2026-01-30 18:53:21,181 auth_service 7 127435613046464 User logged in: 1

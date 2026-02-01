@@ -1,0 +1,71 @@
+INFO 2025-12-13 15:54:28,637 cart_item_service 1093 139999802541760 Fetching cart list for User ID: 1
+DEBUG 2025-12-13 15:54:28,640 cart_item_service 1093 139999802541760 Cart retrieved/created for User ID: 1, Cart ID: 1
+ERROR 2025-12-13 15:54:28,653 cart_item_service 1093 139999802541760 Error fetching cart list for User ID: 1
+Traceback (most recent call last):
+  File "/app/src/apps/cart/services/cart_item_service.py", line 45, in get_user_cart_items
+    logger_list.info(f"Retrieved {items.count()} items for Cart ID: {cart.id}")
+                                  ^^^^^^^^^^^^^
+TypeError: list.count() takes exactly one argument (0 given)
+INFO 2025-12-13 15:55:43,435 cart_item_service 1164 140314702509760 Fetching cart list for User ID: 1
+DEBUG 2025-12-13 15:55:43,438 cart_item_service 1164 140314702509760 Cart retrieved/created for User ID: 1, Cart ID: 1
+INFO 2025-12-13 15:55:43,449 cart_item_service 1164 140314702509760 Retrieved [<CartItem: کارت ویزیت لاکچری - کد 8464 (x5000)>, <CartItem: کارت ویزیت لاکچری - کد 3914 (x2000)>, <CartItem: تراکت تبلیغاتی - کد 6158 (x2000)>, <CartItem: کارت ویزیت لاکچری - کد 8649 (x10000)>, <CartItem: استیکر شیشه‌ای - کد 7542 (x5000)>, <CartItem: تراکت تبلیغاتی - کد 4202 (x10000)>, <CartItem: استیکر شیشه‌ای - کد 9068 (x5000)>, <CartItem: سربرگ اداری - کد 7813 (x2000)>, <CartItem: تراکت تبلیغاتی - کد 7848 (x2000)>, <CartItem: کارت ویزیت لاکچری - کد 1566 (x1000)>] items for Cart ID: 1
+ERROR 2025-12-13 15:55:43,451 cart_item_service 1164 140314702509760 Error fetching cart list for User ID: 1
+Traceback (most recent call last):
+  File "/app/src/apps/cart/services/cart_item_service.py", line 55, in get_user_cart_items
+    "item_count": items.count()
+                  ^^^^^^^^^^^^^
+TypeError: list.count() takes exactly one argument (0 given)
+INFO 2025-12-13 15:56:13,675 cart_item_service 1167 139675972048576 Fetching cart list for User ID: 1
+DEBUG 2025-12-13 15:56:13,679 cart_item_service 1167 139675972048576 Cart retrieved/created for User ID: 1, Cart ID: 1
+INFO 2025-12-13 15:56:13,689 cart_item_service 1167 139675972048576 Retrieved [<CartItem: کارت ویزیت لاکچری - کد 8464 (x5000)>, <CartItem: کارت ویزیت لاکچری - کد 3914 (x2000)>, <CartItem: تراکت تبلیغاتی - کد 6158 (x2000)>, <CartItem: کارت ویزیت لاکچری - کد 8649 (x10000)>, <CartItem: استیکر شیشه‌ای - کد 7542 (x5000)>, <CartItem: تراکت تبلیغاتی - کد 4202 (x10000)>, <CartItem: استیکر شیشه‌ای - کد 9068 (x5000)>, <CartItem: سربرگ اداری - کد 7813 (x2000)>, <CartItem: تراکت تبلیغاتی - کد 7848 (x2000)>, <CartItem: کارت ویزیت لاکچری - کد 1566 (x1000)>] items for Cart ID: 1
+ERROR 2025-12-13 15:56:13,690 cart_item_service 1167 139675972048576 Error fetching cart list for User ID: 1
+Traceback (most recent call last):
+  File "/app/src/apps/cart/services/cart_item_service.py", line 55, in get_user_cart_items
+    "item_count": items.count()
+                  ^^^^^^^^^^^^^
+TypeError: list.count() takes exactly one argument (0 given)
+INFO 2025-12-13 15:57:36,906 cart_item_service 1174 140156278576832 Fetching cart list for User ID: 1
+DEBUG 2025-12-13 15:57:36,910 cart_item_service 1174 140156278576832 Cart retrieved/created for User ID: 1, Cart ID: 1
+INFO 2025-12-13 15:57:36,923 cart_item_service 1174 140156278576832 Retrieved [<CartItem: کارت ویزیت لاکچری - کد 8464 (x5000)>, <CartItem: کارت ویزیت لاکچری - کد 3914 (x2000)>, <CartItem: تراکت تبلیغاتی - کد 6158 (x2000)>, <CartItem: کارت ویزیت لاکچری - کد 8649 (x10000)>, <CartItem: استیکر شیشه‌ای - کد 7542 (x5000)>, <CartItem: تراکت تبلیغاتی - کد 4202 (x10000)>, <CartItem: استیکر شیشه‌ای - کد 9068 (x5000)>, <CartItem: سربرگ اداری - کد 7813 (x2000)>, <CartItem: تراکت تبلیغاتی - کد 7848 (x2000)>, <CartItem: کارت ویزیت لاکچری - کد 1566 (x1000)>] items for Cart ID: 1
+INFO 2025-12-27 07:21:25,399 cart_item_service 80 140340605482688 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:21:25,403 cart_item_service 80 140340605482688 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:21:25,409 cart_item_service 80 140340605482688 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:25:11,420 cart_item_service 86 139733483296448 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:25:11,423 cart_item_service 86 139733483296448 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:25:11,430 cart_item_service 86 139733483296448 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:25:37,443 cart_item_service 89 140523922953920 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:25:37,446 cart_item_service 89 140523922953920 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:25:37,457 cart_item_service 89 140523922953920 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:26:22,956 cart_item_service 92 139651237189312 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:26:22,960 cart_item_service 92 139651237189312 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:26:22,967 cart_item_service 92 139651237189312 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:26:24,462 cart_item_service 92 139651237189312 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:26:24,465 cart_item_service 92 139651237189312 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:26:24,471 cart_item_service 92 139651237189312 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:26:38,465 cart_item_service 92 139651237189312 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:26:38,467 cart_item_service 92 139651237189312 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:26:38,474 cart_item_service 92 139651237189312 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:27:05,322 cart_item_service 95 140518310803136 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:27:05,325 cart_item_service 95 140518310803136 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:27:05,334 cart_item_service 95 140518310803136 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:27:41,383 cart_item_service 95 140518310803136 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:27:41,386 cart_item_service 95 140518310803136 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:27:41,393 cart_item_service 95 140518310803136 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:29:12,302 cart_item_service 158 139705578591936 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:29:12,304 cart_item_service 158 139705578591936 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:29:12,310 cart_item_service 158 139705578591936 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:30:47,045 cart_item_service 163 140557745821376 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:30:47,048 cart_item_service 163 140557745821376 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:30:47,054 cart_item_service 163 140557745821376 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:31:02,547 cart_item_service 166 140226711426752 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:31:02,550 cart_item_service 166 140226711426752 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:31:02,556 cart_item_service 166 140226711426752 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:34:03,388 cart_item_service 169 139956084446912 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:34:03,391 cart_item_service 169 139956084446912 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:34:03,398 cart_item_service 169 139956084446912 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:34:53,829 cart_item_service 172 140695880857280 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:34:53,832 cart_item_service 172 140695880857280 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:34:53,837 cart_item_service 172 140695880857280 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2025-12-27 07:35:22,673 cart_item_service 235 139998339962560 Fetching cart list for User ID: 1
+DEBUG 2025-12-27 07:35:22,676 cart_item_service 235 139998339962560 Cart retrieved/created for User ID: 1, Cart ID: 2
+INFO 2025-12-27 07:35:22,683 cart_item_service 235 139998339962560 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2

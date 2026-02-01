@@ -1,0 +1,105 @@
+INFO 2025-11-27 16:14:43,989 user_order_service 26 140022100522688 Fetching order history for User ID: 6
+INFO 2025-11-27 16:14:44,003 user_order_service 26 140022100522688 Found 2 orders for User ID: 6
+INFO 2025-11-27 16:14:53,353 user_order_service 26 140022100522688 Fetching details for Order ID: 6, User ID: 6
+DEBUG 2025-11-27 16:14:53,388 user_order_service 26 140022100522688 Order details retrieved successfully for Order ID: 6
+INFO 2025-11-29 14:22:22,453 user_order_service 498 139635853342400 Fetching order history for User ID: 1
+ERROR 2025-11-29 14:22:22,454 user_order_service 498 139635853342400 Error fetching order list for User ID: 1
+Traceback (most recent call last):
+  File "/app/src/apps/userprofile/services/user_order_service.py", line 42, in get_user_orders
+    orders = self._service.get_user_orders_summary(user_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/order/services.py", line 107, in get_user_orders_summary
+    return self._repository.get_user_orders_summary(user_id)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'OrderDomainService' object has no attribute '_repository'
+INFO 2025-11-29 14:24:08,343 user_order_service 509 140300176586432 Fetching order history for User ID: 1
+INFO 2025-11-29 14:24:08,346 user_order_service 509 140300176586432 Found 0 orders for User ID: 1
+INFO 2025-11-29 14:24:15,213 user_order_service 509 140300176586432 Fetching details for Order ID: 1, User ID: 1
+ERROR 2025-11-29 14:24:15,213 user_order_service 509 140300176586432 Unexpected error retrieving order 1 for User ID: 1
+Traceback (most recent call last):
+  File "/app/src/apps/userprofile/services/user_order_service.py", line 67, in get_order_detail
+    order = self._service.get_user_order_item_details(user_id, order_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/order/services.py", line 113, in get_user_order_item_details
+    return self._order_repo.get_order_detail_by_id(user_id, order_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'OrderRepository' object has no attribute 'get_order_detail_by_id'
+INFO 2025-11-29 14:26:10,712 user_order_service 512 140353863677632 Fetching details for Order ID: 1, User ID: 1
+ERROR 2025-11-29 14:26:10,712 user_order_service 512 140353863677632 Unexpected error retrieving order 1 for User ID: 1
+Traceback (most recent call last):
+  File "/app/src/apps/userprofile/services/user_order_service.py", line 67, in get_order_detail
+    order = self._service.get_user_order_item_details(user_id, order_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'OrderDomainService' object has no attribute 'get_user_order_item_details'
+INFO 2025-11-29 14:27:23,372 user_order_service 517 139762210961088 Fetching details for Order ID: 1, User ID: 1
+WARNING 2025-11-29 14:27:23,378 user_order_service 517 139762210961088 Order ID 1 not found or access denied for User ID: 1
+INFO 2025-11-29 14:27:27,342 user_order_service 517 139762210961088 Fetching details for Order ID: 1, User ID: 1
+WARNING 2025-11-29 14:27:27,351 user_order_service 517 139762210961088 Order ID 1 not found or access denied for User ID: 1
+INFO 2025-11-29 15:28:31,248 user_order_service 551 140430934013632 Fetching order history for User ID: 1
+INFO 2025-11-29 15:28:31,252 user_order_service 551 140430934013632 Found 1 orders for User ID: 1
+INFO 2025-11-29 15:28:39,190 user_order_service 551 140430934013632 Fetching details for Order ID: 1, User ID: 1
+DEBUG 2025-11-29 15:28:39,201 user_order_service 551 140430934013632 Order details retrieved successfully for Order ID: 1
+INFO 2025-12-01 12:20:33,440 user_order_service 479 140319384573632 Fetching order history for User ID: 6
+INFO 2025-12-01 12:20:33,445 user_order_service 479 140319384573632 Found 1 orders for User ID: 6
+INFO 2025-12-01 12:20:46,455 user_order_service 479 140319384573632 Fetching details for Order ID: 2, User ID: 6
+DEBUG 2025-12-01 12:20:46,475 user_order_service 479 140319384573632 Order details retrieved successfully for Order ID: 2
+INFO 2025-12-02 17:23:51,430 user_order_service 746 140268952262336 Fetching order history for User ID: 2
+INFO 2025-12-02 17:35:21,117 user_order_service 839 140457331037888 Fetching order history for User ID: 2
+INFO 2025-12-02 17:35:35,163 user_order_service 839 140457331037888 Fetching detail Order 2 for User 2
+WARNING 2025-12-02 17:35:35,169 user_order_service 839 140457331037888 Order 2 not found for user 2
+ERROR 2025-12-02 17:35:35,170 user_order_service 839 140457331037888 Error fetching order detail: سفارش مورد نظر یافت نشد.
+INFO 2025-12-02 17:35:38,627 user_order_service 839 140457331037888 Fetching detail Order 4 for User 2
+ERROR 2025-12-02 17:35:38,633 user_order_service 839 140457331037888 Error fetching order detail: Cannot find 'items' on Order object, 'items' is an invalid parameter to prefetch_related()
+INFO 2025-12-02 17:39:13,458 user_order_service 842 140346613995200 Fetching detail Order 4 for User 2
+INFO 2025-12-02 17:39:19,468 user_order_service 842 140346613995200 Fetching detail Order 4 for User 2
+INFO 2025-12-02 17:41:05,028 user_order_service 842 140346604553920 Fetching detail Order 4 for User 2
+INFO 2025-12-02 17:42:05,715 user_order_service 842 140346596161216 Fetching detail Order 4 for User 2
+INFO 2025-12-02 17:55:57,618 user_order_service 857 140324549859008 Fetching detail Order 5 for User 2
+INFO 2025-12-02 17:56:51,277 user_order_service 864 140476770416320 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:04:37,508 user_order_service 871 139881435272896 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:11:23,115 user_order_service 874 139707537331904 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:19:32,610 user_order_service 907 139961187866304 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:21:24,311 user_order_service 907 139961105905344 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:21:42,466 user_order_service 907 139961105905344 Fetching order history for User ID: 2
+INFO 2025-12-02 18:22:31,469 user_order_service 907 139961105905344 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:24:42,620 user_order_service 911 140439189452480 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:25:13,448 user_order_service 914 140127133234880 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:30:15,507 user_order_service 917 140530670540480 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:30:28,466 user_order_service 917 140530670540480 Fetching order history for User ID: 2
+INFO 2025-12-02 18:31:36,447 user_order_service 920 140087534982848 Fetching order history for User ID: 2
+INFO 2025-12-02 18:32:03,747 user_order_service 923 140351287498432 Fetching order history for User ID: 2
+INFO 2025-12-02 18:32:08,762 user_order_service 923 140351287498432 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:33:15,604 user_order_service 926 140023315822272 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:33:17,732 user_order_service 926 140023315822272 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:36:01,763 user_order_service 926 140023307429568 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:37:53,933 user_order_service 936 139702885848768 Fetching order history for User ID: 2
+INFO 2025-12-02 18:38:02,913 user_order_service 936 139702885848768 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:38:07,428 user_order_service 936 139702885848768 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:38:37,840 user_order_service 939 139656056444608 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:39:43,162 user_order_service 942 140513478964928 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:41:53,308 user_order_service 949 139841146885824 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:46:35,703 user_order_service 962 140293732210368 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:47:18,163 user_order_service 967 140632377169600 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:47:35,642 user_order_service 970 140610732463808 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:48:59,310 user_order_service 973 140325853238976 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:49:05,682 user_order_service 973 140325853238976 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:49:12,863 user_order_service 973 140325853238976 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:49:16,348 user_order_service 973 140325853238976 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:50:37,595 user_order_service 980 139805563459264 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:51:08,328 user_order_service 980 139805563459264 Fetching detail Order 4 for User 2
+INFO 2025-12-13 16:10:34,912 user_order_service 1174 140156048762560 Fetching order history for User ID: 1
+INFO 2025-12-13 16:10:48,618 user_order_service 1174 140156048762560 Fetching detail Order 37 for User 1
+ERROR 2025-12-13 16:10:48,622 user_order_service 1174 140156048762560 Error fetching order detail: Invalid field name(s) given in select_related: 'order_status'. Choices are: user, current_status, address, related_invoice
+INFO 2025-12-16 12:08:05,015 user_order_service 13 140585545492160 Fetching order history for User ID: 2
+WARNING 2025-12-16 14:03:52,944 user_order_service 543 139818481915584 Security Alert: User 2 tried to access quotation of Order 2
+WARNING 2025-12-16 14:04:18,646 user_order_service 543 139818481915584 Quotation not found for order 10
+WARNING 2025-12-16 14:06:00,668 user_order_service 543 139818481915584 Security Alert: User 1 tried to access quotation of Order 16
+INFO 2025-12-17 13:02:34,829 user_order_service 8 140478095808192 Fetching order history for User ID: 2
+INFO 2025-12-17 13:03:11,601 user_order_service 8 140478095808192 Fetching order history for User ID: 2
+INFO 2025-12-22 11:07:00,935 user_order_service 486 139937300084416 Fetching detail Order 16 for User 2
+ERROR 2025-12-22 11:07:00,956 user_order_service 486 139937300084416 Error fetching order detail: Invalid field name(s) given in select_related: 'requirement'. Choices are: order_item
+INFO 2025-12-22 11:08:22,061 user_order_service 491 140490700748480 Fetching detail Order 16 for User 2
+INFO 2025-12-22 11:08:31,967 user_order_service 491 140490700748480 Fetching order history for User ID: 2
+INFO 2025-12-24 07:07:45,973 user_order_service 94 139868830168768 Fetching order history for User ID: 2
+INFO 2025-12-24 07:07:56,292 user_order_service 94 139868830168768 Fetching detail Order 18 for User 2
+INFO 2025-12-24 07:08:50,588 user_order_service 94 139868830168768 Fetching detail Order 19 for User 2

@@ -1,0 +1,165 @@
+INFO 2025-12-01 10:47:53,639 cart_item_service 303 139621360105152 Fetching details for CartItem ID: 8, User ID: 6
+DEBUG 2025-12-01 10:47:53,645 cart_item_service 303 139621360105152 CartItem 8 details retrieved successfully.
+INFO 2025-12-01 10:48:04,357 cart_item_service 303 139621360105152 Fetching details for CartItem ID: 5, User ID: 6
+DEBUG 2025-12-01 10:48:04,363 cart_item_service 303 139621360105152 CartItem 5 details retrieved successfully.
+INFO 2025-12-01 10:48:07,045 cart_item_service 303 139621360105152 Fetching details for CartItem ID: 2, User ID: 6
+DEBUG 2025-12-01 10:48:07,051 cart_item_service 303 139621360105152 CartItem 2 details retrieved successfully.
+INFO 2025-12-02 16:45:03,033 cart_item_service 639 140526527428288 Fetching details for CartItem ID: 1, User ID: 2
+DEBUG 2025-12-02 16:45:03,045 cart_item_service 639 140526527428288 CartItem 1 details retrieved successfully.
+INFO 2025-12-02 16:45:38,495 cart_item_service 639 140526527428288 Fetching details for CartItem ID: 1, User ID: 2
+DEBUG 2025-12-02 16:45:38,500 cart_item_service 639 140526527428288 CartItem 1 details retrieved successfully.
+INFO 2025-12-02 16:46:40,523 cart_item_service 639 140526527428288 Fetching details for CartItem ID: 1, User ID: 2
+DEBUG 2025-12-02 16:46:40,530 cart_item_service 639 140526527428288 CartItem 1 details retrieved successfully.
+INFO 2025-12-02 16:46:51,414 cart_item_service 639 140526527428288 Fetching details for CartItem ID: 1, User ID: 2
+DEBUG 2025-12-02 16:46:51,420 cart_item_service 639 140526527428288 CartItem 1 details retrieved successfully.
+INFO 2025-12-05 08:44:23,665 cart_item_service 759 140619104294592 Fetching details for CartItem ID: 3, User ID: 2
+DEBUG 2025-12-05 08:44:23,688 cart_item_service 759 140619104294592 CartItem 3 details retrieved successfully.
+INFO 2025-12-05 08:59:36,380 cart_item_service 7 140092654122688 Fetching details for CartItem ID: 3, User ID: 2
+DEBUG 2025-12-05 08:59:36,386 cart_item_service 7 140092654122688 CartItem 3 details retrieved successfully.
+INFO 2025-12-05 09:00:06,075 cart_item_service 7 140092654122688 Fetching details for CartItem ID: 3, User ID: 2
+DEBUG 2025-12-05 09:00:06,080 cart_item_service 7 140092654122688 CartItem 3 details retrieved successfully.
+INFO 2025-12-09 16:15:31,696 cart_item_service 26 140340777617088 Fetching details for CartItem ID: 3, User ID: 2
+DEBUG 2025-12-09 16:15:31,716 cart_item_service 26 140340777617088 CartItem 3 details retrieved successfully.
+INFO 2025-12-09 16:16:43,247 cart_item_service 26 140340777617088 Fetching details for CartItem ID: 4, User ID: 2
+DEBUG 2025-12-09 16:16:43,253 cart_item_service 26 140340777617088 CartItem 4 details retrieved successfully.
+INFO 2025-12-09 16:16:45,325 cart_item_service 26 140340777617088 Fetching details for CartItem ID: 5, User ID: 2
+DEBUG 2025-12-09 16:16:45,330 cart_item_service 26 140340777617088 CartItem 5 details retrieved successfully.
+INFO 2025-12-09 16:16:59,392 cart_item_service 26 140340777617088 Fetching details for CartItem ID: 4, User ID: 2
+DEBUG 2025-12-09 16:16:59,401 cart_item_service 26 140340777617088 CartItem 4 details retrieved successfully.
+INFO 2025-12-09 16:18:49,804 cart_item_service 26 140340378977984 Fetching details for CartItem ID: 4, User ID: 2
+DEBUG 2025-12-09 16:18:49,810 cart_item_service 26 140340378977984 CartItem 4 details retrieved successfully.
+INFO 2025-12-09 16:22:36,794 cart_item_service 26 140340388419264 Fetching details for CartItem ID: 4, User ID: 2
+WARNING 2025-12-09 16:22:36,800 cart_item_service 26 140340388419264 CartItem 4 not found or access denied for User ID: 2
+INFO 2025-12-09 16:26:43,989 cart_item_service 105 140143319213760 Fetching details for CartItem ID: 9, User ID: 2
+DEBUG 2025-12-09 16:26:43,997 cart_item_service 105 140143319213760 CartItem 9 details retrieved successfully.
+INFO 2025-12-09 17:11:05,842 cart_item_service 258 140432928577216 Fetching details for CartItem ID: 9, User ID: 2
+DEBUG 2025-12-09 17:11:05,846 cart_item_service 258 140432928577216 CartItem 9 details retrieved successfully.
+INFO 2025-12-09 19:25:04,521 cart_item_service 314 139786971154112 Fetching details for CartItem ID: 16, User ID: 2
+DEBUG 2025-12-09 19:25:04,550 cart_item_service 314 139786971154112 CartItem 16 details retrieved successfully.
+INFO 2025-12-13 15:58:13,604 cart_item_service 1174 140156278576832 Fetching details for CartItem ID: 20, User ID: 1
+DEBUG 2025-12-13 15:58:13,623 cart_item_service 1174 140156278576832 CartItem 20 details retrieved successfully.
+INFO 2025-12-13 16:00:55,477 cart_item_service 1174 140156269135552 Fetching details for CartItem ID: 20, User ID: 1
+DEBUG 2025-12-13 16:00:55,489 cart_item_service 1174 140156269135552 CartItem 20 details retrieved successfully.
+INFO 2025-12-13 16:00:58,179 cart_item_service 1174 140156269135552 Fetching details for CartItem ID: 25, User ID: 1
+DEBUG 2025-12-13 16:00:58,187 cart_item_service 1174 140156269135552 CartItem 25 details retrieved successfully.
+INFO 2025-12-13 16:01:00,274 cart_item_service 1174 140156269135552 Fetching details for CartItem ID: 28, User ID: 1
+DEBUG 2025-12-13 16:01:00,281 cart_item_service 1174 140156269135552 CartItem 28 details retrieved successfully.
+INFO 2025-12-13 16:01:09,337 cart_item_service 1174 140156269135552 Fetching details for CartItem ID: 30, User ID: 1
+DEBUG 2025-12-13 16:01:09,345 cart_item_service 1174 140156269135552 CartItem 30 details retrieved successfully.
+INFO 2025-12-13 16:01:13,815 cart_item_service 1174 140156269135552 Fetching details for CartItem ID: 35, User ID: 1
+DEBUG 2025-12-13 16:01:13,824 cart_item_service 1174 140156269135552 CartItem 35 details retrieved successfully.
+INFO 2025-12-13 16:03:19,310 cart_item_service 1174 140156057155264 Fetching details for CartItem ID: 45, User ID: 1
+DEBUG 2025-12-13 16:03:19,319 cart_item_service 1174 140156057155264 CartItem 45 details retrieved successfully.
+INFO 2025-12-13 16:03:22,598 cart_item_service 1174 140156057155264 Fetching details for CartItem ID: 44, User ID: 1
+DEBUG 2025-12-13 16:03:22,605 cart_item_service 1174 140156057155264 CartItem 44 details retrieved successfully.
+INFO 2025-12-13 16:03:30,279 cart_item_service 1174 140156057155264 Fetching details for CartItem ID: 42, User ID: 1
+DEBUG 2025-12-13 16:03:30,286 cart_item_service 1174 140156057155264 CartItem 42 details retrieved successfully.
+INFO 2025-12-15 19:30:32,971 cart_item_service 77 140103926322880 Fetching details for CartItem ID: 1, User ID: 1
+DEBUG 2025-12-15 19:30:32,988 cart_item_service 77 140103926322880 CartItem 1 details retrieved successfully.
+INFO 2025-12-16 08:06:36,252 cart_item_service 38 139659864872640 Fetching details for CartItem ID: 2, User ID: 2
+DEBUG 2025-12-16 08:06:36,267 cart_item_service 38 139659864872640 CartItem 2 details retrieved successfully.
+INFO 2025-12-16 11:57:41,557 cart_item_service 7 139813420439232 Fetching details for CartItem ID: 2, User ID: 2
+WARNING 2025-12-16 11:57:41,570 cart_item_service 7 139813420439232 CartItem 2 not found or access denied for User ID: 2
+INFO 2025-12-16 12:02:15,414 cart_item_service 7 139813410997952 Fetching details for CartItem ID: 3, User ID: 2
+DEBUG 2025-12-16 12:02:15,422 cart_item_service 7 139813410997952 CartItem 3 details retrieved successfully.
+INFO 2025-12-16 12:02:17,533 cart_item_service 7 139813410997952 Fetching details for CartItem ID: 4, User ID: 2
+DEBUG 2025-12-16 12:02:17,539 cart_item_service 7 139813410997952 CartItem 4 details retrieved successfully.
+INFO 2025-12-16 12:02:19,688 cart_item_service 7 139813410997952 Fetching details for CartItem ID: 5, User ID: 2
+DEBUG 2025-12-16 12:02:19,695 cart_item_service 7 139813410997952 CartItem 5 details retrieved successfully.
+INFO 2025-12-23 20:57:26,786 cart_item_service 1150 140174936766144 Fetching details for CartItem ID: 21, User ID: 2
+ERROR 2025-12-23 20:57:26,827 cart_item_service 1150 140174936766144 Unexpected error retrieving CartItem 21 for User ID: 2
+Traceback (most recent call last):
+  File "/app/src/apps/cart/services/cart_item_service.py", line 90, in get_item_detail
+    item = self._item_repo.get_item_details(item_id=item_id, user=user)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CartService.get_item_details() got an unexpected keyword argument 'item_id'
+INFO 2025-12-23 21:07:27,939 cart_item_service 1189 140297473357504 Fetching details for CartItem ID: 21, User ID: 2
+ERROR 2025-12-23 21:07:27,940 cart_item_service 1189 140297473357504 Unexpected error retrieving CartItem 21 for User ID: 2
+Traceback (most recent call last):
+  File "/app/src/apps/cart/services/cart_item_service.py", line 90, in get_item_detail
+    item = self._item_repo.get_item_details(user, item_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CartService.get_item_details() takes 2 positional arguments but 3 were given
+INFO 2025-12-23 21:08:58,411 cart_item_service 1194 139732702983872 Fetching details for CartItem ID: 21, User ID: 2
+ERROR 2025-12-23 21:08:58,412 cart_item_service 1194 139732702983872 Unexpected error retrieving CartItem 21 for User ID: 2
+Traceback (most recent call last):
+  File "/app/src/apps/cart/services/cart_item_service.py", line 90, in get_item_detail
+    item = self._item_repo.get_item_details(user, item_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CartService.get_item_details() takes 2 positional arguments but 3 were given
+INFO 2025-12-23 21:17:36,073 cart_item_service 1229 140530166003392 Fetching details for CartItem ID: 21, User ID: 2
+ERROR 2025-12-23 21:17:36,078 cart_item_service 1229 140530166003392 Unexpected error retrieving CartItem 21 for User ID: 2
+Traceback (most recent call last):
+  File "/app/src/apps/cart/services/cart_item_service.py", line 90, in get_item_detail
+    item = self._item_repo.get_cart_item_for_user(user, item_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/cart/services.py", line 166, in get_cart_item_for_user
+    item = CartItem.objects.get_item_by_id(item_id, user)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/cart/managers.py", line 126, in get_item_by_id
+    return self.get_queryset().get_item_by_id(item_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CartItemQuerySet.get_item_by_id() missing 1 required positional argument: 'user'
+INFO 2025-12-23 21:18:06,213 cart_item_service 1232 139679155353280 Fetching details for CartItem ID: 21, User ID: 2
+ERROR 2025-12-23 21:18:06,223 cart_item_service 1232 139679155353280 Unexpected error retrieving CartItem 21 for User ID: 2
+Traceback (most recent call last):
+  File "/app/shared_libs/core/cart/managers.py", line 55, in get_item_by_id
+    return self.select_related('cart', 'product').get(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.cart.models.CartItem.DoesNotExist: CartItem matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/cart/services/cart_item_service.py", line 90, in get_item_detail
+    item = self._item_repo.get_cart_item_for_user(user, item_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/cart/services.py", line 166, in get_cart_item_for_user
+    item = CartItem.objects.get_item_by_id(item_id, user)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/cart/managers.py", line 126, in get_item_by_id
+    return self.get_queryset().get_item_by_id(item_id, user)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/cart/managers.py", line 60, in get_item_by_id
+    raise ItemNotFoundException("آیتمی با شناسه وارد شده یافت نشد.")
+core.cart.exceptions.ItemNotFoundException: آیتمی با شناسه وارد شده یافت نشد.
+INFO 2025-12-23 21:18:32,990 cart_item_service 1232 139679155353280 Fetching details for CartItem ID: 15, User ID: 2
+DEBUG 2025-12-23 21:18:32,997 cart_item_service 1232 139679155353280 CartItem 15 details retrieved successfully.
+INFO 2025-12-24 06:47:59,177 cart_item_service 7 140251297212096 Fetching details for CartItem ID: 16, User ID: 2
+DEBUG 2025-12-24 06:47:59,196 cart_item_service 7 140251297212096 CartItem 16 details retrieved successfully.
+INFO 2025-12-24 06:50:00,760 cart_item_service 7 140251297212096 Fetching details for CartItem ID: 16, User ID: 2
+DEBUG 2025-12-24 06:50:00,766 cart_item_service 7 140251297212096 CartItem 16 details retrieved successfully.
+INFO 2025-12-25 07:00:51,229 cart_item_service 102 140573163910848 Fetching details for CartItem ID: 18, User ID: 2
+DEBUG 2025-12-25 07:00:51,253 cart_item_service 102 140573163910848 CartItem 18 details retrieved successfully.
+INFO 2025-12-25 07:03:44,316 cart_item_service 189 140097559197376 Fetching details for CartItem ID: 18, User ID: 2
+DEBUG 2025-12-25 07:03:44,326 cart_item_service 189 140097559197376 CartItem 18 details retrieved successfully.
+INFO 2025-12-25 07:18:00,798 cart_item_service 212 140108208535232 Fetching details for CartItem ID: 21, User ID: 2
+DEBUG 2025-12-25 07:18:00,806 cart_item_service 212 140108208535232 CartItem 21 details retrieved successfully.
+INFO 2025-12-27 07:20:23,586 cart_item_service 80 140340605482688 Fetching details for CartItem ID: 1, User ID: 1
+DEBUG 2025-12-27 07:20:23,608 cart_item_service 80 140340605482688 CartItem 1 details retrieved successfully.
+INFO 2025-12-27 07:27:25,381 cart_item_service 95 140518310803136 Fetching details for CartItem ID: 1, User ID: 1
+DEBUG 2025-12-27 07:27:25,391 cart_item_service 95 140518310803136 CartItem 1 details retrieved successfully.
+INFO 2025-12-27 07:29:22,486 cart_item_service 158 139705578591936 Fetching details for CartItem ID: 1, User ID: 1
+DEBUG 2025-12-27 07:29:22,492 cart_item_service 158 139705578591936 CartItem 1 details retrieved successfully.
+INFO 2025-12-27 07:30:38,798 cart_item_service 163 140557745821376 Fetching details for CartItem ID: 1, User ID: 1
+DEBUG 2025-12-27 07:30:38,805 cart_item_service 163 140557745821376 CartItem 1 details retrieved successfully.
+INFO 2025-12-31 19:19:13,776 cart_item_service 269 140694434924224 Fetching item 2
+INFO 2025-12-31 19:19:29,127 cart_item_service 269 140694434924224 Fetching item 1
+WARNING 2025-12-31 19:19:29,156 cart_item_service 269 140694434924224 Access denied or not found: Item 1
+INFO 2025-12-31 19:19:35,275 cart_item_service 269 140694434924224 Fetching item 2
+INFO 2025-12-31 19:27:01,047 cart_item_service 340 140622312756928 Fetching item 2
+WARNING 2025-12-31 19:27:01,103 cart_item_service 340 140622312756928 Access denied or not found: Item 2
+INFO 2025-12-31 19:29:19,877 cart_item_service 340 140621784278720 Fetching item 4
+INFO 2025-12-31 19:31:00,255 cart_item_service 340 140621775886016 Fetching item 4
+INFO 2025-12-31 19:32:35,903 cart_item_service 340 140621775886016 Fetching item 4
+INFO 2025-12-31 20:28:49,170 cart_item_service 437 140680510830272 Fetching item 4
+WARNING 2025-12-31 20:28:49,204 cart_item_service 437 140680510830272 Access denied or not found: Item 4
+INFO 2025-12-31 20:29:14,305 cart_item_service 437 140680510830272 Fetching item 4
+WARNING 2025-12-31 20:29:14,333 cart_item_service 437 140680510830272 Access denied or not found: Item 4
+INFO 2025-12-31 20:29:22,469 cart_item_service 437 140680510830272 Fetching item 5
+INFO 2025-12-31 20:33:48,878 cart_item_service 437 140680480409280 Fetching item 6
+WARNING 2025-12-31 20:33:48,914 cart_item_service 437 140680480409280 Access denied or not found: Item 6
+INFO 2025-12-31 20:33:52,779 cart_item_service 437 140680480409280 Fetching item 6
+INFO 2026-01-08 06:38:13,575 cart_item_service 95 139645913564864 Fetching item 7

@@ -23,7 +23,78 @@ class OrderTransitionAppService:
     def __init__(self):
         self.flow_domain_service = OrderStatusFlowService()
         self.audit_service = LoggerService()
+
+    # ===== EXECUTE APPROVE ===== #    
+    def execute_approve(self, requester: User, order_id: int, description: str = None):
+        """
+        تایید و جلو بردن وضعیت سفارش به مرحله بعد (Next Status).
         
+        لاجیک عملکرد:
+        1. بررسی دسترسی کاربر به گروه وضعیت فعلی (Group Access).
+        2. پیدا کردن وضعیت بعدی بر اساس sort_order.
+        3. اعمال تغییر وضعیت.
+        """
+
+        # ===== بررسی مجوز کاربر ===== #
+        AppPermissionChecker.check_has_permission(requester, 'change_orderstatus')
+        
+        # ===== تلاش برای دریافت سفارش ===== #
+        try:
+            order = Order.objects.get_order_by_id(order_id)
+            if not order:
+                raise ValidationError("سفارش یافت نشد.")
+        except Exception:
+            raise ValidationError("خطا در بازیابی سفارش.")
+
+        # ===== در صورت نبود وضعیت برای سفارش ===== #
+        current_status = order.current_status
+        if not current_status:
+            raise ValidationError("این سفارش هنوز وضعیتی ندارد.")
+
+        try:
+            # ===== بررسی دسترسی به وضعیت ===== #
+            self._validate_role_scope(requester, current_status)
+            next_sort_order = current_status.sort_order + 1
+            
+            if order.current_status.internal_code in ["DELIVERED", 'DELIVER']:
+                raise ValidationError("این سفارش در مرحله نهایی تایید هست و از قبل تایید شده است.")
+
+            # ===== بررسی وجود وضعیت بعدی ===== #
+            try:
+                next_status = OrderStatus.objects.filter(sort_order=next_sort_order).first()
+            except Exception:
+                next_status = None
+
+            if not next_status:
+                raise ValidationError("این سفارش در مرحله نهایی قرار دارد و وضعیت بعدی برای تایید وجود ندارد.")
+
+            
+            # ===== تغییر وضعیت ===== #
+            return self.flow_domain_service.change_order_status(
+                order=order,
+                new_status_code=next_status.internal_code,
+                user=requester,
+                description=description or _(f"تایید و انتقال خودکار به {next_status.name}")
+            )
+
+        except (ValidationError, PermissionDenied) as e:
+            # ===== ثبت لاگ خطا ===== #
+            self.audit_service.record_log(
+                user=requester,
+                obj=order,
+                action='APPROVE_FAILED',
+                changes={
+                    'from': current_status.internal_code,
+                    'attempt': 'NEXT_STATUS',
+                    'error_type': type(e).__name__,
+                    'error_message': str(e)
+                },
+                description=_(f"تلاش ناموفق برای تایید سفارش")
+            )
+            raise e
+
+
+    # ===== EXECUTE TRANSITION ===== #
     def execute_transition(self, requester: User, new_status_code: str, order_id: int, description: str = None):
         """
         تغییر وضعیت سفارش.
@@ -76,6 +147,7 @@ class OrderTransitionAppService:
             )
             raise e
         
+    # ===== VALIDATE ITEM PERMISSION / ACTION ===== #
     def _validate_item_permission(self, user: User, item: OrderItem, new_status: OrderStatus):
         """
         چک می‌کند آیا کاربر حق دارد به این آیتم دست بزند؟
@@ -102,6 +174,7 @@ class OrderTransitionAppService:
         if item.status and item.status.group.code not in role.allowed_status_groups:
              raise PermissionDenied(f"شما اجازه تغییر وضعیت آیتم در مرحله '{item.status.group.name}' را ندارید.")
         
+    # ===== VALIDATE ROLE SCOPE / ACTION ===== #
     def _validate_role_scope(self, user: User, current_status: OrderStatus):
         """
         بررسی می‌کند آیا نقش کاربر اجازه دسترسی به سفارش در وضعیت فعلی را دارد؟
@@ -120,7 +193,8 @@ class OrderTransitionAppService:
         # ===== بررسی اینکه آیا وضعیت گروه دسترسی برای کاربر هست یا خیر. اگر نه، نباید تغییر دهد ===== #
         if not role.allowed_groups.filter(id=current_status.group_id).exists():
              raise PermissionDenied(f"شما دسترسی به ویرایش سفارش در مرحله '{current_status.group.name}' را ندارید.")
-         
+    
+    # ===== VALIDATE TRANSITION DIRECTION / ACTION ===== #
     def _validate_transition_direction(self, current_status: OrderStatus, new_status: OrderStatus):
         """
         قانون حرکت: دنده عقب فقط با وضعیت 'رد شده' (Reject) مجاز است.
@@ -133,6 +207,7 @@ class OrderTransitionAppService:
 
         is_backward = new_status.sort_order < current_status.sort_order
 
+    # ===== VALIDATE ALL ORDER FILES / ACTION ===== #
     def _validate_all_order_files(self, order: Order):
         """
         چک کردن فایل‌های تمام اقلام سفارش.

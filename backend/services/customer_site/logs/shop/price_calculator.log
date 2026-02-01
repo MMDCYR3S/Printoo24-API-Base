@@ -1,0 +1,648 @@
+INFO 2025-11-18 15:32:00,707 product_price_cal_service 97 139876951389888 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:32:00,708 product_price_cal_service 97 139876951389888 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:32:00,709 product_price_cal_service 97 139876951389888 Base price from quantity: 50000
+DEBUG 2025-11-18 15:32:00,710 product_price_cal_service 97 139876951389888 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:32:00,720 product_price_cal_service 97 139876951389888 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:32:00,720 product_price_cal_service 97 139876951389888 Size impact: 20000.00
+INFO 2025-11-18 15:32:19,608 product_price_cal_service 100 139681731704512 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:32:19,608 product_price_cal_service 100 139681731704512 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:32:19,609 product_price_cal_service 100 139681731704512 Base price from quantity: 50000
+DEBUG 2025-11-18 15:32:19,610 product_price_cal_service 100 139681731704512 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:32:19,611 product_price_cal_service 100 139681731704512 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:32:19,612 product_price_cal_service 100 139681731704512 Size impact: 20000.00
+DEBUG 2025-11-18 15:32:19,614 product_price_cal_service 100 139681731704512 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:32:19,616 product_price_cal_service 100 139681731704512 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:32:19,617 product_price_cal_service 100 139681731704512 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:32:19,618 product_price_cal_service 100 139681731704512 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:32:19,619 product_price_cal_service 100 139681731704512 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:32:19,620 product_price_cal_service 100 139681731704512 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:32:19,620 product_price_cal_service 100 139681731704512 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:32:19,621 product_price_cal_service 100 139681731704512 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:33:26,168 product_price_cal_service 103 139993958840000 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:33:26,169 product_price_cal_service 103 139993958840000 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:33:26,170 product_price_cal_service 103 139993958840000 Base price from quantity: 50000
+DEBUG 2025-11-18 15:33:26,171 product_price_cal_service 103 139993958840000 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:33:26,172 product_price_cal_service 103 139993958840000 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:33:26,173 product_price_cal_service 103 139993958840000 Size impact: 20000.00
+DEBUG 2025-11-18 15:33:26,174 product_price_cal_service 103 139993958840000 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:33:26,176 product_price_cal_service 103 139993958840000 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:33:26,177 product_price_cal_service 103 139993958840000 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:33:26,178 product_price_cal_service 103 139993958840000 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:33:26,179 product_price_cal_service 103 139993958840000 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:33:26,180 product_price_cal_service 103 139993958840000 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:33:26,181 product_price_cal_service 103 139993958840000 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:33:26,182 product_price_cal_service 103 139993958840000 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:35:34,308 product_price_cal_service 106 140429010925248 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:35:34,309 product_price_cal_service 106 140429010925248 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:35:34,310 product_price_cal_service 106 140429010925248 Base price from quantity: 50000
+DEBUG 2025-11-18 15:35:34,311 product_price_cal_service 106 140429010925248 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:35:34,311 product_price_cal_service 106 140429010925248 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:35:34,313 product_price_cal_service 106 140429010925248 Size impact: 20000.00
+DEBUG 2025-11-18 15:35:34,315 product_price_cal_service 106 140429010925248 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:35:34,317 product_price_cal_service 106 140429010925248 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:35:34,318 product_price_cal_service 106 140429010925248 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:35:34,319 product_price_cal_service 106 140429010925248 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:35:34,320 product_price_cal_service 106 140429010925248 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:35:34,321 product_price_cal_service 106 140429010925248 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:35:34,321 product_price_cal_service 106 140429010925248 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:35:34,322 product_price_cal_service 106 140429010925248 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:36:38,427 product_price_cal_service 109 140272442799808 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:36:38,428 product_price_cal_service 109 140272442799808 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:36:38,429 product_price_cal_service 109 140272442799808 Base price from quantity: 50000
+DEBUG 2025-11-18 15:36:38,430 product_price_cal_service 109 140272442799808 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:36:38,431 product_price_cal_service 109 140272442799808 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:36:38,433 product_price_cal_service 109 140272442799808 Size impact: 20000.00
+DEBUG 2025-11-18 15:36:38,434 product_price_cal_service 109 140272442799808 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:36:38,436 product_price_cal_service 109 140272442799808 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:36:38,437 product_price_cal_service 109 140272442799808 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:36:38,438 product_price_cal_service 109 140272442799808 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:36:38,438 product_price_cal_service 109 140272442799808 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:36:38,439 product_price_cal_service 109 140272442799808 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:36:38,440 product_price_cal_service 109 140272442799808 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:36:38,440 product_price_cal_service 109 140272442799808 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:36:51,528 product_price_cal_service 112 139901019354816 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:36:51,529 product_price_cal_service 112 139901019354816 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:36:51,531 product_price_cal_service 112 139901019354816 Base price from quantity: 50000
+DEBUG 2025-11-18 15:36:51,532 product_price_cal_service 112 139901019354816 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:36:51,533 product_price_cal_service 112 139901019354816 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:36:51,534 product_price_cal_service 112 139901019354816 Size impact: 20000.00
+DEBUG 2025-11-18 15:36:51,535 product_price_cal_service 112 139901019354816 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:36:51,537 product_price_cal_service 112 139901019354816 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:36:51,538 product_price_cal_service 112 139901019354816 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:36:51,538 product_price_cal_service 112 139901019354816 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:36:51,539 product_price_cal_service 112 139901019354816 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:36:51,540 product_price_cal_service 112 139901019354816 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:36:51,541 product_price_cal_service 112 139901019354816 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:36:51,541 product_price_cal_service 112 139901019354816 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:37:34,291 product_price_cal_service 119 140148462319296 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:37:34,292 product_price_cal_service 119 140148462319296 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:37:34,293 product_price_cal_service 119 140148462319296 Base price from quantity: 50000
+DEBUG 2025-11-18 15:37:34,294 product_price_cal_service 119 140148462319296 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:37:34,295 product_price_cal_service 119 140148462319296 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:37:34,295 product_price_cal_service 119 140148462319296 Size impact: 20000.00
+DEBUG 2025-11-18 15:37:34,297 product_price_cal_service 119 140148462319296 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:37:34,299 product_price_cal_service 119 140148462319296 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:37:34,300 product_price_cal_service 119 140148462319296 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:37:34,301 product_price_cal_service 119 140148462319296 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:37:34,302 product_price_cal_service 119 140148462319296 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:37:34,304 product_price_cal_service 119 140148462319296 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:37:34,305 product_price_cal_service 119 140148462319296 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:37:34,306 product_price_cal_service 119 140148462319296 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:37:35,903 product_price_cal_service 119 140148462319296 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:37:35,904 product_price_cal_service 119 140148462319296 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:37:35,905 product_price_cal_service 119 140148462319296 Base price from quantity: 50000
+DEBUG 2025-11-18 15:37:35,906 product_price_cal_service 119 140148462319296 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:37:35,907 product_price_cal_service 119 140148462319296 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:37:35,908 product_price_cal_service 119 140148462319296 Size impact: 20000.00
+DEBUG 2025-11-18 15:37:35,910 product_price_cal_service 119 140148462319296 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:37:35,912 product_price_cal_service 119 140148462319296 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:37:35,913 product_price_cal_service 119 140148462319296 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:37:35,914 product_price_cal_service 119 140148462319296 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:37:35,915 product_price_cal_service 119 140148462319296 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:37:35,916 product_price_cal_service 119 140148462319296 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:37:35,917 product_price_cal_service 119 140148462319296 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:37:35,918 product_price_cal_service 119 140148462319296 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:38:38,914 product_price_cal_service 122 140592686298816 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:38:38,915 product_price_cal_service 122 140592686298816 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:38:38,916 product_price_cal_service 122 140592686298816 Base price from quantity: 50000
+DEBUG 2025-11-18 15:38:38,917 product_price_cal_service 122 140592686298816 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:38:38,918 product_price_cal_service 122 140592686298816 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:38:38,919 product_price_cal_service 122 140592686298816 Size impact: 20000.00
+DEBUG 2025-11-18 15:38:38,922 product_price_cal_service 122 140592686298816 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:38:38,924 product_price_cal_service 122 140592686298816 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:38:38,925 product_price_cal_service 122 140592686298816 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:38:38,926 product_price_cal_service 122 140592686298816 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:38:38,927 product_price_cal_service 122 140592686298816 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:38:38,927 product_price_cal_service 122 140592686298816 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:38:38,928 product_price_cal_service 122 140592686298816 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:38:38,929 product_price_cal_service 122 140592686298816 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:39:01,499 product_price_cal_service 127 140350981142208 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:39:01,501 product_price_cal_service 127 140350981142208 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:39:01,502 product_price_cal_service 127 140350981142208 Base price from quantity: 50000
+DEBUG 2025-11-18 15:39:01,504 product_price_cal_service 127 140350981142208 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:39:01,506 product_price_cal_service 127 140350981142208 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:39:01,507 product_price_cal_service 127 140350981142208 Size impact: 20000.00
+DEBUG 2025-11-18 15:39:01,509 product_price_cal_service 127 140350981142208 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:39:01,511 product_price_cal_service 127 140350981142208 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:39:01,512 product_price_cal_service 127 140350981142208 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:39:01,513 product_price_cal_service 127 140350981142208 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:39:01,516 product_price_cal_service 127 140350981142208 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:39:01,518 product_price_cal_service 127 140350981142208 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:39:01,519 product_price_cal_service 127 140350981142208 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:39:01,520 product_price_cal_service 127 140350981142208 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:39:03,465 product_price_cal_service 127 140350981142208 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:39:03,505 product_price_cal_service 127 140350981142208 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:39:03,507 product_price_cal_service 127 140350981142208 Base price from quantity: 50000
+DEBUG 2025-11-18 15:39:03,509 product_price_cal_service 127 140350981142208 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:39:03,511 product_price_cal_service 127 140350981142208 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:39:03,512 product_price_cal_service 127 140350981142208 Size impact: 20000.00
+DEBUG 2025-11-18 15:39:03,515 product_price_cal_service 127 140350981142208 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:39:03,517 product_price_cal_service 127 140350981142208 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:39:03,518 product_price_cal_service 127 140350981142208 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:39:03,519 product_price_cal_service 127 140350981142208 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:39:03,520 product_price_cal_service 127 140350981142208 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:39:03,544 product_price_cal_service 127 140350981142208 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:39:03,545 product_price_cal_service 127 140350981142208 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:39:03,546 product_price_cal_service 127 140350981142208 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:39:12,481 product_price_cal_service 130 140117121431232 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:39:12,482 product_price_cal_service 130 140117121431232 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:39:12,483 product_price_cal_service 130 140117121431232 Base price from quantity: 50000
+DEBUG 2025-11-18 15:39:12,485 product_price_cal_service 130 140117121431232 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:39:12,486 product_price_cal_service 130 140117121431232 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:39:12,487 product_price_cal_service 130 140117121431232 Size impact: 20000.00
+DEBUG 2025-11-18 15:39:12,489 product_price_cal_service 130 140117121431232 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:39:12,491 product_price_cal_service 130 140117121431232 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:39:12,492 product_price_cal_service 130 140117121431232 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:39:12,492 product_price_cal_service 130 140117121431232 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:39:12,495 product_price_cal_service 130 140117121431232 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:39:12,497 product_price_cal_service 130 140117121431232 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:39:12,498 product_price_cal_service 130 140117121431232 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:39:12,499 product_price_cal_service 130 140117121431232 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:45:05,435 product_price_cal_service 135 140192520337088 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:45:05,436 product_price_cal_service 135 140192520337088 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:45:05,437 product_price_cal_service 135 140192520337088 Base price from quantity: 50000
+DEBUG 2025-11-18 15:45:05,438 product_price_cal_service 135 140192520337088 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:45:05,439 product_price_cal_service 135 140192520337088 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:45:05,441 product_price_cal_service 135 140192520337088 Size impact: 20000.00
+DEBUG 2025-11-18 15:45:05,444 product_price_cal_service 135 140192520337088 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:45:05,446 product_price_cal_service 135 140192520337088 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:45:05,447 product_price_cal_service 135 140192520337088 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:45:05,448 product_price_cal_service 135 140192520337088 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:45:05,449 product_price_cal_service 135 140192520337088 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:45:05,450 product_price_cal_service 135 140192520337088 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:45:05,450 product_price_cal_service 135 140192520337088 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:45:05,451 product_price_cal_service 135 140192520337088 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:45:59,540 product_price_cal_service 138 140661045065408 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:45:59,542 product_price_cal_service 138 140661045065408 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:45:59,543 product_price_cal_service 138 140661045065408 Base price from quantity: 50000
+DEBUG 2025-11-18 15:45:59,544 product_price_cal_service 138 140661045065408 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:45:59,544 product_price_cal_service 138 140661045065408 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:45:59,545 product_price_cal_service 138 140661045065408 Size impact: 20000.00
+DEBUG 2025-11-18 15:45:59,547 product_price_cal_service 138 140661045065408 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:45:59,548 product_price_cal_service 138 140661045065408 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:45:59,549 product_price_cal_service 138 140661045065408 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:45:59,549 product_price_cal_service 138 140661045065408 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:45:59,550 product_price_cal_service 138 140661045065408 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:45:59,551 product_price_cal_service 138 140661045065408 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:45:59,552 product_price_cal_service 138 140661045065408 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:45:59,552 product_price_cal_service 138 140661045065408 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:46:57,890 product_price_cal_service 147 139831088772800 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:46:57,891 product_price_cal_service 147 139831088772800 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:46:57,892 product_price_cal_service 147 139831088772800 Base price from quantity: 50000
+DEBUG 2025-11-18 15:46:57,893 product_price_cal_service 147 139831088772800 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:46:57,894 product_price_cal_service 147 139831088772800 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:46:57,895 product_price_cal_service 147 139831088772800 Size impact: 20000.00
+DEBUG 2025-11-18 15:46:57,897 product_price_cal_service 147 139831088772800 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:46:57,899 product_price_cal_service 147 139831088772800 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:46:57,900 product_price_cal_service 147 139831088772800 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:46:57,900 product_price_cal_service 147 139831088772800 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:46:57,901 product_price_cal_service 147 139831088772800 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:46:57,902 product_price_cal_service 147 139831088772800 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:46:57,902 product_price_cal_service 147 139831088772800 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:46:57,903 product_price_cal_service 147 139831088772800 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:47:31,320 product_price_cal_service 150 140222427821760 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:47:31,322 product_price_cal_service 150 140222427821760 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:47:31,322 product_price_cal_service 150 140222427821760 Base price from quantity: 50000
+DEBUG 2025-11-18 15:47:31,323 product_price_cal_service 150 140222427821760 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:47:31,324 product_price_cal_service 150 140222427821760 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:47:31,324 product_price_cal_service 150 140222427821760 Size impact: 20000.00
+DEBUG 2025-11-18 15:47:31,326 product_price_cal_service 150 140222427821760 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:47:31,327 product_price_cal_service 150 140222427821760 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:47:31,328 product_price_cal_service 150 140222427821760 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:47:31,329 product_price_cal_service 150 140222427821760 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:47:31,329 product_price_cal_service 150 140222427821760 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:47:31,330 product_price_cal_service 150 140222427821760 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:47:31,331 product_price_cal_service 150 140222427821760 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:47:31,333 product_price_cal_service 150 140222427821760 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-18 15:48:06,883 product_price_cal_service 153 139843480843968 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-18 15:48:06,884 product_price_cal_service 153 139843480843968 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-18 15:48:06,885 product_price_cal_service 153 139843480843968 Base price from quantity: 50000
+DEBUG 2025-11-18 15:48:06,886 product_price_cal_service 153 139843480843968 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-18 15:48:06,887 product_price_cal_service 153 139843480843968 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-18 15:48:06,887 product_price_cal_service 153 139843480843968 Size impact: 20000.00
+DEBUG 2025-11-18 15:48:06,889 product_price_cal_service 153 139843480843968 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-18 15:48:06,890 product_price_cal_service 153 139843480843968 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-18 15:48:06,891 product_price_cal_service 153 139843480843968 Total impacts calculated: 100000.00
+DEBUG 2025-11-18 15:48:06,892 product_price_cal_service 153 139843480843968 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-18 15:48:06,893 product_price_cal_service 153 139843480843968 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-18 15:48:06,893 product_price_cal_service 153 139843480843968 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-18 15:48:06,894 product_price_cal_service 153 139843480843968 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-18 15:48:06,895 product_price_cal_service 153 139843480843968 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-20 09:05:36,183 product_price_cal_service 78 140658635437760 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A4
+INFO 2025-11-20 09:05:36,198 product_price_cal_service 78 140658635437760 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:05:36,199 product_price_cal_service 78 140658635437760 Base price from quantity: 70000
+DEBUG 2025-11-20 09:05:36,200 product_price_cal_service 78 140658635437760 Material impact (کارت ویزیت): 40000.00
+DEBUG 2025-11-20 09:05:36,201 product_price_cal_service 78 140658635437760 Using standard size - Name: کارت ویزیت - A4, Price impact: 30000.00
+DEBUG 2025-11-20 09:05:36,201 product_price_cal_service 78 140658635437760 Size impact: 30000.00
+DEBUG 2025-11-20 09:05:36,208 product_price_cal_service 78 140658635437760 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:05:36,213 product_price_cal_service 78 140658635437760 Option impact (کارت ویزیت - تعداد وجه - تک وجه): 30000.00
+INFO 2025-11-20 09:05:36,214 product_price_cal_service 78 140658635437760 Total impacts calculated: 120000.00
+DEBUG 2025-11-20 09:05:36,215 product_price_cal_service 78 140658635437760 Raw price (base + impacts): 190000.00
+DEBUG 2025-11-20 09:05:36,216 product_price_cal_service 78 140658635437760 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:05:36,216 product_price_cal_service 78 140658635437760 Final price calculated: 190000.000 (raw: 190000.00 × modifier: 1.0)
+INFO 2025-11-20 09:05:36,217 product_price_cal_service 78 140658635437760 Price calculation completed for product khrt-wyzyt - Final price: 190000.0
+DEBUG 2025-11-20 09:05:36,218 product_price_cal_service 78 140658635437760 Full calculation result: {'base_price': 70000.0, 'total_impacts': 120000.0, 'raw_price_before_modifier': 190000.0, 'modifier_percent': 0.0, 'final_price': 190000.0}
+INFO 2025-11-20 09:06:52,315 product_price_cal_service 81 140717288584896 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A4
+INFO 2025-11-20 09:06:52,316 product_price_cal_service 81 140717288584896 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:06:52,317 product_price_cal_service 81 140717288584896 Base price from quantity: 70000
+DEBUG 2025-11-20 09:06:52,318 product_price_cal_service 81 140717288584896 Material impact (کارت ویزیت): 40000.00
+DEBUG 2025-11-20 09:06:52,319 product_price_cal_service 81 140717288584896 Using standard size - Name: کارت ویزیت - A4, Price impact: 30000.00
+DEBUG 2025-11-20 09:06:52,320 product_price_cal_service 81 140717288584896 Size impact: 30000.00
+DEBUG 2025-11-20 09:06:52,325 product_price_cal_service 81 140717288584896 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:06:52,328 product_price_cal_service 81 140717288584896 Option impact (کارت ویزیت - تعداد وجه - تک وجه): 30000.00
+INFO 2025-11-20 09:06:52,338 product_price_cal_service 81 140717288584896 Total impacts calculated: 120000.00
+DEBUG 2025-11-20 09:06:52,339 product_price_cal_service 81 140717288584896 Raw price (base + impacts): 190000.00
+DEBUG 2025-11-20 09:06:52,341 product_price_cal_service 81 140717288584896 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:06:52,341 product_price_cal_service 81 140717288584896 Final price calculated: 190000.000 (raw: 190000.00 × modifier: 1.0)
+INFO 2025-11-20 09:06:52,342 product_price_cal_service 81 140717288584896 Price calculation completed for product khrt-wyzyt - Final price: 190000.0
+DEBUG 2025-11-20 09:06:52,343 product_price_cal_service 81 140717288584896 Full calculation result: {'base_price': 70000.0, 'total_impacts': 120000.0, 'raw_price_before_modifier': 190000.0, 'modifier_percent': 0.0, 'final_price': 190000.0}
+INFO 2025-11-20 09:07:29,478 product_price_cal_service 86 139805202577088 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A4
+INFO 2025-11-20 09:07:29,479 product_price_cal_service 86 139805202577088 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:07:29,480 product_price_cal_service 86 139805202577088 Base price from quantity: 70000
+DEBUG 2025-11-20 09:07:29,481 product_price_cal_service 86 139805202577088 Material impact (کارت ویزیت): 40000.00
+DEBUG 2025-11-20 09:07:29,482 product_price_cal_service 86 139805202577088 Using standard size - Name: کارت ویزیت - A4, Price impact: 30000.00
+DEBUG 2025-11-20 09:07:29,483 product_price_cal_service 86 139805202577088 Size impact: 30000.00
+DEBUG 2025-11-20 09:07:29,486 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:07:29,490 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد وجه - تک وجه): 30000.00
+INFO 2025-11-20 09:07:29,491 product_price_cal_service 86 139805202577088 Total impacts calculated: 120000.00
+DEBUG 2025-11-20 09:07:29,492 product_price_cal_service 86 139805202577088 Raw price (base + impacts): 190000.00
+DEBUG 2025-11-20 09:07:29,493 product_price_cal_service 86 139805202577088 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:07:29,493 product_price_cal_service 86 139805202577088 Final price calculated: 190000.000 (raw: 190000.00 × modifier: 1.0)
+INFO 2025-11-20 09:07:29,494 product_price_cal_service 86 139805202577088 Price calculation completed for product khrt-wyzyt - Final price: 190000.0
+DEBUG 2025-11-20 09:07:29,495 product_price_cal_service 86 139805202577088 Full calculation result: {'base_price': 70000.0, 'total_impacts': 120000.0, 'raw_price_before_modifier': 190000.0, 'modifier_percent': 0.0, 'final_price': 190000.0}
+INFO 2025-11-20 09:07:39,230 product_price_cal_service 86 139805202577088 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A4
+INFO 2025-11-20 09:07:39,231 product_price_cal_service 86 139805202577088 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:07:39,232 product_price_cal_service 86 139805202577088 Base price from quantity: 70000
+DEBUG 2025-11-20 09:07:39,233 product_price_cal_service 86 139805202577088 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 09:07:39,234 product_price_cal_service 86 139805202577088 Using standard size - Name: کارت ویزیت - A4, Price impact: 30000.00
+DEBUG 2025-11-20 09:07:39,235 product_price_cal_service 86 139805202577088 Size impact: 30000.00
+DEBUG 2025-11-20 09:07:39,241 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:07:39,244 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد وجه - تک وجه): 30000.00
+INFO 2025-11-20 09:07:39,245 product_price_cal_service 86 139805202577088 Total impacts calculated: 110000.00
+DEBUG 2025-11-20 09:07:39,245 product_price_cal_service 86 139805202577088 Raw price (base + impacts): 180000.00
+DEBUG 2025-11-20 09:07:39,246 product_price_cal_service 86 139805202577088 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:07:39,247 product_price_cal_service 86 139805202577088 Final price calculated: 180000.000 (raw: 180000.00 × modifier: 1.0)
+INFO 2025-11-20 09:07:39,248 product_price_cal_service 86 139805202577088 Price calculation completed for product khrt-wyzyt - Final price: 180000.0
+DEBUG 2025-11-20 09:07:39,249 product_price_cal_service 86 139805202577088 Full calculation result: {'base_price': 70000.0, 'total_impacts': 110000.0, 'raw_price_before_modifier': 180000.0, 'modifier_percent': 0.0, 'final_price': 180000.0}
+INFO 2025-11-20 09:07:46,208 product_price_cal_service 86 139805202577088 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A4
+INFO 2025-11-20 09:07:46,209 product_price_cal_service 86 139805202577088 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:07:46,210 product_price_cal_service 86 139805202577088 Base price from quantity: 50000
+DEBUG 2025-11-20 09:07:46,211 product_price_cal_service 86 139805202577088 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 09:07:46,212 product_price_cal_service 86 139805202577088 Using standard size - Name: کارت ویزیت - A4, Price impact: 30000.00
+DEBUG 2025-11-20 09:07:46,213 product_price_cal_service 86 139805202577088 Size impact: 30000.00
+DEBUG 2025-11-20 09:07:46,217 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:07:46,220 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد وجه - تک وجه): 30000.00
+INFO 2025-11-20 09:07:46,221 product_price_cal_service 86 139805202577088 Total impacts calculated: 110000.00
+DEBUG 2025-11-20 09:07:46,222 product_price_cal_service 86 139805202577088 Raw price (base + impacts): 160000.00
+DEBUG 2025-11-20 09:07:46,223 product_price_cal_service 86 139805202577088 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:07:46,224 product_price_cal_service 86 139805202577088 Final price calculated: 160000.000 (raw: 160000.00 × modifier: 1.0)
+INFO 2025-11-20 09:07:46,225 product_price_cal_service 86 139805202577088 Price calculation completed for product khrt-wyzyt - Final price: 160000.0
+DEBUG 2025-11-20 09:07:46,225 product_price_cal_service 86 139805202577088 Full calculation result: {'base_price': 50000.0, 'total_impacts': 110000.0, 'raw_price_before_modifier': 160000.0, 'modifier_percent': 0.0, 'final_price': 160000.0}
+INFO 2025-11-20 09:08:00,786 product_price_cal_service 86 139805202577088 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A4
+INFO 2025-11-20 09:08:00,787 product_price_cal_service 86 139805202577088 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:08:00,789 product_price_cal_service 86 139805202577088 Base price from quantity: 70000
+DEBUG 2025-11-20 09:08:00,790 product_price_cal_service 86 139805202577088 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 09:08:00,791 product_price_cal_service 86 139805202577088 Using standard size - Name: کارت ویزیت - A4, Price impact: 30000.00
+DEBUG 2025-11-20 09:08:00,792 product_price_cal_service 86 139805202577088 Size impact: 30000.00
+DEBUG 2025-11-20 09:08:00,796 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:08:00,799 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد وجه - تک وجه): 30000.00
+INFO 2025-11-20 09:08:00,799 product_price_cal_service 86 139805202577088 Total impacts calculated: 110000.00
+DEBUG 2025-11-20 09:08:00,800 product_price_cal_service 86 139805202577088 Raw price (base + impacts): 180000.00
+DEBUG 2025-11-20 09:08:00,801 product_price_cal_service 86 139805202577088 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:08:00,801 product_price_cal_service 86 139805202577088 Final price calculated: 180000.000 (raw: 180000.00 × modifier: 1.0)
+INFO 2025-11-20 09:08:00,802 product_price_cal_service 86 139805202577088 Price calculation completed for product khrt-wyzyt - Final price: 180000.0
+DEBUG 2025-11-20 09:08:00,803 product_price_cal_service 86 139805202577088 Full calculation result: {'base_price': 70000.0, 'total_impacts': 110000.0, 'raw_price_before_modifier': 180000.0, 'modifier_percent': 0.0, 'final_price': 180000.0}
+INFO 2025-11-20 09:08:05,877 product_price_cal_service 86 139805202577088 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 09:08:05,879 product_price_cal_service 86 139805202577088 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:08:05,880 product_price_cal_service 86 139805202577088 Base price from quantity: 70000
+DEBUG 2025-11-20 09:08:05,881 product_price_cal_service 86 139805202577088 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 09:08:05,881 product_price_cal_service 86 139805202577088 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 09:08:05,882 product_price_cal_service 86 139805202577088 Size impact: 20000.00
+DEBUG 2025-11-20 09:08:05,886 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:08:05,889 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد وجه - تک وجه): 30000.00
+INFO 2025-11-20 09:08:05,889 product_price_cal_service 86 139805202577088 Total impacts calculated: 100000.00
+DEBUG 2025-11-20 09:08:05,890 product_price_cal_service 86 139805202577088 Raw price (base + impacts): 170000.00
+DEBUG 2025-11-20 09:08:05,891 product_price_cal_service 86 139805202577088 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:08:05,891 product_price_cal_service 86 139805202577088 Final price calculated: 170000.000 (raw: 170000.00 × modifier: 1.0)
+INFO 2025-11-20 09:08:05,893 product_price_cal_service 86 139805202577088 Price calculation completed for product khrt-wyzyt - Final price: 170000.0
+DEBUG 2025-11-20 09:08:05,894 product_price_cal_service 86 139805202577088 Full calculation result: {'base_price': 70000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 170000.0, 'modifier_percent': 0.0, 'final_price': 170000.0}
+INFO 2025-11-20 09:08:11,700 product_price_cal_service 86 139805202577088 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 09:08:11,701 product_price_cal_service 86 139805202577088 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:08:11,702 product_price_cal_service 86 139805202577088 Base price from quantity: 70000
+DEBUG 2025-11-20 09:08:11,704 product_price_cal_service 86 139805202577088 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 09:08:11,705 product_price_cal_service 86 139805202577088 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 09:08:11,706 product_price_cal_service 86 139805202577088 Size impact: 20000.00
+DEBUG 2025-11-20 09:08:11,710 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:08:11,713 product_price_cal_service 86 139805202577088 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 09:08:11,716 product_price_cal_service 86 139805202577088 Total impacts calculated: 110000.00
+DEBUG 2025-11-20 09:08:11,718 product_price_cal_service 86 139805202577088 Raw price (base + impacts): 180000.00
+DEBUG 2025-11-20 09:08:11,719 product_price_cal_service 86 139805202577088 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:08:11,720 product_price_cal_service 86 139805202577088 Final price calculated: 180000.000 (raw: 180000.00 × modifier: 1.0)
+INFO 2025-11-20 09:08:11,721 product_price_cal_service 86 139805202577088 Price calculation completed for product khrt-wyzyt - Final price: 180000.0
+DEBUG 2025-11-20 09:08:11,722 product_price_cal_service 86 139805202577088 Full calculation result: {'base_price': 70000.0, 'total_impacts': 110000.0, 'raw_price_before_modifier': 180000.0, 'modifier_percent': 0.0, 'final_price': 180000.0}
+INFO 2025-11-20 09:12:59,970 product_price_cal_service 105 140120013403840 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 09:12:59,972 product_price_cal_service 105 140120013403840 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:12:59,972 product_price_cal_service 105 140120013403840 Base price from quantity: 70000
+DEBUG 2025-11-20 09:12:59,973 product_price_cal_service 105 140120013403840 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 09:12:59,974 product_price_cal_service 105 140120013403840 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 09:12:59,975 product_price_cal_service 105 140120013403840 Size impact: 20000.00
+DEBUG 2025-11-20 09:12:59,978 product_price_cal_service 105 140120013403840 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:12:59,983 product_price_cal_service 105 140120013403840 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 09:12:59,984 product_price_cal_service 105 140120013403840 Total impacts calculated: 110000.00
+DEBUG 2025-11-20 09:12:59,985 product_price_cal_service 105 140120013403840 Raw price (base + impacts): 180000.00
+DEBUG 2025-11-20 09:12:59,986 product_price_cal_service 105 140120013403840 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:12:59,986 product_price_cal_service 105 140120013403840 Final price calculated: 180000.000 (raw: 180000.00 × modifier: 1.0)
+INFO 2025-11-20 09:12:59,987 product_price_cal_service 105 140120013403840 Price calculation completed for product khrt-wyzyt - Final price: 180000.0
+DEBUG 2025-11-20 09:12:59,988 product_price_cal_service 105 140120013403840 Full calculation result: {'base_price': 70000.0, 'total_impacts': 110000.0, 'raw_price_before_modifier': 180000.0, 'modifier_percent': 0.0, 'final_price': 180000.0}
+INFO 2025-11-20 09:24:51,357 product_price_cal_service 147 140204051527360 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 09:24:51,358 product_price_cal_service 147 140204051527360 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 09:24:51,359 product_price_cal_service 147 140204051527360 Base price from quantity: 70000
+DEBUG 2025-11-20 09:24:51,359 product_price_cal_service 147 140204051527360 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 09:24:51,360 product_price_cal_service 147 140204051527360 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 09:24:51,360 product_price_cal_service 147 140204051527360 Size impact: 20000.00
+DEBUG 2025-11-20 09:24:51,364 product_price_cal_service 147 140204051527360 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 09:24:51,368 product_price_cal_service 147 140204051527360 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 09:24:51,369 product_price_cal_service 147 140204051527360 Total impacts calculated: 110000.00
+DEBUG 2025-11-20 09:24:51,369 product_price_cal_service 147 140204051527360 Raw price (base + impacts): 180000.00
+DEBUG 2025-11-20 09:24:51,370 product_price_cal_service 147 140204051527360 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 09:24:51,371 product_price_cal_service 147 140204051527360 Final price calculated: 180000.000 (raw: 180000.00 × modifier: 1.0)
+INFO 2025-11-20 09:24:51,372 product_price_cal_service 147 140204051527360 Price calculation completed for product khrt-wyzyt - Final price: 180000.0
+DEBUG 2025-11-20 09:24:51,372 product_price_cal_service 147 140204051527360 Full calculation result: {'base_price': 70000.0, 'total_impacts': 110000.0, 'raw_price_before_modifier': 180000.0, 'modifier_percent': 0.0, 'final_price': 180000.0}
+INFO 2025-11-20 10:24:05,351 product_price_cal_service 262 140099110274752 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 10:24:05,352 product_price_cal_service 262 140099110274752 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 10:24:05,354 product_price_cal_service 262 140099110274752 Base price from quantity: 50000
+DEBUG 2025-11-20 10:24:05,356 product_price_cal_service 262 140099110274752 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 10:24:05,356 product_price_cal_service 262 140099110274752 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 10:24:05,357 product_price_cal_service 262 140099110274752 Size impact: 20000.00
+DEBUG 2025-11-20 10:24:05,359 product_price_cal_service 262 140099110274752 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-20 10:24:05,362 product_price_cal_service 262 140099110274752 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 10:24:05,363 product_price_cal_service 262 140099110274752 Total impacts calculated: 100000.00
+DEBUG 2025-11-20 10:24:05,364 product_price_cal_service 262 140099110274752 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-20 10:24:05,365 product_price_cal_service 262 140099110274752 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 10:24:05,366 product_price_cal_service 262 140099110274752 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-20 10:24:05,367 product_price_cal_service 262 140099110274752 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-20 10:24:05,368 product_price_cal_service 262 140099110274752 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-20 10:25:06,548 product_price_cal_service 269 139863788615360 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 10:25:06,549 product_price_cal_service 269 139863788615360 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 10:25:06,550 product_price_cal_service 269 139863788615360 Base price from quantity: 50000
+DEBUG 2025-11-20 10:25:06,552 product_price_cal_service 269 139863788615360 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 10:25:06,553 product_price_cal_service 269 139863788615360 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 10:25:06,553 product_price_cal_service 269 139863788615360 Size impact: 20000.00
+DEBUG 2025-11-20 10:25:06,555 product_price_cal_service 269 139863788615360 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-20 10:25:06,556 product_price_cal_service 269 139863788615360 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 10:25:06,558 product_price_cal_service 269 139863788615360 Total impacts calculated: 100000.00
+DEBUG 2025-11-20 10:25:06,558 product_price_cal_service 269 139863788615360 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-20 10:25:06,559 product_price_cal_service 269 139863788615360 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 10:25:06,560 product_price_cal_service 269 139863788615360 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-20 10:25:06,561 product_price_cal_service 269 139863788615360 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-20 10:25:06,561 product_price_cal_service 269 139863788615360 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-20 10:26:57,565 product_price_cal_service 272 140645525092032 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 10:26:57,566 product_price_cal_service 272 140645525092032 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 10:26:57,567 product_price_cal_service 272 140645525092032 Base price from quantity: 50000
+DEBUG 2025-11-20 10:26:57,570 product_price_cal_service 272 140645525092032 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 10:26:57,571 product_price_cal_service 272 140645525092032 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 10:26:57,572 product_price_cal_service 272 140645525092032 Size impact: 20000.00
+DEBUG 2025-11-20 10:26:57,576 product_price_cal_service 272 140645525092032 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-20 10:26:57,592 product_price_cal_service 272 140645525092032 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 10:26:57,593 product_price_cal_service 272 140645525092032 Total impacts calculated: 100000.00
+DEBUG 2025-11-20 10:26:57,594 product_price_cal_service 272 140645525092032 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-20 10:26:57,595 product_price_cal_service 272 140645525092032 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 10:26:57,595 product_price_cal_service 272 140645525092032 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-20 10:26:57,596 product_price_cal_service 272 140645525092032 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-20 10:26:57,597 product_price_cal_service 272 140645525092032 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-20 10:28:04,762 product_price_cal_service 272 140645525092032 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 10:28:04,763 product_price_cal_service 272 140645525092032 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 10:28:04,764 product_price_cal_service 272 140645525092032 Base price from quantity: 50000
+DEBUG 2025-11-20 10:28:04,765 product_price_cal_service 272 140645525092032 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 10:28:04,766 product_price_cal_service 272 140645525092032 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 10:28:04,767 product_price_cal_service 272 140645525092032 Size impact: 20000.00
+DEBUG 2025-11-20 10:28:04,769 product_price_cal_service 272 140645525092032 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-20 10:28:04,771 product_price_cal_service 272 140645525092032 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 10:28:04,772 product_price_cal_service 272 140645525092032 Total impacts calculated: 100000.00
+DEBUG 2025-11-20 10:28:04,772 product_price_cal_service 272 140645525092032 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-20 10:28:04,773 product_price_cal_service 272 140645525092032 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 10:28:04,773 product_price_cal_service 272 140645525092032 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-20 10:28:04,774 product_price_cal_service 272 140645525092032 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-20 10:28:04,775 product_price_cal_service 272 140645525092032 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-20 10:29:04,362 product_price_cal_service 275 140124441540288 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 10:29:04,362 product_price_cal_service 275 140124441540288 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 10:29:04,363 product_price_cal_service 275 140124441540288 Base price from quantity: 50000
+DEBUG 2025-11-20 10:29:04,364 product_price_cal_service 275 140124441540288 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 10:29:04,365 product_price_cal_service 275 140124441540288 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 10:29:04,366 product_price_cal_service 275 140124441540288 Size impact: 20000.00
+DEBUG 2025-11-20 10:29:04,368 product_price_cal_service 275 140124441540288 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-20 10:29:04,370 product_price_cal_service 275 140124441540288 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 10:29:04,370 product_price_cal_service 275 140124441540288 Total impacts calculated: 100000.00
+DEBUG 2025-11-20 10:29:04,371 product_price_cal_service 275 140124441540288 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-20 10:29:04,372 product_price_cal_service 275 140124441540288 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 10:29:04,372 product_price_cal_service 275 140124441540288 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-20 10:29:04,373 product_price_cal_service 275 140124441540288 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-20 10:29:04,374 product_price_cal_service 275 140124441540288 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-20 10:29:52,693 product_price_cal_service 275 140124441540288 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 10:29:52,694 product_price_cal_service 275 140124441540288 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 10:29:52,695 product_price_cal_service 275 140124441540288 Base price from quantity: 50000
+DEBUG 2025-11-20 10:29:52,697 product_price_cal_service 275 140124441540288 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 10:29:52,697 product_price_cal_service 275 140124441540288 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 10:29:52,698 product_price_cal_service 275 140124441540288 Size impact: 20000.00
+DEBUG 2025-11-20 10:29:52,699 product_price_cal_service 275 140124441540288 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-20 10:29:52,702 product_price_cal_service 275 140124441540288 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 10:29:52,703 product_price_cal_service 275 140124441540288 Total impacts calculated: 100000.00
+DEBUG 2025-11-20 10:29:52,703 product_price_cal_service 275 140124441540288 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-20 10:29:52,704 product_price_cal_service 275 140124441540288 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 10:29:52,705 product_price_cal_service 275 140124441540288 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-20 10:29:52,705 product_price_cal_service 275 140124441540288 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-20 10:29:52,706 product_price_cal_service 275 140124441540288 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-20 10:32:39,812 product_price_cal_service 287 139738181768896 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 10:32:39,813 product_price_cal_service 287 139738181768896 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 10:32:39,815 product_price_cal_service 287 139738181768896 Base price from quantity: 50000
+DEBUG 2025-11-20 10:32:39,816 product_price_cal_service 287 139738181768896 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 10:32:39,817 product_price_cal_service 287 139738181768896 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 10:32:39,818 product_price_cal_service 287 139738181768896 Size impact: 20000.00
+DEBUG 2025-11-20 10:32:39,819 product_price_cal_service 287 139738181768896 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-20 10:32:39,821 product_price_cal_service 287 139738181768896 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 10:32:39,821 product_price_cal_service 287 139738181768896 Total impacts calculated: 100000.00
+DEBUG 2025-11-20 10:32:39,823 product_price_cal_service 287 139738181768896 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-20 10:32:39,825 product_price_cal_service 287 139738181768896 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 10:32:39,826 product_price_cal_service 287 139738181768896 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-20 10:32:39,826 product_price_cal_service 287 139738181768896 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-20 10:32:39,827 product_price_cal_service 287 139738181768896 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-20 10:33:58,884 product_price_cal_service 298 140700344645312 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-20 10:33:58,885 product_price_cal_service 298 140700344645312 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 10:33:58,889 product_price_cal_service 298 140700344645312 Base price from quantity: 50000
+DEBUG 2025-11-20 10:33:58,891 product_price_cal_service 298 140700344645312 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-20 10:33:58,892 product_price_cal_service 298 140700344645312 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-20 10:33:58,893 product_price_cal_service 298 140700344645312 Size impact: 20000.00
+DEBUG 2025-11-20 10:33:58,895 product_price_cal_service 298 140700344645312 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-20 10:33:58,898 product_price_cal_service 298 140700344645312 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-20 10:33:58,899 product_price_cal_service 298 140700344645312 Total impacts calculated: 100000.00
+DEBUG 2025-11-20 10:33:58,904 product_price_cal_service 298 140700344645312 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-20 10:33:58,905 product_price_cal_service 298 140700344645312 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 10:33:58,906 product_price_cal_service 298 140700344645312 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-20 10:33:58,908 product_price_cal_service 298 140700344645312 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-20 10:33:58,909 product_price_cal_service 298 140700344645312 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-20 10:44:16,150 product_price_cal_service 304 140267994740416 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A4
+INFO 2025-11-20 10:44:16,151 product_price_cal_service 304 140267994740416 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-20 10:44:16,152 product_price_cal_service 304 140267994740416 Base price from quantity: 70000
+DEBUG 2025-11-20 10:44:16,153 product_price_cal_service 304 140267994740416 Material impact (کارت ویزیت): 40000.00
+DEBUG 2025-11-20 10:44:16,154 product_price_cal_service 304 140267994740416 Using standard size - Name: کارت ویزیت - A4, Price impact: 30000.00
+DEBUG 2025-11-20 10:44:16,155 product_price_cal_service 304 140267994740416 Size impact: 30000.00
+DEBUG 2025-11-20 10:44:16,159 product_price_cal_service 304 140267994740416 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-20 10:44:16,162 product_price_cal_service 304 140267994740416 Option impact (کارت ویزیت - تعداد وجه - تک وجه): 30000.00
+INFO 2025-11-20 10:44:16,163 product_price_cal_service 304 140267994740416 Total impacts calculated: 120000.00
+DEBUG 2025-11-20 10:44:16,164 product_price_cal_service 304 140267994740416 Raw price (base + impacts): 190000.00
+DEBUG 2025-11-20 10:44:16,165 product_price_cal_service 304 140267994740416 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-20 10:44:16,166 product_price_cal_service 304 140267994740416 Final price calculated: 190000.000 (raw: 190000.00 × modifier: 1.0)
+INFO 2025-11-20 10:44:16,167 product_price_cal_service 304 140267994740416 Price calculation completed for product khrt-wyzyt - Final price: 190000.0
+DEBUG 2025-11-20 10:44:16,167 product_price_cal_service 304 140267994740416 Full calculation result: {'base_price': 70000.0, 'total_impacts': 120000.0, 'raw_price_before_modifier': 190000.0, 'modifier_percent': 0.0, 'final_price': 190000.0}
+INFO 2025-11-21 10:04:14,400 product_price_cal_service 123 140486544189120 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-21 10:04:14,418 product_price_cal_service 123 140486544189120 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-21 10:04:14,419 product_price_cal_service 123 140486544189120 Base price from quantity: 50000
+DEBUG 2025-11-21 10:04:14,420 product_price_cal_service 123 140486544189120 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-21 10:04:14,421 product_price_cal_service 123 140486544189120 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-21 10:04:14,422 product_price_cal_service 123 140486544189120 Size impact: 20000.00
+DEBUG 2025-11-21 10:04:14,424 product_price_cal_service 123 140486544189120 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-21 10:04:14,426 product_price_cal_service 123 140486544189120 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-21 10:04:14,427 product_price_cal_service 123 140486544189120 Total impacts calculated: 100000.00
+DEBUG 2025-11-21 10:04:14,428 product_price_cal_service 123 140486544189120 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-21 10:04:14,429 product_price_cal_service 123 140486544189120 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-21 10:04:14,430 product_price_cal_service 123 140486544189120 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-21 10:04:14,431 product_price_cal_service 123 140486544189120 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-21 10:04:14,432 product_price_cal_service 123 140486544189120 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-21 11:36:47,150 product_price_cal_service 469 140274089064128 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 50000: 1000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A3
+INFO 2025-11-21 11:36:47,151 product_price_cal_service 469 140274089064128 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-21 11:36:47,152 product_price_cal_service 469 140274089064128 Base price from quantity: 50000
+DEBUG 2025-11-21 11:36:47,154 product_price_cal_service 469 140274089064128 Material impact (کارت ویزیت): 30000.00
+DEBUG 2025-11-21 11:36:47,155 product_price_cal_service 469 140274089064128 Using standard size - Name: کارت ویزیت - A3, Price impact: 20000.00
+DEBUG 2025-11-21 11:36:47,156 product_price_cal_service 469 140274089064128 Size impact: 20000.00
+DEBUG 2025-11-21 11:36:47,158 product_price_cal_service 469 140274089064128 Option impact (کارت ویزیت - تعداد برگ - 10 برگ): 10000.00
+DEBUG 2025-11-21 11:36:47,161 product_price_cal_service 469 140274089064128 Option impact (کارت ویزیت - تعداد وجه - دو وجه): 40000.00
+INFO 2025-11-21 11:36:47,162 product_price_cal_service 469 140274089064128 Total impacts calculated: 100000.00
+DEBUG 2025-11-21 11:36:47,163 product_price_cal_service 469 140274089064128 Raw price (base + impacts): 150000.00
+DEBUG 2025-11-21 11:36:47,164 product_price_cal_service 469 140274089064128 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-21 11:36:47,165 product_price_cal_service 469 140274089064128 Final price calculated: 150000.000 (raw: 150000.00 × modifier: 1.0)
+INFO 2025-11-21 11:36:47,166 product_price_cal_service 469 140274089064128 Price calculation completed for product khrt-wyzyt - Final price: 150000.0
+DEBUG 2025-11-21 11:36:47,167 product_price_cal_service 469 140274089064128 Full calculation result: {'base_price': 50000.0, 'total_impacts': 100000.0, 'raw_price_before_modifier': 150000.0, 'modifier_percent': 0.0, 'final_price': 150000.0}
+INFO 2025-11-21 11:37:34,053 product_price_cal_service 469 140274089064128 ProductPriceCalculator initialized - Product: khrt-wyzyt, Quantity: کارت ویزیت - 70000: 2000, Material: کارت ویزیت, Options count: 2, Size: کارت ویزیت - A4
+INFO 2025-11-21 11:37:34,054 product_price_cal_service 469 140274089064128 Starting price calculation for product: khrt-wyzyt
+DEBUG 2025-11-21 11:37:34,055 product_price_cal_service 469 140274089064128 Base price from quantity: 70000
+DEBUG 2025-11-21 11:37:34,056 product_price_cal_service 469 140274089064128 Material impact (کارت ویزیت): 40000.00
+DEBUG 2025-11-21 11:37:34,057 product_price_cal_service 469 140274089064128 Using standard size - Name: کارت ویزیت - A4, Price impact: 30000.00
+DEBUG 2025-11-21 11:37:34,059 product_price_cal_service 469 140274089064128 Size impact: 30000.00
+DEBUG 2025-11-21 11:37:34,064 product_price_cal_service 469 140274089064128 Option impact (کارت ویزیت - تعداد برگ - 20 برگ): 20000.00
+DEBUG 2025-11-21 11:37:34,068 product_price_cal_service 469 140274089064128 Option impact (کارت ویزیت - تعداد وجه - تک وجه): 30000.00
+INFO 2025-11-21 11:37:34,069 product_price_cal_service 469 140274089064128 Total impacts calculated: 120000.00
+DEBUG 2025-11-21 11:37:34,070 product_price_cal_service 469 140274089064128 Raw price (base + impacts): 190000.00
+DEBUG 2025-11-21 11:37:34,071 product_price_cal_service 469 140274089064128 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-21 11:37:34,072 product_price_cal_service 469 140274089064128 Final price calculated: 190000.000 (raw: 190000.00 × modifier: 1.0)
+INFO 2025-11-21 11:37:34,072 product_price_cal_service 469 140274089064128 Price calculation completed for product khrt-wyzyt - Final price: 190000.0
+DEBUG 2025-11-21 11:37:34,073 product_price_cal_service 469 140274089064128 Full calculation result: {'base_price': 70000.0, 'total_impacts': 120000.0, 'raw_price_before_modifier': 190000.0, 'modifier_percent': 0.0, 'final_price': 190000.0}
+INFO 2025-11-29 14:40:51,820 calculators 517 139762094003904 ProductPriceCalculator initialized - Product: khrt-wyzyt-glsh-brq, Quantity: کارت ویزیت گلاسه براق - 350000: 2000, Material: کارت ویزیت گلاسه براق, Options count: 0, Size: کارت ویزیت گلاسه براق - 8.5x4.8 (استاندارد)
+INFO 2025-11-29 14:40:51,835 calculators 517 139762094003904 Starting price calculation for product: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:40:51,837 calculators 517 139762094003904 Base price from quantity: 350000
+DEBUG 2025-11-29 14:40:51,839 calculators 517 139762094003904 Material impact (کارت ویزیت گلاسه براق): 35000.00
+DEBUG 2025-11-29 14:40:51,841 calculators 517 139762094003904 Using standard size - Name: کارت ویزیت گلاسه براق - 8.5x4.8 (استاندارد), Price impact: 0.00
+DEBUG 2025-11-29 14:40:51,842 calculators 517 139762094003904 Size impact: 0.00
+INFO 2025-11-29 14:40:51,843 calculators 517 139762094003904 Total impacts calculated: 35000.00
+DEBUG 2025-11-29 14:40:51,844 calculators 517 139762094003904 Raw price (base + impacts): 385000.00
+DEBUG 2025-11-29 14:40:51,845 calculators 517 139762094003904 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-29 14:40:51,846 calculators 517 139762094003904 Final price calculated: 385000.000 (raw: 385000.00 × modifier: 1.0)
+INFO 2025-11-29 14:40:51,847 calculators 517 139762094003904 Price calculation completed for product khrt-wyzyt-glsh-brq - Final price: 385000.0
+DEBUG 2025-11-29 14:40:51,848 calculators 517 139762094003904 Full calculation result: {'base_price': 350000.0, 'total_impacts': 35000.0, 'raw_price_before_modifier': 385000.0, 'modifier_percent': 0.0, 'final_price': 385000.0}
+INFO 2025-11-29 14:41:16,447 calculators 517 139762094003904 ProductPriceCalculator initialized - Product: khrt-wyzyt-glsh-brq, Quantity: کارت ویزیت گلاسه براق - 350000: 2000, Material: کارت ویزیت گلاسه براق, Options count: 0, Size: کارت ویزیت گلاسه براق - 8.5x4.8 (استاندارد)
+INFO 2025-11-29 14:41:16,447 calculators 517 139762094003904 Starting price calculation for product: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:41:16,447 calculators 517 139762094003904 Base price from quantity: 350000
+DEBUG 2025-11-29 14:41:16,447 calculators 517 139762094003904 Material impact (کارت ویزیت گلاسه براق): 35000.00
+DEBUG 2025-11-29 14:41:16,448 calculators 517 139762094003904 Using standard size - Name: کارت ویزیت گلاسه براق - 8.5x4.8 (استاندارد), Price impact: 0.00
+DEBUG 2025-11-29 14:41:16,448 calculators 517 139762094003904 Size impact: 0.00
+INFO 2025-11-29 14:41:16,448 calculators 517 139762094003904 Total impacts calculated: 35000.00
+DEBUG 2025-11-29 14:41:16,449 calculators 517 139762094003904 Raw price (base + impacts): 385000.00
+DEBUG 2025-11-29 14:41:16,451 calculators 517 139762094003904 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-29 14:41:16,452 calculators 517 139762094003904 Final price calculated: 385000.000 (raw: 385000.00 × modifier: 1.0)
+INFO 2025-11-29 14:41:16,452 calculators 517 139762094003904 Price calculation completed for product khrt-wyzyt-glsh-brq - Final price: 385000.0
+DEBUG 2025-11-29 14:41:16,453 calculators 517 139762094003904 Full calculation result: {'base_price': 350000.0, 'total_impacts': 35000.0, 'raw_price_before_modifier': 385000.0, 'modifier_percent': 0.0, 'final_price': 385000.0}
+INFO 2025-11-29 14:41:34,925 calculators 517 139762094003904 ProductPriceCalculator initialized - Product: khrt-wyzyt-glsh-brq, Quantity: کارت ویزیت گلاسه براق - 350000: 2000, Material: کارت ویزیت گلاسه براق, Options count: 0, Size: کارت ویزیت گلاسه براق - 8.5x4.8 (استاندارد)
+INFO 2025-11-29 14:41:34,925 calculators 517 139762094003904 Starting price calculation for product: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:41:34,926 calculators 517 139762094003904 Base price from quantity: 350000
+DEBUG 2025-11-29 14:41:34,926 calculators 517 139762094003904 Material impact (کارت ویزیت گلاسه براق): 35000.00
+DEBUG 2025-11-29 14:41:34,926 calculators 517 139762094003904 Using standard size - Name: کارت ویزیت گلاسه براق - 8.5x4.8 (استاندارد), Price impact: 0.00
+DEBUG 2025-11-29 14:41:34,927 calculators 517 139762094003904 Size impact: 0.00
+INFO 2025-11-29 14:41:34,927 calculators 517 139762094003904 Total impacts calculated: 35000.00
+DEBUG 2025-11-29 14:41:34,927 calculators 517 139762094003904 Raw price (base + impacts): 385000.00
+DEBUG 2025-11-29 14:41:34,928 calculators 517 139762094003904 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-29 14:41:34,928 calculators 517 139762094003904 Final price calculated: 385000.000 (raw: 385000.00 × modifier: 1.0)
+INFO 2025-11-29 14:41:34,928 calculators 517 139762094003904 Price calculation completed for product khrt-wyzyt-glsh-brq - Final price: 385000.0
+DEBUG 2025-11-29 14:41:34,929 calculators 517 139762094003904 Full calculation result: {'base_price': 350000.0, 'total_impacts': 35000.0, 'raw_price_before_modifier': 385000.0, 'modifier_percent': 0.0, 'final_price': 385000.0}
+INFO 2025-11-29 15:22:45,437 calculators 546 140175272310464 ProductPriceCalculator initialized - Product: khrt-wyzyt-glsh-brq, Quantity: کارت ویزیت گلاسه براق - 350000: 2000, Material: کارت ویزیت گلاسه براق, Options count: 0, Size: کارت ویزیت گلاسه براق - 8.5x4.8 (استاندارد)
+INFO 2025-11-29 15:22:45,438 calculators 546 140175272310464 Starting price calculation for product: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 15:22:45,438 calculators 546 140175272310464 Base price from quantity: 350000
+DEBUG 2025-11-29 15:22:45,438 calculators 546 140175272310464 Material impact (کارت ویزیت گلاسه براق): 35000.00
+DEBUG 2025-11-29 15:22:45,439 calculators 546 140175272310464 Using standard size - Name: کارت ویزیت گلاسه براق - 8.5x4.8 (استاندارد), Price impact: 0.00
+DEBUG 2025-11-29 15:22:45,439 calculators 546 140175272310464 Size impact: 0.00
+INFO 2025-11-29 15:22:45,439 calculators 546 140175272310464 Total impacts calculated: 35000.00
+DEBUG 2025-11-29 15:22:45,440 calculators 546 140175272310464 Raw price (base + impacts): 385000.00
+DEBUG 2025-11-29 15:22:45,440 calculators 546 140175272310464 Price modifier - Percent: 0.00%, Factor: 1.0
+INFO 2025-11-29 15:22:45,440 calculators 546 140175272310464 Final price calculated: 385000.000 (raw: 385000.00 × modifier: 1.0)
+INFO 2025-11-29 15:22:45,441 calculators 546 140175272310464 Price calculation completed for product khrt-wyzyt-glsh-brq - Final price: 385000.0
+DEBUG 2025-11-29 15:22:45,441 calculators 546 140175272310464 Full calculation result: {'base_price': 350000.0, 'total_impacts': 35000.0, 'raw_price_before_modifier': 385000.0, 'modifier_percent': 0.0, 'final_price': 385000.0}
+INFO 2025-12-01 10:42:25,130 calculators 281 139898462037696 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=False
+DEBUG 2025-12-01 10:42:25,148 calculators 281 139898462037696 Total Area (sqm): 4.5000
+INFO 2025-12-01 10:43:46,260 calculators 292 139673007552192 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=False
+DEBUG 2025-12-01 10:43:46,261 calculators 292 139673007552192 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 10:43:46,261 calculators 292 139673007552192 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 10:43:46,262 calculators 292 139673007552192 Options Cost: 0
+INFO 2025-12-01 10:43:46,263 calculators 292 139673007552192 Calculation Done: 3050000.0
+INFO 2025-12-01 10:44:04,460 calculators 292 139673007552192 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=True
+DEBUG 2025-12-01 10:44:04,462 calculators 292 139673007552192 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 10:44:04,463 calculators 292 139673007552192 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 10:44:04,464 calculators 292 139673007552192 Options Cost: 0
+INFO 2025-12-01 10:44:04,464 calculators 292 139673007552192 Calculation Done: 2900000.0
+INFO 2025-12-01 10:46:51,226 calculators 303 139621360105152 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=True
+DEBUG 2025-12-01 10:46:51,226 calculators 303 139621360105152 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 10:46:51,227 calculators 303 139621360105152 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 10:46:51,228 calculators 303 139621360105152 Options Cost: 0
+INFO 2025-12-01 10:46:51,230 calculators 303 139621360105152 Calculation Done: 2900000.0
+INFO 2025-12-01 10:47:18,278 calculators 303 139621360105152 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=True
+DEBUG 2025-12-01 10:47:18,279 calculators 303 139621360105152 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 10:47:18,280 calculators 303 139621360105152 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 10:47:18,281 calculators 303 139621360105152 Options Cost: 0
+INFO 2025-12-01 10:47:18,282 calculators 303 139621360105152 Calculation Done: 2900000.0
+INFO 2025-12-01 10:47:25,603 calculators 303 139621360105152 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=True
+DEBUG 2025-12-01 10:47:25,604 calculators 303 139621360105152 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 10:47:25,606 calculators 303 139621360105152 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 10:47:25,607 calculators 303 139621360105152 Options Cost: 0
+INFO 2025-12-01 10:47:25,607 calculators 303 139621360105152 Calculation Done: 2900000.0
+INFO 2025-12-01 10:47:32,189 calculators 303 139621360105152 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=True
+DEBUG 2025-12-01 10:47:32,190 calculators 303 139621360105152 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 10:47:32,191 calculators 303 139621360105152 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 10:47:32,192 calculators 303 139621360105152 Options Cost: 0
+INFO 2025-12-01 10:47:32,193 calculators 303 139621360105152 Calculation Done: 2900000.0
+INFO 2025-12-01 10:47:33,448 calculators 303 139621360105152 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=True
+DEBUG 2025-12-01 10:47:33,449 calculators 303 139621360105152 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 10:47:33,450 calculators 303 139621360105152 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 10:47:33,451 calculators 303 139621360105152 Options Cost: 0
+INFO 2025-12-01 10:47:33,452 calculators 303 139621360105152 Calculation Done: 2900000.0
+INFO 2025-12-01 10:48:18,975 calculators 303 139621360105152 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=False
+DEBUG 2025-12-01 10:48:18,976 calculators 303 139621360105152 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 10:48:18,978 calculators 303 139621360105152 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 10:48:18,979 calculators 303 139621360105152 Options Cost: 0
+INFO 2025-12-01 10:48:18,980 calculators 303 139621360105152 Calculation Done: 3050000.0
+INFO 2025-12-01 10:53:22,439 calculators 303 139620993976000 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=True
+DEBUG 2025-12-01 10:53:22,440 calculators 303 139620993976000 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 10:53:22,441 calculators 303 139620993976000 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 10:53:22,442 calculators 303 139620993976000 Options Cost: 0
+INFO 2025-12-01 10:53:22,443 calculators 303 139620993976000 Calculation Done: 2900000.0
+INFO 2025-12-01 11:01:05,137 calculators 315 140324626228928 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=False
+DEBUG 2025-12-01 11:01:05,138 calculators 315 140324626228928 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 11:01:05,139 calculators 315 140324626228928 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 11:01:05,141 calculators 315 140324626228928 Options Cost: 0
+INFO 2025-12-01 11:01:05,142 calculators 315 140324626228928 Calculation Done: 3050000.0
+INFO 2025-12-01 11:05:25,002 calculators 339 140493720819392 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=True
+DEBUG 2025-12-01 11:05:25,002 calculators 339 140493720819392 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 11:05:25,003 calculators 339 140493720819392 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 11:05:25,004 calculators 339 140493720819392 Options Cost: 0
+INFO 2025-12-01 11:05:25,005 calculators 339 140493720819392 Calculation Done: 2900000.0
+INFO 2025-12-01 11:06:23,435 calculators 342 140072842163904 Init Calculator: Product=glossy-business-card, Qty=1000, Mat=کاغذ گلاسه ۳۰۰ گرم, WxH=9.0x5.0, Design=True
+DEBUG 2025-12-01 11:06:23,437 calculators 342 140072842163904 Total Area (sqm): 4.5000
+DEBUG 2025-12-01 11:06:23,439 calculators 342 140072842163904 Material Cost: 2700000.00000000
+DEBUG 2025-12-01 11:06:23,440 calculators 342 140072842163904 Options Cost: 0
+INFO 2025-12-01 11:06:23,441 calculators 342 140072842163904 Calculation Done: 2900000.0

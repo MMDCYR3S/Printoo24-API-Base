@@ -1,0 +1,15 @@
+INFO 2025-12-05 08:50:25,833 cart_file_service 834 140245703235264 START: Upload request for CartItem 2, Requirement 3
+DEBUG 2025-12-05 08:50:25,860 cart_file_service 834 140245703235264 Temp file saved at: /app/src/media/temp_cart_uploads/d9d4f9a3-c3d6-43a5-b63c-8e823221307e.pdf
+INFO 2025-12-05 08:50:25,873 cart_file_service 834 140245703235264 Queuing async task for CartItem 2
+INFO 2025-12-05 08:51:38,662 cart_file_service 834 140245691696832 START: Upload request for CartItem 2, Requirement 3
+DEBUG 2025-12-05 08:51:38,670 cart_file_service 834 140245691696832 Temp file saved at: /app/src/media/temp_cart_uploads/d5c97b4b-ab2a-4058-b2c0-add116a50584.png
+INFO 2025-12-05 08:51:38,671 cart_file_service 834 140245691696832 Queuing async task for CartItem 2
+INFO 2025-12-05 08:58:26,447 cart_file_service 7 140092654122688 START: Upload request for CartItem 2, Requirement 3
+DEBUG 2025-12-05 08:58:26,476 cart_file_service 7 140092654122688 Temp file saved at: /app/src/media/temp_cart_uploads/fb12cb07-1df9-4f90-97d6-875602676837.png
+INFO 2025-12-05 08:58:26,490 cart_file_service 7 140092654122688 Queuing async task for CartItem 2
+INFO 2025-12-05 08:58:44,596 cart_file_service 7 140092654122688 START: Upload request for CartItem 3, Requirement 3
+DEBUG 2025-12-05 08:58:44,605 cart_file_service 7 140092654122688 Temp file saved at: /app/src/media/temp_cart_uploads/4b9b728f-d683-4d9d-b0b9-4cf40cf22b3a.png
+INFO 2025-12-05 08:58:44,606 cart_file_service 7 140092654122688 Queuing async task for CartItem 3
+INFO 2025-12-05 09:00:02,366 cart_file_service 7 140092654122688 START: Upload request for CartItem 3, Requirement 4
+DEBUG 2025-12-05 09:00:02,375 cart_file_service 7 140092654122688 Temp file saved at: /app/src/media/temp_cart_uploads/2898ae52-a1f3-44c7-ab59-49830eacaef1.png
+INFO 2025-12-05 09:00:02,376 cart_file_service 7 140092654122688 Queuing async task for CartItem 3

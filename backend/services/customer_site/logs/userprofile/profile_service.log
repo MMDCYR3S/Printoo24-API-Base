@@ -1,0 +1,5 @@
+INFO 2025-11-27 16:15:07,078 user_detail_service 26 140022100522688 Fetching profile details for User ID: 6
+INFO 2025-11-29 14:22:06,785 user_detail_service 498 139635853342400 Fetching profile details for User ID: 1
+INFO 2025-12-17 13:02:34,813 user_detail_service 8 140478079022784 Fetching profile details for User ID: 2
+INFO 2025-12-17 13:03:11,617 user_detail_service 8 140478087415488 Fetching profile details for User ID: 2
+INFO 2025-12-22 11:09:04,883 user_detail_service 491 140490700748480 Fetching profile details for User ID: 2

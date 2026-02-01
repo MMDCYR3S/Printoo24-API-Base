@@ -1,0 +1,38 @@
+INFO 2025-11-27 16:34:40,934 temporary_file_service 26 140022088107712 Starting temp file upload for Product ID: 1
+DEBUG 2025-11-27 16:34:40,935 temporary_file_service 26 140022088107712 Calculating dimensions for Product: 1, Size: 2, Custom: NonexNone
+WARNING 2025-11-27 16:34:41,065 temporary_file_service 26 140022088107712 Dimension validation failed: ['فایل آپلود شده معتبر نیست یا در پردازش آن خطایی رخ داد: cannot identify image file <InMemoryUploadedFile: بطری.pdf (application/pdf)>']
+INFO 2025-11-27 16:44:51,762 temporary_file_service 26 140022052632256 Starting temp file upload for Product ID: 1
+DEBUG 2025-11-27 16:44:51,763 temporary_file_service 26 140022052632256 Calculating dimensions for Product: 1, Size: None, Custom: 20.0x20.0
+WARNING 2025-11-27 16:44:51,766 temporary_file_service 26 140022052632256 Product 1 does not accept custom dimensions.
+INFO 2025-11-27 16:48:20,091 temporary_file_service 26 140021736163008 Starting temp file upload for Product ID: 1
+DEBUG 2025-11-27 16:48:20,092 temporary_file_service 26 140021736163008 Calculating dimensions for Product: 1, Size: None, Custom: 20.0x20.0
+WARNING 2025-11-27 16:48:20,123 temporary_file_service 26 140021736163008 Dimension validation failed: ['عرض فایل شما (42.3cm) با عرض مورد نیاز (20.0cm) مطابقت ندارد.']
+INFO 2025-11-27 16:48:50,049 temporary_file_service 26 140021736163008 Starting temp file upload for Product ID: 1
+DEBUG 2025-11-27 16:48:50,050 temporary_file_service 26 140021736163008 Calculating dimensions for Product: 1, Size: None, Custom: 42.3x42.3
+DEBUG 2025-11-27 16:48:50,090 temporary_file_service 26 140021736163008 Dimension validation passed.
+WARNING 2025-11-27 16:48:50,115 temporary_file_service 26 140021736163008 CMYK validation failed: ['فایل باید در مد رنگی CMYK باشد. مد فعلی: RGB']
+INFO 2025-11-29 14:34:10,551 temporary_file_service 517 139762119730880 Starting temp file upload for Product ID: 1
+INFO 2025-11-29 14:34:39,520 temporary_file_service 517 139762119730880 Starting temp file upload for Product ID: 1
+WARNING 2025-11-29 14:34:39,756 temporary_file_service 517 139762119730880 File validation failed: ['عرض فایل شما (8.5cm) با عرض مورد نیاز (20.0cm) مطابقت ندارد.']
+INFO 2025-11-29 14:34:49,983 temporary_file_service 517 139762119730880 Starting temp file upload for Product ID: 1
+INFO 2025-11-29 14:34:50,129 temporary_file_service 517 139762119730880 Temp file saved: 5a0abe43-5247-4c00-a344-d5ce616c076b.tif
+INFO 2025-11-29 14:37:05,151 temporary_file_service 517 139762210961088 Starting temp file upload for Product ID: 1
+INFO 2025-11-29 14:37:05,204 temporary_file_service 517 139762210961088 Temp file saved: 2c5dacde-0a79-4100-b69e-2356a1c4611d.tif
+INFO 2025-11-29 14:41:05,525 temporary_file_service 517 139762094003904 Starting temp file upload for Product ID: 1
+INFO 2025-11-29 14:41:05,589 temporary_file_service 517 139762094003904 Temp file saved: 7eefd348-2ae1-4bd1-8d53-f30b45739a0f.tif
+INFO 2025-11-29 14:41:29,503 temporary_file_service 517 139762094003904 Starting temp file upload for Product ID: 1
+INFO 2025-11-29 14:41:29,559 temporary_file_service 517 139762094003904 Temp file saved: 402d500d-ae5f-414a-9687-a4756ea32927.tif
+INFO 2025-11-29 15:22:27,211 temporary_file_service 546 140175272310464 Starting temp file upload for Product ID: 1
+INFO 2025-11-29 15:22:27,449 temporary_file_service 546 140175272310464 Temp file saved: 31d0d4fb-a85e-4a23-9459-011bf10ac473.tif
+INFO 2025-12-01 10:51:47,846 temporary_file_service 303 139620993976000 Starting temp file upload for Product ID: 1
+INFO 2025-12-01 10:52:25,830 temporary_file_service 303 139620993976000 Starting temp file upload for Product ID: 6
+INFO 2025-12-01 10:52:48,915 temporary_file_service 303 139620993976000 Starting temp file upload for Product ID: 6
+INFO 2025-12-01 10:52:49,113 temporary_file_service 303 139620993976000 Temp file saved: bb4ff417-5330-48a6-ab15-1976f977e772.tif
+INFO 2025-12-01 10:52:53,779 temporary_file_service 303 139620993976000 Starting temp file upload for Product ID: 6
+INFO 2025-12-01 10:52:53,876 temporary_file_service 303 139620993976000 Temp file saved: 276e167c-65e1-4f33-9e79-63bda2fd340e.tif
+INFO 2025-12-01 11:05:57,061 temporary_file_service 342 140072842163904 Starting temp file upload for Product ID: 6
+INFO 2025-12-01 11:05:57,234 temporary_file_service 342 140072842163904 Temp file saved: 42311bf1-0a59-402d-9574-9b7f83851014.tif
+INFO 2025-12-01 11:05:59,198 temporary_file_service 342 140072842163904 Starting temp file upload for Product ID: 6
+INFO 2025-12-01 11:05:59,296 temporary_file_service 342 140072842163904 Temp file saved: 99b983d3-9622-4bcd-9f4d-9be07fc7c1f5.tif
+INFO 2025-12-01 11:06:16,143 temporary_file_service 342 140072842163904 Starting temp file upload for Product ID: 6
+INFO 2025-12-01 11:06:16,234 temporary_file_service 342 140072842163904 Temp file saved: 2f04b314-700a-4c14-a43e-4b1712f13793.tif

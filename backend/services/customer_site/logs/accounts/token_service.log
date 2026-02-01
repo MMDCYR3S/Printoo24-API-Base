@@ -1,0 +1,132 @@
+INFO 2025-11-15 13:56:11,111 token_service 112 139690947638976 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-15 13:56:11,144 token_service 112 139690947638976 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-16 17:15:45,531 token_service 150 140231386855104 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-16 17:15:45,564 token_service 150 140231386855104 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-18 15:21:22,139 token_service 58 140075992086208 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:21:22,182 token_service 58 140075992086208 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-18 15:27:29,684 token_service 58 140075992086208 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:27:29,692 token_service 58 140075992086208 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-18 15:29:21,630 token_service 58 140075983693504 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:29:21,644 token_service 58 140075983693504 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-18 15:35:25,649 token_service 106 140429010925248 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:35:25,655 token_service 106 140429010925248 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-18 15:44:59,218 token_service 135 140192520337088 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-18 15:44:59,233 token_service 135 140192520337088 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 12:58:05,687 token_service 114 140159255312064 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 12:58:05,738 token_service 114 140159255312064 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 13:25:26,480 token_service 142 140036389467840 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:25:26,499 token_service 142 140036389467840 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 13:26:26,144 token_service 142 140036389467840 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:26:26,159 token_service 142 140036389467840 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 13:50:26,365 token_service 266 140215649826496 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:50:26,390 token_service 266 140215649826496 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 13:56:14,665 token_service 266 140215381391040 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 13:56:14,686 token_service 266 140215381391040 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 15:40:35,829 token_service 569 140505940752064 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 15:40:35,863 token_service 569 140505940752064 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 16:01:22,897 token_service 612 140500628666048 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:01:22,929 token_service 612 140500628666048 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 16:11:18,699 token_service 654 139917629847232 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:11:18,714 token_service 654 139917629847232 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 16:16:49,627 token_service 668 140525504034496 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:16:49,642 token_service 668 140525504034496 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-19 16:23:57,217 token_service 683 139691716245184 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-19 16:23:57,246 token_service 683 139691716245184 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-20 08:40:03,743 token_service 18 140622925129408 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-20 08:40:03,768 token_service 18 140622925129408 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-20 08:49:35,939 token_service 57 140493868496576 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-20 08:49:35,953 token_service 57 140493868496576 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-20 09:05:23,877 token_service 78 140658635437760 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:05:23,892 token_service 78 140658635437760 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-20 09:12:42,597 token_service 105 140120013403840 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:12:42,612 token_service 105 140120013403840 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-20 09:22:28,315 token_service 142 140481084257984 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:22:28,332 token_service 142 140481084257984 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-20 09:41:57,439 token_service 186 139898416789184 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:41:57,466 token_service 186 139898416789184 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-20 09:52:40,419 token_service 253 139803534292672 Creating tokens for user - User ID: 6, Username: admin
+ERROR 2025-11-20 09:52:40,443 token_service 253 139803534292672 Failed to create tokens - User ID: 6, Error: 'Settings' object has no attribute 'SIMPLE_JWT'
+Traceback (most recent call last):
+  File "/usr/src/app/apps/accounts/services/token_service.py", line 49, in create_token_for_user
+    access_token.set_exp(liftime=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"])
+                                 ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/conf/__init__.py", line 83, in __getattr__
+    val = getattr(_wrapped, name)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Settings' object has no attribute 'SIMPLE_JWT'
+INFO 2025-11-20 09:53:30,927 token_service 253 139803534292672 Creating tokens for user - User ID: 6, Username: admin
+ERROR 2025-11-20 09:53:30,942 token_service 253 139803534292672 Failed to create tokens - User ID: 6, Error: 'Settings' object has no attribute 'SIMPLE_JWT'
+Traceback (most recent call last):
+  File "/usr/src/app/apps/accounts/services/token_service.py", line 49, in create_token_for_user
+    access_token.set_exp(liftime=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"])
+                                 ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/conf/__init__.py", line 83, in __getattr__
+    val = getattr(_wrapped, name)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Settings' object has no attribute 'SIMPLE_JWT'
+INFO 2025-11-20 09:54:03,403 token_service 257 139793315919552 Creating tokens for user - User ID: 6, Username: admin
+ERROR 2025-11-20 09:54:03,425 token_service 257 139793315919552 Failed to create tokens - User ID: 6, Error: 'Settings' object has no attribute 'SIMPLE_JWT'
+Traceback (most recent call last):
+  File "/usr/src/app/apps/accounts/services/token_service.py", line 49, in create_token_for_user
+    access_token.set_exp(liftime=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"])
+                                 ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/conf/__init__.py", line 83, in __getattr__
+    val = getattr(_wrapped, name)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Settings' object has no attribute 'SIMPLE_JWT'
+INFO 2025-11-20 09:54:06,845 token_service 257 139793315919552 Creating tokens for user - User ID: 6, Username: admin
+ERROR 2025-11-20 09:54:06,860 token_service 257 139793315919552 Failed to create tokens - User ID: 6, Error: 'Settings' object has no attribute 'SIMPLE_JWT'
+Traceback (most recent call last):
+  File "/usr/src/app/apps/accounts/services/token_service.py", line 49, in create_token_for_user
+    access_token.set_exp(liftime=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"])
+                                 ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/conf/__init__.py", line 83, in __getattr__
+    val = getattr(_wrapped, name)
+          ^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Settings' object has no attribute 'SIMPLE_JWT'
+INFO 2025-11-20 09:54:57,123 token_service 262 140099148838592 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-20 09:54:57,151 token_service 262 140099148838592 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-20 10:09:58,776 token_service 262 140099148838592 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-20 10:09:58,794 token_service 262 140099148838592 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-20 10:40:54,440 token_service 298 140700100323008 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-20 10:40:54,455 token_service 298 140700100323008 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-21 09:57:01,786 token_service 123 140486544189120 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-21 09:57:01,843 token_service 123 140486544189120 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-21 09:57:30,737 token_service 123 140486552581824 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-21 09:57:30,744 token_service 123 140486552581824 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-21 11:35:48,141 token_service 469 140274089064128 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-21 11:35:48,242 token_service 469 140274089064128 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 12:09:18,444 token_service 19 139767854397120 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 12:09:18,523 token_service 19 139767854397120 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 12:28:12,191 token_service 141 140038298924736 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 12:28:12,216 token_service 141 140038298924736 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 12:33:31,092 token_service 228 140439406507712 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 12:33:31,117 token_service 228 140439406507712 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 13:17:53,960 token_service 254 140134997554880 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 13:17:53,977 token_service 254 140134997554880 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 13:48:02,215 token_service 260 140003059586752 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 13:48:02,233 token_service 260 140003059586752 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 14:27:06,433 token_service 298 140466742884032 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 14:27:06,457 token_service 298 140466742884032 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 14:34:19,123 token_service 301 139684290393792 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 14:34:19,135 token_service 301 139684290393792 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 15:25:34,383 token_service 316 140655125853888 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 15:25:34,407 token_service 316 140655125853888 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 16:09:54,917 token_service 327 140288997717696 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 16:09:54,961 token_service 327 140288997717696 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-26 16:41:20,144 token_service 330 140435748193984 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-26 16:41:20,150 token_service 330 140435748193984 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-27 16:12:35,392 token_service 19 139696629872320 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-27 16:12:35,442 token_service 19 139696629872320 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-27 16:44:34,140 token_service 26 140022061024960 Creating tokens for user - User ID: 6, Username: admin
+DEBUG 2025-11-27 16:44:34,147 token_service 26 140022061024960 Tokens created successfully - User ID: 6, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-29 14:03:13,730 token_service 336 140060800317120 Creating tokens for user - User ID: 1, Username: admin
+DEBUG 2025-11-29 14:03:13,767 token_service 336 140060800317120 Tokens created successfully - User ID: 1, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-29 14:30:13,507 token_service 517 139762128123584 Creating tokens for user - User ID: 1, Username: admin
+DEBUG 2025-11-29 14:30:13,519 token_service 517 139762128123584 Tokens created successfully - User ID: 1, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-29 14:36:59,939 token_service 517 139762210961088 Creating tokens for user - User ID: 1, Username: admin
+DEBUG 2025-11-29 14:36:59,946 token_service 517 139762210961088 Tokens created successfully - User ID: 1, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-29 15:22:16,164 token_service 546 140175272310464 Creating tokens for user - User ID: 1, Username: admin
+DEBUG 2025-11-29 15:22:16,184 token_service 546 140175272310464 Tokens created successfully - User ID: 1, Access Token Length: 231, Refresh Token Length: 232
+INFO 2025-11-30 06:45:18,662 token_service 151 140575889159872 Creating tokens for user - User ID: 1, Username: admin
+DEBUG 2025-11-30 06:45:18,686 token_service 151 140575889159872 Tokens created successfully - User ID: 1, Access Token Length: 231, Refresh Token Length: 232

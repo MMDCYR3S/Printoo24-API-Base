@@ -1,0 +1,8 @@
+INFO 2025-12-04 09:36:38,623 tasks 8 140610482953088 [Image Task] Starting for Product 39. File: /app/src/media/temp_uploads/594657ba-bcbd-45cb-81f6-2d578a3f8fe3.tif
+INFO 2025-12-04 09:36:38,769 tasks 8 140610482953088 [Image Task] Success: Image 71 created.
+INFO 2025-12-04 09:36:54,256 tasks 8 140610482953088 [Image Task] Starting for Product 39. File: /app/src/media/temp_uploads/7bd5a1d4-8c02-4b95-ab82-13a006c9dde4.tif
+INFO 2025-12-04 09:36:54,403 tasks 8 140610482953088 [Image Task] Success: Image 72 created.
+INFO 2025-12-04 09:38:55,008 tasks 8 140610482953088 [Attachment Task] Starting upload: file_attach_01
+INFO 2025-12-04 09:38:55,069 tasks 8 140610482953088 [Attachment Task] Success: Attachment 3 created.
+INFO 2025-12-04 09:39:00,875 tasks 8 140610482953088 [Attachment Task] Starting upload: file_attach_02
+INFO 2025-12-04 09:39:00,940 tasks 8 140610482953088 [Attachment Task] Success: Attachment 4 created.

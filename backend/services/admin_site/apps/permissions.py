@@ -16,12 +16,7 @@ class AppPermissionChecker:
         if user.is_superuser:
             return True
             
-       
-        # if not user.is_staff:
-        #     raise PermissionDenied("شما دسترسی به پنل مدیریت را ندارید.")
-
         # 3. دریافت نقش کاربر
-        # نکته: ما از related_name='user_role' استفاده می‌کنیم
         user_role_rel = user.user_role.select_related('role').first()
         
         if not user_role_rel:
@@ -30,14 +25,10 @@ class AppPermissionChecker:
         role = user_role_rel.role
 
         # 4. اصلاح باگ: اگر نقش دسترسی کامل دارد (Full Access)
-        # در مدل Role فیلدی به نام is_super_role یا در JSON تعریف کردیم
-        # اگر آن فیلد True باشد، نیازی به چک کردن پرمیشن نیست
         if getattr(role, 'is_super_role', False):
             return True
 
         # 5. چک کردن مجوز از روی جدول Role
-        # ورودی معمولا 'app_label.codename' است (مثل core.view_order)
-        # ما باید بخش codename را جدا کنیم
         if "." in permission_codename:
             codename = permission_codename.split(".")[1]
         else:

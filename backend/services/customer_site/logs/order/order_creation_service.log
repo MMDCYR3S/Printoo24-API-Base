@@ -1,0 +1,169 @@
+INFO 2025-11-27 16:26:52,763 order_create_service 26 140022100522688 Starting order creation process for User ID: 6
+WARNING 2025-11-27 16:26:52,771 order_create_service 26 140022100522688 Order creation failed: Cart is empty for User ID: 6
+INFO 2025-11-29 15:23:38,262 order_create_service 551 140431165748928 Starting order creation for User ID: 1
+INFO 2025-11-29 15:23:38,262 order_create_service 551 140431165748928 Starting order creation process for User ID: 1
+INFO 2025-11-29 15:23:59,815 order_create_service 551 140431165748928 Starting order creation for User ID: 1
+INFO 2025-11-29 15:23:59,816 order_create_service 551 140431165748928 Starting order creation process for User ID: 1
+ERROR 2025-11-29 15:23:59,833 order_create_service 551 140431165748928 Order creation failed for User 1
+Traceback (most recent call last):
+  File "/app/src/apps/order/services/order_create_service.py", line 72, in execute
+    order = self._order_domain.checkout_cart(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/order/services.py", line 48, in checkout_cart
+    initial_status = OrderStatus.objects.get(name="در انتظار بررسی")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.models.order.OrderStatus.DoesNotExist: OrderStatus matching query does not exist.
+INFO 2025-11-29 15:24:23,227 order_create_service 551 140431165748928 Starting order creation for User ID: 1
+INFO 2025-11-29 15:24:23,227 order_create_service 551 140431165748928 Starting order creation process for User ID: 1
+INFO 2025-11-29 15:24:23,276 order_create_service 551 140431165748928 Order created successfully: 1
+INFO 2025-12-01 12:12:22,006 order_create_service 438 139678732949184 Process start: Create Order for User 6
+INFO 2025-12-01 12:19:38,692 order_create_service 479 140319384573632 Process start: Create Order for User 6
+INFO 2025-12-01 12:19:51,814 order_create_service 479 140319384573632 Process start: Create Order for User 6
+INFO 2025-12-01 12:19:52,323 order_create_service 479 140319384573632 Order 2 created successfully.
+INFO 2025-12-02 17:23:58,280 order_create_service 746 140268952262336 Start checkout for User 2
+WARNING 2025-12-02 17:23:58,304 order_create_service 746 140268952262336 Wallet balance insufficient. User: 2, Need: 103655206.00, Has: 0.00
+INFO 2025-12-02 17:24:04,961 order_create_service 746 140268952262336 Start checkout for User 2
+WARNING 2025-12-02 17:24:04,969 order_create_service 746 140268952262336 Wallet balance insufficient. User: 2, Need: 103655206.00, Has: 0.00
+INFO 2025-12-02 17:25:10,146 order_create_service 746 140268685731520 Start checkout for User 2
+ERROR 2025-12-02 17:25:10,168 order_create_service 746 140268685731520 Order creation failed: OrderStatus matching query does not exist.
+INFO 2025-12-02 17:25:32,165 order_create_service 746 140268685731520 Start checkout for User 2
+ERROR 2025-12-02 17:25:32,182 order_create_service 746 140268685731520 Order creation failed: OrderStatus matching query does not exist.
+INFO 2025-12-02 17:25:33,499 order_create_service 746 140268685731520 Start checkout for User 2
+ERROR 2025-12-02 17:25:33,520 order_create_service 746 140268685731520 Order creation failed: OrderStatus matching query does not exist.
+INFO 2025-12-02 17:29:15,111 order_create_service 746 140268677338816 Start checkout for User 2
+ERROR 2025-12-02 17:29:15,126 order_create_service 746 140268677338816 Order creation failed: OrderStatus matching query does not exist.
+INFO 2025-12-02 17:29:42,253 order_create_service 817 140449273779904 Start checkout for User 2
+ERROR 2025-12-02 17:29:42,280 order_create_service 817 140449273779904 Order creation failed: OrderItem() got unexpected keyword arguments: 'items_data'
+INFO 2025-12-02 17:33:25,843 order_create_service 822 140619768043200 Start checkout for User 2
+ERROR 2025-12-02 17:33:26,064 order_create_service 822 140619768043200 Order creation failed: relation "core_orderitemfile" does not exist
+LINE 1: INSERT INTO "core_orderitemfile" ("order_item_id", "requirem...
+                    ^
+
+INFO 2025-12-02 17:33:57,974 order_create_service 822 140619768043200 Start checkout for User 2
+ERROR 2025-12-02 17:33:58,332 order_create_service 822 140619768043200 Order creation failed: WalletDomainService.debit() got an unexpected keyword argument 'description'
+INFO 2025-12-02 17:34:54,985 order_create_service 839 140457331037888 Start checkout for User 2
+INFO 2025-12-02 17:34:55,447 order_create_service 839 140457331037888 Order 4 created successfully.
+INFO 2025-12-02 17:55:39,699 order_create_service 857 140324549859008 Start checkout for User 2
+INFO 2025-12-02 17:55:39,779 order_create_service 857 140324549859008 Order 5 created successfully.
+INFO 2025-12-09 16:15:06,897 order_create_service 26 140340777617088 Start checkout for User 2
+WARNING 2025-12-09 16:15:06,929 order_create_service 26 140340777617088 Insufficient funds: User 2, Need 61470982827.00, Has 4524404693.00
+INFO 2025-12-09 16:22:46,858 order_create_service 26 140340388419264 Start checkout for User 2
+INFO 2025-12-09 16:49:45,655 order_create_service 199 140540244911808 Start checkout for User 2
+WARNING 2025-12-09 16:49:45,664 order_create_service 199 140540244911808 Insufficient funds: User 2, Need 61207470875.00, Has 4524404693.00
+INFO 2025-12-09 17:01:22,486 order_create_service 240 140443240273600 Start checkout for User 2
+WARNING 2025-12-09 17:01:22,493 order_create_service 240 140443240273600 Insufficient funds: User 2, Need 61207470875.00, Has 4524404693.00
+INFO 2025-12-09 17:10:30,896 order_create_service 258 140432928577216 Start checkout for CartItem ID None by User 2
+INFO 2025-12-09 17:10:41,690 order_create_service 258 140432928577216 Start checkout for CartItem ID None by User 2
+INFO 2025-12-09 17:10:44,147 order_create_service 258 140432928577216 Start checkout for CartItem ID None by User 2
+INFO 2025-12-09 17:10:45,901 order_create_service 258 140432928577216 Start checkout for CartItem ID None by User 2
+INFO 2025-12-09 17:10:48,413 order_create_service 258 140432928577216 Start checkout for CartItem ID None by User 2
+INFO 2025-12-09 17:13:05,913 order_create_service 268 140646824277696 Start checkout for CartItem ID 4 by User 2
+INFO 2025-12-09 17:13:08,816 order_create_service 268 140646824277696 Start checkout for CartItem ID 9 by User 2
+WARNING 2025-12-09 17:13:08,826 order_create_service 268 140646824277696 Insufficient funds: User 2, Need 20365087975.00, Has 4524404693.00
+INFO 2025-12-09 17:13:18,517 order_create_service 268 140646824277696 Start checkout for CartItem ID 16 by User 2
+ERROR 2025-12-09 17:13:18,545 order_create_service 268 140646824277696 Order creation failed for CartItem 16: ['خطای سیستمی: وضعیت اولیه سفارش مشخص نیست.']
+INFO 2025-12-09 17:13:22,757 order_create_service 268 140646824277696 Start checkout for CartItem ID 15 by User 2
+ERROR 2025-12-09 17:13:22,769 order_create_service 268 140646824277696 Order creation failed for CartItem 15: ['خطای سیستمی: وضعیت اولیه سفارش مشخص نیست.']
+INFO 2025-12-09 17:14:12,104 order_create_service 268 140646824277696 Start checkout for CartItem ID 15 by User 2
+ERROR 2025-12-09 17:14:12,135 order_create_service 268 140646824277696 Order creation failed for CartItem 15: OrderItem() got unexpected keyword arguments: 'unit_price'
+INFO 2025-12-09 17:14:44,791 order_create_service 271 139744475346624 Start checkout for CartItem ID 15 by User 2
+INFO 2025-12-09 17:14:44,892 order_create_service 271 139744475346624 Order 42FC5EBF created successfully for CartItem 15.
+INFO 2025-12-09 17:15:17,834 order_create_service 274 140671884367552 Start checkout for CartItem ID 15 by User 2
+INFO 2025-12-09 17:15:17,909 order_create_service 274 140671884367552 Order 4D73C916 created successfully for CartItem 15.
+INFO 2025-12-09 17:15:43,544 order_create_service 274 140671884367552 Start checkout for CartItem ID 15 by User 2
+INFO 2025-12-09 17:15:43,562 order_create_service 274 140671884367552 Order C665E284 created successfully for CartItem 15.
+INFO 2025-12-09 17:16:11,407 order_create_service 277 139785211475648 Start checkout for CartItem ID 15 by User 2
+INFO 2025-12-09 17:16:11,502 order_create_service 277 139785211475648 Order BFB7CC7D created successfully for CartItem 15.
+INFO 2025-12-09 17:18:16,190 order_create_service 280 140668795262656 Start checkout for CartItem ID 15 by User 2
+INFO 2025-12-09 17:18:16,258 order_create_service 280 140668795262656 Order FC2A4E65 created successfully for CartItem 15.
+INFO 2025-12-09 17:21:25,763 order_create_service 293 139810446505664 Start checkout for CartItem ID 15 by User 2
+INFO 2025-12-09 17:21:25,848 order_create_service 293 139810446505664 Order 7951A809 created successfully for CartItem 15.
+INFO 2025-12-09 17:21:36,193 order_create_service 293 139810446505664 Start checkout for CartItem ID 16 by User 2
+INFO 2025-12-09 17:21:36,221 order_create_service 293 139810446505664 Order 389EFC10 created successfully for CartItem 16.
+INFO 2025-12-09 17:23:06,722 order_create_service 300 140044608378560 Start checkout for CartItem ID 16 by User 2
+INFO 2025-12-09 17:23:06,792 order_create_service 300 140044608378560 Order 8CE2D9A1 created successfully for CartItem 16.
+INFO 2025-12-09 17:33:33,750 order_create_service 300 140044522223296 Start checkout for CartItem ID 16 by User 2
+INFO 2025-12-09 17:33:33,788 order_create_service 300 140044522223296 Order 1CD38592 created successfully for CartItem 16.
+INFO 2025-12-09 19:09:47,986 order_create_service 308 140238184945344 Start checkout for CartItem ID 12 by User 2
+INFO 2025-12-09 19:09:48,102 order_create_service 308 140238184945344 Order C523262C created successfully for CartItem 12.
+INFO 2025-12-09 19:17:24,132 order_create_service 311 140613605390016 Start checkout for CartItem ID 12 by User 2
+INFO 2025-12-09 19:17:24,254 order_create_service 311 140613605390016 Order A93ED0FB created successfully for CartItem 12.
+INFO 2025-12-09 19:17:35,630 order_create_service 311 140613605390016 Start checkout for CartItem ID 16 by User 2
+INFO 2025-12-09 19:17:35,669 order_create_service 311 140613605390016 Order 698349C0 created successfully for CartItem 16.
+INFO 2025-12-09 19:17:45,529 order_create_service 311 140613605390016 Start checkout for CartItem ID 9 by User 2
+WARNING 2025-12-09 19:17:45,541 order_create_service 311 140613605390016 Insufficient funds: User 2, Need 20365087975.00, Has 4300715213.00
+INFO 2025-12-09 19:17:48,816 order_create_service 311 140613605390016 Start checkout for CartItem ID 12 by User 2
+INFO 2025-12-09 19:17:48,850 order_create_service 311 140613605390016 Order 267A3AC9 created successfully for CartItem 12.
+INFO 2025-12-09 19:22:36,486 order_create_service 314 139786982692544 Start checkout for CartItem ID 12 by User 2
+WARNING 2025-12-09 19:22:36,511 order_create_service 314 139786982692544 Insufficient funds: User 2, Need 50128605.00, Has 4266008.00
+INFO 2025-12-09 19:22:46,598 order_create_service 314 139786982692544 Start checkout for CartItem ID 16 by User 2
+INFO 2025-12-09 19:22:46,710 order_create_service 314 139786982692544 Order FBE8E4EE created successfully for CartItem 16.
+INFO 2025-12-09 19:22:53,052 order_create_service 314 139786982692544 Start checkout for CartItem ID 16 by User 2
+INFO 2025-12-09 19:22:53,082 order_create_service 314 139786982692544 Order 6D7D1677 created successfully for CartItem 16.
+INFO 2025-12-09 19:35:55,539 order_create_service 318 140474018952896 Start checkout for CartItem ID 16 by User 2
+ERROR 2025-12-09 19:35:55,569 order_create_service 318 140474018952896 Order creation failed for CartItem 16: 'CartItem' instance needs to have a primary key value before this relationship can be used.
+INFO 2025-12-09 19:39:03,986 order_create_service 322 140492505519808 Start checkout for CartItem ID 16 by User 2
+ERROR 2025-12-09 19:39:04,014 order_create_service 322 140492505519808 Order creation failed for CartItem 16: 'CartRepository' object has no attribute 'delete_cart_item'
+INFO 2025-12-09 19:39:17,294 order_create_service 325 140238037096128 Start checkout for CartItem ID 16 by User 2
+INFO 2025-12-09 19:39:17,380 order_create_service 325 140238037096128 Order 6D99B85E created successfully for CartItem 16.
+INFO 2025-12-09 19:39:23,939 order_create_service 325 140238037096128 Start checkout for CartItem ID 16 by User 2
+INFO 2025-12-15 19:31:50,348 order_create_service 83 140708188165824 Start checkout for CartItem ID 1 by User 1
+WARNING 2025-12-15 19:31:50,372 order_create_service 83 140708188165824 Insufficient funds: User 1, Need 222278.00, Has 0.00
+INFO 2025-12-15 19:32:12,857 order_create_service 83 140708188165824 Start checkout for CartItem ID 1 by User 1
+ERROR 2025-12-15 19:32:12,879 order_create_service 83 140708188165824 Order creation failed for CartItem 1: ['خطای سیستمی: وضعیت اولیه سفارش مشخص نیست.']
+INFO 2025-12-15 19:33:26,905 order_create_service 86 139996248053440 Start checkout for CartItem ID 1 by User 1
+INFO 2025-12-15 19:33:27,030 order_create_service 86 139996248053440 Order 688C5882 created successfully for CartItem 1.
+INFO 2025-12-16 08:07:20,051 order_create_service 38 139659864872640 Start checkout for CartItem ID 2 by User 2
+WARNING 2025-12-16 08:07:20,092 order_create_service 38 139659864872640 Insufficient funds: User 2, Need 222278.00, Has 0.00
+INFO 2025-12-16 08:07:37,689 order_create_service 38 139659864872640 Start checkout for CartItem ID 2 by User 2
+ERROR 2025-12-16 08:07:37,741 order_create_service 38 139659864872640 Order creation failed for CartItem 2: OrderItemFile() got unexpected keyword arguments: 'status'
+INFO 2025-12-16 08:08:22,043 order_create_service 41 140518495524544 Start checkout for CartItem ID 2 by User 2
+INFO 2025-12-16 08:08:22,314 order_create_service 41 140518495524544 Order 4AF0C63C created successfully for CartItem 2.
+INFO 2025-12-16 12:07:38,560 order_create_service 13 140585545492160 Start BULK checkout for User 2
+INFO 2025-12-16 12:07:38,698 order_create_service 13 140585545492160 Bulk checkout completed. 4 orders created for User 2.
+INFO 2025-12-16 12:17:26,809 order_create_service 100 140332983555776 Start checkout for CartItem ID 7 by User 2
+ERROR 2025-12-16 12:17:26,835 order_create_service 100 140332983555776 Order creation failed for CartItem 7: 'ProductImage' object has no attribute 'first'
+INFO 2025-12-16 12:17:54,031 order_create_service 103 140587902695104 Start checkout for CartItem ID 7 by User 2
+ERROR 2025-12-16 12:17:54,066 order_create_service 103 140587902695104 Order creation failed for CartItem 7: 'ProductImage' object has no attribute 'name'
+INFO 2025-12-16 12:27:54,983 order_create_service 103 140587894302400 Start checkout for CartItem ID 7 by User 2
+ERROR 2025-12-16 12:27:55,007 order_create_service 103 140587894302400 Order creation failed for CartItem 7: 'ProductImage' object has no attribute 'name'
+INFO 2025-12-16 12:28:34,450 order_create_service 107 140160079664832 Start checkout for CartItem ID 7 by User 2
+ERROR 2025-12-16 12:28:34,478 order_create_service 107 140160079664832 Order creation failed for CartItem 7: ProductImage matching query does not exist.
+INFO 2025-12-16 12:28:53,886 order_create_service 110 139672470681280 Start checkout for CartItem ID 7 by User 2
+ERROR 2025-12-16 12:28:53,926 order_create_service 110 139672470681280 Order creation failed for CartItem 7: 'ProductImage' object has no attribute 'name'
+INFO 2025-12-16 12:40:02,483 order_create_service 314 140370545637056 Start checkout for CartItem ID 7 by User 2
+ERROR 2025-12-16 12:40:02,506 order_create_service 314 140370545637056 Order creation failed for CartItem 7: 'ProductImage' object has no attribute 'name'
+INFO 2025-12-16 12:42:45,974 order_create_service 383 140389953738432 Start checkout for CartItem ID 7 by User 2
+INFO 2025-12-16 12:42:46,092 order_create_service 383 140389953738432 Order FBDD68F3 created successfully for CartItem 7.
+INFO 2025-12-24 07:07:24,929 order_create_service 94 139868830168768 Start checkout for CartItem ID 16 by User 2
+INFO 2025-12-24 07:07:25,055 order_create_service 94 139868830168768 Order 99C32B6D created successfully for CartItem 16.
+INFO 2025-12-24 07:08:39,621 order_create_service 94 139868830168768 Start checkout for CartItem ID 17 by User 2
+INFO 2025-12-24 07:08:39,651 order_create_service 94 139868830168768 Order F36EC5C3 created successfully for CartItem 17.
+INFO 2025-12-24 07:27:58,214 order_create_service 182 140135052080832 Start BULK checkout for User 2
+INFO 2025-12-24 07:27:58,300 order_create_service 182 140135052080832 Bulk checkout completed. 1 orders created for User 2.
+INFO 2025-12-25 07:27:43,995 order_create_service 268 140701814748864 Start checkout for CartItem ID 21 by User 2
+INFO 2025-12-25 07:27:44,096 order_create_service 268 140701814748864 Order D049BCA2 created successfully for CartItem 21.
+INFO 2025-12-31 20:24:34,973 order_create_service 428 140685575624384 Checkout request. User: GUEST
+ERROR 2025-12-31 20:24:35,001 order_create_service 428 140685575624384 Order creation failed: Order() got unexpected keyword arguments: 'address_obj'
+INFO 2025-12-31 20:25:33,024 order_create_service 431 140701085112000 Checkout request. User: GUEST
+ERROR 2025-12-31 20:25:33,079 order_create_service 431 140701085112000 Order creation failed: 'NoneType' object has no attribute 'username'
+INFO 2025-12-31 20:27:43,708 order_create_service 434 140079888594624 Checkout request. User: GUEST
+INFO 2025-12-31 20:28:33,835 order_create_service 437 140680510830272 Checkout request. User: GUEST
+INFO 2025-12-31 20:29:26,816 order_create_service 437 140680510830272 Checkout request. User: GUEST
+INFO 2025-12-31 20:29:30,869 order_create_service 437 140680510830272 Checkout request. User: GUEST
+INFO 2025-12-31 20:34:11,645 order_create_service 437 140680480409280 Checkout request. User: admin
+INFO 2025-12-31 20:34:30,982 order_create_service 437 140680480409280 Checkout request. User: admin
+INFO 2025-12-31 20:36:10,385 order_create_service 444 140280520152768 Checkout request. User: admin
+INFO 2025-12-31 20:36:11,997 order_create_service 444 140280520152768 Checkout request. User: admin
+INFO 2025-12-31 20:39:17,756 order_create_service 455 140539423004352 Checkout request. User: admin
+INFO 2025-12-31 20:40:02,773 order_create_service 458 140669486274240 Checkout request. User: admin
+INFO 2026-01-08 07:19:25,223 order_create_service 146 140085914932928 Checkout request. User: GUEST
+INFO 2026-01-08 07:24:18,899 order_create_service 153 140668647409344 Checkout request. User: GUEST

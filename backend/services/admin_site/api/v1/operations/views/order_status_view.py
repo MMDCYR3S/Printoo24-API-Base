@@ -119,6 +119,38 @@ class OrderTransitionView(GenericAPIView):
         except Exception as e:
             return Response({"detail": f"خطای سیستمی رخ داده است.{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# ========== ORDER APPROVE VIEW ========== #
+@extend_schema(tags=['Admin - Order Status Transition'])
+class OrderApproveView(GenericAPIView):
+    """
+    تایید خودکار و جلو بردن وضعیت سفارش به مرحله بعد (Next Status).
+    نیازی به ارسال کد وضعیت نیست؛ سیستم بر اساس sort_order وضعیت بعدی را تشخیص می‌دهد.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            service = OrderTransitionAppService()
+            
+            updated_order = service.execute_approve(
+                requester=request.user,
+                order_id=pk,
+                description=request.data.get('description') 
+            )
+            
+            return Response({
+                "message": "سفارش تایید شد و به وضعیت بعدی منتقل گردید.",
+                "id": updated_order.id,
+                "new_status": updated_order.current_status.name,
+                "new_status_code": updated_order.current_status.internal_code
+            }, status=status.HTTP_200_OK)
+            
+        except (ValidationError, PermissionDenied) as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            return Response({"detail": f"خطای سیستمی رخ داده است.{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 # ========== ORDER STATUS LIST ========== #
 @extend_schema(tags=['Admin - Order Status Transition'])
 class OrderStatusTransactionListView(GenericAPIView):
