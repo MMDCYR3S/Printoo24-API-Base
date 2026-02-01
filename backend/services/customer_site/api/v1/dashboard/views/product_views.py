@@ -379,36 +379,16 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             )
         },
         description="""
-        تصویر را آپلود می‌کند و ID آن را برمی‌گرداند تا در `media-sync` استفاده شود.
         
         مثال:
         {
             "image": "product_01.png" // فایل آپلود شده از Input
+            "order": 2
         }
 
-        
-
 
 
         
-        **نحوه استفاده در فرانت‌اند:**
-            ```javascript
-                const formData = new FormData();
-                formData.append('image', fileInput.files[0]);
-                
-                fetch('/api/products/5/upload-image/', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer YOUR_TOKEN'
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => console.log(data));
-            ```
-
-            
-
 
 
 
@@ -435,10 +415,17 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         if not file_obj:
             return Response({'image': 'File required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        order = request.data.get('order', 0)
+        try:
+            order = int(order)
+        except (ValueError, TypeError):
+            order = 0
+
         result = self.app_service.upload_product_image_async(
             product_id=id,
             user=request.user,
-            file_obj=file_obj
+            file_obj=file_obj,
+            order=order
         )
         
         if result['status'] == 'processing':

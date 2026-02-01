@@ -8,17 +8,13 @@ class ProductImageQuerySet(BaseQuerySet):
     """
     کوئری‌های مربوط به تصاویر محصول
     """
-    def add_image(self, product, image_file, user):
+    def add_image(self, product, image_file, user, order):
         """ افزودن تصویر جدید به انتهای لیست """
-        # ===== محاسبه ترتیب ===== 
-        max_order = self.filter(product=product).aggregate(Max('order'))['order__max']
-        new_order = (max_order or 0) + 1
-        
         return self.create(
             product=product,
             user=user,
             image=image_file,
-            order=new_order
+            order=order
         )
 
     def get_images_by_ids(self, image_ids: List[int]):
@@ -29,8 +25,8 @@ class ProductImageManager(models.Manager):
     def get_queryset(self):
         return ProductImageQuerySet(self.model, using=self._db)
 
-    def add_image(self, product, image_file, user):
-        return self.get_queryset().add_image(product, image_file, user)
+    def add_image(self, product, image_file, user, order):
+        return self.get_queryset().add_image(product, image_file, user, order)
 
     def get_images_by_ids(self, image_ids: List[int]):
         return self.get_queryset().get_images_by_ids(image_ids)
