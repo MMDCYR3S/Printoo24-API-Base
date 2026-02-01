@@ -61,7 +61,7 @@ class BaseOrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = [
             'id', 'product_name', 'product_code', 'category_name', 
-            'status_display', 'status', 'quantity', 
+            'status_display', 'quantity', 
             'features_summary', 'admin_note', 'items'
         ]
 
@@ -83,14 +83,20 @@ class FullOrderItemSerializer(DesignerOrderItemSerializer):
 
 class BaseOrderDetailSerializer(serializers.ModelSerializer):
     customer_info = serializers.SerializerMethodField()
-    status = OrderStatusSerializer(source='current_status')
-    
+    current_status_display = serializers.CharField(source="current_status.name", read_only=True)
+    type_display = serializers.CharField(source="get_type_display", read_only=True)
+
     class Meta:
         model = Order
-        fields = ['id', 'order_code', 'recipient_name', 'recipient_phone', 'company_name', 'full_address', 'created_at', 'status', 'customer_info', 'type']
+        fields = [
+            'id', 'order_code', 'recipient_name',
+            'recipient_phone', 'company_name', 'full_address',
+            'current_status_display', 'customer_info', 'type_display',
+            'created_at'
+        ]
 
     def get_customer_info(self, obj):
-        if not obj.user: return {"name": "Deleted User"}
+        if not obj.user: return None
         
         info = {"username": obj.user.username, "email": obj.user.email}
         if hasattr(obj.user, 'customer_profile'):
@@ -157,6 +163,6 @@ class AdminOrderDetailSerializer(BaseOrderDetailSerializer):
             'total_price', 
             'base_products_price'
         ]
-    
+
     def get_logistics(self, obj):
         return LogisticsOrderDetailSerializer(obj).data.get('shipping_info')

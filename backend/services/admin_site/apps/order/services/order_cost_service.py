@@ -1,6 +1,8 @@
 from typing import Dict, List, Any
+
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
+from django.core.files.uploadedfile import UploadedFile
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from core.models import (
@@ -10,6 +12,7 @@ from apps.order.models import *
 from apps.order.domain_services import OrderCostService, OrderCostType
 from apps.support.services import LoggerService
 from apps.permissions import AppPermissionChecker
+
 
 class OrderCostAppService:
     """
@@ -25,7 +28,7 @@ class OrderCostAppService:
         self.audit_service = LoggerService()
         
     # ========== SUBMIT REPORT ========== #
-    def submit_department_report(self, requester: User, order_id: int, validated_data: dict, cost_type_id: int = None, files_list=None):
+    def submit_department_report(self, requester: User, order_id: int, validated_data: dict, cost_type_id: int = None, attachments:List[UploadedFile] = []):
         """
         ارسال گزارش هزینه توسط پرسنل (انبار، چاپ، طراحی).
         این متد گزارش و آیتم‌هایش را می‌سازد.
@@ -78,8 +81,14 @@ class OrderCostAppService:
         # ===== اگر آیتم جدید بود ===== #
         if new_items:
             OrderCostItem.objects.bulk_create_items(new_items)
+        
+        # ===== ثبت فایل‌های پیوست ===== #
+        if attachments:
+            self._create_attachments(report, attachments)
+
         # ===== محاسبه قیمت مجدد ===== #
         self.domain_service.recalculate_sheet_totals(sheet)
+        
         # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
             user=requester,
@@ -206,3 +215,9 @@ class OrderCostAppService:
         if not sheet:
             sheet = OrderCostSheet.objects.create(order_id=order_id)
         return sheet
+
+    def _create_attachments(self, report: OrderCostReport, files: List[UploadedFile]):
+        """Helper to create attachments"""
+        attachments = []
+        for file in files:
+            OrderCostAttachment.objects.create(report=report, file=file, title=file.name)

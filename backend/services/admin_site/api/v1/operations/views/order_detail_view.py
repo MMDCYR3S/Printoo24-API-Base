@@ -12,7 +12,7 @@ from ..serializers import (
     BaseOrderDetailSerializer,
 )
 # ========== Order Detail View ========== #
-@extend_schema(tags=['Order'])
+@extend_schema(tags=['Order - List For Staffs'])
 class OrderDetailView(GenericAPIView):
     """
     دریافت جزئیات کامل سفارش براساس نوع نقش کاربر.

@@ -42,7 +42,7 @@ class OrderStatusQuerySet(BaseQuerySet):
     """کوئری‌های مربوط به وضعیت سفارش"""
     
     def get_status_by_code(self, internal_code: str):
-        return self.filter(internal_code=internal_code).first()
+        return self.filter(internal_code__icontains=internal_code).first()
 
     def get_status_with_group_detail(self, status_id: int):
         return self.select_related('group').filter(id=status_id).first()

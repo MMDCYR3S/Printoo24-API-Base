@@ -26,6 +26,10 @@ class OrderCostSheetManager(models.Manager):
 class OrderCostReportQuerySet(BaseQuerySet):
     """کوئری‌های مربوط به گزارشات هزینه"""
     
+    def get_all(self):
+        return self.select_related("submitter", "cost_type") \
+            .order_by("-created_at").all()
+
     def get_reports_by_sheet(self, sheet_id: int):
         return self.filter(sheet_id=sheet_id)\
             .select_related('submitter')\
@@ -44,6 +48,9 @@ class OrderCostReportQuerySet(BaseQuerySet):
 class OrderCostReportManager(models.Manager):
     def get_queryset(self):
         return OrderCostReportQuerySet(self.model, using=self._db)
+    
+    def get_all(self):
+        return self.get_queryset().get_all()
 
     def get_reports_by_sheet(self, sheet_id: int):
         return self.get_queryset().get_reports_by_sheet(sheet_id)

@@ -10,7 +10,7 @@ from apps.operations.filters import OrderFilter
 from ..serializers import OrderListSerializer
 
 # ========== Order List View ========== #
-@extend_schema(tags=['Order'])
+@extend_schema(tags=['Order - List For Staffs'])
 class OrderListView(GenericAPIView):
     """
     API لیست هوشمند سفارشات.

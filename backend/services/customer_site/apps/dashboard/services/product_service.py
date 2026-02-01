@@ -126,6 +126,7 @@ class ProductDashboardService:
 
         try:
             logger.info(f"Attempting async upload for product {product_id}")
+
             # ===== اجرای همگام (Async) ===== #
             upload_product_image_task.delay(
                 product_id=product_id,
@@ -137,8 +138,8 @@ class ProductDashboardService:
 
         except (OperationalError, Exception) as e:
             logger.error(f"Celery connection failed: {str(e)}. Switching to Sync mode.")
-            
-            # === FALLBACK: اجرای همگام (Sync) === #
+
+            # ===== FALLBACK: اجرای همگام (Sync) ===== #
             try:
                 with open(temp_path, 'rb') as f:
                     django_file = File(f, name=original_name)

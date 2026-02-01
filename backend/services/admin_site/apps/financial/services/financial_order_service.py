@@ -110,7 +110,7 @@ class FinancialOrderAppService:
     
     # ============ REPORT CREATE ============ #
     @transaction.atomic
-    def create_report_manually(self, user: User, order_id: int, data: Dict, items: List[Dict], attachments: List[UploadedFile] = []) -> OrderCostReport:
+    def create_report_manually(self, user: User, order_id: int, data: Dict, items: List[Dict] = [], attachments: List[UploadedFile] = []) -> OrderCostReport:
         """
         ایجاد کامل گزارش هزینه شامل هدر، آیتم‌ها و پیوست‌ها.
         """
@@ -134,7 +134,8 @@ class FinancialOrderAppService:
         )
         
         # ===== ایجاد آیتم‌ها و پیوست‌ها ===== #
-        self._bulk_create_items(report, items)
+        if items:
+            self._bulk_create_items(report, items)
         if attachments:
             self._create_attachments(report, attachments)
         
@@ -149,7 +150,7 @@ class FinancialOrderAppService:
             changes={
                 'report_id': report.id,
                 'title': report.title,
-                'items_count': len(items)
+                'items_count': len(items) if items else None
             },
             description=_(f"ثبت گزارش هزینه جدید: {report.title}")
         )
@@ -197,6 +198,10 @@ class FinancialOrderAppService:
             changes={'deleted_report_id': report_id, 'title': report_title},
             description=_(f"حذف گزارش هزینه")
         )
+
+    def get_all_reports(self):
+        """ نمایش تمامی گزارشات هزینه """
+        return OrderCostReport.objects.get_all()
 
     # ============ REPORT LIST ============ #
     def get_order_reports(self, user: User, order_id: int) -> List[OrderCostReport]:
