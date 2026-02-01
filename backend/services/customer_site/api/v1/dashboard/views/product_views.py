@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes, inline_serializer
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes, inline_serializer, OpenApiResponse
 from rest_framework import serializers
 
 # ===== ایمپورت سرویس‌ها و سریالایزرها ===== #
@@ -339,9 +339,94 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== UPLOAD IMAGE ========== #
     @extend_schema(
-        summary="مرحله 3: آپلود عکس محصول",
-        request=ProductImageSerializer,
-        description="تصویر را آپلود می‌کند و ID آن را برمی‌گرداند تا در `media-sync` استفاده شود."
+        summary="مرحله 3: آپلود عکس",
+        request={
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'image': {
+                        'type': 'string',
+                        'format': 'binary',
+                        'description': 'فایل تصویر محصول (JPG, PNG, etc.)'
+                    }
+                },
+                'required': ['image']
+            }
+        },
+        responses={
+            202: OpenApiResponse(
+                description="تصویر در حال پردازش است",
+                examples=[
+                    OpenApiExample(
+                        name="Processing Response",
+                        value={
+                            "status": "processing",
+                            "task_id": "550e8400-e29b-41d4-a716-446655440000"
+                        }
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                description="خطا در درخواست",
+                examples=[
+                    OpenApiExample(
+                        name="Error Response",
+                        value={
+                            "image": "File required"
+                        }
+                    )
+                ]
+            )
+        },
+        description="""
+        تصویر را آپلود می‌کند و ID آن را برمی‌گرداند تا در `media-sync` استفاده شود.
+        
+        مثال:
+        {
+            "image": "product_01.png" // فایل آپلود شده از Input
+        }
+
+        
+
+
+
+        
+        **نحوه استفاده در فرانت‌اند:**
+            ```javascript
+                const formData = new FormData();
+                formData.append('image', fileInput.files[0]);
+                
+                fetch('/api/products/5/upload-image/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer YOUR_TOKEN'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => console.log(data));
+            ```
+
+            
+
+
+
+
+        *** اگر از موارد بالا نتیجه نگرفتی و مثال بهت کمک نکرد، از فرمت زیر کمک بگیر. شاید بهت کمک کرد. این فرمت رو میتونی به AI بدی و ازش راهنمایی بخوای. ***
+            ```
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'image': {
+                        'type': 'string',
+                        'format': 'binary',
+                        'description': 'فایل تصویر محصول (JPG, PNG, etc.)'
+                    }
+                },
+                'required': ['image']
+            }
+            ```
+        """
     )
     @action(detail=True, methods=['post'], url_path='upload-image', parser_classes=[MultiPartParser, FormParser, JSONParser])
     def upload_image(self, request, id=None):
@@ -363,24 +448,137 @@ class ProductDashboardViewSet(viewsets.ViewSet):
     # ========== UPLOAD ATTACHMENT ========== #
     @extend_schema(
         summary="مرحله 4: آپلود فایل‌های پیوست",
-        request=AttachmentLibrarySerializer,
+        request={
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'file': {
+                        'type': 'string',
+                        'format': 'binary',
+                        'description': 'فایل پیوست (PDF, DOC, etc.)'
+                    },
+                    'name': {
+                        'type': 'string',
+                        'description': 'نام فایل (اختیاری)',
+                        'nullable': True
+                    },
+                    'product_id': {
+                        'type': 'integer',
+                        'description': 'شناسه محصول'
+                    }
+                },
+                'required': ['file', 'product_id']
+            }
+        },
+        responses={
+            201: OpenApiResponse(
+                description="فایل با موفقیت آپلود شد",
+                examples=[
+                    OpenApiExample(
+                        name="Success Response",
+                        value={
+                            "id": 456,
+                            "status": "created",
+                            "file_url": "https://example.com/media/attachments/file.pdf",
+                            "name": "دفترچه راهنما",
+                            "product_id": 5
+                        }
+                    )
+                ]
+            ),
+            202: OpenApiResponse(
+                description="فایل در حال پردازش است",
+                examples=[
+                    OpenApiExample(
+                        name="Processing Response",
+                        value={
+                            "status": "processing",
+                            "task_id": "550e8400-e29b-41d4-a716-446655440001"
+                        }
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                description="خطا در درخواست",
+                examples=[
+                    OpenApiExample(
+                        name="Error Response",
+                        value={
+                            "detail": "File and product_id are required."
+                        }
+                    )
+                ]
+            )
+        },
         description="""
-        نکته:
-        اطلاعاتی که باید پست کنی اینها هستند:
+        آپلود فایل‌های پیوست برای محصول.
+        
+        مثال:
         {
-            "name": "exmaple",
-            "file": file,
+            "name": "فایل راهنما",
+            "file": "document.pdf", // این قسمت همون فایل آپلود شده قرار میگیره
             "product_id": 5
         }
-        در قسمت فایل هم باید فایل رو آپلود کنی.
-        نام می‌تونه خالی باشه و اجباری نیست.
+
+
+
+
+        **نکته:** نام می‌تواند خالی باشد و اجباری نیست.
+        
+        **نحوه استفاده در فرانت‌اند:**
+            ```javascript
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                formData.append('name', 'دفترچه راهنما');  // اختیاری
+                formData.append('product_id', 5);
+                
+                fetch('/api/products/upload-attachment/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer YOUR_TOKEN'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => console.log(data));
+            ```
+
+            
+
+
+
+
+            ***اگر باز هم با وجود مثال بالا نتونستی کاری انجام بدی، می‌تونی این فرمت رو به AI بدی. این میتونه بهش کمک کنه که درک کنه دقیقا این API چیکار میکنه:***
+
+            ```
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'file': {
+                        'type': 'string',
+                        'format': 'binary',
+                        'description': 'فایل پیوست (PDF, DOC, etc.)'
+                    },
+                    'name': {
+                        'type': 'string',
+                        'description': 'نام فایل (اختیاری)',
+                        'nullable': True
+                    },
+                    'product_id': {
+                        'type': 'integer',
+                        'description': 'شناسه محصول'
+                    }
+                },
+                'required': ['file', 'product_id']
+            }
+            ```
         """
     )
     @action(detail=False, methods=['post'], url_path='upload-attachment', parser_classes=[MultiPartParser, FormParser])
     def upload_attachment(self, request):
         """ آپلود فایل برای لینک کردن بعدی """
         file_obj = request.FILES.get('file')
-        name = request.data.get('name')
+        name = request.data.get('name', '')
         product_id = request.data.get('product_id')
         
         if not file_obj or not name:
