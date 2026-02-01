@@ -459,8 +459,8 @@ class Attachment(models.Model):
         return str(self.pk)
     
     class Meta:
-        verbose_name = _('فایل محصول')
-        verbose_name_plural = _('فایل های محصولات')
+        verbose_name = _('فایل پیوست')
+        verbose_name_plural = _('فایل های پیوست')
 
 # ====== Option Pricing Strategy Model ====== #
 class OptionPricingStrategy(models.TextChoices):
