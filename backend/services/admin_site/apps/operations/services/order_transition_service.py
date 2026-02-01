@@ -55,9 +55,6 @@ class OrderTransitionAppService:
             # ===== بررسی دسترسی به وضعیت ===== #
             self._validate_role_scope(requester, current_status)
             next_sort_order = current_status.sort_order + 1
-            
-            if order.current_status.internal_code in ["DELIVERED", 'DELIVER']:
-                raise ValidationError("این سفارش در مرحله نهایی تایید هست و از قبل تایید شده است.")
 
             # ===== بررسی وجود وضعیت بعدی ===== #
             try:
@@ -67,6 +64,17 @@ class OrderTransitionAppService:
 
             if not next_status:
                 raise ValidationError("این سفارش در مرحله نهایی قرار دارد و وضعیت بعدی برای تایید وجود ندارد.")
+
+            # ===== مراحلی که نباید تغییر کنند ===== #
+            FORBIDDEN_TRANSITIONS = ['deliver', 'cancel', 'reject']
+
+            target_code = next_status.internal_code.lower()
+
+            if any(keyword in target_code for keyword in FORBIDDEN_TRANSITIONS):
+                raise ValidationError(
+                    "برای انتقال به این مرحله (تکمیل/تحویل)، لطفا از دکمه مربوطه اقدام کنید. "
+                    "تایید خودکار برای مراحل نهایی مجاز نیست."
+                )
 
             
             # ===== تغییر وضعیت ===== #
