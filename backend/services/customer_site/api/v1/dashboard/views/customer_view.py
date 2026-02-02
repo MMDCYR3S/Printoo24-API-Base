@@ -3,6 +3,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from rest_framework.exceptions import ValidationError
 
 from apps.dashboard.services import CustomerOrchestratorService
 from ..serializers.general_serializers import CustomerManagementSerializer
@@ -60,10 +61,20 @@ class CustomerViewSet(ViewSet):
                 {'detail': 'شناسه کاربر باید عددی باشد'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        serializer = CustomerManagementSerializer(data=request.data, partial=True)
+
+        try:
+            user_instance = self.service.user_repo.get_customer_by_id(user_id)
+        except ValidationError:
+            return Response({'detail': 'کاربر یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CustomerManagementSerializer(
+            instance=user_instance, 
+            data=request.data, 
+            partial=True,
+            context={'request': request}
+        )
         serializer.is_valid(raise_exception=True)
-        
+
         try:
             user = self.service.update_customer(user_id, serializer.validated_data)
             output_serializer = CustomerManagementSerializer(user)
