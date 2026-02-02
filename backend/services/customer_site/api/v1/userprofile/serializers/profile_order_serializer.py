@@ -46,7 +46,7 @@ class QuotationSerializer(serializers.ModelSerializer):
 class ProductSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['name', 'slug']
+        fields = ['name', 'slug', 'code']
 
 # ===== Order Item File ===== #
 class OrderItemFileSerializer(serializers.ModelSerializer):
@@ -66,6 +66,7 @@ class OrderItemFileSerializer(serializers.ModelSerializer):
 # ===== Order Item Detail ===== #
 class OrderItemDetailSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
+    product_code = serializers.CharField(source="product.code", read_only=True)
     design_files = OrderItemFileSerializer(source='files', many=True, read_only=True)
     specs = serializers.SerializerMethodField()
 
@@ -73,7 +74,8 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = [
             'id', 
-            'product_name', 
+            'product_name',
+            'product_code',
             'quantity', 
             'specs', 
             'design_files'
