@@ -90,11 +90,11 @@ class CustomerOrchestratorService:
                 raise ValidationError("کاربر یافت نشد.")
 
             # ===== بروزرسانی اطلاعات پایه ===== #
-            allowed_user_fields = ['email', 'username', 'is_active']
+            allowed_user_fields = ['email', 'username', 'is_active', 'password']
             user_update_data = {k: v for k, v in data.items() if k in allowed_user_fields}
             
             if user_update_data:
-                self.user_repo.update_customer(user.id, user_update_data)
+                self.user_repo.update_customer(user_id, user_update_data)
                 logger.debug(f"User base info updated for {user_id}")
             
             # ===== تغییر رمز ===== #
@@ -106,11 +106,13 @@ class CustomerOrchestratorService:
             # 3. بروزرسانی پروفایل
             if hasattr(user, 'customer_profile'):
                 profile = user.customer_profile
+                profile_nested_data = data.get('customer_profile', {})
+                
                 profile_fields = ['first_name', 'last_name', 'phone_number', 'company', 'bio']
                 updated_fields = []
                 for field in profile_fields:
-                    if field in data:
-                        setattr(profile, field, data[field])
+                    if field in profile_nested_data:
+                        setattr(profile, field, profile_nested_data[field])
                         updated_fields.append(field)
                 
                 if updated_fields:
