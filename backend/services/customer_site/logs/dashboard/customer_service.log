@@ -10,3 +10,91 @@ DEBUG 2026-02-02 08:28:03,843 customer_service 7 126022367299264 Fetching custom
 DEBUG 2026-02-02 08:28:05,118 customer_service 7 126022393525952 Fetching customer list
 DEBUG 2026-02-02 08:28:16,202 customer_service 7 126022367299264 Fetching customer list
 DEBUG 2026-02-02 08:28:17,424 customer_service 7 126022618089152 Fetching customer list
+DEBUG 2026-02-02 08:45:21,102 customer_service 7 126022367299264 Fetching customer list
+DEBUG 2026-02-02 08:45:25,388 customer_service 7 126022618089152 Fetching customer list
+DEBUG 2026-02-02 13:27:58,912 customer_service 7 133107881604800 Fetching customer list
+DEBUG 2026-02-02 13:35:17,935 customer_service 7 133107957274304 Fetching customer list
+DEBUG 2026-02-02 13:42:01,418 customer_service 7 133107881604800 Fetching customer list
+DEBUG 2026-02-02 13:42:02,864 customer_service 7 133107957274304 Fetching customer list
+INFO 2026-02-02 13:42:48,868 customer_service 7 133107881604800 START: Creating new customer 'rwldofsdf'
+ERROR 2026-02-02 13:42:48,903 customer_service 7 133107881604800 FAILED: Create customer 'rwldofsdf' failed. Error: User() got unexpected keyword arguments: 'is_customer'
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/customer_service.py", line 54, in create_customer
+    user = self.user_repo.create_customer(user_data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/services/customers.py", line 44, in create_customer
+    user = User.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/managers/users.py", line 69, in create_user
+    user = self.model(username=username, email=email, **extra_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 569, in __init__
+    raise TypeError(
+TypeError: User() got unexpected keyword arguments: 'is_customer'
+INFO 2026-02-02 13:42:54,990 customer_service 7 133107881604800 START: Creating new customer 'rwldofsdf'
+ERROR 2026-02-02 13:42:55,008 customer_service 7 133107881604800 FAILED: Create customer 'rwldofsdf' failed. Error: User() got unexpected keyword arguments: 'is_customer'
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/customer_service.py", line 54, in create_customer
+    user = self.user_repo.create_customer(user_data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/services/customers.py", line 44, in create_customer
+    user = User.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/managers/users.py", line 69, in create_user
+    user = self.model(username=username, email=email, **extra_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 569, in __init__
+    raise TypeError(
+TypeError: User() got unexpected keyword arguments: 'is_customer'
+INFO 2026-02-02 13:47:36,026 customer_service 7 133107881604800 START: Creating new customer 'rwldofsdf'
+ERROR 2026-02-02 13:47:36,039 customer_service 7 133107881604800 FAILED: Create customer 'rwldofsdf' failed. Error: User() got unexpected keyword arguments: 'is_customer'
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/customer_service.py", line 54, in create_customer
+    user = self.user_repo.create_customer(user_data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/services/customers.py", line 44, in create_customer
+    user = User.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/managers/users.py", line 69, in create_user
+    user = self.model(username=username, email=email, **extra_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 569, in __init__
+    raise TypeError(
+TypeError: User() got unexpected keyword arguments: 'is_customer'
+DEBUG 2026-02-02 13:47:36,697 customer_service 7 133107881604800 Fetching customer list
+DEBUG 2026-02-02 13:47:47,242 customer_service 7 133107957274304 Fetching customer list
+DEBUG 2026-02-02 13:47:49,937 customer_service 7 133107881604800 Fetching customer list
+INFO 2026-02-02 13:48:44,009 customer_service 7 133107957274304 START: Creating new customer 'yy1e223d'
+ERROR 2026-02-02 13:48:44,014 customer_service 7 133107957274304 FAILED: Create customer 'yy1e223d' failed. Error: User() got unexpected keyword arguments: 'is_customer'
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/customer_service.py", line 54, in create_customer
+    user = self.user_repo.create_customer(user_data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/services/customers.py", line 44, in create_customer
+    user = User.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/managers/users.py", line 69, in create_user
+    user = self.model(username=username, email=email, **extra_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 569, in __init__
+    raise TypeError(
+TypeError: User() got unexpected keyword arguments: 'is_customer'
+DEBUG 2026-02-02 14:37:08,663 customer_service 134 134043798771392 Fetching customer list
+INFO 2026-02-02 14:38:08,234 customer_service 134 134043798771392 START: Creating new customer 'fgdfgdffff'
+INFO 2026-02-02 14:38:09,983 customer_service 134 134043798771392 User created: ID=2
+DEBUG 2026-02-02 14:38:10,003 customer_service 134 134043798771392 Role 'مشتری' assigned to User 2
+INFO 2026-02-02 14:38:10,006 customer_service 134 134043798771392 SUCCESS: Customer 'fgdfgdffff' (ID: 2) created fully.
+DEBUG 2026-02-02 14:38:10,125 customer_service 134 134043798771392 Fetching customer list
+INFO 2026-02-02 14:38:29,616 customer_service 134 134043798771392 Fetching details for Customer 2

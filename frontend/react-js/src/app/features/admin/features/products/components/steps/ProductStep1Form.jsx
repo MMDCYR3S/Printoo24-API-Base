@@ -47,7 +47,7 @@ const GuideTypeSelector = ({ register, name }) => (
 
 const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   
-  // --- 1. Master Data (حیاتی برای پیدا کردن ID ها) ---
+  // --- 1. Master Data ---
   const { data: parentCategories = [] } = useQuery({
     queryKey: ['admin-parent-categories'],
     queryFn: () => adminCategoryService.getAll(),
@@ -65,6 +65,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
 
   // --- 2. Local State ---
   const [selectedParentId, setSelectedParentId] = useState(null);
+  const [targetSubCategoryId, setTargetSubCategoryId] = useState(null); // ذخیره ID زیردسته مورد نظر
 
   // دریافت فرزندان بر اساس پدر انتخاب شده
   const { data: parentDetails, isFetching: isLoadingChildren } = useQuery({
@@ -74,7 +75,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   });
 
   // --- 3. Form Setup ---
-  const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
+  const { register, control, handleSubmit, watch, setValue, getValues, reset, formState: { errors } } = useForm({
     resolver: zodResolver(ProductStep1Schema),
     defaultValues: {
       shell: { has_quantity: true, is_active: true, guide_type: 'info', price: "0", name: "", category_id: "" },
@@ -84,18 +85,21 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
     }
   });
 
-  // --- 4. Initialization Logic (Re-engineered) ---
+  // --- 4. Initialization Logic ---
   useEffect(() => {
     const isMasterDataReady = standardSizes.length > 0 && systemQuantities.length > 0;
 
     if (initialData && isEditMode && isMasterDataReady) {
-        console.log("🔄 Normalizing Data for Edit Mode...", initialData);
+        console.log("🔄 Initializing Data...", initialData);
 
         // A. نرمال‌سازی Category
         let currentCatId = initialData.shell?.category_info?.id || initialData.shell?.category_id;
         
-        // پیدا کردن والد برای ست کردن دراپ‌داون اول
         if (currentCatId) {
+            // ذخیره ID هدف برای استفاده ثانویه (بعد از لود شدن لیست)
+            setTargetSubCategoryId(currentCatId);
+
+            // پیدا کردن والد برای پر کردن دراپ‌داون اول
             adminCategoryService.getById(currentCatId).then(catData => {
                 if (catData?.parent) {
                     setSelectedParentId(catData.parent);
@@ -105,33 +109,28 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             }).catch(console.error);
         }
 
-        // B. نرمال‌سازی Quantities (تبدیل Value به ID)
-        // سرور فقط مقدار (مثلا 1000) را می‌فرستد، ما باید ID آن را از لیست سیستم پیدا کنیم
+        // B. نرمال‌سازی Quantities
         let normalizedQuantities = [];
         if (Array.isArray(initialData.quantities)) {
             normalizedQuantities = initialData.quantities.map(q => {
-                // جستجو در مستر دیتا بر اساس مقدار
                 const matchedQty = systemQuantities.find(sq => Number(sq.value) === Number(q.value));
                 if (matchedQty) {
                     return {
-                        id: matchedQty.id, // شناسه پیدا شد!
+                        id: matchedQty.id,
                         guide_text: q.guide_text || "",
                         guide_type: q.guide_type || "info"
                     };
                 }
                 return null;
-            }).filter(Boolean); // حذف مواردی که پیدا نشدند
+            }).filter(Boolean);
         }
 
-        // C. نرمال‌سازی Sizes (تبدیل ابعاد/نام به ID)
+        // C. نرمال‌سازی Sizes
         let normalizedSizes = [];
-        // طبق جیسون شما: sizes یک آبجکت است که داخلش آرایه sizes دارد
         const sizesArray = initialData.sizes?.sizes || (Array.isArray(initialData.sizes) ? initialData.sizes : []);
         
         if (sizesArray.length > 0) {
             normalizedSizes = sizesArray.map(s => {
-                // جستجو در مستر دیتا بر اساس ابعاد (دقیق‌ترین روش)
-                // اگر ابعاد دقیق نبود، می‌توان روی نام هم شرط گذاشت
                 const matchedSize = standardSizes.find(ss => 
                     Number(ss.width) === Number(s.width) && 
                     Number(ss.height) === Number(s.height)
@@ -139,8 +138,8 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
 
                 if (matchedSize) {
                     return {
-                        id: matchedSize.id, // شناسه پیدا شد!
-                        price_impact: Number(s.price || 0), // طبق جیسون، فیلد price تاثیر قیمت است
+                        id: matchedSize.id,
+                        price_impact: Number(s.price || 0),
                         guide_text: s.guide_text || "",
                         guide_type: s.guide_type || "info"
                     };
@@ -149,20 +148,18 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             }).filter(Boolean);
         }
 
-        // D. پر کردن فرم با دیتای تمیز شده
+        // D. پر کردن فرم
         reset({
             shell: {
                 ...initialData.shell,
                 name: initialData.shell.name,
                 category_id: currentCatId || "",
                 price: String(initialData.shell.price || "0"),
-                // فیلدهای guide ممکن است نال باشند
                 guide_text: initialData.shell.guide_text || "",
                 guide_type: initialData.shell.guide_type || "info"
             },
             pricing_config: {
                 ...initialData.pricing_config,
-                // اطمینان از عددی بودن و تبدیل مقادیر استرینگ جیسون
                 base_setup_price: Number(initialData.pricing_config.base_setup_price || 0),
                 design_fee: Number(initialData.pricing_config.design_fee || 0),
             },
@@ -170,7 +167,21 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             sizes: normalizedSizes,
         });
     }
-  }, [initialData, isEditMode, reset, standardSizes, systemQuantities]); // وابستگی به مستر دیتا مهم است
+  }, [initialData, isEditMode, reset, standardSizes, systemQuantities]);
+
+  // --- 5. Fix: Re-apply SubCategory when List Loads ---
+  // این افکت زمانی اجرا می‌شود که لیست فرزندان (parentDetails) از سرور برسد
+  useEffect(() => {
+      if (parentDetails?.children && targetSubCategoryId) {
+          // چک می‌کنیم آیا زیردسته هدف در لیست جدید وجود دارد؟
+          const exists = parentDetails.children.find(c => Number(c.id) === Number(targetSubCategoryId));
+          if (exists) {
+              // اگر بود، دوباره مقدار را در فرم ست می‌کنیم تا نمایش داده شود
+              setValue('shell.category_id', targetSubCategoryId);
+          }
+      }
+  }, [parentDetails, targetSubCategoryId, setValue]);
+
 
   // Watchers
   const hasQuantity = watch('shell.has_quantity');
@@ -183,14 +194,14 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   const handleParentChange = (e) => {
     const val = e.target.value;
     setSelectedParentId(val);
-    setValue('shell.category_id', '');
+    setValue('shell.category_id', ''); // در تغییر دستی، مقدار قبلی پاک شود
+    setTargetSubCategoryId(null); // هدف قبلی را هم پاک می‌کنیم
   };
 
   const handleAddQuantity = (e) => {
     const qtyId = e.target.value;
     if (!qtyId) return;
     
-    // جلوگیری از تکراری
     const currentQuantities = watch('quantities') || [];
     const exists = currentQuantities.find(q => String(q.id) === String(qtyId));
     
@@ -258,6 +269,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                   <FormError message={errors.shell?.category_id?.message} />
               </div>
 
+              {/* توضیحات */}
               <div className="form-control md:col-span-2">
                   <label className="label text-sm font-bold text-slate-700 mb-1">توضیحات</label>
                   <textarea 

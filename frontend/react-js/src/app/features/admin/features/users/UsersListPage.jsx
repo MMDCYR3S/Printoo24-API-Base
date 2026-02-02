@@ -2,7 +2,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useCustomers } from '../../hooks/useCustomers';
 import { Plus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-// import CustomerModal from './components/CustomerModal';
+import CustomerModal from './components/CustomerModal';
 import CustomerRow from './components/CustomerRow';
 import CustomerFilters from './components/CustomerFilters';
 import BulkActionsBar from './components/BulkActionsBar';

@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { 
   ArrowRight, Edit, Trash2, Box, Layers, Ruler, 
   DollarSign, CheckCircle2, XCircle, Info, Image as ImageIcon,
-  Settings, FileText, List, Type, CheckSquare, Calendar
+  Settings, FileText, List, Type, CheckSquare, Calendar,
+  Download, ExternalLink, Paperclip
 } from 'lucide-react';
 import { adminProductService } from '../../services/adminProductService';
 import { adminCategoryService } from '../../services/adminCategoryService';
@@ -18,6 +19,13 @@ const formatPrice = (price) => {
   return new Intl.NumberFormat('fa-IQ').format(num);
 };
 
+// تابع کمکی برای لینک فایل
+const getFileUrl = (url) => {
+    if (!url) return '#';
+    if (url.startsWith('http') || url.startsWith('blob:')) return url;
+    return `http://localhost:9010${url}`;
+};
+
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,6 +35,24 @@ const ProductDetailPage = () => {
     queryKey: ['admin-product', id],
     queryFn: () => adminProductService.getById(id),
     retry: 1
+  });
+
+  // 2. دریافت اطلاعات دسته‌بندی فعلی (برای پیدا کردن والد)
+  const categoryId = product?.shell?.category_info?.id;
+  const { data: currentCategory } = useQuery({
+    queryKey: ['category-details', categoryId],
+    queryFn: () => adminCategoryService.getById(categoryId),
+    enabled: !!categoryId,
+    staleTime: 1000 * 60 * 5 // کش کردن برای جلوگیری از درخواست تکراری
+  });
+
+  // 3. دریافت اطلاعات دسته‌بندی والد (اگر وجود داشته باشد)
+  const parentId = currentCategory?.parent;
+  const { data: parentCategory } = useQuery({
+    queryKey: ['category-details', parentId],
+    queryFn: () => adminCategoryService.getById(parentId),
+    enabled: !!parentId,
+    staleTime: 1000 * 60 * 5
   });
 
   if (isLoading) return (
@@ -44,12 +70,11 @@ const ProductDetailPage = () => {
     </div>
   );
 
-  const { shell, pricing_config, quantities, sizes, images, options } = product;
+  const { shell, pricing_config, quantities, sizes, images, options, attachments } = product;
 
   // --- نرمال‌سازی دیتا ---
   const safeQuantities = Array.isArray(quantities) ? quantities : [];
   
-  // فیکس مشکل آبجکت بودن سایزها
   let safeSizes = [];
   if (Array.isArray(sizes)) {
       safeSizes = sizes;
@@ -57,13 +82,13 @@ const ProductDetailPage = () => {
       safeSizes = sizes.sizes;
   }
   
-  // قیمت پایه برای محاسبه در جدول تیراژ
+  const safeAttachments = Array.isArray(attachments) ? attachments : [];
   const basePrice = parseFloat(shell.price || 0);
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-6 pb-32 animate-fade-in-up">
       
-      {/* --- HEADER (FIX: z-index increased to 50) --- */}
+      {/* --- HEADER --- */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-4 border-b border-base-200 pb-6 bg-white/80 backdrop-blur-md sticky top-0 z-50 p-4 rounded-b-2xl -mx-4 -mt-4 shadow-sm transition-all">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/admin/products')} className="btn btn-circle btn-ghost btn-sm text-slate-500 hover:bg-slate-100">
@@ -132,17 +157,32 @@ const ProductDetailPage = () => {
                       <p className="text-sm text-slate-600 leading-7 text-justify bg-slate-50 p-4 rounded-xl border border-slate-100 min-h-[120px]">
                           {shell.description || 'توضیحاتی ثبت نشده است.'}
                       </p>
+                      
+                      {/* ✅ بخش نمایش دسته‌بندی (اصلاح شده) */}
                       <div className="mt-4 flex flex-wrap gap-2">
                          {shell.category_info && (
-                             <span className="badge badge-ghost gap-1 pl-3 py-3">
-                                <Layers size={14}/> 
-                                {typeof shell.category_info === 'object' 
-                                    ? shell.category_info.name 
-                                    : shell.category_info}
-                             </span>
+                             <div className="badge badge-ghost gap-2 pl-4 pr-3 py-4 h-auto">
+                                <Layers size={16} className="text-slate-500"/> 
+                                <div className="flex flex-col items-start leading-none gap-1">
+                                    {/* نام والد */}
+                                    {parentCategory && (
+                                        <span className="text-[10px] text-slate-400 font-medium">
+                                            {parentCategory.name}
+                                        </span>
+                                    )}
+                                    {/* نام زیردسته */}
+                                    <span className="font-bold text-slate-700">
+                                        {currentCategory?.name || (typeof shell.category_info === 'object' ? shell.category_info.name : shell.category_info)}
+                                    </span>
+                                </div>
+                             </div>
                          )}
-                         <span className="badge badge-ghost gap-1 pl-3 py-3">
-                            <Calendar size={14}/> {new Date(shell.created_at).toLocaleDateString('fa-IR')}
+                         
+                         <span className="badge badge-ghost gap-1 pl-3 py-4 h-auto">
+                            <Calendar size={16} className="text-slate-500"/> 
+                            <span className="font-bold text-slate-700 dir-ltr">
+                                {new Date(shell.created_at).toLocaleDateString('fa-IR')}
+                            </span>
                          </span>
                       </div>
                   </div>
@@ -269,7 +309,7 @@ const ProductDetailPage = () => {
                   </div>
               </div>
 
-              {/* Quantities (FIXED: Calculation + Layout) */}
+              {/* Quantities */}
               {shell.has_quantity && (
                   <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                       <div className="p-4 bg-slate-50/50 border-b border-slate-100">
@@ -288,11 +328,8 @@ const ProductDetailPage = () => {
                                  </thead>
                                  <tbody className="text-sm">
                                      {safeQuantities.map((q, idx) => {
-                                         // محاسبه قیمت اگر از سمت سرور نیامده باشد
-                                         // اگر q.price بود استفاده میکنیم، وگرنه (تعداد * قیمت پایه)
                                          const qtyValue = Number(q.value || q);
                                          const calculatedPrice = q.price ? q.price : (qtyValue * basePrice);
-                                         
                                          return (
                                              <tr key={idx} className="hover:bg-slate-50 border-b border-slate-50 last:border-0">
                                                  <td className="font-bold text-slate-700 pr-6">
@@ -338,6 +375,36 @@ const ProductDetailPage = () => {
                       )}
                   </div>
               </div>
+
+              {/* ✅ فایل‌های پیوست */}
+              {safeAttachments.length > 0 && (
+                  <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                      <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
+                          <Paperclip size={18} className="text-indigo-500"/> فایل‌های پیوست
+                      </h3>
+                      <div className="space-y-2">
+                          {safeAttachments.map((att) => (
+                              <a
+                                  key={att.id}
+                                  href={getFileUrl(att.file)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 hover:border-indigo-200 transition-all group"
+                              >
+                                  <div className="flex items-center gap-3">
+                                      <div className="p-2 bg-white rounded-lg text-slate-500 group-hover:text-indigo-500 transition-colors shadow-sm">
+                                          {att.type === 'video' ? <Film size={16}/> : <FileText size={16}/>}
+                                      </div>
+                                      <span className="text-xs font-bold text-slate-700 group-hover:text-indigo-700 transition-colors max-w-[150px] truncate">
+                                          {att.name || 'فایل ضمیمه'}
+                                      </span>
+                                  </div>
+                                  <ExternalLink size={14} className="text-slate-400 group-hover:text-indigo-500"/>
+                              </a>
+                          ))}
+                      </div>
+                  </div>
+              )}
 
           </div>
       </div>
