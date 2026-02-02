@@ -53,7 +53,6 @@ class CreateOrderView(GenericAPIView):
                 summary='سناریو ۱: کاربر مهمان (Guest)',
                 description='کاربر لاگین نکرده است، پس باید تمام مشخصات هویتی و آدرس را دستی وارد کند.',
                 value={
-                    "type": "2",
                     "first_name": "امیر",
                     "last_name": "رضایی",
                     "phone_number": "09121234567",
@@ -71,7 +70,6 @@ class CreateOrderView(GenericAPIView):
                 summary='سناریو ۲: کاربر عضو (آدرس ذخیره شده)',
                 description='کاربر لاگین است و یکی از آدرس‌های پروفایل خود را (address_id) انتخاب کرده است.',
                 value={
-                    "type": "1",
                     "address_id": 15
                 },
                 request_only=True
@@ -82,7 +80,6 @@ class CreateOrderView(GenericAPIView):
                 summary='سناریو ۳: کاربر عضو (آدرس جدید)',
                 description='کاربر لاگین است اما می‌خواهد سفارش به آدرس جدیدی ارسال شود (همزمان پروفایل هم آپدیت می‌شود).',
                 value={
-                    "type": "1",
                     "first_name": "امیر",
                     "last_name": "رضایی",
                     "phone_number": "09129998877",
@@ -200,7 +197,6 @@ class BulkCreateOrderView(GenericAPIView):
                 'Bulk Request (Guest)',
                 summary='درخواست گروهی (مهمان)',
                 value={
-                    "type": "2",
                     "first_name": "سارا",
                     "last_name": "محمدی",
                     "phone_number": "0935...",
