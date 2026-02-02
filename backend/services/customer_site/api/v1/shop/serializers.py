@@ -33,10 +33,11 @@ class ProductPricingConfigSerializer(serializers.ModelSerializer):
 class QuantityDetailSerializer(serializers.ModelSerializer):
     guide_text = serializers.CharField()
     guide_type = serializers.CharField()
+    quantity_value = serializers.CharField(source="quantity.value", read_only=True)
 
     class Meta:
         model = ProductQuantity
-        fields = ['id', 'quantity', 'guide_text', 'guide_type']
+        fields = ['id', 'quantity_value', 'guide_text', 'guide_type']
 
 class SizeDetailSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='size.name', read_only=True)

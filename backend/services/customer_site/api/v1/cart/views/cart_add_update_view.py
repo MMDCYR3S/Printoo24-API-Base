@@ -126,7 +126,7 @@ class AddToCartView(GenericAPIView):
                 product_id=data["product_id"],
                 selections=data["selections"]
             )
-            return Response({"id": cart_item.id, "message": "Item added"}, status=status.HTTP_201_CREATED)
+            return Response({"id": cart_item.id, "message": "محصول به سبد خرید اضافه شد"}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

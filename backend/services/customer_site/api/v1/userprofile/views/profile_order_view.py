@@ -30,10 +30,11 @@ class UserOrderListAPIView(APIView):
                     {
                         "id": 2050,
                         "user": 15,
+                        "recipient_name": "محمد رضایی",
+                        "recipient_phone": "09137555555",
                         "status": "در حال چاپ",
                         "type_display": "سفارش معمولی",
                         "total_price": "1500000",
-                        "address": "تهران، میدان انقلاب، کارگر شمالی...",
                         "created_at": "2023-11-20T14:00:00Z"
                     }
                 ]

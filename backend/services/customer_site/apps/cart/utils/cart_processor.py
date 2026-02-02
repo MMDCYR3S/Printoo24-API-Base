@@ -139,7 +139,7 @@ class CartProcessor:
                 raise ValidationError(_("برای این محصول انتخاب 'تیراژ' (بسته) الزامی است."))
             try:
                 pq = ProductQuantity.objects.select_related('quantity').get(product=self.product, id=qty_id)
-                final_quantity = self.quantity_input if self.quantity_input > 0 else 1
+                final_quantity = self.quantity_input if self.selections.get("quantity") else pq.quantity.value
                 quantity_label = str(pq.quantity.value)
             except ProductQuantity.DoesNotExist:
                 raise ValidationError(_("تیراژ انتخابی نامعتبر است."))

@@ -111,8 +111,8 @@ class OrderWithDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'id', 'user', 'current_status', "status_display", 
-            'total_price', 'address',
+            'id', 'user', 'order_code','current_status', "status_display", 
+            'total_price', "full_address",
             'created_at', 'order_item'
         ]
 
@@ -139,7 +139,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'id', 'user', 'status', 'type_display', 
-            'total_price', 'address', 'address_id',
-            'created_at'
+            'id', 'user', "recipient_name", "recipient_phone",
+            'status', 'type_display', 'total_price',
+            'order_code', 'created_at', "address_id", "address"
         ]

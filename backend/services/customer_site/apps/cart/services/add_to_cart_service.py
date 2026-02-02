@@ -39,8 +39,8 @@ class AddToCartService:
             raise ValidationError("محصول یافت نشد یا غیرفعال است.")
         
         # ===== دریافت تیراژ یا تعداد ===== #
-        quantity_input = int(selections.pop('quantity', 1))
-        
+        quantity_input = int(selections.get('quantity', None) or selections.get('quantity_id', None) or 1)
+
         # ===== پردازش منطقی سبد خرید ===== #
         processor = CartProcessor(product, selections, quantity_input).process()
 
