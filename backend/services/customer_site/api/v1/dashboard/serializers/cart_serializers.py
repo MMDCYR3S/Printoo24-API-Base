@@ -59,8 +59,13 @@ class CartItemAddSimpleSerializer(serializers.Serializer):
 
 # ===== Cart Item Update Serializer ===== #
 class CartItemUpdateSerializer(serializers.Serializer):
-    quantity = serializers.IntegerField(min_value=1, required=False)
-    specs = serializers.DictField(required=False)
+    quantity = serializers.IntegerField(required=False, min_value=1)
+    quantity_id = serializers.IntegerField(required=False)
+    size_id = serializers.IntegerField(required=False, allow_null=True)
+    width = serializers.FloatField(required=False, min_value=0.1)
+    height = serializers.FloatField(required=False, min_value=0.1)
+    options = serializers.DictField(required=False, default={})
+    has_design = serializers.BooleanField(required=False)
     
 # ===== Cart List Serializer ===== #
 class CartListSerializer(serializers.ModelSerializer):  
