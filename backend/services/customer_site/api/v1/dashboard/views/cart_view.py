@@ -132,24 +132,30 @@ class CartDashboardViewSet(viewsets.ViewSet):
         request=CartItemUpdateSerializer,
         examples=[
             OpenApiExample(
-                'Update Quantity',
-                summary='فقط تغییر تعداد',
-                value={"quantity": 2000}
-            ),
-            OpenApiExample(
-                'Update Quantity Package',
-                summary='تغییر بسته تیراژ',
-                value={"quantity_id": 51}
-            ),
-            OpenApiExample(
-                'Update Options',
-                summary='تغییر آپشن (تغییر روکش)',
+                'ذخیره با سایز و تیراژ پیش‌فرض',
+                summary='ذخیره با سایز و تیراژ پیش‌فرض',
                 value={
-                    "quantity_id": 50,
+                    "quantity_id": 12,
+                    "size": 23,
                     "options": {
                         "10": 101, 
                         "12": 206
-                    }
+                    },
+                    "has_design": True
+                }
+            ),
+            OpenApiExample(
+                "ذخیره با سایز و تعداد دلخواه",
+                summary='ذخیره با سایز و تعداد دلخواه',
+                value={
+                    "quantity": 100,
+                    "width": 8,
+                    "height": 5,
+                    "options": {
+                        "10": 101, 
+                        "12": 206
+                    },
+                    "has_design": True
                 }
             )
         ]
