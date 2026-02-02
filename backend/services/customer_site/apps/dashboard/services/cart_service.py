@@ -36,40 +36,40 @@ class CartDashboardService:
             total_amount=Sum(F('cart_items__price'))
         ).order_by('-updated_at')
 
-    def get_user_cart_details(self, user_id: int):
+    def get_user_cart_details(self, cart_id: int):
         """ دریافت جزئیات کامل سبد خرید برای نمایش در ادمین """
-        logger.info(f"START: Get Cart Details for User ID {user_id}")
-        
-        user = get_object_or_404(User, pk=user_id)
-        
-        cart_queryset = Cart.objects.filter(user=user).prefetch_related(
-            Prefetch(
-                'cart_items',
-                queryset=CartItem.objects.select_related('product').prefetch_related(
-                    'uploads'
+        logger.info(f"START: Get Cart Details for User ID {cart_id}")
+        # ===== دریافت سبد خرید ===== #
+        cart = get_object_or_404(
+            Cart.objects.prefetch_related(
+                Prefetch(
+                    'cart_items',
+                    queryset=CartItem.objects.select_related('product').prefetch_related(
+                        'uploads'
+                    )
                 )
-            )
-        ).first()
-        
-        if not cart_queryset:
-             return {'cart': None, 'user': user}
+            ).select_related('user'),
+            pk=cart_id
+        )
 
         return {
-            'cart': cart_queryset,
-            'user': user
+            'cart': cart,
+            'user': cart.user,
+            'session_key': cart.session_key
         }
 
     # ===== Write Operations (Commands) ===== #
     @transaction.atomic
-    def add_item_to_user_cart(self, user_id: int, data: Dict[str, Any]):
+    def add_item_to_cart(self, cart_id: int, data: Dict[str, Any]):
         """
-        افزودن آیتم توسط ادمین.
-        ورودی data باید شبیه فرمت API باشد یا اینجا مپ شود.
+        افزودن آیتم توسط ادمین به یک سبد خرید خاص.
         """
-        logger.info(f"Admin adding item for User {user_id}")
-        user = get_object_or_404(User, pk=user_id)
+        logger.info(f"Admin adding item for Cart ID {cart_id}")
         
-        # 1. استخراج پروداکت
+        # ===== دریافت سبد خرید ===== #
+        cart = get_object_or_404(Cart, pk=cart_id)
+        
+        # ===== دریافت محصول ===== #
         product_slug = data.get('product_slug')
         if not product_slug:
             raise ValidationError("شناسه محصول (Slug) الزامی است.")
@@ -78,27 +78,29 @@ class CartDashboardService:
 
         selections = self._map_admin_data_to_selections(data)
         
-        service = AddToCartService(user)
+        service = AddToCartService(user=cart.user, session_key=cart.session_key)
         try:
             cart_item = service.execute(
                 product_id=product.id,
                 selections=selections
             )
-            logger.info(f"Item {cart_item.id} added via Admin.")
+            logger.info(f"Item {cart_item.id} added via Admin to Cart {cart_id}.")
             return cart_item
         except Exception as e:
             logger.error(f"Failed to add item via Admin: {e}")
             raise e
 
     @transaction.atomic
-    def update_cart_item(self, user_id: int, item_id: int, data: Dict[str, Any]):
-        """ ویرایش آیتم توسط ادمین """
-        logger.info(f"Admin updating Item {item_id}")
-        user = get_object_or_404(User, pk=user_id)
+    def update_cart_item(self, cart_id: int, item_id: int, data: Dict[str, Any]):
+        """ ویرایش آیتم توسط ادمین در یک سبد خاص """
+        logger.info(f"Admin updating Item {item_id} in Cart {cart_id}") 
+
+        # ===== دریافت سبد خرید ===== #
+        cart = get_object_or_404(Cart, pk=cart_id)
         
         selections = self._map_admin_data_to_selections(data)
 
-        service = CartItemUpdateService(user)
+        service = CartItemUpdateService(user=cart.user, session_key=cart.session_key)
         try:
             updated_item = service.update(
                 cart_item_id=item_id,
@@ -109,16 +111,16 @@ class CartDashboardService:
             logger.error(f"Failed to update item via Admin: {e}")
             raise e
 
-    def remove_item_from_cart(self, user_id: int, item_id: int):
-        """ حذف آیتم """
-        user = get_object_or_404(User, pk=user_id)
-        service = CartItemDeleteService(user)
+    def remove_item_from_cart(self, cart_id: int, item_id: int):
+        """ حذف آیتم از یک سبد خاص """
+        cart = get_object_or_404(Cart, pk=cart_id)
+        service = CartItemDeleteService(user=cart.user, session_key=cart.session_key)
         service.delete(item_id)
 
-    def clear_user_cart(self, user_id: int):
-        """ خالی کردن کل سبد """
-        user = get_object_or_404(User, pk=user_id)
-        service = CartClearService(user)
+    def clear_cart(self, cart_id: int):
+        """ خالی کردن کل یک سبد خرید """
+        cart = get_object_or_404(Cart, pk=cart_id)
+        service = CartClearService(user=cart.user, session_key=cart.session_key)
         service.clear()
 
     # ===== Helper Methods (Mapper) ===== #

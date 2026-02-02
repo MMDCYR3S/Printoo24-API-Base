@@ -23,13 +23,13 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
 
 # ===== User Cart Detail Serializer ===== #
 class UserCartDetailSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username')
+    username = serializers.CharField(source='user.username', allow_null=True)
     items = CartItemDetailSerializer(source='cart_items', many=True)
     total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Cart
-        fields = ['id', 'user_id', 'username', 'items', 'total_price', 'updated_at']
+        fields = ['id', 'user_id', 'username', 'session_key', 'items', 'total_price', 'updated_at']
 
     def get_total_price(self, obj):
         return sum(item.price for item in obj.cart_items.all())
@@ -39,17 +39,14 @@ class CartItemSelectionSerializer(serializers.Serializer):
     """
     ساختار انتخاب‌های محصول (ساده‌سازی شده).
     """
-    quantity = serializers.IntegerField(min_value=1)
+    quantity = serializers.IntegerField(min_value=1, required=False, allow_null=True)
+    quantity_id = serializers.IntegerField(required=False, allow_null=True)
     size_id = serializers.IntegerField(required=False, allow_null=True)
     
     custom_width = serializers.FloatField(required=False)
     custom_height = serializers.FloatField(required=False)
     
-    option_value_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        required=False,
-        allow_empty=True
-    )
+    options = serializers.DictField(required=False, default={})
     has_design = serializers.BooleanField(default=True)
 
 # ===== Cart Item Add Simple Serializer ===== #
@@ -66,12 +63,12 @@ class CartItemUpdateSerializer(serializers.Serializer):
     specs = serializers.DictField(required=False)
     
 # ===== Cart List Serializer ===== #
-class CartListSerializer(serializers.ModelSerializer):
+class CartListSerializer(serializers.ModelSerializer):  
     """
     سریالایزر برای نمایش لیست سبدها در جدول داشبورد.
     """
-    user_id = serializers.IntegerField(source='user.id')
-    username = serializers.CharField(source='user.username')
+    user_id = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     items_count = serializers.IntegerField(read_only=True)
     total_amount = serializers.DecimalField(max_digits=14, decimal_places=0, read_only=True)
@@ -81,12 +78,28 @@ class CartListSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ['id', 'user_id', 'username', 'full_name', 'items_count', 'total_amount', 'last_update']
 
+    def get_user_id(self, obj):
+        # ===== بازگردانی شناسه کاربر ===== #
+        return obj.user.id if obj.user else None
+
+    def get_username(self, obj):
+        # ===== کاربر مهمان ===== #
+        if obj.user:
+            return obj.user.username
+        return f"مهمان ({obj.session_key[:8]}...)" if obj.session_key else "ناشناس"
+
     def get_full_name(self, obj):
-        try:
-            profile = obj.user.customer_profile
-            return f"{profile.first_name} {profile.last_name}"
-        except Exception:
-            return "ناشناس"
+        # ===== ااگر کاربر دارای پروفایل بود ===== #
+        if obj.user:
+            try:
+                profile = obj.user.customer_profile
+                if profile.first_name and profile.last_name:
+                    return f"{profile.first_name} {profile.last_name}"
+            except Exception:
+                pass
+            # ===== در صورت نبود کاربر و مهمان بودن ===== #
+            return obj.user.username 
+        return f"مهمان ({obj.session_key[:8]}...)" if obj.session_key else "ناشناس"
 
 # ===== Cart File Upload Serializer ===== #
 class CartFileUploadSerializer(serializers.Serializer):

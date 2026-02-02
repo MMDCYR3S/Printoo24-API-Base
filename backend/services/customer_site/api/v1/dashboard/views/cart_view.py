@@ -36,17 +36,17 @@ class CartDashboardViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         """ 
         دریافت سبد خرید یک کاربر.
-        توجه: pk در اینجا user_id است.
+        توجه: pk در اینجا cart_id است.
         """
-        data = self.service.get_user_cart_details(user_id=pk)
+        data = self.service.get_user_cart_details(cart_id=pk)
         serializer = UserCartDetailSerializer(data['cart'])
         return Response(serializer.data)
 
     # ===== خالی کردن سبد ===== #
     @extend_schema(summary="حذف کل سبد خرید کاربر")
     def destroy(self, request, pk=None):
-        """ pk = user_id """
-        self.service.clear_user_cart(user_id=pk)
+        """ pk = cart_id """
+        self.service.clear_user_cart(cart_id=pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     # ===== افزودن آیتم به سبد کاربر ===== #
@@ -69,12 +69,15 @@ class CartDashboardViewSet(viewsets.ViewSet):
                 summary='سناریو ۱: کارت ویزیت (سایز استاندارد + آپشن)',
                 description='افزودن کارت ویزیت لمینت. سایز استاندارد انتخاب شده و دو ویژگی (جنس کاغذ و نوع روکش) دارد.',
                 value={
-                    "product_slug": "business-card-laminate",
+                    "product_slug": "envelope-dl-7340",
                     "selections": {
-                        "quantity": 1000,
-                        "size_id": 5,  # شناسه سایز مثلاً 9x5
+                        "quantity_id": 10,
+                        "size_id": 7,
                         "has_design": True,
-                        "option_value_ids": [102, 205], # ID های مقادیر انتخابی (مثلاً گلاسه ۳۰۰ گرم، روکش مات)
+                        "options": {
+                            "9": 22,
+                            "10": 25
+                        },
                         "custom_width": 0,
                         "custom_height": 0
                     }
@@ -88,12 +91,15 @@ class CartDashboardViewSet(viewsets.ViewSet):
                 value={
                     "product_slug": "banner-vinyl",
                     "selections": {
-                        "quantity": 1,
+                        "quantity": 10,
                         "size_id": None,
                         "custom_width": 300,
                         "custom_height": 100,
                         "has_design": False,
-                        "option_value_ids": [310]
+                        "options": {
+                            "2": 124,
+                            "13": 102
+                        },
                     }
                 },
                 request_only=True,
@@ -102,18 +108,18 @@ class CartDashboardViewSet(viewsets.ViewSet):
     )
     @action(detail=True, methods=['post'], url_path='items')
     def add_item(self, request, pk=None):
-        """ pk = user_id """
+        """ pk = cart_id """
         serializer = CartItemAddSimpleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         try:
-            self.service.add_item_to_user_cart_simple(
-                user_id=pk, 
+            self.service.add_item_to_cart(
+                cart_id=pk, 
                 data=serializer.validated_data
             )
             
             # ===== مشاهده سبد ===== #
-            data = self.service.get_user_cart_details(user_id=pk)
+            data = self.service.get_user_cart_details(cart_id=pk)
             return Response(UserCartDetailSerializer(data['cart']).data, status=status.HTTP_201_CREATED)
             
         except ValidationError as e:
@@ -127,19 +133,35 @@ class CartDashboardViewSet(viewsets.ViewSet):
         examples=[
             OpenApiExample(
                 'Update Quantity',
-                summary='تغییر تعداد',
+                summary='فقط تغییر تعداد',
                 value={"quantity": 2000}
+            ),
+            OpenApiExample(
+                'Update Quantity Package',
+                summary='تغییر بسته تیراژ',
+                value={"quantity_id": 51}
+            ),
+            OpenApiExample(
+                'Update Options',
+                summary='تغییر آپشن (تغییر روکش)',
+                value={
+                    "quantity_id": 50,
+                    "options": {
+                        "10": 101, 
+                        "12": 206
+                    }
+                }
             )
         ]
     )
-    @action(detail=True, methods=['patch'], url_path='items/(?P<item_id>\d+)')
+    @action(detail=True, methods=['patch'], url_path='items/(?P<item_id>\d+)/quantity')
     def update_item(self, request, pk=None, item_id=None):
-        """ pk = user_id, item_id = cart_item.id """
+        """ pk = cart_id, item_id = cart_item.id """
         serializer = CartItemUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         self.service.update_cart_item(
-            user_id=pk, 
+            cart_id=pk, 
             item_id=item_id, 
             data=serializer.validated_data
         )
@@ -148,7 +170,7 @@ class CartDashboardViewSet(viewsets.ViewSet):
     @extend_schema(summary="حذف آیتم از سبد")
     @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>\d+)')
     def remove_item(self, request, pk=None, item_id=None):
-        self.service.remove_item_from_cart(user_id=pk, item_id=item_id)
+        self.service.remove_item_from_cart(cart_id=pk, item_id=item_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     # ===== مشاهده لیست تمام سبدها ===== #
