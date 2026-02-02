@@ -10,6 +10,9 @@ class CustomerService:
     این سرویس وظیفه دارد کاربر، پروفایل، نقش و کیف پول را به صورت یکپارچه مدیریت کند.
     """
 
+    def get_by_id(self, user_id: int):
+        return User.objects.get(pk=user_id)
+
     def get_all_customers(self):
         """دریافت لیست تمام مشتریان (Read Operation)"""
         # برای خواندن می‌توانیم مستقیم از منیجر استفاده کنیم
@@ -45,8 +48,7 @@ class CustomerService:
             username=username,
             email=email,
             password=password,
-            is_active=data.get('is_active', True),
-            is_customer=True
+            is_active=data.get('is_active', True)
         )
 
         # ===== ایجاد پروفایل ===== #

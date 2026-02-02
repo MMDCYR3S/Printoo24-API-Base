@@ -2,3 +2,70 @@ DEBUG 2025-12-18 14:38:42,477 customer_service 475 139827648566976 Fetching cust
 DEBUG 2025-12-22 10:32:33,791 customer_service 394 140057175389888 Fetching customer list
 DEBUG 2025-12-22 10:33:51,611 customer_service 400 139631400056512 Fetching customer list
 DEBUG 2025-12-22 10:34:16,851 customer_service 403 140188979295936 Fetching customer list
+INFO 2026-02-02 14:09:57,583 customer_service 74 125764599191232 Fetching details for Customer 7
+INFO 2026-02-02 14:10:17,761 customer_service 74 125764599191232 START: Updating Customer 7
+INFO 2026-02-02 14:10:17,772 customer_service 74 125764599191232 SUCCESS: Customer 7 updated.
+INFO 2026-02-02 14:12:11,100 customer_service 77 138683469698752 START: Updating Customer 7
+ERROR 2026-02-02 14:12:11,161 customer_service 77 138683469698752 FAILED: Update customer 7 failed. Error: Field 'id' expected a number but got <User: mamad>.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/__init__.py", line 2128, in get_prep_value
+    return int(value)
+           ^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'User'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/customer_service.py", line 97, in update_customer
+    self.user_repo.update_customer(user, user_update_data)
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/services/customers.py", line 80, in update_customer
+    user = self.get_customer_by_id(user_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/services/customers.py", line 23, in get_customer_by_id
+    user = User.objects.filter(pk=user_id).with_full_profile().first()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1415, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 38, in __init__
+    self.rhs = self.get_prep_lookup()
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 410, in get_prep_lookup
+    return super().get_prep_lookup()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/lookups.py", line 96, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+TypeError: Field 'id' expected a number but got <User: mamad>.
+INFO 2026-02-02 14:18:39,508 customer_service 145 134172170688192 START: Updating Customer 7
+DEBUG 2026-02-02 14:18:39,529 customer_service 145 134172170688192 User base info updated for 7
+INFO 2026-02-02 14:18:39,770 customer_service 145 134172170688192 Password updated for User 7
+INFO 2026-02-02 14:18:39,772 customer_service 145 134172170688192 SUCCESS: Customer 7 updated.
+INFO 2026-02-02 14:18:44,607 customer_service 145 134172170688192 START: Updating Customer 7
+DEBUG 2026-02-02 14:18:44,621 customer_service 145 134172170688192 User base info updated for 7
+INFO 2026-02-02 14:18:44,833 customer_service 145 134172170688192 Password updated for User 7
+INFO 2026-02-02 14:18:44,834 customer_service 145 134172170688192 SUCCESS: Customer 7 updated.
