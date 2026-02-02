@@ -50,12 +50,22 @@ class CustomerViewSet(ViewSet):
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # ===== ویرایش مشتری ===== #
+    @extend_schema(request=CustomerManagementSerializer, responses=CustomerManagementSerializer)
     def update(self, request, pk=None):
+        """ آپدیت کاربر با فیلدهای داخل سریالایزر """
+        try:
+            user_id = int(pk)
+        except (ValueError, TypeError):
+            return Response(
+                {'detail': 'شناسه کاربر باید عددی باشد'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         serializer = CustomerManagementSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         
         try:
-            user = self.service.update_customer(pk, serializer.validated_data)
+            user = self.service.update_customer(user_id, serializer.validated_data)
             output_serializer = CustomerManagementSerializer(user)
             return Response(output_serializer.data)
         except Exception as e:

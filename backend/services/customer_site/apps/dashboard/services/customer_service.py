@@ -94,7 +94,7 @@ class CustomerOrchestratorService:
             user_update_data = {k: v for k, v in data.items() if k in allowed_user_fields}
             
             if user_update_data:
-                self.user_repo.update_customer(user, user_update_data)
+                self.user_repo.update_customer(user.id, user_update_data)
                 logger.debug(f"User base info updated for {user_id}")
             
             # ===== تغییر رمز ===== #
