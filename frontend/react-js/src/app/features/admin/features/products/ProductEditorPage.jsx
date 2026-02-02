@@ -11,50 +11,51 @@ import ProductStep2Options from './components/steps/ProductStep2Options';
 import ProductStep3Media from './components/steps/ProductStep3Media';
 
 const steps = [
-  { id: 'basic', label: 'اطلاعات پایه و قیمت', icon: Layers },
-  { id: 'options', label: 'ویژگی‌ها و آپشن‌ها', icon: Settings },
-  { id: 'media', label: 'تصاویر و فایل‌ها', icon: ImageIcon },
+  { id: 'basic', label: 'اطلاعات پایه', icon: Layers },
+  { id: 'options', label: 'ویژگی‌ها', icon: Settings },
+  { id: 'media', label: 'مدیا و فایل', icon: ImageIcon },
 ];
 
 const ProductEditorPage = () => {
   const navigate = useNavigate();
   
   const { 
-    isEditMode, 
+    isEditMode, productId,
     activeTab, setActiveTab, 
-    product, isLoading, isError, // ✅ اضافه شدن isError
+    product, isLoading, isError,
     
     saveStep1, isSavingStep1,
     saveStep2, isSavingStep2,
     saveStep3, isSavingStep3,
-    uploadImage, isUploading
+    
+    // ✅ دریافت توابع آپلود (حیاتی)
+    uploadImageAsync, 
+    uploadAttachmentAsync, 
+    isUploading 
   } = useProductEditor();
 
-  // 1. نمایش لودینگ
   if (isLoading) {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
             <span className="loading loading-spinner loading-lg text-primary"></span>
-            <span className="text-slate-400 text-sm animate-pulse">در حال دریافت اطلاعات محصول...</span>
+            <span className="text-slate-400 text-sm animate-pulse">در حال بارگذاری...</span>
         </div>
     );
   }
 
-  // 2. نمایش خطا (اگر محصول پیدا نشد)
   if (isEditMode && isError) {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-6">
             <div className="p-4 bg-red-50 text-error rounded-full"><AlertTriangle size={48}/></div>
-            <h2 className="text-xl font-bold text-slate-800">محصول مورد نظر یافت نشد!</h2>
-            <button onClick={() => navigate('/admin/products')} className="btn btn-primary">بازگشت به لیست</button>
+            <h2 className="text-xl font-bold text-slate-800">محصول یافت نشد!</h2>
+            <button onClick={() => navigate('/admin/products')} className="btn btn-primary">بازگشت</button>
         </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20 font-sans">
-      
-      {/* === Header === */}
+      {/* Header */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/admin/products')} className="btn btn-ghost btn-circle btn-sm">
@@ -62,19 +63,14 @@ const ProductEditorPage = () => {
           </button>
           <div>
             <h1 className="text-xl font-black text-slate-800">
-              {isEditMode ? `ویرایش محصول: ${product?.shell?.name || '...'}` : 'ایجاد محصول جدید'}
+              {isEditMode ? `ویرایش: ${product?.shell?.name}` : 'محصول جدید'}
             </h1>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
-               {isEditMode ? 'تغییرات به صورت آنی اعمال نمی‌شود (نیاز به ذخیره)' : 'قدم اول: تعریف هویت محصول'}
-            </p>
           </div>
         </div>
 
-        {/* Wizard Steps */}
         <div className="hidden md:flex gap-1 bg-slate-100 p-1 rounded-xl">
            {steps.map((step, index) => {
              const isActive = step.id === activeTab;
-             // فقط اگر در حالت ادیت باشیم و دیتای محصول موجود باشد می‌توانیم تب عوض کنیم
              const canNavigate = isEditMode && product; 
              const isPast = steps.findIndex(s => s.id === activeTab) > index;
              
@@ -98,7 +94,7 @@ const ProductEditorPage = () => {
         <div className="w-10"></div>
       </div>
 
-      {/* === Main Content === */}
+      {/* Content */}
       <div className="max-w-5xl mx-auto mt-8 px-6">
         <motion.div
           key={activeTab}
@@ -108,7 +104,6 @@ const ProductEditorPage = () => {
         >
            {activeTab === 'basic' && (
               <ProductStep1Form 
-                 // اگر در حالت ادیت هستیم اما پروداکت هنوز نرسیده (بعید است چون لودینگ هندل شد)، null بفرست
                  initialData={isEditMode ? product : null} 
                  onSave={saveStep1} 
                  isSaving={isSavingStep1}
@@ -116,7 +111,6 @@ const ProductEditorPage = () => {
               />
            )}
 
-           {/* فقط وقتی دیتا داریم اجازه رندر تب‌های بعدی را بده */}
            {activeTab === 'options' && product && (
               <ProductStep2Options 
                  initialData={product} 
@@ -128,8 +122,13 @@ const ProductEditorPage = () => {
            {activeTab === 'media' && product && (
               <ProductStep3Media 
                  initialData={product} 
+                 productId={productId} 
+                 
+                 // ✅ اینجا اتصال برقرار می‌شود:
                  onSave={saveStep3} 
-                 onUpload={uploadImage} 
+                 onUploadImage={uploadImageAsync}
+                 onUploadAttachment={uploadAttachmentAsync}
+                 
                  isSaving={isSavingStep3}
                  isUploading={isUploading}
               />

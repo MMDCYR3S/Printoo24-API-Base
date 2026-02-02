@@ -99,3 +99,40 @@ INFO 2026-01-30 19:28:13,999 product_service 276 137561339238080 Attempting asyn
 INFO 2026-01-30 19:28:23,611 product_service 276 137561339238080 Attempting async attachment upload: moz
 INFO 2026-01-30 19:28:31,705 product_service 276 137561339238080 Attempting async attachment upload: moz
 INFO 2026-01-30 19:36:45,633 product_service 297 130994780935872 Attempting async attachment upload: moz
+INFO 2026-02-01 12:15:07,291 product_service 20 123213529122496 Attempting async upload for product 31
+INFO 2026-02-01 12:15:12,249 product_service 20 123213529122496 Attempting async upload for product 31
+ERROR 2026-02-01 14:34:23,353 product_service 20 123213529122496 Error syncing option None: 'option_id'
+INFO 2026-02-01 14:34:38,866 product_service 20 123213529122496 Attempting async attachment upload: IMG_۲۰۲۳۰۹۲۷_۱۰۵۶۳۳_۲۰۹~2.jpg
+INFO 2026-02-01 14:34:44,321 product_service 20 123213529122496 Attempting async attachment upload: photo23695169047.jpg
+INFO 2026-02-01 14:34:58,691 product_service 20 123213529122496 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
+INFO 2026-02-01 14:35:07,303 product_service 20 123213529122496 Attempting async attachment upload: شناسایی الزامات طراحی و قابلیت تبیین سیستم‌های هوش مصنوعی.pdf
+INFO 2026-02-01 14:40:03,579 product_service 20 123213140977344 Attempting async attachment upload: IMG_۲۰۲۳۰۹۲۷_۱۰۵۶۳۳_۲۰۹~2.jpg
+INFO 2026-02-01 14:40:08,087 product_service 20 123213140977344 Attempting async attachment upload: zjk2qeuth8ad.webp
+INFO 2026-02-01 14:40:14,665 product_service 20 123213140977344 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
+INFO 2026-02-01 14:40:20,008 product_service 20 123213140977344 Attempting async attachment upload: شناسایی الزامات طراحی و قابلیت تبیین سیستم‌های هوش مصنوعی.pdf
+ERROR 2026-02-01 14:43:39,574 product_service 20 123213140977344 Error syncing option None: 'option_id'
+ERROR 2026-02-01 14:43:45,826 product_service 20 123213140977344 Error syncing option None: 'option_id'
+INFO 2026-02-01 14:44:04,867 product_service 20 123213140977344 Attempting async attachment upload: zjk2qeuth8ad.webp
+INFO 2026-02-01 14:44:08,325 product_service 20 123213140977344 Attempting async attachment upload: zjk2qeuth8ad.jpg
+INFO 2026-02-01 14:50:52,959 product_service 20 123213535418048 Attempting async attachment upload: zjk2qeuth8ad.webp
+INFO 2026-02-01 14:51:00,207 product_service 20 123213535418048 Attempting async attachment upload: zjk2qeuth8ad.jpg
+INFO 2026-02-01 15:01:35,807 product_service 20 123213535418048 Attempting async attachment upload: zjk2qeuth8ad.jpg
+INFO 2026-02-01 15:24:40,290 product_service 20 123213503948480 Attempting async upload for product 31
+INFO 2026-02-01 15:24:45,507 product_service 20 123213503948480 Attempting async upload for product 31
+INFO 2026-02-01 15:25:00,524 product_service 20 123213503948480 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
+ERROR 2026-02-01 15:40:11,030 product_service 20 123213140977344 Error syncing option None: 'option_id'
+INFO 2026-02-02 07:44:17,918 product_service 7 126022618089152 Attempting async upload for product 32
+INFO 2026-02-02 07:44:29,607 product_service 7 126022618089152 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
+INFO 2026-02-02 07:44:35,061 product_service 7 126022618089152 Attempting async attachment upload: شناسایی الزامات طراحی و قابلیت تبیین سیستم‌های هوش مصنوعی.pdf
+ERROR 2026-02-02 07:44:50,822 product_service 7 126022618089152 Error syncing option None: 'option_id'
+INFO 2026-02-02 07:54:00,496 product_service 7 126022393525952 Attempting async upload for product 33
+INFO 2026-02-02 07:54:04,088 product_service 7 126022393525952 Attempting async upload for product 33
+INFO 2026-02-02 07:54:29,749 product_service 7 126022393525952 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
+INFO 2026-02-02 07:54:33,522 product_service 7 126022393525952 Attempting async attachment upload: شناسایی الزامات طراحی و قابلیت تبیین سیستم‌های هوش مصنوعی.pdf
+INFO 2026-02-02 08:08:13,571 product_service 7 126022350513856 Attempting async upload for product 34
+INFO 2026-02-02 08:22:34,397 product_service 7 126022342121152 Attempting async upload for product 35
+INFO 2026-02-02 08:22:39,564 product_service 7 126022342121152 Attempting async upload for product 35
+INFO 2026-02-02 08:24:29,675 product_service 7 126022342121152 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
+INFO 2026-02-02 08:24:33,736 product_service 7 126022342121152 Attempting async attachment upload: Human Decision-making is Susceptible.pdf
+INFO 2026-02-02 08:25:03,309 product_service 7 126022367299264 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
+INFO 2026-02-02 08:25:08,097 product_service 7 126022367299264 Attempting async attachment upload: How Persuasive Could LLMs Be.pdf

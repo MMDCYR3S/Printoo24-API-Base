@@ -1,13 +1,16 @@
-// src/app/features/admin/products/services/adminProductService.js
 import apiClient from '../../../services/apiClient';
 
 const BASE_URL = '/dashboard/products/';
 
 export const adminProductService = {
-  // ✅ 1. متد لیست‌گیری
-// لیست محصولات
+  // --- Read ---
   getAll: async () => {
     const { data } = await apiClient.get(BASE_URL);
+    return data;
+  },
+
+  getById: async (id) => {
+    const { data } = await apiClient.get(`${BASE_URL}${id}/`);
     return data;
   },
 
@@ -16,78 +19,52 @@ export const adminProductService = {
     return data;
   },
 
-  // ✅ لیست مقادیر تیراژ (Master Data)
   getQuantitiesList: async () => {
     const { data } = await apiClient.get('/dashboard/quantities/');
     return data;
   },
 
-  // --- CRUD ---
-  create: async (data) => {
-    const response = await apiClient.post(BASE_URL, data);
-    return response.data;
+  // --- Write (Step 1: Core) ---
+  create: async (payload) => {
+    // طبق مستندات: POST /api/v1/dashboard/products/
+    const { data } = await apiClient.post(BASE_URL, payload);
+    return data;
   },
 
-  getById: async (id) => {
-    const response = await apiClient.get(`${BASE_URL}${id}/`);
-    return response.data;
+  update: async (id, payload) => {
+    // برای ویرایش معمولاً PUT روی ID محصول است
+    const { data } = await apiClient.put(`${BASE_URL}${id}/`, payload);
+    return data;
   },
 
-  update: async (id, data) => {
-    const response = await apiClient.put(`${BASE_URL}${id}/`, data);
-    return response.data;
-  },
-
-  // --- مرحله ۲: مدیریت آپشن‌ها (ویژگی‌ها) ---
   syncOptions: async (id, payload) => {
-    const response = await apiClient.post(`${BASE_URL}${id}/options/`, payload);
-    return response.data;
+    const { data } = await apiClient.post(`${BASE_URL}${id}/options/`, payload);
+    return data;
   },
 
-  updateOptionConfig: async (id, payload) => {
-    const response = await apiClient.patch(`${BASE_URL}${id}/update-option-config/`, payload);
-    return response.data;
-  },
-
-  deleteOption: async (id, optionId) => {
-    await apiClient.delete(`${BASE_URL}${id}/options/${optionId}/`);
-    return optionId;
-  },
-
-  // --- مرحله ۳: مدیریت تصاویر و فایل‌ها ---
+  // --- Media (Steps 3 & 4) ---
   uploadImage: async (id, formData) => {
-    const response = await apiClient.post(`${BASE_URL}${id}/upload-image/`, formData, {
+    const { data } = await apiClient.post(`${BASE_URL}${id}/upload-image/`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+    return data;
   },
 
-  // ✅ اضافه شده برای ویدیو و داکیومنت (طبق خواسته شما برای فایل‌های غیر تصویری)
-  uploadAttachment: async (id, formData) => {
-    const response = await apiClient.post(`${BASE_URL}${id}/upload-attachment/`, formData, {
+  uploadAttachment: async (formData) => {
+    const { data } = await apiClient.post(`${BASE_URL}upload-attachment/`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+    return data;
   },
 
-  syncMedia: async (id, payload) => {
-    const response = await apiClient.post(`${BASE_URL}${id}/media-sync/`, payload);
-    return response.data;
-  },
-
-  // --- عملیات گروهی (دست‌نخورده) ---
+  // --- Bulk ---
   bulkDelete: async (product_ids) => {
-    const response = await apiClient.delete(`${BASE_URL}bulk-delete/`, {
-      data: product_ids 
-    });
-    return response.data;
+    const { data } = await apiClient.delete(`${BASE_URL}bulk-delete/`, { data: product_ids });
+    return data;
   },
 
   bulkStatus: async ({ product_ids, is_active }) => {
-    const response = await apiClient.patch(`${BASE_URL}bulk-status/`, {
-      product_ids,
-      is_active
-    });
-    return response.data;
+    const { data } = await apiClient.patch(`${BASE_URL}bulk-status/`, { product_ids, is_active });
+    return data;
   },
 };

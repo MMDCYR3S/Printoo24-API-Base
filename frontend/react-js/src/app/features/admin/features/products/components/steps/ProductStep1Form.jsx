@@ -14,7 +14,7 @@ import { adminCategoryService } from '../../../../services/adminCategoryService'
 import { adminProductService } from '../../../../services/adminProductService';
 import toast from 'react-hot-toast';
 
-// --- Components ---
+// --- UI Components ---
 const SectionTitle = ({ icon: Icon, title, desc }) => (
   <div className="flex items-start gap-4 mb-8 border-b border-slate-100 pb-5">
     <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shadow-sm">
@@ -37,20 +37,20 @@ const FormError = ({ message }) => (
 
 const GuideTypeSelector = ({ register, name }) => (
     <select {...register(name)} className="select select-bordered select-sm w-24 bg-white text-xs h-10">
-        <option value="info">آبی (Info)</option>
-        <option value="tip">زرد (Tip)</option>
-        <option value="warning">نارنجی (Warn)</option>
-        <option value="danger">قرمز (Danger)</option>
-        <option value="success">سبز (Success)</option>
+        <option value="info">آبی</option>
+        <option value="tip">زرد</option>
+        <option value="warning">نارنجی</option>
+        <option value="danger">قرمز</option>
+        <option value="success">سبز</option>
     </select>
 );
 
 const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   
-  // --- 1. Master Data Queries ---
+  // --- 1. Master Data (حیاتی برای پیدا کردن ID ها) ---
   const { data: parentCategories = [] } = useQuery({
     queryKey: ['admin-parent-categories'],
-    queryFn: adminCategoryService.getAll,
+    queryFn: () => adminCategoryService.getAll(),
   });
 
   const { data: standardSizes = [] } = useQuery({
@@ -65,7 +65,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
 
   // --- 2. Local State ---
   const [selectedParentId, setSelectedParentId] = useState(null);
-  const [isDataReady, setIsDataReady] = useState(!isEditMode); // در حالت جدید دیتا آماده است، در ادیت باید صبر کنیم
 
   // دریافت فرزندان بر اساس پدر انتخاب شده
   const { data: parentDetails, isFetching: isLoadingChildren } = useQuery({
@@ -85,70 +84,93 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
     }
   });
 
-  // --- 4. DATA SYNC & INITIALIZATION (Critical Fix) ---
+  // --- 4. Initialization Logic (Re-engineered) ---
   useEffect(() => {
-    const initializeForm = async () => {
-      if (initialData && isEditMode) {
-        try {
-          console.log("🔄 Initializing form with data:", initialData);
+    const isMasterDataReady = standardSizes.length > 0 && systemQuantities.length > 0;
 
-          // A. استخراج ID دسته‌بندی فرزند
-          let childId = initialData.shell?.category_id;
-          
-          // هندل کردن حالتی که category_info آبجکت یا رشته است
-          if (!childId && initialData.shell?.category_info) {
-             if (typeof initialData.shell.category_info === 'object') {
-                childId = initialData.shell.category_info.id;
-             } else if (typeof initialData.shell.category_info === 'number') {
-                childId = initialData.shell.category_info;
-             }
-          }
+    if (initialData && isEditMode && isMasterDataReady) {
+        console.log("🔄 Normalizing Data for Edit Mode...", initialData);
 
-          // B. پیدا کردن پدرِ این دسته‌بندی (Server Lookup)
-          if (childId) {
-            try {
-              // گرفتن اطلاعات کامل دسته فرزند برای فهمیدن والدش
-              const catDetail = await adminCategoryService.getById(childId);
-              if (catDetail && catDetail.parent) {
-                setSelectedParentId(catDetail.parent); // ست کردن والد
-              } else {
-                // شاید خودش والد باشد یا دیتای والد ندارد
-                setSelectedParentId(childId); 
-              }
-            } catch (err) {
-              console.error("❌ Error finding parent category:", err);
-            }
-          }
-
-          // C. آماده‌سازی داده‌ها برای فرم
-          const formattedData = {
-            shell: {
-              ...initialData.shell,
-              category_id: childId || "", // مطمئن می‌شویم ID عددی می‌نشیند
-              price: String(initialData.shell.price || "0"), // تبدیل به رشته برای اینپوت
-            },
-            pricing_config: initialData.pricing_config || {
-                base_setup_price: 0, design_service_available: false, design_fee: 0
-            },
-            // اطمینان از اینکه آرایه است
-            quantities: Array.isArray(initialData.quantities) ? initialData.quantities : [],
-            sizes: Array.isArray(initialData.sizes) ? initialData.sizes : [],
-          };
-
-          reset(formattedData);
-          setIsDataReady(true);
-
-        } catch (error) {
-          console.error("Form Init Error:", error);
-          toast.error("خطا در بارگذاری اطلاعات محصول");
+        // A. نرمال‌سازی Category
+        let currentCatId = initialData.shell?.category_info?.id || initialData.shell?.category_id;
+        
+        // پیدا کردن والد برای ست کردن دراپ‌داون اول
+        if (currentCatId) {
+            adminCategoryService.getById(currentCatId).then(catData => {
+                if (catData?.parent) {
+                    setSelectedParentId(catData.parent);
+                } else {
+                    setSelectedParentId(currentCatId); 
+                }
+            }).catch(console.error);
         }
-      }
-    };
 
-    initializeForm();
-    // فقط یکبار اجرا شود (وقتی initialData تغییر کرد)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialData]); 
+        // B. نرمال‌سازی Quantities (تبدیل Value به ID)
+        // سرور فقط مقدار (مثلا 1000) را می‌فرستد، ما باید ID آن را از لیست سیستم پیدا کنیم
+        let normalizedQuantities = [];
+        if (Array.isArray(initialData.quantities)) {
+            normalizedQuantities = initialData.quantities.map(q => {
+                // جستجو در مستر دیتا بر اساس مقدار
+                const matchedQty = systemQuantities.find(sq => Number(sq.value) === Number(q.value));
+                if (matchedQty) {
+                    return {
+                        id: matchedQty.id, // شناسه پیدا شد!
+                        guide_text: q.guide_text || "",
+                        guide_type: q.guide_type || "info"
+                    };
+                }
+                return null;
+            }).filter(Boolean); // حذف مواردی که پیدا نشدند
+        }
+
+        // C. نرمال‌سازی Sizes (تبدیل ابعاد/نام به ID)
+        let normalizedSizes = [];
+        // طبق جیسون شما: sizes یک آبجکت است که داخلش آرایه sizes دارد
+        const sizesArray = initialData.sizes?.sizes || (Array.isArray(initialData.sizes) ? initialData.sizes : []);
+        
+        if (sizesArray.length > 0) {
+            normalizedSizes = sizesArray.map(s => {
+                // جستجو در مستر دیتا بر اساس ابعاد (دقیق‌ترین روش)
+                // اگر ابعاد دقیق نبود، می‌توان روی نام هم شرط گذاشت
+                const matchedSize = standardSizes.find(ss => 
+                    Number(ss.width) === Number(s.width) && 
+                    Number(ss.height) === Number(s.height)
+                );
+
+                if (matchedSize) {
+                    return {
+                        id: matchedSize.id, // شناسه پیدا شد!
+                        price_impact: Number(s.price || 0), // طبق جیسون، فیلد price تاثیر قیمت است
+                        guide_text: s.guide_text || "",
+                        guide_type: s.guide_type || "info"
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+        }
+
+        // D. پر کردن فرم با دیتای تمیز شده
+        reset({
+            shell: {
+                ...initialData.shell,
+                name: initialData.shell.name,
+                category_id: currentCatId || "",
+                price: String(initialData.shell.price || "0"),
+                // فیلدهای guide ممکن است نال باشند
+                guide_text: initialData.shell.guide_text || "",
+                guide_type: initialData.shell.guide_type || "info"
+            },
+            pricing_config: {
+                ...initialData.pricing_config,
+                // اطمینان از عددی بودن و تبدیل مقادیر استرینگ جیسون
+                base_setup_price: Number(initialData.pricing_config.base_setup_price || 0),
+                design_fee: Number(initialData.pricing_config.design_fee || 0),
+            },
+            quantities: normalizedQuantities,
+            sizes: normalizedSizes,
+        });
+    }
+  }, [initialData, isEditMode, reset, standardSizes, systemQuantities]); // وابستگی به مستر دیتا مهم است
 
   // Watchers
   const hasQuantity = watch('shell.has_quantity');
@@ -161,15 +183,14 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   const handleParentChange = (e) => {
     const val = e.target.value;
     setSelectedParentId(val);
-    setValue('shell.category_id', ''); // وقتی والد عوض شد، فرزند باید خالی شود تا کاربر انتخاب کند
+    setValue('shell.category_id', '');
   };
 
   const handleAddQuantity = (e) => {
     const qtyId = e.target.value;
     if (!qtyId) return;
     
-    // جلوگیری از تکراری بر اساس ID (نه value)
-    // استفاده از form values به جای fields برای مقایسه دقیق
+    // جلوگیری از تکراری
     const currentQuantities = watch('quantities') || [];
     const exists = currentQuantities.find(q => String(q.id) === String(qtyId));
     
@@ -182,32 +203,27 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
     e.target.value = ""; 
   };
 
-  // اگر در حال لود دیتا برای ادیت هستیم، لودینگ نشان بده
-  if (!isDataReady && isEditMode) {
-      return <div className="p-20 text-center text-slate-400">در حال آماده‌سازی فرم ویرایش...</div>;
-  }
-
   return (
     <form onSubmit={handleSubmit(onSave)} className="w-full max-w-5xl mx-auto pb-32 space-y-10">
       
       {/* === CARD 1: Basic Info === */}
       <div className="card bg-white shadow-xl shadow-slate-200/40 border border-slate-100 p-8 rounded-[2rem]">
-          <SectionTitle icon={Box} title="اطلاعات پایه محصول" desc="مشخصات عمومی جهت نمایش در فروشگاه" />
+          <SectionTitle icon={Box} title="اطلاعات پایه محصول" desc="مشخصات عمومی و دسته‌بندی" />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="form-control md:col-span-2">
-                  <label className="label text-sm font-bold text-slate-700 mb-1">نام کامل محصول</label>
+                  <label className="label text-sm font-bold text-slate-700 mb-1">نام محصول <span className="text-error">*</span></label>
                   <input 
                       {...register('shell.name')} 
-                      className="input input-lg input-bordered w-full rounded-2xl bg-slate-50 focus:bg-white focus:border-blue-500 transition-all text-base font-bold text-slate-800" 
-                      placeholder="مثال: کارت ویزیت لمینت مات"
+                      className="input input-lg input-bordered w-full rounded-2xl bg-slate-50 focus:bg-white text-base font-bold text-slate-800" 
+                      placeholder="مثال: کارت ویزیت لمینت براق"
                   />
                   <FormError message={errors.shell?.name?.message} />
               </div>
 
               {/* دسته بندی - مرحله ۱: والد */}
               <div className="form-control">
-                  <label className="label text-sm font-bold text-slate-700 mb-1">۱. انتخاب گروه اصلی</label>
+                  <label className="label text-sm font-bold text-slate-700 mb-1">۱. گروه اصلی</label>
                   <select 
                      className="select select-lg select-bordered w-full rounded-2xl bg-white text-base"
                      onChange={handleParentChange}
@@ -221,7 +237,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
               {/* دسته بندی - مرحله ۲: فرزند */}
               <div className="form-control">
                   <label className="label text-sm font-bold text-slate-700 mb-1">
-                      ۲. انتخاب محصول (زیر دسته)
+                      ۲. زیر دسته (محصول نهایی) <span className="text-error">*</span>
                       {isLoadingChildren && <span className="loading loading-spinner loading-xs mr-2 text-primary"></span>}
                   </label>
                   <select 
@@ -230,9 +246,14 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                      disabled={!selectedParentId}
                   >
                       <option value="">
-                          {selectedParentId ? '-- انتخاب محصول --' : 'ابتدا گروه را انتخاب کنید...'}
+                          {selectedParentId ? '-- انتخاب کنید --' : 'ابتدا گروه را انتخاب کنید'}
                       </option>
-                      {parentDetails?.children?.map(child => <option key={child.id} value={child.id}>{child.name}</option>)}
+                      {parentDetails?.children?.map(child => (
+                          <option key={child.id} value={child.id}>{child.name}</option>
+                      ))}
+                      {parentDetails && !parentDetails.children?.length && (
+                          <option value={parentDetails.id}>{parentDetails.name} (بدون زیرمجموعه)</option>
+                      )}
                   </select>
                   <FormError message={errors.shell?.category_id?.message} />
               </div>
@@ -241,13 +262,13 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                   <label className="label text-sm font-bold text-slate-700 mb-1">توضیحات</label>
                   <textarea 
                       {...register('shell.description')}
-                      className="textarea textarea-bordered h-28 rounded-2xl bg-slate-50 text-base p-4"
+                      className="textarea textarea-bordered h-24 rounded-2xl bg-slate-50 text-base"
                   ></textarea>
               </div>
 
-              <div className="form-control md:col-span-2 bg-slate-50 p-6 rounded-2xl flex flex-col md:flex-row gap-6 items-end">
+              <div className="form-control md:col-span-2 bg-slate-50 p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-end">
                    <div className="w-full">
-                        <label className="label text-xs font-bold text-slate-500 mb-1">متن راهنما (مثل: تحویل فوری)</label>
+                        <label className="label text-xs font-bold text-slate-500 mb-1">متن راهنما (مثل: زمان تحویل)</label>
                         <div className="flex gap-2">
                             <input {...register('shell.guide_text')} className="input input-bordered w-full bg-white"/>
                             <GuideTypeSelector register={register} name="shell.guide_type" />
@@ -256,63 +277,63 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                    <div className="form-control min-w-[150px]">
                        <label className="cursor-pointer label justify-start gap-3">
                            <input type="checkbox" {...register('shell.is_active')} className="toggle toggle-success" />
-                           <span className="label-text font-bold text-slate-700">محصول فعال است</span>
+                           <span className="label-text font-bold text-slate-700">محصول فعال</span>
                        </label>
                    </div>
               </div>
           </div>
       </div>
 
-      {/* === CARD 2: Strategy & Pricing === */}
+      {/* === CARD 2: Pricing Strategy === */}
       <div className="card bg-white shadow-xl shadow-slate-200/40 border border-slate-100 p-8 rounded-[2rem]">
-          <SectionTitle icon={Calculator} title="استراتژی قیمت‌گذاری" desc="تعیین نحوه فروش (تیراژی یا تعدادی)" />
+          <SectionTitle icon={Calculator} title="استراتژی قیمت‌گذاری" desc="نحوه محاسبه قیمت برای مشتری" />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-               {/* Tiered Option */}
                <div 
                   onClick={() => setValue('shell.has_quantity', true)}
                   className={clsx(
-                      "relative cursor-pointer rounded-3xl p-8 border-2 transition-all flex items-center gap-6",
+                      "cursor-pointer rounded-3xl p-6 border-2 transition-all flex items-center gap-4",
                       hasQuantity ? "border-blue-500 bg-blue-50" : "border-slate-100 bg-white"
                   )}
                >
-                   <div className={clsx("p-4 rounded-2xl", hasQuantity ? "bg-blue-500 text-white" : "bg-slate-100 text-slate-400")}>
-                       <Printer size={32} />
+                   <div className={clsx("p-3 rounded-xl", hasQuantity ? "bg-blue-500 text-white" : "bg-slate-100 text-slate-400")}>
+                       <Printer size={28} />
                    </div>
                    <div>
-                       <h4 className={clsx("font-black text-lg", hasQuantity ? "text-blue-700" : "text-slate-600")}>فروش تیراژی (پکی)</h4>
-                       <p className="text-xs text-slate-500 mt-2">انتخاب بسته‌های مشخص (مثلاً ۱۰۰۰ تایی)</p>
+                       <h4 className={clsx("font-bold text-lg", hasQuantity ? "text-blue-700" : "text-slate-600")}>تیراژی (پکی)</h4>
+                       <p className="text-xs text-slate-500 mt-1">مثل کارت ویزیت (۱۰۰۰تایی، ۲۰۰۰تایی)</p>
                    </div>
                </div>
 
-               {/* Custom Qty Option */}
                <div 
                   onClick={() => setValue('shell.has_quantity', false)}
                   className={clsx(
-                      "relative cursor-pointer rounded-3xl p-8 border-2 transition-all flex items-center gap-6",
+                      "cursor-pointer rounded-3xl p-6 border-2 transition-all flex items-center gap-4",
                       !hasQuantity ? "border-emerald-500 bg-emerald-50" : "border-slate-100 bg-white"
                   )}
                >
-                   <div className={clsx("p-4 rounded-2xl", !hasQuantity ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400")}>
-                       <MousePointerClick size={32} />
+                   <div className={clsx("p-3 rounded-xl", !hasQuantity ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400")}>
+                       <MousePointerClick size={28} />
                    </div>
                    <div>
-                       <h4 className={clsx("font-black text-lg", !hasQuantity ? "text-emerald-700" : "text-slate-600")}>فروش تعدادی (آزاد)</h4>
-                       <p className="text-xs text-slate-500 mt-2">مشتری تعداد دقیق را وارد می‌کند</p>
+                       <h4 className={clsx("font-bold text-lg", !hasQuantity ? "text-emerald-700" : "text-slate-600")}>تعدادی / متری</h4>
+                       <p className="text-xs text-slate-500 mt-1">مثل بنر یا ریسو (تعداد دلخواه مشتری)</p>
                    </div>
                </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
               <div className="form-control">
-                  <label className="label text-sm font-bold text-slate-700">قیمت پایه واحد</label>
+                  <label className="label text-sm font-bold text-slate-700">قیمت پایه (تومان)</label>
                   <div className="relative">
                       <input 
                           {...register('shell.price')}
-                          className="input input-lg input-bordered w-full pl-12 font-mono text-xl font-bold text-emerald-600 dir-ltr bg-white"
+                          className="input input-lg input-bordered w-full pl-10 font-mono text-xl font-bold text-emerald-600 dir-ltr bg-white"
+                          placeholder="0"
                       />
-                      <DollarSign className="absolute left-4 top-4 text-emerald-500" size={20}/>
+                      <DollarSign className="absolute left-3 top-4 text-emerald-500" size={20}/>
                   </div>
+                  <FormError message={errors.shell?.price?.message} />
               </div>
 
               <div className="form-control">
@@ -325,7 +346,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
 
               {!hasQuantity && (
                   <div className="form-control">
-                      <label className="label text-sm font-bold text-slate-700">محدوده تعداد</label>
+                      <label className="label text-sm font-bold text-slate-700">محدوده تعداد سفارش</label>
                       <div className="flex gap-2">
                           <input type="number" {...register('pricing_config.min_quantity')} className="input input-lg input-bordered w-full bg-white text-center" placeholder="Min"/>
                           <input type="number" {...register('pricing_config.max_quantity')} className="input input-lg input-bordered w-full bg-white text-center" placeholder="Max"/>
@@ -334,57 +355,65 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
               )}
           </div>
 
-          {/* Design Toggle */}
-          <div className="mt-6 pt-6 border-t border-slate-100 flex items-center justify-between gap-4">
-               <div className="flex items-center gap-4">
-                   <div className="p-3 bg-purple-50 text-purple-600 rounded-xl"><Palette size={20}/></div>
-                   <h5 className="font-bold text-slate-800">سرویس طراحی آنلاین</h5>
+          <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+               <div className="flex items-center gap-3">
+                   <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Palette size={20}/></div>
+                   <h5 className="font-bold text-slate-800 text-sm">امکان سفارش طراحی آنلاین دارد؟</h5>
                </div>
                <div className="flex items-center gap-4">
-                   <input type="checkbox" {...register('pricing_config.design_service_available')} className="toggle toggle-primary toggle-lg" />
+                   <input type="checkbox" {...register('pricing_config.design_service_available')} className="toggle toggle-primary" />
                    {designAvailable && (
-                       <input type="number" {...register('pricing_config.design_fee')} className="input input-bordered w-40 text-sm" placeholder="هزینه طراحی"/>
+                       <input type="number" {...register('pricing_config.design_fee')} className="input input-bordered input-sm w-36" placeholder="هزینه طراحی"/>
                    )}
                </div>
           </div>
       </div>
 
-      {/* === CARD 3: Data Lists === */}
+      {/* === CARD 3: Sizes & Quantities === */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           
           {/* Sizes */}
           <div className="card bg-white shadow-xl p-8 rounded-[2rem] border border-slate-100">
               <div className="flex justify-between items-center mb-6">
-                  <SectionTitle icon={Ruler} title="سایزهای مجاز" />
-                  <button type="button" onClick={() => appendSize({ id: "", price_impact: 0 })} className="btn btn-primary btn-sm">
+                  <SectionTitle icon={Ruler} title="سایزهای محصول" />
+                  <button type="button" onClick={() => appendSize({ id: "", price_impact: 0 })} className="btn btn-primary btn-sm btn-outline">
                      <Plus size={16}/> افزودن
                   </button>
               </div>
               <div className="space-y-4">
                   {sizeFields.map((field, index) => (
-                      <div key={field.id} className="p-4 bg-slate-50 rounded-2xl flex flex-col gap-3">
+                      <div key={field.id} className="p-4 bg-slate-50 rounded-2xl flex flex-col gap-3 relative group hover:bg-slate-100 transition-colors">
+                          <button onClick={() => removeSize(index)} className="btn btn-xs btn-circle btn-error absolute -top-2 -left-2 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12}/></button>
+                          
                           <div className="flex gap-3">
-                              <select {...register(`sizes.${index}.id`)} className="select select-bordered w-full bg-white font-bold">
-                                  <option value="">انتخاب...</option>
+                              <select {...register(`sizes.${index}.id`)} className="select select-bordered w-full bg-white font-bold text-sm">
+                                  <option value="">انتخاب سایز...</option>
                                   {standardSizes.map(s => <option key={s.id} value={s.id}>{s.name} ({s.width}×{s.height})</option>)}
                               </select>
-                              <button onClick={() => removeSize(index)} className="btn btn-square btn-ghost text-error"><Trash2 size={18}/></button>
+                              <input type="number" {...register(`sizes.${index}.price_impact`)} className="input input-bordered w-1/3 font-mono text-emerald-600 bg-white text-sm" placeholder="+ قیمت" />
                           </div>
-                          <input type="number" {...register(`sizes.${index}.price_impact`)} className="input input-bordered w-full font-mono text-emerald-600 bg-white" placeholder="افزایش قیمت (+)" />
+                          
+                          <div className="flex gap-2">
+                              <input {...register(`sizes.${index}.guide_text`)} className="input input-xs input-bordered w-full bg-white" placeholder="راهنما"/>
+                              <GuideTypeSelector register={register} name={`sizes.${index}.guide_type`} />
+                          </div>
                       </div>
                   ))}
+                  {sizeFields.length === 0 && <div className="text-center text-xs text-slate-400 py-4">سایزی تعریف نشده است</div>}
               </div>
           </div>
 
-          {/* Quantities (Fixed Display Issue) */}
+          {/* Quantities */}
           {hasQuantity && (
               <div className="card bg-white shadow-xl p-8 rounded-[2rem] border border-slate-100">
                   <div className="flex justify-between items-center mb-6">
                       <SectionTitle icon={Hash} title="تیراژهای مجاز" />
-                      <div className="w-48">
-                           <select className="select select-bordered select-sm w-full font-bold" onChange={handleAddQuantity}>
+                      <div className="w-40">
+                           <select 
+                                className="select select-bordered select-sm w-full font-bold" 
+                                onChange={handleAddQuantity}
+                           >
                                <option value="">+ افزودن...</option>
-                               {/* مپ کردن لیست مستر دیتا (Value را نشان میدیم، ID را میفرستیم) */}
                                {systemQuantities.map((q) => (
                                    <option key={q.id} value={q.id}>{Number(q.value).toLocaleString()} عدد</option>
                                ))}
@@ -392,40 +421,36 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                       </div>
                   </div>
 
-                  <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                       {qtyFields.map((field, index) => {
-                         // ✅ FIX: استفاده از watch برای خواندن ID واقعی از فرم (نه field.id که داخلی است)
                          const rowId = watch(`quantities.${index}.id`);
-                         
-                         // پیدا کردن عدد واقعی از روی ID برای نمایش به کاربر
                          const foundQty = systemQuantities.find(q => String(q.id) === String(rowId));
                          const displayValue = foundQty ? Number(foundQty.value).toLocaleString() : '---';
                          
                          return (
-                              <div key={field.id} className="flex flex-col gap-3 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
-                                  <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                                      <span className="font-black text-xl text-slate-800">{displayValue} <span className="text-xs text-slate-400">عدد</span></span>
-                                      <button onClick={() => removeQty(index)} className="btn btn-square btn-sm btn-ghost text-error">
-                                          <Trash2 size={16}/>
-                                      </button>
+                              <div key={field.id} className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm relative group">
+                                  <button onClick={() => removeQty(index)} className="btn btn-xs btn-circle btn-ghost text-error absolute top-2 left-2 opacity-0 group-hover:opacity-100"><Trash2 size={14}/></button>
+                                  
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className="font-black text-lg text-slate-800">{displayValue} <span className="text-xs text-slate-400">عدد</span></span>
                                   </div>
                                   <div className="flex gap-2">
-                                      <input {...register(`quantities.${index}.guide_text`)} className="input input-sm input-bordered w-full bg-slate-50" placeholder="برچسب"/>
+                                      <input {...register(`quantities.${index}.guide_text`)} className="input input-xs input-bordered w-full bg-slate-50" placeholder="برچسب"/>
                                       <GuideTypeSelector register={register} name={`quantities.${index}.guide_type`} />
                                   </div>
                               </div>
                          );
                       })}
-                      {qtyFields.length === 0 && <div className="text-center py-10 text-slate-400">لیست خالی است</div>}
+                      {qtyFields.length === 0 && <div className="text-center text-xs text-slate-400 py-4">لیست تیراژ خالی است</div>}
                   </div>
               </div>
           )}
       </div>
 
       <div className="sticky bottom-4 z-50 flex justify-end">
-         <button type="submit" disabled={isSaving} className="btn btn-primary h-14 px-10 rounded-full shadow-2xl text-lg font-bold">
+         <button type="submit" disabled={isSaving} className="btn btn-primary h-14 px-10 rounded-full shadow-2xl shadow-primary/30 text-lg font-bold hover:scale-105 active:scale-95 transition-all">
             {isSaving ? <span className="loading loading-spinner"></span> : <Save size={22}/>}
-            {isEditMode ? 'ذخیره تغییرات' : 'مرحله بعد'}
+            {isEditMode ? 'ذخیره تغییرات' : 'ثبت و مرحله بعد'}
          </button>
       </div>
     </form>

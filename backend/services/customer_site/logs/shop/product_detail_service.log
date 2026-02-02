@@ -383,3 +383,10 @@ DEBUG 2026-01-30 18:54:25,285 product_detail_service 7 127435621439168 ShopProdu
 DEBUG 2026-01-30 18:54:41,551 product_detail_service 7 127435219654336 ShopProductDetailService initialized
 DEBUG 2026-01-30 18:54:42,739 product_detail_service 7 127435613046464 ShopProductDetailService initialized
 DEBUG 2026-01-30 18:54:55,420 product_detail_service 7 127435613046464 ShopProductDetailService initialized
+DEBUG 2026-02-01 11:54:47,200 product_detail_service 20 123213140977344 ShopProductDetailService initialized
+DEBUG 2026-02-01 12:03:47,609 product_detail_service 20 123213140977344 ShopProductDetailService initialized
+DEBUG 2026-02-01 12:04:51,656 product_detail_service 20 123213132584640 ShopProductDetailService initialized
+DEBUG 2026-02-01 14:45:43,316 product_detail_service 20 123213503948480 ShopProductDetailService initialized
+DEBUG 2026-02-01 14:45:51,565 product_detail_service 20 123213503948480 ShopProductDetailService initialized
+DEBUG 2026-02-01 14:59:43,048 product_detail_service 20 123213535418048 ShopProductDetailService initialized
+DEBUG 2026-02-01 14:59:49,929 product_detail_service 20 123213535418048 ShopProductDetailService initialized

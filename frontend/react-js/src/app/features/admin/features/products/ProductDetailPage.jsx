@@ -1,10 +1,11 @@
+// src/app/features/admin/products/ProductDetailPage.jsx
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   ArrowRight, Edit, Trash2, Box, Layers, Ruler, 
   DollarSign, CheckCircle2, XCircle, Info, Image as ImageIcon,
-  Settings, FileText, List, Type, CheckSquare, Calendar, MonitorPlay
+  Settings, FileText, List, Type, CheckSquare, Calendar
 } from 'lucide-react';
 import { adminProductService } from '../../services/adminProductService';
 import { adminCategoryService } from '../../services/adminCategoryService';
@@ -28,13 +29,6 @@ const ProductDetailPage = () => {
     retry: 1
   });
 
-  // 2. دریافت لیست دسته‌ها برای پیدا کردن نام دسته
-  const { data: categories } = useQuery({
-    queryKey: ['admin-categories'],
-    queryFn: adminCategoryService.getAll,
-    enabled: !!product?.shell?.category_info, // اگر آی‌دی دسته در شل بود (در مثال شما category_info استرینگ بود، اگر آی‌دی عددی دارید اینجا استفاده کنید)
-  });
-
   if (isLoading) return (
     <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
        <span className="loading loading-spinner loading-lg text-primary"></span>
@@ -50,26 +44,34 @@ const ProductDetailPage = () => {
     </div>
   );
 
-  // Destructuring Data for cleaner access
   const { shell, pricing_config, quantities, sizes, images, options } = product;
 
-  // هندل کردن safe data (چون در مثال شما برخی فیلدها string بودند ولی احتمالاً آرایه هستند)
-  // اگر بکند استرینگ برمی‌گرداند باید JSON.parse شود، اما من اینجا فرض را بر آرایه بودن می‌گذارم.
-  const safeQuantities = Array.isArray(quantities) ? quantities : []; 
-  const safeSizes = Array.isArray(sizes) ? sizes : [];
+  // --- نرمال‌سازی دیتا ---
+  const safeQuantities = Array.isArray(quantities) ? quantities : [];
   
+  // فیکس مشکل آبجکت بودن سایزها
+  let safeSizes = [];
+  if (Array.isArray(sizes)) {
+      safeSizes = sizes;
+  } else if (sizes && typeof sizes === 'object' && Array.isArray(sizes.sizes)) {
+      safeSizes = sizes.sizes;
+  }
+  
+  // قیمت پایه برای محاسبه در جدول تیراژ
+  const basePrice = parseFloat(shell.price || 0);
+
   return (
-    <div className=" max-w-[1600px] mx-auto space-y-6 pb-32 animate-fade-in-up">
+    <div className="max-w-[1600px] mx-auto space-y-6 pb-32 animate-fade-in-up">
       
-      {/* --- HEADER --- */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4 border-b border-base-200 pb-6 bg-white/50 backdrop-blur-sm sticky top-0 z-10 p-4 rounded-b-2xl -mx-4 -mt-4 shadow-sm">
+      {/* --- HEADER (FIX: z-index increased to 50) --- */}
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4 border-b border-base-200 pb-6 bg-white/80 backdrop-blur-md sticky top-0 z-50 p-4 rounded-b-2xl -mx-4 -mt-4 shadow-sm transition-all">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/admin/products')} className="btn btn-circle btn-ghost btn-sm text-slate-500 hover:bg-slate-100">
              <ArrowRight size={22}/>
           </button>
           
           <div className="flex gap-4 items-center">
-              {/* Product Thumbnail */}
+              {/* Thumbnail */}
               <div className="avatar">
                   <div className="w-16 h-16 rounded-xl ring-1 ring-slate-200 shadow-sm bg-white p-1">
                       {images && images.length > 0 ? (
@@ -113,13 +115,13 @@ const ProductDetailPage = () => {
         </div>
       </div>
 
-      {/* --- MAIN GRID LAYOUT --- */}
+      {/* --- MAIN GRID --- */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
           
           {/* === LEFT COLUMN (DETAILS) === */}
           <div className="xl:col-span-8 space-y-6">
               
-              {/* 1. Basic Information & Config */}
+              {/* 1. Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   
                   {/* Info Card */}
@@ -130,24 +132,22 @@ const ProductDetailPage = () => {
                       <p className="text-sm text-slate-600 leading-7 text-justify bg-slate-50 p-4 rounded-xl border border-slate-100 min-h-[120px]">
                           {shell.description || 'توضیحاتی ثبت نشده است.'}
                       </p>
-<div className="mt-4 flex flex-wrap gap-2">
-   {shell.category_info && (
-       <span className="badge badge-ghost gap-1 pl-3 py-3">
-          <Layers size={14}/> 
-          {/* ✅ اصلاح شده: بررسی می‌کنیم اگر آبجکت بود، فقط نام را نشان بده */}
-          {typeof shell.category_info === 'object' 
-              ? shell.category_info.name 
-              : shell.category_info}
-       </span>
-   )}
-   
-   <span className="badge badge-ghost gap-1 pl-3 py-3">
-      <Calendar size={14}/> {new Date(shell.created_at).toLocaleDateString('fa-IR')}
-   </span>
-</div>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                         {shell.category_info && (
+                             <span className="badge badge-ghost gap-1 pl-3 py-3">
+                                <Layers size={14}/> 
+                                {typeof shell.category_info === 'object' 
+                                    ? shell.category_info.name 
+                                    : shell.category_info}
+                             </span>
+                         )}
+                         <span className="badge badge-ghost gap-1 pl-3 py-3">
+                            <Calendar size={14}/> {new Date(shell.created_at).toLocaleDateString('fa-IR')}
+                         </span>
+                      </div>
                   </div>
 
-                  {/* Pricing Config Card */}
+                  {/* Pricing Config */}
                   <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
                       <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-50 rounded-full blur-xl"></div>
                       <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2 relative z-10">
@@ -179,15 +179,14 @@ const ProductDetailPage = () => {
                   </div>
               </div>
 
-              {/* 2. OPTIONS (Form Builder Visualization) - CRITICAL PART */}
+              {/* 2. OPTIONS */}
               <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                   <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                      <div>
                         <h3 className="font-bold text-slate-800 flex items-center gap-2">
                             <List size={20} className="text-purple-600"/> 
-                            ویژگی‌های محصول (فرم سفارش)
+                            ویژگی‌های محصول (آپشن‌ها)
                         </h3>
-                        <p className="text-xs text-slate-500 mt-1">آپشن‌هایی که مشتری هنگام خرید باید انتخاب کند</p>
                      </div>
                      <span className="badge badge-neutral text-xs">{options?.length || 0} فیلد</span>
                   </div>
@@ -195,8 +194,7 @@ const ProductDetailPage = () => {
                   <div className="p-5 grid grid-cols-1 gap-4">
                       {options && options.length > 0 ? (
                           options.map((opt) => (
-                              <div key={opt.id} className="border border-slate-200 rounded-xl p-4 hover:border-purple-200 hover:shadow-md transition-all group bg-white">
-                                  {/* Option Header */}
+                              <div key={opt.id} className="border border-slate-200 rounded-xl p-4 bg-white">
                                   <div className="flex justify-between items-start mb-3">
                                       <div className="flex items-center gap-3">
                                           <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
@@ -213,7 +211,6 @@ const ProductDetailPage = () => {
                                       </div>
                                   </div>
 
-                                  {/* Choices / Values */}
                                   {opt.choices && opt.choices.length > 0 ? (
                                       <div className="mt-3 flex flex-wrap gap-2">
                                           {opt.choices.map((choice) => (
@@ -233,21 +230,13 @@ const ProductDetailPage = () => {
                                           ))}
                                       </div>
                                   ) : (
-                                    <div className="text-xs text-slate-400 italic bg-slate-50 p-2 rounded">
-                                        بدون گزینه از پیش تعریف شده (ورودی کاربر)
-                                    </div>
-                                  )}
-                                  
-                                  {opt.guide_text && (
-                                      <div className="mt-3 text-[11px] text-slate-400 flex items-start gap-1">
-                                          <Info size={12} className="mt-0.5 shrink-0"/> {opt.guide_text}
-                                      </div>
+                                    <div className="text-xs text-slate-400 italic bg-slate-50 p-2 rounded">بدون گزینه (ورودی کاربر)</div>
                                   )}
                               </div>
                           ))
                       ) : (
                           <div className="text-center py-10 text-slate-400 border-2 border-dashed border-slate-100 rounded-xl">
-                              هیچ ویژگی (Option) برای این محصول تعریف نشده است.
+                              ویژگی تعریف نشده است.
                           </div>
                       )}
                   </div>
@@ -255,7 +244,7 @@ const ProductDetailPage = () => {
 
           </div>
 
-          {/* === RIGHT COLUMN (SIDEBAR) === */}
+          {/* === RIGHT COLUMN === */}
           <div className="xl:col-span-4 space-y-6">
               
               {/* Gallery */}
@@ -267,9 +256,8 @@ const ProductDetailPage = () => {
                       {images?.map((img) => (
                           <div key={img.id} className="relative aspect-square group cursor-pointer overflow-hidden rounded-lg border border-slate-100">
                               <img src={img.image} alt="Product" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"/>
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
                               <span className="absolute bottom-1 right-1 bg-black/50 text-white text-[8px] px-1.5 rounded backdrop-blur-sm">
-                                  Order: {img.order}
+                                  #{img.order}
                               </span>
                           </div>
                       ))}
@@ -281,7 +269,7 @@ const ProductDetailPage = () => {
                   </div>
               </div>
 
-              {/* Quantities Table (Tiered Pricing) */}
+              {/* Quantities (FIXED: Calculation + Layout) */}
               {shell.has_quantity && (
                   <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                       <div className="p-4 bg-slate-50/50 border-b border-slate-100">
@@ -289,25 +277,36 @@ const ProductDetailPage = () => {
                               <Layers size={18} className="text-orange-500"/> لیست قیمت تیراژ
                           </h3>
                       </div>
-                      <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                      <div className="max-h-64 overflow-y-auto custom-scrollbar p-0">
                          {safeQuantities.length > 0 ? (
-                             <table className="table table-xs w-full">
-                                 <thead>
+                             <table className="table table-sm w-full">
+                                 <thead className="bg-slate-50 text-slate-500 text-xs">
                                     <tr>
-                                        <th>تعداد</th>
-                                        <th className="text-left">قیمت (IQD)</th>
+                                        <th className="text-right pr-6">تعداد (عدد)</th>
+                                        <th className="text-left pl-6">قیمت کل (تخمینی)</th>
                                     </tr>
                                  </thead>
-                                 <tbody>
-                                     {safeQuantities.map((q, idx) => (
-                                         <tr key={idx} className="hover:bg-slate-50">
-                                             <td className="font-bold">{q.value || q}</td>
-                                             <td className="font-mono dir-ltr text-right text-emerald-600">
-                                                {/* هندل کردن حالتی که دیتا ناقص باشد */}
-                                                {q.price ? formatPrice(q.price) : '---'}
-                                             </td>
-                                         </tr>
-                                     ))}
+                                 <tbody className="text-sm">
+                                     {safeQuantities.map((q, idx) => {
+                                         // محاسبه قیمت اگر از سمت سرور نیامده باشد
+                                         // اگر q.price بود استفاده میکنیم، وگرنه (تعداد * قیمت پایه)
+                                         const qtyValue = Number(q.value || q);
+                                         const calculatedPrice = q.price ? q.price : (qtyValue * basePrice);
+                                         
+                                         return (
+                                             <tr key={idx} className="hover:bg-slate-50 border-b border-slate-50 last:border-0">
+                                                 <td className="font-bold text-slate-700 pr-6">
+                                                     {qtyValue.toLocaleString()}
+                                                 </td>
+                                                 <td className="text-left pl-6">
+                                                     <div className="font-mono dir-ltr font-bold text-emerald-600">
+                                                         {formatPrice(calculatedPrice)}
+                                                     </div>
+                                                     <div className="text-[10px] text-slate-400 font-mono">IQD</div>
+                                                 </td>
+                                             </tr>
+                                         );
+                                     })}
                                  </tbody>
                              </table>
                          ) : (
@@ -324,12 +323,18 @@ const ProductDetailPage = () => {
                   </h3>
                   <div className="flex flex-wrap gap-2">
                       {safeSizes.length > 0 ? safeSizes.map((s, idx) => (
-                          <span key={idx} className="badge badge-ghost border border-slate-200 bg-white py-3 text-xs">
-                             {/* فرض بر اینکه سایز آبجکت است، اگر استرینگ بود هندل شود */}
-                             {typeof s === 'string' ? s : `${s.width || '?'}x${s.height || '?'} cm`}
-                          </span>
+                          <div key={idx} className="badge badge-lg h-auto py-2 px-3 bg-slate-50 border border-slate-200 text-slate-700 flex flex-col gap-0.5 items-center">
+                             <span className="font-bold text-xs">{s.name || 'سایز'}</span>
+                             {(s.width && s.height) && (
+                                 <span className="text-[10px] text-slate-400 font-mono dir-ltr">
+                                     {s.width} × {s.height} cm
+                                 </span>
+                             )}
+                          </div>
                       )) : (
-                          <span className="text-xs text-slate-400">سایز محدود تعریف نشده است.</span>
+                          <span className="text-xs text-slate-400 bg-slate-50 p-2 rounded w-full text-center border border-dashed border-slate-200">
+                              سایز محدود تعریف نشده است.
+                          </span>
                       )}
                   </div>
               </div>
@@ -340,12 +345,11 @@ const ProductDetailPage = () => {
   );
 };
 
-// --- Sub-Components (برای تمیزی کد) ---
-
+// --- Sub-Components ---
 const ConfigItem = ({ label, value, isPrice }) => (
-    <div className="flex justify-between items-center text-sm py-1 border-b border-slate-50 last:border-0">
+    <div className="flex justify-between items-center text-sm py-2 border-b border-slate-50 last:border-0">
         <span className="text-slate-500">{label}</span>
-        <span className={clsx("font-medium", isPrice ? "text-emerald-600 dir-ltr font-mono" : "text-slate-800")}>
+        <span className={clsx("font-bold", isPrice ? "text-emerald-600 dir-ltr font-mono" : "text-slate-800")}>
             {value}
         </span>
     </div>
@@ -361,19 +365,17 @@ const BooleanTag = ({ label, value }) => (
     </div>
 );
 
-// تشخیص آیکون برای نوع اینپوت
 const getIconForInputType = (type) => {
     switch (type) {
         case 'text': return <Type size={18}/>;
         case 'textarea': return <FileText size={18}/>;
         case 'select': case 'radio': return <List size={18}/>;
         case 'checkbox': return <CheckSquare size={18}/>;
-        case 'file': return <ImageIcon size={18}/>; // یا Upload
+        case 'file': return <ImageIcon size={18}/>;
         default: return <Settings size={18}/>;
     }
 };
 
-// ترجمه نوع اینپوت
 const translateInputType = (type) => {
     const map = {
         'text': 'متنی کوتاه',
