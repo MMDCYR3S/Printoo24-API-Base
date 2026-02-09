@@ -1,48 +1,83 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { MapPin, Plus, Trash2, X, Check } from 'lucide-react';
+import { MapPin, Plus, Trash2, X, AlertCircle } from 'lucide-react';
 import { profileService } from '../../services/profileService';
 
 const AddressPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  
+  const { 
+    register, 
+    handleSubmit, 
+    reset, 
+    watch, 
+    setValue, 
+    formState: { errors } 
+  } = useForm();
 
-  // دریافت آدرس‌ها
-  const { data: rawAddresses, isLoading } = useQuery({
+  // رصد لحظه‌ای استان انتخاب شده برای لود شهرها
+  const selectedProvinceId = watch('province_id');
+
+  // --- دریافت داده‌ها ---
+
+  // 1. لیست آدرس‌های فعلی
+  const { data: rawAddresses, isLoading: isAddressesLoading } = useQuery({
     queryKey: ['addresses'],
     queryFn: profileService.getAddresses,
   });
-  
   const addresses = Array.isArray(rawAddresses?.[0]) ? rawAddresses[0] : (rawAddresses || []);
 
-  // افزودن آدرس
+  // 2. لیست استان‌ها (فقط یکبار لود شود)
+  const { data: provinces, isLoading: isProvincesLoading } = useQuery({
+    queryKey: ['provinces'],
+    queryFn: profileService.getProvinces,
+    staleTime: Infinity, // استان‌ها به ندرت تغییر می‌کنند
+  });
+
+  // 3. لیست شهرها (وابسته به استان انتخاب شده)
+  const { data: cities, isLoading: isCitiesLoading } = useQuery({
+    queryKey: ['cities', selectedProvinceId],
+    queryFn: () => profileService.getCities(selectedProvinceId),
+    enabled: !!selectedProvinceId, // تا استانی انتخاب نشود، درخواست نزن
+  });
+
+  // وقتی استان عوض شد، شهر قبلی را پاک کن
+  useEffect(() => {
+    setValue('city_id', '');
+  }, [selectedProvinceId, setValue]);
+
+
+  // --- عملیات (Mutations) ---
+
   const addMutation = useMutation({
     mutationFn: profileService.addAddress,
     onSuccess: () => {
-      toast.success('آدرس جدید ثبت شد');
+      toast.success('آدرس جدید با موفقیت ثبت شد');
       queryClient.invalidateQueries(['addresses']);
-      queryClient.invalidateQueries(['profile-addresses']); // برای آپدیت عدد داشبورد
+      queryClient.invalidateQueries(['profile-addresses']);
       setIsModalOpen(false);
       reset();
     },
-    onError: () => toast.error('خطا در ثبت آدرس')
+    onError: (err) => {
+      const msg = err?.response?.data?.detail || 'خطا در ثبت آدرس. لطفا ورودی‌ها را بررسی کنید.';
+      toast.error(msg);
+    }
   });
 
-  // حذف آدرس
   const deleteMutation = useMutation({
     mutationFn: profileService.deleteAddress,
     onSuccess: () => {
       toast.success('آدرس حذف شد');
       queryClient.invalidateQueries(['addresses']);
       queryClient.invalidateQueries(['profile-addresses']);
-    }
+    },
+    onError: () => toast.error('خطا در حذف آدرس')
   });
 
   const onSubmit = (data) => {
-    // تبدیل اعداد به فرمت API
     const payload = {
       ...data,
       province_id: Number(data.province_id),
@@ -51,74 +86,163 @@ const AddressPage = () => {
     addMutation.mutate(payload);
   };
 
-  if (isLoading) return <div className="text-center py-10"><span className="loading loading-spinner"></span></div>;
+  if (isAddressesLoading) return <div className="flex justify-center py-20"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-black text-slate-800">آدرس‌های من</h1>
-        <button onClick={() => setIsModalOpen(true)} className="btn btn-primary btn-sm gap-2 rounded-xl">
-          <Plus size={18} /> آدرس جدید
+    <div className="space-y-6 animate-in fade-in duration-500">
+      
+      {/* هدر صفحه */}
+      <div className="flex justify-between items-center border-b border-slate-100 pb-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+            <MapPin className="text-primary" /> آدرس‌های من
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">مدیریت آدرس‌های ارسال سفارش</p>
+        </div>
+        <button 
+          onClick={() => setIsModalOpen(true)} 
+          className="btn btn-primary btn-sm gap-2 rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+        >
+          <Plus size={18} /> افزودن آدرس
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {addresses.map((addr) => (
-          <div key={addr.id} className="bg-white p-5 rounded-3xl border border-slate-200 relative group">
-            <div className="flex items-start gap-3 mb-3">
-              <MapPin className="text-orange-500 mt-1" size={20} />
-              <div>
-                <span className="font-bold text-slate-800 block">{addr.province_detail?.name}، {addr.city_detail?.name}</span>
-                <p className="text-sm text-slate-500 mt-1 leading-relaxed">{addr.address}</p>
+      {/* لیست آدرس‌ها */}
+      {addresses.length === 0 ? (
+        <div className="text-center py-16 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+          <MapPin size={48} className="mx-auto text-slate-300 mb-4" />
+          <p className="text-slate-500 font-bold">هنوز آدرسی ثبت نکرده‌اید</p>
+          <button onClick={() => setIsModalOpen(true)} className="btn btn-ghost btn-sm mt-2 text-primary">ثبت اولین آدرس</button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {addresses.map((addr) => (
+            <div key={addr.id} className="bg-white p-5 rounded-3xl border border-slate-200 relative group hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 bg-orange-50 text-orange-500 rounded-xl">
+                   <MapPin size={20} />
+                </div>
+                <div>
+                  <span className="font-bold text-slate-800 block text-lg">
+                    {addr.province_detail?.name}، {addr.city_detail?.name}
+                  </span>
+                  <p className="text-sm text-slate-500 mt-2 leading-relaxed bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    {addr.address}
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-between items-center pt-3 mt-2 border-t border-slate-50">
+                <span className="text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded-lg font-mono dir-ltr border border-slate-100">
+                  ZIP: {addr.postal_code}
+                </span>
+                <button 
+                  onClick={() => deleteMutation.mutate(addr.id)}
+                  disabled={deleteMutation.isPending}
+                  className="btn btn-ghost btn-xs text-error hover:bg-error/10"
+                >
+                  {deleteMutation.isPending ? <span className="loading loading-spinner loading-xs"></span> : <><Trash2 size={14} /> حذف</>}
+                </button>
               </div>
             </div>
-            <div className="flex justify-between items-center pt-3 border-t border-slate-50">
-              <span className="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded font-mono dir-ltr">
-                Zip: {addr.postal_code}
-              </span>
-              <button 
-                onClick={() => deleteMutation.mutate(addr.id)}
-                className="btn btn-ghost btn-xs text-error hover:bg-error/10"
-              >
-                <Trash2 size={14} /> حذف
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* مودال افزودن آدرس */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg">ثبت آدرس جدید</h3>
-              <button onClick={() => setIsModalOpen(false)} className="btn btn-circle btn-sm btn-ghost"><X size={20}/></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all">
+          <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl animate-in zoom-in-95 duration-200 border border-slate-100">
+            
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="font-black text-xl text-slate-800">ثبت آدرس جدید</h3>
+                <span className="text-xs text-slate-400">اطلاعات پستی را دقیق وارد کنید</span>
+              </div>
+              <button onClick={() => { setIsModalOpen(false); reset(); }} className="btn btn-circle btn-sm btn-ghost text-slate-500 hover:bg-slate-100"><X size={20}/></button>
             </div>
             
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              
+              {/* انتخاب استان و شهر */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* استان */}
                 <div className="form-control">
-                  <label className="label text-xs">ID استان</label>
-                  <input type="number" placeholder="مثلا 1" className="input input-bordered rounded-xl" {...register('province_id', {required: true})} />
+                  <label className="label text-xs font-bold text-slate-600">استان</label>
+                  <select 
+                    className={`select select-bordered rounded-xl w-full ${errors.province_id ? 'select-error' : ''}`} 
+                    {...register('province_id', { required: 'انتخاب استان الزامی است' })}
+                    disabled={isProvincesLoading}
+                  >
+                    <option value="">انتخاب استان...</option>
+                    {provinces?.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                  {isProvincesLoading && <span className="text-[10px] text-primary mt-1">در حال بارگذاری استان‌ها...</span>}
                 </div>
+
+                {/* شهر */}
                 <div className="form-control">
-                  <label className="label text-xs">ID شهر</label>
-                  <input type="number" placeholder="مثلا 12" className="input input-bordered rounded-xl" {...register('city_id', {required: true})} />
+                  <label className="label text-xs font-bold text-slate-600">شهر</label>
+                  <select 
+                    className={`select select-bordered rounded-xl w-full ${errors.city_id ? 'select-error' : ''}`} 
+                    {...register('city_id', { required: 'انتخاب شهر الزامی است' })}
+                    disabled={!selectedProvinceId || isCitiesLoading}
+                  >
+                    <option value="">
+                      {!selectedProvinceId 
+                        ? 'اول استان را انتخاب کنید' 
+                        : (isCitiesLoading ? 'در حال دریافت...' : 'انتخاب شهر...')}
+                    </option>
+                    {cities?.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
+
+              {/* کد پستی */}
               <div className="form-control">
-                <label className="label text-xs">کد پستی (۱۰ رقم)</label>
-                <input type="text" maxLength={10} className="input input-bordered rounded-xl text-left dir-ltr" {...register('postal_code', {required: true, minLength: 10})} />
+                <label className="label text-xs font-bold text-slate-600">
+                  کد پستی
+                  <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">حتما ۱۰ رقم</span>
+                </label>
+                <input 
+                  type="text" 
+                  maxLength={10} 
+                  placeholder="xxxxxxxxxx"
+                  className={`input input-bordered rounded-xl text-left dir-ltr font-mono tracking-widest ${errors.postal_code ? 'input-error' : ''}`} 
+                  {...register('postal_code', { 
+                    required: 'کد پستی الزامی است', 
+                    minLength: { value: 10, message: 'کد پستی باید ۱۰ رقم باشد' },
+                    pattern: { value: /^[0-9]+$/, message: 'فقط عدد وارد کنید' }
+                  })} 
+                />
+                {errors.postal_code && <span className="text-error text-[10px] mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.postal_code.message}</span>}
               </div>
+
+              {/* آدرس دقیق */}
               <div className="form-control">
-                <label className="label text-xs">آدرس دقیق</label>
-                <textarea className="textarea textarea-bordered rounded-xl h-24" {...register('address', {required: true})}></textarea>
+                <label className="label text-xs font-bold text-slate-600">آدرس دقیق پستی</label>
+                <textarea 
+                  className={`textarea textarea-bordered rounded-xl h-24 leading-relaxed ${errors.address ? 'textarea-error' : ''}`} 
+                  placeholder="نام خیابان، نام کوچه، پلاک، واحد..."
+                  {...register('address', { required: 'آدرس دقیق الزامی است' })}
+                ></textarea>
+                 {errors.address && <span className="text-error text-[10px] mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.address.message}</span>}
               </div>
               
-              <button type="submit" className="btn btn-primary w-full rounded-xl mt-4" disabled={addMutation.isPending}>
-                {addMutation.isPending ? <span className="loading loading-spinner"></span> : 'ثبت آدرس'}
-              </button>
+              <div className="pt-2">
+                <button 
+                  type="submit" 
+                  className="btn btn-primary w-full rounded-xl shadow-lg shadow-primary/20 text-base" 
+                  disabled={addMutation.isPending}
+                >
+                  {addMutation.isPending ? <span className="loading loading-spinner"></span> : 'ثبت و ذخیره آدرس'}
+                </button>
+              </div>
+
             </form>
           </div>
         </div>

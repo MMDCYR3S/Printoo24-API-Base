@@ -1,12 +1,23 @@
 // src/app/services/adminCategoryService.js
-import apiClient from '../../../services/apiClient'; // فرض بر این است که اینستنس Axios شماست
+import apiClient from '../../../services/apiClient'; // مسیر ایمپورت را چک کنید
 
 const BASE_URL = '/dashboard/categories/';
 
 export const adminCategoryService = {
-  // دریافت لیست (می‌تواند شامل فیلترهای کوئری باشد)
-  getAll: async (params = {}) => {
-    const { data } = await apiClient.get(BASE_URL, { params });
+  // دریافت لیست والدها (ریشه‌ها)
+  getRoots: async () => {
+    // معمولا اندپوینت پیش‌فرض ریشه‌ها را می‌دهد
+    const { data } = await apiClient.get(BASE_URL);
+    return data;
+  },
+
+  // دریافت لیست کامل زیردسته‌ها (برای تب زیردسته‌ها)
+  // فرض: بک‌اند فیلتری دارد یا لیست فلت را برمی‌گرداند. 
+  // اگر بک‌اند جنگو باشد معمولا parent__isnull=false کار می‌کند
+  getAllSubCategories: async () => {
+    const { data } = await apiClient.get(BASE_URL, { 
+      params: { parent__isnull: false } 
+    });
     return data;
   },
 
@@ -34,15 +45,12 @@ export const adminCategoryService = {
     return id;
   },
 
-  // --- عملیات گروهی ---
   bulkDelete: async (ids) => {
-    // طبق داکیومنت، متد DELETE بادی می‌گیرد (استاندارد REST مدرن)
     await apiClient.delete(`${BASE_URL}bulk-delete/`, { data: { ids } });
     return ids;
   },
 
   bulkStatus: async ({ ids, active }) => {
-    // طبق داکیومنت: active کوئری پارامتر است، ids در بادی
     await apiClient.patch(`${BASE_URL}bulk-status/?active=${active}`, { ids });
     return { ids, active };
   },

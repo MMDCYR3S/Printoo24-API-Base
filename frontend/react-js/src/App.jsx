@@ -41,6 +41,7 @@ import ProductSizesPage from './app/features/admin/features/products/ProductSize
 import CategoryListPage from './app/features/admin/features/categories/CategoryListPage';
 import CategoryUpsertPage from './app/features/admin/features/categories/CategoryUpsertPage';
 import SubCategoryPage from './app/features/admin/features/categories/SubCategoryPage';
+import CategoryDetailPage from './app/features/admin/features/categories/CategoryDetailPage'
 
 // Admin > Orders
 import OrderCreatePage from './app/features/admin/features/orders/OrderCreatePage';
@@ -101,8 +102,10 @@ function App() {
               {/* Categories */}
               <Route path="categories" element={<CategoryListPage />} />
               <Route path="categories/new" element={<CategoryUpsertPage />} />
-              <Route path="categories/:id/edit" element={<CategoryUpsertPage />} />
+              <Route path="categories/edit/:id/" element={<CategoryUpsertPage />} />
               <Route path="categories/:id/subs" element={<SubCategoryPage />} />
+              <Route path="detail/:id" element={<CategoryDetailPage />} />
+              <Route path="edit/:id" element={<CategoryUpsertPage />} />
 
               {/* Orders */}
               <Route path="orders">
