@@ -73,4 +73,4 @@ class UserDetailSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ["username", "is_active", "is_staff", "is_superuser", "is_verified"]
+        fields = ["id" ,"username", "is_active", "is_staff", "is_superuser", "is_verified"]

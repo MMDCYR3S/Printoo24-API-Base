@@ -16,6 +16,18 @@ class ProductCategoryQuerySet(TreeQuerySet):
         دریافت تمام دسته‌بندی‌ها به صورت مرتب شده بر اساس ساختار درختی.
         """
         return self.filter(is_active=True).order_by('tree_id', 'lft')
+    
+    def get_subcategories_with_parent(self):
+        """
+        دریافت تمام زیردسته‌ها (دسته‌هایی که والد دارند) به همراه اطلاعات والد.
+        استفاده از select_related برای جلوگیری از مشکل N+1.
+        """
+        return self.filter(
+            parent__isnull=False,
+            is_active=True
+        ).select_related(
+            'parent'
+        ).order_by('parent__id', 'name')
 
     def get_root_categories(self):
         """
@@ -41,6 +53,9 @@ class ProductCategoryManager(TreeManager):
 
     def get_all_active_categories(self):
         return self.get_queryset().get_all_active_categories()
+    
+    def get_subcategories_with_parent(self):
+        return self.get_queryset().get_subcategories_with_parent()
 
     def get_root_categories(self):
         return self.get_queryset().get_root_categories()

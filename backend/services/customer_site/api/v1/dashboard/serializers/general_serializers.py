@@ -3,6 +3,7 @@ from drf_spectacular.utils import extend_schema_field
 
 from core.models import (
     ProductCategory,
+    Product,
     User,
 )
 from apps.accounts.models import (
@@ -10,6 +11,37 @@ from apps.accounts.models import (
     WalletTransaction,
 )
 from apps.home.models import ContactUs, PromotionalModal
+
+# ========== CATEGORY SERIALIZERS ========== #
+# ===== سریالایزر مینیمال محصول برای نمایش در لیست‌ها ===== #
+class ProductMinimalSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر سبک برای نمایش در لایه دسته‌بندی‌ها.
+    شامل کمترین اطلاعات برای رندر کردن کارت محصول.
+    """
+    image_url = serializers.SerializerMethodField()
+    price_display = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'slug', 'price', 'image_url', 'price_display']
+
+    def get_image_url(self, obj):
+        if hasattr(obj, 'media') and obj.media.exists():
+            image = obj.media.first().file
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(image.url)
+            return image.url
+        
+        # اگر عکس ندارد، از یک پلیس‌هولدر استفاده کن
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri('/static/images/no-image.png')
+        return '/static/images/no-image.png'
+
+    def get_price_display(self, obj):
+        return f"{obj.price:,.0f}"
 
 # ===== سریالایزر مدیریت دسته‌بندی‌ها (داشبورد) ===== #
 class CategoryLinkSerializer(serializers.ModelSerializer):
@@ -20,10 +52,11 @@ class CategoryLinkSerializer(serializers.ModelSerializer):
         view_name='api:v1:dashboard:product_category_dashboard-detail',
         lookup_field='id'
     )
+    products = ProductMinimalSerializer(many=True, read_only=True)
 
     class Meta:
         model = ProductCategory
-        fields = ['id', 'name', 'detail_url']
+        fields = ['id', 'name', 'detail_url', 'products']
 
 # ======= 
 class ParentCategoryListSerializer(serializers.ModelSerializer):
@@ -36,13 +69,14 @@ class ParentCategoryListSerializer(serializers.ModelSerializer):
     )
     banner_wide_url = serializers.CharField(source='get_banner_wide_url', read_only=True)
     children_count = serializers.SerializerMethodField()
+    products = ProductMinimalSerializer(many=True, read_only=True)
 
     class Meta:
         model = ProductCategory
         fields = [
             'id', 'name', 'slug', 'detail_url', 'is_active',
             'banner_wide', 'banner_box', 'banner_wide_url',
-            'children_count'
+            'children_count', 'products'
         ]
         
     def get_children_count(self, obj):
@@ -50,6 +84,28 @@ class ParentCategoryListSerializer(serializers.ModelSerializer):
         محاسبه تعداد فرزندان مستقیم
         """
         return obj.get_children().count()
+    
+# ===== سریالایزر اطلاعات والد (Nested Serializer) ===== #
+class ParentInfoSerializer(serializers.Serializer):
+    """
+    نمایش اطلاعات خلاصه شده والد دسته‌بندی.
+    این سریالایزر برای جلوگیری از تودرتو شدن بی‌مورد و ساده کردن خروجی استفاده می‌شود.
+    """
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    slug = serializers.SlugField(read_only=True)
+
+# ===== سریالایزر لیست زیردسته‌ها ===== #
+class SubcategoryWithParentSerializer(serializers.Serializer):
+    """
+    نمایش لیست مسطح زیردسته‌ها به همراه اطلاعات والد.
+    این ساختار دقیقاً خروجی متد get_subcategories_flat_list در سرویس اپلیکیشن را پوشش می‌دهد.
+    """
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    slug = serializers.SlugField(read_only=True)
+    parent = ParentInfoSerializer(read_only=True)
+    products = ProductMinimalSerializer(many=True, read_only=True)
 
 # ========== جزئیات با لینک ========== #
 class ProductCategoryDetailWithLinksSerializer(serializers.ModelSerializer):
@@ -59,13 +115,14 @@ class ProductCategoryDetailWithLinksSerializer(serializers.ModelSerializer):
     banner_wide_url = serializers.CharField(source='get_banner_wide_url', read_only=True)
     children = CategoryLinkSerializer(many=True, read_only=True, source='get_children')
     parent_name = serializers.CharField(source='parent.name', read_only=True)
+    products = ProductMinimalSerializer(many=True, read_only=True)
 
     class Meta:
         model = ProductCategory
         fields = [
             'id', 'name', 'slug', 'parent', 'parent_name', 'description',
             'banner_wide', 'banner_box', 'banner_wide_url',
-            'is_active', 'children', 'created_at', 'updated_at'
+            'is_active', 'children', 'products', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'slug', 'created_at', 'updated_at', 'banner_wide_url']
 
@@ -94,6 +151,21 @@ class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
             return ProductCategoryDashboardSerializer(children, many=True, context=self.context).data
         return []
 
+# ===== سریالایزر ورودی برای عملیات گروهی ===== #
+class CategoryBulkUpsertSerializer(serializers.Serializer):
+    """
+    سریالایزر برای دریافت لیست دسته‌بندی‌ها جهت ایجاد یا ویرایش گروهی.
+    فیلد id: اگر ارسال شود => Update. اگر خالی باشد => Create.
+    فیلد parent_slug: برای اتصال به والد (چه موجود در دیتابیس چه در همین لیست).
+    """
+    id = serializers.IntegerField(required=False, allow_null=True)
+    name = serializers.CharField(max_length=150)
+    slug = serializers.SlugField(max_length=150, required=False)
+    parent_slug = serializers.SlugField(max_length=150, required=False, allow_null=True, write_only=True)
+    description = serializers.CharField(required=False, allow_blank=True)
+    is_active = serializers.BooleanField(required=False, default=True)
+
+# ========== OTHER SERIALIZERS ========== #
 # ===== سریالایزر تماس با ما ===== #
 class ContactUsSerializer(serializers.ModelSerializer):
     status_display = serializers.SerializerMethodField()

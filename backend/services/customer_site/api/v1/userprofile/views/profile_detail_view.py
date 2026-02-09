@@ -33,6 +33,7 @@ class CustomerProfileAPIView(APIView):
                 summary='نمونه پاسخ کامل',
                 description='شامل نام کاربری، ایمیل و اطلاعات شخصی.',
                 value={
+                    "id": 1,
                     "username": "reza_ahmadi",
                     "email": "reza@example.com",
                     "is_active": True,
@@ -59,6 +60,7 @@ class CustomerProfileAPIView(APIView):
             
             combined_data = {
                 # ===== اطلاعات کاربر ===== #
+                'id': user.id,
                 'username': user.username,
                 'email': user.email,
                 'is_active': user.is_active,

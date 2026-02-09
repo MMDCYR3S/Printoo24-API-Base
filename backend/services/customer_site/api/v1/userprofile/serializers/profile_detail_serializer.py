@@ -13,7 +13,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerProfile
         fields = [
-            'username', 'email', 'is_active', 
+            'id', 'username', 'email', 'is_active', 
             'first_name', 'last_name', 'phone_number', 
             'company', 'bio', 'created_at'
         ]
