@@ -3,13 +3,16 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 
 from core.product.services import ProductCategoryService
+from apps.shop.services import ShopCategoryService
 from ..serializers.general_serializers import (
     ProductCategoryDashboardSerializer,
     ParentCategoryListSerializer,
-    ProductCategoryDetailWithLinksSerializer
+    ProductCategoryDetailWithLinksSerializer,
+    SubcategoryWithParentSerializer,
+    CategoryBulkUpsertSerializer
 )
 
 # ===== ویو‌ست مدیریت دسته‌بندی‌ها ===== #
@@ -56,7 +59,6 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
         
         serializer = ParentCategoryListSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-
     # ===== بازنویسی متد create (افزودن) ===== #
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -85,6 +87,95 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
         instance = self.get_object()
         self.service.delete_category(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        summary="لیست تمام زیردسته‌بندی‌ها",
+        description="لیست تمام زیردسته‌ها به صورت مسطح به همراه نام و اطلاعات والدین آن‌ها. مناسب برای فیلترها.",
+        responses=SubcategoryWithParentSerializer(many=True)
+    )
+    @action(detail=False, methods=['get'], url_path='subcategories')
+    def sub_categories(self, request, *args, **kwargs):
+        service = ShopCategoryService(request=request)
+        categories_data = service.get_subcategories_flat_list()
+        return Response(categories_data)
+
+    # ===== اکشن سفارشی: ایجاد و ویرایش گروهی ===== #
+    @extend_schema(
+        request=CategoryBulkUpsertSerializer(many=True),
+        summary="ایجاد و ویرایش گروهی دسته‌بندی‌ها",
+        description="این اکشن امکان ثبت همزمان چندین دسته‌بندی را فراهم می‌کند. " \
+                    "با ارسال id، آیتم ویرایش می‌شود. عدم ارسال id باعث ایجاد جدید می‌شود. " \
+                    "برای اتصال فرزند به والد می‌توانید از parent_slug استفاده کنید." ,
+        examples=[
+            OpenApiExample(
+                "Bulk Insert",
+                summary="ایجاد دسته بندی ها",
+                description="نکته مهم: اگر میخواهی دسته بندی جدید اضافه کنی، باید بدون id باشه. اگر قصد ویرایش داری، id رو میدی و تغییرات رو اعمال میکنی.",
+                value=[
+                    {
+                        "name": "الکترونیک",
+                        "slug": "electronics",
+                        "is_active": True
+                        # بدون id => ایجاد جدید
+                    },
+                    {
+                        "name": "گوشی موبایل",
+                        "slug": "mobile",
+                        "parent_slug": "electronics",
+                        "is_active": True
+                    },
+                    {
+                        "name": "تجهیزات خانگی",
+                        "slug": "home-appliances",
+                        "parent_slug": "electronics",
+                        "is_active": True
+                    },
+                ]
+            ),
+            OpenApiExample(
+                "Bulk Upsert",
+                summary=" ویرایش دسته بندی ها",
+                description="نکته مهم: اگر میخواهی دسته بندی جدید اضافه کنی، باید بدون id باشه. اگر قصد ویرایش داری، id رو میدی و تغییرات رو اعمال میکنی.",
+                value=[
+                    {
+                        "id": 45,
+                        "name": "لپ تاپ (ویرایش شده)",
+                        "slug": "laptop-updated",
+                        "parent_slug": "electronics", 
+                        "is_active": True
+                    },
+                    {
+                        "id": 46,
+                        "name": "تلفن (ویرایش شده)",
+                        "slug": "phone-updated",
+                        "parent_slug": "electronics", 
+                        "is_active": True
+                    }
+                ]
+            )
+        ],
+        responses={200: list}
+    )
+    @action(detail=False, methods=['post'], url_path='bulk-upsert')
+    def bulk_upsert(self, request):
+        """
+        پلتفرم: دریافت لیستی از دسته‌بندی‌ها و انجام عملیات Create/Update
+        """
+        serializer = CategoryBulkUpsertSerializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        
+        validated_data = serializer.validated_data
+        
+        # ===== ایجاد سرویس دامنه برای ایجاد یا ویرایش دسته جمعی ===== #
+        result = self.service.bulk_upsert_categories(validated_data, request.user)
+        
+        return Response(
+            {
+                "detail": "عملیات گروهی با موفقیت انجام شد.",
+                "results": result
+            },
+            status=status.HTTP_200_OK
+        )
 
     # ===== اکشن سفارشی: تغییر وضعیت گروهی ===== #
     @extend_schema(

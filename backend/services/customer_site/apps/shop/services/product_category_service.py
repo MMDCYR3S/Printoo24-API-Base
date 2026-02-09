@@ -7,6 +7,7 @@ from django.urls import NoReverseMatch
 
 from core.product.services import ProductCategoryService, ProductService
 from core.models import ProductCategory
+from api.v1.dashboard.serializers import ProductMinimalSerializer
 
 logger = logging.getLogger('shop.services.category')
 
@@ -21,20 +22,19 @@ class ShopCategoryService:
         self._product_repo = ProductService()
         
     # ===== Get Category Tree Structure ===== #
-    def get_category_tree_structure(self) -> List[Dict[str, Any]]:
+    def get_category_tree_structure(self, include_products: bool = False) -> List[Dict[str, Any]]:
         """
-        خروجی: ساختار درختی تو در تو (فقط نام و لینک).
-        مناسب برای هدر سایت یا منوی کناری.
+        خروجی: ساختار درختی.
         """
         categories = self._domain_service.get_category_tree_queryset()
         root_nodes = get_cached_trees(categories)
-        return [self._serialize_node_light(node) for node in root_nodes]
+        return [self._serialize_node_light(node, include_products) for node in root_nodes]
 
-    def _serialize_node_light(self, node: ProductCategory) -> Dict[str, Any]:
+    def _serialize_node_light(self, node: ProductCategory, include_products: bool = False) -> Dict[str, Any]:
         """تبدیل نود به دیکشنری سبک"""
-        children = [self._serialize_node_light(child) for child in node.get_children()]
+        children = [self._serialize_node_light(child, include_products) for child in node.get_children()]
         
-        return {
+        data = {
             "id": node.id,
             "name": node.name,
             "slug": node.slug,
@@ -46,6 +46,17 @@ class ShopCategoryService:
             },
             "children": children,
         }
+        
+        # ===== اگر باید محصولات هم بازنشون شود ===== #
+        if include_products:
+            products_qs = self._product_repo.get_products_by_category_ids([node.id])[:7]
+            data["products"] = ProductMinimalSerializer(
+                products_qs, 
+                many=True, 
+                context={'request': self.request}
+            ).data
+
+        return data
 
     # ===== Get Category Landing Data ===== #
     def get_category_landing_data(self, slug: str) -> Dict[str, Any]:
@@ -92,32 +103,30 @@ class ShopCategoryService:
                     } 
                     for child in category.get_children() if child.is_active
                 ],
-                "products": products_queryset
+                "products": ProductMinimalSerializer(
+                    products_queryset, 
+                    many=True, 
+                    context={'request': self.request}
+                ).data
             }
         return data
     
     # ===== Get All Categories With Products ===== #
     def get_all_categories_with_products(self) -> List[Dict[str, Any]]:
         """
-        دریافت لیست تمام دسته‌بندی‌های اصلی (Root) به همراه بنرها و محصولات زیرمجموعه.
-        مناسب برای صفحه اصلی فروشگاه.
+        دریافت لیست تمام دسته‌بندی‌های اصلی (Root) به همراه محصولات.
         """
         logger.info("Fetching all root categories with products")
 
-        # ===== دریافت کوئری‌ست دسته‌بندی‌ها ===== #
         root_categories = self._domain_service.get_all_active_categories()
-        
         result_list = []
 
         for category in root_categories:
-            # ===== دریافت کوئری‌ست زیر‌دسته‌ها ===== #
             descendants = category.get_descendants(include_self=True)
             descendant_ids = descendants.values_list('id', flat=True)
 
-            # ===== دریافت کوئری‌ست محصولات ===== #
             products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)[:7]
 
-            # ===== ساخت دیکشنری برای هر دسته‌بندی ===== #
             category_data = {
                 "category_info": {
                     "id": category.id,
@@ -136,11 +145,59 @@ class ShopCategoryService:
                     } 
                     for child in category.get_children() if child.is_active
                 ],
-                "products": products_queryset
+                "products": ProductMinimalSerializer(
+                    products_queryset, 
+                    many=True, 
+                    context={'request': self.request}
+                ).data
             }
             result_list.append(category_data)
             
         return result_list
+
+    # ===== Get SubCategories With Parent ===== #
+    def get_subcategories_flat_list(self) -> List[Dict[str, Any]]:
+        """
+        دریافت لیست مسطح از تمام زیردسته‌ها به همراه نام والد.
+        مناسب برای نمایش در لیست‌های فیلتر یا نقشه سایت.
+        """
+        logger.info("Fetching flat list of subcategories with parents")
+        # ===== دریافت تمامی زیردسته بندی ها ===== #
+        categories = self._domain_service.get_all_subcategories_with_parent()
+        
+        result = []
+        
+        # ===== ایجاد یک والد برای هر زیر‌دسته ===== #
+        for cat in categories:
+            parent_data = None
+            if cat.parent:
+                parent_data = {
+                    "id": cat.parent.id,
+                    "name": cat.parent.name,
+                    "slug": cat.parent.slug
+                }
+                
+            products_qs = self._product_repo.get_products_by_category_ids([cat.id])[:7]
+                
+            result.append({
+                "id": cat.id,
+                "name": cat.name,
+                "slug": cat.slug,
+                "description": cat.description,
+                "is_active": cat.is_active,
+                "banners": {
+                    "wide": self._get_image_url(cat.parent.banner_wide),
+                    "box": self._get_image_url(cat.parent.banner_box),
+                },
+                "parent": parent_data,
+                "products": ProductMinimalSerializer(
+                    products_qs, 
+                    many=True, 
+                    context={'request': self.request}
+                ).data
+            })
+            
+        return result
 
     # ===== Get Image URL ===== #
     def _get_image_url(self, image_field):
