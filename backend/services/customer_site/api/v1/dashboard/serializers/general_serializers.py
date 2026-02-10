@@ -90,15 +90,15 @@ class ParentCategoryListSerializer(serializers.ModelSerializer):
         lookup_field='id'
     )
     banner_wide_url = serializers.CharField(source='get_banner_wide_url', read_only=True)
+    children = CategoryLinkSerializer(many=True, read_only=True, source='get_children')
     children_count = serializers.IntegerField(read_only=True) # مقدار را از annotate می گیریم
-    
     products_preview = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductCategory
         fields = [
             'id', 'name', 'slug', 'detail_url', 'is_active',
-            'banner_wide', 'banner_box', 'banner_wide_url',
+            'banner_wide', 'banner_box', 'banner_wide_url', 'children',
             'children_count', 'products_preview', 'created_at'
         ]
         
