@@ -101,6 +101,7 @@ class UserManager(BaseUserManager):
         return self.get_queryset().customers()\
                 .with_full_profile()\
                 .prefetch_related('addresses__province', 'addresses__city')\
+                .distinct()\
                 .order_by('-created_at')
 
     def get_count_by_date_range(self, start_date: datetime, end_date: datetime) -> int:
