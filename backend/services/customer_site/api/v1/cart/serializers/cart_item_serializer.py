@@ -68,12 +68,12 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
         raw = obj.items or {}
         meta = raw.get('meta', {})
         
-        # تلاش برای ساخت یک دیکشنری تمیز
+        # ===== ساخت دیکشنری ===== #
         return {
             "size_label": meta.get('size_info', {}).get('size_name') or "سایز اختصاصی",
             "quantity_label": meta.get('quantity_info', {}).get('quantity_text') or str(obj.quantity),
             "dimensions": f"{meta.get('size_info', {}).get('width')}x{meta.get('size_info', {}).get('height')}",
-            "options": raw.get('options', []), # لیست آپشن‌های انتخاب شده
+            "options": raw.get('options', []),
             "has_design": meta.get('has_design', True)
         }
 

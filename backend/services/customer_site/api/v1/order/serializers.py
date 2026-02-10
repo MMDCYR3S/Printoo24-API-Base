@@ -1,7 +1,25 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from core.models import Order, OrderItem, OrderItemFile, Product, Address, City, Province
+from core.models import Order, OrderItem, OrderItemFile, Product, City, Province, Address
+
+# ===== Province List ===== #
+class ProvinceSerialzier(serializers.ModelSerializer):
+    """
+    سریالایزر برای استان
+    """
+    class Meta:
+        model = Province
+        fields = ["id", "name"]
+
+# ===== City List ===== #
+class CitySerialzier(serializers.ModelSerializer):
+    """
+    سریالایزر برای استان
+    """
+    class Meta:
+        model = City
+        fields = ["id", "name", "province"]
 
 # ===== Product Summary Serializer ===== #
 class ProductSummarySerializer(serializers.ModelSerializer):
@@ -199,3 +217,35 @@ class OrderSerializer(serializers.ModelSerializer):
                 raise ValidationError({"city_id": "شهر نامعتبر است."})
 
         return attrs
+
+# ===== سریالایزر استان (برای نمایش داخل آدرس) =====
+class ProvinceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Province
+        fields = ['id', 'name', 'slug']
+
+# ===== سریالایزر شهر (برای نمایش داخل آدرس) =====
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ['id', 'name', 'slug']
+
+# ===== سریالایزر اصلی آدرس =====
+class AddressListSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر مخصوص نمایش لیست آدرس‌ها.
+    استان و شهر به صورت آبجکت کامل نمایش داده می‌شوند.
+    """
+    province = ProvinceSerializer(read_only=True)
+    city = CitySerializer(read_only=True)
+
+    class Meta:
+        model = Address
+        fields = [
+            'id', 
+            'province', 
+            'city', 
+            'postal_code', 
+            'address', 
+            'created_at'
+        ]

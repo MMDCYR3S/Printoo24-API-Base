@@ -1,12 +1,15 @@
 from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiTypes
 
+from core.models import Province, City
+from core.users.services import AddressService
 from apps.order.services import CreateOrderFromCartService
 from apps.order.exceptions import EmptyCartError, InsufficientFundsError
-from .serializers import OrderSerializer
+from .serializers import OrderSerializer, CitySerialzier, ProvinceSerialzier, AddressListSerializer
 
 # ========================================== #
 # ===== 1. Single Item Checkout View ======= #
@@ -274,3 +277,71 @@ class BulkCreateOrderView(GenericAPIView):
             return Response({"error": str(e)}, status=status.HTTP_402_PAYMENT_REQUIRED)
         except Exception as e:
             return Response({"error": "System Error", "detail": str(e)}, status=500)
+
+@extend_schema(tags=["Order"])
+class ProvinceView(GenericAPIView):
+    """
+    نمایش استان‌ها
+    """
+    def get(self, request, *args, **kwargs):
+        """ نمایش لیست استان‌ها """
+        provinces = Province.objects.all()
+        serializer = ProvinceSerialzier(provinces, many=True, context={'request' : request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+@extend_schema(
+    summary='Get cities by province',
+    description='Retrieve all cities for a specific province',
+    parameters=[
+        OpenApiParameter(
+            name='province_id',
+            type=OpenApiTypes.INT,
+            location=OpenApiParameter.QUERY,
+            description='ID of the province',
+            required=True
+        ),
+    ],
+    responses={
+        200: CitySerialzier(many=True),
+        400: OpenApiTypes.OBJECT,
+        404: OpenApiTypes.OBJECT,
+    }
+)
+@extend_schema(tags=["Order"])
+class CityView(GenericAPIView):
+    """
+    نمایش شهرها
+    """
+    def get(self, request, *args, **kwargs):
+        """ نمایش لیست شهرها بر اساس استان انتخاب شده """
+        province_id = request.query_params.get('province_id')
+        
+        if not province_id:
+            return Response(
+                {"error": "province_id parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        cities = City.objects.filter(province_id=province_id)
+        serializer = CitySerialzier(cities, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)    
+
+@extend_schema(tags=["Order"])
+class UserAddressListView(APIView):
+    """
+    API برای دریافت لیست آدرس‌های اختصاصی کاربر لاگین شده.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = AddressListSerializer
+
+    @extend_schema(
+        summary="دریافت آدرس‌های کاربر جاری",
+        description="لیست تمام آدرس‌های ثبت شده توسط کاربری که توکن ارسال کرده است.",
+        responses={200: AddressListSerializer(many=True)}
+    )
+    def get(self, request):
+        service = AddressService()
+        user_id = request.user.id
+        addresses = service.get_user_addresses(user_id=user_id)
+        serializer = AddressListSerializer(addresses, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

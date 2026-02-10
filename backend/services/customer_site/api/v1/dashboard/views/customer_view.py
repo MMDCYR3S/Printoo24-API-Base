@@ -122,7 +122,7 @@ class CustomerViewSet(ViewSet):
         self.service.bulk_delete(ids)
         return Response({'detail': 'کاربران انتخاب شده حذف شدند.'})
 
-        # ===== Province + City ===== #
+    # ===== Province + City ===== #
     @action(detail=False, methods=["get"], url_path='provinces')
     def provinces(self, request):
         provinces = Province.objects.all()
