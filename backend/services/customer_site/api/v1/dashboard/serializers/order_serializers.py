@@ -124,7 +124,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 # ===== ایجاد سفارش (Input) ===== #
 class AdminOrderCreateSerializer(serializers.Serializer):
     """
-    سریالایزر ایجاد سفارش توسط ادمین.
+    سریالایزر ایجاد سفارش توسط ادمین.d
     اصلاح شده: افزودن فیلدهای اطلاعات گیرنده و آدرس
     """
     user_id = serializers.IntegerField()

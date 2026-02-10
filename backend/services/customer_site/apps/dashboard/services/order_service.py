@@ -32,6 +32,14 @@ class OrderDashboardService:
         self.order_domain = OrderService()
         self.temp_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_order_uploads'))
 
+    def get_orders_list(self):
+        """
+        لیست تمام سفارشات با جزئیات لازم برای جدول داشبورد.
+        """
+        return Order.objects.select_related('user__customer_profile', 'current_status')\
+            .prefetch_related('order_item_order')\
+            .order_by('-created_at').filter(type="1")
+
     # ===== لیست و جزئیات ===== #
     def get_all_orders_queryset(self):
         """

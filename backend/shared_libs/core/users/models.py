@@ -25,7 +25,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text='شناسه کاربری',
     )
     username = models.CharField(_("نام کاربری"), max_length=150, unique=True)
-    email = models.EmailField(_('آدرس ایمیل'), unique=True)
+    email = models.EmailField(_('آدرس ایمیل'), unique=True, null=True, blank=True)
     is_active = models.BooleanField(_('فعال'), default=True)
     is_staff = models.BooleanField(_('کاربری'), default=False)
     is_superuser = models.BooleanField(_('ادمین'), default=False)
@@ -35,7 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = []
     
     objects = UserManager()
     
@@ -185,7 +185,12 @@ class Address(models.Model):
     user = models.ForeignKey("core.User", related_name='addresses', on_delete=models.CASCADE)
     province = models.ForeignKey(Province, verbose_name=_("استان"), on_delete=models.CASCADE)
     city = models.ForeignKey(City, verbose_name=_("شهر"), on_delete=models.CASCADE)
-    postal_code = models.CharField(_('کد پستی'), max_length=10)
+    postal_code = models.CharField(
+        _('کد پستی'), 
+        max_length=10, 
+        null=True, 
+        blank=True
+    )
     address = models.TextField(_('آدرس'))
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

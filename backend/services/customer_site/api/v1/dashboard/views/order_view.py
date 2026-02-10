@@ -37,7 +37,7 @@ class OrderDashboardViewSet(viewsets.ViewSet):
             'date_from': request.query_params.get('date_from'),
             'date_to': request.query_params.get('date_to'),
         }
-        queryset = self.service.get_orders_list(filters)
+        queryset = self.service.get_orders_list()
         
         serializer = OrderListSerializer(queryset, many=True)
         return Response(serializer.data)

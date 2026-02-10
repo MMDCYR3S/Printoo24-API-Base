@@ -105,3 +105,5 @@ DEBUG 2026-02-10 07:20:00,054 customer_service 7 124657318659776 Fetching custom
 DEBUG 2026-02-10 07:20:58,975 customer_service 7 124657277540032 Fetching customer list
 DEBUG 2026-02-10 07:20:59,501 customer_service 7 124657285932736 Fetching customer list
 DEBUG 2026-02-10 07:33:12,706 customer_service 7 124657303975616 Fetching customer list
+DEBUG 2026-02-10 12:53:11,039 customer_service 878 126928351827648 Fetching customer list
+DEBUG 2026-02-10 12:54:23,430 customer_service 878 126928342386368 Fetching customer list
