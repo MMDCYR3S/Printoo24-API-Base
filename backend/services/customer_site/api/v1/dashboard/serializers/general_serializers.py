@@ -160,8 +160,8 @@ class CategoryBulkUpsertSerializer(serializers.Serializer):
     """
     id = serializers.IntegerField(required=False, allow_null=True)
     name = serializers.CharField(max_length=150)
-    slug = serializers.SlugField(max_length=150, required=False)
-    parent_slug = serializers.SlugField(max_length=150, required=False, allow_null=True, write_only=True)
+    slug = serializers.SlugField(max_length=150, required=False, allow_blank=True)
+    parent_slug = serializers.SlugField(max_length=150, required=False, allow_null=True, allow_blank=True, write_only=True)
     description = serializers.CharField(required=False, allow_blank=True)
     is_active = serializers.BooleanField(required=False, default=True)
 
