@@ -101,9 +101,16 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
     @action(detail=False, methods=['get'], url_path='subcategories')
     def sub_categories(self, request, *args, **kwargs):
         service = ShopCategoryService(request=request)
+        
         categories_data = service.get_subcategories_flat_list()
-        return Response(categories_data)
-
+        
+        serializer = SubcategoryWithParentSerializer(
+            categories_data, 
+            many=True, 
+            context={'request': request}
+        )
+        
+        return Response(serializer.data)
     # ===== اکشن سفارشی: ایجاد و ویرایش گروهی ===== #
     @extend_schema(
         request=CategoryBulkUpsertSerializer(many=True),

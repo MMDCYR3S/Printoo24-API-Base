@@ -49,28 +49,49 @@ class OrderDashboardService:
 
     # ===== ایجاد سفارش مستقیم (Direct Order) ===== #
     def create_admin_order(self,
-                           user_id: int, address_id: int, 
+                           user_id: int,
                            items_data: List[Dict],
-                           total_price_override: float = None):
+                           address_id: int = None,
+                           total_price_override: float = None,
+                           # ===== آرگومان‌های جدید ===== #
+                           full_address: str = None,
+                           recipient_name: str = None,
+                           recipient_phone: str = None,
+                           company_name: str = None):
         """
         فراخوانی سرویس دامین برای ایجاد سفارش.
+        اصلاح شده: دریافت مستقیم اطلاعات گیرنده و آدرس.
         """
         logger.info(f"Dashboard: Creating order for User {user_id}")
         
         user = User.objects.get(id=user_id)
-        if user.customer_profile is not None:
-            recipient_name = user.customer_profile.fullname() if user.customer_profile.fullname() else user.username
-        recipient_phone = user.customer_profile.phone_number
         
-        address = Address.objects.get(id=address_id)
-        full_address = f"{address.province.name} - {address.city.name} - {address.address}"
+        # ===== مدیریت اطلاعام اختیاری کاربر ===== #
+        final_recipient_name = recipient_name
+        final_recipient_phone = recipient_phone
         
+        if not final_recipient_name and user.customer_profile:
+             final_recipient_name = user.customer_profile.fullname() or user.username
+             
+        if not final_recipient_phone and user.customer_profile:
+             final_recipient_phone = user.customer_profile.phone_number
+
+        final_full_address = full_address
+        
+        # ===== اگر آدرس نبود ===== #
+        if address_id:
+            address_obj = Address.objects.get(id=address_id)
+            if not final_full_address:
+                final_full_address = f"{address_obj.province.name} - {address_obj.city.name} - {address_obj.address}"
+        
+        # ===== نمایش داده‌ ایجاد شده ===== #
         return self.order_domain.create_order_direct(
             user_id=user_id,
             address_id=address_id,
-            recipient_name=recipient_name,
-            recipient_phone=recipient_phone,
-            full_address=full_address,
+            recipient_name=final_recipient_name,
+            recipient_phone=final_recipient_phone,
+            company_name=company_name,
+            full_address=final_full_address,
             items_data=items_data,
             total_price_override=total_price_override,
             type="1"

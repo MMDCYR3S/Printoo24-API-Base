@@ -394,3 +394,4 @@ DEBUG 2026-02-09 06:23:53,896 product_detail_service 7 140651354109632 ShopProdu
 DEBUG 2026-02-10 07:34:35,524 product_detail_service 7 124657303975616 ShopProductDetailService initialized
 DEBUG 2026-02-10 07:44:50,784 product_detail_service 7 124657295582912 ShopProductDetailService initialized
 DEBUG 2026-02-10 11:28:42,031 product_detail_service 597 125835092686528 ShopProductDetailService initialized
+DEBUG 2026-02-10 11:39:23,879 product_detail_service 765 132770212173504 ShopProductDetailService initialized

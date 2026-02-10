@@ -113,15 +113,13 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         valid_data = serializer.validated_data
         
         try:
+            # ===== ایجاد از طریق سرویس ===== #
             order = self.service.create_admin_order(
-                # =====  ===== #
-                user_id=valid_data.get('user_id'),
+                user_id=valid_data['user_id'],
                 items_data=valid_data['items'],
                 total_price_override=valid_data.get('price'),
-                # ===== آدرس ===== #
                 address_id=valid_data.get('address_id'),
                 full_address=valid_data.get('full_address'),
-                # ===== اطلاعات پایه ===== #
                 recipient_name=valid_data.get('recipient_name'),
                 recipient_phone=valid_data.get('recipient_phone'),
                 company_name=valid_data.get('company_name')
