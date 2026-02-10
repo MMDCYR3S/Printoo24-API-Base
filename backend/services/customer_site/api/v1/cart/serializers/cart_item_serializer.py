@@ -1,12 +1,30 @@
 from rest_framework import serializers
-from core.models import Product
+from core.models import Product, ProductImage
 from apps.cart.models import Cart, CartItem, CartItemUpload
 
-# ===== Product Summary ===== #
+# ===== Product Serializer ===== #
 class ProductSerializer(serializers.ModelSerializer):
+    # ===== عکس مورد نظر  ===== #
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug', 'has_quantity']
+        fields = ['id', 'name', 'slug', 'has_quantity', 'image']
+
+    def get_image(self, obj):
+        # ===== دریافت اولین عکس ===== #
+        first_img = obj.product_image.order_by('order', 'id').first()
+        
+        # ===== اگر عکس بود ===== #
+        if first_img and first_img.image:
+            request = self.context.get('request')
+            
+            # ===== نمایش آدرس آن ===== #
+            if request:
+                return request.build_absolute_uri(first_img.image.url)
+            return first_img.image.url
+            
+        return None
 
 # ===== Uploaded Files Serializer ===== #
 class CartItemUploadSerializer(serializers.ModelSerializer):
@@ -27,7 +45,7 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     uploads = CartItemUploadSerializer(many=True, read_only=True)
     # ===== ریز جزئیات آیتم و محصول انتخابی ===== #
-    specs = serializers.SerializerMethodField(help_text="مشخصات فنی (سایز، متریال و ...)")
+    items = serializers.SerializerMethodField(help_text="مشخصات فنی (سایز، متریال و ...)")
 
     class Meta:
         model = CartItem
@@ -38,12 +56,12 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
             'description',
             'quantity',
             'price',
-            'specs',
+            'items',
             'uploads',
             'created_at'
         ]
 
-    def get_specs(self, obj):
+    def get_items(self, obj):
         """
         استخراج داده‌های قابل نمایش از فیلد JSON `items`
         """
@@ -61,7 +79,7 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
 
 # ===== Cart List Serializer ===== #
 class CartListSerializer(serializers.ModelSerializer):
-    items = CartItemDetailSerializer(many=True, read_only=True)
+    items = CartItemDetailSerializer(source="cart_items", many=True, read_only=True)
     total_price = serializers.SerializerMethodField()
 
     class Meta:

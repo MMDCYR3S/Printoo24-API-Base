@@ -27,18 +27,21 @@ class ProductMinimalSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'price', 'image_url', 'price_display']
 
     def get_image_url(self, obj):
-        if hasattr(obj, 'media') and obj.media.exists():
-            image = obj.media.first().file
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(image.url)
-            return image.url
+        images = getattr(obj, 'product_image', None)
+        if images and images.exists():
+            main_image = images.order_by('order', 'id').first()
+            if main_image and main_image.image:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(main_image.image.url)
+                return main_image.image.url
         
-        # اگر عکس ندارد، از یک پلیس‌هولدر استفاده کن
+        # ===== اگر عکس نبود ===== #
         request = self.context.get('request')
+        no_image_path = '/static/images/no-image.png'
         if request:
-            return request.build_absolute_uri('/static/images/no-image.png')
-        return '/static/images/no-image.png'
+            return request.build_absolute_uri(no_image_path)
+        return no_image_path
 
     def get_price_display(self, obj):
         return f"{obj.price:,.0f}"
