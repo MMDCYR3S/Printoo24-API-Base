@@ -190,11 +190,7 @@ class ShopCategoryService:
                     "box": self._get_image_url(cat.parent.banner_box),
                 },
                 "parent": parent_data,
-                "products": ProductMinimalSerializer(
-                    products_qs, 
-                    many=True, 
-                    context={'request': self.request}
-                ).data
+                "products": products_qs
             })
             
         return result
