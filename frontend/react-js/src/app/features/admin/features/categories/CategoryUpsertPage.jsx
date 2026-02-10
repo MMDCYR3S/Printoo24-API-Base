@@ -27,14 +27,12 @@ const CategoryUpsertPage = () => {
     enabled: isEdit,
   });
 
-  // 2. دریافت لیست دسته‌ها (فقط ریشه‌ها برای انتخاب به عنوان والد)
+  // 2. دریافت لیست والدها
   const { data: rootCategories = [] } = useQuery({
     queryKey: ['admin-categories-roots'],
     queryFn: () => adminCategoryService.getRoots(),
   });
 
-  // تشخیص اینکه آیا این دسته خودش زیرمجموعه است؟ (اگر والد داشته باشد، زیرمجموعه است)
-  // اگر زیرمجموعه باشد، نباید تب "زیرمجموعه‌ها" را ببیند.
   const isSubCategory = !!categoryData?.parent;
 
   const { 
@@ -44,7 +42,6 @@ const CategoryUpsertPage = () => {
     defaultValues: { is_active: true }
   });
 
-  // پر کردن فرم
   useEffect(() => {
     if (categoryData) {
       reset({
@@ -57,26 +54,17 @@ const CategoryUpsertPage = () => {
     }
   }, [categoryData, reset]);
 
-  // Mutation
+  // Mutation والد
   const mutation = useMutation({
     mutationFn: (data) => {
       const formData = { ...data };
       
-      // ✅ 1. افزودن User ID از لوکال استوریج
       const storedUserId = localStorage.getItem('userId');
-      if (storedUserId) {
-        formData.user = parseInt(storedUserId);
-      } else {
-        console.warn("User ID not found!");
-      }
+      if (storedUserId) formData.user = parseInt(storedUserId);
 
-      // هندل کردن والد
       if (formData.parent === '' || formData.parent === '0') formData.parent = null;
-      
-      // هندل کردن عکس (اگر استرینگ بود یعنی تغییر نکرده، حذفش کن)
       if (typeof formData.banner_box === 'string') delete formData.banner_box;
       
-      // ✅ 2. اطمینان از حذف Slug و Banner Wide
       delete formData.slug; 
       delete formData.banner_wide;
 
@@ -89,12 +77,11 @@ const CategoryUpsertPage = () => {
       toast.success(isEdit ? 'تغییرات ذخیره شد' : 'دسته ایجاد شد');
       
       if (!isEdit) {
-        // اگر جدید بود و والد نداشت (ریشه بود)، برو برای افزودن زیردسته
         if (!data.parent) {
+            // ریدایرکت برای افزودن زیردسته
             navigate(`/admin/categories/edit/${data.id}`, { replace: true });
             setActiveTab('subs');
         } else {
-            // اگر زیردسته ساختیم، برگرد به لیست
             navigate('/admin/categories');
         }
       }
@@ -106,8 +93,6 @@ const CategoryUpsertPage = () => {
   });
 
   const onSubmit = (data) => mutation.mutate(data);
-
-  // دیدن مقدار لحظه‌ای والد برای کنترل UI
   const watchedParent = watch('parent');
 
   if (isEdit && isFetching) return <div className="h-screen flex items-center justify-center"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
@@ -136,7 +121,6 @@ const CategoryUpsertPage = () => {
             <Info size={16}/> اطلاعات اصلی
         </button>
         
-        {/* ✅ تب زیرمجموعه فقط اگر دسته والد باشد (Root) نشان داده می‌شود */}
         {(!watchedParent && !isSubCategory) && (
             <button 
                 role="tab" 
@@ -150,47 +134,30 @@ const CategoryUpsertPage = () => {
         )}
       </div>
 
-      {/* --- Tab 1: Info --- */}
+      {/* Tab 1: Info */}
       <div className={activeTab === 'info' ? 'block' : 'hidden'}>
         <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-              
               <div className="form-control mb-4">
                 <label className="label font-bold text-slate-700 text-sm mb-2">نام دسته‌بندی <span className="text-error">*</span></label>
-                <input 
-                  {...register('name')}
-                  className={`input input-bordered rounded-xl w-full ${errors.name ? 'input-error' : ''}`}
-                />
+                <input {...register('name')} className={`input input-bordered rounded-xl w-full ${errors.name ? 'input-error' : ''}`}/>
                 {errors.name && <span className="text-error text-xs mt-1">{errors.name.message}</span>}
               </div>
 
               <div className="form-control mb-4">
                 <label className="label font-bold text-slate-700 text-sm mb-2">دسته والد</label>
-                <select 
-                  {...register('parent')} 
-                  className="select select-bordered w-full rounded-xl"
-                >
+                <select {...register('parent')} className="select select-bordered w-full rounded-xl">
                   <option value="">-- دسته اصلی (Root) --</option>
-                  {rootCategories
-                      .filter(c => c.id !== Number(id)) // خودش را نشان نده
-                      .map(c => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
-                      ))
-                  }
+                  {rootCategories.filter(c => c.id !== Number(id)).map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
                 </select>
-                <label className="label text-xs text-slate-400">
-                    اگر "دسته اصلی" باشد، می‌تواند زیرمجموعه داشته باشد. اگر والد انتخاب کنید، خودش زیرمجموعه می‌شود.
-                </label>
               </div>
 
               <div className="form-control">
                 <label className="label font-bold text-slate-700 text-sm mb-2">توضیحات</label>
-                <textarea 
-                  {...register('description')}
-                  className="textarea textarea-bordered h-32 rounded-xl w-full" 
-                ></textarea>
+                <textarea {...register('description')} className="textarea textarea-bordered h-32 rounded-xl w-full"></textarea>
               </div>
             </div>
           </div>
@@ -204,7 +171,6 @@ const CategoryUpsertPage = () => {
                   </label>
                </div>
             </div>
-
             <div className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
               <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">تصویر</h3>
               <ImageUploader 
@@ -215,36 +181,24 @@ const CategoryUpsertPage = () => {
                   aspectRatio="square"
               />
             </div>
-            
-            <button 
-                type="submit" 
-                disabled={mutation.isPending}
-                className="btn btn-primary w-full shadow-xl rounded-xl h-12 text-lg font-bold"
-            >
+            <button type="submit" disabled={mutation.isPending} className="btn btn-primary w-full shadow-xl rounded-xl h-12 text-lg font-bold">
                 {mutation.isPending ? <span className="loading loading-dots"></span> : <><Save size={20}/> ذخیره</>}
             </button>
           </div>
         </form>
       </div>
 
-      {/* --- Tab 2: Sub Categories --- */}
+      {/* Tab 2: Sub Categories */}
       <div className={activeTab === 'subs' ? 'block' : 'hidden'}>
          {!isEdit ? (
-             <div className="alert alert-info shadow-sm">
-                <AlertCircle size={20}/>
-                <span>برای افزودن زیرمجموعه، ابتدا دسته اصلی را ذخیره کنید.</span>
-             </div>
+             <div className="alert alert-info shadow-sm"><AlertCircle size={20}/><span>برای افزودن زیرمجموعه، ابتدا دسته اصلی را ذخیره کنید.</span></div>
          ) : isSubCategory ? (
-             <div className="alert alert-warning shadow-sm">
-                <AlertCircle size={20}/>
-                <span>این دسته خودش یک زیرمجموعه است و نمی‌تواند زیرمجموعه دیگری داشته باشد.</span>
-             </div>
+             <div className="alert alert-warning shadow-sm"><AlertCircle size={20}/><span>این دسته خودش یک زیرمجموعه است.</span></div>
          ) : (
-             // نمایش کامپوننت مدیریت زیردسته‌ها فقط برای Rootها
+             // ✅ پاس دادن کل دیتای دسته والد به کامپوننت فرزند
              <SubCategoryManager parentCategory={categoryData} />
          )}
       </div>
-
     </div>
   );
 };

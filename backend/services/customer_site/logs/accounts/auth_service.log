@@ -900,3 +900,15 @@ INFO 2026-02-09 11:47:22,583 auth_service 7 140651387680448 User logged in: 1
 DEBUG 2026-02-09 11:58:49,074 auth_service 7 140651387680448 AuthService initialized with UserIdentityService
 INFO 2026-02-09 11:58:49,079 auth_service 7 140651387680448 Login attempt for: admin
 INFO 2026-02-09 11:58:50,203 auth_service 7 140651387680448 User logged in: 1
+DEBUG 2026-02-10 07:32:22,170 auth_service 7 124657318659776 AuthService initialized with UserIdentityService
+INFO 2026-02-10 07:32:22,172 auth_service 7 124657318659776 Login attempt for: admin
+INFO 2026-02-10 07:32:22,940 auth_service 7 124657318659776 User logged in: 1
+DEBUG 2026-02-10 07:54:11,748 auth_service 7 124657295582912 AuthService initialized with UserIdentityService
+INFO 2026-02-10 07:54:11,750 auth_service 7 124657295582912 Login attempt for: admin
+INFO 2026-02-10 07:54:12,566 auth_service 7 124657295582912 User logged in: 1
+DEBUG 2026-02-10 08:02:40,346 auth_service 7 124657295582912 AuthService initialized with UserIdentityService
+INFO 2026-02-10 08:02:40,347 auth_service 7 124657295582912 Login attempt for: admin
+INFO 2026-02-10 08:02:40,992 auth_service 7 124657295582912 User logged in: 1
+DEBUG 2026-02-10 08:59:38,893 auth_service 256 130640923236032 AuthService initialized with UserIdentityService
+INFO 2026-02-10 08:59:38,900 auth_service 256 130640923236032 Login attempt for: admin
+INFO 2026-02-10 08:59:39,584 auth_service 256 130640923236032 User logged in: 1
