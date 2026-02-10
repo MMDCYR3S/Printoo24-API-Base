@@ -223,35 +223,44 @@ class ReplyMessageSerializer(serializers.Serializer):
         style={'base_template': 'textarea.html'}
     )
 
+class AddressSerializer(serializers.ModelSerializer):
+    # نکته حیاتی: فیلد id را تعریف می‌کنیم تا در آپدیت بتوانیم آن را دریافت کنیم
+    id = serializers.IntegerField(required=False)
+    
+    # فیلدها برای نمایش نام (Read Only)
+    province_name = serializers.CharField(source='province.name', read_only=True)
+    city_name = serializers.CharField(source='city.name', read_only=True)
+
+    class Meta:
+        model = Address
+        fields = ['id', 'province', 'province_name', 'city', 'city_name', 'postal_code', 'address']
+        extra_kwargs = {
+            'province': {'required': True},
+            'city': {'required': True},
+        }
 # ===== سریالایزر ترکیبی ===== #
 class CustomerManagementSerializer(serializers.ModelSerializer):
-    # ===== فیلدهای پروفایل ===== #
+    # ... فیلدهای پروفایل ...
     first_name = serializers.CharField(source='customer_profile.first_name', required=False)
     last_name = serializers.CharField(source='customer_profile.last_name', required=False)
     phone_number = serializers.CharField(source='customer_profile.phone_number', required=False)
     company = serializers.CharField(source='customer_profile.company', required=False, allow_null=True)
     bio = serializers.CharField(source='customer_profile.bio', required=False, allow_null=True)
-    
-    # ===== فیلدهای آدرس (جدید) ===== #
-    province = serializers.PrimaryKeyRelatedField(queryset=Province.objects.all(), required=False, allow_null=True)
-    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), required=False, allow_null=True)
-    postal_code = serializers.CharField(max_length=10, required=False, allow_blank=True)
-    address = serializers.CharField(required=False, allow_blank=True)
 
-    # ===== فیلد های مربوط به کیف پول ===== #
+    # ===== تغییر اصلی: لیست آدرس‌ها ===== #
+    # این فیلد هم برای نمایش است و هم برای دریافت اطلاعات (Write)
+    addresses = AddressSerializer(many=True, required=False)
+
     wallet_balance = serializers.DecimalField(
-        source='wallet.decimal', 
-        max_digits=12, 
-        decimal_places=2, 
-        read_only=True
+        source='wallet.decimal', max_digits=12, decimal_places=2, read_only=True
     )
 
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'password', 'is_active', 'is_staff', 'is_superuser',
-            'is_verified', 'first_name', 'last_name', 'phone_number', 'company', 'bio', 
-            'province', 'city', 'postal_code', 'address', 
+            'id', 'username', 'email', 'password', 'is_active', 'is_staff', 
+            'first_name', 'last_name', 'phone_number', 'company', 'bio', 
+            'addresses', # تغییر نام فیلد به addresses (جمع)
             'wallet_balance', 'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'wallet_balance']
@@ -260,18 +269,6 @@ class CustomerManagementSerializer(serializers.ModelSerializer):
             'username': {'required': True},
             'email': {'required': True},
         }
-
-    def to_representation(self, instance):
-        """اضافه کردن داده‌های آدرس در خروجی (Retrieve/List)"""
-        data = super().to_representation(instance)
-        # ===== دریافت آخرین آدرس کاربر ===== #
-        last_address = instance.addresses.select_related('province', 'city').last()
-        if last_address:
-            data['province'] = last_address.province_id
-            data['city'] = last_address.city_id
-            data['postal_code'] = last_address.postal_code
-            data['address'] = last_address.address
-        return data
 
 # ===== سریالایزر نمایش تراکنش‌ها ===== #
 class WalletTransactionSerializer(serializers.ModelSerializer):
