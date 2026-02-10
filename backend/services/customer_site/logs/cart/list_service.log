@@ -69,3 +69,5 @@ INFO 2025-12-27 07:34:53,837 cart_item_service 172 140695880857280 Retrieved <Ca
 INFO 2025-12-27 07:35:22,673 cart_item_service 235 139998339962560 Fetching cart list for User ID: 1
 DEBUG 2025-12-27 07:35:22,676 cart_item_service 235 139998339962560 Cart retrieved/created for User ID: 1, Cart ID: 2
 INFO 2025-12-27 07:35:22,683 cart_item_service 235 139998339962560 Retrieved <CartItemQuerySet [<CartItem: پاکت نامه ملخی - نمونه 273 (x1)>]> items for Cart ID: 2
+INFO 2026-02-09 11:47:44,005 cart_item_service 7 140651387680448 Fetching cart list for User:1
+INFO 2026-02-09 11:47:45,013 cart_item_service 7 140651387680448 Fetching cart list for User:1

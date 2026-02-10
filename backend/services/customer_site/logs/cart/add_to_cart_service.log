@@ -217,3 +217,5 @@ INFO 2025-12-31 20:33:22,722 add_to_cart_service 437 140680480409280 Start addin
 INFO 2025-12-31 20:33:22,772 add_to_cart_service 437 140680480409280 Creating new cart item
 INFO 2026-01-08 06:38:02,779 add_to_cart_service 95 139645913564864 Start adding product 29 for user
 INFO 2026-01-08 06:38:02,837 add_to_cart_service 95 139645913564864 Creating new cart item
+INFO 2026-02-09 06:24:12,645 add_to_cart_service 7 140651354109632 Start adding product 9 for user
+INFO 2026-02-09 06:24:12,710 add_to_cart_service 7 140651354109632 Creating new cart item

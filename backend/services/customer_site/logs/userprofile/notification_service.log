@@ -2,3 +2,5 @@ INFO 2025-12-22 11:10:50,141 customer_notification_service 557 140640062011072 F
 DEBUG 2025-12-22 11:10:50,156 customer_notification_service 557 140640062011072 Found 2 notifications for User ID: 2
 INFO 2025-12-22 11:11:57,130 customer_notification_service 562 140225783264960 Fetching notifications for User ID: 2
 DEBUG 2025-12-22 11:11:57,134 customer_notification_service 562 140225783264960 Found 2 notifications for User ID: 2
+INFO 2026-02-10 07:32:42,206 customer_notification_service 7 124657318659776 Fetching notifications for User ID: 1
+DEBUG 2026-02-10 07:32:42,219 customer_notification_service 7 124657318659776 Found 0 notifications for User ID: 1

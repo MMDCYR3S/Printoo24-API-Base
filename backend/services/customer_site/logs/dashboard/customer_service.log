@@ -98,3 +98,10 @@ DEBUG 2026-02-02 14:38:10,003 customer_service 134 134043798771392 Role 'مشت�
 INFO 2026-02-02 14:38:10,006 customer_service 134 134043798771392 SUCCESS: Customer 'fgdfgdffff' (ID: 2) created fully.
 DEBUG 2026-02-02 14:38:10,125 customer_service 134 134043798771392 Fetching customer list
 INFO 2026-02-02 14:38:29,616 customer_service 134 134043798771392 Fetching details for Customer 2
+DEBUG 2026-02-09 06:04:50,165 customer_service 7 140651370895040 Fetching customer list
+INFO 2026-02-09 06:05:08,577 customer_service 7 140651370895040 Fetching details for Customer 2
+INFO 2026-02-09 12:25:06,858 customer_service 7 140651614344896 Fetching details for Customer 1
+DEBUG 2026-02-10 07:20:00,054 customer_service 7 124657318659776 Fetching customer list
+DEBUG 2026-02-10 07:20:58,975 customer_service 7 124657277540032 Fetching customer list
+DEBUG 2026-02-10 07:20:59,501 customer_service 7 124657285932736 Fetching customer list
+DEBUG 2026-02-10 07:33:12,706 customer_service 7 124657303975616 Fetching customer list

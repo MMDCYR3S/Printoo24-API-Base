@@ -1,23 +1,16 @@
 // src/app/services/adminCategoryService.js
-import apiClient from '../../../services/apiClient'; // مسیر ایمپورت را چک کنید
+import apiClient from '../../../services/apiClient';
 
 const BASE_URL = '/dashboard/categories/';
 
 export const adminCategoryService = {
-  // دریافت لیست والدها (ریشه‌ها)
   getRoots: async () => {
-    // معمولا اندپوینت پیش‌فرض ریشه‌ها را می‌دهد
     const { data } = await apiClient.get(BASE_URL);
     return data;
   },
 
-  // دریافت لیست کامل زیردسته‌ها (برای تب زیردسته‌ها)
-  // فرض: بک‌اند فیلتری دارد یا لیست فلت را برمی‌گرداند. 
-  // اگر بک‌اند جنگو باشد معمولا parent__isnull=false کار می‌کند
   getAllSubCategories: async () => {
-    const { data } = await apiClient.get(BASE_URL, { 
-      params: { parent__isnull: false } 
-    });
+    const { data } = await apiClient.get(`${BASE_URL}subcategories/`);
     return data;
   },
 
@@ -54,4 +47,11 @@ export const adminCategoryService = {
     await apiClient.patch(`${BASE_URL}bulk-status/?active=${active}`, { ids });
     return { ids, active };
   },
+
+  // ✅ متد جدید برای عملیات گروهی
+  bulkUpsert: async (payload) => {
+    // payload: آرایه‌ای از آبجکت‌ها طبق داکیومنت
+    const { data } = await apiClient.post(`${BASE_URL}bulk-upsert/`, payload);
+    return data;
+  }
 };
