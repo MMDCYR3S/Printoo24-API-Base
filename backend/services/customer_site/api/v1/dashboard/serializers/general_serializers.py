@@ -117,15 +117,25 @@ class ParentInfoSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
     slug = serializers.SlugField(read_only=True)
 
-# ===== سریالایزر لیست زیردسته‌ها ===== #
+# ===== سریالایزر کمکی برای تصاویر ===== #
+class CategoryBannerSerializer(serializers.Serializer):
+    wide = serializers.CharField(read_only=True, allow_null=True)
+    box = serializers.CharField(read_only=True, allow_null=True)
+
+# ===== سریالایزر لیست زیردسته‌ها (اصلاح شده) ===== #
 class SubcategoryWithParentSerializer(serializers.Serializer):
     """
-    نمایش لیست مسطح زیردسته‌ها به همراه اطلاعات والد.
-    این ساختار دقیقاً خروجی متد get_subcategories_flat_list در سرویس اپلیکیشن را پوشش می‌دهد.
+    نمایش لیست مسطح زیردسته‌ها به همراه اطلاعات والد و تصاویر.
     """
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(read_only=True)
     slug = serializers.SlugField(read_only=True)
+    description = serializers.CharField(read_only=True, allow_null=True) # توضیحات هم بود که اضافه کردم
+    is_active = serializers.BooleanField(read_only=True)
+    
+    # ===== اضافه کردن فیلد تصاویر ===== #
+    banners = CategoryBannerSerializer(read_only=True)
+    
     parent = ParentInfoSerializer(read_only=True)
     products = ProductMinimalSerializer(many=True, read_only=True)
 
