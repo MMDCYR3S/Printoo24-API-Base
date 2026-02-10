@@ -915,3 +915,9 @@ INFO 2026-02-10 08:59:39,584 auth_service 256 130640923236032 User logged in: 1
 DEBUG 2026-02-10 11:12:27,924 auth_service 533 140685021976256 AuthService initialized with UserIdentityService
 INFO 2026-02-10 11:12:27,925 auth_service 533 140685021976256 Login attempt for: admin
 INFO 2026-02-10 11:12:28,166 auth_service 533 140685021976256 User logged in: 1
+DEBUG 2026-02-10 13:22:42,068 auth_service 949 138813410113216 AuthService initialized with UserIdentityService
+INFO 2026-02-10 13:22:42,069 auth_service 949 138813410113216 Login attempt for: admin
+INFO 2026-02-10 13:22:42,234 auth_service 949 138813410113216 User logged in: 1
+DEBUG 2026-02-10 13:41:54,417 auth_service 1022 125024585549504 AuthService initialized with UserIdentityService
+INFO 2026-02-10 13:41:54,418 auth_service 1022 125024585549504 Login attempt for: admin
+INFO 2026-02-10 13:41:54,604 auth_service 1022 125024585549504 User logged in: 1

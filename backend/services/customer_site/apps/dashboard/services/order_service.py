@@ -16,7 +16,8 @@ from django.core.exceptions import ValidationError
 from core.models import (
     Order, OrderItem,
     Product, Address,
-    OrderItemFile, User
+    OrderItemFile, User,
+    OrderStatus
 )
 from core.order.services import OrderService
 
@@ -254,6 +255,41 @@ class OrderDashboardService:
                 logger.critical(f"SYNC FAILED: {str(sync_error)}", exc_info=True)
                 if os.path.exists(temp_path): os.remove(temp_path)
                 raise sync_error
+
+
+    # ===== Get All Status ===== #
+    def get_all_order_statuses(self):
+        """
+        دریافت لیست وضعیت‌ها مرتب شده بر اساس sort_order
+        """
+        return OrderStatus.objects.all().order_by('sort_order')
+
+    # ===== تغییر وضعیت سفارش ===== #
+    @transaction.atomic
+    def change_order_status(self, order_id: int, status_code: str, description: str = None):
+        """
+        تغییر وضعیت سفارش بر اساس کد سیستمی وضعیت.
+        """
+        logger.info(f"Changing status for Order {order_id} to {status_code}")
+        
+        order = get_object_or_404(Order, pk=order_id)
+        
+        # ===== بررسی وجود وضعیت ===== #
+        try:
+            new_status = OrderStatus.objects.get(internal_code=status_code)
+        except OrderStatus.DoesNotExist:
+            raise ValidationError(f"وضعیت با کد {status_code} یافت نشد.")
+
+        # ===== تغییر وضعیت ===== #
+        previous_status = order.current_status
+        order.current_status = new_status
+        
+        # ===== ثبت وضعیت سفارش ===== #
+        order.save()
+
+        logger.info(f"Order {order.id} status changed: {previous_status} -> {new_status}")
+        
+        return order
 
     # ===== Bulk Operations ===== #
     def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, int]:

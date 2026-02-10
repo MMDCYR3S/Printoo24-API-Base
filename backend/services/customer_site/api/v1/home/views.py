@@ -97,7 +97,7 @@ class PromotionalModalView(APIView):
 
 
 # ===== 3. CONTACT US VIEW ===== #
-@extend_schema(tags=['General - Contact'])
+@extend_schema(tags=['General - Content'])
 class ContactUsView(APIView):
     """
     فرم تماس با ما.
