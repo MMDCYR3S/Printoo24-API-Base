@@ -1,5 +1,5 @@
 // src/app/features/shop/hooks/useProductCalculator.js
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 
 export const useProductCalculator = (productData) => {
   // --- State ---
@@ -14,7 +14,7 @@ export const useProductCalculator = (productData) => {
   // برای آپشن‌ها: { [optionId]: choiceId }
   const [selectedOptions, setSelectedOptions] = useState({});
 
-  // --- Initialization ---
+  // --- Initialization (دقیقا کد خودت) ---
   useEffect(() => {
     if (!productData) return;
 
@@ -52,7 +52,7 @@ export const useProductCalculator = (productData) => {
     }
   }, [productData?.product_info?.id]);
 
-  // --- Calculation Logic ---
+  // --- Calculation Logic (دقیقا کد خودت با نام pricing) ---
   const pricing = useMemo(() => {
     // مقادیر اولیه
     const result = { baseUnitPrice: 0, extraCosts: 0, finalUnitPrice: 0, finalQuantity: 1, totalPrice: 0 };
@@ -99,9 +99,36 @@ export const useProductCalculator = (productData) => {
     };
   }, [productData, quantityType, selectedQuantityId, customQuantity, sizeType, selectedSizeId, selectedOptions]);
 
+  // --- متد جدید برای ساخت Payload (بدون تاثیر روی محاسبات قبلی) ---
+  const getSubmitPayload = useCallback(() => {
+    if (!productData) return null;
+
+    const payload = {
+      product_id: productData.product_info?.id || productData.id,
+      options: selectedOptions,
+      has_design: true 
+    };
+
+    if (quantityType === 'fixed') {
+      payload.quantity_id = selectedQuantityId;
+    } else {
+      payload.quantity = parseInt(customQuantity);
+    }
+
+    if (sizeType === 'fixed') {
+      payload.size_id = selectedSizeId;
+    } else {
+      payload.width = parseFloat(customDimensions.width);
+      payload.height = parseFloat(customDimensions.height);
+    }
+
+    return payload;
+  }, [productData, quantityType, selectedQuantityId, customQuantity, sizeType, selectedSizeId, customDimensions, selectedOptions]);
+
   return {
     state: { quantityType, selectedQuantityId, customQuantity, sizeType, selectedSizeId, customDimensions, selectedOptions },
     setters: { setQuantityType, setSelectedQuantityId, setCustomQuantity, setSizeType, setSelectedSizeId, setCustomDimensions, setSelectedOptions },
-    pricing
+    pricing, // این همان نامی است که صفحه محصول انتظار دارد
+    getSubmitPayload // این تابع جدید را فقط موقع کلیک دکمه صدا بزنید
   };
 };

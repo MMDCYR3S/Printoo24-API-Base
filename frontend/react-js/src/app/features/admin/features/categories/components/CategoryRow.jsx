@@ -1,14 +1,12 @@
 // src/app/features/admin/categories/components/CategoryRow.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { 
-  Edit, Trash2, Eye, CheckCircle2, XCircle, 
-  ChevronDown, ChevronLeft, CornerDownRight, ImageIcon 
+  Edit, Trash2, Eye, ChevronDown, ChevronLeft, 
+  CornerDownRight, Image as ImageIcon, Box 
 } from 'lucide-react';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
-import { adminCategoryService } from '../../../services/adminCategoryService';
 
 const CategoryRow = ({ 
   category, 
@@ -18,24 +16,16 @@ const CategoryRow = ({
   onToggleStatus 
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const hasChildren = category.children_count > 0;
-
-  // Lazy Fetch Children (فقط وقتی باز می‌شود درخواست می‌زند)
-  const { data: details, isLoading: isLoadingChildren } = useQuery({
-    queryKey: ['category-details', category.id],
-    queryFn: () => adminCategoryService.getById(category.id),
-    enabled: isExpanded && hasChildren, // شرط اجرای کوئری
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const subCategories = details?.children || [];
+  
+  // بررسی وجود فرزندان در دیتای دریافتی
+  const hasChildren = category.children && category.children.length > 0;
 
   return (
     <>
       {/* --- سطر والد --- */}
       <tr className={clsx("group hover:bg-slate-50 transition-colors border-b border-slate-50", isSelected && "bg-blue-50/50")}>
         {/* Checkbox */}
-        <th className="text-center">
+        <th className="text-center w-12">
           <label>
             <input 
               type="checkbox" 
@@ -47,7 +37,7 @@ const CategoryRow = ({
         </th>
 
         {/* Image */}
-        <td>
+        <td className="w-20">
           <div className="avatar">
             <div className="w-12 h-12 rounded-xl ring-1 ring-slate-100 bg-white p-0.5">
               {category.banner_box ? (
@@ -64,6 +54,7 @@ const CategoryRow = ({
         {/* Name & Accordion Trigger */}
         <td>
           <div className="flex items-center gap-2">
+            {/* دکمه بازشو آکاردئون */}
             {hasChildren ? (
                 <button 
                     onClick={() => setIsExpanded(!isExpanded)}
@@ -72,7 +63,7 @@ const CategoryRow = ({
                     {isExpanded ? <ChevronDown size={16}/> : <ChevronLeft size={16}/>}
                 </button>
             ) : (
-                <span className="w-6 h-6 inline-block"></span> // Spacer
+                <span className="w-6 h-6 inline-block"></span> // فضاسازی برای تراز ماندن
             )}
             
             <div className="flex flex-col">
@@ -80,7 +71,7 @@ const CategoryRow = ({
                     {category.name}
                 </Link>
                 {hasChildren && (
-                    <span className="text-[10px] text-slate-400">{category.children_count} زیرمجموعه</span>
+                    <span className="text-[10px] text-slate-400 mt-0.5">{category.children.length} زیرمجموعه</span>
                 )}
             </div>
           </div>
@@ -94,7 +85,7 @@ const CategoryRow = ({
         </td>
 
         {/* Status */}
-        <td className="text-center">
+        <td className="text-center w-24">
             <button 
                 onClick={() => onToggleStatus([category.id], !category.is_active)}
                 className={clsx(
@@ -109,19 +100,37 @@ const CategoryRow = ({
         </td>
 
         {/* Actions */}
-        <td>
+        <td className="w-40">
           <div className="flex justify-end items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-            <Link to={`edit/${category.id}`} className="btn btn-sm btn-ghost btn-square text-slate-400 hover:text-blue-600">
+            {/* دکمه دیتیل برای والد */}
+            <Link 
+                to={`/admin/categories/${category.id}`}
+                className="btn btn-sm btn-ghost btn-square text-slate-400 hover:text-indigo-600 tooltip tooltip-top"
+                data-tip="جزئیات"
+            >
+                <Eye size={16} />
+            </Link>
+            
+            <Link 
+                to={`edit/${category.id}`}
+                className="btn btn-sm btn-ghost btn-square text-slate-400 hover:text-blue-600 tooltip tooltip-top"
+                data-tip="ویرایش"
+            >
                 <Edit size={16} />
             </Link>
-            <button onClick={() => onDelete(category.id)} className="btn btn-sm btn-ghost btn-square text-slate-400 hover:text-red-500">
+
+            <button 
+                onClick={() => onDelete(category.id)} 
+                className="btn btn-sm btn-ghost btn-square text-slate-400 hover:text-red-500 tooltip tooltip-top"
+                data-tip="حذف"
+            >
                 <Trash2 size={16} />
             </button>
           </div>
         </td>
       </tr>
 
-      {/* --- سطر آکاردئون (فرزندان) --- */}
+      {/* --- بخش آکاردئون (فرزندان) --- */}
       <AnimatePresence>
         {isExpanded && hasChildren && (
             <tr>
@@ -130,44 +139,45 @@ const CategoryRow = ({
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="bg-slate-50/50 overflow-hidden shadow-inner"
+                        className="bg-slate-50/50 shadow-inner overflow-hidden"
                     >
-                        <div className="pr-16 pl-4 py-4 space-y-2 relative border-r-4 border-primary/20 mr-8 my-2 rounded-l-xl">
-                            {isLoadingChildren ? (
-                                <div className="flex items-center gap-2 text-sm text-slate-400 py-2">
-                                    <span className="loading loading-spinner loading-xs"></span> در حال دریافت زیرمجموعه‌ها...
+                        <div className="pr-16 pl-4 py-4 mr-8 my-2 border-r-2 border-primary/20 space-y-1">
+                            {category.children.map(child => (
+                                <div key={child.id} className="flex items-center justify-between p-2 hover:bg-white rounded-lg group/sub transition-colors border border-transparent hover:border-slate-100">
+                                    <div className="flex items-center gap-3">
+                                        <CornerDownRight size={16} className="text-slate-300"/>
+                                        
+                                        {/* کلیک روی نام زیردسته -> رفتن به دیتیل */}
+                                        <Link 
+                                            to={`/admin/categories/${child.id}`}
+                                            className="font-medium text-slate-600 hover:text-primary text-sm flex items-center gap-2"
+                                        >
+                                            {child.name}
+                                        </Link>
+                                        
+                                        {child.products && child.products.length > 0 && (
+                                            <span className="badge badge-xs bg-slate-100 border-0 text-[10px] text-slate-400">
+                                                {child.products.length} محصول
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* عملیات سریع برای زیردسته */}
+                                    <div className="flex gap-1 opacity-0 group-hover/sub:opacity-100 transition-opacity">
+                                        <Link to={`/admin/categories/${child.id}`} className="btn btn-xs btn-ghost text-indigo-500" title="مشاهده جزئیات">
+                                            <Eye size={14}/>
+                                        </Link>
+                                        <Link to={`edit/${child.id}`} className="btn btn-xs btn-ghost text-slate-400 hover:text-blue-600" title="ویرایش">
+                                            <Edit size={14}/>
+                                        </Link>
+                                    </div>
                                 </div>
-                            ) : subCategories.length === 0 ? (
-                                <div className="text-sm text-slate-400 italic">هیچ زیرمجموعه‌ای یافت نشد.</div>
-                            ) : (
-                                <table className="table table-sm w-full bg-transparent">
-                                    <tbody>
-                                        {subCategories.map(sub => (
-                                            <tr key={sub.id} className="hover:bg-slate-100/50 border-b border-slate-100 last:border-0">
-                                                <td className="w-8">
-                                                    <CornerDownRight size={16} className="text-slate-300"/>
-                                                </td>
-                                                <td>
-                                                    <Link to={`edit/${sub.id}`} className="font-medium text-slate-600 hover:text-primary text-sm flex items-center gap-2">
-                                                        {sub.name}
-                                                    </Link>
-                                                </td>
-                                                <td className="font-mono text-xs text-slate-400 dir-ltr text-right">
-                                                    /{sub.slug || 'no-slug'}
-                                                </td>
-                                                <td className="text-left w-24">
-                                                    <Link to={`edit/${sub.id}`} className="btn btn-xs btn-ghost text-slate-400 hover:text-blue-600">
-                                                        <Edit size={14}/>
-                                                    </Link>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
-                            <div className="mt-3 pt-2 border-t border-slate-200">
-                                <Link to={`edit/${category.id}`} className="btn btn-xs btn-outline btn-primary gap-1">
-                                    <Edit size={12}/> مدیریت زیرمجموعه‌ها
+                            ))}
+                            
+                            {/* دکمه افزودن زیردسته جدید */}
+                            <div className="mt-3 pr-7">
+                                <Link to={`edit/${category.id}`} className="text-xs text-primary hover:underline flex items-center gap-1 opacity-70 hover:opacity-100">
+                                    <Box size={12}/> مدیریت زیرمجموعه‌ها
                                 </Link>
                             </div>
                         </div>
