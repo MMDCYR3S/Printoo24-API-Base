@@ -4,6 +4,9 @@ from drf_spectacular.utils import extend_schema_field
 from core.models import (
     ProductCategory,
     Product,
+    Province,
+    City,
+    Address,
     User,
 )
 from apps.accounts.models import (
@@ -160,7 +163,6 @@ class CategoryBulkUpsertSerializer(serializers.Serializer):
     """
     id = serializers.IntegerField(required=False, allow_null=True)
     name = serializers.CharField(max_length=150)
-    slug = serializers.SlugField(max_length=150, required=False, allow_blank=True)
     parent_slug = serializers.SlugField(max_length=150, required=False, allow_null=True, allow_blank=True, write_only=True)
     description = serializers.CharField(required=False, allow_blank=True)
     is_active = serializers.BooleanField(required=False, default=True)
@@ -230,6 +232,12 @@ class CustomerManagementSerializer(serializers.ModelSerializer):
     company = serializers.CharField(source='customer_profile.company', required=False, allow_null=True)
     bio = serializers.CharField(source='customer_profile.bio', required=False, allow_null=True)
     
+    # ===== فیلدهای آدرس (جدید) ===== #
+    province = serializers.PrimaryKeyRelatedField(queryset=Province.objects.all(), required=False, allow_null=True)
+    city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all(), required=False, allow_null=True)
+    postal_code = serializers.CharField(max_length=10, required=False, allow_blank=True)
+    address = serializers.CharField(required=False, allow_blank=True)
+
     # ===== فیلد های مربوط به کیف پول ===== #
     wallet_balance = serializers.DecimalField(
         source='wallet.decimal', 
@@ -243,6 +251,7 @@ class CustomerManagementSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'password', 'is_active', 'is_staff', 'is_superuser',
             'is_verified', 'first_name', 'last_name', 'phone_number', 'company', 'bio', 
+            'province', 'city', 'postal_code', 'address', 
             'wallet_balance', 'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'wallet_balance']
@@ -251,6 +260,18 @@ class CustomerManagementSerializer(serializers.ModelSerializer):
             'username': {'required': True},
             'email': {'required': True},
         }
+
+    def to_representation(self, instance):
+        """اضافه کردن داده‌های آدرس در خروجی (Retrieve/List)"""
+        data = super().to_representation(instance)
+        # ===== دریافت آخرین آدرس کاربر ===== #
+        last_address = instance.addresses.select_related('province', 'city').last()
+        if last_address:
+            data['province'] = last_address.province_id
+            data['city'] = last_address.city_id
+            data['postal_code'] = last_address.postal_code
+            data['address'] = last_address.address
+        return data
 
 # ===== سریالایزر نمایش تراکنش‌ها ===== #
 class WalletTransactionSerializer(serializers.ModelSerializer):

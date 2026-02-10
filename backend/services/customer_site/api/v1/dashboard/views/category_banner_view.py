@@ -114,19 +114,16 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
                 value=[
                     {
                         "name": "الکترونیک",
-                        "slug": "electronics",
                         "is_active": True
                         # بدون id => ایجاد جدید
                     },
                     {
                         "name": "گوشی موبایل",
-                        "slug": "mobile",
                         "parent_slug": "electronics",
                         "is_active": True
                     },
                     {
                         "name": "تجهیزات خانگی",
-                        "slug": "home-appliances",
                         "parent_slug": "electronics",
                         "is_active": True
                     },
@@ -140,14 +137,12 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
                     {
                         "id": 45,
                         "name": "لپ تاپ (ویرایش شده)",
-                        "slug": "laptop-updated",
                         "parent_slug": "electronics", 
                         "is_active": True
                     },
                     {
                         "id": 46,
                         "name": "تلفن (ویرایش شده)",
-                        "slug": "phone-updated",
                         "parent_slug": "electronics", 
                         "is_active": True
                     }

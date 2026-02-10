@@ -173,7 +173,7 @@ class ProductCategoryService:
             remaining_children = []
             for item in children:
                 # ===== اصلاح: حذف فیلدهای مجازی ===== #
-                parent_slug = item.pop('parent_slug')
+                parent_slug = item.pop('parent_slug', None)
                 
                 # جستجوی والد (ابتدا در حافظه سپس در دیتابیس)
                 parent = created_map.get(parent_slug) or ProductCategory.objects.filter(slug=parent_slug).first()
