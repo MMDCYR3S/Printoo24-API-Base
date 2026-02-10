@@ -293,15 +293,13 @@ class AddressSerializer(serializers.ModelSerializer):
         }
 # ===== سریالایزر ترکیبی ===== #
 class CustomerManagementSerializer(serializers.ModelSerializer):
-    # ... فیلدهای پروفایل ...
     first_name = serializers.CharField(source='customer_profile.first_name', required=False)
     last_name = serializers.CharField(source='customer_profile.last_name', required=False)
     phone_number = serializers.CharField(source='customer_profile.phone_number', required=False)
-    company = serializers.CharField(source='customer_profile.company', required=False, allow_null=True)
-    bio = serializers.CharField(source='customer_profile.bio', required=False, allow_null=True)
+    company = serializers.CharField(source='customer_profile.company', required=False, allow_null=True , allow_blank=True)
+    bio = serializers.CharField(source='customer_profile.bio', required=False, allow_null=True , allow_blank=True)
 
     # ===== تغییر اصلی: لیست آدرس‌ها ===== #
-    # این فیلد هم برای نمایش است و هم برای دریافت اطلاعات (Write)
     addresses = AddressSerializer(many=True, required=False)
 
     wallet_balance = serializers.DecimalField(
@@ -313,14 +311,13 @@ class CustomerManagementSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'password', 'is_active', 'is_staff', 
             'first_name', 'last_name', 'phone_number', 'company', 'bio', 
-            'addresses', # تغییر نام فیلد به addresses (جمع)
-            'wallet_balance', 'created_at'
+            'addresses', 'wallet_balance', 'created_at'
         ]
         read_only_fields = ['id', 'created_at', 'wallet_balance']
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
             'username': {'required': True},
-            'email': {'required': True},
+            'email': {'required': False},
         }
 
 # ===== سریالایزر نمایش تراکنش‌ها ===== #
