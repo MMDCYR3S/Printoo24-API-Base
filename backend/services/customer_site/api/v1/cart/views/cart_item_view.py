@@ -28,14 +28,20 @@ class CartListView(GenericAPIView):
         
         # ===== تشخیص شناسه نشست ===== #
         session_key = request.session.session_key
+        if not session_key:
+            request.session.create()
+            session_key = request.session.session_key
         
         # ===== ایجاد سرویس ===== #
         service = CartListService()
-        result = service.get_cart_details(user=user, session_key=session_key)
+        data = service.get_cart_details(
+            user=user,
+            session_key=session_key
+        )
         
         # ===== نمایش نتیجه ===== #
-        cart = result['cart']
-        items = result['items']
+        cart = data['cart']
+        items = data['items']
         
         # ===== اگر سبد خرید وجود نداشت ===== #
         if not cart:
