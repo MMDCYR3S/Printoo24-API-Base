@@ -4,7 +4,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from core.models import User, CustomerProfile, Role, UserRole
-from core.users.services import CustomerService
+from core.users.services import CustomerService, AddressService
 from apps.accounts.models import Wallet
 
 # تعریف لاگر اختصاصی
@@ -16,6 +16,7 @@ class CustomerOrchestratorService:
     """
     def __init__(self):
         self.user_repo = CustomerService()
+        self.address_service = AddressService()
 
     def get_customer_list(self):
         logger.debug("Fetching customer list")
@@ -50,6 +51,8 @@ class CustomerOrchestratorService:
                 if k in ['first_name', 'last_name', 'phone_number', 'company', 'bio']
             }
 
+            addresses_data = data.pop('addresses', [])
+
             # ===== ایجاد کاربر ===== #
             user = self.user_repo.create_customer(user_data)
             logger.info(f"User created: ID={user.id}")
@@ -72,6 +75,12 @@ class CustomerOrchestratorService:
             else:
                 logger.warning("Customer Role not found! User created without explicit role.")
 
+            if addresses_data:
+                for addr in addresses_data:
+                    if 'id' in addr: del addr['id']
+                    self.address_service.create_address(user_id=user.id, data=addr)
+            
+            logger.info(f"{len(addresses_data)} addresses created for User {user.id}")
             logger.info(f"SUCCESS: Customer '{username}' (ID: {user.id}) created fully.")
             return user
 
@@ -119,8 +128,20 @@ class CustomerOrchestratorService:
                     profile.save()
                     logger.debug(f"Profile fields {updated_fields} updated for User {user_id}")
 
-            logger.info(f"SUCCESS: Customer {user_id} updated.")
-            return user
+            logger.info(f"START: Updating Customer {user_id} and addresses")
+        
+            # ===== دریافت آدرس ===== #
+            addresses_data = data.pop('addresses', None)
+
+            # ===== آپدیت اطلاعات کاربر ===== #
+            user = self.user_repo.update_customer(user_id, data)
+
+            # ===== داده‌های آدرس ===== #
+            if addresses_data is not None:
+                self._handle_address_updates(user, addresses_data)
+
+                logger.info(f"SUCCESS: Customer {user_id} updated.")
+                return user
 
         except Exception as e:
             logger.error(f"FAILED: Update customer {user_id} failed. Error: {str(e)}", exc_info=True)
@@ -149,3 +170,24 @@ class CustomerOrchestratorService:
     def bulk_delete(self, user_ids: List[int]):
         logger.warning(f"Bulk deleting {len(user_ids)} users: {user_ids}")
         return self.user_repo.bulk_delete_customers(user_ids)
+
+    def _handle_address_updates(self, user: User, addresses_data: List[Dict]):
+        """
+        متد کمکی برای مدیریت منطق:
+        - اگر ID دارد -> آپدیت کن
+        - اگر ID ندارد -> بساز
+        - (اختیاری: اگر ID در لیست نیست -> حذف کن؟ فعلا فقط ایجاد/ویرایش را پیاده می‌کنیم)
+        """
+        for addr_data in addresses_data:
+            address_id = addr_data.get('id')
+            
+            if address_id:
+                # ===== حالت ویرایش ===== #
+                existing_address = self.address_service.get_user_addresses(user.id).filter(id=address_id).exists()
+                if existing_address:
+                    self.address_service.update_address(user.id, address_id, addr_data)
+                else:
+                    logger.warning(f"Address ID {address_id} does not belong to user {user.id} or not found.")
+            else:
+                # ===== حالت ایجاد ===== #
+                self.address_service.create_address(user.id, addr_data)

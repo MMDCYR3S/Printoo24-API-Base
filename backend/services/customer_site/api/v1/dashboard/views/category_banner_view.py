@@ -1,9 +1,13 @@
+import re
+
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+
 
 from core.product.services import ProductCategoryService
 from apps.shop.services import ShopCategoryService
@@ -12,7 +16,7 @@ from ..serializers.general_serializers import (
     ParentCategoryListSerializer,
     ProductCategoryDetailWithLinksSerializer,
     SubcategoryWithParentSerializer,
-    CategoryBulkUpsertSerializer
+    CategoryBulkUpsertSerializer,
 )
 
 # ===== ویو‌ست مدیریت دسته‌بندی‌ها ===== #
@@ -23,6 +27,7 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
     شامل: لیست، جزئیات، افزودن، ویرایش، حذف و عملیات گروهی.
     """
     serializer_class = ProductCategoryDashboardSerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     permission_classes = [IsAdminUser]
     lookup_field = 'id'
     
@@ -34,7 +39,7 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
     # ===== بازنویسی متد get_queryset ===== #
     def get_queryset(self):
         return self.service.get_category_tree_queryset()
-    
+     
     # ===== بازنویسی متد retrieve (مشاهده جزئیات) ===== #
     @extend_schema(
         summary="مشاهده جزئیات دسته‌بندی",
@@ -96,59 +101,62 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
     @action(detail=False, methods=['get'], url_path='subcategories')
     def sub_categories(self, request, *args, **kwargs):
         service = ShopCategoryService(request=request)
+        
         categories_data = service.get_subcategories_flat_list()
-        return Response(categories_data)
-
+        
+        serializer = SubcategoryWithParentSerializer(
+            categories_data, 
+            many=True, 
+            context={'request': request}
+        )
+        
+        return Response(serializer.data)
     # ===== اکشن سفارشی: ایجاد و ویرایش گروهی ===== #
     @extend_schema(
         request=CategoryBulkUpsertSerializer(many=True),
         summary="ایجاد و ویرایش گروهی دسته‌بندی‌ها",
         description="این اکشن امکان ثبت همزمان چندین دسته‌بندی را فراهم می‌کند. " \
                     "با ارسال id، آیتم ویرایش می‌شود. عدم ارسال id باعث ایجاد جدید می‌شود. " \
-                    "برای اتصال فرزند به والد می‌توانید از parent_slug استفاده کنید." ,
+                    "برای اتصال فرزند به والد می‌توانید از parent_slug استفاده کنید. " \
+                    "نکته: برای ارسال عکس، درخواست باید به صورت multipart/form-data باشد.",
         examples=[
             OpenApiExample(
-                "Bulk Insert",
-                summary="ایجاد دسته بندی ها",
-                description="نکته مهم: اگر میخواهی دسته بندی جدید اضافه کنی، باید بدون id باشه. اگر قصد ویرایش داری، id رو میدی و تغییرات رو اعمال میکنی.",
+                "Bulk Insert with Images",
+                summary="ایجاد دسته‌ها با عکس",
+                description="نمونه ایجاد دسته‌بندی جدید به همراه آپلود بنرها.",
                 value=[
                     {
                         "name": "الکترونیک",
-                        "slug": "electronics",
+                        "description": "تجهیزات دیجیتال و الکترونیکی",
+                        "banner_wide": "(Binary File)",
+                        "banner_box": "(Binary File)",
                         "is_active": True
-                        # بدون id => ایجاد جدید
                     },
                     {
                         "name": "گوشی موبایل",
-                        "slug": "mobile",
                         "parent_slug": "electronics",
+                        "banner_box": "(Binary File)",
                         "is_active": True
-                    },
-                    {
-                        "name": "تجهیزات خانگی",
-                        "slug": "home-appliances",
-                        "parent_slug": "electronics",
-                        "is_active": True
-                    },
+                    }
                 ]
             ),
             OpenApiExample(
-                "Bulk Upsert",
-                summary=" ویرایش دسته بندی ها",
-                description="نکته مهم: اگر میخواهی دسته بندی جدید اضافه کنی، باید بدون id باشه. اگر قصد ویرایش داری، id رو میدی و تغییرات رو اعمال میکنی.",
+                "Bulk Upsert (Mix)",
+                summary="ترکیب ویرایش و ایجاد",
+                description="مثال ترکیبی: آیتم اول ویرایش می‌شود (چون ID دارد) و عکسش تغییر می‌کند. آیتم دوم جدید ایجاد می‌شود.",
                 value=[
                     {
                         "id": 45,
                         "name": "لپ تاپ (ویرایش شده)",
-                        "slug": "laptop-updated",
                         "parent_slug": "electronics", 
+                        "banner_wide": "(Binary File - New Banner)",
                         "is_active": True
                     },
                     {
-                        "id": 46,
-                        "name": "تلفن (ویرایش شده)",
-                        "slug": "phone-updated",
-                        "parent_slug": "electronics", 
+                        "name": "لوازم جانبی لپ‌تاپ",
+                        "parent_slug": "electronics",
+                        "description": "کیف، موس و خنک کننده",
+                        "banner_box": "(Binary File)",
                         "is_active": True
                     }
                 ]
@@ -158,15 +166,22 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
     )
     @action(detail=False, methods=['post'], url_path='bulk-upsert')
     def bulk_upsert(self, request):
-        """
-        پلتفرم: دریافت لیستی از دسته‌بندی‌ها و انجام عملیات Create/Update
-        """
-        serializer = CategoryBulkUpsertSerializer(data=request.data, many=True)
-        serializer.is_valid(raise_exception=True)
+        # ===== درخواست خام ===== #
+        raw_data = request.data
         
+        # ===== اگر درخواست مولتی بود ===== #
+        if 'multipart/form-data' in request.content_type:
+            formatted_data = self._transform_multipart_data(request)
+        else:
+            formatted_data = request.data
+        
+        # ===== اعتبارسنجی ===== #
+        serializer = CategoryBulkUpsertSerializer(data=formatted_data, many=True)
+        serializer.is_valid(raise_exception=True)
+
         validated_data = serializer.validated_data
         
-        # ===== ایجاد سرویس دامنه برای ایجاد یا ویرایش دسته جمعی ===== #
+        # ===== ارسال به سرویس ===== #
         result = self.service.bulk_upsert_categories(validated_data, request.user)
         
         return Response(
@@ -176,7 +191,6 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
             },
             status=status.HTTP_200_OK
         )
-
     # ===== اکشن سفارشی: تغییر وضعیت گروهی ===== #
     @extend_schema(
         request=None,
@@ -207,3 +221,34 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
         
         self.service.bulk_delete(ids)
         return Response({'detail': 'موارد انتخاب شده حذف شدند.'}, status=status.HTTP_204_NO_CONTENT)
+
+    def _transform_multipart_data(self, request) -> list:
+        """
+        تبدیل هوشمند داده‌های Multipart به لیست.
+        تغییر: جدا کردن پردازش POST و FILES برای تضمین دریافت عکس‌ها.
+        """
+        items_dict = {}
+
+        def parse_key_value(key, value):
+            match = re.search(r'\[(\d+)\]\.?(\w+)', key)
+            if match:
+                index = int(match.group(1))
+                field_name = match.group(2)
+                
+                if index not in items_dict:
+                    items_dict[index] = {}
+                
+                items_dict[index][field_name] = value
+            elif key in ['id', 'name', 'slug', 'parent_slug', 'description', 'is_active', 'banner_wide', 'banner_box']:
+                if 0 not in items_dict: items_dict[0] = {}
+                items_dict[0][key] = value
+
+        if hasattr(request, 'POST'):
+            for key, value in request.POST.items():
+                parse_key_value(key, value)
+        
+        if hasattr(request, 'FILES'):
+            for key, value in request.FILES.items():
+                parse_key_value(key, value)
+
+        return [items_dict[i] for i in sorted(items_dict.keys())]

@@ -1,3 +1,4 @@
+from jsonschema import ValidationError
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -10,7 +11,9 @@ from ..serializers import (
     OrderListSerializer, 
     OrderDetailSerializer, 
     AdminOrderCreateSerializer,
-    AdminOrderUpdateSerializer
+    AdminOrderUpdateSerializer,
+    OrderStatusChangeSerializer,
+    OrderStatusListSerializer
 )
 
 # ===== Order Dashboard ViewSet ===== #
@@ -37,7 +40,7 @@ class OrderDashboardViewSet(viewsets.ViewSet):
             'date_from': request.query_params.get('date_from'),
             'date_to': request.query_params.get('date_to'),
         }
-        queryset = self.service.get_orders_list(filters)
+        queryset = self.service.get_orders_list()
         
         serializer = OrderListSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -113,15 +116,13 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         valid_data = serializer.validated_data
         
         try:
+            # ===== ایجاد از طریق سرویس ===== #
             order = self.service.create_admin_order(
-                # =====  ===== #
-                user_id=valid_data.get('user_id'),
+                user_id=valid_data['user_id'],
                 items_data=valid_data['items'],
                 total_price_override=valid_data.get('price'),
-                # ===== آدرس ===== #
                 address_id=valid_data.get('address_id'),
                 full_address=valid_data.get('full_address'),
-                # ===== اطلاعات پایه ===== #
                 recipient_name=valid_data.get('recipient_name'),
                 recipient_phone=valid_data.get('recipient_phone'),
                 company_name=valid_data.get('company_name')
@@ -184,7 +185,7 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     # ===== اصلاحیه: اکشن درست ===== #
-    @action(detail=True, methods=['post'], url_path='items/(?P<item_id>\d+)/upload', parser_classes=[MultiPartParser])
+    @action(detail=True, methods=['post'], url_path='items/(?P<item_id>\d+)/upload', parser_classes=[MultiPartParser, JSONParser])
     def upload_file(self, request, pk=None, item_id=None):
         """ آپلود فایل برای آیتم """
         # ===== دریافت فایل ها از 
@@ -199,30 +200,71 @@ class OrderDashboardViewSet(viewsets.ViewSet):
             return Response(result, status=status_code)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # ===== GET ALL STATUSES ===== #
+    @extend_schema(
+        summary="دریافت لیست وضعیت‌های سفارش",
+        description="لیست کامل وضعیت‌ها برای نمایش در دراپ‌داون تغییر وضعیت.",
+        responses=OrderStatusListSerializer(many=True)
+    )
+    @action(detail=False, methods=['get'], url_path='statuses')
+    def get_statuses(self, request):
+        statuses = self.service.get_all_order_statuses()
+        serializer = OrderStatusListSerializer(statuses, many=True)
+        return Response(serializer.data)
+
+    # ===== CHANGE STATUS ===== #
+    @extend_schema(
+        summary="تغییر وضعیت سفارش",
+        description="تغییر وضعیت بر اساس internal_code. (مثلا: approved_design)",
+        request=OrderStatusChangeSerializer,
+        responses=OrderDetailSerializer # یا یک پیام ساده
+    )
+    @action(detail=True, methods=['post'], url_path='change-status')
+    def change_status(self, request, pk=None):
+        serializer = OrderStatusChangeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        status_code = serializer.validated_data['status_code']
+        description = serializer.validated_data.get('description')
+
+        try:
+            updated_order = self.service.change_order_status(
+                order_id=pk,
+                status_code=status_code,
+                description=description
+            )
+            # ===== نمایش تغییرات ===== #
+            return Response(OrderDetailSerializer(updated_order).data, status=status.HTTP_200_OK)
+            
+        except ValidationError as e:
+            return Response({'detail': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     # ========== BULK ACTIONS ========== #
-    # @extend_schema(
-    #     summary="حذف گروهی سفارشات",
-    #     description="""
-    #     حذف چندین سفارش به صورت همزمان.
-    #     **نکته مهم:** فقط سفارشاتی که در وضعیت‌های اولیه (مثل Pending یا Canceled) هستند قابل حذف می‌باشند.
-    #     سفارشاتی که فاکتور نهایی یا پرداختی دارند حذف نمی‌شوند.
-    #     """,
-    #     request=inline_serializer(
-    #         name='OrderBulkDelete',
-    #         fields={
-    #             'order_ids': serializers.ListField(child=serializers.IntegerField())
-    #         }
-    #     ),
-    #     responses={200: OpenApiTypes.OBJECT},
-    #     examples=[
-    #         OpenApiExample(
-    #             'Delete Draft Orders',
-    #             value={'order_ids': [101, 102, 105]},
-    #             request_only=True
-    #         )
-    #     ]
-    # )
+    @extend_schema(
+        summary="حذف گروهی سفارشات",
+        description="""
+        حذف چندین سفارش به صورت همزمان.
+        **نکته مهم:** فقط سفارشاتی که در وضعیت‌های اولیه (مثل Pending یا Canceled) هستند قابل حذف می‌باشند.
+        سفارشاتی که فاکتور نهایی یا پرداختی دارند حذف نمی‌شوند.
+        """,
+        request=inline_serializer(
+            name='OrderBulkDelete',
+            fields={
+                'order_ids': serializers.ListField(child=serializers.IntegerField())
+            }
+        ),
+        responses={200: OpenApiTypes.OBJECT},
+        examples=[
+            OpenApiExample(
+                'Delete Draft Orders',
+                value={'order_ids': [101, 102, 105]},
+                request_only=True
+            )
+        ]
+    )
     # ===== BULK DELETE ===== #
     @extend_schema(request=inline_serializer(name='BulkDel', fields={'ids': serializers.ListField()}))
     @action(detail=False, methods=['delete'], url_path='bulk-delete')

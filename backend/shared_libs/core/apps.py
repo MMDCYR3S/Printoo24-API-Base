@@ -15,7 +15,6 @@ class CoreConfig(AppConfig):
         import core.signals
 #         post_migrate.connect(create_initial_statuses, sender=self)
         
-        
 # def create_initial_statuses(sender, **kwargs):
 #     """
 #     این تابع پس از هر بار migrate اجرا می‌شود و چک می‌کند

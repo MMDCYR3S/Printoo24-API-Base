@@ -99,15 +99,6 @@ class OrderStatus(models.Model):
     def __str__(self):
         return f"{self.name} ({self.internal_code})"
     
-    def clean(self):
-        """ اعتبارسنجی‌های خاص """
-        if self.status_type == 'initial':
-            if self.group.order_status.filter(status_type='initial').count() == 1:
-                # ===== بررسی اینکه آیا داریم خود آن یک وضعیت اولیه رو ویرایش میکنیم یا نه ===== #
-                if not self.pk or (self.pk and self.group.order_status.filter(status_type='initial').first().pk != self.pk):
-                    raise ValueError(_("این گروه قبلا یک وضعیت آغازین داشته است."))
-            pass
-        
     def save(self, *args, **kwargs):
         """
         تولید و فرمت‌دهی خودکار کد سیستمی.

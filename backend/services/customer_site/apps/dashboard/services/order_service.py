@@ -16,7 +16,8 @@ from django.core.exceptions import ValidationError
 from core.models import (
     Order, OrderItem,
     Product, Address,
-    OrderItemFile, User
+    OrderItemFile, User,
+    OrderStatus
 )
 from core.order.services import OrderService
 
@@ -31,6 +32,14 @@ class OrderDashboardService:
     def __init__(self):
         self.order_domain = OrderService()
         self.temp_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_order_uploads'))
+
+    def get_orders_list(self):
+        """
+        لیست تمام سفارشات با جزئیات لازم برای جدول داشبورد.
+        """
+        return Order.objects.select_related('user__customer_profile', 'current_status')\
+            .prefetch_related('order_item_order')\
+            .order_by('-created_at').filter(type="1")
 
     # ===== لیست و جزئیات ===== #
     def get_all_orders_queryset(self):
@@ -49,28 +58,49 @@ class OrderDashboardService:
 
     # ===== ایجاد سفارش مستقیم (Direct Order) ===== #
     def create_admin_order(self,
-                           user_id: int, address_id: int, 
+                           user_id: int,
                            items_data: List[Dict],
-                           total_price_override: float = None):
+                           address_id: int = None,
+                           total_price_override: float = None,
+                           # ===== آرگومان‌های جدید ===== #
+                           full_address: str = None,
+                           recipient_name: str = None,
+                           recipient_phone: str = None,
+                           company_name: str = None):
         """
         فراخوانی سرویس دامین برای ایجاد سفارش.
+        اصلاح شده: دریافت مستقیم اطلاعات گیرنده و آدرس.
         """
         logger.info(f"Dashboard: Creating order for User {user_id}")
         
         user = User.objects.get(id=user_id)
-        if user.customer_profile is not None:
-            recipient_name = user.customer_profile.fullname() if user.customer_profile.fullname() else user.username
-        recipient_phone = user.customer_profile.phone_number
         
-        address = Address.objects.get(id=address_id)
-        full_address = f"{address.province.name} - {address.city.name} - {address.address}"
+        # ===== مدیریت اطلاعام اختیاری کاربر ===== #
+        final_recipient_name = recipient_name
+        final_recipient_phone = recipient_phone
         
+        if not final_recipient_name and user.customer_profile:
+             final_recipient_name = user.customer_profile.fullname() or user.username
+             
+        if not final_recipient_phone and user.customer_profile:
+             final_recipient_phone = user.customer_profile.phone_number
+
+        final_full_address = full_address
+        
+        # ===== اگر آدرس نبود ===== #
+        if address_id:
+            address_obj = Address.objects.get(id=address_id)
+            if not final_full_address:
+                final_full_address = f"{address_obj.province.name} - {address_obj.city.name} - {address_obj.address}"
+        
+        # ===== نمایش داده‌ ایجاد شده ===== #
         return self.order_domain.create_order_direct(
             user_id=user_id,
             address_id=address_id,
-            recipient_name=recipient_name,
-            recipient_phone=recipient_phone,
-            full_address=full_address,
+            recipient_name=final_recipient_name,
+            recipient_phone=final_recipient_phone,
+            company_name=company_name,
+            full_address=final_full_address,
             items_data=items_data,
             total_price_override=total_price_override,
             type="1"
@@ -225,6 +255,41 @@ class OrderDashboardService:
                 logger.critical(f"SYNC FAILED: {str(sync_error)}", exc_info=True)
                 if os.path.exists(temp_path): os.remove(temp_path)
                 raise sync_error
+
+
+    # ===== Get All Status ===== #
+    def get_all_order_statuses(self):
+        """
+        دریافت لیست وضعیت‌ها مرتب شده بر اساس sort_order
+        """
+        return OrderStatus.objects.all().order_by('sort_order')
+
+    # ===== تغییر وضعیت سفارش ===== #
+    @transaction.atomic
+    def change_order_status(self, order_id: int, status_code: str, description: str = None):
+        """
+        تغییر وضعیت سفارش بر اساس کد سیستمی وضعیت.
+        """
+        logger.info(f"Changing status for Order {order_id} to {status_code}")
+        
+        order = get_object_or_404(Order, pk=order_id)
+        
+        # ===== بررسی وجود وضعیت ===== #
+        try:
+            new_status = OrderStatus.objects.get(internal_code=status_code)
+        except OrderStatus.DoesNotExist:
+            raise ValidationError(f"وضعیت با کد {status_code} یافت نشد.")
+
+        # ===== تغییر وضعیت ===== #
+        previous_status = order.current_status
+        order.current_status = new_status
+        
+        # ===== ثبت وضعیت سفارش ===== #
+        order.save()
+
+        logger.info(f"Order {order.id} status changed: {previous_status} -> {new_status}")
+        
+        return order
 
     # ===== Bulk Operations ===== #
     def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, int]:

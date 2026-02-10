@@ -95,6 +95,14 @@ class UserManager(BaseUserManager):
             "total": total_count,
             **status_breakdown
         }
+    
+    def get_all_customers(self):
+        """دریافت لیست کامل مشتریان با پروفایل، کیف پول و آدرس‌ها"""
+        return self.get_queryset().customers()\
+                .with_full_profile()\
+                .prefetch_related('addresses__province', 'addresses__city')\
+                .distinct()\
+                .order_by('-created_at')
 
     def get_count_by_date_range(self, start_date: datetime, end_date: datetime) -> int:
         return self.filter(created_at__range=(start_date, end_date)).count()

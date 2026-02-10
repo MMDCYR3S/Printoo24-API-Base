@@ -35,6 +35,26 @@ export const profileService = {
     return response.data; // جزئیات کامل
   },
 
+  // دریافت پیش‌فاکتور (جدید)
+  getQuotation: async (orderId) => {
+    const response = await apiClient.get(`/profile/orders/quotation/${orderId}/`);
+    return response.data;
+  },
+
+  // 🌍 موقعیت مکانی (استان و شهر)
+  getProvinces: async () => {
+    const response = await apiClient.get('/profile/locations/provinces/');
+    return response.data;
+  },
+
+  getCities: async (provinceId) => {
+    if (!provinceId) return [];
+    const response = await apiClient.get('/profile/locations/cities/', {
+      params: { province_id: provinceId }
+    });
+    return response.data;
+  },
+
   // 📍 آدرس‌ها
   getAddresses: async () => {
     const response = await apiClient.get('/profile/addresses/');

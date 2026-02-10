@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Order, OrderItem, OrderItemFile
+from core.models import Order, OrderItem, OrderItemFile, OrderStatus
 from api.v1.dashboard.serializers import CartItemAddSimpleSerializer
 
 # ===== فایل‌های آیتم ===== #
@@ -123,12 +123,50 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 
 # ===== ایجاد سفارش (Input) ===== #
 class AdminOrderCreateSerializer(serializers.Serializer):
+    """
+    سریالایزر ایجاد سفارش توسط ادمین.d
+    اصلاح شده: افزودن فیلدهای اطلاعات گیرنده و آدرس
+    """
     user_id = serializers.IntegerField()
-    address_id = serializers.IntegerField()
-    price = serializers.DecimalField(max_digits=14, decimal_places=0, required=False)
     items = serializers.ListField(child=CartItemAddSimpleSerializer())
+    price = serializers.DecimalField(max_digits=14, decimal_places=0, required=False, allow_null=True)
+    
+    # ===== فیلدهای آدرس و گیرنده ===== #
+    address_id = serializers.IntegerField(required=False, allow_null=True)
+    full_address = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    recipient_name = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    recipient_phone = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    company_name = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+    def validate(self, attrs):
+        """
+        بررسی اینکه حداقل یکی از موارد (شناسه آدرس) یا (آدرس متنی کامل) وجود داشته باشد.
+        """
+        if not attrs.get('address_id') and not attrs.get('full_address'):
+            raise serializers.ValidationError("وارد کردن 'address_id' یا 'full_address' الزامی است.")
+        return attrs
 
 # ===== ویرایش سفارش (Input) ===== #
 class AdminOrderUpdateSerializer(serializers.Serializer):
     address_id = serializers.IntegerField(required=False)
     type = serializers.ChoiceField(choices=Order.ORDER_TYPE, required=False)
+
+# ===== سریالایزر نمایش لیست وضعیت‌ها (برای دراپ‌داون) ===== #
+class OrderStatusListSerializer(serializers.ModelSerializer):
+    group_name = serializers.CharField(source='group.name', read_only=True, allow_null=True)
+    
+    class Meta:
+        model = OrderStatus
+        fields = ['id', 'name', 'internal_code', 'status_type', 'sort_order', 'group_name']
+
+# ===== سریالایزر ورودی برای تغییر وضعیت ===== #
+class OrderStatusChangeSerializer(serializers.Serializer):
+    status_code = serializers.CharField(
+        required=True, 
+        help_text="کد سیستمی وضعیت (internal_code) مثلا: CONFIRMED_DESIGN"
+    )
+    description = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        help_text="توضیحات اختیاری بابت تغییر وضعیت (مثلا علت رد شدن)"
+    )
