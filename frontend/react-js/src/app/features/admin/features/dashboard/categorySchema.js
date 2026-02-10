@@ -19,11 +19,10 @@ const imageSchema = z
 
 export const categorySchema = z.object({
   name: z.string().min(2, "نام دسته‌بندی باید حداقل ۲ کاراکتر باشد"),
-  // slug حذف شد یا اختیاری شد چون بک‌اند می‌سازد
-  slug: z.string().optional(), 
+  // slug کامل حذف شد
   parent: z.string().or(z.number()).nullable().optional(),
   description: z.string().optional(),
   is_active: z.boolean().default(true),
-  // banner_wide حذف شد
   banner_box: imageSchema.optional(),
+  // banner_wide هم حذف شده بود
 });

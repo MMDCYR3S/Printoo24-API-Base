@@ -35,6 +35,7 @@ const LoginPage = () => {
       // ✅ 2. ذخیره اطلاعات کاربر در LocalStorage (همون چیزی که خواستی)
       if (data.user) {
         localStorage.setItem('userData', JSON.stringify(data.user));
+        localStorage.setItem('userId', data.user.id);
         
         // آپدیت کردن کش ریکت کوئری همزمان
         queryClient.setQueryData(['profile-info'], data.user);
