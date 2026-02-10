@@ -117,16 +117,13 @@ class ProductCategoryService:
         """
         results = []
         
-        # تفکیک داده‌ها
         updates_data = [item for item in validated_data_list if item.get('id')]
         creates_data = [item for item in validated_data_list if not item.get('id')]
 
-        # ====================================
-        # 1. پردازش ویرایش‌ها (Updates)
-        # ====================================
+        # ===== UPDATE OPERATION ===== #
         if updates_data:
             update_ids = [item['id'] for item in updates_data]
-            # واکشی دسته‌ها برای آپدیت
+            # ===== واکشی داده‌های مربوط به والد ===== #
             existing_categories = ProductCategory.objects.filter(id__in=update_ids)
             existing_map = {cat.id: cat for cat in existing_categories}
 
@@ -136,8 +133,7 @@ class ProductCategoryService:
                 if not instance:
                     continue
                 
-                # مدیریت والد (Parent)
-                # اگر parent_slug در دیکشنری بود (حتی اگر None بود یعنی والد حذف شود)
+                # ===== مدیریت تغییر والد در آپدیت ===== #
                 if 'parent_slug' in item:
                     p_slug = item.pop('parent_slug')
                     if p_slug:

@@ -80,32 +80,32 @@ class CategoryLinkSerializer(serializers.ModelSerializer):
         model = ProductCategory
         fields = ['id', 'name', 'detail_url', 'products']
 
-# ======= 
+# ========== PARENT CATEGORY LIST SERIALIZER ========== #
 class ParentCategoryListSerializer(serializers.ModelSerializer):
     """
-    مخصوص لیست والدها: بدون عکس، فقط اطلاعات پایه و لینک جزئیات
+    مخصوص لیست والدها: بهینه شده برای جلوگیری از کرش کردن سرور
     """
     detail_url = serializers.HyperlinkedIdentityField(
         view_name='api:v1:dashboard:product_category_dashboard-detail',
         lookup_field='id'
     )
     banner_wide_url = serializers.CharField(source='get_banner_wide_url', read_only=True)
-    children_count = serializers.SerializerMethodField()
-    products = ProductMinimalSerializer(many=True, read_only=True)
+    children_count = serializers.IntegerField(read_only=True) # مقدار را از annotate می گیریم
+    
+    products_preview = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductCategory
         fields = [
             'id', 'name', 'slug', 'detail_url', 'is_active',
             'banner_wide', 'banner_box', 'banner_wide_url',
-            'children_count', 'products'
+            'children_count', 'products_preview', 'created_at'
         ]
         
-    def get_children_count(self, obj):
-        """
-        محاسبه تعداد فرزندان مستقیم
-        """
-        return obj.get_children().count()
+    def get_products_preview(self, obj):
+        """نمایش فقط ۵ محصول اول برای جلوگیری از سنگین شدن ریسپانس"""
+        products = obj.products.all()[:5]
+        return ProductMinimalSerializer(products, many=True, context=self.context).data
     
 # ===== سریالایزر اطلاعات والد (Nested Serializer) ===== #
 class ParentInfoSerializer(serializers.Serializer):
@@ -174,17 +174,41 @@ class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
         return []
 
 # ===== سریالایزر ورودی برای عملیات گروهی ===== #
-class CategoryBulkUpsertSerializer(serializers.Serializer):
+class CategoryBulkUpsertSerializer(serializers.ModelSerializer):
     """
-    سریالایزر برای دریافت لیست دسته‌بندی‌ها جهت ایجاد یا ویرایش گروهی.
-    فیلد id: اگر ارسال شود => Update. اگر خالی باشد => Create.
-    فیلد parent_slug: برای اتصال به والد (چه موجود در دیتابیس چه در همین لیست).
+    سریالایزر هوشمند برای ایجاد و ویرایش گروهی.
+    - فیلد id: اختیاری (اگر باشد یعنی آپدیت، نباشد یعنی ایجاد)
+    - فیلد parent_slug: برای اتصال به والد
+    - سایر فیلدها: مستقیماً از مدل ارث‌بری می‌شوند.
     """
     id = serializers.IntegerField(required=False, allow_null=True)
-    name = serializers.CharField(max_length=150)
-    parent_slug = serializers.SlugField(max_length=150, required=False, allow_null=True, allow_blank=True, write_only=True)
-    description = serializers.CharField(required=False, allow_blank=True)
-    is_active = serializers.BooleanField(required=False, default=True)
+    
+    parent_slug = serializers.SlugField(
+        max_length=150, 
+        required=False, 
+        allow_null=True, 
+        allow_blank=True, 
+        write_only=True
+    )
+
+    class Meta:
+        model = ProductCategory
+        fields = [
+            'id', 'name', 'slug', 'description', 
+            'banner_wide', 'banner_box', 
+            'is_active', 'parent_slug'
+        ]
+        extra_kwargs = {
+            'slug': {'required': False},
+            'name': {'required': True},
+        }
+
+    def validate(self, attrs):
+        """
+        اگر چک خاصی نیاز داری اینجا اضافه کن.
+        مثلا: نمیشه والد خودت باشی (در سرویس هندل میشه البته)
+        """
+        return attrs
 
 # ========== OTHER SERIALIZERS ========== #
 # ===== سریالایزر تماس با ما ===== #
