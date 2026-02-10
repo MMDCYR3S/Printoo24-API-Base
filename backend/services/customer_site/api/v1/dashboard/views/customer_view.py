@@ -2,11 +2,16 @@ from rest_framework import status
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from rest_framework.exceptions import ValidationError
 
+from core.models import Province, City
 from apps.dashboard.services import CustomerOrchestratorService
-from ..serializers.general_serializers import CustomerManagementSerializer
+from ..serializers.general_serializers import (
+    CustomerManagementSerializer,
+    ProvinceSerialzier,
+    CitySerialzier,
+)
 
 # ===== Customer ViewSet ===== #
 @extend_schema(
@@ -115,3 +120,43 @@ class CustomerViewSet(ViewSet):
         ids = request.data.get('ids', [])
         self.service.bulk_delete(ids)
         return Response({'detail': 'کاربران انتخاب شده حذف شدند.'})
+
+        # ===== Province + City ===== #
+    @action(detail=False, methods=["get"], url_path='provinces')
+    def provinces(self, request):
+        provinces = Province.objects.all()
+        serializer = ProvinceSerialzier(provinces, many=True, context={'request' : request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @extend_schema(
+        summary='Get cities by province',
+        description='Retrieve all cities for a specific province',
+        parameters=[
+            OpenApiParameter(
+                name='province_id',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description='ID of the province',
+                required=True
+            ),
+        ],
+        responses={
+            200: CitySerialzier(many=True),
+            400: OpenApiTypes.OBJECT,
+            404: OpenApiTypes.OBJECT,
+        }
+    )
+    @action(detail=False, methods=["get"], url_path='cities')
+    def cities(self, request):
+        province_id = request.query_params.get('province_id')
+        
+        if not province_id:
+            return Response(
+                {"error": "province_id parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        cities = City.objects.filter(province_id=province_id)
+        serializer = CitySerialzier(cities, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+

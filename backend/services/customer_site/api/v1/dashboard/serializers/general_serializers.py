@@ -15,6 +15,25 @@ from apps.accounts.models import (
 )
 from apps.home.models import ContactUs, PromotionalModal
 
+# ===== Province List ===== #
+class ProvinceSerialzier(serializers.ModelSerializer):
+    """
+    سریالایزر برای استان
+    """
+    class Meta:
+        model = Province
+        fields = ["id", "name"]
+
+# ===== City List ===== #
+class CitySerialzier(serializers.ModelSerializer):
+    """
+    سریالایزر برای استان
+    """
+    class Meta:
+        model = City
+        fields = ["id", "name", "province"]
+
+
 # ========== CATEGORY SERIALIZERS ========== #
 # ===== سریالایزر مینیمال محصول برای نمایش در لیست‌ها ===== #
 class ProductMinimalSerializer(serializers.ModelSerializer):

@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 
+
 from core.product.services import ProductCategoryService
 from apps.shop.services import ShopCategoryService
 from ..serializers.general_serializers import (
@@ -12,7 +13,7 @@ from ..serializers.general_serializers import (
     ParentCategoryListSerializer,
     ProductCategoryDetailWithLinksSerializer,
     SubcategoryWithParentSerializer,
-    CategoryBulkUpsertSerializer
+    CategoryBulkUpsertSerializer,
 )
 
 # ===== ویو‌ست مدیریت دسته‌بندی‌ها ===== #
