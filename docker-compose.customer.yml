@@ -21,9 +21,6 @@ services:
       - shared_data_net
       - customer_net
     restart: always
-    depends_on:
-      - db
-      - redis
 
   # ====== Celery Workers ====== #
   celery_worker_customer:
@@ -42,9 +39,6 @@ services:
     networks:
       - shared_data_net
     restart: always
-    depends_on:
-      - db
-      - redis
 
   # ====== Frontend (Nginx) ====== #
   frontend:
