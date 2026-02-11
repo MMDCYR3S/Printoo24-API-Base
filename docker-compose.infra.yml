@@ -2,15 +2,13 @@ services:
   # ====== Database ====== #
   db:
     image: postgres:17-alpine
+    container_name: printoo_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    ports:
-      - "5432:5432"
     env_file:
       - ./env/.env.dev
     networks:
       - data_network
-    # ===== تنظیمات سلامت کانتینر ===== #
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -20,6 +18,7 @@ services:
   # ====== Redis ====== #
   redis:
     image: redis:7-alpine
+    container_name: printoo_redis
     networks:
       - data_network
 
@@ -27,7 +26,6 @@ services:
 networks:
   data_network:
     driver: bridge
-    # ===== نام ثابت برای دسترسی خارجی ===== #
     name: printoo_shared_data_network
 
 volumes:
