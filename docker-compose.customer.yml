@@ -5,22 +5,25 @@ services:
   customer_site:
     build:
       context: .
-      # حتماً داکرفایل پروداکشن که در ادامه می‌گذارم را در این مسیر بسازید
       dockerfile: backend/services/customer_site/dockerfiles/prod/Dockerfile
     container_name: printoo_customer_site
-    # در پروداکشن command را حذف می‌کنیم تا از CMD داخل داکرفایل (Gunicorn) استفاده شود
     volumes:
-      - ./backend/services/customer_site/media:/app/media
+      - customer_media:/app/src/media
+      - customer_static:/app/src/staticfiles
     ports:
       - "9010:9010"
     environment:
       - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+      - DJANGO_SETTINGS_MODULE=customer_site.settings.production
     env_file:
       - ./env/.env.prod
     networks:
       - shared_data_net
       - customer_net
     restart: always
+    depends_on:
+      - db
+      - redis
 
   # ====== Celery Workers ====== #
   celery_worker_customer:
@@ -30,14 +33,18 @@ services:
     container_name: printoo_celery_customer
     command: celery -A customer_site.celery worker -l info
     volumes:
-      - ./backend/services/customer_site/media:/app/media
+      - customer_media:/app/src/media
     environment:
       - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+      - DJANGO_SETTINGS_MODULE=customer_site.settings.production
     env_file:
       - ./env/.env.prod
     networks:
       - shared_data_net
     restart: always
+    depends_on:
+      - db
+      - redis
 
   # ====== Frontend (Nginx) ====== #
   frontend:
@@ -45,11 +52,9 @@ services:
       context: ./frontend/react-js
       dockerfile: Dockerfile.prod
     container_name: printoo_frontend
-    ports:
-      - "80:80" # پورت استاندارد وب
-    restart: always
     networks: 
       - customer_net
+    restart: always
 
 networks:
   customer_net:
@@ -57,3 +62,7 @@ networks:
   shared_data_net:
     external: true
     name: printoo_shared_data_network
+
+volumes:
+  customer_media:
+  customer_static:
