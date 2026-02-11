@@ -1,6 +1,7 @@
 from typing import Dict, List, Any
 from datetime import datetime
 from django.contrib.auth.models import BaseUserManager
+from django.utils.translation import gettext_lazy as _
 from django.db.models import Count, Q
 from .base import BaseQuerySet
 
