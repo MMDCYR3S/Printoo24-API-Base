@@ -2,8 +2,7 @@ import uuid
 from slugify import slugify
 
 from django.db import models
-from django.contrib.auth.models import Permission
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin 
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, Permission 
 from django.utils.translation import gettext_lazy as _
 
 from .managers import (
