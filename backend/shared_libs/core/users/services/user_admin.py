@@ -34,7 +34,7 @@ class UserAdminService:
         # ===== ایجاد کاربر===== #
         user = User.objects.create_user(
             username=data['username'],
-            email=data['email'],
+            email=data('email', None),
             password=data.get('password'), # پسورد اولیه
             is_staff=True,
             is_active=True

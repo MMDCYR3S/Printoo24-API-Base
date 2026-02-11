@@ -24,7 +24,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text='شناسه کاربری',
     )
     username = models.CharField(_("نام کاربری"), max_length=150, unique=True)
-    email = models.EmailField(_('آدرس ایمیل'), unique=True, null=True, blank=True)
+    email = models.EmailField(_('آدرس ایمیل'), null=True, blank=True)
     is_active = models.BooleanField(_('فعال'), default=True)
     is_staff = models.BooleanField(_('کاربری'), default=False)
     is_superuser = models.BooleanField(_('ادمین'), default=False)
