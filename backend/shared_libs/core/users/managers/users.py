@@ -59,22 +59,50 @@ class UserManager(BaseUserManager):
         return self.get_queryset().staff().with_roles().filter(id=user_id).first()
 
     # ===== ایجاد کاربر (Standard Django + Custom Logic) ===== #
-    def create_user(self, username, password=None, **extra_fields):
+    def create_user(self, username, password=None, email=None, **extra_fields):
+        """
+        ایجاد و ذخیره یک کاربر عادی
+        """
         if not username:
-            raise ValueError('The Username must be set')
-            
-        user = self.model(username=username, **extra_fields)
+            raise ValueError(_('نام کاربری الزامی است'))
+        
+        if email:
+            email = self.normalize_email(email)
+        
+        user = self.model(
+            username=username,
+            email=email,
+            **extra_fields
+        )
+        
         user.set_password(password)
         user.save(using=self._db)
+        
         return user
-
     def create_superuser(self, username, password=None, **extra_fields):
+        """
+        ایجاد و ذخیره یک سوپریوزر
+        توجه: email اختیاریه و از extra_fields می‌گیریمش
+        """
+        email = extra_fields.pop('email', None)
+        
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_verified', True)
         extra_fields.setdefault('is_active', True)
-        return self.create_user(username, password, **extra_fields)
-
+        extra_fields.setdefault('is_verified', True)
+        
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError(_('Superuser باید is_staff=True باشد.'))
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError(_('Superuser باید is_superuser=True باشد.'))
+        
+        return self.create_user(username, password, email, **extra_fields)
+    
+    def get_by_natural_key(self, username):
+        """
+        بازیابی کاربر با username
+        """
+        return self.get(**{self.model.USERNAME_FIELD: username})
     # ===== داشبورد و آمار (Stats) ===== #
     def get_dashboard_stats(self) -> Dict[str, Any]:
         """
