@@ -5,7 +5,7 @@ export default function DashboardLayout() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* سایدبار موقت */}
-      <aside className="w-64 bg-slate-900 text-white hidden md:block">
+      <aside className="w-64 bg-gray-dark text-gold-light hidden md:block">
         <div className="p-6 font-bold text-xl">Printoo Admin</div>
         <nav className="p-4 space-y-2">
           <div className="p-2 bg-slate-800 rounded cursor-pointer">سفارشات</div>

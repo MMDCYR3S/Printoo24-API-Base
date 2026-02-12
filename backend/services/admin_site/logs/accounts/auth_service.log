@@ -74,3 +74,5 @@ INFO 2026-02-01 07:28:24,919 auth_serivce 73 137663555303104 Staff login success
 INFO 2026-02-01 08:48:04,969 auth_serivce 167 124282295285440 Staff login successful: User 'admin' (ID: 1)
 INFO 2026-02-01 09:21:52,517 auth_serivce 205 124031554549440 Staff login successful: User 'admin' (ID: 1)
 INFO 2026-02-01 11:09:09,412 auth_serivce 300 139254641456832 Staff login successful: User 'admin' (ID: 1)
+INFO 2026-02-12 15:25:37,949 auth_serivce 11 123279172957888 Staff login successful: User 'admin' (ID: 1)
+INFO 2026-02-12 16:03:57,792 auth_serivce 30 124940834563776 Staff login successful: User 'admin' (ID: 1)
