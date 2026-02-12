@@ -1,8 +1,8 @@
-// src/app/features/admin/customers/components/CustomerList.jsx
 import { useState, useMemo, useCallback } from 'react';
 import { useCustomers } from '../../hooks/useCustomers';
-import { Plus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Search } from 'lucide-react';
 import CustomerModal from './components/CustomerModal';
+import WalletAdjustModal from '../../components/WalletAdjustModal'; // ایمپورت مودال جدید
 import CustomerRow from './components/CustomerRow';
 import CustomerFilters from './components/CustomerFilters';
 import BulkActionsBar from './components/BulkActionsBar';
@@ -12,24 +12,28 @@ const ITEMS_PER_PAGE = 10;
 const CustomerList = () => {
   const { usersQuery, bulkStatusMutation, bulkDeleteMutation } = useCustomers();
   
-  // States
+  // Data States
   const [selectedIds, setSelectedIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' }); // Sorting State
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+
+  // Wallet Modal States (جدید)
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
+  const [walletUser, setWalletUser] = useState(null);
 
   // --- Filtering & Sorting Logic ---
   const processedData = useMemo(() => {
     if (!usersQuery.data) return [];
     
     let result = usersQuery.data.filter(user => {
-      // Search
+      // Search Logic
       const term = searchTerm.toLowerCase();
       const matchesSearch = 
         (user.username?.toLowerCase().includes(term)) ||
@@ -38,12 +42,12 @@ const CustomerList = () => {
         (user.first_name?.toLowerCase().includes(term)) ||
         (user.last_name?.toLowerCase().includes(term));
       
-      // Status Filter
+      // Status Logic
       const matchesStatus = statusFilter === 'all' 
         ? true 
         : statusFilter === 'active' ? user.is_active : !user.is_active;
 
-      // Role Filter
+      // Role Logic
       const matchesRole = roleFilter === 'all'
         ? true
         : roleFilter === 'admin' ? user.is_staff : !user.is_staff;
@@ -51,12 +55,11 @@ const CustomerList = () => {
       return matchesSearch && matchesStatus && matchesRole;
     });
 
-    // Sorting
+    // Sorting Logic
     result.sort((a, b) => {
       let aValue = a[sortConfig.key];
       let bValue = b[sortConfig.key];
 
-      // Handle nulls
       if (!aValue) aValue = '';
       if (!bValue) bValue = '';
 
@@ -74,15 +77,14 @@ const CustomerList = () => {
     return result;
   }, [usersQuery.data, searchTerm, statusFilter, roleFilter, sortConfig]);
 
-  // --- Pagination ---
+  // --- Pagination Logic ---
   const totalPages = Math.ceil(processedData.length / ITEMS_PER_PAGE);
   const paginatedData = processedData.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  // --- Handlers ---
-  // استفاده از useCallback برای جلوگیری از رندر مجدد Rowها
+  // --- Action Handlers ---
   const handleToggleOne = useCallback((id) => {
     setSelectedIds(prev => 
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
@@ -104,16 +106,25 @@ const CustomerList = () => {
     }));
   };
 
+  // Edit Handler
   const handleEdit = useCallback((user) => {
     setEditingUser(user);
     setIsModalOpen(true);
   }, []);
 
+  // Wallet Handler (جدید)
+  const handleWalletAction = useCallback((user) => {
+    setWalletUser(user);
+    setWalletModalOpen(true);
+  }, []);
+
+  // Create Handler
   const handleCreate = () => {
     setEditingUser(null);
     setIsModalOpen(true);
   };
 
+  // Bulk Handlers
   const handleBulkDelete = () => {
     if (window.confirm(`آیا مطمئن هستید که می‌خواهید ${selectedIds.length} کاربر را حذف کنید؟`)) {
       bulkDeleteMutation.mutate(selectedIds);
@@ -126,48 +137,64 @@ const CustomerList = () => {
     setSelectedIds([]);
   };
 
-  if (usersQuery.isLoading) return <div className="p-12 text-center loading loading-spinner text-primary"></div>;
-
   // Helper for Sort Icons
   const SortIcon = ({ columnKey }) => {
-    if (sortConfig.key !== columnKey) return <ArrowUpDown size={14} className="opacity-30" />;
+    if (sortConfig.key !== columnKey) return <ArrowUpDown size={14} className="opacity-20" />;
     return sortConfig.direction === 'asc' ? <ArrowUp size={14} className="text-primary" /> : <ArrowDown size={14} className="text-primary" />;
   };
 
+  // Loading State
+  if (usersQuery.isLoading) {
+    return (
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+            <span className="loading loading-spinner loading-lg text-primary"></span>
+            <p className="text-slate-400 text-sm animate-pulse">در حال دریافت لیست کاربران...</p>
+        </div>
+    );
+  }
+
   return (
-    <div className="p-6 max-w-[1800px] mx-auto space-y-6 pb-24"> {/* pb-24 for floating bar space */}
+    <div className="p-6 md:p-8 max-w-[1920px] mx-auto space-y-8 pb-32"> 
       
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 border-b border-slate-200/60 pb-6">
         <div>
-          <h1 className="text-2xl font-black text-slate-800">مدیریت کاربران</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            <span className="font-bold text-slate-800">{usersQuery.data?.length || 0}</span> کاربر ثبت شده
+          <h1 className="text-3xl font-black text-slate-800 tracking-tight">مدیریت کاربران</h1>
+          <p className="text-slate-500 text-sm mt-2 font-medium">
+            لیست تمام کاربران، کارمندان و وضعیت حساب‌ها
           </p>
         </div>
-        <button onClick={handleCreate} className="btn btn-primary gap-2 shadow-lg shadow-primary/20 px-6">
-          <Plus size={20} />
-          کاربر جدید
-        </button>
+        <div className="flex items-center gap-3">
+            <div className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-xs font-bold border border-slate-200">
+                مجموع: {usersQuery.data?.length || 0}
+            </div>
+            <button onClick={handleCreate} className="btn btn-primary gap-2 shadow-lg shadow-primary/20 px-6 rounded-xl hover:scale-105 transition-transform">
+            <Plus size={20} />
+            کاربر جدید
+            </button>
+        </div>
       </div>
 
-      {/* Filters Component */}
-      <CustomerFilters 
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        roleFilter={roleFilter}
-        onRoleChange={setRoleFilter}
-        onRefresh={() => usersQuery.refetch()}
-      />
+      {/* Filters Section */}
+      <div className="bg-white p-1 rounded-3xl shadow-sm border border-slate-100">
+        <CustomerFilters 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            roleFilter={roleFilter}
+            onRoleChange={setRoleFilter}
+            onRefresh={() => usersQuery.refetch()}
+        />
+      </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      {/* Main Table */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden relative min-h-[400px]">
         <div className="overflow-x-auto">
           <table className="table w-full">
-            <thead className="bg-slate-50 text-slate-500 font-semibold uppercase text-xs tracking-wider">
-              <tr className='text-right'>
+            {/* Table Head */}
+            <thead className="bg-slate-50/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider border-b border-slate-100 backdrop-blur-sm sticky top-0 z-10">
+              <tr className='text-right h-12'>
                 <th className="w-12">
                   <label className="cursor-pointer">
                     <input 
@@ -183,33 +210,36 @@ const CustomerList = () => {
                   <div className="flex items-center gap-2">کاربر <SortIcon columnKey="username"/></div>
                 </th>
                 
-                <th onClick={() => handleSort('is_active')} className="cursor-pointer hover:bg-slate-100 transition-colors">
+                <th onClick={() => handleSort('is_active')} className="cursor-pointer hover:bg-slate-100 transition-colors w-28">
                   <div className="flex items-center gap-2">وضعیت <SortIcon columnKey="is_active"/></div>
                 </th>
                 
-                <th onClick={() => handleSort('is_staff')} className="cursor-pointer hover:bg-slate-100 transition-colors">
+                <th onClick={() => handleSort('is_staff')} className="cursor-pointer hover:bg-slate-100 transition-colors w-28">
                    <div className="flex items-center gap-2">نقش <SortIcon columnKey="is_staff"/></div>
                 </th>
                 
-                <th onClick={() => handleSort('wallet_balance')} className="cursor-pointer hover:bg-slate-100 transition-colors">
-                   <div className="flex items-center gap-2">کیف پول <SortIcon columnKey="wallet_balance"/></div>
+                <th onClick={() => handleSort('wallet_balance')} className="cursor-pointer hover:bg-slate-100 transition-colors text-right w-40">
+                   <div className="flex items-center justify-end gap-2">موجودی <SortIcon columnKey="wallet_balance"/></div>
                 </th>
                 
-                <th onClick={() => handleSort('created_at')} className="cursor-pointer hover:bg-slate-100 transition-colors">
+                <th onClick={() => handleSort('created_at')} className="cursor-pointer hover:bg-slate-100 transition-colors w-40">
                    <div className="flex items-center gap-2">تاریخ عضویت <SortIcon columnKey="created_at"/></div>
                 </th>
                 
-                <th className="text-left w-20">عملیات</th>
+                <th className="text-left w-24 pl-6">عملیات</th>
               </tr>
             </thead>
             
-            <tbody className="divide-y divide-slate-100 text-right">
+            {/* Table Body */}
+            <tbody className="divide-y divide-slate-50 text-right bg-white">
               {paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-20">
-                    <div className="flex flex-col items-center gap-2 opacity-50">
-                        <span className="text-4xl">🔍</span>
-                        <p>هیچ کاربری با این مشخصات یافت نشد</p>
+                  <td colSpan="7" className="text-center py-32">
+                    <div className="flex flex-col items-center gap-4 opacity-40">
+                        <div className="p-4 bg-slate-100 rounded-full">
+                            <Search size={40} className="text-slate-400"/>
+                        </div>
+                        <p className="font-bold text-slate-500">کاربری یافت نشد</p>
                     </div>
                   </td>
                 </tr>
@@ -221,6 +251,7 @@ const CustomerList = () => {
                     isSelected={selectedIds.includes(user.id)}
                     onToggle={handleToggleOne}
                     onEdit={handleEdit}
+                    onWalletAction={handleWalletAction} // پراپ اتصال به مودال والت
                   />
                 ))
               )}
@@ -228,28 +259,30 @@ const CustomerList = () => {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-center lg:justify-end">
-            <div className="join bg-white shadow-sm border border-slate-200 rounded-lg overflow-hidden">
-                <button 
-                    className="join-item btn btn-sm btn-ghost border-l border-slate-200 rounded-none disabled:bg-transparent" 
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(p => p - 1)}
-                >
-                    <ChevronRight size={16}/>
-                </button>
-                <span className="join-item btn btn-sm btn-ghost pointer-events-none font-mono text-slate-600">
-                     Page {currentPage} of {totalPages || 1}
-                </span>
-                <button 
-                    className="join-item btn btn-sm btn-ghost border-r border-slate-200 rounded-none disabled:bg-transparent" 
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(p => p + 1)}
-                >
-                    <ChevronLeft size={16}/>
-                </button>
+        {/* Pagination Footer */}
+        {totalPages > 1 && (
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-center lg:justify-end">
+                <div className="join bg-white shadow-sm border border-slate-200 rounded-xl overflow-hidden">
+                    <button 
+                        className="join-item btn btn-sm btn-ghost border-l border-slate-200 rounded-none disabled:bg-transparent px-4 hover:bg-slate-50" 
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(p => p - 1)}
+                    >
+                        <ChevronRight size={16}/>
+                    </button>
+                    <span className="join-item btn btn-sm btn-ghost pointer-events-none font-mono text-slate-600 px-4 text-xs font-bold">
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <button 
+                        className="join-item btn btn-sm btn-ghost border-r border-slate-200 rounded-none disabled:bg-transparent px-4 hover:bg-slate-50" 
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(p => p + 1)}
+                    >
+                        <ChevronLeft size={16}/>
+                    </button>
+                </div>
             </div>
-        </div>
+        )}
       </div>
 
       {/* Floating Bulk Actions */}
@@ -260,13 +293,21 @@ const CustomerList = () => {
         onDelete={handleBulkDelete}
       />
 
-      {/* Modal */}
+      {/* Modals */}
       {isModalOpen && (
           <CustomerModal 
             isOpen={isModalOpen} 
             onClose={() => setIsModalOpen(false)} 
             initialData={editingUser}
           />
+      )}
+
+      {walletModalOpen && (
+         <WalletAdjustModal 
+           isOpen={walletModalOpen}
+           onClose={() => setWalletModalOpen(false)}
+           user={walletUser}
+         />
       )}
 
     </div>

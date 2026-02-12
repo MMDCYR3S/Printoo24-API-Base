@@ -107,3 +107,137 @@ DEBUG 2026-02-10 07:20:59,501 customer_service 7 124657285932736 Fetching custom
 DEBUG 2026-02-10 07:33:12,706 customer_service 7 124657303975616 Fetching customer list
 DEBUG 2026-02-10 12:53:11,039 customer_service 878 126928351827648 Fetching customer list
 DEBUG 2026-02-10 12:54:23,430 customer_service 878 126928342386368 Fetching customer list
+DEBUG 2026-02-12 09:43:18,726 customer_service 202 130740604892864 Fetching customer list
+DEBUG 2026-02-12 09:43:22,428 customer_service 202 130739609794240 Fetching customer list
+DEBUG 2026-02-12 09:43:23,449 customer_service 202 130740596500160 Fetching customer list
+DEBUG 2026-02-12 10:19:51,609 customer_service 248 129122665748160 Fetching customer list
+DEBUG 2026-02-12 10:22:39,603 customer_service 248 129122665748160 Fetching customer list
+INFO 2026-02-12 10:23:35,945 customer_service 248 129122665748160 Bulk toggling status to True for 1 users
+DEBUG 2026-02-12 10:23:36,438 customer_service 248 129122665748160 Fetching customer list
+INFO 2026-02-12 10:23:42,401 customer_service 248 129122665748160 Bulk toggling status to True for 1 users
+DEBUG 2026-02-12 10:23:42,550 customer_service 248 129122665748160 Fetching customer list
+INFO 2026-02-12 10:23:49,443 customer_service 248 129122665748160 Bulk toggling status to True for 1 users
+DEBUG 2026-02-12 10:23:49,722 customer_service 248 129122665748160 Fetching customer list
+INFO 2026-02-12 10:24:23,821 customer_service 248 129122665748160 Fetching details for Customer 3
+DEBUG 2026-02-12 10:26:48,024 customer_service 248 129122680432320 Fetching customer list
+DEBUG 2026-02-12 10:26:48,155 customer_service 248 129122680432320 Fetching customer list
+DEBUG 2026-02-12 10:27:07,364 customer_service 248 129122680432320 Fetching customer list
+DEBUG 2026-02-12 10:27:07,514 customer_service 248 129122680432320 Fetching customer list
+DEBUG 2026-02-12 10:27:16,128 customer_service 248 129122665748160 Fetching customer list
+DEBUG 2026-02-12 10:27:17,955 customer_service 248 129122680432320 Fetching customer list
+DEBUG 2026-02-12 10:31:12,427 customer_service 357 134253863147200 Fetching customer list
+DEBUG 2026-02-12 10:31:56,086 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:31:56,221 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:32:05,117 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:32:23,935 customer_service 357 134253863147200 Fetching customer list
+DEBUG 2026-02-12 10:32:24,065 customer_service 357 134253863147200 Fetching customer list
+DEBUG 2026-02-12 10:32:31,727 customer_service 357 134253863147200 Fetching customer list
+DEBUG 2026-02-12 10:32:50,468 customer_service 357 134253843216064 Fetching customer list
+DEBUG 2026-02-12 10:32:50,581 customer_service 357 134253843216064 Fetching customer list
+DEBUG 2026-02-12 10:32:59,867 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:32:59,983 customer_service 357 134253843216064 Fetching customer list
+DEBUG 2026-02-12 10:33:31,359 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:33:31,484 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:33:36,654 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:33:38,238 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:34:08,386 customer_service 357 134253863147200 Fetching customer list
+DEBUG 2026-02-12 10:34:08,508 customer_service 357 134253863147200 Fetching customer list
+DEBUG 2026-02-12 10:34:15,372 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:34:17,014 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 10:39:35,539 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 11:23:09,420 customer_service 357 134253863147200 Fetching customer list
+DEBUG 2026-02-12 11:23:11,112 customer_service 357 134253863147200 Fetching customer list
+DEBUG 2026-02-12 11:23:53,906 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 11:23:55,192 customer_service 357 134253852657344 Fetching customer list
+DEBUG 2026-02-12 11:45:55,442 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 11:48:34,497 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:48:35,780 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:52:29,824 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:52:29,989 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:52:40,832 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 11:52:40,979 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 11:52:51,641 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:52:51,756 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:53:00,055 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 11:53:00,196 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 11:53:09,683 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:53:09,890 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:53:17,367 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 11:53:17,510 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 11:54:04,722 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:54:04,870 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 11:55:23,902 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 11:55:24,025 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:06:01,751 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 12:06:02,980 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 12:08:07,240 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:08:08,843 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:09:40,529 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 12:09:48,576 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 12:09:58,732 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:10:38,990 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:11:20,187 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:11:21,584 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:11:26,074 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:11:27,112 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:11:33,548 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:11:41,295 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 12:11:57,637 customer_service 425 132317448226496 Fetching customer list
+DEBUG 2026-02-12 12:11:59,288 customer_service 425 132317448226496 Fetching customer list
+DEBUG 2026-02-12 12:12:06,723 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 12:12:24,659 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 12:12:26,644 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 12:13:10,885 customer_service 425 132317853161152 Fetching customer list
+DEBUG 2026-02-12 12:13:19,359 customer_service 425 132317448226496 Fetching customer list
+DEBUG 2026-02-12 12:13:27,382 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:13:34,850 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:13:52,599 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:13:57,424 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:15:51,632 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:15:56,181 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:16:14,982 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:18:42,466 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:20:17,364 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:20:17,903 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:20:27,720 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:20:28,339 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:31:34,101 customer_service 425 132317448226496 Fetching customer list
+INFO 2026-02-12 12:31:34,250 customer_service 425 132317465011904 Fetching details for Customer 3
+DEBUG 2026-02-12 12:31:36,044 customer_service 425 132317448226496 Fetching customer list
+INFO 2026-02-12 12:31:36,069 customer_service 425 132317830084288 Fetching details for Customer 3
+INFO 2026-02-12 12:31:47,514 customer_service 425 132317830084288 Fetching details for Customer 3
+DEBUG 2026-02-12 12:32:26,768 customer_service 425 132317830084288 Fetching customer list
+INFO 2026-02-12 12:32:26,798 customer_service 425 132317853161152 Fetching details for Customer 3
+INFO 2026-02-12 12:32:26,945 customer_service 425 132317853161152 Fetching details for Customer 3
+DEBUG 2026-02-12 12:32:26,959 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:32:34,709 customer_service 425 132317853161152 Fetching customer list
+INFO 2026-02-12 12:32:34,720 customer_service 425 132317465011904 Fetching details for Customer 3
+INFO 2026-02-12 12:32:34,860 customer_service 425 132317465011904 Fetching details for Customer 3
+DEBUG 2026-02-12 12:32:34,876 customer_service 425 132317853161152 Fetching customer list
+WARNING 2026-02-12 12:33:58,093 customer_service 425 132317853161152 START: Deleting Customer 3
+ERROR 2026-02-12 12:33:58,228 customer_service 425 132317853161152 FAILED: Delete customer 3 error: ("Cannot delete some instances of model 'User' because they are referenced through protected foreign keys: 'Address.user', 'Order.user'.", {<Order: ORD-E6F9D01A | sdssdfsdfsdf>})
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/customer_service.py", line 97, in delete_customer
+    user.delete()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1280, in delete
+    collector.collect([self], keep_parents=keep_parents)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/deletion.py", line 350, in collect
+    raise ProtectedError(
+django.db.models.deletion.ProtectedError: ("Cannot delete some instances of model 'User' because they are referenced through protected foreign keys: 'Address.user', 'Order.user'.", {<Order: ORD-E6F9D01A | sdssdfsdfsdf>})
+WARNING 2026-02-12 12:34:07,910 customer_service 425 132317853161152 START: Deleting Customer 3
+ERROR 2026-02-12 12:34:07,996 customer_service 425 132317853161152 FAILED: Delete customer 3 error: ("Cannot delete some instances of model 'User' because they are referenced through protected foreign keys: 'Address.user', 'Order.user'.", {<Order: ORD-E6F9D01A | sdssdfsdfsdf>})
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/customer_service.py", line 97, in delete_customer
+    user.delete()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1280, in delete
+    collector.collect([self], keep_parents=keep_parents)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/deletion.py", line 350, in collect
+    raise ProtectedError(
+django.db.models.deletion.ProtectedError: ("Cannot delete some instances of model 'User' because they are referenced through protected foreign keys: 'Address.user', 'Order.user'.", {<Order: ORD-E6F9D01A | sdssdfsdfsdf>})
+DEBUG 2026-02-12 12:34:44,368 customer_service 425 132317465011904 Fetching customer list
+DEBUG 2026-02-12 12:34:46,091 customer_service 425 132317853161152 Fetching customer list
+INFO 2026-02-12 12:34:50,993 customer_service 425 132317465011904 Fetching details for Customer 2
+DEBUG 2026-02-12 12:34:51,030 customer_service 425 132317830084288 Fetching customer list
+DEBUG 2026-02-12 12:34:53,066 customer_service 425 132317830084288 Fetching customer list
+INFO 2026-02-12 12:34:54,941 customer_service 425 132317830084288 Fetching details for Customer 2
+INFO 2026-02-12 12:35:00,049 customer_service 425 132317830084288 Fetching details for Customer 3
