@@ -112,6 +112,7 @@ class ShopCategoryService:
         return data
     
     # ===== Get All Categories With Products ===== #
+    # ===== Get All Categories With Products ===== #
     def get_all_categories_with_products(self) -> List[Dict[str, Any]]:
         """
         دریافت لیست تمام دسته‌بندی‌های اصلی (Root) به همراه محصولات.
@@ -125,7 +126,9 @@ class ShopCategoryService:
             descendants = category.get_descendants(include_self=True)
             descendant_ids = descendants.values_list('id', flat=True)
 
-            products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)[:7]
+            products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)
+            
+            products_queryset = products_queryset.prefetch_related('product_image')[:7]
 
             category_data = {
                 "category_info": {
@@ -145,17 +148,12 @@ class ShopCategoryService:
                     } 
                     for child in category.get_children() if child.is_active
                 ],
-                "products": ProductMinimalSerializer(
-                    products_queryset, 
-                    many=True, 
-                    context={'request': self.request}
-                ).data
+                "products": products_queryset 
             }
             result_list.append(category_data)
             
         return result_list
-
-    # ===== Get SubCategories With Parent ===== #
+    
     def get_subcategories_flat_list(self) -> List[Dict[str, Any]]:
         """
         دریافت لیست مسطح از تمام زیردسته‌ها به همراه نام والد.

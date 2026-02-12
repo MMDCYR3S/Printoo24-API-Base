@@ -148,21 +148,13 @@ class FinanceOrderDetailSerializer(BaseOrderDetailSerializer):
 # ===== Role: Admin (Super Detail) ===== #
 class AdminOrderDetailSerializer(BaseOrderDetailSerializer):
     items = FullOrderItemSerializer(source='order_item_order', many=True, read_only=True)
-    cost_sheet = OrderCostSheetSerializer(read_only=True)
-    logistics = serializers.SerializerMethodField()
     
-    # اصلاح: استفاده مستقیم از سریالایزر به جای SerializerMethodField ناقص
     invoice = InvoiceSimpleSerializer(source='related_invoice', read_only=True)
     
     class Meta(BaseOrderDetailSerializer.Meta):
         fields = BaseOrderDetailSerializer.Meta.fields + [
-            'items', 
-            'cost_sheet',
+            'items',
             'invoice',
-            'logistics',
-            'total_price', 
+            'total_price',
             'base_products_price'
         ]
-
-    def get_logistics(self, obj):
-        return LogisticsOrderDetailSerializer(obj).data.get('shipping_info')

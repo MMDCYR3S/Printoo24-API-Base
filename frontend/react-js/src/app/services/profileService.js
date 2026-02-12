@@ -21,37 +21,20 @@ export const profileService = {
 
   getWalletHistory: async () => {
     const response = await apiClient.get('/profile/wallet/history/');
-    return response.data; // آرایه‌ای از تراکنش‌ها
+    return response.data;
   },
 
   // 📦 سفارشات
   getOrders: async () => {
     const response = await apiClient.get('/profile/orders/');
-    return response.data; // لیست خلاصه
+    return response.data;
   },
 
+  // 🔥 آپدیت شده برای تطابق با اندپوینت جدید داشبورد
   getOrderDetails: async (orderId) => {
-    const response = await apiClient.get(`/profile/orders/${orderId}/`);
-    return response.data; // جزئیات کامل
-  },
-
-  // دریافت پیش‌فاکتور (جدید)
-  getQuotation: async (orderId) => {
-    const response = await apiClient.get(`/profile/orders/quotation/${orderId}/`);
-    return response.data;
-  },
-
-  // 🌍 موقعیت مکانی (استان و شهر)
-  getProvinces: async () => {
-    const response = await apiClient.get('/profile/locations/provinces/');
-    return response.data;
-  },
-
-  getCities: async (provinceId) => {
-    if (!provinceId) return [];
-    const response = await apiClient.get('/profile/locations/cities/', {
-      params: { province_id: provinceId }
-    });
+    // طبق مستندات جدید: /api/v1/dashboard/orders/{id}/
+    // فرض بر این است که baseURL در apiClient تنظیم شده است
+    const response = await apiClient.get(`/dashboard/orders/${orderId}/`);
     return response.data;
   },
 

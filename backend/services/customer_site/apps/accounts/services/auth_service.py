@@ -93,10 +93,6 @@ class AuthService:
             if not user.is_active:
                 logger.warning(f"Login blocked - Inactive user: {username}")
                 raise ValidationError("حساب کاربری شما غیرفعال است.")
-
-            # ===== ایمیل تأیید شده باشد ===== #
-            if not user.is_verified:
-                raise ValidationError("لطفاً ابتدا ایمیل خود را تأیید کنید.")
             
             # ===== تولید توکن ===== #
             tokens = self._generate_tokens(user)

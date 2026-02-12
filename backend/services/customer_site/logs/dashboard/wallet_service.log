@@ -1,0 +1,114 @@
+INFO 2026-02-12 10:26:47,028 wallet_service 248 129122680432320 START: Adjust balance for User 3. Amount: 5000.00, Type: deposit
+INFO 2026-02-12 10:26:47,883 wallet_service 248 129122680432320 DEPOSIT SUCCESS: User 3, New Balance: 5000.00
+INFO 2026-02-12 10:26:56,776 wallet_service 248 129122680432320 START: Adjust balance for User 3. Amount: 80000.00, Type: debit
+ERROR 2026-02-12 10:26:56,816 wallet_service 248 129122680432320 FAILED: Adjust balance for User 3. Error: موجودی کافی نیست. موجودی فعلی: 5000.00
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 54, in adjust_balance
+    wallet = self.domain_service.debit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 60, in debit
+    raise InsufficientFundsException(f"موجودی کافی نیست. موجودی فعلی: {wallet.balance}")
+apps.accounts.exceptions.InsufficientFundsException: موجودی کافی نیست. موجودی فعلی: 5000.00
+INFO 2026-02-12 10:27:02,441 wallet_service 248 129122680432320 START: Adjust balance for User 3. Amount: 80000.00, Type: debit
+ERROR 2026-02-12 10:27:02,458 wallet_service 248 129122680432320 FAILED: Adjust balance for User 3. Error: موجودی کافی نیست. موجودی فعلی: 5000.00
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 54, in adjust_balance
+    wallet = self.domain_service.debit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 60, in debit
+    raise InsufficientFundsException(f"موجودی کافی نیست. موجودی فعلی: {wallet.balance}")
+apps.accounts.exceptions.InsufficientFundsException: موجودی کافی نیست. موجودی فعلی: 5000.00
+INFO 2026-02-12 10:27:07,203 wallet_service 248 129122680432320 START: Adjust balance for User 3. Amount: 80000.00, Type: deposit
+INFO 2026-02-12 10:27:07,254 wallet_service 248 129122680432320 DEPOSIT SUCCESS: User 3, New Balance: 85000.00
+INFO 2026-02-12 10:31:55,897 wallet_service 357 134253863147200 START: Adjust balance for User 3. Amount: 444545515.00, Type: deposit
+INFO 2026-02-12 10:31:56,011 wallet_service 357 134253863147200 DEPOSIT SUCCESS: User 3, New Balance: 444630515.00
+INFO 2026-02-12 10:32:23,803 wallet_service 357 134253852657344 START: Adjust balance for User 1. Amount: 76846465.00, Type: deposit
+INFO 2026-02-12 10:32:23,843 wallet_service 357 134253852657344 DEPOSIT SUCCESS: User 1, New Balance: 100825688.00
+INFO 2026-02-12 10:32:50,356 wallet_service 357 134253852657344 START: Adjust balance for User 3. Amount: 5555555555.00, Type: deposit
+INFO 2026-02-12 10:32:50,390 wallet_service 357 134253852657344 DEPOSIT SUCCESS: User 3, New Balance: 6000186070.00
+INFO 2026-02-12 10:32:59,718 wallet_service 357 134253843216064 START: Adjust balance for User 3. Amount: 20000.00, Type: deposit
+INFO 2026-02-12 10:32:59,745 wallet_service 357 134253843216064 DEPOSIT SUCCESS: User 3, New Balance: 6000206070.00
+INFO 2026-02-12 10:33:24,665 wallet_service 357 134253843216064 START: Adjust balance for User 1. Amount: 6000000000.00, Type: debit
+ERROR 2026-02-12 10:33:24,675 wallet_service 357 134253843216064 FAILED: Adjust balance for User 1. Error: موجودی کافی نیست. موجودی فعلی: 100825688.00
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 54, in adjust_balance
+    wallet = self.domain_service.debit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 60, in debit
+    raise InsufficientFundsException(f"موجودی کافی نیست. موجودی فعلی: {wallet.balance}")
+apps.accounts.exceptions.InsufficientFundsException: موجودی کافی نیست. موجودی فعلی: 100825688.00
+INFO 2026-02-12 10:33:29,479 wallet_service 357 134253843216064 START: Adjust balance for User 1. Amount: 600000000.00, Type: debit
+ERROR 2026-02-12 10:33:29,493 wallet_service 357 134253843216064 FAILED: Adjust balance for User 1. Error: موجودی کافی نیست. موجودی فعلی: 100825688.00
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 54, in adjust_balance
+    wallet = self.domain_service.debit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 60, in debit
+    raise InsufficientFundsException(f"موجودی کافی نیست. موجودی فعلی: {wallet.balance}")
+apps.accounts.exceptions.InsufficientFundsException: موجودی کافی نیست. موجودی فعلی: 100825688.00
+INFO 2026-02-12 10:33:31,250 wallet_service 357 134253843216064 START: Adjust balance for User 1. Amount: 60000000.00, Type: debit
+INFO 2026-02-12 10:33:31,280 wallet_service 357 134253843216064 DEBIT SUCCESS: User 1, New Balance: 40825688.00
+INFO 2026-02-12 10:33:49,943 wallet_service 357 134253852657344 START: Adjust balance for User 1. Amount: 1000000000.00, Type: debit
+ERROR 2026-02-12 10:33:49,959 wallet_service 357 134253852657344 FAILED: Adjust balance for User 1. Error: موجودی کافی نیست. موجودی فعلی: 40825688.00
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 54, in adjust_balance
+    wallet = self.domain_service.debit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 60, in debit
+    raise InsufficientFundsException(f"موجودی کافی نیست. موجودی فعلی: {wallet.balance}")
+apps.accounts.exceptions.InsufficientFundsException: موجودی کافی نیست. موجودی فعلی: 40825688.00
+INFO 2026-02-12 10:33:59,562 wallet_service 357 134253852657344 START: Adjust balance for User 1. Amount: 100000000.00, Type: debit
+ERROR 2026-02-12 10:33:59,577 wallet_service 357 134253852657344 FAILED: Adjust balance for User 1. Error: موجودی کافی نیست. موجودی فعلی: 40825688.00
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 54, in adjust_balance
+    wallet = self.domain_service.debit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 60, in debit
+    raise InsufficientFundsException(f"موجودی کافی نیست. موجودی فعلی: {wallet.balance}")
+apps.accounts.exceptions.InsufficientFundsException: موجودی کافی نیست. موجودی فعلی: 40825688.00
+INFO 2026-02-12 10:34:08,267 wallet_service 357 134253852657344 START: Adjust balance for User 1. Amount: 10000000.00, Type: debit
+INFO 2026-02-12 10:34:08,302 wallet_service 357 134253852657344 DEBIT SUCCESS: User 1, New Balance: 30825688.00
+INFO 2026-02-12 10:40:23,616 wallet_service 357 134253852657344 START: Adjust balance for User 1. Amount: 50000.00, Type: debit
+INFO 2026-02-12 10:40:23,651 wallet_service 357 134253852657344 DEBIT SUCCESS: User 1, New Balance: 30775688.00
+INFO 2026-02-12 11:48:21,497 wallet_service 425 132317830084288 START: Adjust balance for User 3. Amount: 100000.00, Type: deposit
+INFO 2026-02-12 11:48:21,710 wallet_service 425 132317830084288 DEPOSIT SUCCESS: User 3, New Balance: 6000306070.00
+INFO 2026-02-12 11:48:26,308 wallet_service 425 132317830084288 START: Adjust balance for User 2. Amount: 100000.00, Type: deposit
+INFO 2026-02-12 11:48:26,337 wallet_service 425 132317830084288 DEPOSIT SUCCESS: User 2, New Balance: 100000.00
+INFO 2026-02-12 11:52:29,627 wallet_service 425 132317853161152 START: Adjust balance for User 2. Amount: 5000.00, Type: debit
+INFO 2026-02-12 11:52:29,727 wallet_service 425 132317853161152 DEBIT SUCCESS: User 2, New Balance: 95000.00
+INFO 2026-02-12 11:52:40,700 wallet_service 425 132317853161152 START: Adjust balance for User 3. Amount: 60000000.00, Type: debit
+INFO 2026-02-12 11:52:40,732 wallet_service 425 132317853161152 DEBIT SUCCESS: User 3, New Balance: 5940306070.00
+INFO 2026-02-12 11:52:51,547 wallet_service 425 132317830084288 START: Adjust balance for User 3. Amount: 5900000000.00, Type: debit
+INFO 2026-02-12 11:52:51,576 wallet_service 425 132317830084288 DEBIT SUCCESS: User 3, New Balance: 40306070.00
+INFO 2026-02-12 11:52:59,955 wallet_service 425 132317853161152 START: Adjust balance for User 3. Amount: 40000000.00, Type: debit
+INFO 2026-02-12 11:52:59,983 wallet_service 425 132317853161152 DEBIT SUCCESS: User 3, New Balance: 306070.00
+INFO 2026-02-12 11:53:09,465 wallet_service 425 132317830084288 START: Adjust balance for User 2. Amount: 800.00, Type: deposit
+INFO 2026-02-12 11:53:09,552 wallet_service 425 132317830084288 DEPOSIT SUCCESS: User 2, New Balance: 95800.00
+INFO 2026-02-12 11:53:17,205 wallet_service 425 132317853161152 START: Adjust balance for User 2. Amount: 800000.00, Type: deposit
+INFO 2026-02-12 11:53:17,272 wallet_service 425 132317853161152 DEPOSIT SUCCESS: User 2, New Balance: 895800.00
+INFO 2026-02-12 11:54:04,552 wallet_service 425 132317830084288 START: Adjust balance for User 2. Amount: 8000.00, Type: deposit
+INFO 2026-02-12 11:54:04,604 wallet_service 425 132317830084288 DEPOSIT SUCCESS: User 2, New Balance: 903800.00
+INFO 2026-02-12 11:55:23,749 wallet_service 425 132317853161152 START: Adjust balance for User 3. Amount: 800.00, Type: deposit
+INFO 2026-02-12 11:55:23,807 wallet_service 425 132317853161152 DEPOSIT SUCCESS: User 3, New Balance: 306870.00
+INFO 2026-02-12 12:32:26,492 wallet_service 425 132317465011904 START: Adjust balance for User 3. Amount: 800000.00, Type: deposit
+INFO 2026-02-12 12:32:26,654 wallet_service 425 132317465011904 DEPOSIT SUCCESS: User 3, New Balance: 1106870.00
+INFO 2026-02-12 12:32:34,500 wallet_service 425 132317830084288 START: Adjust balance for User 3. Amount: 8000.00, Type: debit
+INFO 2026-02-12 12:32:34,572 wallet_service 425 132317830084288 DEBIT SUCCESS: User 3, New Balance: 1098870.00

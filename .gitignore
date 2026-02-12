@@ -183,3 +183,5 @@ cart_uploads/
 
 # فایل‌های تصویری با الگوی box_*.jpg
 box_*.jpg
+
+node_modules

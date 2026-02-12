@@ -52,6 +52,7 @@ import AdminOrderDetailsPage from './app/features/admin/features/orders/OrderDet
 import UserListPage from './app/features/admin/features/users/UsersListPage';
 import ProvincesPage from './app/features/admin/features/locations/ProvincesPage';
 import CitiesPage from './app/features/admin/features/locations/CitiesPage';
+import CustomerDetailPage from './app/features/admin/features/users/CustomerDetailPage'; 
 
 // Admin > Messages & Settings
 import MessageListPage from './app/features/admin/features/messages/MessageListPage';
@@ -116,6 +117,7 @@ function App() {
 
               {/* Users & Locations */}
               <Route path="users" element={<UserListPage />} />
+              <Route path="users/:id" element={<CustomerDetailPage />} />
               <Route path="provinces" element={<ProvincesPage />} />
               <Route path="cities" element={<CitiesPage />} />
               

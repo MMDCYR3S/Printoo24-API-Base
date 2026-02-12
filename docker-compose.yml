@@ -119,9 +119,6 @@ services:
     container_name: printoo_frontend
     ports:
      - "5173:5173"
-    
-    # === نکته مهم: وقتی هاست مود هست، نتورک‌ها رو پاک می‌کنیم ===
-    # network_mode: "host"
     volumes:
       - ./frontend/react-js:/app
       - /app/node_modules
@@ -132,8 +129,25 @@ services:
     networks: 
       - customer_site_network
 
+  # # ====== Frontend (Admin) ====== #
+  # frontend_admin:
+  #   build:
+  #     context: ./frontend/react-js
+  #     dockerfile: Dockerfile
+  #   container_name: printoo_frontend_admin
+  #   ports:
+  #    - "5174:5174"
+  #   volumes:
+  #     - ./frontend/react-js:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
+  #   depends_on:
+  #     - admin_site`
+  #   networks: 
+  #     - admin_site_network
+
 # ====== Networks' Settings ====== #
-# === نکته مهم: این بخش باید حتماً فعال باشه (کامنت نباشه) ===
 networks:
   admin_site_network:
     driver: bridge

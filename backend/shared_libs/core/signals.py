@@ -33,14 +33,14 @@ def generate_code_on_relation_creation(sender, instance, created, **kwargs):
         Product.objects.filter(pk=product.pk).update(code=new_code)
         
 # =========== PREVENT SYSTEM DATA DELETION =========== #
-@receiver(pre_delete, sender=OrderStatus)
-@receiver(pre_delete, sender=OrderStatusGroup)
-def prevent_system_data_deletion(sender, instance, **kwargs):
-    """
-    جلوگیری از حذف رکوردهای سیستمی حیاتی.
-    """
-    if instance.is_system:
-        raise PermissionDenied(f"حذف رکورد سیستمی '{instance}' مجاز نیست.")
+# @receiver(pre_delete, sender=OrderStatus)
+# @receiver(pre_delete, sender=OrderStatusGroup)
+# def prevent_system_data_deletion(sender, instance, **kwargs):
+#     """
+#     جلوگیری از حذف رکوردهای سیستمی حیاتی.
+#     """
+#     if instance.is_system:
+#         raise PermissionDenied(f"حذف رکورد سیستمی '{instance}' مجاز نیست.")
     
 # ========== CREATE STATUS GROUP ========== #
 @receiver(post_save, sender=Role)

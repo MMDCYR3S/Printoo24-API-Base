@@ -32,8 +32,9 @@ class WalletDashboardService:
     @transaction.atomic
     def adjust_balance(self, user_id: int, amount: Decimal, action_type: str) -> Wallet:
         """
-        مدیریت افزایش یا کاهش موجودی توسط ادمین.
-        action_type: 'deposit' | 'debit'
+        این متد برای اصلاح موجودی (واریز یا برداشت) استفاده می‌شود.
+        پارامترها:
+        - user_id: شناسه کاربری که می‌خواهیم موجودی‌اش را تغییر دهیم.
         """
         logger.info(f"START: Adjust balance for User {user_id}. Amount: {amount}, Type: {action_type}")
         
@@ -45,14 +46,13 @@ class WalletDashboardService:
             if amount <= 0:
                 raise ValidationError("مبلغ باید بزرگتر از صفر باشد.")
 
-            # ارجاع به سرویس دامین
             if action_type == 'deposit':
                 wallet = self.domain_service.deposit(user, amount)
-                logger.info(f"DEPOSIT SUCCESS: User {user_id}, New Balance: {wallet.decimal}")
+                logger.info(f"DEPOSIT SUCCESS: User {user_id}, New Balance: {wallet.balance}")
                 
             elif action_type == 'debit':
                 wallet = self.domain_service.debit(user, amount)
-                logger.info(f"DEBIT SUCCESS: User {user_id}, New Balance: {wallet.decimal}")
+                logger.info(f"DEBIT SUCCESS: User {user_id}, New Balance: {wallet.balance}")
                 
             else:
                 raise ValidationError("نوع عملیات نامعتبر است.")
