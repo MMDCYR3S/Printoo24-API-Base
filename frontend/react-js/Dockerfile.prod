@@ -1,4 +1,4 @@
-# مرحله دوم: اجرا با Nginx
+FROM node:22-bookworm
 FROM nginx:stable-alpine
 
 # ۱. پاک کردن محتویات پوشه پیش‌فرض Nginx
