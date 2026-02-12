@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.accounts.exceptions import InsufficientFundsException
@@ -32,45 +32,46 @@ class WalletViewSet(viewsets.ViewSet):
 
     # ===== تغییر موجودی ===== #
     @extend_schema(
-        summary="تغییر موجودی دستی (واریز/برداشت)",
+        summary="تغییر موجودی با شناسه کاربر (واریز/برداشت)",
+        description="در این متد نیازی به دانستن ID کیف پول نیست، فقط ID کاربر را ارسال کنید.",
         request=WalletAdjustmentSerializer,
         responses={200: WalletListSerializer},
         examples=[
             OpenApiExample(
                 'مثال واریز (افزایش)',
-                value={'amount': '100000.00', 'action_type': 'deposit'},
-                request_only=True,
-            ),
-            OpenApiExample(
-                'مثال برداشت (کاهش)',
-                value={'amount': '50000.00', 'action_type': 'debit'},
+                value={'user_id': 10, 'amount': '100000.00', 'action_type': 'deposit'},
                 request_only=True,
             ),
         ]
     )
-    @action(detail=True, methods=['post'], url_path='adjust')
-    def adjust_balance(self, request, pk=None):
-        # ===== دریافت کیف پول مورد نظر ===== #
-        try:
-            wallet = Wallet.objects.get(pk=pk)
-        except Wallet.DoesNotExist:
-             return Response({'detail': 'کیف پول یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
-
+    @action(detail=False, methods=['post'], url_path='adjust-balance')
+    def adjust_balance(self, request):
+        
         # ===== اعتبارسنجی ورودی ===== #
         serializer = WalletAdjustmentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # ===== اجرای سرویس برای افزایش یا کاهش موجودی ===== #
+        user_id = serializer.validated_data['user_id']
+        amount = serializer.validated_data['amount']
+        action_type = serializer.validated_data['action_type']
+
+        # ===== اجرای عملیات اصلاح موجودی ===== #
         try:
             updated_wallet = self.service.adjust_balance(
-                user_id=wallet.user_id,
-                amount=serializer.validated_data['amount'],
-                action_type=serializer.validated_data['action_type'],
+                user_id=user_id,
+                amount=amount,
+                action_type=action_type,
             )
+            
+            # ===== بازگشت اطلاعات کیف پول به‌روزرسانی شده ===== #
             return Response(WalletListSerializer(updated_wallet).data, status=status.HTTP_200_OK)
             
+        except NotFound as e:
+            return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except (InsufficientFundsException, ValidationError) as e:
-            raise ValidationError({'detail': str(e)})
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'detail': 'خطای سیستمی رخ داده است.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # ===== تاریخچه تراکنش‌ها ===== #
     @extend_schema(summary="تاریخچه تراکنش‌های یک کیف پول")

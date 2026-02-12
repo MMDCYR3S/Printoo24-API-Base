@@ -18,8 +18,12 @@ class WalletListSerializer(serializers.ModelSerializer):
         except Exception:
             return "-"
 
-# ===== سریالایزر تغییر موجودی (Action) ===== #
+# ===== اصلاح سریالایزر تغییر موجودی ===== #
 class WalletAdjustmentSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField(
+        required=True, 
+        help_text="شناسه کاربری که قصد تغییر موجودی او را دارید"
+    )
     amount = serializers.DecimalField(
         max_digits=12, 
         decimal_places=2, 
@@ -30,12 +34,19 @@ class WalletAdjustmentSerializer(serializers.Serializer):
         choices=[('deposit', 'واریز (افزایش)'), ('debit', 'برداشت (کاهش)')],
         help_text="نوع عملیات: deposit برای افزایش، debit برای کاهش"
     )
+    description = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        help_text="توضیحات تراکنش (اختیاری)"
+    )
 
     class Meta:
         swagger_schema_fields = {
             "example": {
+                "user_id": 15,
                 "amount": "50000.00",
-                "action_type": "deposit"
+                "action_type": "deposit",
+                "description": "هدیه مدیریت"
             }
         }
 

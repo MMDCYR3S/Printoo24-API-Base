@@ -34,60 +34,32 @@ class CustomerOrchestratorService:
     # ===== شاهکار: ایجاد اتمیک مشتری ===== #
     @transaction.atomic
     def create_customer(self, data: Dict[str, Any]) -> User:
-        # ===== دریافت نام کاربری برای لاگ ===== #
         username = data.get('username')
         logger.info(f"START: Creating new customer '{username}'")
         
         try:
             # ===== تفکیک داده های ورودی ===== #
-            user_payload = {
-                k: v for k, v in data.items() 
-                if k in ['username', 'email', 'password', 'is_active']
-            }
-            profile_payload = {
-                k: v for k, v in data.items() 
-                if k in ['first_name', 'last_name', 'phone_number', 'company', 'bio']
-            }
-            addresses_data = data.get('addresses', [])
+            user = self.user_repo.create_customer(data)
+            logger.info(f"User core (User+Profile+Role) created: ID={user.id}")
 
-            # ===== ایجاد کاربر در دیتابیس ===== #
-            user = self.user_repo.create_customer(user_payload)
-            logger.info(f"User created: ID={user.id}")
-
-            # ===== ایجاد یا آپدیت پروفایل مشتری (حل مشکل عدم ذخیره مشخصات) ===== #
-            CustomerProfile.objects.update_or_create(
-                user=user,
-                defaults=profile_payload
-            )
-            logger.debug(f"Profile synced for User {user.id}")
-                
-            # ===== ایجاد کیف پول (اصلاح باگ AttributeError و فیلد balance) ===== #
             Wallet.objects.get_or_create(
                 user=user,
                 defaults={'balance': 0}
             )
             logger.debug(f"Wallet initialized for User {user.id}")
 
-            # ===== اختصاص نقش مشتری به کاربر ===== #
-            customer_role = Role.objects.filter(is_customer=True).first()
-            if customer_role:
-                UserRole.objects.get_or_create(user=user, role=customer_role)
-                logger.debug(f"Role '{customer_role.name}' assigned.")
-            else:
-                logger.warning("Customer Role not found!")
-
-            # ===== ثبت آدرس های کاربر ===== #
+            # ===== ایجاد کاربر در دیتابیس ===== #
+            addresses_data = data.get('addresses', [])
             if addresses_data:
                 for addr in addresses_data:
                     addr.pop('id', None)
                     self.address_service.create_address(user_id=user.id, data=addr)
+                logger.debug(f"{len(addresses_data)} addresses created for User {user.id}")
             
-            # ===== اتمام موفقیت آمیز عملیات ===== #
             logger.info(f"SUCCESS: Customer '{username}' created fully.")
             return user
 
         except Exception as e:
-            # ===== لاگ خطا و بازگشت تغییرات ===== #
             logger.error(f"FAILED: Create customer '{username}'. Error: {str(e)}", exc_info=True)
             raise e
 
@@ -97,60 +69,25 @@ class CustomerOrchestratorService:
         logger.info(f"START: Updating Customer {user_id}")
         
         try:
+            # ===== دریافت مشتری ===== #
             user = self.user_repo.get_customer_by_id(user_id)
-            if not user:
-                raise ValidationError("کاربر یافت نشد.")
-
-            # ===== بروزرسانی اطلاعات پایه ===== #
-            allowed_user_fields = ['email', 'username', 'is_active', 'password']
-            user_update_data = {k: v for k, v in data.items() if k in allowed_user_fields}
             
-            if user_update_data:
-                self.user_repo.update_customer(user_id, user_update_data)
-                logger.debug(f"User base info updated for {user_id}")
-            
-            # ===== تغییر رمز ===== #
-            if 'password' in data and data['password']:
-                user.set_password(data['password'])
-                user.save()
-                logger.info(f"Password updated for User {user_id}")
-
-            # 3. بروزرسانی پروفایل
-            if hasattr(user, 'customer_profile'):
-                profile = user.customer_profile
-                profile_nested_data = data.get('customer_profile', {})
-                
-                profile_fields = ['first_name', 'last_name', 'phone_number', 'company', 'bio']
-                updated_fields = []
-                for field in profile_fields:
-                    if field in profile_nested_data:
-                        setattr(profile, field, profile_nested_data[field])
-                        updated_fields.append(field)
-                
-                if updated_fields:
-                    profile.save()
-                    logger.debug(f"Profile fields {updated_fields} updated for User {user_id}")
-
-            logger.info(f"START: Updating Customer {user_id} and addresses")
-        
-            # ===== دریافت آدرس ===== #
-            addresses_data = data.pop('addresses', None)
-
-            # ===== آپدیت اطلاعات کاربر ===== #
+            # ===== مدیریت اطلاعات کاربر و پروفایل ===== #
             user = self.user_repo.update_customer(user_id, data)
+            logger.debug(f"User & Profile updated via Domain Service for {user_id}")
 
-            # ===== داده‌های آدرس ===== #
+            # ===== مدیریت آدرس‌ها ===== #
+            addresses_data = data.get('addresses')
             if addresses_data is not None:
                 self._handle_address_updates(user, addresses_data)
+                logger.debug(f"Addresses updated for {user_id}")
 
-                logger.info(f"SUCCESS: Customer {user_id} updated.")
-                return user
+            logger.info(f"SUCCESS: Customer {user_id} updated.")
+            return user
 
         except Exception as e:
             logger.error(f"FAILED: Update customer {user_id} failed. Error: {str(e)}", exc_info=True)
-            raise e
-
-    # ===== عملیات حذف تکی ===== #
+            raise e 
     @transaction.atomic
     def delete_customer(self, user_id: int):
         logger.warning(f"START: Deleting Customer {user_id}")
