@@ -22,7 +22,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/admin/, '')
       },
       '/api/customer': {
-        target: 'http://127.0.0.1:9010',
+        target: 'customer_site:9010',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/customer/, '')
       }

@@ -129,7 +129,6 @@ services:
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - customer_site
-      - admin_site
     networks: 
       - customer_site_network
 
