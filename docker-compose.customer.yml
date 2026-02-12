@@ -42,12 +42,20 @@ services:
 
   # ====== Frontend (Nginx) ====== #
   frontend:
-    build:
+    build: 
       context: ./frontend/react-js
       dockerfile: Dockerfile.prod
     container_name: printoo_frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend/react-js/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - customer_static:/app/src/staticfiles
+      - customer_media:/app/src/media
     networks: 
       - customer_net
+    depends_on:
+      - customer_site
     restart: always
 
 networks:
