@@ -42,6 +42,11 @@ class WalletViewSet(viewsets.ViewSet):
                 value={'user_id': 10, 'amount': '100000.00', 'action_type': 'deposit'},
                 request_only=True,
             ),
+            OpenApiExample(
+                'مثال برداشت (کاهش)',
+                value={'user_id': 10, 'amount': '100000.00', 'action_type': 'debit'},
+                request_only=True,
+            ),
         ]
     )
     @action(detail=False, methods=['post'], url_path='adjust-balance')
