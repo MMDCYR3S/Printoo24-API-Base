@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // مطمئن شو که پورت درسته
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+const BASE_URL = '/api/v1';
 // فانکشن کمکی برای تولید شناسه مهمان (بدون تغییر در ساختار اصلی)
 const getGuestToken = () => {
   let token = localStorage.getItem('guest_token');
