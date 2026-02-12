@@ -52,9 +52,9 @@ class Command(BaseCommand):
         # گروه‌ها
         groups_data = [
             {"name": "ادمین", "code": "admin", "description": "مدیریت کل سیستم"},
-            {"name": "طراح", "code": "designer", "description": "واحد طراحی و لیتوگرافی"},
-            {"name": "چاپ", "code": "printing", "description": "واحد تولید و چاپ"},
-            {"name": "انبار", "code": "warehouse", "description": "واحد انبار و ارسال"},
+            {"name": "طراح", "code": "design", "description": "واحد طراحی و لیتوگرافی"},
+            {"name": "چاپ", "code": "print", "description": "واحد تولید و چاپ"},
+            {"name": "انبار", "code": "logistics", "description": "واحد انبار و ارسال"},
             {"name": "مشتری", "code": "customer", "description": "نمایش برای مشتری"},
         ]
 
@@ -74,8 +74,8 @@ class Command(BaseCommand):
         statuses_data = [
             {"name": "در انتظار بررسی", "internal_code": "PENDING_INITIAL_ADMIN", "status_type": "initial", "group": "admin"},
             {"name": "در حال طراحی", "internal_code": "DESIGN_PROGRESS_DESIGNER", "status_type": "progress", "group": "designer"},
-            {"name": "در حال چاپ", "internal_code": "PRINTING_PROGRESS_PRINTING", "status_type": "progress", "group": "printing"},
-            {"name": "ارسال‌شده", "internal_code": "SHIPPED_PROGRESS_WAREHOUSE", "status_type": "progress", "group": "warehouse"},
+            {"name": "در حال چاپ", "internal_code": "print_PROGRESS_PRINT", "status_type": "progress", "group": "print"},
+            {"name": "ارسال‌شده", "internal_code": "SHIPPED_PROGRESS_LOGISTICS", "status_type": "progress", "group": "logistics"},
             {"name": "تحویل‌شده", "internal_code": "DELIVERED_APPROVE_ADMIN", "status_type": "approve", "group": "admin"},
             {"name": "لغو شده", "internal_code": "CANCELED_CANCEL_ADMIN", "status_type": "cancel", "group": "admin"},
         ]
@@ -123,8 +123,8 @@ class Command(BaseCommand):
         self.designer_role.allowed_groups.set([self.groups_map['designer']])
         
         # نقش چاپخانه
-        self.printer_role, _ = Role.objects.get_or_create(
-            slug='printer',
+        self.print_role, _ = Role.objects.get_or_create(
+            slug='print',
             defaults={
                 'name': 'اپراتور چاپ',
                 'description': 'واحد تولید و چاپ',
@@ -132,11 +132,11 @@ class Command(BaseCommand):
                 'is_customer': False
             }
         )
-        self.printer_role.allowed_groups.set([self.groups_map['printing']])
+        self.print_role.allowed_groups.set([self.groups_map['print']])
         
         # نقش انباردار
-        self.warehouse_role, _ = Role.objects.get_or_create(
-            slug='warehouse',
+        self.logistics_role, _ = Role.objects.get_or_create(
+            slug='logistics',
             defaults={
                 'name': 'انباردار',
                 'description': 'واحد انبار و ارسال',
@@ -144,7 +144,7 @@ class Command(BaseCommand):
                 'is_customer': False
             }
         )
-        self.warehouse_role.allowed_groups.set([self.groups_map['warehouse']])
+        self.logistics_role.allowed_groups.set([self.groups_map['logistics']])
         
         # نقش مشتری
         self.customer_role, _ = Role.objects.get_or_create(
@@ -182,7 +182,7 @@ class Command(BaseCommand):
                 'is_superuser': True
             }
         )
-        admin_user.set_password('123456')
+        admin_user.set_password('admin')
         admin_user.save()
         UserRole.objects.get_or_create(user=admin_user, role=self.admin_role)
         
@@ -195,35 +195,35 @@ class Command(BaseCommand):
                 'is_staff': True
             }
         )
-        self.designer_user.set_password('123456')
+        self.designer_user.set_password('admin')
         self.designer_user.save()
         UserRole.objects.get_or_create(user=self.designer_user, role=self.designer_role)
         
         # 3. اپراتور چاپ
-        self.printer_user, _ = User.objects.get_or_create(
-            username='printer',
+        self.print_user, _ = User.objects.get_or_create(
+            username='print',
             defaults={
-                'email': 'printer@test.com',
+                'email': 'print@test.com',
                 'is_active': True,
                 'is_staff': True
             }
         )
-        self.printer_user.set_password('123456')
-        self.printer_user.save()
-        UserRole.objects.get_or_create(user=self.printer_user, role=self.printer_role)
+        self.print_user.set_password('admin')
+        self.print_user.save()
+        UserRole.objects.get_or_create(user=self.print_user, role=self.print_role)
         
         # 4. انباردار
-        self.warehouse_user, _ = User.objects.get_or_create(
-            username='warehouse',
+        self.logistics_user, _ = User.objects.get_or_create(
+            username='logistics',
             defaults={
-                'email': 'warehouse@test.com',
+                'email': 'logistics@test.com',
                 'is_active': True,
                 'is_staff': True
             }
         )
-        self.warehouse_user.set_password('123456')
-        self.warehouse_user.save()
-        UserRole.objects.get_or_create(user=self.warehouse_user, role=self.warehouse_role)
+        self.logistics_user.set_password('admin')
+        self.logistics_user.save()
+        UserRole.objects.get_or_create(user=self.logistics_user, role=self.logistics_role)
         
         # 5. مشتری
         customer_user, _ = User.objects.get_or_create(
@@ -243,7 +243,7 @@ class Command(BaseCommand):
             defaults={
                 'first_name': 'علی',
                 'last_name': 'احمدی',
-                'phone_number': '09123456789',
+                'phone_number': '09admin789',
                 'company': 'شرکت تست'
             }
         )
@@ -254,13 +254,13 @@ class Command(BaseCommand):
             defaults={
                 'province': province,
                 'city': city,
-                'postal_code': '1234567890',
+                'postal_code': 'admin7890',
                 'address': 'خیابان ولیعصر، پلاک 123'
             }
         )
         
-        self.stdout.write(self.style.SUCCESS("✅ Users created: admin, designer, printer, warehouse, customer1"))
-        self.stdout.write(self.style.WARNING("🔑 All passwords: 123456"))
+        self.stdout.write(self.style.SUCCESS("✅ Users created: admin, design, print, logistics, customer1"))
+        self.stdout.write(self.style.WARNING("🔑 All passwords: admin"))
 
     def _create_cost_categories(self):
         """ایجاد دسته‌بندی‌های هزینه"""
@@ -333,7 +333,7 @@ class Command(BaseCommand):
                 user=self.designer_user,
                 amount=Decimal('5000000'),
                 method='card_to_card',
-                tracking_code='1234567890',
+                tracking_code='admin7890',
                 payment_date=timezone.now(),
                 status='confirmed'
             )
@@ -401,7 +401,7 @@ class Command(BaseCommand):
             for rep_data in print_reports_data:
                 report = OrderCostReport.objects.create(
                     sheet=cost_sheet,
-                    submitter=self.printer_user,
+                    submitter=self.print_user,
                     title=rep_data['title'],
                     cost_type=rep_data['cost_type'],
                     is_approved=True,
@@ -418,7 +418,7 @@ class Command(BaseCommand):
                     )
             
             # ===== 5 گزارش برای واحد انبار ===== #
-            warehouse_reports_data = [
+            logistics_reports_data = [
                 {
                     'title': 'گزارش هزینه بسته‌بندی اولیه',
                     'cost_type': cost_type_material,
@@ -460,10 +460,10 @@ class Command(BaseCommand):
                 },
             ]
             
-            for rep_data in warehouse_reports_data:
+            for rep_data in logistics_reports_data:
                 report = OrderCostReport.objects.create(
                     sheet=cost_sheet,
-                    submitter=self.warehouse_user,
+                    submitter=self.logistics_user,
                     title=rep_data['title'],
                     cost_type=rep_data['cost_type'],
                     is_approved=True,
