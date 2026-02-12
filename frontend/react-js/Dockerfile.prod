@@ -1,19 +1,17 @@
-FROM node:22-bookworm
+# مرحله اول: ساخت
+FROM node:22-bookworm AS build-stage
+WORKDIR /app
+RUN npm config set registry https://mirror-npm.runflare.com/
+COPY package.json package-lock.json ./
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+# مرحله دوم: اجرا با Nginx
 FROM nginx:stable-alpine
-
-# ۱. پاک کردن محتویات پوشه پیش‌فرض Nginx
-RUN rm -rf /usr/share/nginx/html/*
-
-# ۲. کپی کردن فایل‌های بیلد شده از مرحله قبل
 COPY --from=build-stage /app/dist /usr/share/nginx/html
-
-# ۳. حذف کانفیگ پیش‌فرض و کپی کانفیگ خودت (با نام دقیق)
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
-
-# ۴. (اختیاری اما محکم‌کاری) تنظیم دسترسی‌ها
-RUN chmod -R 755 /usr/share/nginx/html
-
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]
