@@ -137,8 +137,6 @@ class OrderStatus(models.Model):
                 self.sort_order = max_order + 1
 
         super().save(*args, **kwargs)
-
-        super().save(*args, **kwargs)
                 
 # ======================= #
 # ===== Order Model ===== #

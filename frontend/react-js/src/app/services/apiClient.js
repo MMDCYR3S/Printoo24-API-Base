@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // مطمئن شو که پورت درسته
-const BASE_URL = '/api/v1';
+const BASE_URL = 'http://localhost:9010/api/v1';
 
 // فانکشن کمکی برای تولید شناسه مهمان (بدون تغییر در ساختار اصلی)
 const getGuestToken = () => {

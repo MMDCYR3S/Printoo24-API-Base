@@ -21,7 +21,6 @@ class OrderDetailAppService:
         این متد جایگزین متد منیجر قبلی می‌شود.
         """
         # ===== ساخت کوئری پایه ===== #
-        # نکته: در سرویس self به آبجکت سرویس اشاره دارد، پس با Order.objects شروع می‌کنیم
         queryset = Order.objects.filter(id=order_id)
         
         # ===== اعمال اولوک‌ها ===== #
@@ -29,8 +28,7 @@ class OrderDetailAppService:
             'user', 
             'current_status__group', 
             'address__city',
-            'address__province', 
-            'cost_sheet'
+            'address__province'
         )
 
         # ===== اعمال پرچ‌ها ===== #
@@ -44,29 +42,6 @@ class OrderDetailAppService:
                         queryset=OrderItemFile.objects.filter(is_latest=True).order_by('-version')
                     )
                 )
-            ),
-            
-            # ===== سند مالی ===== #
-            Prefetch(
-                'cost_sheet',
-                queryset=OrderCostSheet.objects.prefetch_related(
-                    Prefetch(
-                        'reports',
-                        queryset=OrderCostReport.objects.select_related('submitter').prefetch_related(
-                            Prefetch(
-                                'items',
-                                queryset=OrderCostItem.objects.select_related('catalog_item')
-                            ),
-                            'attachments'
-                        ).order_by('-created_at')
-                    )
-                )
-            ),
-
-            # ===== مرسوله ===== #
-            Prefetch(
-                'shipments',
-                queryset=OrderShipment.objects.select_related('order').prefetch_related('packages')
             )
         )
         
