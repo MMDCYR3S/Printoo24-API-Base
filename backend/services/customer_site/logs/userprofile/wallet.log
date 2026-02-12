@@ -122,3 +122,5 @@ INFO 2026-02-10 15:55:46,869 user_transaction_service 484 137922290538176 Fetchi
 WARNING 2026-02-10 15:55:46,885 user_transaction_service 484 137922290538176 No wallet found for User ID: 1
 INFO 2026-02-10 16:31:39,024 user_transaction_service 633 140347533399744 Fetching wallet balance for User ID: 1
 DEBUG 2026-02-10 16:31:39,042 user_transaction_service 633 140347533399744 Wallet balance: 25000000.00
+INFO 2026-02-12 11:42:13,390 user_transaction_service 425 132317830084288 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-12 11:42:13,425 user_transaction_service 425 132317830084288 Wallet balance: 30775688.00
