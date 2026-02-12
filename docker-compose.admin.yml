@@ -39,6 +39,24 @@ services:
     networks:
       - shared_data_net
 
+  # ====== Frontend (Admin) ====== #
+  frontend_admin:
+    build:
+      context: ./frontend/react-js
+      dockerfile: Dockerfile
+    container_name: printoo_frontend_admin
+    ports:
+     - "5174:5174"
+    volumes:
+      - ./frontend/react-js:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - admin_site
+    networks: 
+      - admin_site_network
+
 networks:
   admin_net:
     driver: bridge

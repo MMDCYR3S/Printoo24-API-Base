@@ -8,10 +8,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         roles_data = [
             {
-                'code': 'admin_internal', 
-                'name': 'مدیر داخلی', 
+                'code': 'admin', 
+                'name': 'ادمین', 
                 'desc': 'دسترسی کامل به مدیریت سفارشات و کاربران داخلی',
-                'perms': ['view_order', 'change_order', 'view_user'] # مثال
             },
             {
                 'code': 'finance', 

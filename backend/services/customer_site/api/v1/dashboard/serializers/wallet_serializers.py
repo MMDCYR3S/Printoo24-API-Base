@@ -27,7 +27,7 @@ class WalletAdjustmentSerializer(serializers.Serializer):
     amount = serializers.DecimalField(
         max_digits=12, 
         decimal_places=2, 
-        min_value=0.01,
+        min_value=1,
         help_text="مبلغ تراکنش به عدد اعشاری"
     )
     action_type = serializers.ChoiceField(
