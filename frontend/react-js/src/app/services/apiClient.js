@@ -1,18 +1,7 @@
-// src/app/services/apiClient.js
 import axios from 'axios';
 
 // مطمئن شو که پورت درسته
 const BASE_URL = 'http://localhost:9010/api/v1';
-
-// فانکشن کمکی برای تولید شناسه مهمان (بدون تغییر در ساختار اصلی)
-const getGuestToken = () => {
-  let token = localStorage.getItem('guest_token');
-  if (!token) {
-    token = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('guest_token', token);
-  }
-  return token;
-};
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -26,9 +15,6 @@ apiClient.interceptors.request.use(
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      // فقط زمانی که توکن لاگین نداریم، توکن مهمان را بفرست
-      config.headers['X-Guest-Token'] = getGuestToken();
     }
     return config;
   },

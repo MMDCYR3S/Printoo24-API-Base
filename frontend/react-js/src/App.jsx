@@ -4,12 +4,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 
-// موقت
-import DesignUploadPage from './app/features/shop/components/DesignUploadPage';
-import CartPage from './app/features/shop/CartPage'
-import CheckoutPage from './app/features/shop/CheckoutPage';
-
-
 // --- Layouts & Guards ---
 import MainLayout from './app/layouts/MainLayout';
 import AuthLayout from './app/features/auth/AuthLayout';
@@ -110,7 +104,7 @@ function App() {
               <Route path="categories/new" element={<CategoryUpsertPage />} />
               <Route path="categories/edit/:id/" element={<CategoryUpsertPage />} />
               <Route path="categories/:id/subs" element={<SubCategoryPage />} />
-              <Route path="categories/:id/" element={<CategoryDetailPage />} />
+              <Route path="detail/:id" element={<CategoryDetailPage />} />
               <Route path="edit/:id" element={<CategoryUpsertPage />} />
 
               {/* Orders */}
@@ -152,15 +146,6 @@ function App() {
               <Route path="wallet" element={<WalletPage />} />
               <Route path="addresses" element={<AddressPage />} />
             </Route>
-
-
-
-
-<Route path="/cart/upload/:itemId" element={<DesignUploadPage />} />
-<Route path="/cart" element={<CartPage />} />
-<Route path="/checkout" element={<CheckoutPage />} />
-
-
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
