@@ -335,7 +335,7 @@ class CustomerReadSerializer(serializers.ModelSerializer):
     addresses = AddressReadSerializer(many=True, read_only=True)
     
     wallet_balance = serializers.DecimalField(
-        source='wallet.decimal', max_digits=12, decimal_places=2, read_only=True
+        source='wallet.balance', max_digits=12, decimal_places=2, read_only=True
     )
 
     class Meta:

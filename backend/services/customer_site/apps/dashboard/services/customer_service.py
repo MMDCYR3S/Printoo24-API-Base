@@ -3,7 +3,7 @@ from typing import Dict, Any, List
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from core.models import User, CustomerProfile, Role, UserRole
+from core.models import User, CustomerProfile, Role, UserRole, User
 from core.users.services import CustomerService, AddressService
 from apps.accounts.models import Wallet
 
@@ -34,58 +34,61 @@ class CustomerOrchestratorService:
     # ===== شاهکار: ایجاد اتمیک مشتری ===== #
     @transaction.atomic
     def create_customer(self, data: Dict[str, Any]) -> User:
-        """
-        ایجاد مشتری به همراه تمام متعلقات (پروفایل، کیف پول، نقش).
-        """
+        # ===== دریافت نام کاربری برای لاگ ===== #
         username = data.get('username')
         logger.info(f"START: Creating new customer '{username}'")
         
         try:
-            # ===== تفکیک داده ها ===== #
-            user_data = {
+            # ===== تفکیک داده های ورودی ===== #
+            user_payload = {
                 k: v for k, v in data.items() 
                 if k in ['username', 'email', 'password', 'is_active']
             }
-            profile_data = {
+            profile_payload = {
                 k: v for k, v in data.items() 
                 if k in ['first_name', 'last_name', 'phone_number', 'company', 'bio']
             }
+            addresses_data = data.get('addresses', [])
 
-            addresses_data = data.pop('addresses', [])
-
-            # ===== ایجاد کاربر ===== #
-            user = self.user_repo.create_customer(user_data)
+            # ===== ایجاد کاربر در دیتابیس ===== #
+            user = self.user_repo.create_customer(user_payload)
             logger.info(f"User created: ID={user.id}")
 
-            # ===== ایجاد پروفایل در صورت نبود ===== #
-            if not CustomerProfile.objects.filter(user=user).exists():
-                CustomerProfile.objects.create(user=user)
-                logger.debug(f"Profile created for User {user.id}")
+            # ===== ایجاد یا آپدیت پروفایل مشتری (حل مشکل عدم ذخیره مشخصات) ===== #
+            CustomerProfile.objects.update_or_create(
+                user=user,
+                defaults=profile_payload
+            )
+            logger.debug(f"Profile synced for User {user.id}")
                 
-            # ===== ایجاد کیف پول ===== #
-            if not Wallet.objects.filter(user=user).exists():
-                Wallet.objects.create(user=user, decimal=0)
-                logger.debug(f"Wallet created for User {user.id}")
+            # ===== ایجاد کیف پول (اصلاح باگ AttributeError و فیلد balance) ===== #
+            Wallet.objects.get_or_create(
+                user=user,
+                defaults={'balance': 0}
+            )
+            logger.debug(f"Wallet initialized for User {user.id}")
 
-            # ===== ایجاد نقش ===== #
+            # ===== اختصاص نقش مشتری به کاربر ===== #
             customer_role = Role.objects.filter(is_customer=True).first()
             if customer_role:
-                UserRole.objects.create(user=user, role=customer_role)
-                logger.debug(f"Role '{customer_role.name}' assigned to User {user.id}")
+                UserRole.objects.get_or_create(user=user, role=customer_role)
+                logger.debug(f"Role '{customer_role.name}' assigned.")
             else:
-                logger.warning("Customer Role not found! User created without explicit role.")
+                logger.warning("Customer Role not found!")
 
+            # ===== ثبت آدرس های کاربر ===== #
             if addresses_data:
                 for addr in addresses_data:
-                    if 'id' in addr: del addr['id']
+                    addr.pop('id', None)
                     self.address_service.create_address(user_id=user.id, data=addr)
             
-            logger.info(f"{len(addresses_data)} addresses created for User {user.id}")
-            logger.info(f"SUCCESS: Customer '{username}' (ID: {user.id}) created fully.")
+            # ===== اتمام موفقیت آمیز عملیات ===== #
+            logger.info(f"SUCCESS: Customer '{username}' created fully.")
             return user
 
         except Exception as e:
-            logger.error(f"FAILED: Create customer '{username}' failed. Error: {str(e)}", exc_info=True)
+            # ===== لاگ خطا و بازگشت تغییرات ===== #
+            logger.error(f"FAILED: Create customer '{username}'. Error: {str(e)}", exc_info=True)
             raise e
 
     # ===== ویرایش اتمیک مشتری ===== #
