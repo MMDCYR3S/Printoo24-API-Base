@@ -20,8 +20,24 @@ class WalletListSerializer(serializers.ModelSerializer):
 
 # ===== سریالایزر تغییر موجودی (Action) ===== #
 class WalletAdjustmentSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=12, decimal_places=0, min_value=1)
-    action_type = serializers.ChoiceField(choices=[('deposit', 'افزایش'), ('debit', 'کاهش')])
+    amount = serializers.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        min_value=0.01,
+        help_text="مبلغ تراکنش به عدد اعشاری"
+    )
+    action_type = serializers.ChoiceField(
+        choices=[('deposit', 'واریز (افزایش)'), ('debit', 'برداشت (کاهش)')],
+        help_text="نوع عملیات: deposit برای افزایش، debit برای کاهش"
+    )
+
+    class Meta:
+        swagger_schema_fields = {
+            "example": {
+                "amount": "50000.00",
+                "action_type": "deposit"
+            }
+        }
 
 # ===== سریالایزر تاریخچه تراکنش ===== #
 class WalletTransactionSerializer(serializers.ModelSerializer):
