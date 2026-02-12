@@ -9,9 +9,9 @@ from .views import (
 
 urlpatterns = [
     # ===== Staff URLs ===== #
-    # path('staff/', StaffListCreateView.as_view(), name='staff-list-create'),
-    # path('staff/<int:pk>/', StaffDetailView.as_view(), name='staff-detail'),
-    # path('staff/actions/<str:action>/', StaffBulkActionsView.as_view(), name='staff-bulk-actions'),
+    path('staff/', StaffListCreateView.as_view(), name='staff-list-create'),
+    path('staff/<int:pk>/', StaffDetailView.as_view(), name='staff-detail'),
+    path('staff/actions/<str:action>/', StaffBulkActionsView.as_view(), name='staff-bulk-actions'),
     
     # ===== Role URLs ===== #
     # path('roles/permissions/', PermissionListAPIView.as_view(), name='permission-list'),
