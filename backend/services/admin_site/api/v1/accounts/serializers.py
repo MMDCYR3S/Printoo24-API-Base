@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import User, Role
+from core.models import User, Role, Address, Province, City
 from django.contrib.auth.models import Permission
 
 # ========== Permission & Role DTOs ========== #
@@ -99,3 +99,113 @@ class LoginSerializer(serializers.Serializer):
 
 class RefreshTokenSerializer(serializers.Serializer):
     refresh = serializers.CharField()
+
+
+# ========== Customer Serializers ========== #
+class CustomerListSerializer(serializers.ModelSerializer):
+    """
+    خروجی لیست مشتریان.
+    اطلاعات User و Profile را ترکیب می‌کند.
+    """
+    first_name = serializers.CharField(source='customer_profile.first_name', read_only=True)
+    last_name = serializers.CharField(source='customer_profile.last_name', read_only=True)
+    phone_number = serializers.CharField(source='customer_profile.phone_number', read_only=True)
+    company = serializers.CharField(source='customer_profile.company', read_only=True)
+    bio = serializers.CharField(source='customer_profile.bio', read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'email', 'is_active', 'last_login', 'created_at',
+            'first_name', 'last_name', 'phone_number', 'company', 'bio'
+        ]
+
+# ========== CUSTOMER UPDATE SERIALIZER ========== #
+class CustomerUpdateSerializer(serializers.Serializer):
+    """
+    ویرایش اطلاعات مشتری.
+    """
+    email = serializers.EmailField(required=False)
+    is_active = serializers.BooleanField(required=False)
+    password = serializers.CharField(required=False, write_only=True, min_length=8)
+
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+    phone_number = serializers.CharField(required=False, allow_blank=True)
+    company = serializers.CharField(required=False, allow_blank=True)
+    bio = serializers.CharField(required=False, allow_blank=True)
+
+# ========== GEO SERIALIZERS ========== #
+class ProvinceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Province
+        fields = ['id', 'name', 'slug']
+
+class CitySerializer(serializers.ModelSerializer):
+    province_name = serializers.CharField(source='province.name', read_only=True)
+    
+    class Meta:
+        model = City
+        fields = ['id', 'name', 'slug', 'province', 'province_name']
+
+# ========== ADDRESS SERIALIZERS ========== #
+class AddressSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر برای نمایش و ایجاد/ویرایش آدرس
+    """
+    province_id = serializers.IntegerField(write_only=True)
+    city_id = serializers.IntegerField(write_only=True)
+    
+    # ===== اطلاعات آدرس ===== #
+    province = serializers.CharField(source='province.name', read_only=True)
+    city = serializers.CharField(source='city.name', read_only=True)
+
+    class Meta:
+        model = Address
+        fields = [
+            'id', 'province_id', 'city_id', 'postal_code', 'address', 
+            'province', 'city', 'created_at'
+        ]
+
+# ========== CUSTOMER SERIALIZERS ========== #
+class CustomerCreateSerializer(serializers.Serializer):
+    """
+    آپدیت شده: اضافه شدن فیلد addresses
+    """
+    # ===== اطلاعات اصلی کاربر ===== #
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+    is_active = serializers.BooleanField(default=True)
+
+    # ===== اطلاعات پروفایل ===== #
+    first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    phone_number = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    company = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    bio = serializers.CharField(required=False, allow_blank=True)
+
+    # ===== اطلاعات آدرس ===== #
+    addresses = AddressSerializer(many=True, required=False, write_only=True)
+
+class CustomerDetailSerializer(serializers.ModelSerializer):
+    """
+    نمایش جزئیات کامل یک مشتری شامل پروفایل و تمام آدرس‌ها
+    """
+    # ===== اطلاعات پروفایل ===== #
+    first_name = serializers.CharField(source='customer_profile.first_name', read_only=True)
+    last_name = serializers.CharField(source='customer_profile.last_name', read_only=True)
+    phone_number = serializers.CharField(source='customer_profile.phone_number', read_only=True)
+    company = serializers.CharField(source='customer_profile.company', read_only=True)
+    bio = serializers.CharField(source='customer_profile.bio', read_only=True)
+    
+    # ===== آدرس ===== #
+    addresses = AddressSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'email', 'is_active', 'last_login', 'created_at',
+            'first_name', 'last_name', 'phone_number', 'company', 'bio',
+            'addresses'
+        ]

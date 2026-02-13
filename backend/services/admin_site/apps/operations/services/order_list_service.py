@@ -1,6 +1,7 @@
 from typing import List
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import PermissionDenied
 
 from core.models import Order, User
 from apps.support.services import LoggerService
@@ -16,7 +17,7 @@ class OrderListAppService:
     def __init__(self):
         self.audit_service = LoggerService()
 
-    def get_order_list_for_staff(self, requester: User) -> List[Order]:
+    def get_order_list_for_staff(self, requester: User):
         """
         دریافت لیست سفارشات فیلتر شده بر اساس نقش کارمند.
         """
@@ -37,14 +38,14 @@ class OrderListAppService:
             # ===== بررسی وجود نقش برای کاربر ===== #
             user_role_rel = requester.user_role.select_related('role').first()
             if not user_role_rel:
-                return Order.objects.none()
+                raise PermissionDenied(_("شما هیچ نقش سیستمی فعالی ندارید و مجاز به مشاهده لیست سفارشات نیستید."))
             
             # ===== دریافت نقش کاربر ===== #
             role = user_role_rel.role
             role_slug = role.slug
             # ===== دریافت گروه‌های مرتبط با نقش ===== #
             allowed_groups = list(role.allowed_groups.values_list('code', flat=True))
-
+            
             if role.type == "admin" or allowed_groups:
                 final_qs = queryset.filter(current_status__group__code__in=allowed_groups)
             else:

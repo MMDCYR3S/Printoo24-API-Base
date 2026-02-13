@@ -7,18 +7,6 @@ from apps.logistics.models import OrderPackage, OrderShipment
 from .order_cost_serializer import OrderCostSheetSerializer
 
 # ========== 1. Micro Serializers ========== #
-
-class OrderStatusGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderStatusGroup
-        fields = ['name', 'code']
-
-class OrderStatusSerializer(serializers.ModelSerializer):
-    group = OrderStatusGroupSerializer(read_only=True)
-    class Meta:
-        model = OrderStatus
-        fields = ['name', 'internal_code', 'group', 'status_type']
-
 class FileSerializer(serializers.ModelSerializer):
     """ نمایش فایل‌های طراحی """
     file_url = serializers.CharField(source='file.url', read_only=True)
@@ -29,26 +17,7 @@ class FileSerializer(serializers.ModelSerializer):
         model = OrderItemFile
         fields = ['id', 'file_url', 'filename', 'version', 'is_latest', 'admin_feedback', 'requirement_name']
 
-class PackageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderPackage
-        fields = ['box_number', 'weight_grams', 'label_code', 'content_summary']
-
-class ShipmentSerializer(serializers.ModelSerializer):
-    packages = PackageSerializer(many=True, read_only=True)
-    
-    class Meta:
-        model = OrderShipment
-        fields = ['id', 'tracking_code', 'status', 'delivery_method', 'packages', 'expected_delivery_date']
-
-class InvoiceSimpleSerializer(serializers.ModelSerializer):
-    status_name = serializers.CharField(source='status.name', read_only=True)
-    class Meta:
-        model = Invoice
-        fields = ['id', 'invoice_number', 'final_amount', 'paid_amount', 'status_name', 'is_pre_payment_done']
-
 # ========== 2. Item Serializers =========== #
-
 class BaseOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
     product_code = serializers.CharField(source='product.code', read_only=True)
@@ -96,7 +65,8 @@ class BaseOrderDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_customer_info(self, obj):
-        if not obj.user: return None
+        if not obj.user:
+            return None
         
         info = {"username": obj.user.username, "email": obj.user.email}
         if hasattr(obj.user, 'customer_profile'):
@@ -108,53 +78,15 @@ class BaseOrderDetailSerializer(serializers.ModelSerializer):
             })
         return info
 
-# ===== Role: Designer / Production ===== #
-class DesignerOrderDetailSerializer(BaseOrderDetailSerializer):
-    """ نمایش برای واحد طراحی و چاپ """
-    items = DesignerOrderItemSerializer(source='order_item_order', many=True, read_only=True)
-    
-    class Meta(BaseOrderDetailSerializer.Meta):
-        fields = BaseOrderDetailSerializer.Meta.fields + ['items']
-
-# ===== Role: Logistics ===== #
-class LogisticsOrderDetailSerializer(BaseOrderDetailSerializer):
-    """ نمایش برای انبار و لجستیک """
-    shipping_info = serializers.SerializerMethodField()
-    items = BaseOrderItemSerializer(source='order_item_order', many=True, read_only=True) 
-    
-    class Meta(BaseOrderDetailSerializer.Meta):
-        fields = BaseOrderDetailSerializer.Meta.fields + ['items', 'shipping_info']
-
-    def get_shipping_info(self, obj):
-        address = obj.address
-        return {
-            "recipient_name": f"{address.user.username}" if address else "",
-            "full_address": str(address),
-            "postal_code": address.postal_code if address else "",
-            "shipments": ShipmentSerializer(obj.shipments.all(), many=True).data
-        }
-
-# ===== Role: Finance ===== #
-class FinanceOrderDetailSerializer(BaseOrderDetailSerializer):
-    """ نمایش برای واحد مالی """
-    cost_sheet = OrderCostSheetSerializer(read_only=True)
-    invoice = InvoiceSimpleSerializer(source='related_invoice', read_only=True)
-    
-    class Meta(BaseOrderDetailSerializer.Meta):
-        fields = BaseOrderDetailSerializer.Meta.fields + [
-            'invoice', 'cost_sheet', 'total_price', 'base_products_price'
-        ]
-
-# ===== Role: Admin (Super Detail) ===== #
-class AdminOrderDetailSerializer(BaseOrderDetailSerializer):
+class UniversalOrderDetailSerializer(BaseOrderDetailSerializer):
+    """
+    سریالایزر جامع برای نمایش تمام جزئیات به همه پرسنل.
+    """
     items = FullOrderItemSerializer(source='order_item_order', many=True, read_only=True)
-    
-    invoice = InvoiceSimpleSerializer(source='related_invoice', read_only=True)
-    
     class Meta(BaseOrderDetailSerializer.Meta):
+        model = Order
         fields = BaseOrderDetailSerializer.Meta.fields + [
             'items',
-            'invoice',
-            'total_price',
+            'total_price', 
             'base_products_price'
         ]

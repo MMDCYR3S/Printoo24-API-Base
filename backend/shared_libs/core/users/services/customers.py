@@ -17,10 +17,22 @@ class CustomerService:
         """دریافت لیست تمام مشتریان (Read Operation)"""
         # برای خواندن می‌توانیم مستقیم از منیجر استفاده کنیم
         return User.objects.get_all_customers()
+    
+    def get_all_customers_admin(self):
+        """دریافت لیست تمام مشتریان (Read Operation)"""
+        # برای خواندن می‌توانیم مستقیم از منیجر استفاده کنیم
+        return User.objects.get_all_customers_admin()
 
     def get_customer_by_id(self, user_id: int) -> User:
         """دریافت یک مشتری خاص"""
         user = User.objects.filter(pk=user_id).with_full_profile().first()
+        if not user:
+            raise ValidationError("مشتری یافت نشد.")
+        return user
+    
+    def get_customer_by_id_admin(self, user_id: int) -> User:
+        """دریافت یک مشتری خاص"""
+        user = User.objects.filter(pk=user_id).with_full_profile_admin().first()
         if not user:
             raise ValidationError("مشتری یافت نشد.")
         return user
@@ -77,7 +89,7 @@ class CustomerService:
         """
         ویرایش اطلاعات مشتری (شامل یوزر و پروفایل).
         """
-        user = self.get_customer_by_id(user_id)
+        user = self.get_customer_by_id_admin(user_id)
         profile = getattr(user, 'customer_profile', None)
 
         # 1. آپدیت اطلاعات یوزر
