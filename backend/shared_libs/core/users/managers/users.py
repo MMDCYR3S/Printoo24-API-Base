@@ -27,6 +27,11 @@ class UserQuerySet(BaseQuerySet):
     def with_full_profile(self):
         """همراه با پروفایل و کیف پول (برای مشتریان)"""
         return self.select_related('customer_profile', 'wallet')
+    
+    # ===== بهینه‌سازی کوئری‌ها (Eager Loading) ===== #
+    def with_full_profile_admin(self):
+        """همراه با پروفایل و کیف پول (برای مشتریان)"""
+        return self.select_related('customer_profile')
 
     def with_roles(self):
         """همراه با نقش‌ها و دسترسی‌ها (برای پرسنل)"""
@@ -44,11 +49,19 @@ class UserManager(BaseUserManager):
     
     def get_queryset(self):
         return UserQuerySet(self.model, using=self._db)
+    
+    def customers(self):
+        return self.get_queryset().customers()
 
     # ===== متدهای دسترسی به QuerySet سفارشی ===== #
     def get_all_customers(self):
         """دریافت لیست کامل مشتریان با پرفورمنس بالا"""
         return self.get_queryset().customers().with_full_profile().order_by('-created_at')
+    
+    # ===== متدهای دسترسی به QuerySet سفارشی ===== #
+    def get_all_customers_admin(self):
+        """دریافت لیست کامل مشتریان با پرفورمنس بالا"""
+        return self.get_queryset().customers().with_full_profile_admin().order_by('-created_at')
 
     def get_all_staff(self):
         """دریافت لیست کارکنان"""
