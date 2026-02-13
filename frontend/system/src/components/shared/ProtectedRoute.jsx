@@ -7,8 +7,8 @@ const ProtectedRoute = ({ children }) => {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    // کاربر را به لاگین بفرست ولی آدرس فعلی را نگه دار تا بعداً برگردد
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // اصلاح آدرس به /auth/login برای تطابق با AppRoutes
+    return <Navigate to="/auth/login" state={{ from: location }} replace />;
   }
 
   return children;
