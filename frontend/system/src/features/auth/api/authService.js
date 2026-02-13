@@ -1,9 +1,12 @@
 import apiClient from "../../../api/client";
 import { API_ENDPOINTS } from "../../../config/constants";
 
-// نکته مهم: حتما باید کلمه export اینجا باشد
-export const authApi = { 
-  // ورود
+export const authApi = {
+  /**
+   * ارسال درخواست ورود به سیستم
+   * @param {string} username
+   * @param {string} password
+   */
   login: async (username, password) => {
     const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, {
       username,
@@ -12,14 +15,20 @@ export const authApi = {
     return response.data;
   },
 
-  // خروج
+  /**
+   * خروج از سیستم
+   * @param {string} refreshToken
+   */
   logout: async (refreshToken) => {
     return apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, {
       refresh: refreshToken,
     });
   },
 
-  // رفرش
+  /**
+   * رفرش توکن
+   * @param {string} refreshToken
+   */
   refreshToken: async (refreshToken) => {
     return apiClient.post(API_ENDPOINTS.AUTH.REFRESH, {
       refresh: refreshToken,

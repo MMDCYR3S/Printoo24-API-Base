@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner"; 
 
 import DashboardLayout from "./components/layout/DashboardLayout";
-import OrdersPage from "./features/orders/pages/OrdersPage";
+import OrdersPage from "./features/shared/orders/pages/OrdersPage";
 import Login from "./features/auth/pages/Login"; 
 import ProtectedRoute from "./components/shared/ProtectedRoute";
 

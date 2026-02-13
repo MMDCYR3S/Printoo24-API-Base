@@ -91,6 +91,9 @@
 }
 
 @theme{
-  --color-light-gold:#FEC226;
+  --color-gold-light:#FEC226;
+  --color-gold-dark: #B78122;
   --color-gray-dark: #262626 ;
+  --color-gray-medium:#D8D8D8;
+  --color-gray-light:#F3F3F3;
 }

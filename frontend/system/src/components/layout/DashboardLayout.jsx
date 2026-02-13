@@ -1,26 +1,45 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
+import React, { useState } from "react";
+import { Outlet, Navigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
+import useAuthStore from "@/store/authStore";
+
+// ایمپورت کانفیگ‌های ادمین
+import { adminNavigation } from "@/features/roles/admin/config/adminNavigation";
+import { adminHeaderActions } from "@/features/roles/admin/config/adminHeaderActions";
 
 export default function DashboardLayout() {
-  return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* سایدبار موقت */}
-      <aside className="w-64 bg-gray-dark text-gold-light hidden md:block">
-        <div className="p-6 font-bold text-xl">Printoo Admin</div>
-        <nav className="p-4 space-y-2">
-          <div className="p-2 bg-slate-800 rounded cursor-pointer">سفارشات</div>
-          <div className="p-2 hover:bg-slate-800 rounded cursor-pointer text-slate-300">طراحی</div>
-          <div className="p-2 hover:bg-slate-800 rounded cursor-pointer text-slate-300">چاپخانه</div>
-        </nav>
-      </aside>
+  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-      {/* محتوای اصلی */}
-      <main className="flex-1">
-        <header className="h-16 border-b bg-white flex items-center px-6">
-          <span className="font-semibold">پنل مدیریت</span>
-        </header>
-        <div className="p-4">
-          <Outlet /> {/* اینجا OrdersPage رندر می‌شود */}
+  if (isLoading) return null;
+  if (!isAuthenticated) return <Navigate to="/auth/login" replace />;
+
+  // تخصیص منو و اکشن‌ها
+  const navigationItems = adminNavigation;
+  const headerActions = adminHeaderActions;
+
+  return (
+    <div className="min-h-screen bg-gray-dark flex flex-col" dir="rtl">
+      {/* پاس دادن دکمه‌های هدر */}
+      <Header actions={headerActions} />
+      
+      <Sidebar 
+        items={navigationItems} 
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
+
+      <main 
+        className={cn(
+          "flex-1 pt-20 pb-8 transition-all duration-300 ease-in-out min-h-screen bg-gray-50", 
+          sidebarCollapsed ? "pr-20" : "pr-72", 
+          "pl-4 sm:pl-8"
+        )}
+      >
+        <div className="container mx-auto max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <Outlet />
         </div>
       </main>
     </div>
