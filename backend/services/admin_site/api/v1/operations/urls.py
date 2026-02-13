@@ -12,10 +12,12 @@ from .views import (
     OrderFinancialTypeView,
     OrderStatusTransactionListView,
     OrderApproveView,
-    OrderRejectView
+    OrderRejectView,
+    DashboardViewSet
 )
 
 router = DefaultRouter()
+router.register(r'dashboard', DashboardViewSet, basename='dashboard')
 # router.register(r'status-groups', OrderStatusGroupViewSet, basename='status-group')
 # router.register(r'statuses', OrderStatusViewSet, basename='status')
 

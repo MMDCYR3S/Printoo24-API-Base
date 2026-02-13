@@ -257,4 +257,19 @@ class WarehouseAppService:
             attachment=data.get('attachment'),
             items_data=data['items'],
             user=user
-        )    
+        )
+    
+    # ===== CONFIRM ENTRY ACTION ===== #
+    @transaction.atomic
+    def confirm_order_entry(self, user: User, order_id: int) -> Order:
+        """
+        تایید ورود سفارش به انبار (توسط انباردار).
+        """
+        AppPermissionChecker.check_has_permission(user, 'change_ordershipment')
+        
+        try:
+            order = Order.objects.get(pk=order_id)
+        except Order.DoesNotExist:
+            raise NotFound("سفارش یافت نشد.")
+
+        return self._logistic_domain.approve_order_entry_to_warehouse(order, user)

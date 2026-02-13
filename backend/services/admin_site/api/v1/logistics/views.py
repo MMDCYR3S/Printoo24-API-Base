@@ -130,6 +130,26 @@ class ShipmentViewSet(viewsets.ViewSet):
             data=serializer.validated_data
         )
         return Response(PackageOutputSerializer(package).data, status=status.HTTP_201_CREATED)
+    
+    # ===== APPROVE VIEW ===== #
+    @extend_schema(
+        summary="تایید ورود کالا به انبار (Receipt)",
+        description="تغییر وضعیت سفارش به 'آماده ارسال/تایید انبار'. این یعنی کالا از تولید آمده و در انبار موجود است.",
+        request=None,
+        responses={200: {"status": "approved_in_warehouse"}}
+    )
+    @action(detail=True, methods=['post'], url_path='approve-entry')
+    def approve_entry(self, request, pk=None):
+        """
+        pk: Order ID
+        """
+        service = WarehouseAppService()
+        service.confirm_order_entry(request.user, order_id=pk)
+        
+        return Response(
+            {"detail": "ورود کالا به انبار تایید شد و وضعیت به 'آماده ارسال' تغییر یافت."}, 
+            status=status.HTTP_200_OK
+        )
 
 # ========== LOGISTIC COSTS ========== #
 @extend_schema(tags=['Warehouse - Financials'])

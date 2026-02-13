@@ -132,3 +132,52 @@ class LogisticsService:
 
         return update_fields
     
+    # ===== APPROVE ORDER ENTRY (WAREHOUSE RECEIPT) ===== #
+    @transaction.atomic
+    def approve_order_entry_to_warehouse(self, order: Order, user: User) -> Order:
+        """
+        تایید ورود کالا به انبار (Receipt Confirmation).
+        زمانی که تولید تمام شده و کالا فیزیکی به انبار می‌رسد، انباردار تایید می‌کند.
+        وضعیت سفارش به 'آماده ارسال' (Approve Type) تغییر می‌کند.
+        """
+
+        current_status = order.current_status
+
+        # ===== دریافت وضعیت تایید انبار ===== #
+        warehouse_approved_status = OrderStatus.objects.filter(
+            group__code=current_status.group.code, 
+            status_type='approve'
+        ).first()
+        
+        if not warehouse_approved_status:
+            raise ValidationError("وضعیت 'تایید انبار' (Approve) تعریف نشده است.")
+
+        # ===== بررسی وضعیت فعلی سفارش ===== #
+        if order.current_status == warehouse_approved_status:
+             raise ValidationError("این سفارش قبلاً توسط انبار تایید (رسید) شده است.")
+
+        old_status_name = order.current_status.name if order.current_status else "نامشخص"
+
+        # ===== تغییر وضعیت سفارش به 'تایید انبار' ===== #
+        order.current_status = warehouse_approved_status
+        order.save(update_fields=['current_status', 'updated_at'])
+
+        # ===== بررسی و به‌روزرسانی وضعیت مرسوله‌ها ===== #
+        pending_shipments = order.shipments.exclude(status__in=['dispatched', 'delivered', 'returned'])
+        
+        # ===== وضعیت ===== #
+        pending_shipments.update(status='ready_to_ship')
+
+        # ===== ثبت لاگ ===== #
+        self.audit_service.record_log(
+            user=user,
+            obj=order,
+            action='WAREHOUSE_CONFIRM',
+            changes={
+                'from_status': old_status_name,
+                'to_status': warehouse_approved_status.name,
+            },
+            description=_("تایید ورود کالا به انبار (اتمام تولید)")
+        )
+        
+        return order

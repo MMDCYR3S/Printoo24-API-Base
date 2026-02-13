@@ -102,5 +102,3 @@ class ShipmentOutputSerializer(serializers.ModelSerializer):
             'status',
             'tracking_code',
         ]
-        
-
