@@ -44,3 +44,14 @@ class OrderTransitionSerializer(serializers.Serializer):
         """ نرمال‌سازی کد وضعیت به حروف بزرگ """
         return value.upper().strip()
         
+class OrderRejectSerializer(serializers.Serializer):
+    """
+    ورودی متد رد کردن سفارش.
+    فقط توضیحات دریافت می‌شود (کد وضعیت سمت بک‌ند تعیین می‌شود).
+    """
+    description = serializers.CharField(
+        required=True,
+        allow_blank=False,
+        error_messages={'required': 'لطفاً دلیل رد کردن سفارش را بنویسید.'},
+        help_text="دلیل رد شدن سفارش (جهت نمایش به مشتری یا واحد قبلی)"
+    )

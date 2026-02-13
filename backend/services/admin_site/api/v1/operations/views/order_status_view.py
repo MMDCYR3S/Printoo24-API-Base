@@ -11,7 +11,7 @@ from apps.order.domain_services import OrderStatusService
 from apps.permissions import AppPermissionChecker
 from ..serializers import (
     OrderStatusListSerializer, OrderStatusInputSerializer,
-    OrderTransitionSerializer
+    OrderTransitionSerializer, OrderRejectSerializer
 )
 
 # ========== Order Status ViewSet ========== #
@@ -150,6 +150,49 @@ class OrderApproveView(GenericAPIView):
         
         except Exception as e:
             return Response({"detail": f"خطای سیستمی رخ داده است.{str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+# ========== ORDER REJECT VIEW ========== #
+@extend_schema(tags=['Admin - Order Status Transition'])
+class OrderRejectView(GenericAPIView):
+    """
+    رد کردن سفارش (Reject).
+    سیستم به صورت خودکار وضعیت Reject مربوط به گروه فعلی سفارش را پیدا کرده و اعمال می‌کند.
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderRejectSerializer 
+
+    def post(self, request, pk):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        description = serializer.validated_data['description']
+        
+        try:
+            service = OrderTransitionAppService()
+            # ===== رد صلاحیت ===== #
+            updated_order = service.execute_reject(
+                requester=request.user,
+                order_id=pk,
+                description=description
+            )
+
+            return Response({
+                "message": "سفارش با موفقیت رد شد.",
+                "id": updated_order.id,
+                "new_status": updated_order.current_status.name,
+                "previous_group": updated_order.current_status.group.name,
+                "is_rejected": True
+            }, status=status.HTTP_200_OK)
+            
+        except (ValidationError, PermissionDenied) as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            # ===== ثبت خطا ===== #
+            return Response(
+                {"detail": f"خطای سیستمی در پردازش درخواست: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # ========== ORDER STATUS LIST ========== #
 @extend_schema(tags=['Admin - Order Status Transition'])

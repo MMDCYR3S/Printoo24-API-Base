@@ -20,20 +20,12 @@ class OrderDetailAppService:
         متد خصوصی برای ساخت کوئری سنگین و دریافت سوپر-دیتا.
         این متد جایگزین متد منیجر قبلی می‌شود.
         """
-        # ===== ساخت کوئری پایه ===== #
-        queryset = Order.objects.filter(id=order_id)
-        
-        # ===== اعمال اولوک‌ها ===== #
-        queryset = queryset.select_related(
+        queryset = Order.objects.filter(id=order_id).select_related(
             'user', 
             'current_status__group', 
             'address__city',
             'address__province'
-        )
-
-        # ===== اعمال پرچ‌ها ===== #
-        queryset = queryset.prefetch_related(
-            # ===== آیتم‌ها ===== #
+        ).prefetch_related(
             Prefetch(
                 'order_item_order',
                 queryset=OrderItem.objects.select_related('product').prefetch_related(
@@ -44,7 +36,6 @@ class OrderDetailAppService:
                 )
             )
         )
-        
         return queryset.first()
 
     def get_order_detail(self, requester: User, order_id: int):
@@ -54,62 +45,42 @@ class OrderDetailAppService:
         """
         # ===== دریافت سفارش ===== #
         order = self._get_full_order_data(order_id)
-        
         if not order:
             raise NotFound("سفارش مورد نظر یافت نشد.")
         
-        try:
-            # ===== دریافت نقش کاربر و چک‌های اولیه ===== #
-            if requester.is_superuser:
-                self._log_access(requester, order, 'superuser', 'granted')
-                return order, 'superuser'
-            # ===== بررسی نقش ===== #
-            user_role_rel = requester.user_role.select_related('role').first()
-            if not user_role_rel:
-                raise PermissionDenied("شما هیچ نقش سیستمی فعالی ندارید.")
-            
-            role = user_role_rel.role
-             
-            # ===== بررسی وجود گروه وضعیتی ===== #
-            allowed_group_codes = list(role.allowed_groups.values_list('code', flat=True))
-            if not allowed_group_codes:
-                 raise PermissionDenied(f"نقش '{role.name}' دسترسی به هیچ مرحله‌ای از سفارشات را ندارد.")
-             
-            # ===== بررسی دسترسی ===== #
-            if not order.current_status or not order.current_status.group:
-                 raise PermissionDenied(f"شما دسترسی به مشاهده سفارش در مرحله '{order.current_status.group.name}' را ندارید.")
-             
-            current_group_code = order.current_status.group.code
-            if current_group_code not in allowed_group_codes:
-                raise PermissionDenied(
-                    f"نقش شما ({role.name}) اجازه مشاهده سفارش در مرحله '{order.current_status.group.name}' را ندارد."
-                )
-            # ===== 5. لاگ دسترسی موفق ===== #
-            self._log_access(requester, order, role.slug, 'granted')
-            return order, role.slug
+        if requester.is_superuser:
+            self._log_access(requester, order, 'superuser', 'granted')
+            return order
 
-        except PermissionDenied as e:
-            # ===== لاگ دسترسی ناموفق ===== #
-            self._log_access(requester, order, 'unknown', 'denied', str(e))
-            raise e
+        user_role_rel = requester.user_role.select_related('role').first()
+        if not user_role_rel:
+            raise PermissionDenied("شما هیچ نقش سیستمی فعالی ندارید.")
+        
+        role = user_role_rel.role
+        allowed_group_codes = list(role.allowed_groups.values_list('code', flat=True))
+
+        if role.type != 'admin':
+            if not allowed_group_codes:
+                 raise PermissionDenied(f"نقش '{role.name}' دسترسی به سفارشات را ندارد.")
+            
+            if not order.current_status or not order.current_status.group:
+                 raise PermissionDenied("وضعیت سفارش نامعتبر است.")
+             
+            if order.current_status.group.code not in allowed_group_codes:
+                raise PermissionDenied(f"دسترسی به این مرحله ({order.current_status.group.name}) ندارید.")
+
+        self._log_access(requester, order, role.slug, 'granted')
+        return order
     
-    # ========== LOG ACCESS ========== #
+    # ===== LOG ACCESS ===== #
     def _log_access(self, user, order, role, status, reason=None):
-        """ متد کمکی برای ثبت لاگ دسترسی خواندن """
         changes = {
             'access_status': status, 
             'role_used': role,
             'order_code': order.order_code,
             'current_status': order.current_status.name if order.current_status else 'None'
         }
-        
-        if reason:
-            changes['denial_reason'] = reason
-
+        if reason: changes['denial_reason'] = reason
         self.audit_service.record_log(
-            user=user,
-            obj=order,
-            action='VIEW_ORDER_DETAIL',
-            changes=changes,
-            description=_("مشاهده جزئیات کامل سفارش")
+            user=user, obj=order, action='VIEW_ORDER_DETAIL', changes=changes, description="مشاهده جزئیات سفارش"
         )

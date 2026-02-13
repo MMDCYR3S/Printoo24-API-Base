@@ -101,6 +101,75 @@ class OrderTransitionAppService:
             )
             raise e
 
+    # ===== EXECUTE REJECT ===== #
+    def execute_reject(self, requester: User, order_id: int, description: str = None):
+        """
+        رد کردن وضعیت سفارش (Reject).
+        
+        لاجیک:
+        1. بررسی دسترسی کاربر به گروه وضعیت فعلی.
+        2. پیدا کردن وضعیت از نوع 'reject' که مربوط به همین گروه باشد.
+        3. اعمال تغییر وضعیت.
+        """
+        # ===== بررسی مجوز ===== #
+        AppPermissionChecker.check_has_permission(requester, 'change_orderstatus')
+
+        # ===== دریافت سفارش ===== #
+        try:
+            order = Order.objects.get_order_by_id(order_id)
+            if not order:
+                raise ValidationError("سفارش یافت نشد.")
+        except Exception:
+            raise ValidationError("خطا در بازیابی سفارش.")
+
+        current_status = order.current_status
+        if not current_status:
+            raise ValidationError("این سفارش وضعیت مشخصی ندارد و قابل رد کردن نیست.")
+
+        try:
+            # ===== بررسی دسترسی به وضعیت ===== #
+            self._validate_role_scope(requester, current_status)
+
+            # ===== رد کردن وضعیت ===== #
+            target_reject_status = OrderStatus.objects.filter(
+                group=current_status.group,
+                status_type='reject'
+            ).first()
+
+            # ===== اگر وضعیت رد شده برای این گروه تعریف نشده بود، خطا بده ===== #
+            if not target_reject_status:
+                raise ValidationError(
+                    f"خطای تنظیمات سیستم: وضعیت 'رد شده' (Reject) برای گروه '{current_status.group.name}' تعریف نشده است."
+                )
+            
+            # ===== اعمال تغییر وضعیت ===== #
+            if current_status.id == target_reject_status.id:
+                raise ValidationError("این سفارش قبلاً رد شده است.")
+            
+
+            return self.flow_domain_service.change_order_status(
+                order=order,
+                new_status_code=target_reject_status.internal_code,
+                user=requester,
+                description=description or _(f"سفارش در مرحله {current_status.group.name} رد شد.")
+            )
+        
+        # ===== در صورت مشکل، خطا دادن ===== #
+        except (ValidationError, PermissionDenied) as e:
+            # ===== ثبت لاگ خطا ===== #
+            self.audit_service.record_log(
+                user=requester,
+                obj=order,
+                action='REJECT_FAILED',
+                changes={
+                    'from': current_status.internal_code,
+                    'attempt': 'REJECT_STATUS',
+                    'error_type': type(e).__name__,
+                    'error_message': str(e)
+                },
+                description=_(f"تلاش ناموفق برای رد کردن سفارش")
+            )
+            raise e
 
     # ===== EXECUTE TRANSITION ===== #
     def execute_transition(self, requester: User, new_status_code: str, order_id: int, description: str = None):
