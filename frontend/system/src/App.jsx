@@ -1,37 +1,30 @@
-// src/App.jsx (Final Version)
+// مسیر: src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner"; 
+import AppRoutes from "@/routes/AppRoutes";
 
-import DashboardLayout from "./components/layout/DashboardLayout";
-import OrdersPage from "./features/shared/orders/pages/OrdersPage";
-import Login from "./features/auth/pages/Login"; 
-import ProtectedRoute from "./components/shared/ProtectedRoute";
+// حذف ایمپورت App.css برای جلوگیری از تداخل استایل‌های پیش‌فرض Vite
+// import "./App.css"; 
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000,
+    },
+  },
+});
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          {/* مسیر عمومی لاگین */}
-          <Route path="/login" element={<Login />} />
-
-          {/* مسیرهای محافظت شده */}
-          <Route path="/" element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Navigate to="/orders" replace />} />
-            <Route path="orders" element={<OrdersPage />} />
-            {/* بقیه روت‌ها اینجا اضافه می‌شوند */}
-          </Route>
-        </Routes>
-      </Router>
-      <Toaster position="top-center" richColors />
+      <BrowserRouter>
+        <AppRoutes />
+        <Toaster position="top-center" richColors closeButton />
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }
