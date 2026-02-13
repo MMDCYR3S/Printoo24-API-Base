@@ -5,16 +5,17 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.financial.services import FinancialOrderAppService
-from apps.order.models import OrderCostCategory, OrderCostSheet, OrderCostReport
+from apps.order.models import OrderFinancialCategory, OrderFinancialSheet, OrderFinancialReport
 
 # Import Serializers (Assuming they are in serializers.py)
 from ..serializers import (
-    OrderCostReportDetailSerializer, ApproveReportInputSerializer,
+    OrderFinancialReportDetailSerializer, ApproveReportInputSerializer,
     CreateReportInputSerializer, UpdateReportInputSerializer, 
-    CostItemInputSerializer, OrderCostItemSerializer,
-    OrderCostReportListSerializer, CostCatalogSerializer, CostCatalogInputSerializer,
-    OrderCostSheetSerializer, UpdateSheetInputSerializer,
-    CreateSheetInputSerializer
+    FinancialItemInputSerializer, OrderFinancialItemSerializer,
+    OrderFinancialReportListSerializer, FinancialCatalogSerializer, FinancialCatalogInputSerializer,
+    OrderFinancialSheetSerializer, UpdateSheetInputSerializer,
+    CreateSheetInputSerializer, CreateRevenueReportInputSerializer,
+    BulkActionSerializer, 
 )
 
 class BaseFinancialViewSet(viewsets.GenericViewSet):
@@ -25,65 +26,65 @@ class BaseFinancialViewSet(viewsets.GenericViewSet):
 
 
 # ===== 1. Master Data ViewSet (Categories) ===== #
-@extend_schema(tags=['Financial - Cost Category'])
+@extend_schema(tags=['Financial - Financial Category'])
 class FinancialCatalogViewSet(BaseFinancialViewSet):
     permission_classes = [IsAuthenticated]
     
-    queryset = OrderCostCategory.objects.all() 
+    queryset = OrderFinancialCategory.objects.all() 
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
-            return CostCatalogInputSerializer
-        return CostCatalogSerializer
+            return FinancialCatalogInputSerializer
+        return FinancialCatalogSerializer
 
     def list(self, request):
         """ دریافت یک مورد (کاتالوگ) با ID """
         category = self.service.get_all_categories(request.user)
-        return Response(CostCatalogSerializer(category, many=True).data)
+        return Response(FinancialCatalogSerializer(category, many=True).data)
     
     def retrieve(self, request, pk=None):
         """ دریافت یک مORDER_COST_CATEGORY با ID """
         category = self.service._category_repo.get_by_id(pk)
-        return Response(CostCatalogSerializer(category).data)
+        return Response(FinancialCatalogSerializer(category).data)
 
     def create(self, request):
-        serializer = CostCatalogInputSerializer(data=request.data)
+        serializer = FinancialCatalogInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         category = self.service.create_category(request.user, serializer.validated_data)
-        return Response(CostCatalogSerializer(category).data, status=status.HTTP_201_CREATED)
+        return Response(FinancialCatalogSerializer(category).data, status=status.HTTP_201_CREATED)
 
     def update(self, request, pk=None):
-        serializer = CostCatalogInputSerializer(data=request.data)
+        serializer = FinancialCatalogInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         category = self.service.update_category(request.user, pk, serializer.validated_data)
-        return Response(CostCatalogSerializer(category).data)
+        return Response(FinancialCatalogSerializer(category).data)
 
     def destroy(self, request, pk=None):
         self.service.delete_category(request.user, pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# ===== 2. Financial - Sheet Costing ViewSet ===== #
-@extend_schema(tags=['Financial - Sheet Costing'])
-class FinancialOrderCostViewSet(BaseFinancialViewSet):
+# ===== 2. Financial - Sheet Financialing ViewSet ===== #
+@extend_schema(tags=['Financial - Sheet Financialing'])
+class FinancialOrderFinancialViewSet(BaseFinancialViewSet):
     """ 
     مدیریت بهای تمام شده سفارشات (Ledger).
     """
     permission_classes = [IsAuthenticated]
-    queryset = OrderCostSheet.objects.all() 
-    serializer_class = OrderCostSheetSerializer
+    queryset = OrderFinancialSheet.objects.all() 
+    serializer_class = OrderFinancialSheetSerializer
 
     @extend_schema(
         request=CreateReportInputSerializer, 
-        responses={201: OrderCostReportDetailSerializer},
+        responses={201: OrderFinancialReportDetailSerializer},
         examples=[
             OpenApiExample(
-                name='Cost Report Creation', # نام مثال در سواگر
+                name='Financial Report Creation', # نام مثال در سواگر
                 description='یک نمونه کامل برای ارسال گزارش هزینه شامل آیتم‌ها و فایل‌های پیوست',
                 value={
                     "order_id": 10,
                     "title": "هزینه چاپ و کاغذ بخش افست",
-                    "cost_type": 5,
+                    "financial_tag": 5,
                     "description": "خرید اقلام لازم برای سفارش شماره ۴۵۱۲",
                     "items": [
                         {
@@ -113,12 +114,12 @@ class FinancialOrderCostViewSet(BaseFinancialViewSet):
         serializer.is_valid(raise_exception=True)
         
         sheet = self.service.create_sheet(request.user, serializer.validated_data['order_id'])
-        return Response(OrderCostSheetSerializer(sheet).data, status=status.HTTP_201_CREATED)
+        return Response(OrderFinancialSheetSerializer(sheet).data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, pk=None):
         """ دریافت شیت با ID شیت """
         sheet = self.get_object() 
-        return Response(OrderCostSheetSerializer(sheet).data)
+        return Response(OrderFinancialSheetSerializer(sheet).data)
 
     @extend_schema(request=UpdateSheetInputSerializer)
     def partial_update(self, request, pk=None):
@@ -127,7 +128,7 @@ class FinancialOrderCostViewSet(BaseFinancialViewSet):
         serializer.is_valid(raise_exception=True)
         
         sheet = self.service.update_sheet(request.user, pk, serializer.validated_data)
-        return Response(OrderCostSheetSerializer(sheet).data)
+        return Response(OrderFinancialSheetSerializer(sheet).data)
 
     def destroy(self, request, pk=None):
         """ حذف سند """
@@ -139,7 +140,7 @@ class FinancialOrderCostViewSet(BaseFinancialViewSet):
     def get_by_order(self, request, order_id=None):
         """ دریافت شیت بر اساس شناسه سفارش """
         sheet = self.service.get_order_cost_sheet(request.user, order_id=int(order_id))
-        return Response(OrderCostSheetSerializer(sheet).data)
+        return Response(OrderFinancialSheetSerializer(sheet).data)
 
     @action(detail=True, methods=['post'], url_path='lock')
     def lock_sheet(self, request, pk=None):
@@ -153,29 +154,29 @@ class FinancialOrderCostViewSet(BaseFinancialViewSet):
         """ لیست تمام گزارشات هزینه این شیت """
         sheet = self.get_object()
         reports = self.service.get_order_reports(request.user, order_id=sheet.order_id)
-        return Response(OrderCostReportListSerializer(reports, many=True).data)
+        return Response(OrderFinancialReportListSerializer(reports, many=True).data)
 
 
 # ===== REPORT MANAGEMENT VIEWSET ===== #
-@extend_schema(tags=['Financial - Report Management'])
+@extend_schema(tags=['Financial - Cost Management'])
 class FinancialReportActionViewSet(BaseFinancialViewSet):
     """
     مدیریت ریز گزارش‌ها و اقلام آن‌ها.
     """
     permission_classes = [IsAuthenticated]
-    queryset = OrderCostReport.objects.all()
+    queryset = OrderFinancialReport.objects.filter(nature='cost')
 
     # ========== LIST ========== #
     def list(self, request):
         """ مشاهده لیست گزارشات """
-        reports = self.service.get_all_reports()
-        serializer = OrderCostReportListSerializer(reports, many=True)
+        reports = self.queryset.all()
+        serializer = OrderFinancialReportListSerializer(reports, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # ========== CREATE ========== #
     @extend_schema(
         request=CreateReportInputSerializer, 
-        responses={201: OrderCostReportDetailSerializer},
+        responses={201: OrderFinancialReportDetailSerializer},
         description="ایجاد گزارش هزینه جدید همراه با لیست آیتم‌ها و پیوست‌ها"
     )
     def create(self, request):
@@ -195,13 +196,13 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
             items=items,
             attachments=attachments
         )
-        return Response(OrderCostReportDetailSerializer(report).data, status=status.HTTP_201_CREATED)
+        return Response(OrderFinancialReportDetailSerializer(report).data, status=status.HTTP_201_CREATED)
 
     # ========== RETRIEVE ========== #
     def retrieve(self, request, pk=None):
         """ مشاهده جزئیات گزارش """
         report = self.service.get_report_detail(request.user, report_id=pk)
-        return Response(OrderCostReportDetailSerializer(report).data)
+        return Response(OrderFinancialReportDetailSerializer(report).data)
 
     # ========== UPDATE ========== #
     @extend_schema(request=UpdateReportInputSerializer)
@@ -211,7 +212,7 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
         serializer.is_valid(raise_exception=True)
         
         report = self.service.update_report(request.user, pk, serializer.validated_data)
-        return Response(OrderCostReportDetailSerializer(report).data)
+        return Response(OrderFinancialReportDetailSerializer(report).data)
 
     # ========== DELETE ========== #
     def destroy(self, request, pk=None):
@@ -235,30 +236,138 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
         return Response(status=status.HTTP_200_OK)
 
     # ========== ADD ITEM ACTIONS =========== #
-    @extend_schema(request=CostItemInputSerializer, responses=OrderCostItemSerializer)
+    @extend_schema(request=FinancialItemInputSerializer, responses=OrderFinancialItemSerializer)
     @action(detail=True, methods=['post'], url_path='items')
     def add_item(self, request, pk=None):
         """ افزودن قلم به این گزارش (pk = report_id) """
-        serializer = CostItemInputSerializer(data=request.data)
+        serializer = FinancialItemInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         item = self.service.add_item_to_report(request.user, pk, serializer.validated_data)
-        return Response(OrderCostItemSerializer(item).data, status=status.HTTP_201_CREATED)
+        return Response(OrderFinancialItemSerializer(item).data, status=status.HTTP_201_CREATED)
     
     # ========== UPDATE ITEM ACTION ========== #
-    @extend_schema(request=CostItemInputSerializer, responses=OrderCostItemSerializer)
+    @extend_schema(request=FinancialItemInputSerializer, responses=OrderFinancialItemSerializer)
     @action(detail=True, methods=['patch'], url_path='item/(?P<item_id>\d+)')
     def update_item(self, request, pk=None, item_id=None):
         """ ویرایش یک قلم خاص از گزارش """
-        serializer = CostItemInputSerializer(data=request.data, partial=True)
+        serializer = FinancialItemInputSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         
         item = self.service.update_report_item(request.user, item_id, serializer.validated_data)
-        return Response(OrderCostItemSerializer(item).data)
+        return Response(OrderFinancialItemSerializer(item).data)
 
     # ========== DELETE ITEM ACTION ========== #
     @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>\d+)')
     def delete_item(self, request, pk=None, item_id=None):
         """ حذف یک قلم خاص """
         self.service.delete_report_item(request.user, item_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# ===== REVENUE MANAGEMENT VIEWSET ===== #
+@extend_schema(tags=['Financial - Revenue Management'])
+class RevenueReportViewSet(BaseFinancialViewSet):
+    """
+    مدیریت اختصاصی درآمدهای سفارش توسط واحد مالی.
+    """
+    permission_classes = [IsAuthenticated]
+    queryset = OrderFinancialReport.objects.filter(nature='revenue')
+    serializer_class = OrderFinancialReportDetailSerializer
+
+    # ===== LIST & SEARCH REVENUES ===== #
+    def list(self, request):
+        revenues = self.queryset.all()
+        return Response(OrderFinancialReportListSerializer(revenues, many=True).data)
+
+    # ===== RETRIEVE REVENUE DETAIL ===== #
+    def retrieve(self, request, pk=None):
+        """ 
+        مشاهده جزئیات کامل یک درآمد.
+        چرایی: مالی باید بتواند ریز اقلام یک درآمد ثبت شده را ببیند.
+        """
+        report = self.service.get_report_detail(request.user, report_id=pk)
+        
+        if report.nature != 'revenue':
+            return Response({"detail": "فایل مورد نظر درآمد نیست."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        return Response(OrderFinancialReportDetailSerializer(report).data)
+
+    # ===== CREATE REVENUE ===== #
+    @extend_schema(request=CreateRevenueReportInputSerializer)
+    def create(self, request):
+        serializer = CreateRevenueReportInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        report = self.service.create_revenue_report(
+            user=request.user,
+            order_id=serializer.validated_data.pop('order_id'),
+            data=serializer.validated_data,
+            items=serializer.validated_data.pop('items', []),
+            attachments=request.FILES.getlist('attachments')
+        )
+        return Response(OrderFinancialReportDetailSerializer(report).data, status=status.HTTP_201_CREATED)
+
+    # ===== UPDATE REPORT HEADER ===== #
+    @extend_schema(request=UpdateReportInputSerializer)
+    def partial_update(self, request, pk=None):
+        """ فقط ویرایش هدر گزارش درآمد """
+        report = self.service.update_report(request.user, pk, request.data)
+        return Response(OrderFinancialReportDetailSerializer(report).data)
+
+    # ===== ITEM ACTIONS (SEPARATE EDIT) ===== #
+    @action(detail=True, methods=['post'], url_path='add-item')
+    def add_item(self, request, pk=None):
+        """ افزودن قلم جدید به درآمد موجود """
+        serializer = FinancialItemInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        item = self.service.add_item_to_report(request.user, pk, serializer.validated_data)
+        return Response(OrderFinancialItemSerializer(item).data)
+
+    @action(detail=False, methods=['patch'], url_path='update-item/(?P<item_id>\d+)')
+    def update_item(self, request, item_id=None):
+        """ ویرایش مستقیم یک قلم درآمدی خاص """
+        item = self.service.update_report_item(request.user, item_id, request.data)
+        return Response(OrderFinancialItemSerializer(item).data)
+
+    # ===== DELETE SINGLE REVENUE ===== #
+    def destroy(self, request, pk=None):
+        """ 
+        حذف تکی گزارش درآمد.
+        """
+        self.service.delete_revenue_report(request.user, pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # ===== DELETE ITEM FROM REVENUE ===== #
+    @action(detail=True, methods=['delete'], url_path='items/(?P<item_id>\d+)')
+    def delete_item(self, request, pk=None, item_id=None):
+        """
+        حذف یک قلم خاص از یک گزارش درآمدی.
+        چرایی: ممکن است فقط یکی از ردیف‌های درآمد اشتباه باشد، نه کل گزارش.
+        """
+        self.service.delete_report_item(request.user, item_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    # ===== DECIDE ON REVENUE (APPROVE/REJECT) ===== #
+    @extend_schema(request=ApproveReportInputSerializer)
+    @action(detail=True, methods=['post'], url_path='decide')
+    def decide(self, request, pk=None):
+        """ تایید یا رد درآمد (is_approved = true/false) """
+        serializer = ApproveReportInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        self.service.decide_on_revenue(
+            user=request.user, 
+            report_id=pk, 
+            approve=serializer.validated_data['approve']
+        )
+        return Response(status=status.HTTP_200_OK)
+
+    # ===== BULK OPERATIONS ===== #
+    @extend_schema(request=BulkActionSerializer)
+    @action(detail=False, methods=['delete'], url_path='bulk-delete')
+    def bulk_delete(self, request):
+        """ حذف دسته‌جمعی درآمدهای انتخاب شده """
+        serializer = BulkActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.service.bulk_delete_reports(request.user, serializer.validated_data['ids'])
         return Response(status=status.HTTP_204_NO_CONTENT)

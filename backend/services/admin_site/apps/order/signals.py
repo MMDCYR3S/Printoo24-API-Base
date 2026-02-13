@@ -1,12 +1,12 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import OrderCostReport, OrderCostItem
+from .models import OrderFinancialReport, OrderFinancialItem
 from apps.logistics.models import OrderShipment
 from core.models import Order
 
 
 # ========== محاسبه قیمت سند مالی ========== #
-@receiver(post_save, sender=OrderCostReport)
+@receiver(post_save, sender=OrderFinancialReport)
 def update_sheet_on_report_change(sender, instance, created, **kwargs):
     """
     هرگاه گزارشی ذخیره شد (چه جدید، چه آپدیت وضعیت)،
@@ -15,7 +15,7 @@ def update_sheet_on_report_change(sender, instance, created, **kwargs):
     if instance.sheet:
         instance.sheet.recalculate_totals()
 
-@receiver(post_delete, sender=OrderCostReport)
+@receiver(post_delete, sender=OrderFinancialReport)
 def update_sheet_on_report_delete(sender, instance, **kwargs):
     """
     اگر گزارشی حذف شد، مبالغ آن باید از سند مادر کسر شود.
@@ -23,7 +23,7 @@ def update_sheet_on_report_delete(sender, instance, **kwargs):
     if instance.sheet:
         instance.sheet.recalculate_totals()
 
-@receiver(post_save, sender=OrderCostItem)
+@receiver(post_save, sender=OrderFinancialItem)
 def update_sheet_on_item_change(sender, instance, created, **kwargs):
     """
     اگر مبلغ ریز اقلام تغییر کرد، باید روی ریپورت و سپس روی شیت تاثیر بگذارد.

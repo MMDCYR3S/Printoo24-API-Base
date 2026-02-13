@@ -7,117 +7,199 @@ from slugify import slugify
 
 from .managers import *
 
-# ========== ORDER COST MODELS ========== #
-class OrderCostCategory(models.Model):
+# ===== ORDER FINANCIAL CONFIGURATION ===== #
+
+class OrderFinancialCategory(models.Model):
     """
-    دسته‌بندی هزینه‌ها برای گزارش‌گیری دقیق.
-    مثال: "مواد اولیه"، "خدمات چاپ"، "برون‌سپاری"، "حمل و نقل"، "سربار"
+    دسته‌بندی‌های مالی (سرفصل‌های حساب).
+    توجه: ماهیت (هزینه/درآمد) از اینجا حذف شد و به خود گزارش منتقل شد.
+    اینجا فقط نوع عملیات و عنوان را نگه می‌داریم.
     """
-    COST_TYPE = [
-        ('design', _('طراحی')),
-        ('print', _('چاپ')),
-        ('material', _('مواد اولیه')),
-        ('transport', _('حمل و نقل')),
-        ('packing', _('بسته‌بندی')),
-        ('storage', _('برون‌سپاری')),
-        ('other', _('سایر')),
+    OPERATION_TYPE = [
+        ('design', _('واحد طراحی')),
+        ('print', _('واحد چاپ/تولید')),
+        ('material', _('تامین مواد اولیه')),
+        ('logistics', _('لجستیک و ارسال')),
+        ('outsourcing', _('برون‌سپاری')),
+        ('overhead', _('سربار/عمومی')),
+        ('sales', _('فروش و خدمات')),
     ]
     
-    title = models.CharField(_("عنوان دسته"), max_length=100)
+    title = models.CharField(_("عنوان سرفصل"), max_length=100)
     slug = models.SlugField(_("کد سیستمی"), unique=True)
-    cost_type = models.CharField(_("نوع هزینه"), max_length=20, choices=COST_TYPE, default='other')
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     
-    objects = OrderCostCategoryManager()
+    operation_type = models.CharField(
+        _("گروه عملیاتی"), 
+        max_length=20, 
+        choices=OPERATION_TYPE, 
+        default='overhead',
+        help_text="برای تفکیک گزارش‌ها در نمودارها (مثلا چقدر خرج چاپ شده)"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    
+    objects = OrderFinancialCategoryManager()
     
     class Meta:
-        db_table = 'admin_order_cost_categories'
-        verbose_name = _("دسته هزینه")
-        verbose_name_plural = _("دسته‌های هزینه")
+        db_table = 'admin_order_financial_categories'
+        verbose_name = _("سرفصل مالی سفارش")
+        verbose_name_plural = _("سرفصل‌های مالی سفارش")
 
     def __str__(self):
-        return self.title
+        return f"{self.title} ({self.get_operation_type_display()})"
     
-# ========== Order Cost Type ========== #
-class OrderCostType(models.Model):
-    """ نوع هزینه سفارش """
+# ===== Order Financial Type ===== #
+class OrderFinancialType(models.Model):
+    """ 
+    تگ‌های ریز برای گزارش‌گیری (اختیاری).
+    """
     title = models.CharField(max_length=100, verbose_name=_("عنوان"))
     slug = models.SlugField(max_length=100, unique=True, verbose_name=_("اسلاگ"), blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     
     class Meta:
-        db_table = "admin_order_cost_type"
-        verbose_name = _("نوع هزینه سفارش")
-        verbose_name_plural = _("نوع هزینه سفارش")
+        db_table = "admin_order_financial_types"
+        verbose_name = _("تگ مالی")
+        verbose_name_plural = _("تگ‌های مالی")
         
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"{self.title} - {self.slug}"
+        return self.title
 
-# ========== Order Cost Sheet ========== #
-class OrderCostSheet(models.Model):
+# ===== ORDER P&L SHEET (MAIN DOCUMENT) ===== #
+
+class OrderFinancialSheet(models.Model):
     """
-    سند کل بهای تمام شده سفارش (Internal Invoice).
-    این مدل هیچ دیتای توصیفی ندارد، فقط اعداد نهایی را برای گزارش‌گیری مالی نگه می‌دارد.
-    این رکورد باید همزمان با ایجاد سفارش (یا در اولین مرحله مالی) ساخته شود.
+    سند سود و زیان (P&L) اختصاصی هر سفارش.
     """
     order = models.OneToOneField(
         'core.Order', 
         on_delete=models.CASCADE, 
-        related_name='cost_sheet',
+        related_name='financial_sheet',
         verbose_name=_("سفارش مرتبط")
     )
     
-    # ===== وضعیت کلی سند ===== #
     is_locked = models.BooleanField(
-        _("قفل شده؟"), 
+        _("قفل حسابرسی"), 
         default=False, 
-        help_text="اگر تیک بخورد، هیچ گزارشی دیگر قابل اضافه شدن نیست (پایان سال مالی یا تسویه نهایی)."
+        help_text="پس از بستن حساب‌های سفارش، امکان تغییر وجود ندارد."
     )
     
-    # ===== تجمیع هزینه‌ها (Auto Calculated) ===== #
-    total_material_cost = models.DecimalField(_("جمع هزینه مواد"), max_digits=18, decimal_places=0, default=0)
-    total_service_cost = models.DecimalField(_("جمع هزینه خدمات/چاپ"), max_digits=18, decimal_places=0, default=0)
-    total_shipping_cost = models.DecimalField(_("جمع هزینه ارسال"), max_digits=18, decimal_places=0, default=0)
-    total_overhead_cost = models.DecimalField(_("جمع سربار/سایر"), max_digits=18, decimal_places=0, default=0)
+    # ===== خروجی‌ها (Costs) ===== #
+    total_material_cost = models.DecimalField(_("هزینه مواد"), max_digits=18, decimal_places=0, default=0)
+    total_production_cost = models.DecimalField(_("هزینه تولید/چاپ"), max_digits=18, decimal_places=0, default=0)
+    total_service_cost = models.DecimalField(_("هزینه خدمات/طراحی"), max_digits=18, decimal_places=0, default=0)
+    total_delivery_cost = models.DecimalField(_("هزینه ارسال"), max_digits=18, decimal_places=0, default=0)
+    total_other_cost = models.DecimalField(_("سایر هزینه‌ها"), max_digits=18, decimal_places=0, default=0)
     
-    # ===== اعداد نهایی سود و زیان ===== #
-    final_total_cost = models.DecimalField(_("بهای تمام شده کل"), max_digits=18, decimal_places=0, default=0)
+    final_total_cost = models.DecimalField(_("جمع کل بهای تمام شده"), max_digits=18, decimal_places=0, default=0)
     
-    revenue_amount = models.DecimalField(_("مبلغ فروش (فاکتور)"), max_digits=18, decimal_places=0, default=0)
+    # ===== ورودی‌ها (Revenues) ===== #
+    total_revenue = models.DecimalField(_("جمع کل درآمد (فروش + اضافات)"), max_digits=18, decimal_places=0, default=0)
+    
+    # ===== نتیجه نهایی (Result) ===== #
     net_profit = models.DecimalField(_("سود/زیان خالص"), max_digits=18, decimal_places=0, default=0)
     profit_margin_percent = models.FloatField(_("حاشیه سود (%)"), default=0.0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    objects = OrderCostSheetManager()
+    objects = OrderFinancialSheetManager()
 
     class Meta:
-        db_table = 'admin_order_cost_sheets'
-        verbose_name = _("سند بهای تمام شده")
-        verbose_name_plural = _("اسناد بهای تمام شده")
+        db_table = 'admin_order_financial_sheets'
+        verbose_name = _("سند سود و زیان سفارش")
+        verbose_name_plural = _("اسناد سود و زیان")
 
     def __str__(self):
-        return f"Sheet for {self.order.order_code}"
+        return f"Financial Sheet: {self.order.order_code}"
 
     def recalculate_totals(self):
+        """
+        محاسبه مجدد بر اساس ماهیت گزارش (Report Nature).
+        """
+        # ===== دریافت آیتم‌ها از گزارش‌های تایید شده ===== #
+        # نکته: باید report را هم select کنیم چون ماهیت الان توی ریپورت هست
+        items = OrderFinancialItem.objects.filter(
+            report__sheet=self,
+            report__is_approved=True
+        ).select_related('category', 'report')
+
+        # ===== ریست کردن متغیرها ===== #
+        costs = {
+            'material': 0, 'print': 0, 'design': 0, 
+            'logistics': 0, 'other': 0
+        }
+        total_rev = 0
+        total_cost = 0
+
+        # ===== پردازش آیتم‌ها ===== #
+        for item in items:
+            amount = item.amount or 0
+            
+            # ماهیت را از هدر گزارش می‌خوانیم
+            nature = item.report.nature 
+            
+            if nature == 'revenue':
+                total_rev += amount
+            else:
+                # اگر هزینه بود، تفکیک می‌کنیم که چه نوع هزینه‌ای است
+                total_cost += amount
+                
+                cat = item.category
+                if cat:
+                    op_type = cat.operation_type
+                    if op_type == 'material':
+                        costs['material'] += amount
+                    elif op_type in ['print', 'outsourcing']:
+                        costs['print'] += amount
+                    elif op_type == 'design':
+                        costs['design'] += amount
+                    elif op_type == 'logistics':
+                        costs['logistics'] += amount
+                    else:
+                        costs['other'] += amount
+                else:
+                    # بدون دسته‌بندی -> سایر
+                    costs['other'] += amount
+
+        # ===== آپدیت فیلدهای مدل ===== #
+        self.total_material_cost = costs['material']
+        self.total_production_cost = costs['print']
+        self.total_service_cost = costs['design']
+        self.total_delivery_cost = costs['logistics']
+        self.total_other_cost = costs['other']
+        
+        self.final_total_cost = total_cost
+        self.total_revenue = total_rev
+        
+        # ===== محاسبه سود ===== #
+        self.net_profit = total_rev - total_cost
+        
+        if total_rev > 0:
+            self.profit_margin_percent = (float(self.net_profit) / float(total_rev)) * 100
+        else:
+            self.profit_margin_percent = 0.0
+
         self.save()
 
-# ===== Order Cost Report ===== #
-class OrderCostReport(models.Model):
+# ===== ORDER FINANCIAL REPORTS ===== #
+class OrderFinancialReport(models.Model):
     """
-    گزارش هزینه ارسالی از سمت دپارتمان‌ها.
-    این موجودیت توسط اپراتورها پر می‌شود و به تایید مدیر مالی می‌رسد.
+    سندی که کاربر ثبت می‌کند.
+    ماهیت (هزینه یا درآمد) در اینجا تعیین می‌شود.
     """
+    NATURE_CHOICES = [
+        ('cost', _('هزینه (Cost) - خروجی')),
+        ('revenue', _('درآمد (Revenue) - ورودی')),
+    ]
+
     sheet = models.ForeignKey(
-        OrderCostSheet, 
+        OrderFinancialSheet, 
         on_delete=models.CASCADE, 
         related_name='reports',
         verbose_name=_("سند مادر")
@@ -126,100 +208,154 @@ class OrderCostReport(models.Model):
     submitter = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.PROTECT,
-        verbose_name=_("ارسال کننده گزارش")
+        verbose_name=_("ثبت کننده")
     )
     
-    title = models.CharField(_("عنوان گزارش"), max_length=200, help_text="مثلا: هزینه کاغذ مصرفی بخش افست")
-    cost_type = models.ForeignKey(
-        OrderCostType, verbose_name=_("نوع هزینه"),
-        on_delete=models.CASCADE,
+    title = models.CharField(_("عنوان گزارش"), max_length=200)
+    
+    # +++++ فیلد جدید: ماهیت گزارش +++++
+    nature = models.CharField(
+        _("ماهیت گزارش"), 
+        max_length=10, 
+        choices=NATURE_CHOICES, 
+        default='cost',
+        help_text="تعیین می‌کند اقلام این گزارش به درآمد اضافه شوند یا به هزینه."
+    )
+
+    financial_tag = models.ForeignKey(
+        OrderFinancialType, 
+        verbose_name=_("تگ مالی"),
+        on_delete=models.SET_NULL,
         blank=True, null=True
     )
 
     is_approved = models.BooleanField(_("تایید شده"), default=False)
-    
     description = models.TextField(_("توضیحات تکمیلی"), blank=True, null=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    objects = OrderCostReportManager()
+    objects = OrderFinancialReportManager()
 
     class Meta:
-        db_table = 'admin_order_cost_reports'
-        verbose_name = _('گزارش هزینه داخلی')
-        verbose_name_plural = _('گزارشات هزینه داخلی')
+        db_table = 'admin_order_financial_reports'
+        verbose_name = _('گزارش مالی')
+        verbose_name_plural = _('گزارشات مالی')
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title}"
-    
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+        return f"{self.title} ({self.get_nature_display()})"
 
-# ===== Order Cost Item Model ===== #
-class OrderCostItem(models.Model):
+# ===== Order Financial Item ===== #
+class OrderFinancialItem(models.Model):
     """
-    اقلام ریز هزینه که زیرمجموعه یک گزارش هستند.
-    مثال: "هزینه اول: کاغذ - 12000"
+    اقلام ریز گزارش.
     """
     report = models.ForeignKey(
-        OrderCostReport,
+        OrderFinancialReport,
         related_name='items',
         on_delete=models.CASCADE,
-        verbose_name=_("گزارش مرتبط"),
-        blank=True,
-        null=True
+        verbose_name=_("گزارش مرتبط")
     )
-    catalog_item = models.ForeignKey(
-        OrderCostCategory, 
-        on_delete=models.PROTECT,
-        verbose_name=_("شرح هزینه"),
-        null=True, blank=True
-    )
-    custom_title = models.CharField(_("عنوان (متفرقه)"), max_length=150, blank=True, null=True)
-    amount = models.DecimalField(_("مبلغ"), max_digits=18, decimal_places=0)
-    description = models.CharField(_("توضیحات تکمیلی"), max_length=255, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     
-    objects = OrderCostItemManager()
+    category = models.ForeignKey(
+        OrderFinancialCategory, 
+        on_delete=models.PROTECT,
+        verbose_name=_("سرفصل حساب"),
+        help_text="گروه عملیاتی (چاپ، طراحی و...) را مشخص می‌کند.",
+        blank=True, null=True
+    )
+    
+    custom_title = models.CharField(_("عنوان ریز قلم"), max_length=150, blank=True, null=True)
+    amount = models.DecimalField(_("مبلغ"), max_digits=18, decimal_places=0)
+    description = models.CharField(_("توضیحات"), max_length=255, blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    
+    objects = OrderFinancialItemManager()
 
     class Meta:
-        db_table = 'admin_order_cost_items'
-        verbose_name = _('قلم هزینه')
-        verbose_name_plural = _('اقلام هزینه')
+        db_table = 'admin_order_financial_items'
+        verbose_name = _('قلم مالی')
+        verbose_name_plural = _('اقلام مالی')
 
     @property
     def final_title(self):
-        """ برای نمایش در فاکتور یا گزارش """
-        if self.catalog_item:
-            return self.catalog_item.title
-        return self.custom_title
+        return self.custom_title if self.custom_title else self.category.title
 
     def __str__(self):
-        return f"{self.custom_title}: {self.amount}"
-    
-class OrderCostAttachment(models.Model):
-    """
-    جدول پیوست‌های گزارش هزینه.
-    جایگزین فیلد تکی 'attachment' در مدل OrderCostSheet می‌شود (یا در کنار آن).
-    """
+        return f"{self.final_title}: {self.amount}"
+
+# ===== Order Financial Attachment ===== #
+class OrderFinancialAttachment(models.Model):
     report = models.ForeignKey(
-        OrderCostReport, 
+        OrderFinancialReport, 
         related_name='attachments', 
         on_delete=models.CASCADE,
-        verbose_name=_("گزارش هزینه")
+        verbose_name=_("گزارش مرتبط")
     )
-    file = models.FileField(_("فایل ضمیمه"), upload_to='financial/costs/attachments/%Y/%m/')
+    file = models.FileField(_("فایل ضمیمه"), upload_to='financial/attachments/%Y/%m/')
     title = models.CharField(_("عنوان فایل"), max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
-    objects = OrderCostAttachmentManager()
+    objects = OrderFinancialAttachmentManager()
 
     class Meta:
-        db_table = 'admin_order_cost_attachments'
-        verbose_name = _('پیوست هزینه')
-        verbose_name_plural = _('پیوست‌های هزینه')
+        db_table = 'admin_order_financial_attachments'
+        verbose_name = _('پیوست مالی')
+        verbose_name_plural = _('پیوست‌های مالی')
+
+# ===== ORDER SCHEDULE (No Changes) ===== #
+class OrderSchedule(models.Model):
+    # (همان کدهای قبلی بدون تغییر)
+    order = models.OneToOneField(
+        'core.Order', 
+        on_delete=models.CASCADE, 
+        related_name='schedule',
+        verbose_name=_("سفارش مرتبط")
+    )
+    start_date = models.DateTimeField(_("تاریخ شروع فرآیند"), default=timezone.now)
+    due_date = models.DateTimeField(_("تاریخ تحویل نهایی (Deadline)"))
+    completed_at = models.DateTimeField(_("تاریخ تکمیل واقعی"), null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    
+    objects = OrderScheduleManager()
+
+    class Meta:
+        db_table = 'admin_order_schedules'
+        verbose_name = _('زمان‌بندی سفارش')
+        verbose_name_plural = _('زمان‌بندی‌های سفارش')
+        indexes = [
+            models.Index(fields=['start_date', 'due_date']),
+            models.Index(fields=['completed_at']),
+        ]
+
+    def __str__(self):
+        return f"Schedule: {self.order.order_code}"
+
+    def clean(self):
+        if self.due_date and self.start_date and self.due_date < self.start_date:
+            raise ValidationError(_("تاریخ تحویل نمی‌تواند قبل از تاریخ شروع باشد."))
+
+    @property
+    def duration_days(self):
+        return (self.due_date - self.start_date).days
+
+    @property
+    def is_overdue(self):
+        if self.completed_at:
+            return False
+        return timezone.now() > self.due_date
+
+    @property
+    def delay_days(self):
+        target_date = self.completed_at if self.completed_at else timezone.now()
+        if target_date > self.due_date:
+            return (target_date - self.due_date).days
+        return 0
 
 # ========== ORDER SCHEDULE ========== #
 class OrderSchedule(models.Model):

@@ -9,7 +9,7 @@ from apps.support.services import LoggerService
 from apps.order.models import *
 
 # ========== COST SERVICE ========== #
-class OrderCostService:
+class OrderFinancialService:
     """
     سرویس دامنه مدیریت هزینه‌های سفارش.
     """
@@ -18,37 +18,30 @@ class OrderCostService:
 
     # ============ BUSINESS LOGIC & STATE TRANSITIONS ============ #
     @transaction.atomic
-    def approve_report(self, report_id: int, approver: User) -> OrderCostReport:
-        """
-        تایید نهایی گزارش هزینه.
-        """
-        # ===== بررسی وجود ===== #
-        report = OrderCostReport.objects.get_report_detail(report_id)
+    def approve_report(self, report_id: int, approver: User) -> OrderFinancialReport:
+        """ تایید نهایی گزارش مالی و تاثیر آن روی سند کل """
         
-        if not report:
+        # ===== دریافت و اعتبارسنجی گزارش ===== #
+        try:
+            report = OrderFinancialReport.objects.select_related('sheet__order').get(pk=report_id)
+        except OrderFinancialReport.DoesNotExist:
             raise ValidationError("گزارش یافت نشد.")
-        
-        # ===== دریافت سفارش مربوطه ===== #
-        order = report.sheet.order
-        if not order:
-            raise ValidationError("سفارش مرتبط با این گزارش یافت نشد.")
-
-        self._validate_sheet_is_modifiable(report.sheet)
         
         if report.is_approved:
             raise ValidationError("این گزارش قبلاً تایید شده است.")
 
+        self._validate_sheet_is_modifiable(report.sheet)
+
         self.audit_service.record_log(
             user=approver,
             obj=report.sheet,
-            action='APPROVE',
+            action='APPROVE_FINANCIAL',
             changes={
-                'target': 'CostReport',
                 'report_id': report.id,
-                'report_title': report.title,
+                'title': report.title,
                 'status_change': 'Pending -> Approved'
             },
-            description=_(f"تایید گزارش هزینه: {report.title}")
+            description=_(f"تایید گزارش مالی: {report.title}")
         )
 
         # ===== تغییر وضعیت ===== #
@@ -56,59 +49,50 @@ class OrderCostService:
         report.save()
 
         # ===== تغییر وضعیت در صورت تایید تمامی گزارش‌ها ===== #
-        has_pending_reports = order.cost_sheet.reports.filter(is_approved=False).exists()
-
-        if not has_pending_reports:
-            self._advance_order_status(order, approver)
-
-        # ===== بروزرسانی سند مادر ===== #
         self.recalculate_sheet_totals(report.sheet)
+        
+        order = report.sheet.order
+        has_pending = order.financial_sheet.reports.filter(is_approved=False).exists()
+        
+        if not has_pending:
+            self._advance_order_status(order, approver)
         
         return report
 
     @transaction.atomic
-    def reject_report(self, report_id: int, user: User) -> OrderCostReport:
-        """
-        رد کردن گزارش هزینه و ثبت لاگ.
-        """
-        report = OrderCostReport.objects.get_report_detail(report_id)
-        if not report:
+    def reject_report(self, report_id: int, user: User) -> OrderFinancialReport:
+        """ رد کردن گزارش """
+        try:
+            report = OrderFinancialReport.objects.select_related('sheet').get(pk=report_id)
+        except OrderFinancialReport.DoesNotExist:
             raise ValidationError("گزارش یافت نشد.")
 
         self._validate_sheet_is_modifiable(report.sheet)
-
         was_approved = report.is_approved
         
-        # ===== ثبت لاگ ===== #
+        # لاگ
         self.audit_service.record_log(
             user=user,
             obj=report.sheet,
-            action='REJECT',
-            changes={
-                'target': 'CostReport',
-                'report_id': report.id,
-                'report_title': report.title,
-                'status_change': 'Approved -> Rejected' if was_approved else 'Pending -> Rejected'
-            },
-            description=_(f"رد کردن گزارش هزینه: {report.title}")
+            action='REJECT_FINANCIAL',
+            changes={'report_id': report.id},
+            description=_(f"رد کردن گزارش: {report.title}")
         )
 
-        # ===== تغییر وضعیت ===== #
         report.is_approved = False
         report.save()
 
-        # ===== تغییر جمع ===== #
         if was_approved:
             self.recalculate_sheet_totals(report.sheet)
 
         return report
 
     @transaction.atomic
-    def lock_cost_sheet(self, order_id: int, user: User) -> OrderCostSheet:
+    def lock_cost_sheet(self, order_id: int, user: User) -> OrderFinancialSheet:
         """
         قفل کردن سند مالی و ثبت لاگ امنیتی.
         """
-        sheet = OrderCostSheet.objects.get_by_order_id(order_id)
+        sheet = OrderFinancialSheet.objects.get_by_order_id(order_id)
         if not sheet:
             raise ValidationError("سند مالی برای این سفارش یافت نشد.")
             
@@ -133,18 +117,18 @@ class OrderCostService:
         
         return sheet
 
-    def recalculate_sheet_totals(self, sheet: OrderCostSheet) -> None:
+    def recalculate_sheet_totals(self, sheet: OrderFinancialSheet) -> None:
         """
         فراخوانی منطق محاسبه مجدد در مدل.
         """
         sheet.recalculate_totals()
 
     # ============ VALIDATION GUARDS (Business Rules Helpers) ============ #
-    def validate_report_modification(self, report_id: int) -> OrderCostReport:
+    def validate_report_modification(self, report_id: int) -> OrderFinancialReport:
         """
         بررسی می‌کند که آیا امکان ویرایش یا حذف این گزارش وجود دارد؟
         """
-        report = OrderCostReport.objects.get_report_detail(report_id)
+        report = OrderFinancialReport.objects.get_report_detail(report_id)
         if not report:
             raise ValidationError("گزارش یافت نشد.")
             
@@ -155,7 +139,7 @@ class OrderCostService:
         
         return report
 
-    def validate_item_modification(self, report: OrderCostReport) -> None:
+    def validate_item_modification(self, report: OrderFinancialReport) -> None:
         """
         بررسی قوانین مربوط به تغییر اقلام (Items) داخل گزارش.
         """
@@ -163,43 +147,34 @@ class OrderCostService:
             raise ValidationError("امکان تغییر اقلام در گزارش تایید شده وجود ندارد.")
         self._validate_sheet_is_modifiable(report.sheet)
 
-    def _validate_sheet_is_modifiable(self, sheet: OrderCostSheet) -> None:
+    def _validate_sheet_is_modifiable(self, sheet: OrderFinancialSheet) -> None:
         """Internal helper"""
         if sheet.is_locked:
             raise ValidationError("سند مالی این سفارش قفل شده است و امکان تغییر وجود ندارد.")
         
-    # ========== CHANGE ORDER STATUS ========== #
+    # ===== AUTO STATUS ADVANCE ===== #
     def _advance_order_status(self, order: Order, user: User):
-        """
-        جابجایی خودکار وضعیت سفارش به مرحله بعد بر اساس sort_order
-        """
+        """ جابجایی خودکار وضعیت سفارش به مرحله بعد """
         current_status = order.current_status
-        
         if not current_status:
             return
         
-        # ===== دریافت وضعیت بعدی ===== #
         next_status = OrderStatus.objects.filter(
             sort_order__gt=current_status.sort_order
         ).order_by('sort_order').first()
 
-        # ===== اگر وضعیت بعدی بود، اون رو به وضعیت فعلی تغییر بده ===== #
         if next_status:
-            old_status_name = current_status.name
+            old_name = current_status.name
             order.current_status = next_status
             order.save(update_fields=['current_status', 'updated_at'])
 
-        self.audit_service.record_log(
-            user=user,
-            obj=order,
-            action='AUTO_STATUS',
-            changes={
-                'from_status': old_status_name,
-                'to_status': next_status.name,
-                'reason': 'All cost reports approved'
-            },
-            description=_(f"تغییر خودکار وضعیت از {old_status_name} به {next_status.name} به دلیل تکمیل گزارش‌های هزینه")
-        )
+            self.audit_service.record_log(
+                user=user,
+                obj=order,
+                action='AUTO_STATUS_ADVANCE',
+                changes={'from': old_name, 'to': next_status.name},
+                description=_("تغییر وضعیت خودکار پس از تایید تمام اسناد مالی")
+            )
 
 
 # ========== ORDER SCHEDULE SERVICE ========== #

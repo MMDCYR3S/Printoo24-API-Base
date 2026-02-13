@@ -6,7 +6,7 @@ from django.db import transaction
 
 from apps.permissions import AppPermissionChecker
 from core.models import User, Order
-from apps.order.models import OrderCostSheet
+from apps.order.models import OrderFinancialSheet
 from apps.logistics.models import OrderShipment, OrderPackage
 from apps.logistics.logistics import LogisticsService
 from apps.support.services import LoggerService
@@ -233,11 +233,11 @@ class WarehouseAppService:
         )
     
     # ========== ADD LOGISTIC COST REPORT ========== #
-    def add_logistic_cost_report(self, user: User, order_id: int, data: Dict[str, Any]) -> OrderCostSheet:
+    def add_logistic_cost_report(self, user: User, order_id: int, data: Dict[str, Any]) -> OrderFinancialSheet:
         AppPermissionChecker.check_has_permission(user, 'add_ordercostreport')
         # ===== دریافت سند مالی ===== #
         try:
-            sheet = OrderCostSheet.objects.get(order_id=order_id)
+            sheet = OrderFinancialSheet.objects.get(order_id=order_id)
         except Order.DoesNotExist:
             raise NotFound("سفارش یافت نشد.")
         # ===== ثبت لاگ ===== #

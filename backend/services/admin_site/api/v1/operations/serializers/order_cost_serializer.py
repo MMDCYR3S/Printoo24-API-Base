@@ -1,52 +1,54 @@
 import json
 from rest_framework import serializers
 from apps.order.models import (
-    OrderCostSheet, OrderCostReport, OrderCostItem, 
-    OrderCostAttachment, OrderCostType
+    OrderFinancialSheet, OrderFinancialReport, OrderFinancialItem, 
+    OrderFinancialAttachment, OrderFinancialType
 )
 
 # ========== 1. Base / Read Serializers ========== #
-class OrderCostAttachmentSerializer(serializers.ModelSerializer):
+class OrderFinancialAttachmentSerializer(serializers.ModelSerializer):
     file_url = serializers.FileField(source='file', read_only=True)
     class Meta:
-        model = OrderCostAttachment
+        model = OrderFinancialAttachment
         fields = ['id', 'title', 'file_url', 'created_at']
 
-class OrderCostItemSerializer(serializers.ModelSerializer):
+class OrderFinancialItemSerializer(serializers.ModelSerializer):
     """ نمایش اقلام هزینه (Output) """
-    cost_type_display = serializers.CharField(source='catalog_item.title', read_only=True, default="سایر/دستی")
+    financial_tag_display = serializers.CharField(source='catalog_item.title', read_only=True, default="سایر/دستی")
     
     class Meta:
-        model = OrderCostItem
+        model = OrderFinancialItem
         fields = [
-            'id', 'custom_title', 'cost_type_display', 
+            'id', 'custom_title', 'financial_tag_display', 
             'amount', 'description'
         ]
 
-class OrderCostReportSerializer(serializers.ModelSerializer):
-    """ نمایش جزئیات یک گزارش هزینه (Journal Entry) """
-    items = OrderCostItemSerializer(many=True, read_only=True)
-    attachments = OrderCostAttachmentSerializer(many=True, read_only=True)
+class OrderFinancialReportSerializer(serializers.ModelSerializer):
+    """ نمایش جزئیات یک گزارش مالی """
+    items = OrderFinancialItemSerializer(many=True, read_only=True)
+    attachments = OrderFinancialAttachmentSerializer(many=True, read_only=True)
     submitter_name = serializers.CharField(source='submitter.username', read_only=True)
-    cost_type_display = serializers.CharField(source='cost_type.title', read_only=True)
+    financial_tag_display = serializers.CharField(source='financial_tag.title', read_only=True)
+    nature_display = serializers.CharField(source='get_nature_display', read_only=True)
 
     class Meta:
-        model = OrderCostReport
+        model = OrderFinancialReport
         fields = [
-            'id', 'title', 'cost_type_display', 'cost_type',
+            'id', 'title', 'nature', 'nature_display', 
+            'financial_tag', 'financial_tag_display',
             'is_approved', 'submitter_name', 'created_at',
             'items', 'attachments'
         ]
 
-class OrderCostSheetSerializer(serializers.ModelSerializer):
+class OrderFinancialSheetSerializer(serializers.ModelSerializer):
     """ 
     نمایش سند مادر (Ledger).
     شامل اعداد تجمیعی و لیست گزارش‌های تایید شده/نشده.
     """
-    reports = OrderCostReportSerializer(many=True, read_only=True)
+    reports = OrderFinancialReportSerializer(many=True, read_only=True)
     
     class Meta:
-        model = OrderCostSheet
+        model = OrderFinancialSheet
         fields = [
             'id', 'is_locked', 
             'total_material_cost', 'total_service_cost',
@@ -56,7 +58,7 @@ class OrderCostSheetSerializer(serializers.ModelSerializer):
         ]
 
 # ========== 2. Write / Input Serializers ========== #
-class OrderCostItemInputSerializer(serializers.Serializer):
+class OrderFinancialItemInputSerializer(serializers.Serializer):
     """ اعتبارسنجی ورودی هر قلم هزینه در هنگام ثبت گزارش """
     catalog_id = serializers.IntegerField(required=False, allow_null=True)
     custom_title = serializers.CharField(required=False, allow_blank=True)
@@ -68,17 +70,17 @@ class OrderCostItemInputSerializer(serializers.Serializer):
             raise serializers.ValidationError("وارد کردن 'عنوان دستی' یا انتخاب 'دسته‌بندی' الزامی است.")
         return data
 
-class OrderCostReportSubmitSerializer(serializers.Serializer):
+class OrderFinancialReportSubmitSerializer(serializers.Serializer):
     """ 
     ورودی اصلی برای ثبت گزارش توسط واحدها (انبار، چاپ و...).
     جایگزین متد قدیمی Add Items.
     """
-    cost_type_id = serializers.IntegerField(required=False, allow_null=True)
+    financial_tag_id = serializers.IntegerField(required=False, allow_null=True)
     title = serializers.CharField(max_length=200)
     description = serializers.CharField(required=False, allow_blank=True)
     # ===== اقلام ===== #
     items = serializers.ListField(
-        child=OrderCostItemInputSerializer(),
+        child=OrderFinancialItemInputSerializer(),
         required=False, allow_empty=True,
         allow_null=True
     )
@@ -88,9 +90,9 @@ class OrderCostReportSubmitSerializer(serializers.Serializer):
         required=False, write_only=True
     )
 
-# ========== Order Cost Type List Serializer ========== #
-class OrderCostTypeListSerializer(serializers.ModelSerializer):
+# ========== Order Financial Type List Serializer ========== #
+class OrderFinancialTypeListSerializer(serializers.ModelSerializer):
     """ لیست نوع هزینه ها """
     class Meta:
-        model = OrderCostType
+        model = OrderFinancialType
         fields = ['id', 'title']

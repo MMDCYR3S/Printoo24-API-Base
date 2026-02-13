@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.order.models import OrderCostSheet
+from apps.order.models import OrderFinancialSheet
 from apps.logistics.models import OrderPackage, OrderShipment
 from decimal import Decimal
 
@@ -18,24 +18,24 @@ class PackageOutputSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 # ========== COST SERIALIZERS ========== #
-class LogisticCostItemInputSerializer(serializers.Serializer):
+class LogisticFinancialItemInputSerializer(serializers.Serializer):
     catalog_id = serializers.IntegerField(required=False, allow_null=True)
     custom_title = serializers.CharField(required=False, allow_blank=True, max_length=150)
     amount = serializers.DecimalField(max_digits=18, decimal_places=0, min_value=Decimal('1'))
     description = serializers.CharField(required=False, allow_blank=True, max_length=255)
     
-class CreateLogisticCostReportInputSerializer(serializers.Serializer):
+class CreateLogisticFinancialReportInputSerializer(serializers.Serializer):
     """ ورودی برای API ثبت گزارش هزینه لجستیک """
     title = serializers.CharField(required=True, max_length=200)
     description = serializers.CharField(required=False, allow_blank=True)
     attachment = serializers.FileField(required=False)
-    items = LogisticCostItemInputSerializer(many=True, required=True, min_length=1)
+    items = LogisticFinancialItemInputSerializer(many=True, required=True, min_length=1)
 
-class CostReportOutputSerializer(serializers.ModelSerializer):
+class FinancialReportOutputSerializer(serializers.ModelSerializer):
     """ خروجی مدل گزارش هزینه """
 
     class Meta:
-        model = OrderCostSheet
+        model = OrderFinancialSheet
         fields = "__all__"
 
 # ========== SHIPMENT SERIALIZERS ========== #

@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models import Prefetch
 
 from core.models import User, Order, OrderItem, OrderItemFile
-from apps.order.models import OrderCostSheet, OrderCostReport, OrderCostItem
+from apps.order.models import OrderFinancialSheet, OrderFinancialReport, OrderFinancialItem
 from apps.logistics.models import OrderShipment
 from apps.support.services import LoggerService
 

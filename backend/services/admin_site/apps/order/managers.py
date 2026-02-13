@@ -7,7 +7,7 @@ class BaseQuerySet(models.QuerySet):
         return self.filter(id=id).first()
     
 # ========== COST SHEET QUERYSET ========== #
-class OrderCostSheetQuerySet(BaseQuerySet):
+class OrderFinancialSheetQuerySet(BaseQuerySet):
     """کوئری‌های مربوط به سند هزینه مادر"""
     
     def get_by_order_id(self, order_id: int):
@@ -15,19 +15,19 @@ class OrderCostSheetQuerySet(BaseQuerySet):
         return self.filter(order_id=order_id).first()
 
 # ========== COST SHEET MANAGERS ========== #
-class OrderCostSheetManager(models.Manager):
+class OrderFinancialSheetManager(models.Manager):
     def get_queryset(self):
-        return OrderCostSheetQuerySet(self.model, using=self._db)
+        return OrderFinancialSheetQuerySet(self.model, using=self._db)
 
     def get_by_order_id(self, order_id: int):
         return self.get_queryset().get_by_order_id(order_id)
 
 # ========== COST REPORT QUERYSET ========== #
-class OrderCostReportQuerySet(BaseQuerySet):
+class OrderFinancialReportQuerySet(BaseQuerySet):
     """کوئری‌های مربوط به گزارشات هزینه"""
     
     def get_all(self):
-        return self.select_related("submitter", "cost_type") \
+        return self.select_related("submitter", "financial_tag") \
             .order_by("-created_at").all()
 
     def get_reports_by_sheet(self, sheet_id: int):
@@ -37,17 +37,17 @@ class OrderCostReportQuerySet(BaseQuerySet):
             
     def get_report_detail(self, report_id: int):
         return self.filter(id=report_id)\
-            .select_related('sheet__order', 'submitter')\
-            .prefetch_related('items__catalog_item', 'attachments')\
+            .select_related('sheet__order', 'submitter', 'financial_tag')\
+            .prefetch_related('attachments')\
             .first()
             
     def get_by_id(self, pk: int):
         return self.filter(pk=pk).first()
 
 # ========== COST REPORT MANAGERS ========== #
-class OrderCostReportManager(models.Manager):
+class OrderFinancialReportManager(models.Manager):
     def get_queryset(self):
-        return OrderCostReportQuerySet(self.model, using=self._db)
+        return OrderFinancialReportQuerySet(self.model, using=self._db)
     
     def get_all(self):
         return self.get_queryset().get_all()
@@ -62,7 +62,7 @@ class OrderCostReportManager(models.Manager):
         return self.get_queryset().get_by_id(pk)
 
 # ========== COST ITEM MANAGERS ========== #
-class OrderCostItemManager(models.Manager):
+class OrderFinancialItemManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset()
     
@@ -76,7 +76,7 @@ class OrderCostItemManager(models.Manager):
         return self.filter(report_id=report_id)
 
 # ========== COST ATTACHMENT MANAGERS ========== #
-class OrderCostAttachmentManager(models.Manager):
+class OrderFinancialAttachmentManager(models.Manager):
     def model(self, **kwargs):
         return self.model(**kwargs)
     
@@ -84,7 +84,7 @@ class OrderCostAttachmentManager(models.Manager):
         return self.bulk_create(attachments)
 
 # ========== COST CATEGORY QUERYSET ========== #
-class OrderCostCategoryQuerySet(BaseQuerySet):
+class OrderFinancialCategoryQuerySet(BaseQuerySet):
     
     def get_all_active(self):
         return self.order_by('title')
@@ -93,13 +93,13 @@ class OrderCostCategoryQuerySet(BaseQuerySet):
         return self.filter(slug=slug).first()
 
 # ========== COST CATEGORY MANAGERS ========== #
-class OrderCostCategoryManager(models.Manager):
+class OrderFinancialCategoryManager(models.Manager):
     """ منیجر برای مدل دسته هزاره """
     def get_by_id(self, pk: int):
         return self.get_queryset().get_by_id(pk)
     
     def get_queryset(self):
-        return OrderCostCategoryQuerySet(self.model, using=self._db)
+        return OrderFinancialCategoryQuerySet(self.model, using=self._db)
 
     def get_all_active(self):
         return self.get_queryset().get_all_active()

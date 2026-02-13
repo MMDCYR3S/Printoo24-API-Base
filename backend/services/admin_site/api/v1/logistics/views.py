@@ -11,8 +11,8 @@ from .serializers import (
     UpdateShipmentInputSerializer,
     ShipmentStatusInputSerializer,
     ShipmentOutputSerializer,
-    CreateLogisticCostReportInputSerializer,
-    CostReportOutputSerializer,
+    CreateLogisticFinancialReportInputSerializer,
+    FinancialReportOutputSerializer,
     PackageInputSerializer,
     PackageOutputSerializer,
 )
@@ -132,8 +132,8 @@ class ShipmentViewSet(viewsets.ViewSet):
         return Response(PackageOutputSerializer(package).data, status=status.HTTP_201_CREATED)
 
 # ========== LOGISTIC COSTS ========== #
-@extend_schema(tags=['Warehouse - Costs'])
-class LogisticCostViewSet(viewsets.ViewSet):
+@extend_schema(tags=['Warehouse - Financials'])
+class LogisticFinancialViewSet(viewsets.ViewSet):
     """
     مدیریت گزارش‌های هزینه لجستیک
     """
@@ -141,12 +141,12 @@ class LogisticCostViewSet(viewsets.ViewSet):
 
     @extend_schema(
         summary="ثبت گزارش هزینه برای یک سفارش",
-        request=CreateLogisticCostReportInputSerializer,
-        responses={201: CostReportOutputSerializer},
+        request=CreateLogisticFinancialReportInputSerializer,
+        responses={201: FinancialReportOutputSerializer},
         parameters=[OpenApiParameter(name='order_id', type=int, location=OpenApiParameter.QUERY, description='شناسه سفارش')]
     )
     def create(self, request):
-        serializer = CreateLogisticCostReportInputSerializer(data=request.data)
+        serializer = CreateLogisticFinancialReportInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         order_id = request.query_params.get('order_id')
@@ -159,4 +159,4 @@ class LogisticCostViewSet(viewsets.ViewSet):
             order_id=order_id,
             data=serializer.validated_data
         )
-        return Response(CostReportOutputSerializer(report).data, status=status.HTTP_201_CREATED)
+        return Response(FinancialReportOutputSerializer(report).data, status=status.HTTP_201_CREATED)
