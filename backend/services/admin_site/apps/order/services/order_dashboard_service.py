@@ -1,12 +1,12 @@
 import logging
-from typing import List, Dict, Any
 from decimal import Decimal
+from typing import List, Dict, Any
 
 from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from core.models import User, Order, OrderStatus, Address
+from core.models import User, Order, OrderStatus
 from core.order.services import OrderService
 
 # ========== LOGGER ========== #

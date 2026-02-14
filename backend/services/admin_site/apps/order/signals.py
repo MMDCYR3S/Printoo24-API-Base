@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import OrderFinancialReport, OrderFinancialItem
+from .models import OrderFinancialReport, OrderFinancialItem, OrderFinancialSheet
 from apps.logistics.models import OrderShipment
 from core.models import Order
 
@@ -43,4 +43,15 @@ def create_shipment_informations(sender, instance,  created, **kwargs):
             destination_address=instance.full_address,
             tracking_code=instance.order_code,
             status="processing"
+        )
+
+@receiver(post_save, sender=Order)
+def create_financial_sheet(sender, instance, created, **kwargs):
+    """
+    ایجاد یک سند مالی برای هر سفارش جدید
+    """
+    if created:
+        OrderFinancialSheet.objects.create(
+            order=instance,
+            total_revenue=instance.total_price
         )
