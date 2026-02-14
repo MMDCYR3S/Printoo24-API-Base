@@ -9,13 +9,23 @@ const apiClient = axios.create({
   },
 });
 
-// 1. Interceptor درخواست: تزریق توکن
+// 1. Interceptor درخواست: تزریق توکن + اصلاح آدرس
 apiClient.interceptors.request.use(
   (config) => {
+    // الف) تزریق توکن احراز هویت
     const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // ب) اصلاح خودکار آدرس (Auto-Prefix Fix)
+    // اگر آدرس با /api/v1 شروع نشده بود و لینک کامل (http) هم نبود، پیشوند را اضافه کن
+    if (config.url && !config.url.startsWith("/api/v1") && !config.url.startsWith("http")) {
+      // حذف اسلش اول اگر وجود داشته باشد تا دو تا اسلش نشود
+      const cleanUrl = config.url.startsWith("/") ? config.url : `/${config.url}`;
+      config.url = `/api/v1${cleanUrl}`;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -38,7 +48,7 @@ apiClient.interceptors.response.use(
             throw new Error("No refresh token");
         }
 
-        // درخواست رفرش توکن طبق داکیومنت 
+        // درخواست رفرش توکن (چون این آدرس در constants ثابت است، پیشوند دارد و مشکلی نیست)
         const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`, {
           refresh: refreshToken,
         });
@@ -52,10 +62,9 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
 
       } catch (refreshError) {
-        // اگر رفرش توکن هم منقضی بود، خروج کامل
         console.error("Session expired", refreshError);
-        localStorage.clear(); // پاکسازی استوریج
-        window.location.href = "/login"; // ریدارکت به لاگین
+        localStorage.clear();
+        window.location.href = "/auth/login"; 
         return Promise.reject(refreshError);
       }
     }

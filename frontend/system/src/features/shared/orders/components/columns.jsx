@@ -1,6 +1,6 @@
-import { MoreHorizontal, ArrowUpDown, Copy, Eye, FileText } from "lucide-react";
+import { MoreHorizontal, ArrowUpDown, Copy, Eye, FileText, CheckCircle2, XCircle, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge"; // حالا این فایل وجود دارد
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,139 +9,157 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
-// فرمت پول به ریال
+// فرمت پول به تومان (رندومایز شده طبق مثال بک‌ند)
 const formatCurrency = (amount) => {
-  if (!amount) return "۰ ریال";
-  return new Intl.NumberFormat("fa-IR", {
-    style: "currency",
-    currency: "IRR",
-    maximumFractionDigits: 0,
-  }).format(amount);
+  if (!amount) return "۰ تومان";
+  return new Intl.NumberFormat("fa-IR").format(amount) + " تومان";
 };
 
-// فرمت تاریخ به شمسی
+// فرمت تاریخ و ساعت (ساعت در چاپخانه مهم است)
 const formatDate = (dateString) => {
   if (!dateString) return "-";
   return new Intl.DateTimeFormat("fa-IR", {
-    year: "numeric",
     month: "short",
     day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(new Date(dateString));
 };
 
-export const columns = [
+export const getColumns = (handleApprove, handleReject) => [
   {
     accessorKey: "order_code",
-    header: "کد سفارش",
+    header: "شناسه",
     cell: ({ row }) => (
-      <div className="font-mono text-xs font-bold text-gray-600 bg-gray-100 px-2 py-1 rounded-md inline-block tracking-wider border border-gray-200">
+      <div className="font-mono text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-100">
         {row.getValue("order_code")}
       </div>
     ),
   },
   {
-    accessorKey: "company_name",
-    header: "مشتری / شرکت",
+    accessorKey: "recipient_name",
+    header: "مشتری / تحویل‌گیرنده",
     cell: ({ row }) => {
-      const company = row.getValue("company_name");
+      const company = row.original.company_name;
       const recipient = row.original.recipient_name;
+      const phone = row.original.recipient_phone;
       return (
-        <div className="flex flex-col">
-          <span className="font-bold text-gray-800 text-sm">{company || recipient}</span>
-          {company && <span className="text-xs text-gray-500">{recipient}</span>}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-gray-900 text-sm">{company || recipient}</span>
+            {row.original.type_display === "اختصاصی" && (
+              <Badge variant="outline" className="text-[9px] h-4 px-1 border-amber-200 text-amber-700 bg-amber-50">اختصاصی</Badge>
+            )}
+          </div>
+          <div className="flex items-center text-[11px] text-gray-500 gap-1">
+            <Phone size={10} />
+            <span className="font-mono">{phone}</span>
+          </div>
         </div>
       );
     },
   },
   {
-    accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="text-gold-light hover:text-white p-0 hover:bg-transparent"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          تاریخ ثبت
-          <ArrowUpDown className="mr-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="text-sm text-gray-600 font-medium">{formatDate(row.getValue("created_at"))}</div>
-    ),
-  },
-  {
     accessorKey: "total_price",
     header: "مبلغ کل",
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("total_price"));
-      return <div className="font-bold text-gray-800">{formatCurrency(amount)}</div>;
-    },
+    cell: ({ row }) => <div className="font-bold text-gray-800 text-sm">{formatCurrency(row.getValue("total_price"))}</div>,
   },
   {
     accessorKey: "items_count",
     header: "اقلام",
     cell: ({ row }) => (
-      <div className="flex justify-center">
-         <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 text-xs font-bold text-gray-700 border border-gray-200 shadow-sm">
-            {row.getValue("items_count") || 0}
-         </span>
+      <div className="text-center">
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-[11px] font-bold border">
+          {row.getValue("items_count")}
+        </span>
       </div>
     ),
   },
   {
-    accessorKey: "current_status_display",
-    header: "وضعیت",
+    accessorKey: "created_at",
+    header: "زمان ثبت",
+    cell: ({ row }) => (
+      <div className="text-[11px] text-gray-500 leading-tight">
+        {formatDate(row.getValue("created_at"))}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "status_display",
+    header: "وضعیت فعلی",
     cell: ({ row }) => {
-      const status = row.getValue("current_status_display") || "نامشخص";
+      const status = row.original.status_display || "نامشخص";
       const isLocked = row.original.is_locked;
 
-      // انتخاب واریانت مناسب برای Badge
-      let variant = "neutral";
-      if (status.includes("تایید") || status.includes("آماده")) variant = "success";
-      else if (status.includes("چاپ") || status.includes("اجرا")) variant = "info";
-      else if (status.includes("مالی") || status.includes("پرداخت")) variant = "warning";
-      else if (status.includes("لغو") || isLocked) variant = "destructive";
+      let badgeClass = "bg-gray-100 text-gray-600 border-gray-200";
+      if (status.includes("تایید")) badgeClass = "bg-green-50 text-green-700 border-green-200";
+      if (status.includes("چاپ") || status.includes("تولید")) badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
+      if (status.includes("طراحی")) badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
+      if (status.includes("ارسال") || status.includes("پیک")) badgeClass = "bg-amber-50 text-amber-700 border-amber-200";
 
       return (
-        <Badge variant={variant} className="gap-1 font-medium shadow-sm">
-          {isLocked && <span>🔒</span>}
+        <Badge className={`font-medium shadow-none border ${badgeClass} gap-1`}>
+          {isLocked && <span className="text-[10px]">🔒</span>}
           {status}
         </Badge>
       );
     },
   },
   {
-    id: "actions",
+    id: "quick_actions",
+    header: "عملیات سریع",
+    cell: ({ row }) => {
+      const id = row.original.id;
+      return (
+        <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+            onClick={() => handleApprove(id)}
+            title="تایید و مرحله بعد"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+            onClick={() => handleReject(id)}
+            title="رد / لغو"
+          >
+            <XCircle className="h-4 w-4" />
+          </Button>
+        </div>
+      );
+    }
+  },
+  {
+    id: "more",
     cell: ({ row }) => {
       const order = row.original;
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-gold-light/20 text-gray-500">
-              <span className="sr-only">منو</span>
+            <Button variant="ghost" className="h-8 w-8 p-0">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>عملیات سفارش</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(order.order_code)}
-              className="cursor-pointer"
-            >
-              <Copy className="ml-2 h-4 w-4 text-gray-400" />
-              کپی کد سفارش
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={() => {
+               navigator.clipboard.writeText(order.order_code);
+               toast.success("کد سفارش کپی شد");
+            }}>
+              <Copy className="ml-2 h-4 w-4" /> کپی کد
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer font-medium text-gray-700">
-              <Eye className="ml-2 h-4 w-4 text-blue-500" />
-              مشاهده جزئیات
+            <DropdownMenuItem className="text-blue-600">
+              <Eye className="ml-2 h-4 w-4" /> مشاهده جزئیات
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">
-              <FileText className="ml-2 h-4 w-4 text-gold-dark" />
-              فاکتور فروش
+            <DropdownMenuItem>
+              <FileText className="ml-2 h-4 w-4" /> چاپ فاکتور
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
