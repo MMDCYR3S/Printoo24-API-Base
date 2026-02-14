@@ -62,7 +62,7 @@ class Command(BaseCommand):
                 defaults={
                     'title': item['title'],
                     'operation_type': item['op_type'],
-                    'nature': 'revenue' # <--- IMPORTANT
+                    # 'nature': 'revenue' # <--- IMPORTANT
                 }
             )
 
@@ -72,7 +72,7 @@ class Command(BaseCommand):
                 defaults={
                     'title': item['title'],
                     'operation_type': item['op_type'],
-                    'nature': 'cost' # <--- IMPORTANT
+                    # 'nature': 'cost' # <--- IMPORTANT
                 }
             )
             
