@@ -159,50 +159,60 @@ class FinancialOrderAppService:
     
     # ============ REPORT UPDATE ============ #
     @transaction.atomic
-    def update_report(self, user: User, report_id: int, data: Dict) -> OrderFinancialReport:
+    def update_report(self, user: User, order_id: int, report_id: int, data: Dict) -> OrderFinancialReport:
         AppPermissionChecker.check_has_permission(user, 'change_ordercostreport')
         # ===== بررسی قانون قفل نبودن سند مالی ===== #
-        report = self._domain_service.validate_report_modification(report_id)
+        report = OrderFinancialReport.objects.get_by_order_and_id(order_id, report_id)
+        if not report:
+            raise ValidationError("گزارش مورد نظر در این سفارش یافت نشد.")
         # ===== تغییرات اصلی ===== #
+        self._domain_service.validate_report_modification(report.id)
+        
         for key, value in data.items():
             setattr(report, key, value)
         report.save()
         self._domain_service.recalculate_sheet_totals(report.sheet)
 
-        # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
             user=user,
             obj=report.sheet,
             action='UPDATE_COST_REPORT',
-            changes={'report_id': report_id, 'updated_fields': list(data.keys())},
+            changes={'report_id': report_id, 'order_id': order_id, 'updated_fields': list(data.keys())},
             description=_(f"ویرایش هدر گزارش هزینه: {report.title}")
         )
-
         return report
 
     # ============ REPORT DELETE ============ #
     @transaction.atomic
-    def delete_report(self, user: User, report_id: int) -> None:
+    def delete_report(self, user: User, order_id: int, report_id: int) -> None:
         AppPermissionChecker.check_has_permission(user, 'delete_ordercostreport')
-        # ===== اعتبارسنجی گزارش مالی ===== #
-        report = self._domain_service.validate_report_modification(report_id)
+        
+        report = OrderFinancialReport.objects.get_by_order_and_id(order_id, report_id)
+        if not report:
+            raise ValidationError("گزارش مورد نظر در این سفارش یافت نشد.")
+        
+        self._domain_service.validate_report_modification(report.id)
+        
         sheet = report.sheet
         report_title = report.title
-        # ===== حذف گزارش ===== #
+        
         report.delete()
         self._domain_service.recalculate_sheet_totals(sheet)
-        # ===== ثبت لاگ ===== #
+        
         self.audit_service.record_log(
             user=user,
             obj=sheet,
             action='DELETE_COST_REPORT',
-            changes={'deleted_report_id': report_id, 'title': report_title},
+            changes={'deleted_report_id': report_id, 'order_id': order_id, 'title': report_title},
             description=_(f"حذف گزارش هزینه")
         )
-
-    def get_all_reports(self):
-        """ نمایش تمامی گزارشات هزینه """
-        return OrderFinancialReport.objects.get_all()
+    
+    def get_all_reports(self, user: User, nature: str = None):
+        """ نمایش تمامی گزارشات (هزینه یا درآمد) """
+        queryset = OrderFinancialReport.objects.get_all()
+        if nature:
+            queryset = queryset.filter(nature=nature)
+        return queryset
 
     # ============ REPORT LIST ============ #
     def get_order_reports(self, user: User, order_id: int) -> List[OrderFinancialReport]:
@@ -219,15 +229,15 @@ class FinancialOrderAppService:
         return OrderFinancialReport.objects.get_reports_by_sheet(sheet.id)
 
     # ============ REPORT DETAIL ============ #
-    def get_report_detail(self, user: User, report_id: int) -> OrderFinancialReport:
+    def get_report_detail(self, user: User, order_id: int, report_id: int) -> OrderFinancialReport:
         """ 
         مشاهده جزئیات یک گزارش هزینه خاص به همراه اقلام و پیوست‌ها.
         """
         # ===== بررسی مجوز مشاهده ===== #
         AppPermissionChecker.check_has_permission(user, 'view_ordercostreport')
-        report = OrderFinancialReport.objects.get_report_detail(report_id)
+        report = OrderFinancialReport.objects.get_by_order_and_id(order_id, report_id)
         if not report:
-            raise ValidationError("گزارش هزینه مورد نظر یافت نشد.")
+            raise ValidationError("گزارش مورد نظر در این سفارش یافت نشد.")
         return report
     
     # ============ REPORT APPROVE ============ #
@@ -511,34 +521,29 @@ class FinancialOrderAppService:
 
     # ===== DELETE SINGLE REVENUE REPORT ===== #
     @transaction.atomic
-    def delete_revenue_report(self, user: User, report_id: int) -> None:
-        """
-        حذف تکی گزارش درآمد.
-        چرایی: مالی باید بتواند یک ردیف درآمدی اشتباه را حذف کند و تراز شیت آپدیت شود.
-        """
+    def delete_revenue_report(self, user: User, order_id: int, report_id: int) -> None:
         AppPermissionChecker.check_has_permission(user, 'delete_orderfinancialreport')
         
-        # ===== پیدا کردن گزارش با شرط ماهیت درآمد ===== #
-        try:
-            report = OrderFinancialReport.objects.get(id=report_id, nature='revenue')
-        except OrderFinancialReport.DoesNotExist:
+        # ===== دریافت گزارش ===== #
+        report = OrderFinancialReport.objects.get_by_order_and_id(order_id, report_id)
+        
+        if not report or report.nature != 'revenue':
             raise ValidationError("گزارش درآمدی با این مشخصات یافت نشد.")
 
         sheet = report.sheet
         report_title = report.title
         
-        # ===== حذف گزارش و محاسبه مجدد شیت ===== #
+        # ===== حذف گزارش ===== #
         report.delete()
         self._domain_service.recalculate_sheet_totals(sheet)
 
-        # ===== ثبت لاگ ===== #
         self.audit_service.record_log(
             user=user,
             obj=sheet,
-            action='DELETE_REVENUE_REPORT',
-            changes={'deleted_report_id': report_id, 'title': report_title},
+            action='DELETE_REVENUE',
+            changes={'deleted_report_id': report_id, 'order_id': order_id, 'title': report_title},
             description=_(f"حذف گزارش درآمد: {report_title}")
-    )
+        )
 
     # ===== DECIDE ON REVENUE REPORT ===== #
     def decide_on_revenue(self, user: User, report_id: int, approve: bool) -> OrderFinancialReport:
@@ -559,14 +564,12 @@ class FinancialOrderAppService:
             return self._domain_service.reject_report(report_id, user)
 
     # ===== GET REVENUE DETAIL ===== #
-    def get_revenue_detail(self, user: User, report_id: int) -> OrderFinancialReport:
-        """ 
-        مشاهده جزئیات یک گزارش درآمدی خاص.
-        """
+    def get_revenue_detail(self, user: User, order_id: int, report_id: int) -> OrderFinancialReport:
         AppPermissionChecker.check_has_permission(user, 'view_orderfinancialreport')
         
-        report = OrderFinancialReport.objects.filter(id=report_id, nature='revenue').get_report_detail(report_id)
-        if not report:
+        report = OrderFinancialReport.objects.get_by_order_and_id(order_id, report_id)
+        
+        if not report or report.nature != 'revenue':
             raise ValidationError("گزارش درآمد مورد نظر یافت نشد.")
         return report
 

@@ -27,8 +27,12 @@ class OrderFinancialReportQuerySet(BaseQuerySet):
     """کوئری‌های مربوط به گزارشات هزینه"""
     
     def get_all(self):
-        return self.select_related("submitter", "financial_tag") \
-            .order_by("-created_at").all()
+        return self.select_related(
+            "submitter", 
+            "financial_tag",
+            "sheet",
+            "sheet__order"
+        ).order_by("-created_at").all()
 
     def get_reports_by_sheet(self, sheet_id: int):
         return self.filter(sheet_id=sheet_id)\
@@ -40,6 +44,10 @@ class OrderFinancialReportQuerySet(BaseQuerySet):
             .select_related('sheet__order', 'submitter', 'financial_tag')\
             .prefetch_related('attachments')\
             .first()
+    
+    def get_by_order_and_id(self, order_id: int, report_id: int):
+        """ دریافت گزارش با شرط تعلق به سفارش خاص """
+        return self.filter(id=report_id, sheet__order_id=order_id).first()
             
     def get_by_id(self, pk: int):
         return self.filter(pk=pk).first()
@@ -51,6 +59,9 @@ class OrderFinancialReportManager(models.Manager):
     
     def get_all(self):
         return self.get_queryset().get_all()
+    
+    def get_by_order_and_id(self, order_id: int, report_id: int):
+        return self.get_queryset().get_by_order_and_id(order_id, report_id)
 
     def get_reports_by_sheet(self, sheet_id: int):
         return self.get_queryset().get_reports_by_sheet(sheet_id)

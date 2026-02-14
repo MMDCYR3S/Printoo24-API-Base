@@ -70,41 +70,21 @@ class FinancialItemInputSerializer(serializers.Serializer):
     description = serializers.CharField(required=False, allow_blank=True)
 
 class CreateReportInputSerializer(serializers.Serializer):
-    """ ورودی ایجاد دستی گزارش """
-    order_id = serializers.IntegerField(
-        required=True, 
-        help_text="شناسه سفارش (Order ID)"
-    )
+    """ ورودی ایجاد دستی گزارش - order_id از URL گرفته می‌شود """
     
-    title = serializers.CharField(
-        max_length=200, 
-        help_text="عنوان گزارش هزینه"
-    )
+    title = serializers.CharField(max_length=200, help_text="عنوان گزارش هزینه")
+    financial_tag = serializers.IntegerField(required=False, allow_null=True)
+    description = serializers.CharField(required=False, allow_blank=True)
     
-    financial_tag = serializers.IntegerField(
-        required=False, 
-        allow_null=True,
-        help_text="شناسه نوع هزینه (Financial Type ID)"
-    )
-    
-    description = serializers.CharField(
-        required=False, 
-        allow_blank=True,
-        help_text="توضیحات کلی گزارش"
-    )
-    # ===== آیتم‌ها ===== #
     items = serializers.ListField(
         child=FinancialItemInputSerializer(), 
         required=False, 
-        allow_null=True,
-        help_text="لیست آیتم‌های هزینه"
+        allow_null=True
     )
-    # ===== پیوست ها ===== #
     attachments = serializers.ListField(
         child=serializers.FileField(),
         required=False, write_only=True,
-        allow_null=True,
-        help_text="لیست عکس‌هایی که آپلود میشه."
+        allow_null=True
     )
 
 class UpdateReportInputSerializer(serializers.ModelSerializer):
@@ -121,10 +101,11 @@ class OrderFinancialSheetSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderFinancialSheet
         fields = [
-            'id', 'order', 'is_locked', 
-            'total_material_cost', 'total_service_cost', 
-            'total_shipping_cost', 'total_overhead_cost',
-            'final_total_cost', 'revenue_amount', 'net_profit', 'profit_margin_percent'
+            'id', 'order', 'is_locked', 'total_material_cost',
+            'total_production_cost', 'total_service_cost',
+            'total_delivery_cost', 'total_other_cost',
+            'final_total_cost', 'total_revenue', 'net_profit',
+            'profit_margin_percent'
         ]
 
 class CreateSheetInputSerializer(serializers.Serializer):
@@ -135,10 +116,11 @@ class UpdateSheetInputSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderFinancialSheet
         fields = [
-            'id', 'order', 'is_locked', 
-            'total_material_cost', 'total_service_cost', 
-            'total_shipping_cost', 'total_overhead_cost',
-            'final_total_cost', 'revenue_amount', 'net_profit', 'profit_margin_percent'
+            'id', 'order', 'is_locked', 'total_material_cost',
+            'total_production_cost', 'total_service_cost',
+            'total_delivery_cost', 'total_other_cost',
+            'final_total_cost', 'total_revenue', 'net_profit',
+            'profit_margin_percent'
         ]
 
 # ========================================== #
