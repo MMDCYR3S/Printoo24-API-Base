@@ -174,10 +174,51 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # ========== CREATE ========== #
+    # ===== CREATE REVENUE ===== #
     @extend_schema(
-        request=CreateReportInputSerializer, 
+        request=CreateRevenueReportInputSerializer,
         responses={201: OrderFinancialReportDetailSerializer},
-        description="ایجاد گزارش هزینه جدید همراه با لیست آیتم‌ها و پیوست‌ها"
+        examples=[
+            OpenApiExample(
+                name='Create Invoice Revenue',
+                description='ثبت درآمد حاصل از پرداخت فاکتور توسط مشتری',
+                value={
+                    "order_id": 105,
+                    "title": "درآمد فروش - پیش‌پرداخت",
+                    "financial_tag_id": 2, # مثلاً تگ "فروش محصول"
+                    "description": "واریز نقدی مشتری بابت ۵۰ درصد پیش‌پرداخت",
+                    "items": [
+                        {
+                            "custom_title": "پیش‌پرداخت فاکتور #1025",
+                            "amount": "15000000",
+                            "description": "واریز به حساب ملت"
+                        }
+                    ],
+                    "attachments": [] 
+                }
+            ),
+            OpenApiExample(
+                name='Create Extra Service Revenue',
+                description='ثبت درآمد بابت خدمات اضافه (مثل طراحی اختصاصی یا ارسال ویژه)',
+                value={
+                    "order_id": 105,
+                    "title": "هزینه خدمات جانبی",
+                    "financial_tag_id": 4, # مثلاً تگ "خدمات جانبی"
+                    "items": [
+                        {
+                            "catalog_id": 12, # مثلاً دسته‌بندی "طراحی لوگو"
+                            "amount": "2000000",
+                            "description": "طراحی لوگوی اختصاصی"
+                        },
+                        {
+                            "custom_title": "تیپاکس ویژه",
+                            "amount": "150000",
+                            "description": "درخواست ارسال سریع"
+                        }
+                    ]
+                }
+            )
+        ]
     )
     def create(self, request):
         """ ایجاد گزارش جدید + آیتم‌ها """
@@ -236,7 +277,21 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
         return Response(status=status.HTTP_200_OK)
 
     # ========== ADD ITEM ACTIONS =========== #
-    @extend_schema(request=FinancialItemInputSerializer, responses=OrderFinancialItemSerializer)
+    @extend_schema(
+        request=FinancialItemInputSerializer,
+        responses=OrderFinancialItemSerializer,
+        examples=[
+            OpenApiExample(
+                name='Add Revenue Item',
+                description='افزودن یک قلم درآمدی جدید به گزارش موجود',
+                value={
+                    "custom_title": "مابه التفاوت کاغذ",
+                    "amount": "500000",
+                    "description": "افزایش قیمت کاغذ گلاسه"
+                }
+            )
+        ]
+    )
     @action(detail=True, methods=['post'], url_path='items')
     def add_item(self, request, pk=None):
         """ افزودن قلم به این گزارش (pk = report_id) """
@@ -293,7 +348,30 @@ class RevenueReportViewSet(BaseFinancialViewSet):
         return Response(OrderFinancialReportDetailSerializer(report).data)
 
     # ===== CREATE REVENUE ===== #
-    @extend_schema(request=CreateRevenueReportInputSerializer)
+    @extend_schema(
+        request=CreateRevenueReportInputSerializer,
+        responses={201: OrderFinancialReportDetailSerializer},
+        examples=[
+            OpenApiExample(
+                name='Create Invoice Revenue',
+                description='ثبت درآمد حاصل از پرداخت فاکتور',
+                value={
+                    "order_id": 105,
+                    "title": "درآمد فروش - پیش‌پرداخت",
+                    "financial_tag_id": 2, 
+                    "description": "واریز نقدی مشتری بابت ۵۰ درصد پیش‌پرداخت",
+                    "items": [
+                        {
+                            "custom_title": "پیش‌پرداخت فاکتور #1025",
+                            "amount": "15000000",
+                            "description": "واریز به حساب ملت"
+                        }
+                    ],
+                    "attachments": [] 
+                }
+            )
+        ]
+    )
     def create(self, request):
         serializer = CreateRevenueReportInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -308,13 +386,42 @@ class RevenueReportViewSet(BaseFinancialViewSet):
         return Response(OrderFinancialReportDetailSerializer(report).data, status=status.HTTP_201_CREATED)
 
     # ===== UPDATE REPORT HEADER ===== #
-    @extend_schema(request=UpdateReportInputSerializer)
+    @extend_schema(
+        request=UpdateReportInputSerializer,
+        responses=OrderFinancialReportDetailSerializer,
+        examples=[
+            OpenApiExample(
+                name='Update Revenue Header',
+                description='ویرایش اطلاعات کلی گزارش (بدون تغییر اقلام)',
+                value={
+                    "title": "درآمد اصلاح شده - فاکتور ۱۰۲",
+                    "description": "توضیحات تکمیلی بابت واریز به حساب سامان (اصلاح شناسه واریز)",
+                    "financial_tag_id": 3
+                }
+            )
+        ]
+    )
     def partial_update(self, request, pk=None):
         """ فقط ویرایش هدر گزارش درآمد """
         report = self.service.update_report(request.user, pk, request.data)
         return Response(OrderFinancialReportDetailSerializer(report).data)
 
     # ===== ITEM ACTIONS (SEPARATE EDIT) ===== #
+    @extend_schema(
+        request=FinancialItemInputSerializer,
+        responses=OrderFinancialItemSerializer,
+        examples=[
+            OpenApiExample(
+                name='Add Revenue Item',
+                description='افزودن یک قلم درآمدی جدید به گزارش موجود',
+                value={
+                    "custom_title": "هزینه فوریت",
+                    "amount": "500000",
+                    "description": "اضافه شدن خدمات اکسپرس به سفارش"
+                }
+            )
+        ]
+    )
     @action(detail=True, methods=['post'], url_path='add-item')
     def add_item(self, request, pk=None):
         """ افزودن قلم جدید به درآمد موجود """
@@ -323,6 +430,21 @@ class RevenueReportViewSet(BaseFinancialViewSet):
         item = self.service.add_item_to_report(request.user, pk, serializer.validated_data)
         return Response(OrderFinancialItemSerializer(item).data)
 
+    @extend_schema(
+        request=FinancialItemInputSerializer,
+        responses=OrderFinancialItemSerializer,
+        examples=[
+            OpenApiExample(
+                name='Update Revenue Item',
+                description='ویرایش مبلغ یا شرح یک قلم درآمدی خاص',
+                value={
+                    "amount": "14500000",
+                    "description": "اصلاح مبلغ واریزی (کسر کارمزد بانکی)",
+                    "custom_title": "پیش‌پرداخت نهایی"
+                }
+            )
+        ]
+    )
     @action(detail=False, methods=['patch'], url_path='update-item/(?P<item_id>\d+)')
     def update_item(self, request, item_id=None):
         """ ویرایش مستقیم یک قلم درآمدی خاص """
@@ -363,6 +485,18 @@ class RevenueReportViewSet(BaseFinancialViewSet):
         return Response(status=status.HTTP_200_OK)
 
     # ===== BULK OPERATIONS ===== #
+    @extend_schema(
+        request=BulkActionSerializer,
+        examples=[
+            OpenApiExample(
+                name='Bulk Delete Revenues',
+                description='حذف همزمان چندین گزارش درآمد (مثلاً اشتباه اپراتور یا تکراری)',
+                value={
+                    "ids": [105, 106, 110]
+                }
+            )
+        ]
+    )
     @extend_schema(request=BulkActionSerializer)
     @action(detail=False, methods=['delete'], url_path='bulk-delete')
     def bulk_delete(self, request):

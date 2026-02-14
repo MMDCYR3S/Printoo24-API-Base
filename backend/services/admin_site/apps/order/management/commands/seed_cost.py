@@ -49,10 +49,11 @@ class Command(BaseCommand):
         """ایجاد گروه‌های وضعیت و وضعیت‌ها"""
         self.stdout.write("Creating status groups and statuses...")
         
-        # گروه‌ها
+        # ===== 1. GROUPS ===== #
         groups_data = [
             {"name": "ادمین", "code": "admin", "description": "مدیریت کل سیستم"},
-            {"name": "طراح", "code": "design", "description": "واحد طراحی و لیتوگرافی"},
+            {"name": "مالی", "code": "financial", "description": "واحد حسابداری"},
+            {"name": "طراح", "code": "designer", "description": "واحد طراحی و لیتوگرافی"},
             {"name": "چاپ", "code": "print", "description": "واحد تولید و چاپ"},
             {"name": "انبار", "code": "logistics", "description": "واحد انبار و ارسال"},
             {"name": "مشتری", "code": "customer", "description": "نمایش برای مشتری"},
@@ -65,19 +66,47 @@ class Command(BaseCommand):
                 defaults={
                     'name': g_data['name'],
                     'description': g_data['description'],
-                    'is_system': False
+                    'is_system': True
                 }
             )
             self.groups_map[g_data['code']] = group
 
-        # وضعیت‌ها
+        # ===== 2. STATUSES ===== #
         statuses_data = [
+            # --- ADMIN ---
             {"name": "در انتظار بررسی", "internal_code": "PENDING_INITIAL_ADMIN", "status_type": "initial", "group": "admin"},
-            {"name": "در حال طراحی", "internal_code": "DESIGN_PROGRESS_DESIGNER", "status_type": "progress", "group": "designer"},
-            {"name": "در حال چاپ", "internal_code": "print_PROGRESS_PRINT", "status_type": "progress", "group": "print"},
-            {"name": "ارسال‌شده", "internal_code": "SHIPPED_PROGRESS_LOGISTICS", "status_type": "progress", "group": "logistics"},
-            {"name": "تحویل‌شده", "internal_code": "DELIVERED_APPROVE_ADMIN", "status_type": "approve", "group": "admin"},
+            {"name": "تایید نهایی", "internal_code": "APPROVED_APPROVE_ADMIN", "status_type": "approve", "group": "admin"},
+            {"name": "رد شده توسط ادمین", "internal_code": "REJECTED_REJECT_ADMIN", "status_type": "reject", "group": "admin"},
             {"name": "لغو شده", "internal_code": "CANCELED_CANCEL_ADMIN", "status_type": "cancel", "group": "admin"},
+
+            # --- FINANCIAL ---
+            {"name": "در انتظار پرداخت", "internal_code": "PAYMENT_PENDING_PROGRESS_FINANCIAL", "status_type": "progress", "group": "financial"},
+            {"name": "تایید مالی", "internal_code": "PAYMENT_APPROVED_APPROVE_FINANCIAL", "status_type": "approve", "group": "financial"},
+            {"name": "رد شده توسط مالی", "internal_code": "PAYMENT_REJECTED_REJECT_FINANCIAL", "status_type": "reject", "group": "financial"},
+
+            # --- DESIGNER ---
+            {"name": "در حال طراحی", "internal_code": "DESIGN_PROGRESS_DESIGNER", "status_type": "progress", "group": "designer"},
+            {"name": "تایید طراحی", "internal_code": "DESIGN_APPROVED_APPROVE_DESIGNER", "status_type": "approve", "group": "designer"},
+            {"name": "رد شده توسط طراح", "internal_code": "DESIGN_REJECTED_REJECT_DESIGNER", "status_type": "reject", "group": "designer"},
+
+            # --- PRINT (PRODUCTION) ---
+            {"name": "در صف چاپ", "internal_code": "QUEUE_PROGRESS_PRINT", "status_type": "progress", "group": "print"},
+            {"name": "در حال چاپ", "internal_code": "PRINTING_PROGRESS_PRINT", "status_type": "progress", "group": "print"},
+            {"name": "تایید چاپ (اتمام تولید)", "internal_code": "PRINT_DONE_APPROVE_PRINT", "status_type": "approve", "group": "print"},
+            {"name": "رد شده توسط چاپخانه", "internal_code": "PRINT_REJECTED_REJECT_PRINT", "status_type": "reject", "group": "print"},
+
+            # --- LOGISTICS (WAREHOUSE) ---
+            # 1. تایید ورود به انبار (Receipt) -> Approve Type
+            {"name": "دریافت در انبار (آماده ارسال)", "internal_code": "READY_TO_SHIP_APPROVE_LOGISTICS", "status_type": "approve", "group": "logistics"},
+            
+            # 2. در حال ارسال (Dispatched) -> Progress Type
+            {"name": "در حال ارسال (تحویل پیک)", "internal_code": "DISPATCHED_PROGRESS_LOGISTICS", "status_type": "progress", "group": "logistics"},
+            
+            # 3. رد شده
+            {"name": "رد شده توسط انبار", "internal_code": "SHIPMENT_REJECTED_REJECT_LOGISTICS", "status_type": "reject", "group": "logistics"},
+            
+            # 4. تحویل نهایی (مشتری)
+            {"name": "تحویل شده به مشتری", "internal_code": "DELIVERED_APPROVE_ADMIN", "status_type": "approve", "group": "logistics"},
         ]
 
         for index, s_data in enumerate(statuses_data):
@@ -88,10 +117,10 @@ class Command(BaseCommand):
                     'status_type': s_data['status_type'],
                     'group': self.groups_map[s_data['group']],
                     'description': f"وضعیت {s_data['name']}",
-                    'is_system': False,
+                    'is_system': True,
                     'sort_order': index + 1
                 }
-            )
+            )   
 
     def _create_roles(self):
         """ایجاد نقش‌ها"""

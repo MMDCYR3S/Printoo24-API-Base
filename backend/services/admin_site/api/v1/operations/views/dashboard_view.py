@@ -132,7 +132,7 @@ class DashboardViewSet(viewsets.ViewSet):
         description="""
         این اندپوینت شاخص‌های کلان سیستم را برای ادمین نمایش می‌دهد.
         
-        **1. بخش آمار کمی (Entity Counts):**
+        **1. بخش آمار کمی (Entity Counts):**2
         - **total_staff:** تعداد کل پرسنل و کارمندان.
         - **total_customers:** تعداد کل مشتریان ثبت‌نام شده.
         - **total_orders:** تعداد کل سفارشات ثبت شده در تاریخچه سیستم.
