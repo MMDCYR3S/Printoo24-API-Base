@@ -20,8 +20,9 @@ class Invoice(models.Model):
     order = models.OneToOneField(
         'core.Order', 
         related_name='invoice', 
-        on_delete=models.PROTECT, 
-        verbose_name=_("سفارش مرتبط")
+        on_delete=models.SET_NULL, 
+        verbose_name=_("سفارش مرتبط"),
+        null=True, blank=True
     )
     invoice_number = models.CharField(_("شماره فاکتور"), max_length=50, unique=True, db_index=True)
     

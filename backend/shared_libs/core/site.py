@@ -13,7 +13,7 @@ class GroupedAdminSite(admin.AdminSite):
             'Logs': ['AuditLog'],
             'Authentication': ['User', 'UserRole', 'Role', 'Permission'],
             'Users': ['CustomerProfile', 'Address', 'City', 'Province', 'Wallet', 'WalletTransaction'],
-            'Orders': ['Order', 'OrderItem', 'OrderItemFile', 'OrderStatus', 'OrderStatusGroup', 'OrderFinancialSheet', 'OrderFinancialItem', 'OrderFinancialReport', 'OrderShipment', 'OrderFinancialType', 'OrderPackage', 'OrderSchedule'],
+            'Orders': ['Order', 'OrderItem', 'OrderItemFile', 'OrderStatus', 'OrderStatusGroup', 'OrderFinancialSheet', 'OrderFinancialItem', 'OrderFinancialReport', 'OrderShipment', 'OrderStateLog','OrderFinancialType', 'OrderPackage', 'OrderFinancialCategory', 'OrderSchedule'],
             'Products': ['Product', 'ProductCategory', 'ProductOption', 'ProductOptionValue', 'ProductOptionPricingStrategy', 'ProductOptionInputType'],
             'Financial': ['Transaction', 'Quotation', 'QuotationStatus', 'QuotationStatusGroup', 'Invoice', 'InvoiceItem', 'InvoiceStatus', 'InvoiceStatusGroup'],
         }

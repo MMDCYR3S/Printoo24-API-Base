@@ -1,12 +1,11 @@
-from django.db.models.signals import post_save, pre_delete, post_migrate
-from django.core.exceptions import PermissionDenied
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from .models import(
     ProductCategoryRelation, Product,
-    product_code_generator, OrderStatus,
-    OrderStatusGroup, Role
+    product_code_generator, OrderStateLog,
+    OrderStatusGroup, Role, Order
 )   
 
 # =========== GENERATE CORE ON RELATION CREATION =========== #
@@ -64,3 +63,53 @@ def create_status_group_for_role(sender, created, instance, **kwargs):
 
     if status_group:
         instance.allowed_groups.add(status_group)
+
+# ===== TRACK STATUS CHANGE (PRE-SAVE) ===== #
+@receiver(pre_save, sender=Order)
+def capture_old_status(sender, instance, **kwargs):
+    """
+    چرایی: قبل از ذخیره، وضعیت فعلی دیتابیس را می‌گیریم تا بدانیم وضعیت قبلی چه بوده.
+    """
+    if instance.pk:
+        try:
+            old_obj = Order.objects.get(pk=instance.pk)
+            instance._old_status = old_obj.current_status
+        except Order.DoesNotExist:
+            instance._old_status = None
+    else:
+        instance._old_status = None
+
+# ===== LOG STATUS CHANGE (POST-SAVE) ===== #
+@receiver(post_save, sender=Order)
+def log_order_state_change(sender, instance, created, **kwargs):
+    """
+    چرایی: بعد از ذخیره، اگر وضعیت تغییر کرده بود، یک رکورد در تاریخچه ثبت می‌کنیم.
+    """
+    old_status = getattr(instance, '_old_status', None)
+    new_status = instance.current_status
+
+    if created or (old_status and old_status != new_status):
+        
+        # ===== دریافت عامل تغییر (The Logic Fix) ===== #
+        actor = getattr(instance, '_status_changer', None)
+        
+        description = getattr(instance, '_change_reason', None)
+        
+        if not description:
+            if created:
+                description = "ثبت اولیه سفارش"
+            else:
+                from_text = old_status.name if old_status else "نامشخص"
+                to_text = new_status.name if new_status else "نامشخص"
+                description = f"تغییر وضعیت سیستمی از {from_text} به {to_text}"
+
+        if actor: 
+             OrderStateLog.objects.create(
+                order=instance,
+                from_status=old_status,
+                to_status=new_status,
+                actor=actor,
+                description=description
+            )
+        else:
+            pass

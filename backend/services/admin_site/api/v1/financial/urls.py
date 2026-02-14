@@ -17,10 +17,10 @@ router = DefaultRouter()
 # router.register(r'invoices', FinancialInvoiceViewSet, basename='invoice')
 # router.register(r'transactions', FinancialTransactionViewSet, basename='transaction')
 # router.register(r'quotations', FinancialQuotationViewSet, basename='quotation')
+# router.register(r'costs/catalogs', FinancialCatalogViewSet, basename='cost-catalog')
 # router.register(r'costs/sheets', FinancialOrderFinancialViewSet, basename='order-sheet')
 router.register(r'costs/reports', FinancialReportActionViewSet, basename='cost-report')
 router.register(r'revenues/reports', RevenueReportViewSet, basename='revenue-report')
-# router.register(r'costs/catalogs', FinancialCatalogViewSet, basename='cost-catalog')
 
 urlpatterns = [
     path('', include(router.urls)),

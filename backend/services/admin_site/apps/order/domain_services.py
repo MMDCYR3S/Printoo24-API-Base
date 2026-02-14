@@ -4,7 +4,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from core.models import User, Order, OrderItem, OrderStatus, OrderStatusGroup
+from core.models import User, Order, OrderItem, OrderStatus, OrderStatusGroup, OrderStateLog
 from apps.support.services import LoggerService
 from apps.order.models import *
 
@@ -264,6 +264,19 @@ class OrderStatusFlowService:
 
         return item
     
+    # ===== GET ORDER HISTORY (LOGS) ===== #
+    def get_order_state_logs(self, order_id: int):
+        """
+        دریافت تاریخچه تغییرات وضعیت یک سفارش با کوئری بهینه.
+        """
+        logs = OrderStateLog.objects.filter(order_id=order_id).select_related(
+            'from_status', 
+            'to_status', 
+            'actor'
+        ).order_by('-created_at')
+        
+        return logs
+    
     # ============ منطق هسته ============ #
     def _perform_transition(self, order: Order, new_status: OrderStatus, user: User, description: str = None):
         """ متد کمکی برای جلوگیری از تکرار کد در تغییر وضعیت سفارش """
@@ -308,11 +321,15 @@ class OrderStatusFlowService:
             description=description or _(f"تغییر وضعیت سفارش به {new_status.name}")
         )
 
+        order._status_changer = user
+        order._change_reason = description or _(f"تغییر وضعیت به {new_status.name}")
+
         # ===== آپدیت نهایی دیتابیس ===== #
         order.current_status = new_status
         order.save(update_fields=['current_status', 'updated_at'])
         
         return order
+    
 
     def _update_master_order_status(self, order: Order, user: User):
         """

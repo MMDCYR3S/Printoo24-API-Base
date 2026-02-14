@@ -84,7 +84,7 @@ class OrderStatus(models.Model):
         help_text=_("ترتیب قرارگیری در لیست (کم به زیاد).")
     )
     
-    group = models.ForeignKey(OrderStatusGroup, related_name='order_status', on_delete=models.CASCADE, blank=True, null=True)
+    group = models.ForeignKey(OrderStatusGroup, related_name='order_status', on_delete=models.SET_NULL, blank=True, null=True)
     description = models.TextField(_('توضیحات'), blank=True, null=True)
     
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
@@ -151,7 +151,7 @@ class Order(models.Model):
     user = models.ForeignKey(
         "core.User",
         verbose_name=_("مشتری"),
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         null=True, blank=True,
         help_text=_("در صورت نال بودن، سفارش به عنوان مهمان ثبت شده است.")
     )
@@ -169,7 +169,7 @@ class Order(models.Model):
     address = models.ForeignKey(
         "core.Address",
         verbose_name=_("آدرس"),
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         related_name="address_order",
         blank=True,
         null=True
@@ -178,7 +178,7 @@ class Order(models.Model):
     current_status = models.ForeignKey(
         OrderStatus,
         verbose_name=_("وضعیت فعلی"),
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         related_name="orders",
         null=True,
         blank=True
@@ -197,6 +197,16 @@ class Order(models.Model):
 
     def __str__(self):
         return f"{self.order_code} | {self.user}"
+
+    _change_reason = None 
+
+    @property
+    def change_reason(self):
+        return self._change_reason
+
+    @change_reason.setter
+    def change_reason(self, value):
+        self._change_reason = value
 
     # ===== Properties ===== #
     @property
@@ -315,3 +325,51 @@ class OrderItemFile(models.Model):
     @property
     def is_rejected(self):
         return self.status == 'rejected'
+
+# ===== Order State Log (History) ===== #
+class OrderStateLog(models.Model):
+    """
+    تاریخچه تغییرات وضعیت سفارش.
+    این مدل حیاتی است برای پیگیری اینکه چرا یک سفارش رد شده و توسط چه کسی.
+    """
+    order = models.ForeignKey(
+        Order, 
+        related_name='state_logs', 
+        on_delete=models.CASCADE,
+        verbose_name=_("سفارش")
+    )
+    
+    from_status = models.ForeignKey(
+        OrderStatus, 
+        related_name='logs_from',
+        on_delete=models.SET_NULL, 
+        null=True, blank=True,
+        verbose_name=_("از وضعیت")
+    )
+    
+    to_status = models.ForeignKey(
+        OrderStatus, 
+        related_name='logs_to',
+        on_delete=models.PROTECT,
+        verbose_name=_("به وضعیت")
+    )
+    
+    actor = models.ForeignKey(
+        'core.User',
+        on_delete=models.PROTECT,
+        verbose_name=_("تغییر دهنده"),
+        help_text="کاربری که وضعیت را تغییر داده (طراح، انباردار و...)"
+    )
+    
+    description = models.TextField(_("توضیحات / دلیل"), blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'admin_order_state_logs'
+        verbose_name = _('تاریخچه وضعیت')
+        verbose_name_plural = _('تاریخچه‌های وضعیت')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.order.order_code}: {self.from_status} -> {self.to_status}"

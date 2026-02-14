@@ -3,21 +3,24 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     OrderListView,
     OrderDetailView,
-    OrderItemUploadView,
-    OrderStatusGroupViewSet,
-    OrderStatusViewSet,
     OrderTransitionView,
     OrderFinancialReportSubmitView,
-    OrderScheduleManageView,
     OrderFinancialTypeView,
     OrderStatusTransactionListView,
     OrderApproveView,
     OrderRejectView,
-    DashboardViewSet
+    OrderHistoryViewSet,
+    DashboardViewSet,
+    # ===== فیچرهایی برای آینده ===== #
+    OrderItemUploadView,
+    OrderStatusGroupViewSet,
+    OrderStatusViewSet,
+    OrderScheduleManageView,
 )
 
 router = DefaultRouter()
 router.register(r'dashboard', DashboardViewSet, basename='dashboard')
+router.register(r'orders/history', OrderHistoryViewSet, basename='order-history')
 # router.register(r'status-groups', OrderStatusGroupViewSet, basename='status-group')
 # router.register(r'statuses', OrderStatusViewSet, basename='status')
 

@@ -6,3 +6,4 @@ from .order_status_view import *
 from .order_cost_view import *
 from .order_schedule_view import *
 from .dashboard_view import *
+from .order_history_view import *

@@ -8,7 +8,7 @@ class FinancialCatalogSerializer(serializers.ModelSerializer):
     """ برای نمایش لیست و جزئیات """
     class Meta:
         model = OrderFinancialCategory
-        fields = ['id', 'title', 'slug', 'financial_tag']
+        fields = ['id', 'title', 'slug', 'operation_type']
 
 class FinancialCatalogInputSerializer(serializers.Serializer):
     """ ورودی ایجاد و ویرایش دسته‌بندی """

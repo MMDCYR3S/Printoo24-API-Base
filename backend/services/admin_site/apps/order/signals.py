@@ -44,5 +44,3 @@ def create_shipment_informations(sender, instance,  created, **kwargs):
             tracking_code=instance.order_code,
             status="processing"
         )
-
-

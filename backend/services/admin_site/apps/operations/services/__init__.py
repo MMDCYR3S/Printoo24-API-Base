@@ -3,3 +3,4 @@ from .order_detail_service import OrderDetailAppService
 from .order_file_service import OrderFileAppService
 from .order_transition_service import OrderTransitionAppService
 from .order_item_status_service import OrderItemStatusAppService
+from .order_history_service import OrderHistoryAppService
