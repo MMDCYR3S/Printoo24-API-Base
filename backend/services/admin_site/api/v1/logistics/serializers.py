@@ -102,3 +102,21 @@ class ShipmentOutputSerializer(serializers.ModelSerializer):
             'status',
             'tracking_code',
         ]
+
+class ShipmentSummary(serializers.ModelSerializer):
+    """ خروجی مدل مرسوله """
+    delivery_method_display = serializers.CharField(source='get_delivery_method_display', read_only=True)
+    
+    class Meta:
+        model = OrderShipment
+        fields = [
+            'id',
+            'order',
+            'tracking_code',
+            'delivery_method',
+            'delivery_method_display',
+            'destination_address',
+            'expected_delivery_date',
+            'dispatched_at',
+            'delivered_at',
+        ]

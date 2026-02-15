@@ -54,28 +54,32 @@ class OrderTransitionAppService:
         try:
             # ===== بررسی دسترسی به وضعیت ===== #
             self._validate_role_scope(requester, current_status)
-            next_sort_order = current_status.sort_order + 1
 
-            # ===== بررسی وجود وضعیت بعدی ===== #
-            try:
-                next_status = OrderStatus.objects.filter(sort_order=next_sort_order).first()
-            except Exception:
-                next_status = None
-
-            if not next_status:
-                raise ValidationError("این سفارش در مرحله نهایی قرار دارد و وضعیت بعدی برای تایید وجود ندارد.")
-
-            # ===== مراحلی که نباید تغییر کنند ===== #
-            FORBIDDEN_TRANSITIONS = ['deliver', 'cancel', 'reject']
-
-            target_code = next_status.internal_code.lower()
-
-            if any(keyword in target_code for keyword in FORBIDDEN_TRANSITIONS):
+            # ===== زمانی که وضعیت منفی است، تغییر پیدا نکند ===== #
+            if current_status.status_type in ['reject', 'cancel']:
                 raise ValidationError(
-                    "برای انتقال به این مرحله (تکمیل/تحویل)، لطفا از دکمه مربوطه اقدام کنید. "
-                    "تایید خودکار برای مراحل نهایی مجاز نیست."
+                    "این سفارش در وضعیت 'رد شده' یا 'لغو شده' قرار دارد. "
+                    "امکان تایید و ادامه خودکار وجود ندارد. (نیازمند اصلاح سفارش یا بررسی مدیریت)"
                 )
 
+            # ===== دریافت اولین وضعیت معتبر پس از این وضعیت ===== #
+            next_status = OrderStatus.objects.get_next_happy_path_status(
+                current_sort_order=current_status.sort_order
+            )
+
+            # ===== بررسی وجود وضعیت بعدی ===== #
+            if not next_status:
+                raise ValidationError("وضعیت بعدی برای تایید یافت نشد (شاید در مرحله پایانی هستید).")
+
+            # ===== مراحلی که نباید تغییر کنند ===== #
+            target_code = next_status.internal_code.lower()
+            FORBIDDEN_TARGETS = ['delivered', 'completed', 'dispatched', 'deliver', 'complete', 'dispatch']
+
+            if any(forbidden in target_code for forbidden in FORBIDDEN_TARGETS):
+                raise ValidationError(
+                    f"امکان انتقال خودکار به وضعیت '{next_status.name}' وجود ندارد. "
+                    "لطفاً از بخش لجستیک یا دکمه‌های عملیاتی مربوطه استفاده کنید."
+                )
             
             # ===== تغییر وضعیت ===== #
             return self.flow_domain_service.change_order_status(

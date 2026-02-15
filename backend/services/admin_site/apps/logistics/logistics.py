@@ -74,21 +74,25 @@ class LogisticsService:
     
     def approve_shipment(self, shipment: OrderShipment, user: User) -> OrderShipment:
         """
-        تایید تحویل به مشتری
+        تایید تحویل به مشتری و آپدیت وضعیت سفارش مادر
         """
+        # ===== اعتبارسنجی وضعیت فعلی ===== #
         if shipment.status == 'delivered':
-            raise ValidationError("مرسوله تحویل شده و وضعیت آن نهایی است.")
+            raise ValidationError("مرسوله قبلاً تحویل شده و وضعیت آن نهایی است.")
         
         old_status = shipment.status
         approve_status = "delivered"
         
-        # ===== محاسبه زمان تحویل مشتری ===== #
+        # ===== آپدیت فیلدهای مرسوله ===== #
         update_fields = self._get_status_update_fields(shipment, approve_status)
-        
         if not update_fields:
             return shipment
         
-        # ===== ثبت لاگ ===== #
+        # ===== ثبت لاگ تغییر وضعیت ===== #
+        for field, value in update_fields.items():
+            setattr(shipment, field, value)
+
+        # ===== ثبت لاگ مرسوله ===== #
         self.audit_service.record_log(
             user=user,
             obj=shipment,
@@ -99,21 +103,19 @@ class LogisticsService:
                 'to': approve_status,
                 'tracking_code': shipment.tracking_code
             },
-            description=_(f"تایید مرسوله: {approve_status}")
+            description=_(f"تایید نهایی مرسوله توسط مدیریت")
         )
+        
+        # ===== ذخیره تغییرات مرسوله ===== #
+        shipment.save(update_fields=list(update_fields.keys()))
 
-        order = Order.objects.get_order_by_id(shipment.order.id)
+        # ===== تغییر وضعیت سفارش ===== #
+        order = shipment.order        
         order_status = OrderStatus.objects.get_status_by_code("DELIVERED")
         if order.current_status.internal_code not in ["delivered", 'deliver']:
             order.current_status = order_status
             order.save()
 
-        # ===== به روز کردن فیلدهای مربوط ===== #
-        for field, value in update_fields.items():
-            setattr(shipment, field, value)
-        
-        # ===== ذخیره ===== #
-        shipment.save(update_fields=update_fields.keys())
         return shipment
 
     # ========== HELPER FUNCTIONS ========== #

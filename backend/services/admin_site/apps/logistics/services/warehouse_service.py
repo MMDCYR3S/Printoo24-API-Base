@@ -1,6 +1,6 @@
 from typing import Dict, Any, List
 
-from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 from django.utils.translation import gettext_lazy as _
 from django.db import transaction
 
@@ -161,12 +161,21 @@ class WarehouseAppService:
     @transaction.atomic
     def approve_shipment_status(self, user: User, shipment_id: int) -> OrderShipment:
         """ تایید مرسوله """
-        AppPermissionChecker.check_has_permission(user, 'change_ordershipment')
+        AppPermissionChecker.check_has_permission(user, 'change_orderstatus')
+
+        user_role = user.user_role.select_related('role').first()
+        is_admin_role = user_role and user_role.role.slug in ['admin', 'manager', 'ceo']
+        
+        # ===== فقط مدیران می‌توانند تایید نهایی تحویل را انجام دهند ===== #
+        if not (user.is_superuser or is_admin_role):
+            raise PermissionDenied("مجوز رد شد: تایید نهایی تحویل فقط توسط مدیریت امکان‌پذیر است.")
+
         # ===== بررسی وجود ===== #
         shipment = OrderShipment.objects.get_by_id(shipment_id)
         if not shipment:
             raise NotFound("مرسوله یافت نشد.")
-        # ===== بررسی توسط سرویس دامنه و بروزرسانی وضعیت ===== #
+
+        # ===== تایید تحویل ===== #
         return self._logistic_domain.approve_shipment(shipment, user)
 
     # ========== ADD PACKAGE TO SHIPMENT ========== #
@@ -265,7 +274,7 @@ class WarehouseAppService:
         """
         تایید ورود سفارش به انبار (توسط انباردار).
         """
-        AppPermissionChecker.check_has_permission(user, 'change_ordershipment')
+        AppPermissionChecker.check_has_permission(user, 'change_orderstatus')
         
         try:
             order = Order.objects.get(pk=order_id)

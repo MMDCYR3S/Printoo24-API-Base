@@ -24,14 +24,12 @@ class BaseOrderItemSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='product.category.name', read_only=True)
     
     features_summary = serializers.CharField(source='feature_summary', read_only=True)
-    status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     class Meta:
         model = OrderItem
         fields = [
             'id', 'product_name', 'product_code', 'category_name', 
-            'status_display', 'quantity', 
-            'features_summary', 'admin_note', 'items'
+            'quantity', 'features_summary', 'admin_note', 'items'
         ]
 
 class DesignerOrderItemSerializer(BaseOrderItemSerializer):

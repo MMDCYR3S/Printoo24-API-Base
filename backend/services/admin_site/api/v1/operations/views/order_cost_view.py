@@ -2,12 +2,11 @@ import json
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
-from apps.order.models import OrderFinancialType
+from apps.order.models import OrderFinancialType, OrderFinancialCategory
 from apps.order.services import OrderFinancialAppService
 from ..serializers import (
     OrderFinancialReportSubmitSerializer, 
@@ -132,4 +131,15 @@ class OrderFinancialTypeView(GenericAPIView):
     def get(self, request):
         financial_tags = OrderFinancialType.objects.all()
         serializer = self.get_serializer(financial_tags, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+@extend_schema(tags=["Financial Report"])
+class OrderFinancialCategoryView(GenericAPIView):
+    """ نمایش لیست دسته‌بندی‌ها """
+    serializer_class = OrderFinancialTypeListSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        catalogs = OrderFinancialCategory.objects.all()
+        serializer = self.get_serializer(catalogs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

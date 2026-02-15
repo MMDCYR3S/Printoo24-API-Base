@@ -14,12 +14,12 @@ class OrderFinancialAttachmentSerializer(serializers.ModelSerializer):
 
 class OrderFinancialItemSerializer(serializers.ModelSerializer):
     """ نمایش اقلام هزینه (Output) """
-    financial_tag_display = serializers.CharField(source='catalog_item.title', read_only=True, default="سایر/دستی")
+    catalog_title = serializers.CharField(source='category.title', read_only=True, default="سایر/دستی")
     
     class Meta:
         model = OrderFinancialItem
         fields = [
-            'id', 'custom_title', 'financial_tag_display', 
+            'id', 'custom_title', 'catalog_title', 
             'amount', 'description'
         ]
 

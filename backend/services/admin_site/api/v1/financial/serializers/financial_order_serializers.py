@@ -25,12 +25,11 @@ class OrderFinancialAttachmentSerializer(serializers.ModelSerializer):
         fields = ["report", "title", "file", "created_at"]
 
 class OrderFinancialItemSerializer(serializers.ModelSerializer):
-    catalog_title = serializers.CharField(source='catalog_item.title', read_only=True)
-    catalog_id = serializers.IntegerField(source='catalog_item.id', read_only=True)
+    catalog_title = serializers.CharField(source='category.title', read_only=True)
     
     class Meta:
         model = OrderFinancialItem
-        fields = ['id', 'custom_title', 'catalog_id', 'catalog_title', 'amount', 'description']
+        fields = ['id', 'custom_title', 'catalog_title', 'amount', 'description']
 
 class OrderFinancialReportDetailSerializer(serializers.ModelSerializer):
     """ جزئیات کامل یک گزارش هزینه برای مشاهده """

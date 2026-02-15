@@ -6,6 +6,7 @@ from .views import (
     OrderTransitionView,
     OrderFinancialReportSubmitView,
     OrderFinancialTypeView,
+    OrderFinancialCategoryView,
     OrderStatusTransactionListView,
     OrderApproveView,
     OrderRejectView,
@@ -41,7 +42,8 @@ urlpatterns = [
     # ===== Order Financial Report Create ===== #
     path('orders/<int:pk>/costs/submit/', OrderFinancialReportSubmitView.as_view(), name='cost-report-create'),
 
-    path('costs-types/', OrderFinancialTypeView.as_view(), name='order-costs'),
+    path('financial/tags/', OrderFinancialTypeView.as_view(), name='financial-tags'),
+    path('financial/catalogs/', OrderFinancialCategoryView.as_view(), name='financial-catalogs'),
     # ===== Order Schedule ===== #
     # path('orders/<int:pk>/schedule/', OrderScheduleManageView.as_view(), name='order-schedule-manage'),
     

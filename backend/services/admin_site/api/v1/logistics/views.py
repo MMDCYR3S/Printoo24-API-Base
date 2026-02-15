@@ -15,6 +15,7 @@ from .serializers import (
     FinancialReportOutputSerializer,
     PackageInputSerializer,
     PackageOutputSerializer,
+    ShipmentSummary,
 )
 
 # ========== SHIPMENT VIEWSET ========== #
@@ -27,16 +28,17 @@ class ShipmentViewSet(viewsets.ViewSet):
 
     @extend_schema(
         summary="لیست تمام مرسولات",
-        responses={200: ShipmentOutputSerializer(many=True)}
+        responses={200: ShipmentSummary(many=True)},
     )
     def list(self, request):
-        queryset = OrderShipment.objects.all().select_related('order').prefetch_related('packages')
-        serializer = ShipmentOutputSerializer(queryset, many=True)
+        queryset = OrderShipment.objects.all().select_related('order')
+        serializer = ShipmentSummary(queryset, many=True)
         return Response(serializer.data)
 
     @extend_schema(
         summary="دریافت جزئیات مرسوله",
-        responses={200: ShipmentOutputSerializer}
+        responses={200: ShipmentOutputSerializer},
+        deprecated=True
     )
     def retrieve(self, request, pk=None):
         service = WarehouseAppService()
@@ -47,6 +49,7 @@ class ShipmentViewSet(viewsets.ViewSet):
         summary="ایجاد مرسوله جدید برای یک سفارش",
         request=CreateShipmentInputSerializer,
         responses={201: ShipmentOutputSerializer},
+        deprecated=True
     )
     def create(self, request):
         serializer = CreateShipmentInputSerializer(data=request.data)
@@ -65,7 +68,8 @@ class ShipmentViewSet(viewsets.ViewSet):
     @extend_schema(
         summary="ویرایش مرسوله (جزئیات ارسال)",
         request=UpdateShipmentInputSerializer,
-        responses={200: ShipmentOutputSerializer}
+        responses={200: ShipmentOutputSerializer},
+        deprecated=True
     )
     def update(self, request, pk=None):
         serializer = UpdateShipmentInputSerializer(data=request.data, partial=True)
@@ -79,7 +83,7 @@ class ShipmentViewSet(viewsets.ViewSet):
         )
         return Response(ShipmentOutputSerializer(shipment).data)
     
-    @extend_schema(summary="حذف مرسوله (اگر پیاده‌سازی شده باشد)")
+    @extend_schema(summary="حذف مرسوله (اگر پیاده‌سازی شده باشد)", deprecated=True)
     def destroy(self, request, pk=None):
         service = WarehouseAppService()
         shipment = service.delete_shipment(request.user, pk)
@@ -88,7 +92,8 @@ class ShipmentViewSet(viewsets.ViewSet):
     @extend_schema(
         summary="تغییر وضعیت مرسوله",
         request=ShipmentStatusInputSerializer,
-        responses={200: ShipmentOutputSerializer}
+        responses={200: ShipmentOutputSerializer},
+        deprecated=True
     )
     @action(detail=True, methods=['post'], url_path='change-status')
     def change_status(self, request, pk=None):
@@ -116,7 +121,8 @@ class ShipmentViewSet(viewsets.ViewSet):
     @extend_schema(
         summary="افزودن یک بسته جدید به مرسوله موجود",
         request=PackageInputSerializer,
-        responses={201: PackageOutputSerializer}
+        responses={201: PackageOutputSerializer},
+        deprecated=True
     )
     @action(detail=True, methods=['post'], url_path='add-package')
     def add_package(self, request, pk=None):

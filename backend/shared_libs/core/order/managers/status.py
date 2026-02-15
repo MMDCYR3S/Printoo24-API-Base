@@ -52,11 +52,26 @@ class OrderStatusQuerySet(BaseQuerySet):
     
     def get_by_id(self, pk: int):
         return self.filter(pk=pk).first()
+    
+    def get_next_happy_path_status(self, current_sort_order: int):
+        """
+        پیدا کردن اولین وضعیت 'مثبت' بعدی بر اساس ترتیب.
+        وضعیت‌های منفی (رد/کنسل) را نادیده می‌گیرد.
+        """
+        HAPPY_PATH_TYPES = ['initial', 'progress', 'approve']
+        
+        return self.filter(
+            sort_order__gt=current_sort_order,
+            status_type__in=HAPPY_PATH_TYPES
+        ).order_by('sort_order').first()
 
 # ========== STATUS MANAGERS ========== #
 class OrderStatusManager(models.Manager):
     def get_queryset(self):
         return OrderStatusQuerySet(self.model, using=self._db)
+
+    def get_next_happy_path_status(self, current_sort_order: int):
+        return self.get_queryset().get_next_happy_path_status(current_sort_order)
 
     def get_status_by_code(self, internal_code: str):
         return self.get_queryset().get_status_by_code(internal_code)
