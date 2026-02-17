@@ -1,169 +1,179 @@
-import { MoreHorizontal, ArrowUpDown, Copy, Eye, FileText, CheckCircle2, XCircle, Phone } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
+import { MoreHorizontal, Copy, Eye, Trash2, Phone, Calendar, ArrowUpDown } from "lucide-react"; // ArrowUpDown اضافه شد
+import StatusChangeCell from "./StatusChangeCell"; 
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 
-// فرمت پول به تومان (رندومایز شده طبق مثال بک‌ند)
-const formatCurrency = (amount) => {
-  if (!amount) return "۰ تومان";
-  return new Intl.NumberFormat("fa-IR").format(amount) + " تومان";
-};
+const getInitials = (name) => {
+    if (!name) return "U";
+    return name.substring(0, 2).toUpperCase();
+}
 
-// فرمت تاریخ و ساعت (ساعت در چاپخانه مهم است)
-const formatDate = (dateString) => {
-  if (!dateString) return "-";
-  return new Intl.DateTimeFormat("fa-IR", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(dateString));
-};
-
-export const getColumns = (handleApprove, handleReject) => [
+export const columns = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        className="rounded-[4px] border-slate-00 data-[state=checked]:bg-gold-dark data-[state=checked]:border-gold-dark"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        className="rounded-[4px] border-slate-300 data-[state=checked]:bg-gold-dark data-[state=checked]:border-gold-dark"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "order_code",
     header: "شناسه",
     cell: ({ row }) => (
-      <div className="font-mono text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-100">
-        {row.getValue("order_code")}
+      <div className="flex items-center group cursor-pointer" onClick={() => navigator.clipboard.writeText(row.getValue("order_code"))}>
+        <span className="font-mono text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-sm border border-slate-200 group-hover:border-gold-dark/50 group-hover:text-gold-dark transition-colors">
+            {row.getValue("order_code")}
+        </span>
       </div>
     ),
   },
   {
     accessorKey: "recipient_name",
-    header: "مشتری / تحویل‌گیرنده",
-    cell: ({ row }) => {
-      const company = row.original.company_name;
-      const recipient = row.original.recipient_name;
-      const phone = row.original.recipient_phone;
-      return (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <span className="font-bold text-gray-900 text-sm">{company || recipient}</span>
-            {row.original.type_display === "اختصاصی" && (
-              <Badge variant="outline" className="text-[9px] h-4 px-1 border-amber-200 text-amber-700 bg-amber-50">اختصاصی</Badge>
-            )}
-          </div>
-          <div className="flex items-center text-[11px] text-gray-500 gap-1">
-            <Phone size={10} />
-            <span className="font-mono">{phone}</span>
-          </div>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "total_price",
-    header: "مبلغ کل",
-    cell: ({ row }) => <div className="font-bold text-gray-800 text-sm">{formatCurrency(row.getValue("total_price"))}</div>,
-  },
-  {
-    accessorKey: "items_count",
-    header: "اقلام",
+    header: "مشتری",
     cell: ({ row }) => (
-      <div className="text-center">
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-[11px] font-bold border">
-          {row.getValue("items_count")}
+      <div className="flex items-center gap-3">
+        <Avatar className="h-9 w-9 border border-slate-200 rounded-md hidden md:flex"> {/* آواتار مربعی‌تر */}
+            <AvatarFallback className="bg-slate-100 text-slate-600 text-xs font-bold rounded-md">
+                {getInitials(row.getValue("recipient_name"))}
+            </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+            <span className="font-bold text-sm text-slate-800">
+                {row.getValue("recipient_name")}
+            </span>
+            {row.original.company_name && (
+                <span className="text-[10px] text-slate-500 font-medium mt-0.5">
+                    {row.original.company_name}
+                </span>
+            )}
+        </div>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "recipient_phone", 
+    header: "شماره تماس",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-50 px-2 py-1 rounded-sm border border-slate-100 w-fit">
+        <Phone size={12} className="text-slate-400" />
+        <span dir="ltr" className="font-mono tracking-wide">
+             {row.getValue("recipient_phone")}
         </span>
       </div>
     ),
   },
   {
     accessorKey: "created_at",
-    header: "زمان ثبت",
+    // 🔽 فعال کردن سورت تاریخ
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-xs font-bold text-slate-500 hover:text-slate-800 h-8 px-0"
+        >
+          تاریخ ثبت
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
+    },
     cell: ({ row }) => (
-      <div className="text-[11px] text-gray-500 leading-tight">
-        {formatDate(row.getValue("created_at"))}
+      <div className="flex flex-col text-xs text-slate-500">
+        <span className="font-medium flex items-center gap-1">
+             <Calendar size={12} className="text-slate-400"/>
+             {new Date(row.getValue("created_at")).toLocaleDateString('fa-IR')}
+        </span>
+        <span className="text-[10px] text-slate-300 mr-4">
+             {new Date(row.getValue("created_at")).toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'})}
+        </span>
       </div>
     ),
   },
   {
-    accessorKey: "status_display",
-    header: "وضعیت فعلی",
-    cell: ({ row }) => {
-      const status = row.original.status_display || "نامشخص";
-      const isLocked = row.original.is_locked;
-
-      let badgeClass = "bg-gray-100 text-gray-600 border-gray-200";
-      if (status.includes("تایید")) badgeClass = "bg-green-50 text-green-700 border-green-200";
-      if (status.includes("چاپ") || status.includes("تولید")) badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
-      if (status.includes("طراحی")) badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
-      if (status.includes("ارسال") || status.includes("پیک")) badgeClass = "bg-amber-50 text-amber-700 border-amber-200";
-
+    accessorKey: "total_price",
+    // 🔽 فعال کردن سورت قیمت
+    header: ({ column }) => {
       return (
-        <Badge className={`font-medium shadow-none border ${badgeClass} gap-1`}>
-          {isLocked && <span className="text-[10px]">🔒</span>}
-          {status}
-        </Badge>
-      );
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-xs font-bold text-slate-500 hover:text-slate-800 h-8 px-0"
+        >
+          مبلغ سفارش
+          <ArrowUpDown className="ml-2 h-3 w-3" />
+        </Button>
+      )
     },
+    cell: ({ row }) => (
+      <div className="font-black text-slate-800 text-sm tracking-tight">
+        {Number(row.getValue("total_price")).toLocaleString()} 
+        <span className="text-[9px] font-normal text-slate-400 mr-1">تومان</span>
+      </div>
+    ),
   },
   {
-    id: "quick_actions",
-    header: "عملیات سریع",
-    cell: ({ row }) => {
-      const id = row.original.id;
-      return (
-        <div className="flex items-center gap-1">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-            onClick={() => handleApprove(id)}
-            title="تایید و مرحله بعد"
-          >
-            <CheckCircle2 className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-            onClick={() => handleReject(id)}
-            title="رد / لغو"
-          >
-            <XCircle className="h-4 w-4" />
-          </Button>
-        </div>
-      );
-    }
-  },
-  {
-    id: "more",
-    cell: ({ row }) => {
-      const order = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem onClick={() => {
-               navigator.clipboard.writeText(order.order_code);
-               toast.success("کد سفارش کپی شد");
-            }}>
-              <Copy className="ml-2 h-4 w-4" /> کپی کد
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-blue-600">
-              <Eye className="ml-2 h-4 w-4" /> مشاهده جزئیات
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <FileText className="ml-2 h-4 w-4" /> چاپ فاکتور
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+    accessorKey: "internal_code", 
+    header: "وضعیت",
+    cell: ({ row }) => (
+      <StatusChangeCell 
+        orderId={row.original.id} 
+        currentStatus={row.original.internal_code || row.original.status_display} 
+      />
+    ),
+    // این خط برای فیلتر مولتی سلکت حیاتی است
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
     },
   },
+{
+    id: "actions",
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-all">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48 shadow-xl border-slate-100 rounded-md p-1">
+          <DropdownMenuLabel className="text-[10px] text-slate-400 px-2 py-1.5">مدیریت سفارش</DropdownMenuLabel>
+          
+          <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.order_code)} className="rounded-sm text-xs cursor-pointer">
+            <Copy className="ml-2 h-3.5 w-3.5 text-slate-400" /> کپی شناسه
+          </DropdownMenuItem>
+
+          {/* ⭐️ لینک به صفحه جزئیات */}
+          <DropdownMenuItem asChild>
+            <Link 
+              to={`/admin/orders/${row.original.id}`} 
+              className="flex w-full items-center rounded-sm text-xs cursor-pointer font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            >
+              <Eye className="ml-2 h-3.5 w-3.5" /> مشاهده جزئیات
+            </Link>
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator className="bg-slate-100" />
+          
+          <DropdownMenuItem className="rounded-sm text-xs cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50">
+            <Trash2 className="ml-2 h-3.5 w-3.5" /> حذف سفارش
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+  },
+
 ];

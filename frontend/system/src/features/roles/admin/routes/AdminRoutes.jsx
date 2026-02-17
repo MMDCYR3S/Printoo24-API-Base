@@ -14,7 +14,7 @@ export default function AdminRoutes() {
       <Route path="adminDashboard" element={<AdminDashboard />} />
       <Route path="orders" element={<AdminOrderList />} />
       <Route path="orders/new" element={<CreateOrder />} />
-      <Route path="orders/detail/:id" element={<OrderDetail />} />
+      <Route path="orders/:id" element={<OrderDetail />} />
       <Route path="users/staff" element={<StaffList />} />
       <Route path="users/customers" element={<CustomerList />} />
       

@@ -79,3 +79,7 @@ INFO 2026-02-12 16:03:57,792 auth_serivce 30 124940834563776 Staff login success
 INFO 2026-02-13 16:22:22,501 auth_serivce 227 137227532236480 Staff login successful: User 'printer' (ID: 7)
 INFO 2026-02-13 16:52:58,393 auth_serivce 290 138800953030336 Staff login successful: User 'admin' (ID: 1)
 INFO 2026-02-14 07:54:07,205 auth_serivce 7 137802427659968 Staff login successful: User 'admin' (ID: 1)
+INFO 2026-02-15 14:11:29,383 auth_serivce 94 124941489927872 Staff login successful: User 'admin' (ID: 1)
+INFO 2026-02-16 12:33:38,667 auth_serivce 107 131103507601088 Staff login successful: User 'admin' (ID: 1)
+WARNING 2026-02-17 07:41:42,658 auth_serivce 107 131103507601088 Login failed: Invalid credentials for user 'admin'
+INFO 2026-02-17 07:42:09,559 auth_serivce 107 131103507601088 Staff login successful: User 'admin' (ID: 1)
