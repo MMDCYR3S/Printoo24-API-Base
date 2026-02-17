@@ -63,8 +63,8 @@ class OrderDashboardListSerializer(serializers.ModelSerializer):
             'items_count', 'created_at'
         ]
 
+# ===== Order Item Serializer ===== #
 class OrderItemSerializer(serializers.ModelSerializer):
-    # ===== تغییر ۱: هندل کردن نام محصول برای حالت دستی ===== #
     name_display = serializers.SerializerMethodField()
     specifications = serializers.SerializerMethodField()
 
@@ -80,25 +80,24 @@ class OrderItemSerializer(serializers.ModelSerializer):
     
     def get_specifications(self, obj):
         """
-        هوشمندسازی خروجی: هم برای ساختار محصول (system) و هم ساختار دستی (admin) کار می‌کند.
+        هوشمندسازی خروجی برای نمایش تمیز در فرانت‌‌اند.
         """
         raw_data = obj.items or {}
         
-        # ===== ساختار پیش فرض ===== #
         response = {
             'dimensions': {}, 
             'options': [], 
             'attributes': [] 
         }
         
-        # ===== سایز دلخواه محصولات ===== #
+        # 1. ابعاد (Dimensions)
         width = raw_data.get('width') or raw_data.get('meta', {}).get('width')
         height = raw_data.get('height') or raw_data.get('meta', {}).get('height')
         
         if width or height:
             response['dimensions'] = {'width': width, 'height': height}
 
-        # ===== ویژگی های مربوط به محصولات ===== #
+        # 2. آپشن‌های سیستمی (System Options - مربوط به محصولات تعریف شده)
         system_options = raw_data.get('options', [])
         if isinstance(system_options, list):
             for opt in system_options:
@@ -111,31 +110,48 @@ class OrderItemSerializer(serializers.ModelSerializer):
                         'value': val_label
                     })
 
-        # ===== استخراج داده های سمت ادمین به صورت دستی و اختصاصی ===== #
-        ignored_keys = {'width', 'height', 'options', 'meta', 'size_id', 'has_design', 'file_info'}
-        
-        # ===== اگر دیتای متا وجود داشت ===== #
-        meta_data = raw_data.get('meta', {})
-        if isinstance(meta_data, dict):
-            for k, v in meta_data.items():
-                if k not in ['width', 'height']: 
-                    pass 
+        ignored_keys = {
+            'width', 'height', 'options', 'meta', 'size_id', 
+            'has_design', 'file_info', 'specifications', 
+            'admin_logs', 'is_custom_order', 'admin_note'
+        }
 
+        # متد کمکی برای فرمت‌دهی مقادیر
+        def format_value(val):
+            if isinstance(val, bool):
+                return "بله" if val else "خیر"
+            if isinstance(val, list):
+                return ", ".join([str(v) for v in val])
+            if isinstance(val, dict):
+                return str(val) 
+            return str(val)
+        
+        specs_data = raw_data.get('specifications', {})
+        if isinstance(specs_data, dict):
+            for k, v in specs_data.items():
+                if v:
+                    response['attributes'].append({
+                        'label': k.replace('_', ' ').title(),
+                        'value': format_value(v)
+                    })
+
+        # ب) سایر کلیدهای موجود در روت JSON
         for key, value in raw_data.items():
             if key in ignored_keys:
                 continue
             
-            display_value = value
-            if isinstance(value, (dict, list)):
-                display_value = str(value)
-            
+            # اگر مقدار خالی بود رد کن
+            if value is None or value == "":
+                continue
+
             response['attributes'].append({
                 'label': key.replace('_', ' ').title(),
-                'value': display_value
+                'value': format_value(value)
             })
 
         return response
 
+# ===== Order Dashboard Detail Serializer ===== #
 class OrderDashboardDetailSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source='user.get_full_name', read_only=True)
     recipient_name = serializers.CharField(read_only=True)
