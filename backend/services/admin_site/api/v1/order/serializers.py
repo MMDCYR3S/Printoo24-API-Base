@@ -70,7 +70,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'name_display', 'quantity', 'price', 'specifications', 'created_at']
+        fields = ['id', 'name_display', 'name', 'quantity', 'price', 'specifications', 'created_at']
 
     def get_name_display(self, obj):
         """ اولویت با نام محصول است، اگر نبود از نام دستی استفاده می‌کند """
@@ -161,16 +161,32 @@ class OrderDashboardDetailSerializer(serializers.ModelSerializer):
     status_name = serializers.CharField(source='current_status.name', read_only=True)
     items = OrderItemSerializer(source="order_item_order", many=True, read_only=True)
     
+    order_name = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
     address_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = [
-            'id', 'order_code', 'customer_name',
+            'id', 'order_name', 'order_code', 'customer_name', 
             'recipient_name', 'recipient_phone', 'company_name',
-            'full_address' ,'total_price',  'status_name',
-            'type', 'items', 'address_detail', 'created_at'
+            'full_address' ,'total_price', 'status_name',
+            'type', 'description', 'items', 'address_detail', 'created_at'
         ]
+
+    def get_order_name(self, obj):
+        first_item = obj.order_item_order.first()
+        return first_item.name if first_item else _("بدون نام")
+
+    def get_description(self, obj):
+        """
+        منطق سینیوری: چون سفارش چندین آیتم دارد، توضیحات اولین آیتم 
+        که معمولا توضیحات اصلی مشتری است را برمی‌گردانیم.
+        """
+        first_item = obj.order_item_order.first()
+        if first_item and first_item.description:
+            return first_item.description
+        return None
 
     def get_address_detail(self, obj):
         if obj.address:

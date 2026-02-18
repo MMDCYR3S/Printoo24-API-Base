@@ -53,14 +53,32 @@ class BaseOrderDetailSerializer(serializers.ModelSerializer):
     current_status_display = serializers.CharField(source="current_status.name", read_only=True)
     type_display = serializers.CharField(source="get_type_display", read_only=True)
 
+    order_name = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+
     class Meta:
         model = Order
         fields = [
-            'id', 'order_code', 'recipient_name',
-            'recipient_phone', 'company_name', 'full_address',
+            'id', 'order_name', 'order_code', 'recipient_name', 
+            'recipient_phone', 'company_name', 'full_address', 'description',
             'current_status_display', 'customer_info', 'type_display',
             'created_at'
         ]
+
+    def get_order_name(self, obj):
+        first_item = obj.order_item_order.first()
+        return first_item.name if first_item else _("بدون نام")
+
+    def get_description(self, obj):
+        """
+        منطق سینیوری: چون سفارش چندین آیتم دارد، توضیحات اولین آیتم 
+        که معمولا توضیحات اصلی مشتری است را برمی‌گردانیم.
+        """
+        first_item = obj.order_item_order.first()
+        if first_item and first_item.description:
+            return first_item.description
+        return None
+
 
     def get_customer_info(self, obj):
         if not obj.user:
