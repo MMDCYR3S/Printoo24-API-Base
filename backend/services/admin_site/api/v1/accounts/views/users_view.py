@@ -5,10 +5,10 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.core.exceptions import ValidationError, PermissionDenied
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiTypes
 
-from apps.accounts.services import StaffAppService
+from apps.accounts.services import StaffAppService, RoleAppService
 from ..serializers import (
     StaffListSerializer, StaffCreateSerializer, StaffUpdateSerializer,
-    BulkIdsSerializer, BulkRoleChangeSerializer
+    BulkIdsSerializer, BulkRoleChangeSerializer, RoleSerializer
 )
 
 from core.users.exceptions import UsernameAlreadyExistsException, EmailAlreadyExistsException
@@ -250,3 +250,21 @@ class StaffBulkActionsView(GenericAPIView):
         except ValidationError as e:
             return Response({"detail": e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
+# ========== Role View ========== #
+@extend_schema(tags=["Users-Staffs"])
+class RoleListView(GenericAPIView):
+    """ نمایش لیست نقش‌ها """
+    
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = RoleAppService()
+
+    def get(self, request):
+        """ نمایش لیستی از نقش‌ها """
+        try:
+            role_list = self.service.get_role_list(request.user)
+            serializer = RoleSerializer(role_list, many=True)
+            return Response(serializer.data)
+        except PermissionDenied as e:
+            return Response({"detail": str(e)}, status=status.HTTP_403_FORBIDDEN)

@@ -5,7 +5,8 @@ from .views import (
     StaffListCreateView, StaffDetailView, StaffBulkActionsView,
     RoleListCreateView, RoleDetailView, StaffLoginView, StaffLogoutView,
     PermissionListAPIView, CustomerBulkActionsView, CustomerListCreateView,
-    CustomerDetailView, ProvinceListView, CityListView, CustomerAddressManagementView, CustomerAddressDetailView
+    CustomerDetailView, ProvinceListView, CityListView, CustomerAddressManagementView,
+    CustomerAddressDetailView, RoleListView
 )
 
 urlpatterns = [
@@ -13,11 +14,12 @@ urlpatterns = [
     path('staff/', StaffListCreateView.as_view(), name='staff-list-create'),
     path('staff/<int:pk>/', StaffDetailView.as_view(), name='staff-detail'),
     path('staff/actions/<str:action>/', StaffBulkActionsView.as_view(), name='staff-bulk-actions'),
+    path('roles/list/', RoleListView.as_view(), name='role-list-view'),
     
     # ===== Role URLs ===== #
-    # path('roles/permissions/', PermissionListAPIView.as_view(), name='permission-list'),
-    # path('roles/', RoleListCreateView.as_view(), name='role-list-create'),
-    # path('roles/<int:pk>/', RoleDetailView.as_view(), name='role-detail'),
+    path('roles/permissions/', PermissionListAPIView.as_view(), name='permission-list'),
+    path('roles/', RoleListCreateView.as_view(), name='role-list-create'),
+    path('roles/<int:pk>/', RoleDetailView.as_view(), name='role-detail'),
 
     # ===== Auth URLs ===== #
     path('auth/login/', StaffLoginView.as_view(), name='staff-login'),

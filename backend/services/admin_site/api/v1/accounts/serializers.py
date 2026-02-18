@@ -27,6 +27,13 @@ class RoleOutputSerializer(serializers.ModelSerializer):
 
     def get_permission_count(self, obj):
         return obj.permission.count()
+
+# ========== Role DTOs ========== #
+class RoleSerializer(serializers.ModelSerializer):
+    """ خروجی نقش به همراه تعداد دسترسی‌ها و اسکوپ‌ها """
+    class Meta:
+        model = Role
+        fields = ['id', 'name', 'slug']
     
 # ========== Role Input DTOs ========== #
 class RoleInputSerializer(serializers.Serializer):
