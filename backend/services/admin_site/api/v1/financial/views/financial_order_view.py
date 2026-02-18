@@ -274,7 +274,7 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
     # ========== APPROVE ACTION =========== #
     @extend_schema(request=ApproveReportInputSerializer)
     @action(detail=True, methods=['post'], url_path='decide')
-    def decide(self, request, pk=None):
+    def decide(self, request, order_id=None, pk=None, **kwargs):
         """ تایید یا رد گزارش """
         serializer = ApproveReportInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -282,9 +282,8 @@ class FinancialReportActionViewSet(BaseFinancialViewSet):
         if serializer.validated_data['approve']:
             self.service.approve_report(request.user, pk)
         else:
-            self.service.reject_report(
-                request.user, pk
-            )
+            self.service.reject_report(request.user, pk)
+            
         return Response(status=status.HTTP_200_OK)
 
     # ========== ADD ITEM ACTIONS =========== #
@@ -504,7 +503,7 @@ class RevenueReportViewSet(BaseFinancialViewSet):
     # ===== DECIDE ON REVENUE (APPROVE/REJECT) ===== #
     @extend_schema(request=ApproveReportInputSerializer)
     @action(detail=True, methods=['post'], url_path='decide')
-    def decide(self, request, pk=None):
+    def decide(self, request, order_id=None, pk=None):
         """ تایید یا رد درآمد (is_approved = true/false) """
         serializer = ApproveReportInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
