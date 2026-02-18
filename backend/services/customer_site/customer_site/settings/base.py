@@ -24,7 +24,7 @@ env = environ.Env(
 
     DEBUG=(bool, True)
 )
-env_file = os.path.join(BASE_DIR, 'env/.env.dev')
+env_file = os.path.join(BASE_DIR, 'env/.env.prod')
 environ.Env.read_env(env_file)
 
 # Quick-start development settings - unsuitable for production
