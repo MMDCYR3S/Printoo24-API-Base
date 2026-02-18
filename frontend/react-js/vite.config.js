@@ -16,7 +16,7 @@ export default defineConfig({
     proxy: {
       // ✅ کانفیگ جدید: تمام درخواست‌هایی که با /api/v1 شروع می‌شوند
       '/api/v1': {
-        target: 'http://127.0.0.1:9010', // آدرس واقعی بک‌اند
+        target: 'http://customer_site:9010', // آدرس واقعی بک‌اند
         changeOrigin: true,
         secure: false,
         // نکته مهم: اینجا rewrite نداریم چون بک‌اند شما خودش /api/v1 را دارد
@@ -25,7 +25,7 @@ export default defineConfig({
       
       // کانفیگ ادمین (اگر نیاز دارید بماند)
       '/api/admin': {
-        target: 'http://127.0.0.1:8010', 
+        target: 'http://admin_site:8010', 
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/admin/, '')
       }
