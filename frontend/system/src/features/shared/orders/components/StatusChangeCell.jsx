@@ -9,11 +9,20 @@ import { useOrderActions } from "../hooks/useOrders";
 
 // تابع کمکی برای پیدا کردن کانفیگ
 const findStatusConfig = (statusValue) => {
-  if (!statusValue) return null;
+  // 🛑 فیکس حیاتی: به جای برگرداندن null، یک آبجکت پیش‌فرض امن برمی‌گردانیم
+  if (!statusValue) {
+    return {
+      label: "بدون وضعیت",
+      icon: ChevronsUpDown,
+      color: "bg-gray-100 text-gray-500 border-gray-200"
+    };
+  }
+  
   let config = ORDER_STATUSES.find(s => s.value === statusValue);
   if (!config) {
     config = ORDER_STATUSES.find(s => s.label === statusValue);
   }
+  
   return config || {
     label: statusValue,
     icon: ChevronsUpDown,
@@ -21,14 +30,13 @@ const findStatusConfig = (statusValue) => {
   };
 };
 
-
-
 const StatusChangeCell = ({ orderId, currentStatus }) => {
   const [open, setOpen] = useState(false);
   const { changeStatus, isChanging } = useOrderActions(); 
   
   const config = findStatusConfig(currentStatus);
-  const StatusIcon = config.icon;
+  // 🛑 فیکس محافظتی دوم: استفاده از علامت ؟ برای جلوگیری از کرش
+  const StatusIcon = config?.icon || ChevronsUpDown;
 
   const handleSelect = (newStatusCode) => {
     // بستن سریع منو
@@ -46,7 +54,7 @@ const StatusChangeCell = ({ orderId, currentStatus }) => {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-<PopoverTrigger asChild>
+      <PopoverTrigger asChild>
         <Button
           variant="outline" // استفاده از outline برای حس صنعتی
           role="combobox"
@@ -55,7 +63,7 @@ const StatusChangeCell = ({ orderId, currentStatus }) => {
           className={cn(
             "h-8 text-[11px] font-bold border rounded-md px-2.5 transition-all shadow-sm w-full justify-between",
             // استایل صنعتی: رنگ پس‌زمینه سالید خیلی کمرنگ + بوردر مشخص
-            config.color 
+            config?.color 
           )}
         >
           {isChanging ? (
@@ -64,7 +72,7 @@ const StatusChangeCell = ({ orderId, currentStatus }) => {
             <div className="flex items-center gap-2 truncate">
                 {/* نمایش آیکون */}
                 <StatusIcon className="h-3.5 w-3.5 opacity-70" />
-                <span>{config.label}</span>
+                <span>{config?.label}</span>
             </div>
           )}
           <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-30" />
@@ -101,7 +109,8 @@ const StatusChangeCell = ({ orderId, currentStatus }) => {
                     )}>
                         {(currentStatus === status.label || currentStatus === status.value) && <Check className="h-3 w-3" />}
                     </div>
-                    <status.icon className="h-4 w-4 text-muted-foreground" />
+                    {/* رندر امن آیکون در لیست */}
+                    {status.icon && <status.icon className="h-4 w-4 text-muted-foreground" />}
                     <span className="font-medium">{status.label}</span>
                 </CommandItem>
                 ))}

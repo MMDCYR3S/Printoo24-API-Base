@@ -11,7 +11,7 @@ import { adminHeaderActions } from "@/features/roles/admin/config/adminHeaderAct
 import { designNavigation } from "@/features/roles/design/config/designNavigation";
 import { printNavigation } from "@/features/roles/print/config/printNavigation";
 import { logisticsNavigation } from "@/features/roles/logistics/config/logisticsNavigation";
-
+import { financialNavigation } from "@/features/roles/financial/config/financialNavigation";
 
 
 // تنظیمات نقش‌ها (دقیقاً با کلیدهای بک‌اند)
@@ -29,8 +29,10 @@ print: {
     navigation: printNavigation, 
     actions: [] 
   },
-  financial: { navigation: [], actions: [] },
-  
+financial: { 
+    navigation: financialNavigation, 
+    actions: [] 
+  },
 logistics: {
     navigation: logisticsNavigation,
     actions: [],
