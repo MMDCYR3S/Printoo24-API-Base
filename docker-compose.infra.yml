@@ -10,7 +10,7 @@ services:
     networks:
       - data_network
     healthcheck:
-      test: pg_isready -U ${POSTGRES_USER}
+      test: pg_isready -U printo24_user
       interval: 5s
       timeout: 5s
       retries: 5
