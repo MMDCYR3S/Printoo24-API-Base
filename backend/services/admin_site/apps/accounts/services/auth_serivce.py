@@ -35,7 +35,7 @@ class AuthAppService:
         # ===== اگر کاربر وجود نداشت، ثبت در لاگ ===== #
         if user is None:
             self.audit_service.record_log(
-                user=None, # کاربر ناشناس
+                user=None,
                 obj=None,
                 action='LOGIN_FAILED',
                 changes={'username_attempt': username, 'reason': 'Invalid credentials'},

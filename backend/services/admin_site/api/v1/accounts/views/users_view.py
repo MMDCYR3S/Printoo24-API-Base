@@ -181,7 +181,6 @@ class StaffBulkActionsView(GenericAPIView):
                 enum=['delete', 'activate', 'deactivate', 'change_role']
             )
         ],
-        # نکته: چون بادی متغیر است، از آبجکت کلی استفاده می‌کنیم و با مثال توضیح می‌دهیم
         request=OpenApiTypes.OBJECT, 
         responses={200: OpenApiTypes.OBJECT},
         examples=[

@@ -157,7 +157,7 @@ class DashboardAppService:
         if not user.is_superuser:
             return {} 
 
-        # ===== آمار موجودیت‌ها (Counts) ===== #
+        # ===== آمار موجودیت‌ها ===== #
         counts = {
             "total_staff": User.objects.filter(is_staff=True).count(),
             "total_customers": User.objects.filter(is_staff=False).count(),
@@ -173,14 +173,67 @@ class DashboardAppService:
         ).order_by('-count')
 
         # ===== خلاصه مالی کل سیستم (All Time) ===== #
-        financials = OrderFinancialSheet.objects.aggregate(
-            system_revenue=Coalesce(Sum('total_revenue'), Value(0), output_field=DecimalField()),
-            system_cost=Coalesce(Sum('final_total_cost'), Value(0), output_field=DecimalField()),
-            system_profit=Coalesce(Sum('net_profit'), Value(0), output_field=DecimalField())
+        fin_aggregate = OrderFinancialReport.objects.filter(is_approved=True).aggregate(
+            sys_rev=Coalesce(Sum('items__amount', filter=Q(nature='revenue')), Value(0), output_field=DecimalField()),
+            sys_cost=Coalesce(Sum('items__amount', filter=Q(nature='cost')), Value(0), output_field=DecimalField())
         )
+        system_revenue = fin_aggregate['sys_rev']
+        system_cost = fin_aggregate['sys_cost']
+
+        financials = {
+            "system_revenue": system_revenue,
+            "system_cost": system_cost,
+            "system_profit": system_revenue - system_cost
+        }
+
+        # ===== نمودار سالانه (۱۲ ماه گذشته) ===== #
+        twelve_months_ago = self.now - timedelta(days=365)
+        twelve_months_ago = self.now - timedelta(days=365)
+        annual_chart_qs = Order.objects.filter(
+            created_at__gte=twelve_months_ago
+        ).annotate(
+            month=TruncMonth('created_at')
+        ).values('month').annotate(
+            order_count=Count('id', distinct=True),
+            revenue=Coalesce(
+                Sum('financial_sheet__reports__items__amount', 
+                    filter=Q(financial_sheet__reports__nature='revenue', financial_sheet__reports__is_approved=True)
+                ), 
+                Value(0), output_field=DecimalField()
+            ),
+            cost=Coalesce(
+                Sum('financial_sheet__reports__items__amount', 
+                    filter=Q(financial_sheet__reports__nature='cost', financial_sheet__reports__is_approved=True)
+                ), 
+                Value(0), output_field=DecimalField()
+            )
+        ).order_by('month')
+
+        # ===== نمودار ماه جاری ===== #
+        daily_chart_qs = Order.objects.filter(
+            created_at__gte=self.start_of_month
+        ).annotate(
+            date=TruncDay('created_at')
+        ).values('date').annotate(
+            order_count=Count('id', distinct=True),
+            revenue=Coalesce(
+                Sum('financial_sheet__reports__items__amount', 
+                    filter=Q(financial_sheet__reports__nature='revenue', financial_sheet__reports__is_approved=True)
+                ), 
+                Value(0), output_field=DecimalField()
+            ),
+            cost=Coalesce(
+                Sum('financial_sheet__reports__items__amount', 
+                    filter=Q(financial_sheet__reports__nature='cost', financial_sheet__reports__is_approved=True)
+                ), 
+                Value(0), output_field=DecimalField()
+            )
+        ).order_by('date')
 
         return {
             "entity_counts": counts,
             "status_distribution": list(status_distribution),
-            "financial_summary": financials
+            "financial_summary": financials,
+            "annual_chart": list(annual_chart_qs),
+            "daily_chart": list(daily_chart_qs),
         }
