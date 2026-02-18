@@ -95,11 +95,11 @@ class DashboardViewSet(viewsets.ViewSet):
         stats = self.service.get_operational_stats(
             request.user, 
             group_code='production', 
-            operation_type='print' # یا production بسته به سیدینگ
+            operation_type='print'
         )
         return Response(stats)
 
-    # ===== 4. FINANCIAL DASHBOARD (EXTENDED) ===== #
+    # ===== 4. FINANCIAL DASHBOARD ===== #
     @extend_schema(
         summary="داشبورد جامع مالی (مدیر مالی)",
         description="""
@@ -132,7 +132,7 @@ class DashboardViewSet(viewsets.ViewSet):
         description="""
         این اندپوینت شاخص‌های کلان سیستم را برای ادمین نمایش می‌دهد.
         
-        **1. بخش آمار کمی (Entity Counts):**2
+        **1. بخش آمار کمی (Entity Counts):**
         - **total_staff:** تعداد کل پرسنل و کارمندان.
         - **total_customers:** تعداد کل مشتریان ثبت‌نام شده.
         - **total_orders:** تعداد کل سفارشات ثبت شده در تاریخچه سیستم.
@@ -143,9 +143,19 @@ class DashboardViewSet(viewsets.ViewSet):
         - مناسب برای رسم نمودار دایره‌ای (Pie Chart) یا لیست وضعیت‌ها.
         
         **3. بخش خلاصه مالی (Financial Summary - All Time):**
-        - **system_revenue:** کل درآمد سیستم از ابتدا تا کنون.
-        - **system_cost:** کل هزینه‌های انجام شده از ابتدا تا کنون (شامل مواد، چاپ، لجستیک و...).
+        - **system_revenue:** کل درآمد سیستم از ابتدا تا کنون (محاسبه دقیق از روی گزارشات تایید شده درآمدی).
+        - **system_cost:** کل هزینه‌های انجام شده از ابتدا تا کنون (محاسبه دقیق از روی گزارشات تایید شده هزینه‌ای).
         - **system_profit:** سود خالص کل سیستم.
+        
+        **4. بخش نمودار سالانه (Annual Chart):**
+        - آرایه‌ای شامل اطلاعات آماری و مالی **۱۲ ماه گذشته**.
+        - فیلدها: `month` (ماه)، `order_count` (تعداد سفارشات در آن ماه)، `revenue` (مجموع درآمد ماه) و `cost` (مجموع هزینه ماه).
+        - مناسب برای رسم نمودار میله‌ای (Bar Chart) یا خطی (Line Chart) ترکیبی.
+
+        **5. بخش نمودار ماه جاری (Daily Chart):**
+        - آرایه‌ای شامل اطلاعات آماری و مالی به تفکیک **روزهای ماه جاری**.
+        - فیلدها: `date` (روز)، `order_count` (تعداد سفارشات در آن روز)، `revenue` (درآمد آن روز) و `cost` (هزینه آن روز).
+        - بسیار کاربردی برای رسم نمودارهای Area یا Line جهت مشاهده روند صعودی/نزولی روزانه.
         """,
         responses=AdminDashboardSerializer
     )
