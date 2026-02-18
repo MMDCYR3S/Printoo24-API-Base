@@ -4,55 +4,58 @@ import Login from "@/features/auth/pages/Login";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import useAuthStore from "@/store/authStore";
 
-// ایمپورت روترهای هر نقش
 import AdminRoutes from "@/features/roles/admin/routes/AdminRoutes";
 import DesignRoutes from "@/features/roles/design/routes/DesignRoutes";
 import PrintRoutes from "@/features/roles/print/routes/PrintRoutes";
 import FinancialRoutes from "@/features/roles/financial/routes/FinancialRoutes";
 import LogisticsRoutes from "@/features/roles/logistics/routes/LogisticsRoutes";
 
-// --- کامپوننت داخلی محافظت از مسیرها (ادغام شده) ---
 const AuthGuard = ({ children }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const location = useLocation();
 
   if (!isAuthenticated) {
-    // ریدایرکت دقیق به صفحه لاگین تعریف شده
     return <Navigate to="/auth/login" state={{ from: location }} replace />;
+  }
+  return children;
+};
+
+// گارد امنیتی مبتنی بر نقش (با کلید دقیق بک‌اند)
+const RoleGuard = ({ allowedRoles, children }) => {
+  const { user } = useAuthStore();
+  const role = user?.role || "admin"; 
+
+  if (!allowedRoles.includes(role)) {
+    return <Navigate to={`/${role}`} replace />;
   }
   return children;
 };
 
 export default function AppRoutes() {
   const { user } = useAuthStore();
-  const role = user?.role || "admin"; // نقش کاربر برای مسیریابی اولیه
+  const role = user?.role || "admin";
 
   return (
     <Routes>
-      {/* مسیرهای عمومی */}
       <Route path="/auth/login" element={<Login />} />
       
-      {/* تمام مسیرهای اپلیکیشن تحت نظارت AuthGuard و لایوت اصلی */}
       <Route
         path="/*"
         element={
           <AuthGuard>
             <DashboardLayout>
               <Routes>
-                {/* استفاده از /* حیاتی است تا روت‌های داخلی ماژول‌ها 
-                   توسط روتر اصلی شناسایی شوند.
-                */}
-                <Route path="admin/*" element={<AdminRoutes />} />
-                <Route path="design/*" element={<DesignRoutes />} />
-                <Route path="print/*" element={<PrintRoutes />} />
-                <Route path="financial/*" element={<FinancialRoutes />} />
-                <Route path="logistics/*" element={<LogisticsRoutes />} />
+                <Route path="admin/*" element={<RoleGuard allowedRoles={["admin"]}><AdminRoutes /></RoleGuard>} />
                 
-                {/* ریدایرکت هوشمند بر اساس نقش کاربر در بدو ورود */}
+                {/* 🔴 کلید دقیق designer ثبت شد */}
+                <Route path="designer/*" element={<RoleGuard allowedRoles={["designer", "admin"]}><DesignRoutes /></RoleGuard>} />
+                
+                <Route path="print/*" element={<RoleGuard allowedRoles={["print", "admin"]}><PrintRoutes /></RoleGuard>} />
+                <Route path="financial/*" element={<RoleGuard allowedRoles={["financial", "admin"]}><FinancialRoutes /></RoleGuard>} />
+                <Route path="logistics/*" element={<RoleGuard allowedRoles={["logistics", "admin"]}><LogisticsRoutes /></RoleGuard>} />
+                
                 <Route path="/" element={<Navigate to={`/${role}`} replace />} />
-                
-                {/* مدیریت روت‌های تعریف نشده */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to={`/${role}`} replace />} />
               </Routes>
             </DashboardLayout>
           </AuthGuard>

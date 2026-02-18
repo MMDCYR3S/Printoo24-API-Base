@@ -5,17 +5,44 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import useAuthStore from "@/store/authStore";
 
+// ایمپورت کانفیگ‌های نویگیشن
 import { adminNavigation } from "@/features/roles/admin/config/adminNavigation";
 import { adminHeaderActions } from "@/features/roles/admin/config/adminHeaderActions";
+import { designNavigation } from "@/features/roles/design/config/designNavigation";
+import { printNavigation } from "@/features/roles/print/config/printNavigation";
+import { logisticsNavigation } from "@/features/roles/logistics/config/logisticsNavigation";
+
+
+
+// تنظیمات نقش‌ها (دقیقاً با کلیدهای بک‌اند)
+const roleConfigs = {
+  admin: {
+    navigation: adminNavigation,
+    actions: adminHeaderActions,
+  },
+  // 🔴 کلید دقیق طراح طبق بک‌ند
+  designer: {
+    navigation: designNavigation,
+    actions: [], 
+  },
+print: { 
+    navigation: printNavigation, 
+    actions: [] 
+  },
+  financial: { navigation: [], actions: [] },
+  
+logistics: {
+    navigation: logisticsNavigation,
+    actions: [],
+  },
+};
 
 export default function DashboardLayout({ children }) {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, user } = useAuthStore();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // عرض سایدبار را اینجا تعریف می‌کنیم تا هماهنگی کامل باشد
-  // نکته: این مقادیر باید با عرض واقعی کامپوننت Sidebar شما یکی باشد
   const SIDEBAR_WIDTH = "280px"; 
-  const SIDEBAR_COLLAPSED_WIDTH = "80px"; // عرض در حالت بسته (فقط آیکون)
+  const SIDEBAR_COLLAPSED_WIDTH = "80px";
 
   if (isLoading) {
     return (
@@ -27,37 +54,33 @@ export default function DashboardLayout({ children }) {
 
   if (!isAuthenticated) return <Navigate to="/auth/login" replace />;
 
-  const navigationItems = adminNavigation;
-  const headerActions = adminHeaderActions;
+  // 🔴 خواندن مستقیم نقش کاربر بدون مپر (با پیش‌فرض admin)
+  const currentRole = user?.role || "admin";
+  
+  // پیدا کردن تنظیمات مربوط به نقش (اگر پیدا نکرد، ادمین رو نشون میده)
+  const currentConfig = roleConfigs[currentRole] || roleConfigs.admin;
+  const navigationItems = currentConfig.navigation;
+  const headerActions = currentConfig.actions;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col" dir="rtl">
-      {/* هدر: اگر هدر شما روی سایدبار می‌افتد z-index بالا بدهید */}
       <Header actions={headerActions} />
       
-      {/* سایدبار */}
       <Sidebar 
         items={navigationItems} 
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-        // احتمالا باید عرض را به خود سایدبار هم پاس بدهید یا در آنجا ثابت باشد
         className="fixed right-0 top-0 h-full z-40 transition-all duration-300"
       />
 
-      {/* محتوای اصلی */}
       <main 
         className={cn(
-          "flex-1 pt-20 pb-8 min-h-screen transition-all duration-300 ease-in-out",
-          // منطق اصلی پر شدن صفحه اینجاست:
-          // بر اساس وضعیت سایدبار، مارجین راست را تغییر می‌دهیم
+          "flex-1 pt-20 pb-8 min-h-screen transition-all duration-300 ease-in-out"
         )}
         style={{
            marginRight: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH
         }}
       >
-        {/* حذف container و max-w-7xl برای استفاده از تمام عرض صفحه 
-            استفاده از w-full و p-4 یا p-6 برای فاصله مناسب از لبه‌ها
-        */}
         <div className="w-full px-4 md:px-6 lg:px-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {children} 
         </div>
