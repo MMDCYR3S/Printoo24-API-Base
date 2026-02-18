@@ -1,17 +1,19 @@
 // src/app/features/admin/categories/components/SubCategoryManager.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Save, CornerDownRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Save, CornerDownRight, CheckCircle2, AlertCircle, Image as ImageIcon, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adminCategoryService } from '../../../services/adminCategoryService';
 
 const SubCategoryManager = ({ parentCategory }) => {
   const queryClient = useQueryClient();
-  // دریافت اسلاگ والد از پراپ ورودی (طبق عکس شما این دیتا در ریسپانس موجود است)
   const parentSlug = parentCategory?.slug; 
+  
+  // رفرنس برای ذخیره URL های پیش‌نمایش جهت پاکسازی از مموری مرورگر (Best Practice)
+  const previewUrls = useRef([]);
 
-  const { control, register, handleSubmit, reset, formState: { isDirty } } = useForm({
+  const { control, register, handleSubmit, reset, setValue, watch, formState: { isDirty } } = useForm({
     defaultValues: { subs: [] }
   });
 
@@ -20,42 +22,70 @@ const SubCategoryManager = ({ parentCategory }) => {
     name: "subs"
   });
 
+  // دریافت مقادیر لحظه‌ای برای نمایش پیش‌نمایش عکس‌ها
+  const subsWatch = watch("subs");
+
   useEffect(() => {
     if (parentCategory?.children) {
       const formattedData = parentCategory.children.map(child => ({
         id: child.id,
         name: child.name,
-        // slug: child.slug, // نیازی به نمایش اسلاگ زیردسته نیست چون اتوماته، ولی اگه بخواید ادیت کنید میشه گذاشت
         is_active: child.is_active ?? true,
+        // گرفتن عکس قبلی از سرور (در صورت وجود)
+        preview_url: child.banners?.box || null, 
+        banner_box_file: null // فایل جدید باینری
       }));
       reset({ subs: formattedData });
     }
+
+    // Cleanup function: جلوگیری از Memory Leak برای عکس‌های آپلود شده
+    return () => {
+      previewUrls.current.forEach(url => URL.revokeObjectURL(url));
+    };
   }, [parentCategory, reset]);
+
+  // هندل کردن انتخاب فایل
+  const handleFileChange = (e, index) => {
+    const file = e.target.files[0];
+    if (file) {
+      // 1. ذخیره فایل باینری در State فرم
+      setValue(`subs.${index}.banner_box_file`, file, { shouldDirty: true });
+      
+      // 2. ساخت URL پیش‌نمایش لوکال
+      const objectUrl = URL.createObjectURL(file);
+      previewUrls.current.push(objectUrl);
+      setValue(`subs.${index}.preview_url`, objectUrl);
+    }
+  };
 
   const bulkMutation = useMutation({
     mutationFn: (data) => {
-      // ✅ ساخت Payload نهایی
-      const payload = data.subs.map(item => {
-        const itemPayload = {
-          name: item.name,
-          is_active: item.is_active,
-          parent_slug: parentSlug, // ✅ تزریق حیاتی اسلاگ والد برای ارتباط با پدر
-        };
-        
-        // اگر ID دارد یعنی آیتم قدیمی است و باید ویرایش شود
+      // ✅ ساخت FormData بجای JSON خالص
+      const formData = new FormData();
+
+      data.subs.forEach((item, index) => {
+        // ⚠️ مهم: نحوه نام‌گذاری کلیدها در آرایه FormData به بک‌اند شما بستگی دارد.
+        // متداول‌ترین حالت برای دریافت آرایه در بک‌اند فرمت زیر است: `[0]name` یا `0[name]`
+        // اگر بک‌اند شما ارور داد، این بخش (الگوی استرینگ) را طبق نیاز بک‌اند تغییر دهید.
+        const prefix = `[${index}]`;
+
+        formData.append(`${prefix}name`, item.name);
+        formData.append(`${prefix}is_active`, item.is_active);
+        formData.append(`${prefix}parent_slug`, parentSlug);
+
         if (item.id) {
-          itemPayload.id = item.id;
+          formData.append(`${prefix}id`, item.id);
         }
-        
-        // نکته: ما slug زیردسته رو نمیفرستیم تا بکند خودش بسازه
-        return itemPayload;
+
+        // اگر فایل جدیدی انتخاب شده، آن را ضمیمه کن
+        if (item.banner_box_file) {
+          formData.append(`${prefix}banner_box`, item.banner_box_file);
+        }
       });
 
-      // ارسال آرایه به اندپوینت bulk-upsert
-      return adminCategoryService.bulkUpsert(payload);
+      return adminCategoryService.bulkUpsert(formData);
     },
     onSuccess: () => {
-      // اینولیدیت کردن کوئری برای رفرش شدن لیست والد و دیدن تغییرات
       queryClient.invalidateQueries(['category', String(parentCategory.id)]);
       toast.success('زیرمجموعه‌ها با موفقیت ذخیره شدند');
     },
@@ -70,7 +100,6 @@ const SubCategoryManager = ({ parentCategory }) => {
       toast.error('خطا: اسلاگ دسته والد یافت نشد!');
       return;
     }
-    // اگر لیست خالیه، یعنی کاربر همه رو پاک کرده یا هیچی نداره
     if (data.subs.length === 0 && fields.length === 0) {
         toast('لیست خالی است');
         return;
@@ -90,7 +119,8 @@ const SubCategoryManager = ({ parentCategory }) => {
           </p>
         </div>
         <button 
-          onClick={() => append({ name: '', is_active: true })} 
+          type="button"
+          onClick={() => append({ name: '', is_active: true, preview_url: null, banner_box_file: null })} 
           className="btn btn-sm btn-outline btn-primary gap-2"
         >
           <Plus size={16}/> سطر جدید
@@ -108,16 +138,44 @@ const SubCategoryManager = ({ parentCategory }) => {
               <thead>
                 <tr>
                   <th className="w-10">#</th>
+                  <th className="w-16">تصویر</th>
                   <th>نام زیردسته</th>
                   <th className="text-center w-24">وضعیت</th>
                   <th className="w-16"></th>
                 </tr>
               </thead>
               <tbody>
-                {fields.map((field, index) => (
+                {fields.map((field, index) => {
+                  const currentPreview = subsWatch[index]?.preview_url;
+
+                  return (
                   <tr key={field.id} className="hover:bg-slate-50 transition-colors">
                     <td className="text-slate-400 font-mono text-xs">{index + 1}</td>
                     
+                    {/* --- بخش آپلود عکس UI --- */}
+                    <td>
+                      <label className="relative flex w-10 h-10 rounded-lg cursor-pointer group bg-slate-100 border border-slate-200 overflow-hidden hover:border-primary transition-all">
+                        {currentPreview ? (
+                          <img src={currentPreview} alt="preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <ImageIcon size={18} />
+                          </div>
+                        )}
+                        {/* Overlay زمان Hover */}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
+                           <Upload size={14} />
+                        </div>
+                        {/* اینپوت مخفی */}
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={(e) => handleFileChange(e, index)}
+                        />
+                      </label>
+                    </td>
+
                     <td>
                       <input 
                         {...register(`subs.${index}.name`, { required: true })}
@@ -145,7 +203,7 @@ const SubCategoryManager = ({ parentCategory }) => {
                       </button>
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>
