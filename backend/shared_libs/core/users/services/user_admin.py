@@ -55,25 +55,32 @@ class UserAdminService:
         except User.DoesNotExist:
             raise ValidationError("کارمند یافت نشد.")
 
-        # ===== اعتبارسنجی ===== #
+        # ===== اعتبارسنجی نام کاربری ===== #
         if 'username' in data and data['username'] != user.username:
             if User.objects.filter(username=data['username']).exists():
                 raise UsernameAlreadyExistsException("نام کاربری تکراری است.")
 
-        # ===== ویرایش اطلاعات کاربر ===== #
-        for field in ['first_name', 'last_name', 'username', 'email', 'is_active']:
+        # ===== مدیریت رمز عبور (Crucial Step) ===== #
+        password = data.pop('password', None)
+        if password:
+            user.set_password(password)
+
+        # ===== ویرایش فیلدهای مجاز مدل User ===== #
+        allowed_fields = ['username', 'email', 'is_active']
+        for field in allowed_fields:
             if field in data:
                 setattr(user, field, data[field])
+        
         user.save()
 
-        # ===== ویرایش نقش ===== #
+        # ===== ویرایش نقش (بهینه‌سازی شده) ===== #
         if role_id:
-            current_role_rel = user.user_roles.first()
+            current_role_rel = user.user_role.first()
             if not current_role_rel or current_role_rel.role_id != role_id:
                 if not Role.objects.filter(id=role_id).exists():
                      raise ValidationError("نقش نامعتبر است.")
 
-                user.user_roles.all().delete()
+                user.user_role.all().delete()
                 UserRole.objects.create(user=user, role_id=role_id)
 
         return user
@@ -100,7 +107,7 @@ class UserAdminService:
         # ===== اعتبارسنجی ===== #
         target_users_qs = User.objects.filter(
             Q(id__in=user_ids) & 
-            (Q(is_staff=True) | Q(is_superuser=False) | Q(user_roles__role__is_customer=True))
+            (Q(is_staff=True) | Q(is_superuser=False) | Q(user_role__role__is_customer=True))
         )
         
         valid_user_ids = list(target_users_qs.values_list('id', flat=True))

@@ -77,10 +77,17 @@ class StaffCreateSerializer(serializers.Serializer):
     role_id = serializers.IntegerField()
 
 class StaffUpdateSerializer(serializers.Serializer):
-    """ فرم ویرایش کارمند """
+    """ فرم ویرایش کارمند با قابلیت تغییر رمز عبور """
     email = serializers.EmailField(required=False)
+    username = serializers.CharField(max_length=150, required=False)
     role_id = serializers.IntegerField(required=False)
     is_active = serializers.BooleanField(required=False)
+    password = serializers.CharField(
+        write_only=True, 
+        required=False, 
+        min_length=8,
+        help_text="در صورت نیاز به تغییر رمز عبور، مقدار ارسال شود."
+    )
 
 # ========== Bulk Action DTOs ========== #
 class BulkIdsSerializer(serializers.Serializer):

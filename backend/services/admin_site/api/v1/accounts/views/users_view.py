@@ -10,6 +10,7 @@ from ..serializers import (
     StaffListSerializer, StaffCreateSerializer, StaffUpdateSerializer,
     BulkIdsSerializer, BulkRoleChangeSerializer
 )
+
 from core.users.exceptions import UsernameAlreadyExistsException, EmailAlreadyExistsException
 
 # ========== STAFF MANAGEMENT VIEWS ========== #
@@ -99,15 +100,25 @@ class StaffDetailView(GenericAPIView):
 
     @extend_schema(
         summary="ویرایش اطلاعات کارمند",
-        description="می‌توانید نقش، ایمیل یا وضعیت فعال بودن کاربر را تغییر دهید.",
+        description="""
+        امکان ویرایش اطلاعات پایه، تغییر نقش و تغییر رمز عبور کارمند.
+        نکته: اگر فیلد password ارسال شود، رمز عبور کارمند تغییر خواهد کرد.
+        """,
         request=StaffUpdateSerializer,
-        responses={200: StaffListSerializer},
+        responses={
+            200: StaffListSerializer,
+            400: "خطای اعتبارسنجی یا داده‌های ارسالی نامعتبر",
+            403: "عدم دسترسی",
+            409: "نام کاربری یا ایمیل تکراری"
+        },
         examples=[
             OpenApiExample(
-                'Update Role Example',
-                summary='تغییر نقش به مدیر فروش',
+                'Full Update Example',
+                summary='تغییر نقش و رمز عبور',
                 value={
-                    "role_id": 5,
+                    "username": "new_username",
+                    "role_id": 3,
+                    "password": "NewSecurePassword123!",
                     "is_active": True
                 }
             )

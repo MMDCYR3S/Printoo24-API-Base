@@ -52,6 +52,9 @@ class StaffAppService:
         try:
             user = self.domain_service.update_staff(user_id, data, role_id)
             
+            log_data = data.copy()
+            if 'password' in log_data: log_data['password'] = '******'
+
             changes_log = {'updated_fields': list(data.keys())}
             if role_id:
                 changes_log['new_role_id'] = role_id
@@ -60,11 +63,9 @@ class StaffAppService:
                 user=requester,
                 obj=user,
                 action='UPDATE_STAFF',
-                changes=changes_log,
+                changes={'fields': list(log_data.keys()), 'role_changed': bool(role_id)},
                 description=_(f"ویرایش اطلاعات کارمند: {user.username}")
             )
-            
-            logger.info(f"Staff updated: ID {user_id} by Admin '{requester.username}'")
             return user
         except Exception as e:
             logger.error(f"Error updating staff ID {user_id}: {str(e)}")
@@ -77,7 +78,7 @@ class StaffAppService:
             target_user = User.objects.filter(id=user_id).first()
             target_username = target_user.username if target_user else "Unknown"
             
-            self.domain_service.delete_single_staff(user_id)
+            self.domain_service.delete_staff(user_id)
             
             self.audit_service.record_log(
                 user=requester,
