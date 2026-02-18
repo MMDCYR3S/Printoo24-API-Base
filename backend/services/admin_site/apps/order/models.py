@@ -244,7 +244,7 @@ class OrderFinancialReport(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title} ({self.get_nature_display()})"
+        return f"{self.title} ({self.get_nature_display()}) - {self.created_at}"
 
 # ===== Order Financial Item ===== #
 class OrderFinancialItem(models.Model):
