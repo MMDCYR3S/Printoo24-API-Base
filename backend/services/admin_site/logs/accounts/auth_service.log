@@ -83,3 +83,4 @@ INFO 2026-02-15 14:11:29,383 auth_serivce 94 124941489927872 Staff login success
 INFO 2026-02-16 12:33:38,667 auth_serivce 107 131103507601088 Staff login successful: User 'admin' (ID: 1)
 WARNING 2026-02-17 07:41:42,658 auth_serivce 107 131103507601088 Login failed: Invalid credentials for user 'admin'
 INFO 2026-02-17 07:42:09,559 auth_serivce 107 131103507601088 Staff login successful: User 'admin' (ID: 1)
+INFO 2026-02-17 17:23:40,379 auth_serivce 7 132263115224768 Staff login successful: User 'admin' (ID: 1)

@@ -10,6 +10,7 @@ import OrdersToolbar from "./OrdersToolbar";
 import { Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+
 const OrdersDataTable = ({ data = [], isLoading, onDeleteBulk }) => {
   const [rowSelection, setRowSelection] = useState({});
   const [columnFilters, setColumnFilters] = useState([]);

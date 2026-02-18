@@ -13,7 +13,7 @@ export const adminNavigation = [
       { title: "سفارش جدید", icon: PlusCircle, href: "/admin/orders/new" },
       { title: "همه سفارش‌ها", icon: ShoppingCart, href: "/admin/orders" },
       { title: "مدیریت کارمندان", icon: Users, href: "/admin/users/staff" },
-      { title: "مدیریت مشتریان", icon: UserPlus, href: "/admin/users/customers" },
+      { title: "مدیریت مشتریان", icon: UserPlus, href: "/admin/customers" },
     ]
   },
   {
