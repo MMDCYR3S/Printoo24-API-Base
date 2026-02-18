@@ -95,6 +95,7 @@ class OrderStatus(models.Model):
     class Meta:
         verbose_name = _('وضعیت سفارش')
         verbose_name_plural = _('وضعیت‌های سفارش')
+        ordering = ('sort_order', )
 
     def __str__(self):
         return f"{self.name} ({self.internal_code})"
