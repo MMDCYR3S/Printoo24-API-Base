@@ -42,12 +42,12 @@ export const staffService = {
         return response.data;
     } catch (e) {
         // دیتای تستی برای اینکه صفحه خراب نشه تا وقتی API نقش رو بدی
-        return [
-            { id: 1, name: "مدیر کل", label: "Super Admin" },
-            { id: 2, name: "حسابدار", label: "Accountant" },
-            { id: 3, name: "انباردار", label: "Warehouse" },
-            { id: 4, name: "اپراتور چاپ", label: "Print Operator" },
-            { id: 5, name: "طراح", label: "Designer" },
+return [
+            { id: 2, name: "مدیر کل", slug: "admin" },
+            { id: 3, name: "طراح", slug: "designer" },
+            { id: 4, name: "اپراتور چاپ", slug: "print" },
+            { id: 5, name: "انباردار", slug: "logistics" },
+            { id: 6, name: "حسابدار", slug: "financial" },
         ];
     }
   }
