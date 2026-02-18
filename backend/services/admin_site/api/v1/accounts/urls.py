@@ -17,9 +17,9 @@ urlpatterns = [
     path('roles/list/', RoleListView.as_view(), name='role-list-view'),
     
     # ===== Role URLs ===== #
-    path('roles/permissions/', PermissionListAPIView.as_view(), name='permission-list'),
-    path('roles/', RoleListCreateView.as_view(), name='role-list-create'),
-    path('roles/<int:pk>/', RoleDetailView.as_view(), name='role-detail'),
+    # path('roles/permissions/', PermissionListAPIView.as_view(), name='permission-list'),
+    # path('roles/', RoleListCreateView.as_view(), name='role-list-create'),
+    # path('roles/<int:pk>/', RoleDetailView.as_view(), name='role-detail'),
 
     # ===== Auth URLs ===== #
     path('auth/login/', StaffLoginView.as_view(), name='staff-login'),

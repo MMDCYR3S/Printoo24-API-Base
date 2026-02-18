@@ -15,12 +15,10 @@ class CustomerService:
 
     def get_all_customers(self):
         """دریافت لیست تمام مشتریان (Read Operation)"""
-        # برای خواندن می‌توانیم مستقیم از منیجر استفاده کنیم
         return User.objects.get_all_customers()
     
     def get_all_customers_admin(self):
         """دریافت لیست تمام مشتریان (Read Operation)"""
-        # برای خواندن می‌توانیم مستقیم از منیجر استفاده کنیم
         return User.objects.get_all_customers_admin()
 
     def get_customer_by_id(self, user_id: int) -> User:

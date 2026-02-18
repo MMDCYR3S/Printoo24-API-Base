@@ -63,10 +63,35 @@ class FinancialDashboardSerializer(serializers.Serializer):
 class AdminFinancialSummarySerializer(serializers.Serializer):
     """ خلاصه مالی کل سیستم """
     system_revenue = serializers.DecimalField(max_digits=20, decimal_places=0)
-    system_cost = serializers.DecimalField(max_digits=20, decimal_places=0) # <--- اضافه شد
+    system_cost = serializers.DecimalField(max_digits=20, decimal_places=0)
     system_profit = serializers.DecimalField(max_digits=20, decimal_places=0)
 
+
+# ===== ADMIN - CHARTS ===== #
+class AdminAnnualChartItemSerializer(serializers.Serializer):
+    """ ساختار دیتای نمودار سالانه ادمین """
+    month = serializers.DateField()
+    order_count = serializers.IntegerField()
+    revenue = serializers.DecimalField(max_digits=20, decimal_places=0)
+    cost = serializers.DecimalField(max_digits=20, decimal_places=0)
+
+class AdminDailyChartItemSerializer(serializers.Serializer):
+    """ ساختار دیتای نمودار روزانه ادمین """
+    date = serializers.DateField()
+    order_count = serializers.IntegerField()
+    revenue = serializers.DecimalField(max_digits=20, decimal_places=0)
+    cost = serializers.DecimalField(max_digits=20, decimal_places=0)
+
+# ===== آپدیت سریالایزر اصلی داشبورد ادمین ===== #
 class AdminDashboardSerializer(serializers.Serializer):
     entity_counts = serializers.DictField()
     status_distribution = serializers.ListField()
     financial_summary = AdminFinancialSummarySerializer()
+    annual_chart = serializers.ListField(
+        child=AdminAnnualChartItemSerializer(), 
+        help_text="دیتای ۱۲ ماه گذشته برای رسم نمودار سالانه"
+    )
+    daily_chart = serializers.ListField(
+        child=AdminDailyChartItemSerializer(), 
+        help_text="دیتای روزانه برای رسم نمودار ماه جاری"
+    )
