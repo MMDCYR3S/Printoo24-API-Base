@@ -196,6 +196,15 @@ class Order(models.Model):
         # verbose_name = _('سفارش')
         # verbose_name_plural = _('سفارشات')
 
+    def save(self, *args, **kwargs):
+        if not self.current_status:
+            default_status = OrderStatus.objects.filter(
+                status_type='initial'
+            ).order_by('sort_order').first()
+            self.current_status = default_status
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.order_code} | {self.user}"
 
