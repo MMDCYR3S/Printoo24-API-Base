@@ -81,7 +81,7 @@ class CategoryLinkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductCategory
-        fields = ['id', 'name', 'detail_url', 'products']
+        fields = ['id', 'name', 'banner_box', 'detail_url', 'products']
 
 # ========== PARENT CATEGORY LIST SERIALIZER ========== #
 class ParentCategoryListSerializer(serializers.ModelSerializer):
