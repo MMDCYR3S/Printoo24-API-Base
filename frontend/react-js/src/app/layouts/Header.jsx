@@ -1,5 +1,5 @@
 // src/app/layouts/Header.jsx
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Menu, 
@@ -13,10 +13,24 @@ import {
 } from 'lucide-react';
 import MegaMenu from '../components/layout/MegaMenu';
 
+// ایمپورت‌های جدید (مسیرها را بر اساس پوشه‌بندی خودتان در صورت نیاز تنظیم کنید)
+import { useWalletBalance } from '../hooks/useWalletBalance';
+import { formatCurrency } from '../utils/formatters';
+
 const Header = ({ onOpenDrawer }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // استیت بررسی لاگین بودن
   const closeTimeoutRef = useRef(null);
+
+  // بررسی وضعیت لاگین در زمان مانت شدن کامپوننت
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  // استفاده از هوک اختصاصی کیف پول
+  const { balance, loading } = useWalletBalance(isLoggedIn);
 
   const handleMouseEnter = () => {
     if (closeTimeoutRef.current) {
@@ -49,7 +63,6 @@ const Header = ({ onOpenDrawer }) => {
               <Menu size={26} strokeWidth={2.5} />
             </button>
 
-            {/* اصلاح ۱: استفاده از span به جای a برای جلوگیری از خطای nesting */}
             <Link to="/" className="flex items-center group">
               <span className="text-2xl md:text-3xl font-black text-neutral">24</span>
               <span className="text-2xl md:text-3xl font-black bg-gradient-to-l from-primary to-secondary bg-clip-text text-transparent transition-transform">
@@ -80,22 +93,7 @@ const Header = ({ onOpenDrawer }) => {
 
           <div className="flex items-center gap-2">
             
-            {/* کیف پول */}
-            <div 
-              onClick={handleCreditClick}
-              className="tooltip tooltip-bottom cursor-pointer"
-              data-tip="شارژ کیف پول"
-            >
-              <div className="hidden sm:flex items-center gap-2 bg-gradient-to-l from-emerald-500 to-teal-500 text-white px-2 py-1 rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95">
-                <Wallet size={20} />
-                <div className="flex flex-col items-start leading-tight">
-                  <span className="text-[10px] opacity-80">موجودی</span>
-                  <span className="font-bold text-sm dir-ltr">250,000 IQD</span>
-                </div>
-              </div>
-            </div>
-
-            {/* سبد خرید */}
+            {/* سبد خرید (همیشه برای همه کاربران نمایش داده می‌شود) */}
             <div className="tooltip tooltip-bottom" data-tip="سبد خرید">
               <button className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
                 <ShoppingCart size={22} />
@@ -105,49 +103,93 @@ const Header = ({ onOpenDrawer }) => {
               </button>
             </div>
 
-            {/* اطلاعیه‌ها */}
-            <div className="tooltip tooltip-bottom" data-tip="پیام‌ها و اطلاعیه‌ها">
-              <button className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
-                <Bell size={22} />
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full animate-pulse"></span>
-              </button>
-            </div>
+            {/* رندر شرطی بر اساس لاگین بودن */}
+            {isLoggedIn ? (
+              <>
+                {/* کیف پول */}
+                <div 
+                  onClick={handleCreditClick}
+                  className="tooltip tooltip-bottom cursor-pointer"
+                  data-tip="شارژ کیف پول"
+                >
+                  <div className="hidden sm:flex items-center gap-2 bg-gradient-to-l from-emerald-500 to-teal-500 text-white px-2 py-1 rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95">
+                    <Wallet size={20} />
+                    <div className="flex flex-col items-start leading-tight">
+                      <span className="text-[10px] opacity-80">موجودی</span>
+                      {loading ? (
+                        /* انیمیشن لودینگ اسکلتی بجای مبلغ */
+                        <div className="h-4 w-16 bg-white/40 animate-pulse rounded mt-0.5"></div>
+                      ) : (
+                        <span className="font-bold text-sm dir-ltr">
+                          {formatCurrency(balance)} IQD
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-            {/* اصلاح ۲: حذف پراپ‌های اضافه Link و to از div */}
-            <div className="dropdown dropdown-end">
-              <div 
-                tabIndex={0} 
-                role="button" 
-                className="tooltip tooltip-bottom btn btn-circle btn-ghost hover:bg-primary/10 border-2 border-base-300 hover:border-primary transition-colors"
-                data-tip="حساب کاربری"
-              >
-                <User size={22} />
-              </div>
-              <ul tabIndex={0} className="dropdown-content z-[100] menu p-2 shadow-xl bg-white rounded-2xl w-56 mt-3 border border-base-200">
-                <li>
-                  <Link to="/profile" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
-                    <User size={18} />
-                    حساب کاربری
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/orders" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
-                    <ShoppingCart size={18} />
-                    سفارش‌های من
-                  </Link>
-                </li>
-                <div className="divider my-1"></div>
-                <li>
-                  <button className="flex items-center gap-3 py-3 text-error hover:bg-error/10 rounded-xl">
-                    خروج از حساب
+                {/* اطلاعیه‌ها */}
+                <div className="tooltip tooltip-bottom" data-tip="پیام‌ها و اطلاعیه‌ها">
+                  <button className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
+                    <Bell size={22} />
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full animate-pulse"></span>
                   </button>
-                </li>
-              </ul>
-            </div>
+                </div>
+
+                {/* حساب کاربری */}
+                <div className="dropdown dropdown-end">
+                  <div 
+                    tabIndex={0} 
+                    role="button" 
+                    className="tooltip tooltip-bottom btn btn-circle btn-ghost hover:bg-primary/10 border-2 border-base-300 hover:border-primary transition-colors"
+                    data-tip="حساب کاربری"
+                  >
+                    <User size={22} />
+                  </div>
+                  <ul tabIndex={0} className="dropdown-content z-[100] menu p-2 shadow-xl bg-white rounded-2xl w-56 mt-3 border border-base-200">
+                    <li>
+                      <Link to="/profile" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
+                        <User size={18} />
+                        حساب کاربری
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/orders" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
+                        <ShoppingCart size={18} />
+                        سفارش‌های من
+                      </Link>
+                    </li>
+                    <div className="divider my-1"></div>
+                    <li>
+                      <button className="flex items-center gap-3 py-3 text-error hover:bg-error/10 rounded-xl">
+                        خروج از حساب
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </>
+            ) : (
+              /* دکمه‌های ورود و ثبت‌نام برای کاربران مهمان */
+              <div className="flex items-center gap-1 sm:gap-2 mr-1">
+                <Link 
+                  to="/login" 
+                  className="btn btn-ghost btn-sm sm:btn-md hover:bg-primary/10 hover:text-primary rounded-xl font-bold transition-colors"
+                >
+                  ورود
+                </Link>
+                <Link 
+                  to="/register" 
+                  className="btn btn-primary btn-sm sm:btn-md rounded-xl text-white font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all"
+                >
+                  ثبت‌نام
+                </Link>
+              </div>
+            )}
+            
           </div>
         </div>
 
-        {/* نوار دسته‌بندی */}
+        {/* نوار دسته‌بندی (بدون تغییر) */}
         <div className="hidden lg:block border-t border-base-200">
           <div className="flex items-center gap-1 py-2">
             
