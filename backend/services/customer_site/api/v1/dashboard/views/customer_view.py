@@ -1,8 +1,8 @@
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes, inline_serializer
 from rest_framework.exceptions import ValidationError
 
 from core.models import Province, City
@@ -95,11 +95,25 @@ class CustomerViewSet(ViewSet):
 
     # ===== تغییر وضعیت گروهی ===== #
     @extend_schema(
-        request=None,
-        parameters=[
-            OpenApiParameter(name='ids', type=list, location=OpenApiParameter.QUERY),
-            OpenApiParameter(name='active', type=bool, location=OpenApiParameter.QUERY)
-        ]
+        summary="تغییر وضعیت گروهی کاربران",
+        request=inline_serializer(
+            name='UserBulkStatusSerializer',
+            fields={
+                'ids': serializers.ListField(
+                    child=serializers.IntegerField(), 
+                    allow_empty=False,
+                    help_text='لیست شناسه‌های کاربران'
+                ),
+                'is_active': serializers.BooleanField(
+                    default=True,
+                    help_text='وضعیت جدید (فعال/غیرفعال)'
+                )
+            }
+        ),
+        responses={200: inline_serializer(
+            name='UserBulkStatusResponse',
+            fields={'detail': serializers.CharField()}
+        )}
     )
     @action(detail=False, methods=['patch'], url_path='bulk-status')
     def bulk_status(self, request):
