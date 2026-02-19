@@ -286,8 +286,8 @@ class ProductSummarySerializer(serializers.ModelSerializer):
 class SubCategoryTinySerializer(serializers.Serializer):
     name = serializers.CharField()
     slug = serializers.CharField()
-    thumbnail = serializers.URLField(allow_null=True)
-    link = serializers.CharField(allow_null=True)
+    thumbnail = serializers.URLField(allow_null=True, required=False) 
+    link = serializers.CharField(allow_null=True, required=False)
 
 class CategoryInfoSerializer(serializers.Serializer):
     id = serializers.IntegerField()
