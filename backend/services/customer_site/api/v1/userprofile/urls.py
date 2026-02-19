@@ -11,6 +11,7 @@ from .views import (
     UserOrderQuotationAPIView,
     ProvinceListAPIView,
     CityListAPIView,
+    UserOrderInvoiceAPIView,
 )
 
 urlpatterns = [
@@ -20,6 +21,7 @@ urlpatterns = [
     path('orders/', UserOrderListAPIView.as_view(), name='user-order-list'),
     path('orders/<int:order_id>/', UserOrderDetailAPIView.as_view(), name='user-order-detail'),
     path("orders/quotation/<int:order_id>/", UserOrderQuotationAPIView.as_view(), name="user-order-quotation"),
+    path("orders/invoice/<int:order_id>/", UserOrderInvoiceAPIView.as_view(), name="user-order-invoice"),
     # ===== بخش آدرس ===== #
     path('addresses/', UserAddressListCreateAPIView.as_view(), name='user-address-list-create'),
     path('addresses/<int:address_id>/', UserAddressDetailAPIView.as_view(), name='user-address-detail'),
