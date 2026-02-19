@@ -188,66 +188,75 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         return Response({'status': 'Product core updated'})
 
     # ========== OPTIONS ========== #
+     # ========== OPTIONS ========== #
     @extend_schema(
         summary="مرحله ۲: همگام‌سازی ویژگی‌ها (Options)",
         description="""
         **وظیفه:** اتصال ویژگی‌های محصول (رنگ، جنس، خدمات).
         
-        **قابلیت‌های کلیدی:**
-        1. **اتصال از بانک (Linked):** استفاده از `option_id` و `global_value_id`.
-        2. **اورراید (Override):** تغییر نام/قیمت یک مقدار گلوبال فقط برای این محصول.
-        3. **کاستوم (Custom):** افزودن یک مقدار کاملاً جدید که در بانک نیست (`global_value_id: null`).
-        4. **راهنما (Guide):** افزودن راهنما برای کل گروه ویژگی یا تک‌تک مقادیر.
+        **خروجی:** لیستی از اشیاء شامل `product_option_id` (شناسه ذخیره شده در دیتابیس) و وضعیت همگام‌سازی.
         """,
         request=ProductOptionsBulkSerializer,
+        responses={
+            200: inline_serializer(
+                name='BulkSyncOptionsResponse',
+                fields={
+                    'results': serializers.ListField(
+                        child=inline_serializer(
+                            name='SyncResultItem',
+                            fields={
+                                'product_option_id': serializers.IntegerField(help_text="شناسه یکتای ProductOption ایجاد شده در دیتابیس"),
+                                'source_option_id': serializers.IntegerField(allow_null=True, help_text="شناسه ویژگی در بانک (اگر متصل باشد)"),
+                                'status': serializers.CharField()
+                            }
+                        )
+                    )
+                }
+            ),
+            400: OpenApiResponse(description="خطای اعتبارسنجی (مثل نبودن label برای کاستوم)")
+        },
         examples=[
             OpenApiExample(
                 'Full Options Scenario',
                 summary='سناریو کامل: ویژگی متصل (بانک) + ویژگی کاملاً اختصاصی',
-                description="""
-                در این مثال:
-                1. ویژگی 'جنس کاغذ' (ID: 10) از بانک متصل می‌شود.
-                2. یک ویژگی کاملاً جدید به نام 'بسته‌بندی ویژه' (بدون اتصال به بانک) ساخته می‌شود.
-                """,
                 value={
                     "options": [
-                        # 1. ویژگی متصل به بانک (همراه با Override و Custom Value)
                         {
                             "option_id": 10, 
                             "is_required": True,
                             "guide_text": "انتخاب جنس کاغذ",
                             "values_config": [
-                                { "global_value_id": 101, "price_impact": 0 }, # استفاده استاندارد
-                                { "global_value_id": None, "label": "کاغذ خاص", "price_impact": 50000 } # مقدار کاستوم برای ویژگی بانک
+                                { "global_value_id": 101, "price_impact": 0 },
+                                { "global_value_id": None, "label": "کاغذ خاص", "price_impact": 50000 }
                             ]
                         },
                         {
-                            "option_id": None, # نال یعنی ویژگی جدید بساز
+                            "option_id": None, 
                             "name": "special_packaging",
                             "label": "نوع بسته‌بندی (اختصاصی)",
-                            "input_type": "radio", # تعیین نوع ورودی
-                            "is_required": False,
-                            "guide_text": "فقط برای هدایای تبلیغاتی",
-                            "guide_type": "tip",
+                            "input_type": "radio",
                             "values_config": [
                                 {
-                                    "global_value_id": None, # همه مقادیرش باید کاستوم باشند
+                                    "global_value_id": None,
                                     "label": "جعبه چوبی",
                                     "value": "wood_box",
                                     "price_impact": 150000
-                                },
-                                {
-                                    "global_value_id": None,
-                                    "label": "کیسه پارچه‌ای",
-                                    "value": "fabric_bag",
-                                    "price_impact": 20000,
-                                    "is_default": True
                                 }
                             ]
                         }
                     ]
                 },
                 request_only=True
+            ),
+            OpenApiExample(
+                'Success Response',
+                value={
+                    "results": [
+                        {"product_option_id": 105, "source_option_id": 10, "status": "synced"},
+                        {"product_option_id": 106, "source_option_id": None, "status": "synced"}
+                    ]
+                },
+                response_only=True
             )
         ]
     )
@@ -257,11 +266,18 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         serializer = ProductOptionsBulkSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        results = self.app_service.bulk_sync_options(
-            product_id=id, 
-            options_data=serializer.validated_data['options']
-        )
-        return Response({'results': results}, status=status.HTTP_200_OK)
+        try:
+            results = self.app_service.bulk_sync_options(
+                product_id=id, 
+                options_data=serializer.validated_data['options']
+            )
+            return Response({'results': results}, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {"detail": str(e), "code": "sync_failed"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
     
     # ========== UPDATE OPTION CONFIG ========== #
     @extend_schema(

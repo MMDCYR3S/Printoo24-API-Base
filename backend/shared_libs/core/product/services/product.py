@@ -1,6 +1,7 @@
 from typing import List, Optional, Dict, Any
 from django.db.models import Max, ProtectedError
 from django.db import transaction
+from django.utils import timezone
 
 from ..exceptions import (
     ProductNotFoundException,
@@ -268,8 +269,8 @@ class ProductService:
         # ===== اگر ویژگی فقط مربوط به این محصول هست ===== #
         if not global_option:
             create_kwargs.update({
-                "name": data['name'],
-                "label": data['label'],
+                "name": data.get('name', f'custom_option_{timezone.now().timestamp()}'),
+                "label": data.get('label', 'Custom Option'),
                 "input_type": data.get('input_type', 'select')
             })
         product_option = ProductOption.objects.create(**create_kwargs)
