@@ -1,12 +1,12 @@
 import re
 
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, inline_serializer
 
 
 from core.product.services import ProductCategoryService
@@ -193,12 +193,26 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
         )
     # ===== اکشن سفارشی: تغییر وضعیت گروهی ===== #
     @extend_schema(
-        request=None,
-        parameters=[
-            OpenApiParameter(name='ids', type=list, location=OpenApiParameter.QUERY, description='لیست شناسه ها'),
-            OpenApiParameter(name='active', type=bool, location=OpenApiParameter.QUERY, description='وضعیت جدید')
-        ],
-        summary="تغییر وضعیت گروهی"
+        summary="تغییر وضعیت گروهی",
+        description="این سرویس لیستی از شناسه‌ها را گرفته و وضعیت آن‌ها را به صورت گروهی تغییر می‌دهد.",
+        request=inline_serializer(
+            name='CategoryBulkStatusSerializer',
+            fields={
+                'ids': serializers.ListField(
+                    child=serializers.IntegerField(), # اگر از UUID استفاده می‌کنی این رو به UUIDField تغییر بده
+                    allow_empty=False,
+                    help_text='لیست شناسه‌های دسته‌بندی'
+                ),
+                'is_active': serializers.BooleanField(
+                    default=True,
+                    help_text='وضعیت جدید (فعال/غیرفعال)'
+                )
+            }
+        ),
+        responses={200: inline_serializer(
+            name='BulkStatusResponse',
+            fields={'detail': serializers.CharField()}
+        )}
     )
     @action(detail=False, methods=['patch'], url_path='bulk-status')
     def bulk_status(self, request):
