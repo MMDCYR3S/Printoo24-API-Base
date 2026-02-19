@@ -1,11 +1,14 @@
+import uuid
+
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.db import transaction
 
 from .models import(
     ProductCategoryRelation, Product,
     product_code_generator, OrderStateLog,
-    OrderStatusGroup, Role, Order
+    OrderStatusGroup, Role, Order, Quotation
 )   
 
 # =========== GENERATE CORE ON RELATION CREATION =========== #
@@ -113,3 +116,32 @@ def log_order_state_change(sender, instance, created, **kwargs):
             )
         else:
             pass
+
+# ========== CREATE QUOTAION FOR EVERY ORDER ========== #
+# @receiver(post_save, sender=Order, dispatch_uid="unique_quotation_for_order_creation")
+# def create_quotation_for_new_order(sender, instance, created, **kwargs):
+#     if created:
+#         with transaction.atomic():
+            
+#             if Quotation.objects.filter(converted_order=instance).exists():
+#                 return
+            
+#             # ===== ایجاد کد پیش‌فاکتور ===== #
+#             if instance.order_code:
+#                 q_number = f"QTE-{instance.order_code}"
+#             else:
+#                 q_number = f"QTE-{uuid.uuid4().hex[:8].upper()}"
+            
+#             # ===== استخراج نام کاربر ===== #
+#             customer_name = instance.recipient_name
+#             if not customer_name and getattr(instance, 'user', None):
+#                 customer_name = instance.user.get_full_name() or instance.user.username
+            
+#             # ===== ایجاد پیش‌فاکتور ===== #
+#             Quotation.objects.create(
+#                 quotation_number=q_number,
+#                 created_by=instance.user if hasattr(instance, 'user') else None,
+#                 converted_order=instance,
+#                 customer_name=customer_name,
+#                 total_price=instance.total_price,
+#             )

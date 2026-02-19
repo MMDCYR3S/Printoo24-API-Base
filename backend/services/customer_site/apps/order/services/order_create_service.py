@@ -3,7 +3,7 @@ from typing import List
 from django.db import transaction
 from rest_framework.exceptions import ValidationError 
 
-from ..exceptions import EmptyCartError, InsufficientFundsError, ItemNotFoundException
+from ..exceptions import EmptyCartError, ItemNotFoundException
 from core.models import User, Address, Order, CustomerProfile
 from apps.cart.models import Cart, CartItem
 from apps.accounts.services import WalletService
@@ -178,7 +178,7 @@ class CreateOrderFromCartService:
         if user and user.is_authenticated:
             user_balance = self._wallet_service.get_user_balance(user)
             if user_balance < cart_item.price:
-                 raise InsufficientFundsError(f"موجودی ناکافی. مبلغ: {cart_item.price:,}")
+                 logger.info(f"User {user.username} doesn't have enough balance but anyways... :)")
             self._wallet_service.debit(user=user, amount=cart_item.price)
 
         # ===== ایجاد سفارش مربوطه ===== #
@@ -240,7 +240,7 @@ class CreateOrderFromCartService:
         if user and user.is_authenticated:
             user_balance = self._wallet_service.get_user_balance(user)
             if user_balance < total_price:
-                raise InsufficientFundsError(f"موجودی ناکافی. مبلغ کل: {total_price:,} تومان")
+                logger.info(f"User {user.username} doesn't have enough balance but anyways... :)")
             self._wallet_service.debit(user=user, amount=total_price)
             
         # ===== ایجاد سفارشات ===== #
