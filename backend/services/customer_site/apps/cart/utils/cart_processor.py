@@ -54,7 +54,7 @@ class CartProcessor:
             height=height,
             selected_values=self.selected_option_values,
             user_input_data=self.user_raw_inputs,
-            selected_size_id=self.selections.get('size_id'),
+            selected_size_id=self.selections.get('size_id', None),
             has_design=self.selections.get('has_design', True)
         )
         # ===== محاسبه قیمت نهایی ===== #
@@ -65,7 +65,7 @@ class CartProcessor:
             "options": self.final_options_data,
             "meta": {
                 "size_info": {
-                    "size_id": self.selections.get('size_id'),
+                    "size_id": self.selections.get('size_id', None),
                     "size_name": size_label,
                     "width": width,
                     "height": height,
@@ -111,9 +111,9 @@ class CartProcessor:
     # ========== DIMENSIONS LOGIC ========== #
     def _resolve_dimensions(self) -> Tuple[float, float, Optional[str]]:
         """تشخیص طول و عرض بر اساس سایز آماده یا کاستوم"""
-        size_id = self.selections.get('size_id')
-        custom_width = self.selections.get('width')
-        custom_height = self.selections.get('height')
+        size_id = self.selections.get('size_id', None)
+        custom_width = self.selections.get('width', None)
+        custom_height = self.selections.get('height', None)
 
         if size_id:
             try:

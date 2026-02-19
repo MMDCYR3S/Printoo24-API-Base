@@ -33,7 +33,7 @@ class CartDataValidator:
 
         # 2. استخراج داده‌ها با مقادیر پیش‌فرض ایمن
         quantity = int(selections.get("quantity", 1))
-        size_id = selections.get("size_id")
+        size_id = selections.get("size_id", None)
         selected_value_ids = selections.get("option_value_ids", [])
         
         # تبدیل ایمن به float (چون ممکن است رشته خالی یا None بیاید)
