@@ -1,9 +1,9 @@
 // src/app/features/admin/products/components/steps/ProductStep2Options.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { 
   Settings, Plus, Trash2, GripVertical, CheckCircle2, 
-  ChevronDown, ChevronUp, Sparkles, DollarSign, Eye, Smartphone, Save
+  ChevronDown, ChevronUp, Sparkles, DollarSign, Eye, Smartphone, Save, ListPlus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
@@ -21,38 +21,57 @@ const InputTypeIcon = ({ type }) => {
 };
 
 const ProductStep2Options = ({ initialData, onSave, isSaving }) => {
-  // ایندکس آیتمی که در آکاردئون باز است
   const [expandedIndex, setExpandedIndex] = useState(0);
 
-  const { register, control, handleSubmit, watch, setValue, formState: { errors } } = useForm({
-    defaultValues: initialData || { options: [] }
+  // بررسی احتمال قوی: تبدیل کلیدهای بک‌اند (choices, type) به کلیدهای فرانت‌اند (values_config, input_type)
+  const mappedInitialData = useMemo(() => {
+    if (!initialData || !initialData.options) return { options: [] };
+    
+    return {
+      ...initialData,
+      options: initialData.options.map(opt => ({
+        ...opt,
+        // تبدیل type به input_type
+        input_type: opt.type || opt.input_type || 'select',
+        // تبدیل choices به values_config
+        values_config: opt.choices || opt.values_config || []
+      }))
+    };
+  }, [initialData]);
+
+  const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
+    defaultValues: mappedInitialData
   });
+
+  // اطمینان از اینکه اگر دیتای اولیه بعد از رندر اولیه تغییر کرد، فرم دوباره مقادیرش رو بشناسه
+  useEffect(() => {
+    if (initialData) {
+      reset(mappedInitialData);
+    }
+  }, [mappedInitialData, reset]);
 
   const { fields, append, remove, move } = useFieldArray({
     control,
     name: "options"
   });
 
-  // افزودن آپشن جدید (همیشه کاستوم طبق دستور شما)
   const handleAddOption = () => {
     append({
-      option_id: null, // همیشه نال چون کاستوم است
+      id: null,
       label: "",
-      name: "", // باید جنریت شود
+      name: "", 
       input_type: "select",
       is_required: false,
       guide_text: "",
       guide_type: "info",
       values_config: []
     });
-    setExpandedIndex(fields.length); // باز کردن آیتم جدید
+    setExpandedIndex(fields.length);
   };
 
-  // تولید نام سیستمی از روی لیبل فارسی
   const handleLabelBlur = (index, value) => {
      const currentName = watch(`options.${index}.name`);
      if (!currentName && value) {
-         // تبدیل ساده فارسی به حروف انگلیسی برای نام سیستمی
          const slug = "opt_" + Math.random().toString(36).substr(2, 6);
          setValue(`options.${index}.name`, slug);
      }
@@ -61,7 +80,6 @@ const ProductStep2Options = ({ initialData, onSave, isSaving }) => {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 pb-32">
        
-       {/* === LEFT: FORM BUILDER (8 Cols) === */}
        <div className="xl:col-span-7 space-y-6">
           <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
              <div className="flex items-center gap-3">
@@ -106,11 +124,9 @@ const ProductStep2Options = ({ initialData, onSave, isSaving }) => {
           </div>
        </div>
 
-       {/* === RIGHT: LIVE PREVIEW (4 Cols) === */}
        <div className="xl:col-span-5">
            <div className="sticky top-6">
                <div className="card bg-slate-800 text-white shadow-2xl rounded-[2.5rem] overflow-hidden border-4 border-slate-900">
-                   {/* Phone Header */}
                    <div className="bg-slate-900 p-4 flex justify-between items-center text-xs text-slate-400 border-b border-slate-700/50">
                        <span>9:41</span>
                        <div className="flex gap-1.5">
@@ -119,7 +135,6 @@ const ProductStep2Options = ({ initialData, onSave, isSaving }) => {
                        </div>
                    </div>
 
-                   {/* Phone Body */}
                    <div className="p-6 bg-slate-50 min-h-[500px] text-slate-800 relative">
                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-secondary opacity-50"></div>
                        
@@ -135,19 +150,16 @@ const ProductStep2Options = ({ initialData, onSave, isSaving }) => {
                            <Settings size={16} className="text-primary"/> مشخصات سفارش
                        </h4>
 
-                       {/* The Actual Live Form */}
                        <div className="space-y-5">
                            <LivePreview control={control} />
                        </div>
 
-                       {/* Mock Footer */}
                        <div className="mt-8 pt-4 border-t border-slate-200 flex justify-between items-center opacity-50">
                            <div className="w-20 h-4 bg-slate-200 rounded"></div>
                            <div className="w-24 h-8 bg-slate-800 rounded-lg"></div>
                        </div>
                    </div>
                    
-                   {/* Phone Bottom */}
                    <div className="bg-slate-900 p-4 flex justify-center">
                        <div className="w-32 h-1 bg-slate-700 rounded-full"></div>
                    </div>
@@ -159,7 +171,6 @@ const ProductStep2Options = ({ initialData, onSave, isSaving }) => {
            </div>
        </div>
 
-       {/* Footer Action */}
        <div className="fixed bottom-6 left-6 z-50">
             <button 
                 onClick={handleSubmit(onSave)}
@@ -180,7 +191,10 @@ const OptionItemEditor = ({ index, expanded, onToggle, register, control, watch,
 
     return (
         <div className={clsx("bg-white border transition-all rounded-2xl overflow-hidden", expanded ? "border-purple-300 shadow-lg ring-1 ring-purple-100" : "border-slate-200 hover:border-slate-300")}>
-            {/* Header */}
+            
+            {/* فیلد مخفی برای آیدی آپشن */}
+            <input type="hidden" {...register(`options.${index}.id`)} />
+
             <div className="flex items-center gap-3 p-4 cursor-pointer bg-slate-50/50 hover:bg-slate-50" onClick={onToggle}>
                 <div className="cursor-grab text-slate-300 hover:text-slate-500"><GripVertical size={16}/></div>
                 <div className="flex-1">
@@ -200,7 +214,6 @@ const OptionItemEditor = ({ index, expanded, onToggle, register, control, watch,
                 </div>
             </div>
 
-            {/* Body */}
             <AnimatePresence>
                 {expanded && (
                     <motion.div 
@@ -209,7 +222,6 @@ const OptionItemEditor = ({ index, expanded, onToggle, register, control, watch,
                         exit={{ height: 0, opacity: 0 }}
                         className="border-t border-slate-100 p-5 space-y-6 bg-white"
                     >
-                        {/* Row 1: Config */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="form-control">
                                 <label className="label text-xs font-bold text-slate-600">عنوان نمایشی (برای مشتری)</label>
@@ -232,7 +244,6 @@ const OptionItemEditor = ({ index, expanded, onToggle, register, control, watch,
                             </div>
                         </div>
 
-                        {/* Row 2: Settings */}
                         <div className="flex gap-4 items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
                              <div className="flex items-center gap-2">
                                  <input type="checkbox" {...register(`options.${index}.is_required`)} className="toggle toggle-xs toggle-error"/>
@@ -244,7 +255,6 @@ const OptionItemEditor = ({ index, expanded, onToggle, register, control, watch,
                              </div>
                         </div>
 
-                        {/* Row 3: Values Manager (Nested Field Array) */}
                         {(inputType === 'select' || inputType === 'radio' || inputType === 'checkbox') && (
                             <OptionValuesManager 
                                 nestIndex={index} 
@@ -273,7 +283,7 @@ const OptionValuesManager = ({ nestIndex, control, register, watch }) => {
                 <h5 className="font-bold text-xs text-slate-600 flex items-center gap-2">
                     <ListPlus size={14}/> مقادیر قابل انتخاب
                 </h5>
-                <button type="button" onClick={() => append({ label: "", price_impact: 0, is_default: false })} className="btn btn-xs btn-ghost text-primary">
+                <button type="button" onClick={() => append({ id: null, label: "", price_impact: 0, is_default: false })} className="btn btn-xs btn-ghost text-primary">
                     <Plus size={12}/> سطر جدید
                 </button>
             </div>
@@ -281,16 +291,18 @@ const OptionValuesManager = ({ nestIndex, control, register, watch }) => {
             <div className="space-y-2">
                 {fields.map((item, k) => (
                     <div key={item.id} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-100 shadow-sm group">
+                        
+                        {/* فیلد مخفی برای آیدی مقادیر داخل لیست */}
+                        <input type="hidden" {...register(`options.${nestIndex}.values_config.${k}.id`)} />
+
                         <GripVertical size={12} className="text-slate-300 cursor-grab"/>
                         
-                        {/* Label */}
                         <input 
                             {...register(`options.${nestIndex}.values_config.${k}.label`)}
                             className="input input-xs input-bordered w-full focus:border-primary"
                             placeholder="عنوان گزینه (مثلاً: مات)"
                         />
                         
-                        {/* Price */}
                         <div className="relative w-32 shrink-0">
                             <input 
                                 type="number" 
@@ -304,7 +316,6 @@ const OptionValuesManager = ({ nestIndex, control, register, watch }) => {
                             <span className="absolute left-1 top-0.5 text-[9px] text-slate-400">IQD</span>
                         </div>
 
-                        {/* Default Radio/Checkbox Logic needs manual handling or simple checkbox for now */}
                         <label className="cursor-pointer tooltip tooltip-left" data-tip="پیش‌فرض">
                             <input 
                                 type="checkbox" 
@@ -326,7 +337,6 @@ const OptionValuesManager = ({ nestIndex, control, register, watch }) => {
 
 // --- Sub-Component: LIVE PREVIEW (The Customer View) ---
 const LivePreview = ({ control }) => {
-    // Watch all options to re-render preview
     const options = useWatch({ control, name: "options" });
 
     if (!options || options.length === 0) {
@@ -350,7 +360,6 @@ const LivePreview = ({ control }) => {
                         {opt.guide_text && <span className="label-text-alt text-[10px] text-info bg-info/10 px-1 rounded">{opt.guide_text}</span>}
                     </label>
 
-                    {/* Render based on Input Type */}
                     {opt.input_type === 'select' && (
                         <select className="select select-bordered select-sm w-full bg-white text-xs rounded-xl shadow-sm">
                             <option>انتخاب کنید...</option>
@@ -392,7 +401,6 @@ const LivePreview = ({ control }) => {
                 </div>
             ))}
             
-            {/* Price Calculation Simulation */}
             <div className="mt-8 pt-4 border-t border-dashed border-slate-300">
                 <div className="flex justify-between items-center text-xs font-bold text-slate-700">
                     <span>جمع کل (تخمینی):</span>
@@ -402,8 +410,5 @@ const LivePreview = ({ control }) => {
         </div>
     );
 };
-
-// Icon imports fix
-import { ListPlus } from 'lucide-react';
 
 export default ProductStep2Options;
