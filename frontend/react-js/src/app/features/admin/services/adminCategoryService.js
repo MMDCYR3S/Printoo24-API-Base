@@ -49,9 +49,12 @@ export const adminCategoryService = {
   },
 
   // ✅ متد جدید برای عملیات گروهی
-  bulkUpsert: async (payload) => {
-    // payload: آرایه‌ای از آبجکت‌ها طبق داکیومنت
-    const { data } = await apiClient.post(`${BASE_URL}bulk-upsert/`, payload);
+bulkUpsert: async (payload) => {
+    // در صورتی که payload از نوع FormData باشد، axios اتوماتیک هدر multipart را ست می‌کند
+    // اما برای اطمینان بیشتر هدر را صراحتاً ارسال می‌کنیم
+    const { data } = await apiClient.post(`${BASE_URL}bulk-upsert/`, payload, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return data;
   }
 };

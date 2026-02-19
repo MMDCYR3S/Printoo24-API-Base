@@ -129,23 +129,23 @@ services:
     networks: 
       - customer_site_network
 
-  # # ====== Frontend (Admin) ====== #
-  # frontend_admin:
-  #   build:
-  #     context: ./frontend/react-js
-  #     dockerfile: Dockerfile
-  #   container_name: printoo_frontend_admin
-  #   ports:
-  #    - "5174:5174"
-  #   volumes:
-  #     - ./frontend/react-js:/app
-  #     - /app/node_modules
-  #   environment:
-  #     - CHOKIDAR_USEPOLLING=true
-  #   depends_on:
-  #     - admin_site`
-  #   networks: 
-  #     - admin_site_network
+  # ====== Frontend (Admin) ====== #
+  frontend_admin:
+    build:
+      context: ./frontend/system
+      dockerfile: Dockerfile
+    container_name: printoo_frontend_admin
+    ports:
+     - "5174:5174"
+    volumes:
+      - ./frontend/system:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - admin_site
+    networks: 
+      - admin_site_network
 
 # ====== Networks' Settings ====== #
 networks:

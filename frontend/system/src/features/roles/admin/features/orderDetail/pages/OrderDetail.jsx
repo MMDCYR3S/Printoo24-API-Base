@@ -7,13 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { 
   ArrowRight, Printer, MapPin, Phone, Calendar, 
-  CreditCard, Box, Hash, Copy, Truck, UserCircle, 
-  Clock, CheckCircle2, AlertCircle 
+  CreditCard, Box, Copy, Truck, UserCircle, 
+  Clock, AlertCircle, FileText
 } from "lucide-react";
 import StatusChangeCell from "@/features/shared/orders/components/StatusChangeCell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import OrderHistoryTimeline from "../components/OrderHistoryTimeline"; // <--- اضافه شد
 
 // --- توابع کمکی ---
 const formatPrice = (price) => Number(price).toLocaleString();
@@ -44,7 +44,7 @@ const OrderDetail = () => {
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20 animate-in fade-in duration-500">
       
-      {/* 1. HERO SECTION: هدر تیره و جذاب برای اطلاعات کلیدی */}
+      {/* 1. HERO SECTION */}
       <div className="bg-slate-900 text-white pt-8 pb-12 px-6 shadow-lg mb-[-40px]">
         <div className="max-w-[1600px] mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -61,6 +61,12 @@ const OrderDetail = () => {
                                 {order.type === "2" ? "اختصاصی" : "سیستمی"}
                             </Badge>
                         </div>
+                        {/* اضافه شدن نام سفارش به هدر */}
+                        {order.order_name && (
+                            <p className="text-slate-300 text-sm font-medium mb-3 border-r-2 border-gold-light pr-2">
+                                {order.order_name}
+                            </p>
+                        )}
                         <div className="flex items-center gap-4 text-xs text-slate-400 font-medium">
                             <span className="flex items-center gap-1.5">
                                 <Calendar className="h-3.5 w-3.5" />
@@ -74,10 +80,8 @@ const OrderDetail = () => {
                     </div>
                 </div>
 
-                {/* بخش عملیات سریع (Status & Print) */}
                 <div className="flex items-center gap-3 bg-white/5 p-1.5 rounded-lg border border-white/10 backdrop-blur-sm">
                     <div className="w-[200px]">
-                        {/* اینجا کامپوننت وضعیت رو کمی شفاف و دارک میکنیم با کلاس کاستوم اگر ساپورت کنه، یا استاندارد میذاریم */}
                         <StatusChangeCell orderId={order.id} currentStatus={order.status_name} />
                     </div>
                     <Separator orientation="vertical" className="h-8 bg-white/10" />
@@ -89,14 +93,14 @@ const OrderDetail = () => {
         </div>
       </div>
 
-      {/* 2. GRID LAYOUT: چیدمان کارت‌ها */}
+      {/* 2. GRID LAYOUT */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
             
-            {/* ستون چپ (اطلاعات مشتری و مالی) - عرض کمتر */}
+            {/* ستون چپ (اطلاعات مشتری، مالی و توضیحات کلی سفارش) */}
             <div className="xl:col-span-4 space-y-6">
                 
-                {/* کارت مشتری (Customer Card) */}
+                {/* کارت مشتری */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group hover:border-blue-300/50 transition-colors">
                     <div className="p-6">
                         <div className="flex items-start justify-between mb-6">
@@ -142,7 +146,22 @@ const OrderDetail = () => {
                     </div>
                 </div>
 
-                {/* کارت مالی (Financial Summary) */}
+                {/* اضافه شدن: کارت توضیحات سفارش */}
+                {order.description && (
+                    <div className="bg-amber-50/50 rounded-xl shadow-sm border border-amber-200 overflow-hidden">
+                        <div className="px-6 py-4 border-b border-amber-100 flex items-center gap-2">
+                            <FileText className="h-4 w-4 text-amber-600" />
+                            <h3 className="font-bold text-amber-800 text-sm">توضیحات کلی سفارش</h3>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-sm text-amber-900/80 leading-relaxed text-justify">
+                                {order.description}
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {/* کارت مالی */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
                         <h3 className="font-bold text-slate-700 text-sm flex items-center gap-2">
@@ -158,24 +177,22 @@ const OrderDetail = () => {
                             <span className="text-slate-500 text-sm">مبلغ کل اقلام</span>
                             <span className="font-bold text-slate-800">{formatPrice(order.total_price)}</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-slate-500 text-sm">مالیات / خدمات</span>
-                            <span className="font-bold text-slate-400 text-sm">0</span>
-                        </div>
                         <Separator className="my-2" />
                         <div className="flex justify-between items-end">
                             <span className="text-slate-800 font-bold text-base">مبلغ نهایی</span>
                             <div className="text-right">
                                 <span className="block font-black text-2xl text-slate-900 tracking-tight">{formatPrice(order.total_price)}</span>
-                                <span className="text-[10px] text-slate-400 font-bold">تومان - پرداخت آنلاین</span>
+                                <span className="text-[10px] text-slate-400 font-bold">تومان</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* ستون راست (اقلام سفارش) - عرض بیشتر */}
+            {/* ستون راست (اقلام سفارش + تایم لاین تاریخچه) */}
             <div className="xl:col-span-8 space-y-6">
+                
+                {/* لیست اقلام سفارش */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[400px]">
                     <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
                         <div className="flex items-center gap-3">
@@ -184,16 +201,15 @@ const OrderDetail = () => {
                             </div>
                             <div>
                                 <h2 className="font-bold text-slate-800 text-lg">لیست اقلام سفارش</h2>
-                                <p className="text-xs text-slate-400 font-medium">شامل {order.items.length} ردیف محصول</p>
+                                <p className="text-xs text-slate-400 font-medium">شامل {order.items?.length || 0} ردیف محصول</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="divide-y divide-slate-100">
-                        {order.items.map((item, index) => (
+                        {order.items?.map((item, index) => (
                             <div key={item.id} className="p-6 hover:bg-slate-50/50 transition-colors group">
                                 <div className="flex flex-col md:flex-row gap-6">
-                                    {/* شماره ردیف و تعداد */}
                                     <div className="flex flex-col items-center gap-2 min-w-[60px]">
                                         <span className="text-[10px] text-slate-300 font-bold">#{index + 1}</span>
                                         <div className="h-12 w-16 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200 text-slate-600 font-black text-lg shadow-inner">
@@ -202,7 +218,6 @@ const OrderDetail = () => {
                                         <span className="text-[10px] text-slate-400">عدد</span>
                                     </div>
 
-                                    {/* جزئیات اصلی */}
                                     <div className="flex-1 space-y-4">
                                         <div className="flex justify-between items-start">
                                             <div>
@@ -216,7 +231,6 @@ const OrderDetail = () => {
                                             </div>
                                         </div>
 
-                                        {/* مشخصات فنی (Grid Layout) */}
                                         {item.specifications?.attributes?.length > 0 && (
                                             <div className="bg-slate-50 rounded-xl border border-slate-200/60 p-4 relative overflow-hidden">
                                                 <div className="absolute top-0 right-0 bg-slate-200 text-slate-500 text-[9px] px-2 py-0.5 rounded-bl-lg font-bold">
@@ -244,20 +258,17 @@ const OrderDetail = () => {
                     </div>
                 </div>
 
-                {/* لاگ‌های لجستیک یا توضیحات اضافه (Optional) */}
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center gap-4 text-slate-500 text-sm border-l-4 border-l-blue-500">
-                    <Truck className="h-5 w-5 text-blue-500" />
-                    <p>این سفارش نیاز به بسته‌بندی ضدضربه دارد (توضیحات سیستمی تستی).</p>
-                </div>
+                {/* فراخوانی کامپوننت جدید تاریخچه سیستم - معماری تمیز بدون شلوغ کردن صفحه اصلی */}
+                <OrderHistoryTimeline orderId={id} />
+                
             </div>
-
         </div>
       </div>
     </div>
   );
 };
 
-// --- اسکلتون لودینگ (Skeleton) ---
+// --- اسکلتون لودینگ ---
 const OrderDetailSkeleton = () => (
     <div className="min-h-screen bg-slate-50">
         <div className="h-48 bg-slate-200 w-full animate-pulse mb-8"></div>
@@ -266,8 +277,9 @@ const OrderDetailSkeleton = () => (
                 <div className="h-64 bg-slate-200 rounded-xl animate-pulse"></div>
                 <div className="h-40 bg-slate-200 rounded-xl animate-pulse"></div>
             </div>
-            <div className="xl:col-span-8">
-                <div className="h-[500px] bg-slate-200 rounded-xl animate-pulse"></div>
+            <div className="xl:col-span-8 space-y-6">
+                <div className="h-[400px] bg-slate-200 rounded-xl animate-pulse"></div>
+                <div className="h-[300px] bg-slate-200 rounded-xl animate-pulse"></div>
             </div>
         </div>
     </div>
