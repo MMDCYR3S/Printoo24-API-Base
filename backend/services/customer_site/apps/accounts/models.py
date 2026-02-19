@@ -32,7 +32,7 @@ class Wallet(models.Model):
         if amount <= 0:
             raise ValidationError("مبلغ برداشت باید مثبت باشد.")
         if self.balance < amount:
-            raise InsufficientFundsException(f"موجودی ناکافی.")
+            pass
         self.balance -= amount
 
     class Meta:

@@ -57,7 +57,7 @@ class WalletService:
 
         #  ===== بررسی مقدار ===== #
         if wallet.balance < amount:
-            raise InsufficientFundsException(f"موجودی کافی نیست. موجودی فعلی: {wallet.balance}")
+            pass
         
         # ===== تعیین مقدار جدید ===== #
         wallet.withdraw(amount) 
