@@ -936,3 +936,15 @@ INFO 2026-02-12 11:39:56,634 auth_service 425 132317853161152 User logged in: 1
 DEBUG 2026-02-12 11:43:53,192 auth_service 425 132317456619200 AuthService initialized with UserIdentityService
 INFO 2026-02-12 11:43:53,194 auth_service 425 132317456619200 Login attempt for: admin
 INFO 2026-02-12 11:43:54,032 auth_service 425 132317456619200 User logged in: 1
+DEBUG 2026-02-19 07:54:23,124 auth_service 189 139509487527616 AuthService initialized with UserIdentityService
+INFO 2026-02-19 07:54:23,125 auth_service 189 139509487527616 Login attempt for: admin
+WARNING 2026-02-19 07:54:23,687 auth_service 189 139509487527616 Invalid credentials for: admin
+DEBUG 2026-02-19 07:54:42,266 auth_service 189 139509487527616 AuthService initialized with UserIdentityService
+INFO 2026-02-19 07:54:42,267 auth_service 189 139509487527616 Login attempt for: admin
+WARNING 2026-02-19 07:54:42,992 auth_service 189 139509487527616 Invalid credentials for: admin
+DEBUG 2026-02-19 07:54:51,255 auth_service 189 139509487527616 AuthService initialized with UserIdentityService
+INFO 2026-02-19 07:54:51,256 auth_service 189 139509487527616 Login attempt for: admin
+INFO 2026-02-19 07:54:51,848 auth_service 189 139509487527616 User logged in: 1
+DEBUG 2026-02-19 08:26:44,587 auth_service 189 139509512705728 AuthService initialized with UserIdentityService
+INFO 2026-02-19 08:26:44,589 auth_service 189 139509512705728 Login attempt for: admin
+INFO 2026-02-19 08:26:45,397 auth_service 189 139509512705728 User logged in: 1

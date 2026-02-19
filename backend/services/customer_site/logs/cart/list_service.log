@@ -130,3 +130,5 @@ INFO 2026-02-10 16:29:30,864 cart_item_service 633 140347585853120 Fetching cart
 INFO 2026-02-10 16:29:41,011 cart_item_service 633 140347585853120 Fetching cart list for User:1
 INFO 2026-02-10 16:31:28,741 cart_item_service 633 140347558577856 Fetching cart list for User:1
 INFO 2026-02-10 16:31:28,840 cart_item_service 633 140347558577856 Fetching cart list for User:1
+INFO 2026-02-19 08:23:38,054 cart_item_service 189 139509504313024 Fetching cart list for User:1
+INFO 2026-02-19 08:23:38,188 cart_item_service 189 139509504313024 Fetching cart list for User:1

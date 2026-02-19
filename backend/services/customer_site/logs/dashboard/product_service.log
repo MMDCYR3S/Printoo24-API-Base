@@ -136,3 +136,10 @@ INFO 2026-02-02 08:24:29,675 product_service 7 126022342121152 Attempting async 
 INFO 2026-02-02 08:24:33,736 product_service 7 126022342121152 Attempting async attachment upload: Human Decision-making is Susceptible.pdf
 INFO 2026-02-02 08:25:03,309 product_service 7 126022367299264 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
 INFO 2026-02-02 08:25:08,097 product_service 7 126022367299264 Attempting async attachment upload: How Persuasive Could LLMs Be.pdf
+INFO 2026-02-19 09:11:43,112 product_service 189 139509127706304 Attempting async upload for product 36
+ERROR 2026-02-19 10:30:57,173 product_service 189 139509110920896 Error syncing option None: 'option_id'
+ERROR 2026-02-19 10:31:03,521 product_service 189 139509110920896 Error syncing option None: 'option_id'
+ERROR 2026-02-19 10:31:53,858 product_service 189 139509110920896 Error syncing option None: 'option_id'
+ERROR 2026-02-19 11:07:04,068 product_service 473 127973682480832 Error syncing option None: 'option_id'
+ERROR 2026-02-19 11:07:08,136 product_service 473 127973682480832 Error syncing option None: 'option_id'
+ERROR 2026-02-19 11:49:07,961 product_service 473 127973306918592 Error syncing option None: 'option_id'
