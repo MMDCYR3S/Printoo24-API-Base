@@ -1,4 +1,4 @@
-import uuid
+import logging
 
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -8,8 +8,10 @@ from django.db import transaction
 from .models import(
     ProductCategoryRelation, Product,
     product_code_generator, OrderStateLog,
-    OrderStatusGroup, Role, Order, Quotation
-)   
+    OrderStatusGroup, Role, Order, UserRole, User
+)
+
+logger = logging.getLogger(__name__)
 
 # =========== GENERATE CORE ON RELATION CREATION =========== #
 @receiver(post_save, sender=ProductCategoryRelation)
@@ -145,3 +147,42 @@ def log_order_state_change(sender, instance, created, **kwargs):
 #                 customer_name=customer_name,
 #                 total_price=instance.total_price,
 #             )
+
+# ===== سیگنال تخصیص نقش پیش‌فرض (مشتری) به کاربر جدید ===== #
+@receiver(post_save, sender=User, dispatch_uid="assign_customer_role_on_new_user")
+def assign_default_role_to_new_user(sender, instance, created, **kwargs):
+    """
+    این سیگنال به محض ایجاد یک کاربر جدید در سیستم فراخوانی می‌شود.
+    اگر کاربر ادمین یا کارمند نباشد، نقش 'مشتری' به صورت خودکار به او اختصاص می‌یابد.
+    """
+    
+    # ===== بررسی اینکه آیا کاربر جدید است و ادمین/کارمند نیست ===== #
+    if created and not instance.is_superuser and not instance.is_staff:
+        
+        # ===== استفاده از تراکنش برای حفظ یکپارچگی دیتابیس ===== #
+        with transaction.atomic():
+            try:
+                # ===== 1. دریافت نقش مشتری (اگر نبود، با این مشخصات ساخته می‌شود) ===== #
+                customer_role, role_created = Role.objects.get_or_create(
+                    slug='customer',
+                    defaults={
+                        'name': 'مشتری',
+                        'type': 'normal',
+                        'is_customer': True
+                    }
+                )
+                
+                if role_created:
+                    logger.info("نقش 'مشتری' در سیستم وجود نداشت و به صورت خودکار ایجاد شد.")
+
+                # ===== 2. اختصاص نقش به کاربر (در جدول واسط UserRole) ===== #
+                UserRole.objects.get_or_create(
+                    user=instance,
+                    role=customer_role
+                )
+                
+                logger.info(f"نقش 'مشتری' با موفقیت به کاربر {instance.username} اختصاص یافت.")
+                
+            except Exception as e:
+                # ===== لاگ کردن خطا در صورت بروز مشکل سیستمی ===== #
+                logger.error(f"خطا در تخصیص نقش مشتری به کاربر {instance.username}: {str(e)}")
