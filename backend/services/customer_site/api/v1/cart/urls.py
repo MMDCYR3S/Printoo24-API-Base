@@ -6,7 +6,8 @@ from .views import (
     CartListView,
     CartItemDeleteView,
     CartClearView,
-    CartItemFileUploadView
+    CartItemFileUploadView,
+    CartItemFileDeleteView
 )
 
 app_name = "cart"
@@ -23,6 +24,7 @@ urlpatterns = [
         name='update-item'
     ),
     path('items/<int:item_id>/upload/', CartItemFileUploadView.as_view(), name='cart-item-upload'),
+    path('uploads/<int:upload_id>/', CartItemFileDeleteView.as_view(), name='cart-item-delete-upload'),
     path(
         'items/', 
         CartListView.as_view(), 
