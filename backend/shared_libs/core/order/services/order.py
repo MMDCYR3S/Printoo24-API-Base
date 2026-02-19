@@ -38,16 +38,16 @@ class OrderService:
     # ===== CUSTOM ORDER CREATION ===== #
     @transaction.atomic
     def create_order_direct(self,
-                                        items_data: List[Dict[str, Any]],
-                                        user_id: int = None,
-                                        address_id: int = None,
-                                        recipient_name: str = None,
-                                        recipient_phone: str = None,
-                                        company_name: str = None,
-                                        full_address: str = None,
-                                        total_price_override: float = None,
-                                        type: str = "2"
-                                        ) -> Order:
+                            items_data: List[Dict[str, Any]],
+                            user_id: int = None,
+                            address_id: int = None,
+                            recipient_name: str = None,
+                            recipient_phone: str = None,
+                            company_name: str = None,
+                            full_address: str = None,
+                            total_price_override: float = None,
+                            type: str = "2"
+                            ) -> Order:
         """
         ایجاد مستقیم سفارش (توسط ادمین) بدون استفاده از سبد خرید.
         """
@@ -169,6 +169,9 @@ class OrderService:
             )
             for item in prepared_items
         ])
+
+        order._created_by_admin = True
+        order.save()
                 
         return order
         

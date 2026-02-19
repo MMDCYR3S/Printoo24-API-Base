@@ -1,10 +1,17 @@
+import logging
+
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from core.models import Order
+from django.contrib.contenttypes.models import ContentType
+
+from core.models import Order, User
+from apps.notification.models import CustomerNotification
 from apps.accounts.models import WalletTransaction
 from .tasks import send_order_status_notification, send_wallet_notification
 
-# ========= Store Old Order Status ========= #
+logger = logging.getLogger(__name__)
+
+# ========== ORDER STATUS CHANGE OLD ========== #
 @receiver(pre_save, sender=Order)
 def store_old_order_status(sender, instance, **kwargs):
     """
@@ -21,6 +28,7 @@ def store_old_order_status(sender, instance, **kwargs):
     else:
         instance._old_status_id = None
 
+# ========== TRINGGER ORDER NOTIFICATION ========== #
 @receiver(post_save, sender=Order)
 def trigger_order_notification(sender, instance, created, **kwargs):
     """
@@ -39,7 +47,7 @@ def trigger_order_notification(sender, instance, created, **kwargs):
                 new_status_id=instance.current_status_id
             )
 
-# ===== Trigger Wallet Notification ===== #
+# ========== TRIGGER WALLET NOTIFICATION ========== #
 @receiver(post_save, sender=WalletTransaction)
 def trigger_wallet_notification(sender, instance, created, **kwargs):
     """
@@ -48,3 +56,56 @@ def trigger_wallet_notification(sender, instance, created, **kwargs):
     """
     if created:
         send_wallet_notification.delay(transaction_id=instance.id)
+
+# ========== CREATE NOTIFICATION FOR ADMIN ========== #
+@receiver(post_save, sender=Order, dispatch_uid="notify_admin_on_new_order")
+def notify_admins_for_new_order(sender, instance, created, **kwargs):
+    """
+    سیگنال هوشمند ارسال اعلان به ادمین‌ها در زمان ثبت سفارش.
+    پشتیبانی از: سفارش کاربر، سفارش مهمان و نادیده‌گرفتن سفارشات ثبتی توسط ادمین.
+    """
+    if not created:
+        return
+    
+    # ===== تشخیص منبع ثبت ===== #
+    if getattr(instance, '_created_by_admin', False):
+        logger.info(f"Order {instance.id} created by ADMIN. Skipping notification.")
+        return
+
+    # ===== پیدا کردن ادمین‌ها ===== #
+    admins = User.objects.filter(is_superuser=True, is_active=True)
+    if not admins.exists():
+        return
+
+    # ===== تولید محتوای پیام بر اساس نوع کاربر (لاگین شده یا مهمان) ===== #
+    order_code = instance.order_code or "نامشخص"
+    
+    if instance.user:
+        sender_user = instance.user
+        sender_name = instance.user.customer_profile.fullname() or instance.user.username
+        message = f"سفارش جدید با کد '{order_code}' توسط کاربر '{sender_name}' در سیستم ثبت شد."
+    else:
+        sender_user = None
+        sender_name = instance.recipient_name or "کاربر مهمان"
+        message = f"سفارش جدید با کد '{order_code}' توسط '{sender_name}' (مهمان) در سیستم ثبت شد."
+
+    # ===== ۴. ذخیره گروهی (Bulk Create) اعلان‌ها ===== #
+    content_type = ContentType.objects.get_for_model(instance)
+    
+    notifications = [
+        CustomerNotification(
+            recipient=admin,
+            sender=sender_user,
+            name="ثبت سفارش جدید",
+            message=message,
+            content_type=content_type,
+            object_id=instance.id
+        )
+        for admin in admins
+    ]
+    
+    try:
+        CustomerNotification.objects.bulk_create(notifications)
+        logger.info(f"Sent {len(notifications)} notifications to admins for Order {instance.id}")
+    except Exception as e:
+        logger.error(f"Failed to create admin notifications for Order {instance.id}: {str(e)}")
