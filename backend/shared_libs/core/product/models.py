@@ -1,5 +1,5 @@
 import random
-from slugify import slugify
+from slugify import slugify as unicode_slugify
 from decimal import Decimal
 
 from django.db import models
@@ -149,7 +149,7 @@ class ProductCategory(MPTTModel):
     def save(self, *args, **kwargs):
         """ ذخیره اسلاگ به صورت خودکار """
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = unicode_slugify(self.name)
         super().save(*args, **kwargs)
     
     def __str__(self):
@@ -278,7 +278,7 @@ class Product(HasGuide, models.Model):
     def save(self, *args, **kwargs):
         """ ذخیره اسلاگ محصول به صورت خودکار """
         if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
+            self.slug = unicode_slugify(self.name)
         if self.slug in Product.objects.filter(slug=self.slug).exclude(pk=self.pk):
             raise ValidationError('محصول با این نام قبلا ساخته شده است.')
             

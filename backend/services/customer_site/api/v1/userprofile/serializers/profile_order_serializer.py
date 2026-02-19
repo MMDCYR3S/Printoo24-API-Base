@@ -48,6 +48,21 @@ class ProductSummarySerializer(serializers.ModelSerializer):
         model = Product
         fields = ['name', 'slug', 'code']
 
+class ProductMinimalSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ['name', 'code', 'slug', 'image']
+
+    def get_image(self, obj):
+        """واکشی اولین تصویر محصول با اولویت ترتیب نمایش"""
+        request = self.context.get('request')
+        first_image = obj.product_image.all().order_by('order').first()
+        if first_image and first_image.image:
+            return request.build_absolute_uri(first_image.image.url) if request else first_image.image.url
+        return None
+
 # ===== Order Item File ===== #
 class OrderItemFileSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
@@ -65,17 +80,18 @@ class OrderItemFileSerializer(serializers.ModelSerializer):
 
 # ===== Order Item Detail ===== #
 class OrderItemDetailSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product.name', read_only=True)
-    product_code = serializers.CharField(source="product.code", read_only=True)
+    product = ProductMinimalSerializer(read_only=True)
+    item_price = serializers.DecimalField(source='price', max_digits=12, decimal_places=2, read_only=True)
     design_files = OrderItemFileSerializer(source='files', many=True, read_only=True)
     specs = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = OrderItem
         fields = [
             'id', 
-            'product_name',
-            'product_code',
+            'product',
+            'item_price',
             'quantity', 
             'specs', 
             'design_files'
@@ -109,6 +125,7 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
 class OrderWithDetailsSerializer(serializers.ModelSerializer):
     order_item = OrderItemDetailSerializer(source="order_item_order", many=True, read_only=True)
     status_display = serializers.CharField(source='get_current_status_display', read_only=True)
+    
     
     class Meta:
         model = Order
