@@ -8,6 +8,7 @@ from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample
 from ..serializers import CartItemFileUploadSerializer
 from apps.cart.services import CartItemUploadService
 
+# ========== FILE UPLOAD VIEW ========== #
 @extend_schema(tags=["Cart"])
 class CartItemFileUploadView(GenericAPIView):
     """
@@ -73,6 +74,52 @@ class CartItemFileUploadView(GenericAPIView):
                 "file_name": upload_instance.file.name,
                 "requirement_id": requirement_id
             }, status=status.HTTP_201_CREATED)
+            
+        except NotFound as e:
+            return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ========== FILE DELETE VIEW ========== #
+@extend_schema(tags=["Cart"])
+class CartItemFileDeleteView(GenericAPIView):
+    """
+    DELETE /api/v1/cart/uploads/{upload_id}/
+    حذف فایل آپلود شده از سبد خرید.
+    """
+    permission_classes = [AllowAny]
+    
+    @extend_schema(
+        summary="حذف فایل طراحی",
+        description="""
+        با ارسال شناسه فایل (upload_id)، آن را از سبد خرید حذف می‌کند.
+        سیستم به صورت خودکار چک می‌کند که فایل متعلق به کاربر (یا مهمان) فعلی باشد.
+        """,
+        responses={
+            204: OpenApiTypes.OBJECT, 
+            400: OpenApiTypes.OBJECT,
+            404: OpenApiTypes.OBJECT
+        }
+    )
+    def delete(self, request, upload_id):
+        # ===== تشخیص هویت (User یا Session) ===== #
+        user = request.user if request.user.is_authenticated else None
+        session_key = request.session.session_key
+
+        service = CartItemUploadService()
+        
+        try:
+            service.delete_file(
+                upload_id=upload_id,
+                user=user,
+                session_key=session_key
+            )
+            # در REST استاندارد، کد 204 برای حذف موفق برگردانده می‌شود
+            return Response(
+                {"message": "فایل با موفقیت حذف شد."}, 
+                status=status.HTTP_204_NO_CONTENT
+            )
             
         except NotFound as e:
             return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)

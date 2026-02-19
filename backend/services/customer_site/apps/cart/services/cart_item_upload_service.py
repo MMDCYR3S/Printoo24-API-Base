@@ -46,3 +46,39 @@ class CartItemUploadService:
         
         logger.info(f"File uploaded successfully: {upload_instance.id}")
         return upload_instance
+
+    # ===== متد جدید برای حذف فایل ===== #
+    def delete_file(
+        self, 
+        upload_id: int, 
+        user: User = None, 
+        session_key: str = None
+    ):
+        """
+        حذف ایمن فایل آپلود شده با بررسی مالکیت سبد خرید و پاکسازی هارد دیسک.
+        """
+        logger.info(f"Attempting to delete upload {upload_id}")
+
+        if not user and not session_key:
+             raise ValidationError("نشست کاربر معتبر نیست. لطفاً صفحه را رفرش کنید.")
+
+        # ===== کوئری ایمن برای بررسی مالکیت فایل ===== #
+        query = Q(id=upload_id)
+        if user and user.is_authenticated:
+            query &= Q(cart_item__cart__user=user)
+        else:
+            query &= Q(cart_item__cart__session_key=session_key, cart_item__cart__user__isnull=True)
+
+        try:
+            upload_instance = CartItemUpload.objects.get(query)
+        except CartItemUpload.DoesNotExist:
+            raise NotFound("فایل مورد نظر یافت نشد یا شما اجازه حذف آن را ندارید.")
+
+        # ===== پاکسازی فیزیکی فایل از ===== #
+        if upload_instance.file:
+            upload_instance.file.delete(save=False) 
+
+        # ===== حذف رکورد از دیتابیس ===== #
+        upload_instance.delete()
+        
+        logger.info(f"File {upload_id} deleted successfully.")

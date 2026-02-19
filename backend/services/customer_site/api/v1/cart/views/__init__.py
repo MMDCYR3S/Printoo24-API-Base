@@ -1,4 +1,4 @@
 from .cart_add_update_view import AddToCartView, CartItemUpdateView
 from .cart_item_view import CartListView, CartItemDetailView
 from .cart_delete_view import CartItemDeleteView, CartClearView
-from .cart_item_upload_view import CartItemFileUploadView
+from .cart_item_upload_view import CartItemFileUploadView, CartItemFileDeleteView
