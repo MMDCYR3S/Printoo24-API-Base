@@ -235,15 +235,17 @@ class CartProcessor:
         if prod_opt.input_type == OptionInputType.NUMBER:
             try:
                 float(raw_value)
-            except Exception as e:
+            except ValueError:
                 raise ValidationError(f"مقدار وارد شده برای '{prod_opt.label}' باید عددی باشد.")
-        choice = prod_opt.choices.filter(label=raw_value).first()
-        self.selected_option_values.append(choice)
+        
+        # ===== اصلاح سینیوری ===== #
+        choice = prod_opt.choices.first()
+        if choice:
+            self.selected_option_values.append(choice)
         
         return {
             "option_id": prod_opt.id,
             "option_label": prod_opt.label or prod_opt.name,
             "type": "raw",
-            "value": str(raw_value),
-            "price": float(prod_opt.price_impact)
+            "value": str(raw_value)
         }
