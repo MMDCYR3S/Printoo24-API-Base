@@ -108,7 +108,7 @@ const ProductSizesPage = () => {
               <tr>
                 <th>#</th>
                 <th className='text-right' >نام سایز</th>
-                <th className="text-center">ابعاد (cm)</th>
+                <th className="text-center " >ابعاد (cm)</th>
                 <th className="text-center">عملیات</th>
               </tr>
             </thead>
@@ -117,7 +117,7 @@ const ProductSizesPage = () => {
                 <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                   <th>{index + 1}</th>
                   <td className="font-bold text-slate-700 text-right">{item.name}</td>
-                  <td className="text-center dir-ltr">
+                  <td className="text-center" dir='ltr'>
                     <span className="badge badge-ghost font-mono">{item.width} x {item.height}</span>
                   </td>
                   <td>
