@@ -228,3 +228,13 @@ INFO 2026-02-10 14:09:52,012 add_to_cart_service 352 126708827199168 Start addin
 INFO 2026-02-10 14:09:52,058 add_to_cart_service 352 126708827199168 Merging with existing item 3
 INFO 2026-02-10 14:41:20,162 add_to_cart_service 352 126708446394048 Start adding product 11 for user
 INFO 2026-02-10 14:41:20,251 add_to_cart_service 352 126708446394048 Creating new cart item
+INFO 2026-02-19 14:09:04,189 add_to_cart_service 591 124649413277376 Start adding product 39 for user
+INFO 2026-02-19 14:09:12,735 add_to_cart_service 591 124649413277376 Start adding product 39 for user
+INFO 2026-02-19 14:11:13,215 add_to_cart_service 591 124649874646720 Start adding product 39 for user
+INFO 2026-02-19 14:12:05,789 add_to_cart_service 591 124649874646720 Start adding product 39 for user
+INFO 2026-02-19 14:12:21,330 add_to_cart_service 591 124649874646720 Start adding product 39 for user
+INFO 2026-02-19 14:24:52,299 add_to_cart_service 805 129516464936640 Start adding product 39 for user
+INFO 2026-02-19 14:25:03,262 add_to_cart_service 805 129516464936640 Start adding product 39 for user
+INFO 2026-02-19 14:25:08,193 add_to_cart_service 805 129516464936640 Start adding product 39 for user
+INFO 2026-02-19 14:25:23,375 add_to_cart_service 805 129516464936640 Start adding product 39 for user
+INFO 2026-02-19 14:25:28,956 add_to_cart_service 805 129516464936640 Start adding product 39 for user

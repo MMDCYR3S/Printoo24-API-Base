@@ -143,3 +143,15 @@ ERROR 2026-02-19 10:31:53,858 product_service 189 139509110920896 Error syncing 
 ERROR 2026-02-19 11:07:04,068 product_service 473 127973682480832 Error syncing option None: 'option_id'
 ERROR 2026-02-19 11:07:08,136 product_service 473 127973682480832 Error syncing option None: 'option_id'
 ERROR 2026-02-19 11:49:07,961 product_service 473 127973306918592 Error syncing option None: 'option_id'
+INFO 2026-02-19 13:53:34,661 product_service 591 124649844225728 Attempting async upload for product 38
+INFO 2026-02-19 13:53:36,057 product_service 591 124649844225728 Attempting async upload for product 38
+INFO 2026-02-19 13:53:36,572 product_service 591 124649844225728 Attempting async upload for product 38
+INFO 2026-02-19 13:53:37,102 product_service 591 124649844225728 Attempting async upload for product 38
+INFO 2026-02-19 13:54:07,996 product_service 591 124649844225728 Attempting async attachment upload: 20260125-173909_2_compressed.mp4
+INFO 2026-02-19 13:54:20,644 product_service 591 124649844225728 Attempting async attachment upload: گزارش_تحلیلی_پرسنل_IT.pdf
+INFO 2026-02-19 14:00:05,617 product_service 591 124649844225728 Attempting async upload for product 39
+INFO 2026-02-19 14:00:05,812 product_service 591 124649844225728 Attempting async upload for product 39
+INFO 2026-02-19 14:00:06,150 product_service 591 124649844225728 Attempting async upload for product 39
+INFO 2026-02-19 14:00:06,550 product_service 591 124649844225728 Attempting async upload for product 39
+INFO 2026-02-19 14:00:20,092 product_service 591 124649844225728 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
+INFO 2026-02-19 14:00:27,253 product_service 591 124649844225728 Attempting async attachment upload: Smart_Stone_Costing_Engine.pdf
