@@ -348,13 +348,13 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                   <FormError message={errors.shell?.price?.message} />
               </div>
 
-              <div className="form-control">
+              {/* <div className="form-control">
                   <label className="label text-sm font-bold text-slate-700">هزینه ثابت (Setup)</label>
                   <input 
                       type="number" {...register('pricing_config.base_setup_price')}
                       className="input input-lg input-bordered w-full font-mono dir-ltr bg-white"
                   />
-              </div>
+              </div> */}
 
               {!hasQuantity && (
                   <div className="form-control">
