@@ -12,3 +12,4 @@ from .order_view import OrderDashboardViewSet
 from .slider_view import SliderDashboardViewSet
 from .dashboard_view import *
 from .location_views import *
+from .financial_view import *
