@@ -65,37 +65,41 @@ class UserOrderDetailAPIView(APIView):
 
     @extend_schema(
         summary="جزئیات کامل سفارش",
-        description="""
-        این متد تمام جزئیات فنی آیتم‌های سفارش و فایل‌های آپلود شده را برمی‌گرداند.
-        فیلد `specs` شامل مشخصات فنی محصول (جنس، ابعاد، آپشن‌ها) است که از JSON استخراج شده است.
-        """,
+        description="خروجی شامل اطلاعات محصول (آبجکت تودرتو)، مشخصات فنی استخراج شده و فایل‌های طراحی است.",
         responses={200: OrderWithDetailsSerializer},
         examples=[
             OpenApiExample(
                 'Complex Order Detail',
-                summary='سفارش کارت ویزیت + سربرگ',
-                description='نمونه خروجی واقعی شامل فایل‌های طراحی و مشخصات فنی',
                 value={
                     "id": 2050,
+                    "order_code": "4582-PENDING-CARD-2023",
                     "status_display": "تایید شده",
                     "total_price": "2500000",
-                    "address": 12, # یا آبجکت آدرس بسته به تنظیمات سریالایزر
+                    "full_address": "تهران، خیابان آزادی، ...",
                     "created_at": "2023-11-20T14:00:00Z",
                     "order_item": [
                         {
                             "id": 501,
-                            "product_name": "کارت ویزیت لمینت",
+                            "product": {
+                                "name": "کارت ویزیت لمینت",
+                                "code": "8234-PRINT-CARD-2023",
+                                "slug": "laminate-business-card",
+                                "image": "https://api.printoo.ir/media/products/card.jpg"
+                            },
+                            "item_price": "1250000",
                             "quantity": 1000,
                             "specs": {
                                 "dimensions": "9 x 5 cm",
                                 "material": "گلاسه ۳۰۰ گرم",
-                                "size": "کارت ویزیت استاندارد",
-                                "has_design": True,
-                                "options": [
-                                    "روکش: لمینت براق",
-                                    "گوشه: گرد"
-                                ]
-                            }
+                                "options": ["روکش: لمینت براق"]
+                            },
+                            "design_files": [
+                                {
+                                    "id": 10,
+                                    "requirement_name": "طرح روی کارت",
+                                    "file_url": "https://api.printoo.ir/media/designs/v1.pdf"
+                                }
+                            ]
                         }
                     ]
                 }

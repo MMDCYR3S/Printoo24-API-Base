@@ -14,14 +14,12 @@ class InvoiceQuerySet(BaseQuerySet):
         """ لیست فاکتورها برای پنل مدیریت (همراه با سفارش و کاربر) """
         return self.select_related(
             'order__user__customer_profile'
-        ).prefetch_related('transactions').order_by('-issued_at')
+        ).order_by('-issued_at')
         
     def get_invoice_detail(self, invoice_id: int):
         """ دریافت جزئیات کامل یک فاکتور """
         return self.select_related(
             'order__user', 'order__address'
-        ).prefetch_related(
-            'transactions', 
         ).filter(id=invoice_id).first()
     
     def get_by_invoice_number(self, number: str):

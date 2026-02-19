@@ -112,14 +112,13 @@ class ShopCategoryService:
         return data
     
     # ===== Get All Categories With Products ===== #
-    # ===== Get All Categories With Products ===== #
     def get_all_categories_with_products(self) -> List[Dict[str, Any]]:
         """
         دریافت لیست تمام دسته‌بندی‌های اصلی (Root) به همراه محصولات.
         """
         logger.info("Fetching all root categories with products")
 
-        root_categories = self._domain_service.get_all_active_categories()
+        root_categories = self._domain_service.get_root_categories()
         result_list = []
 
         for category in root_categories:
@@ -127,7 +126,6 @@ class ShopCategoryService:
             descendant_ids = descendants.values_list('id', flat=True)
 
             products_queryset = self._product_repo.get_products_by_category_ids(descendant_ids)
-            
             products_queryset = products_queryset.prefetch_related('product_image')[:7]
 
             category_data = {
@@ -184,8 +182,8 @@ class ShopCategoryService:
                 "description": cat.description,
                 "is_active": cat.is_active,
                 "banners": {
-                    "wide": self._get_image_url(cat.parent.banner_wide),
-                    "box": self._get_image_url(cat.parent.banner_box),
+                    "wide": self._get_image_url(cat.banner_wide),
+                    "box": self._get_image_url(cat.banner_box),
                 },
                 "parent": parent_data,
                 "products": products_qs
