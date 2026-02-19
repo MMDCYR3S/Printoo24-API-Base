@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Order, OrderItem, OrderItemFile, Product, Address, Quotation
+from core.models import Order, OrderItem, OrderItemFile, Product, Address, Quotation, Invoice
 
 # ===== Quotation ===== #
 class QuotationSerializer(serializers.ModelSerializer):
@@ -161,4 +161,30 @@ class OrderSerializer(serializers.ModelSerializer):
             'id', 'user', "recipient_name", "recipient_phone",
             'status', 'type_display', 'total_price',
             'order_code', 'created_at', "address_id", "address"
+        ]
+
+# ===== User Invoice Serializer ===== #
+class UserInvoiceSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر نمایش فاکتور نهایی به مشتری
+    """
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    
+    class Meta:
+        model = Invoice
+        fields = [
+            'id',
+            'invoice_number',
+            'items_amount',
+            'services_amount',
+            'tax_amount',
+            'discount_amount',
+            'final_amount',
+            'paid_amount',
+            'remaining_amount',
+            'description',
+            'status',
+            'status_display',
+            'issued_at',
+            'finalized_at',
         ]

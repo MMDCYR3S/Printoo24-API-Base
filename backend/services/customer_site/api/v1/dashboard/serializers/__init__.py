@@ -8,3 +8,5 @@ from .wallet_serializers import *
 from .slider_serializers import *
 from .dashboard_serializers import *
 from .location_serializers import *
+from .invoice_serializers import *
+from .quotation_serializers import *
