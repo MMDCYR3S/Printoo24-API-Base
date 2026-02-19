@@ -1041,3 +1041,14 @@ INFO 2026-02-19 14:58:09,105 user_detail_service 805 129516455495360 Fetching pr
 INFO 2026-02-19 14:58:10,515 user_detail_service 805 129516429268672 Fetching profile details for User ID: 1
 INFO 2026-02-19 14:58:10,989 user_detail_service 805 129516429268672 Fetching profile details for User ID: 1
 INFO 2026-02-19 15:03:21,620 user_detail_service 805 129516429268672 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:00:51,842 user_detail_service 914 127647635994304 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:00:52,659 user_detail_service 914 127647635994304 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:00:52,881 user_detail_service 914 127647855318720 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:25:44,449 user_detail_service 914 127647846926016 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:25:44,880 user_detail_service 914 127647846926016 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:25:45,591 user_detail_service 914 127647635994304 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:25:45,802 user_detail_service 914 127647846926016 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:30:53,929 user_detail_service 914 127647846926016 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:30:54,419 user_detail_service 914 127647846926016 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:30:55,777 user_detail_service 914 127647624455872 Fetching profile details for User ID: 1
+INFO 2026-02-19 17:30:56,093 user_detail_service 914 127647846926016 Fetching profile details for User ID: 1

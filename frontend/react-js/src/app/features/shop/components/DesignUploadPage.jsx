@@ -8,16 +8,14 @@ const DesignUploadPage = () => {
   const { itemId } = useParams();
   const navigate = useNavigate();
   
-  // فایل‌هایی که الان روی سرور هستند (قبلا آپلود شدن)
+  // استیت‌ها
   const [serverFiles, setServerFiles] = useState([]);
-  
-  // فایل‌هایی که کاربر انتخاب کرده ولی هنوز دکمه آپلود رو نزده
   const [pendingFiles, setPendingFiles] = useState([]);
-  
   const [loadingItem, setLoadingItem] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  // این همون استیتی هست که جا مونده بود و صفحه رو سفید کرد!
+  const [deletingId, setDeletingId] = useState(null);
 
-  // دریافت اطلاعات آیتم و فایل‌های قبلی هنگام لود صفحه
   useEffect(() => {
     fetchItemDetails();
   }, [itemId]);
@@ -26,7 +24,6 @@ const DesignUploadPage = () => {
     try {
       setLoadingItem(true);
       const data = await cartService.getItem(itemId);
-      // طبق داکیومنت، آرایه uploads داخل دیتا هست
       if (data && data.uploads) {
         setServerFiles(data.uploads);
       }
@@ -38,55 +35,38 @@ const DesignUploadPage = () => {
     }
   };
 
-  // هندل کردن انتخاب فایل (دراپ یا کلیک)
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files).map(file => ({
         file,
-        id: Math.random().toString(36).substr(2, 9), // ID موقت برای UI
-        preview: URL.createObjectURL(file), // پیش‌نمایش لوکال
-        status: 'pending' // pending, uploading, success, error
+        id: Math.random().toString(36).substr(2, 9),
+        preview: URL.createObjectURL(file),
+        status: 'pending' 
       }));
       setPendingFiles(prev => [...prev, ...newFiles]);
     }
-    e.target.value = ''; // ریست اینپوت
+    e.target.value = ''; 
   };
 
-  // حذف از صف انتظار (قبل از آپلود)
   const removePendingFile = (tempId) => {
     setPendingFiles(prev => prev.filter(f => f.id !== tempId));
   };
 
-  // شروع عملیات آپلود برای فایل‌های جدید
   const handleUploadPending = async () => {
     if (pendingFiles.length === 0) return;
 
     setIsUploading(true);
     let successCount = 0;
-
-    // کپی آرایه برای پیمایش
     const queue = [...pendingFiles];
 
     for (const item of queue) {
-      // فقط اونایی که هنوز آپلود نشدن یا ارور دادن رو دوباره تلاش کن
       if (item.status === 'success') continue;
 
       try {
-        // تغییر وضعیت به در حال آپلود در UI
         setPendingFiles(prev => prev.map(f => f.id === item.id ? { ...f, status: 'uploading' } : f));
-        
-        // فراخوانی API
-        const res = await cartService.uploadDesign(itemId, item.file);
-        
-        // حذف از صف pending و اضافه کردن به لیست serverFiles
+        await cartService.uploadDesign(itemId, item.file);
         setPendingFiles(prev => prev.filter(f => f.id !== item.id));
-        
-        // افزودن به لیست سرور (برای نمایش در گالری پایین)
-        // فرض بر اینه که ریسپانس سرور ساختار فایل رو برمیگردونه. 
-        // اگر برنگردوند، دوباره fetchItemDetails میکنیم.
-        // اینجا فرض میکنیم باید دوباره فچ کنیم تا مطمئن بشیم دیتای سرور دقیقه
         successCount++;
-
       } catch (err) {
         console.error(err);
         setPendingFiles(prev => prev.map(f => f.id === item.id ? { ...f, status: 'error' } : f));
@@ -96,27 +76,41 @@ const DesignUploadPage = () => {
 
     if (successCount > 0) {
       toast.success(`${successCount} فایل با موفقیت ذخیره شد`);
-      // به‌روزرسانی لیست سرور
       fetchItemDetails();
     }
     
     setIsUploading(false);
   };
 
-  // باز کردن عکس در تب جدید
+  // تابعی که برای حذف کردن از سرور نیاز داشتی و جا مونده بود
+  const handleDeleteServerFile = async (uploadId) => {
+    if (!window.confirm('آیا از حذف این فایل طراحی اطمینان دارید؟')) return;
+    
+    try {
+      setDeletingId(uploadId);
+      await cartService.deleteUpload(uploadId);
+      setServerFiles(prev => prev.filter(f => f.id !== uploadId));
+      toast.success('فایل با موفقیت حذف شد');
+    } catch (err) {
+      console.error("خطا در حذف:", err);
+      toast.error('مشکلی در حذف فایل پیش آمد');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const openImage = (url) => {
     window.open(url, '_blank');
   };
 
   if (loadingItem) {
-    return <div className="min-h-screen flex items-center justify-center"><span className="loading loading-dots loading-lg"></span></div>;
+    return <div className="min-h-screen flex items-center justify-center"><span className="loading loading-dots loading-lg text-primary"></span></div>;
   }
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 pb-24">
       <div className="max-w-4xl mx-auto space-y-6">
         
-        {/* هدر صفحه */}
         <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
             <div>
                 <h1 className="text-xl font-bold text-slate-800">مدیریت فایل‌های سفارش</h1>
@@ -127,7 +121,6 @@ const DesignUploadPage = () => {
             </button>
         </div>
 
-        {/* ناحیه آپلود (دراپ زون) */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
             <h2 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <UploadCloud className="text-blue-600"/>
@@ -153,7 +146,6 @@ const DesignUploadPage = () => {
             </div>
         </div>
 
-        {/* لیست در انتظار آپلود (Pending) */}
         {pendingFiles.length > 0 && (
             <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100 animate-in fade-in slide-in-from-bottom-4">
                 <div className="flex justify-between items-center mb-4">
@@ -168,7 +160,6 @@ const DesignUploadPage = () => {
                     {pendingFiles.map((item) => (
                         <div key={item.id} className="bg-white p-3 rounded-xl border border-amber-200 flex items-center justify-between">
                             <div className="flex items-center gap-3 overflow-hidden">
-                                {/* پیش‌نمایش کوچک */}
                                 {item.file.type.startsWith('image/') ? (
                                     <img src={item.preview} alt="" className="w-10 h-10 rounded-lg object-cover bg-slate-100" />
                                 ) : (
@@ -204,7 +195,6 @@ const DesignUploadPage = () => {
             </div>
         )}
 
-        {/* گالری فایل‌های روی سرور (Uploaded) */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm min-h-[200px]">
              <h2 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <CheckCircle className="text-emerald-500"/>
@@ -220,32 +210,50 @@ const DesignUploadPage = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {serverFiles.map((file, idx) => (
                         <div key={idx} className="group relative aspect-square bg-slate-100 rounded-2xl overflow-hidden border border-slate-200">
+                            
                             {/* نمایش تصویر یا آیکون فایل */}
                             {file.file_url.match(/\.(jpeg|jpg|png|gif|webp)$/i) ? (
                                 <img src={file.file_url} alt="upload" className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 p-4 text-center">
                                     <File size={32} className="mb-2"/>
-                                    <span className="text-xs break-all line-clamp-2">فایل ضمیمه</span>
+                                    <span className="text-xs break-all line-clamp-2" dir="ltr">{file.file_url.split('/').pop()}</span>
                                 </div>
                             )}
+                            
+                            {/* بج وضعیت */}
+                            <div className="absolute top-2 right-2 z-30 bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm">
+                                ثبت شده
+                            </div>
 
-                            {/* کاور هاور برای مشاهده */}
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
+                            {/* 🔥 کاور هاور: دکمه چشم و سطل زباله دقیقاً جفت هم وسط عکس 🔥 */}
+                            <div className={`absolute inset-0 transition-all flex items-center justify-center gap-3 backdrop-blur-sm z-20
+                                ${deletingId === file.id ? 'bg-black/60 opacity-100' : 'bg-black/50 opacity-0 group-hover:opacity-100'}`}
+                            >
+                                {/* دکمه چشم */}
                                 <button 
                                     onClick={() => openImage(file.file_url)}
-                                    className="p-2 bg-white text-slate-800 rounded-full hover:scale-110 transition-transform shadow-lg"
-                                    title="مشاهده"
+                                    className="p-3 bg-white text-slate-800 rounded-xl hover:scale-110 transition-transform shadow-lg"
+                                    title="مشاهده بزرگتر"
                                 >
                                     <Eye size={20} />
                                 </button>
-                                {/* دکمه حذف (اگر API ساپورت کند، فعلا فقط ویو) */}
+                                
+                                {/* دکمه حذف */}
+                                <button 
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteServerFile(file.id); }}
+                                    disabled={deletingId === file.id}
+                                    className="p-3 bg-red-500 text-white rounded-xl hover:bg-red-600 hover:scale-110 transition-transform shadow-lg disabled:opacity-50"
+                                    title="حذف این فایل"
+                                >
+                                    {deletingId === file.id ? (
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                    ) : (
+                                        <Trash2 size={20} />
+                                    )}
+                                </button>
                             </div>
-                            
-                            {/* بج وضعیت */}
-                            <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm">
-                                ثبت شده
-                            </div>
+
                         </div>
                     ))}
                 </div>
@@ -254,7 +262,6 @@ const DesignUploadPage = () => {
 
       </div>
 
-      {/* فوتر ثابت پایین */}
       <div className="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] z-50">
         <div className="max-w-4xl mx-auto flex items-center gap-4">
             <div className="flex-1 text-sm text-slate-500 hidden sm:block">
@@ -265,7 +272,7 @@ const DesignUploadPage = () => {
             
             <button
                 onClick={() => navigate('/cart')}
-                disabled={isUploading || pendingFiles.length > 0} // تا وقتی فایلی تو صف آپلوده، نذار بره
+                disabled={isUploading || pendingFiles.length > 0 || deletingId !== null} 
                 className="btn btn-primary px-8 rounded-xl flex-1 sm:flex-none shadow-lg shadow-primary/30"
             >
                 {pendingFiles.length > 0 

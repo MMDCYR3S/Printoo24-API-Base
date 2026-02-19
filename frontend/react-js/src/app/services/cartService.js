@@ -35,5 +35,14 @@ export const cartService = {
   getCartItems: async () => {
     const response = await apiClient.get('/cart/items/');
     return response.data;
-  }
+  },
+
+  getTotalNumber: async () => {
+    const Total = await apiClient.get('/cart/items')
+    return Total.data.total_items
+  },
+  deleteUpload: async (uploadId) => {
+    const response = await apiClient.delete(`/cart/uploads/${uploadId}/`);
+    return response.data;
+  },
 };
