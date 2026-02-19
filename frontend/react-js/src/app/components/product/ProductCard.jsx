@@ -5,9 +5,12 @@ import { Eye } from 'lucide-react';
 const ProductCard = ({ product }) => {
   const formattedPrice = new Intl.NumberFormat('fa-IQ').format(parseFloat(product.price) || 0);
 
-  // استخراج نام دسته‌ها
+  // استخراج نام دسته‌ها (با پشتیبانی از حالت‌های بدون دسته مثل لندینگ)
   const parentCategory = product.category?.parent_category || 'محصولات';
   const childCategory = product.category?.children_category;
+
+  // دریافت آدرس عکس با پشتیبانی از هر دو حالت API (شاپ و لندینگ)
+  const imageUrl = product.thumbnail || product.image;
 
   return (
     <Link 
@@ -17,9 +20,9 @@ const ProductCard = ({ product }) => {
       
       {/* بخش تصویر */}
       <div className="relative aspect-video rounded-2xl bg-slate-50 overflow-hidden isolate">
-        {product.thumbnail ? (
+        {imageUrl ? (
           <img 
-            src={product.thumbnail} 
+            src={imageUrl} 
             alt={product.name} 
             loading="lazy"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"

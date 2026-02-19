@@ -246,3 +246,5 @@ INFO 2026-02-19 11:59:15,023 user_transaction_service 473 127973315311296 Fetchi
 DEBUG 2026-02-19 11:59:15,083 user_transaction_service 473 127973315311296 Wallet balance: 30775688.00
 INFO 2026-02-19 12:04:04,287 user_transaction_service 473 127973315311296 Fetching wallet balance for User ID: 1
 DEBUG 2026-02-19 12:04:04,324 user_transaction_service 473 127973315311296 Wallet balance: 30775688.00
+INFO 2026-02-19 12:07:37,920 user_transaction_service 518 124791901288128 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-19 12:07:37,938 user_transaction_service 518 124791901288128 Wallet balance: 30775688.00
