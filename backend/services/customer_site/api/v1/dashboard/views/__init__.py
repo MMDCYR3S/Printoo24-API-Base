@@ -13,3 +13,4 @@ from .slider_view import SliderDashboardViewSet
 from .dashboard_view import *
 from .location_views import *
 from .financial_view import *
+from .staff_view import *
