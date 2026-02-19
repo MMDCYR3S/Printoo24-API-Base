@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { 
   Box, Calculator, Ruler, Hash, AlertTriangle, 
   Save, Printer, MousePointerClick, Trash2, 
-  Plus, DollarSign, Palette
+  Plus, DollarSign, Palette, CheckCircle2
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useQuery } from '@tanstack/react-query';
@@ -14,36 +14,50 @@ import { adminCategoryService } from '../../../../services/adminCategoryService'
 import { adminProductService } from '../../../../services/adminProductService';
 import toast from 'react-hot-toast';
 
-// --- UI Components ---
-const SectionTitle = ({ icon: Icon, title, desc }) => (
-  <div className="flex items-start gap-4 mb-8 border-b border-slate-100 pb-5">
-    <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shadow-sm">
-       <Icon size={28} strokeWidth={1.5} />
+// --- UI Components (Modernized) ---
+
+// کامپوننت تایتل با پشتیبانی از استپ عددی مدرن
+const SectionTitle = ({ step, icon: Icon, title, desc }) => (
+  <div className="flex items-start gap-5 mb-10 pb-6 border-b border-slate-200/60">
+    <div className="relative flex-shrink-0 mt-1">
+      <div className="w-14 h-14 rounded-[1.25rem] bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-primary shadow-sm border border-primary/10">
+         <Icon size={26} strokeWidth={1.5} />
+      </div>
+      {step && (
+        <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary text-white text-sm font-black flex items-center justify-center shadow-lg shadow-primary/40 border-2 border-white">
+          {step}
+        </div>
+      )}
     </div>
-    <div>
-      <h3 className="font-extrabold text-slate-800 text-xl tracking-tight">{title}</h3>
-      {desc && <p className="text-sm text-slate-500 mt-1 font-medium">{desc}</p>}
+    <div className="pt-1.5">
+      <h3 className="font-extrabold text-slate-800 text-2xl tracking-tight">{title}</h3>
+      {desc && <p className="text-sm text-slate-500 mt-2 font-medium">{desc}</p>}
     </div>
   </div>
 );
 
+// استایل مدرن ارورها
 const FormError = ({ message }) => (
   message ? (
-    <div className="text-error text-[11px] mt-2 flex items-center gap-1.5 font-bold bg-red-50 p-2 rounded-lg animate-pulse">
-        <AlertTriangle size={14}/> {message}
+    <div className="text-error text-xs mt-2 flex items-center gap-1.5 font-bold animate-in fade-in slide-in-from-top-1">
+        <AlertTriangle size={14} className="text-error"/> {message}
     </div>
   ) : null
 );
 
+// سلکتور راهنما با طراحی جدید
 const GuideTypeSelector = ({ register, name }) => (
-    <select {...register(name)} className="select select-bordered select-sm w-24 bg-white text-xs h-10">
-        <option value="info">آبی</option>
-        <option value="tip">زرد</option>
-        <option value="warning">نارنجی</option>
-        <option value="danger">قرمز</option>
-        <option value="success">سبز</option>
+    <select {...register(name)} className="bg-transparent border-b-2 border-slate-200 text-xs font-bold text-slate-600 focus:border-primary focus:outline-none transition-colors px-2 py-2 cursor-pointer hover:border-slate-300">
+        <option value="info">آبی (Info)</option>
+        <option value="tip">زرد (Tip)</option>
+        <option value="warning">نارنجی (Warn)</option>
+        <option value="danger">قرمز (Danger)</option>
+        <option value="success">سبز (Success)</option>
     </select>
 );
+
+// کلاس‌های استایل مشترک برای اینپوت‌های زیرخط‌دار (Underline Inputs)
+const underlineInputClass = "w-full bg-transparent border-b-2 border-slate-200 px-1 py-3 text-slate-800 placeholder-slate-300 focus:border-primary focus:outline-none transition-all duration-300 hover:border-slate-300";
 
 const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   
@@ -65,9 +79,8 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
 
   // --- 2. Local State ---
   const [selectedParentId, setSelectedParentId] = useState(null);
-  const [targetSubCategoryId, setTargetSubCategoryId] = useState(null); // ذخیره ID زیردسته مورد نظر
+  const [targetSubCategoryId, setTargetSubCategoryId] = useState(null);
 
-  // دریافت فرزندان بر اساس پدر انتخاب شده
   const { data: parentDetails, isFetching: isLoadingChildren } = useQuery({
     queryKey: ['admin-category-details', selectedParentId],
     queryFn: () => adminCategoryService.getById(selectedParentId),
@@ -85,21 +98,15 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
     }
   });
 
-  // --- 4. Initialization Logic ---
+  // --- 4. Initialization Logic (بدون تغییر) ---
   useEffect(() => {
     const isMasterDataReady = standardSizes.length > 0 && systemQuantities.length > 0;
 
     if (initialData && isEditMode && isMasterDataReady) {
-        console.log("🔄 Initializing Data...", initialData);
-
-        // A. نرمال‌سازی Category
         let currentCatId = initialData.shell?.category_info?.id || initialData.shell?.category_id;
         
         if (currentCatId) {
-            // ذخیره ID هدف برای استفاده ثانویه (بعد از لود شدن لیست)
             setTargetSubCategoryId(currentCatId);
-
-            // پیدا کردن والد برای پر کردن دراپ‌داون اول
             adminCategoryService.getById(currentCatId).then(catData => {
                 if (catData?.parent) {
                     setSelectedParentId(catData.parent);
@@ -109,7 +116,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             }).catch(console.error);
         }
 
-        // B. نرمال‌سازی Quantities
         let normalizedQuantities = [];
         if (Array.isArray(initialData.quantities)) {
             normalizedQuantities = initialData.quantities.map(q => {
@@ -125,7 +131,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             }).filter(Boolean);
         }
 
-        // C. نرمال‌سازی Sizes
         let normalizedSizes = [];
         const sizesArray = initialData.sizes?.sizes || (Array.isArray(initialData.sizes) ? initialData.sizes : []);
         
@@ -148,7 +153,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             }).filter(Boolean);
         }
 
-        // D. پر کردن فرم
         reset({
             shell: {
                 ...initialData.shell,
@@ -169,14 +173,10 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
     }
   }, [initialData, isEditMode, reset, standardSizes, systemQuantities]);
 
-  // --- 5. Fix: Re-apply SubCategory when List Loads ---
-  // این افکت زمانی اجرا می‌شود که لیست فرزندان (parentDetails) از سرور برسد
   useEffect(() => {
       if (parentDetails?.children && targetSubCategoryId) {
-          // چک می‌کنیم آیا زیردسته هدف در لیست جدید وجود دارد؟
           const exists = parentDetails.children.find(c => Number(c.id) === Number(targetSubCategoryId));
           if (exists) {
-              // اگر بود، دوباره مقدار را در فرم ست می‌کنیم تا نمایش داده شود
               setValue('shell.category_id', targetSubCategoryId);
           }
       }
@@ -194,8 +194,8 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   const handleParentChange = (e) => {
     const val = e.target.value;
     setSelectedParentId(val);
-    setValue('shell.category_id', ''); // در تغییر دستی، مقدار قبلی پاک شود
-    setTargetSubCategoryId(null); // هدف قبلی را هم پاک می‌کنیم
+    setValue('shell.category_id', ''); 
+    setTargetSubCategoryId(null); 
   };
 
   const handleAddQuantity = (e) => {
@@ -215,48 +215,48 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSave)} className="w-full max-w-5xl mx-auto pb-32 space-y-10">
+    <form onSubmit={handleSubmit(onSave)} className="w-full max-w-5xl mx-auto pb-32 space-y-12 font-sans">
       
-      {/* === CARD 1: Basic Info === */}
-      <div className="card bg-white shadow-xl shadow-slate-200/40 border border-slate-100 p-8 rounded-[2rem]">
-          <SectionTitle icon={Box} title="اطلاعات پایه محصول" desc="مشخصات عمومی و دسته‌بندی" />
+      {/* === STEP 1: Basic Info === */}
+      <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 border border-white p-8 md:p-10 rounded-[2rem] transition-all hover:shadow-primary/5">
+          <SectionTitle step="1" icon={Box} title="اطلاعات پایه محصول" desc="مشخصات عمومی و دسته‌بندی محصول را وارد کنید" />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="form-control md:col-span-2">
-                  <label className="label text-sm font-bold text-slate-700 mb-1">نام محصول <span className="text-error">*</span></label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+              <div className="md:col-span-2 group">
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2 transition-colors group-focus-within:text-primary">نام محصول <span className="text-error">*</span></label>
                   <input 
                       {...register('shell.name')} 
-                      className="input input-lg input-bordered w-full rounded-2xl bg-slate-50 focus:bg-white text-base font-bold text-slate-800" 
+                      className={clsx(underlineInputClass, "text-xl font-black py-4")}
                       placeholder="مثال: کارت ویزیت لمینت براق"
                   />
                   <FormError message={errors.shell?.name?.message} />
               </div>
 
-              {/* دسته بندی - مرحله ۱: والد */}
-              <div className="form-control">
-                  <label className="label text-sm font-bold text-slate-700 mb-1">۱. گروه اصلی</label>
+              {/* دسته بندی - والد */}
+              <div className="group">
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2 transition-colors group-focus-within:text-primary">۱. گروه اصلی</label>
                   <select 
-                     className="select select-lg select-bordered w-full rounded-2xl bg-white text-base"
+                     className={clsx(underlineInputClass, "text-base font-bold text-slate-700 cursor-pointer")}
                      onChange={handleParentChange}
                      value={selectedParentId || ''}
                   >
-                      <option value="">-- انتخاب گروه --</option>
+                      <option value="" className="text-slate-400">-- انتخاب گروه --</option>
                       {parentCategories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                   </select>
               </div>
 
-              {/* دسته بندی - مرحله ۲: فرزند */}
-              <div className="form-control">
-                  <label className="label text-sm font-bold text-slate-700 mb-1">
+              {/* دسته بندی - فرزند */}
+              <div className="group relative">
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2 transition-colors group-focus-within:text-primary flex items-center gap-2">
                       ۲. زیر دسته (محصول نهایی) <span className="text-error">*</span>
-                      {isLoadingChildren && <span className="loading loading-spinner loading-xs mr-2 text-primary"></span>}
+                      {isLoadingChildren && <span className="loading loading-spinner loading-xs text-primary"></span>}
                   </label>
                   <select 
                      {...register('shell.category_id')} 
-                     className="select select-lg select-bordered w-full rounded-2xl bg-white text-base"
+                     className={clsx(underlineInputClass, "text-base font-bold text-slate-700 cursor-pointer")}
                      disabled={!selectedParentId}
                   >
-                      <option value="">
+                      <option value="" className="text-slate-400">
                           {selectedParentId ? '-- انتخاب کنید --' : 'ابتدا گروه را انتخاب کنید'}
                       </option>
                       {parentDetails?.children?.map(child => (
@@ -270,162 +270,175 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
               </div>
 
               {/* توضیحات */}
-              <div className="form-control md:col-span-2">
-                  <label className="label text-sm font-bold text-slate-700 mb-1">توضیحات</label>
+              <div className="md:col-span-2 group">
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2 transition-colors group-focus-within:text-primary">توضیحات محصول</label>
                   <textarea 
                       {...register('shell.description')}
-                      className="textarea textarea-bordered h-24 rounded-2xl bg-slate-50 text-base"
+                      className="w-full bg-slate-50/50 border-b-2 border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-primary focus:bg-white focus:outline-none transition-all duration-300 rounded-t-2xl resize-none h-28"
+                      placeholder="توضیحاتی که مشتری در صفحه محصول می‌بیند..."
                   ></textarea>
               </div>
 
-              <div className="form-control md:col-span-2 bg-slate-50 p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-end">
-                   <div className="w-full">
-                        <label className="label text-xs font-bold text-slate-500 mb-1">متن راهنما (مثل: زمان تحویل)</label>
-                        <div className="flex gap-2">
-                            <input {...register('shell.guide_text')} className="input input-bordered w-full bg-white"/>
+              {/* تنظیمات اضافی */}
+              <div className="md:col-span-2 bg-slate-50/80 p-6 rounded-2xl flex flex-col md:flex-row gap-8 items-end border border-slate-100/50">
+                   <div className="w-full group">
+                        <label className="block text-xs font-bold text-slate-500 mb-2">متن راهنما (مثل: زمان تحویل)</label>
+                        <div className="flex gap-4 items-end">
+                            <input {...register('shell.guide_text')} className={clsx(underlineInputClass, "flex-1")} placeholder="مثال: تحویل ۳ روز کاری"/>
                             <GuideTypeSelector register={register} name="shell.guide_type" />
                         </div>
                    </div>
-                   <div className="form-control min-w-[150px]">
-                       <label className="cursor-pointer label justify-start gap-3">
-                           <input type="checkbox" {...register('shell.is_active')} className="toggle toggle-success" />
-                           <span className="label-text font-bold text-slate-700">محصول فعال</span>
+                   <div className="min-w-[180px]">
+                       <label className="cursor-pointer flex items-center gap-4 bg-white px-5 py-3 rounded-xl shadow-sm border border-slate-100 hover:border-primary/30 transition-all">
+                           <input type="checkbox" {...register('shell.is_active')} className="toggle toggle-success toggle-md" />
+                           <span className="font-bold text-slate-700 text-sm">محصول فعال</span>
                        </label>
                    </div>
               </div>
           </div>
       </div>
 
-      {/* === CARD 2: Pricing Strategy === */}
-      <div className="card bg-white shadow-xl shadow-slate-200/40 border border-slate-100 p-8 rounded-[2rem]">
-          <SectionTitle icon={Calculator} title="استراتژی قیمت‌گذاری" desc="نحوه محاسبه قیمت برای مشتری" />
+      {/* === STEP 2: Pricing Strategy === */}
+      <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 border border-white p-8 md:p-10 rounded-[2rem] transition-all hover:shadow-primary/5">
+          <SectionTitle step="2" icon={Calculator} title="استراتژی قیمت‌گذاری" desc="نحوه فروش و محاسبه قیمت برای این محصول" />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+               {/* کارت انتخاب تیراژی */}
                <div 
                   onClick={() => setValue('shell.has_quantity', true)}
                   className={clsx(
-                      "cursor-pointer rounded-3xl p-6 border-2 transition-all flex items-center gap-4",
-                      hasQuantity ? "border-blue-500 bg-blue-50" : "border-slate-100 bg-white"
+                      "cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300 flex items-start gap-5 relative overflow-hidden group",
+                      hasQuantity ? "border-primary bg-primary/5 shadow-md shadow-primary/10" : "border-slate-100 bg-white hover:border-slate-300 hover:bg-slate-50"
                   )}
                >
-                   <div className={clsx("p-3 rounded-xl", hasQuantity ? "bg-blue-500 text-white" : "bg-slate-100 text-slate-400")}>
+                   {hasQuantity && <div className="absolute top-0 right-0 w-16 h-16 bg-primary/10 rounded-bl-full -z-10 transition-transform group-hover:scale-150"></div>}
+                   {hasQuantity && <CheckCircle2 size={24} className="absolute top-4 left-4 text-primary animate-in zoom-in" />}
+                   
+                   <div className={clsx("p-4 rounded-xl transition-colors", hasQuantity ? "bg-primary text-white shadow-lg shadow-primary/30" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200")}>
                        <Printer size={28} />
                    </div>
-                   <div>
-                       <h4 className={clsx("font-bold text-lg", hasQuantity ? "text-blue-700" : "text-slate-600")}>تیراژی (پکی)</h4>
-                       <p className="text-xs text-slate-500 mt-1">مثل کارت ویزیت (۱۰۰۰تایی، ۲۰۰۰تایی)</p>
+                   <div className="pt-1">
+                       <h4 className={clsx("font-black text-lg mb-1", hasQuantity ? "text-primary" : "text-slate-700")}>تیراژی (پکی)</h4>
+                       <p className="text-sm text-slate-500 font-medium leading-relaxed">مثل کارت ویزیت یا تراکت (بسته‌های ۱۰۰۰تایی، ۲۰۰۰تایی)</p>
                    </div>
                </div>
 
+               {/* کارت انتخاب تعدادی/متری */}
                <div 
                   onClick={() => setValue('shell.has_quantity', false)}
                   className={clsx(
-                      "cursor-pointer rounded-3xl p-6 border-2 transition-all flex items-center gap-4",
-                      !hasQuantity ? "border-emerald-500 bg-emerald-50" : "border-slate-100 bg-white"
+                      "cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300 flex items-start gap-5 relative overflow-hidden group",
+                      !hasQuantity ? "border-emerald-500 bg-emerald-50/50 shadow-md shadow-emerald-500/10" : "border-slate-100 bg-white hover:border-slate-300 hover:bg-slate-50"
                   )}
                >
-                   <div className={clsx("p-3 rounded-xl", !hasQuantity ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400")}>
+                   {!hasQuantity && <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-bl-full -z-10 transition-transform group-hover:scale-150"></div>}
+                   {!hasQuantity && <CheckCircle2 size={24} className="absolute top-4 left-4 text-emerald-500 animate-in zoom-in" />}
+
+                   <div className={clsx("p-4 rounded-xl transition-colors", !hasQuantity ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200")}>
                        <MousePointerClick size={28} />
                    </div>
-                   <div>
-                       <h4 className={clsx("font-bold text-lg", !hasQuantity ? "text-emerald-700" : "text-slate-600")}>تعدادی / متری</h4>
-                       <p className="text-xs text-slate-500 mt-1">مثل بنر یا ریسو (تعداد دلخواه مشتری)</p>
+                   <div className="pt-1">
+                       <h4 className={clsx("font-black text-lg mb-1", !hasQuantity ? "text-emerald-700" : "text-slate-700")}>تعدادی / متری</h4>
+                       <p className="text-sm text-slate-500 font-medium leading-relaxed">مثل بنر، استیکر یا کارهای سفارشی (تعداد دلخواه مشتری)</p>
                    </div>
                </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
-              <div className="form-control">
-                  <label className="label text-sm font-bold text-slate-700">قیمت پایه (تومان)</label>
-                  <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 rounded-[1.5rem] bg-gradient-to-br from-slate-50 to-white border border-slate-100/80 shadow-inner">
+              <div className="group">
+                  <label className="block text-sm font-extrabold text-slate-800 mb-3">قیمت پایه (تومان)</label>
+                  <div className="relative flex items-center">
                       <input 
                           {...register('shell.price')}
-                          className="input input-lg input-bordered w-full pl-10 font-mono text-xl font-bold text-emerald-600 dir-ltr bg-white"
+                          className={clsx(underlineInputClass, "pl-12 font-mono text-2xl font-black text-emerald-600 dir-ltr")}
                           placeholder="0"
                       />
-                      <DollarSign className="absolute left-3 top-4 text-emerald-500" size={20}/>
+                      <DollarSign className="absolute left-2 text-emerald-400 group-focus-within:text-emerald-600 transition-colors" size={24}/>
                   </div>
                   <FormError message={errors.shell?.price?.message} />
               </div>
 
-              {/* <div className="form-control">
-                  <label className="label text-sm font-bold text-slate-700">هزینه ثابت (Setup)</label>
-                  <input 
-                      type="number" {...register('pricing_config.base_setup_price')}
-                      className="input input-lg input-bordered w-full font-mono dir-ltr bg-white"
-                  />
-              </div> */}
-
               {!hasQuantity && (
-                  <div className="form-control">
-                      <label className="label text-sm font-bold text-slate-700">محدوده تعداد سفارش</label>
-                      <div className="flex gap-2">
-                          <input type="number" {...register('pricing_config.min_quantity')} className="input input-lg input-bordered w-full bg-white text-center" placeholder="Min"/>
-                          <input type="number" {...register('pricing_config.max_quantity')} className="input input-lg input-bordered w-full bg-white text-center" placeholder="Max"/>
+                  <div className="md:col-span-2 group">
+                      <label className="block text-sm font-extrabold text-slate-800 mb-3">محدوده تعداد سفارش (حداقل و حداکثر)</label>
+                      <div className="flex items-center gap-4">
+                          <input type="number" {...register('pricing_config.min_quantity')} className={clsx(underlineInputClass, "text-center font-mono text-lg")} placeholder="حداقل (Min)"/>
+                          <span className="text-slate-300 font-light">تا</span>
+                          <input type="number" {...register('pricing_config.max_quantity')} className={clsx(underlineInputClass, "text-center font-mono text-lg")} placeholder="حداکثر (Max)"/>
                       </div>
                   </div>
               )}
           </div>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
-               <div className="flex items-center gap-3">
-                   <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Palette size={20}/></div>
-                   <h5 className="font-bold text-slate-800 text-sm">امکان سفارش طراحی آنلاین دارد؟</h5>
+          <div className="mt-8 pt-6 flex flex-wrap items-center justify-between gap-6">
+               <div className="flex items-center gap-4 bg-purple-50/50 px-5 py-3 rounded-2xl border border-purple-100">
+                   <div className="p-2.5 bg-purple-100 text-purple-600 rounded-xl shadow-sm"><Palette size={20}/></div>
+                   <h5 className="font-extrabold text-slate-800 text-sm">امکان سفارش طراحی آنلاین دارد؟</h5>
                </div>
-               <div className="flex items-center gap-4">
-                   <input type="checkbox" {...register('pricing_config.design_service_available')} className="toggle toggle-primary" />
+               <div className="flex items-center gap-6 bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100">
+                   <input type="checkbox" {...register('pricing_config.design_service_available')} className="toggle toggle-primary toggle-md" />
                    {designAvailable && (
-                       <input type="number" {...register('pricing_config.design_fee')} className="input input-bordered input-sm w-36" placeholder="هزینه طراحی"/>
+                       <div className="relative animate-in slide-in-from-right-4 fade-in">
+                           <input type="number" {...register('pricing_config.design_fee')} className={clsx(underlineInputClass, "w-40 font-mono text-center text-primary font-bold")} placeholder="هزینه طراحی"/>
+                       </div>
                    )}
                </div>
           </div>
       </div>
 
-      {/* === CARD 3: Sizes & Quantities === */}
+      {/* === STEP 3: Sizes & Quantities === */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           
           {/* Sizes */}
-          <div className="card bg-white shadow-xl p-8 rounded-[2rem] border border-slate-100">
-              <div className="flex justify-between items-center mb-6">
-                  <SectionTitle icon={Ruler} title="سایزهای محصول" />
-                  <button type="button" onClick={() => appendSize({ id: "", price_impact: 0 })} className="btn btn-primary btn-sm btn-outline">
-                     <Plus size={16}/> افزودن
+          <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 p-8 md:p-10 rounded-[2rem] border border-white hover:shadow-primary/5 transition-all flex flex-col h-full">
+              <div className="flex justify-between items-start mb-6">
+                  <SectionTitle step={hasQuantity ? "3" : "3"} icon={Ruler} title="سایزهای مجاز" desc="ابعاد قابل انتخاب برای مشتری" />
+                  <button type="button" onClick={() => appendSize({ id: "", price_impact: 0 })} className="btn btn-primary btn-sm rounded-full shadow-lg shadow-primary/20 hover:scale-105 mt-2 px-6">
+                     <Plus size={16}/> سایز جدید
                   </button>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 flex-1">
                   {sizeFields.map((field, index) => (
-                      <div key={field.id} className="p-4 bg-slate-50 rounded-2xl flex flex-col gap-3 relative group hover:bg-slate-100 transition-colors">
-                          <button onClick={() => removeSize(index)} className="btn btn-xs btn-circle btn-error absolute -top-2 -left-2 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12}/></button>
+                      <div key={field.id} className="p-5 bg-slate-50/80 rounded-2xl flex flex-col gap-4 relative group hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-slate-200">
+                          <button onClick={() => removeSize(index)} className="absolute -top-3 -left-3 w-8 h-8 bg-error text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-md hover:scale-110"><Trash2 size={14}/></button>
                           
-                          <div className="flex gap-3">
-                              <select {...register(`sizes.${index}.id`)} className="select select-bordered w-full bg-white font-bold text-sm">
-                                  <option value="">انتخاب سایز...</option>
+                          <div className="flex gap-5">
+                              <select {...register(`sizes.${index}.id`)} className={clsx(underlineInputClass, "font-bold text-sm cursor-pointer")}>
+                                  <option value="" className="text-slate-400">انتخاب سایز از سیستم...</option>
                                   {standardSizes.map(s => <option key={s.id} value={s.id}>{s.name} ({s.width}×{s.height})</option>)}
                               </select>
-                              <input type="number" {...register(`sizes.${index}.price_impact`)} className="input input-bordered w-1/3 font-mono text-emerald-600 bg-white text-sm" placeholder="+ قیمت" />
+                              <div className="relative w-1/3">
+                                  <input type="number" {...register(`sizes.${index}.price_impact`)} className={clsx(underlineInputClass, "font-mono text-emerald-600 font-bold pl-8")} placeholder="+ افزایش قیمت" />
+                                  <span className="absolute left-1 top-3 text-[10px] text-slate-400">IQD</span>
+                              </div>
                           </div>
                           
-                          <div className="flex gap-2">
-                              <input {...register(`sizes.${index}.guide_text`)} className="input input-xs input-bordered w-full bg-white" placeholder="راهنما"/>
+                          <div className="flex gap-4">
+                              <input {...register(`sizes.${index}.guide_text`)} className={clsx(underlineInputClass, "text-xs")} placeholder="متن راهنمای این سایز (اختیاری)"/>
                               <GuideTypeSelector register={register} name={`sizes.${index}.guide_type`} />
                           </div>
                       </div>
                   ))}
-                  {sizeFields.length === 0 && <div className="text-center text-xs text-slate-400 py-4">سایزی تعریف نشده است</div>}
+                  {sizeFields.length === 0 && (
+                      <div className="h-full min-h-[150px] flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                          <Ruler size={32} className="mb-2 opacity-50"/>
+                          <span className="text-sm font-medium">سایزی تعریف نشده است</span>
+                      </div>
+                  )}
               </div>
           </div>
 
           {/* Quantities */}
-          {hasQuantity && (
-              <div className="card bg-white shadow-xl p-8 rounded-[2rem] border border-slate-100">
-                  <div className="flex justify-between items-center mb-6">
-                      <SectionTitle icon={Hash} title="تیراژهای مجاز" />
-                      <div className="w-40">
+          {hasQuantity ? (
+              <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 p-8 md:p-10 rounded-[2rem] border border-white hover:shadow-primary/5 transition-all flex flex-col h-full animate-in fade-in slide-in-from-bottom-4">
+                  <div className="flex justify-between items-start mb-6">
+                      <SectionTitle step="4" icon={Hash} title="تیراژهای مجاز" desc="تعدادهای قابل سفارش (پک)" />
+                      <div className="w-48 mt-2 relative">
                            <select 
-                                className="select select-bordered select-sm w-full font-bold" 
+                                className="w-full bg-primary/10 text-primary border-none rounded-full px-4 py-2 font-bold text-sm cursor-pointer outline-none hover:bg-primary/20 transition-colors appearance-none text-center"
                                 onChange={handleAddQuantity}
                            >
-                               <option value="">+ افزودن...</option>
+                               <option value="">+ افزودن تیراژ جدید...</option>
                                {systemQuantities.map((q) => (
                                    <option key={q.id} value={q.id}>{Number(q.value).toLocaleString()} عدد</option>
                                ))}
@@ -433,37 +446,48 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                       </div>
                   </div>
 
-                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                  <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar flex-1">
                       {qtyFields.map((field, index) => {
                          const rowId = watch(`quantities.${index}.id`);
                          const foundQty = systemQuantities.find(q => String(q.id) === String(rowId));
                          const displayValue = foundQty ? Number(foundQty.value).toLocaleString() : '---';
                          
                          return (
-                              <div key={field.id} className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm relative group">
-                                  <button onClick={() => removeQty(index)} className="btn btn-xs btn-circle btn-ghost text-error absolute top-2 left-2 opacity-0 group-hover:opacity-100"><Trash2 size={14}/></button>
+                              <div key={field.id} className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm relative group hover:shadow-md hover:border-primary/30 transition-all">
+                                  <button onClick={() => removeQty(index)} className="absolute top-1/2 -translate-y-1/2 left-4 w-8 h-8 text-slate-300 hover:bg-error hover:text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={16}/></button>
                                   
-                                  <div className="flex justify-between items-center mb-2">
-                                      <span className="font-black text-lg text-slate-800">{displayValue} <span className="text-xs text-slate-400">عدد</span></span>
-                                  </div>
-                                  <div className="flex gap-2">
-                                      <input {...register(`quantities.${index}.guide_text`)} className="input input-xs input-bordered w-full bg-slate-50" placeholder="برچسب"/>
-                                      <GuideTypeSelector register={register} name={`quantities.${index}.guide_type`} />
+                                  <div className="flex flex-col gap-3 pr-2">
+                                      <span className="font-black text-2xl text-slate-800 tracking-tight">{displayValue} <span className="text-sm font-bold text-slate-400">عدد</span></span>
+                                      
+                                      <div className="flex gap-4 border-t border-slate-50 pt-3">
+                                          <input {...register(`quantities.${index}.guide_text`)} className={clsx(underlineInputClass, "text-xs py-1")} placeholder="برچسب (مثل: پیشنهاد ویژه)"/>
+                                          <GuideTypeSelector register={register} name={`quantities.${index}.guide_type`} />
+                                      </div>
                                   </div>
                               </div>
                          );
                       })}
-                      {qtyFields.length === 0 && <div className="text-center text-xs text-slate-400 py-4">لیست تیراژ خالی است</div>}
+                      {qtyFields.length === 0 && (
+                          <div className="h-full min-h-[150px] flex flex-col items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+                              <Hash size={32} className="mb-2 opacity-50"/>
+                              <span className="text-sm font-medium">لیست تیراژ خالی است</span>
+                          </div>
+                      )}
                   </div>
               </div>
+          ) : (
+              <div className="hidden xl:block"></div> /* Empty div to keep grid layout clean if quantities are hidden */
           )}
       </div>
 
-      <div className="sticky bottom-4 z-50 flex justify-end">
-         <button type="submit" disabled={isSaving} className="btn btn-primary h-14 px-10 rounded-full shadow-2xl shadow-primary/30 text-lg font-bold hover:scale-105 active:scale-95 transition-all">
-            {isSaving ? <span className="loading loading-spinner"></span> : <Save size={22}/>}
-            {isEditMode ? 'ذخیره تغییرات' : 'ثبت و مرحله بعد'}
-         </button>
+      {/* === Footer Actions (Glassmorphism) === */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex justify-center w-full px-6 pointer-events-none">
+         <div className="bg-white/80 backdrop-blur-md p-3 rounded-full shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] border border-white/50 pointer-events-auto">
+             <button type="submit" disabled={isSaving} className="btn btn-primary h-14 px-12 rounded-full shadow-lg shadow-primary/40 text-lg font-black hover:scale-[1.02] active:scale-95 transition-all gap-3 border-none">
+                {isSaving ? <span className="loading loading-spinner"></span> : <Save size={24}/>}
+                {isEditMode ? 'ذخیره تغییرات' : 'ثبت و مرحله بعد'}
+             </button>
+         </div>
       </div>
     </form>
   );
