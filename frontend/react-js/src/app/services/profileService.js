@@ -34,7 +34,7 @@ export const profileService = {
   getOrderDetails: async (orderId) => {
     // طبق مستندات جدید: /api/v1/dashboard/orders/{id}/
     // فرض بر این است که baseURL در apiClient تنظیم شده است
-    const response = await apiClient.get(`/dashboard/orders/${orderId}/`);
+    const response = await apiClient.get(`/profile/orders/${orderId}/`);
     return response.data;
   },
 

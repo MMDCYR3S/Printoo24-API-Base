@@ -50,7 +50,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   // --- 1. Master Data ---
   const { data: parentCategories = [] } = useQuery({
     queryKey: ['admin-parent-categories'],
-    queryFn: () => adminCategoryService.getAll(),
+    queryFn: () => adminCategoryService.getRoots(),
   });
 
   const { data: standardSizes = [] } = useQuery({
