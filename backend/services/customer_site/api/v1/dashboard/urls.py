@@ -24,6 +24,7 @@ from .views import (
     ProductImageViewSet,
     InvoiceViewSet,
     QuotationViewSet,
+    StaffViewSet
 )
 
 router = DefaultRouter()
@@ -46,6 +47,7 @@ router.register(r'orders', OrderDashboardViewSet, basename='orders')
 router.register(r'sliders', SliderDashboardViewSet, basename='sliders')
 router.register(r'provinces', ProvinceDashboardViewSet, basename='provinces')
 router.register(r'cities', CityDashboardViewSet, basename='cities')
+router.register(r'staffs', StaffViewSet, basename='staff')
 
 app_name = "dashboard"
 

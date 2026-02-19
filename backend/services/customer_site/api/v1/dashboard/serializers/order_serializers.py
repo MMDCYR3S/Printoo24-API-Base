@@ -129,8 +129,15 @@ class AdminOrderCreateSerializer(serializers.Serializer):
     """
     user_id = serializers.IntegerField()
     items = serializers.ListField(child=CartItemAddSimpleSerializer())
-    price = serializers.DecimalField(max_digits=14, decimal_places=0, required=False, allow_null=True)
-    
+
+    total_price = serializers.DecimalField(
+        max_digits=18, 
+        decimal_places=0, 
+        required=False, 
+        allow_null=True,
+        help_text="اگر وارد شود، قیمت محاسبه شده‌ی آیتم‌ها نادیده گرفته شده و این مبلغ به عنوان فاکتور ثبت می‌شود."
+    )
+
     # ===== فیلدهای آدرس و گیرنده ===== #
     address_id = serializers.IntegerField(required=False, allow_null=True)
     full_address = serializers.CharField(required=False, allow_blank=True, allow_null=True)
@@ -150,6 +157,13 @@ class AdminOrderCreateSerializer(serializers.Serializer):
 class AdminOrderUpdateSerializer(serializers.Serializer):
     address_id = serializers.IntegerField(required=False)
     type = serializers.ChoiceField(choices=Order.ORDER_TYPE, required=False)
+
+    total_price = serializers.DecimalField(
+        max_digits=18, 
+        decimal_places=0, 
+        required=False, 
+        allow_null=True
+    )
 
 # ===== سریالایزر نمایش لیست وضعیت‌ها (برای دراپ‌داون) ===== #
 class OrderStatusListSerializer(serializers.ModelSerializer):
