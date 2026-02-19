@@ -49,7 +49,7 @@ class WalletQuerySet(BaseQuerySet):
         """
         wallet, _ = self.select_for_update().get_or_create(
             user=user,
-            defaults={'decimal': 0}
+            defaults={'balance': 0}
         )
         return wallet
 
