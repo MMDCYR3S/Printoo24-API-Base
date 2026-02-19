@@ -106,22 +106,23 @@ const OrderWizard = ({ productData, state, setters }) => {
         </div>
 
         {quantities?.length > 0 ? (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-            {quantities.map(qty => (
-              <button
-                key={qty.id}
-                onClick={() => setters.setSelectedQuantityId(qty.id)}
-                className={clsx(
-                  "py-3 px-2 rounded-xl border-2 text-center transition-all",
-                  state.selectedQuantityId == qty.id
-                    ? "border-primary bg-primary text-white shadow-lg shadow-primary/30 font-bold scale-105"
-                    : "border-slate-100 bg-white text-slate-600 hover:border-primary/30"
-                )}
-              >
-                {parseInt(qty.quantity).toLocaleString()} <span className="text-[10px] opacity-80">عدد</span>
-              </button>
-            ))}
-          </div>
+<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+  {quantities.map(qty => (
+    <button
+      key={qty.id}
+      onClick={() => setters.setSelectedQuantityId(qty.id)}
+      className={clsx(
+        "py-3 px-2 rounded-xl border-2 text-center transition-all",
+        state.selectedQuantityId == qty.id
+          ? "border-primary bg-primary text-white shadow-lg shadow-primary/30 font-bold scale-105"
+          : "border-slate-100 bg-white text-slate-600 hover:border-primary/30"
+      )}
+    >
+      {/* 🔴 این خط آپدیت شد تا جلوی NaN را بگیرد */}
+      {(Number(qty.quantity) || 0).toLocaleString()} <span className="text-[10px] opacity-80">عدد</span>
+    </button>
+  ))}
+</div>
         ) : (
           <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl max-w-md">
             <button 

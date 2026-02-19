@@ -5,50 +5,44 @@ import {
 } from 'lucide-react';
 import { useOrderCreate } from '../../hooks/useOrderCreate';
 import { useCustomers } from '../../hooks/useCustomers';
-import { useAdminProducts } from '../../hooks/useAdminProducts'; // فرض بر اینکه لیست محصولات رو داریم
+import { useAdminProducts } from '../../hooks/useAdminProducts'; 
 import { formatPrice } from '../../utils/formatPrice';
 import { MapPin } from 'lucide-react';
 
 const OrderCreatePage = () => {
   const { 
-    
     step, totalSteps, nextStep, prevStep, 
     selectedUser, setSelectedUser, 
     cartItems, setCartItems, 
-    submitOrder, isSubmitting, calculateTotal , userDetails,          // اضافه شده
-    selectedAddressId,    // اضافه شده
-    setSelectedAddressId  // اضافه شده
+    submitOrder, isSubmitting, calculateTotal , userDetails,          
+    selectedAddressId,    
+    setSelectedAddressId  
   } = useOrderCreate();
 
   return (
     <div className="p-6 max-w-5xl mx-auto pb-24">
       <h1 className="text-2xl font-black text-slate-800 mb-8">ثبت سفارش جدید</h1>
 
-      {/* --- Steps Indicator --- */}
       <ul className="steps w-full mb-10">
         <li className={`step ${step >= 1 ? 'step-primary' : ''}`}>انتخاب مشتری</li>
         <li className={`step ${step >= 2 ? 'step-primary' : ''}`}>افزودن محصولات</li>
         <li className={`step ${step >= 3 ? 'step-primary' : ''}`}>تایید و ثبت</li>
       </ul>
 
-      {/* --- Step Content --- */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm min-h-[400px] p-6 relative">
         
-{/* Step 1: Customer & Address Selection */}
         {step === 1 && (
           <StepCustomerSelection 
             selectedUser={selectedUser} 
             onSelect={setSelectedUser}
-            userDetails={userDetails}             // پاس دادن جزئیات
-            selectedAddressId={selectedAddressId} // پاس دادن آدرس انتخاب شده
-            onSelectAddress={setSelectedAddressId} // هندلر انتخاب آدرس
+            userDetails={userDetails}             
+            selectedAddressId={selectedAddressId} 
+            onSelectAddress={setSelectedAddressId} 
           />
         )}
 
-        {/* Step 2: Add Products */}
         {step === 2 && <StepProductSelection cartItems={cartItems} setCartItems={setCartItems} />}
 
-        {/* Step 3: Review */}
         {step === 3 && (
           <div className="text-center space-y-6 py-10">
             <CheckCircle size={64} className="text-emerald-500 mx-auto" />
@@ -75,7 +69,6 @@ const OrderCreatePage = () => {
 
       </div>
 
-      {/* --- Navigation Buttons --- */}
       <div className="flex justify-between mt-6">
         <button 
           onClick={prevStep} 
@@ -103,7 +96,7 @@ const OrderCreatePage = () => {
   );
 };
 
-// --- Sub-Components (Internal) ---
+// --- Sub-Components ---
 
 const StepCustomerSelection = ({ selectedUser, onSelect, userDetails, selectedAddressId, onSelectAddress }) => {
   const [term, setTerm] = useState('');
@@ -116,14 +109,14 @@ const StepCustomerSelection = ({ selectedUser, onSelect, userDetails, selectedAd
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       
-      {/* ستون راست: جستجوی کاربر */}
       <div className="space-y-4">
         <h3 className="font-bold border-b pb-2">۱. انتخاب مشتری</h3>
-        <div className="form-control">
+        <div className="form-control relative">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text" 
-            className="input input-bordered w-full" 
-            placeholder="جستجو (نام، موبایل)..."
+            className="input input-bordered w-full pl-10" 
+            placeholder="جستجوی مشتری (نام، موبایل)..."
             value={term}
             onChange={e => setTerm(e.target.value)}
           />
@@ -145,7 +138,6 @@ const StepCustomerSelection = ({ selectedUser, onSelect, userDetails, selectedAd
         </div>
       </div>
 
-      {/* ستون چپ: نمایش آدرس‌ها (فقط وقتی کاربر انتخاب شد) */}
       <div className="space-y-4">
         <h3 className="font-bold border-b pb-2 opacity-50" style={{ opacity: selectedUser ? 1 : 0.5 }}>
           ۲. انتخاب آدرس ارسال
@@ -178,7 +170,6 @@ const StepCustomerSelection = ({ selectedUser, onSelect, userDetails, selectedAd
             ) : (
               <div className="alert alert-warning text-sm">
                 <span>⚠️ این کاربر هیچ آدرسی ثبت نکرده است!</span>
-                {/* اینجا در آینده میشه دکمه "افزودن آدرس" گذاشت */}
               </div>
             )}
           </div>
@@ -190,14 +181,20 @@ const StepCustomerSelection = ({ selectedUser, onSelect, userDetails, selectedAd
 };
 
 const StepProductSelection = ({ cartItems, setCartItems }) => {
-  // دریافت لیست کامل + وضعیت لودینگ
   const { allProducts, isLoading } = useAdminProducts(); 
   const [selectedProduct, setSelectedProduct] = useState(null);
   
-  // فرم افزودن آیتم
+  // استیت جستجوی محصول
+  const [searchTerm, setSearchTerm] = useState('');
+  
   const [qty, setQty] = useState(1);
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
+
+  // فیلتر کردن محصولات بر اساس جستجو
+  const filteredProducts = allProducts?.filter(p => 
+    p.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
 
   const handleAddItem = () => {
     if (!selectedProduct) return;
@@ -210,8 +207,8 @@ const StepProductSelection = ({ cartItems, setCartItems }) => {
     };
     setCartItems([...cartItems, newItem]);
     
-    // ریست فرم
     setSelectedProduct(null);
+    setSearchTerm('');
     setQty(1);
     setWidth('');
     setHeight('');
@@ -223,44 +220,53 @@ const StepProductSelection = ({ cartItems, setCartItems }) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* بخش فرم افزودن */}
+      
+      {/* فرم افزودن محصول */}
       <div className="space-y-4 border-l pl-6 border-slate-100">
         <h3 className="font-bold flex items-center gap-2"><Plus size={18}/> افزودن محصول</h3>
         
-        {/* انتخاب محصول با هندل کردن لودینگ */}
-        <div className="form-control">
-          <label className="label text-xs">انتخاب محصول</label>
-          <select 
-            className="select select-bordered w-full"
-            onChange={(e) => {
-              // چون value رشته است، با == مقایسه می‌کنیم یا تبدیل به عدد می‌کنیم
-              const prod = allProducts?.find(p => p.id == e.target.value);
-              setSelectedProduct(prod || null);
-            }}
-            value={selectedProduct?.id || ''}
-            disabled={isLoading} // غیرفعال هنگام لود
-          >
-            <option value="">
-              {isLoading ? 'در حال دریافت لیست محصولات...' : '-- انتخاب کنید --'}
-            </option>
-            
-            {/* استفاده از allProducts به جای products */}
-            {!isLoading && allProducts?.map(p => (
-              <option key={p.id} value={p.id}>
-                {p.name} ({new Intl.NumberFormat('fa-IQ').format(p.price)} IQD)
-              </option>
-            ))}
-          </select>
+        {/* اینپوت جستجوی محصول مستقیم */}
+        <div className="form-control relative">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input 
+            type="text" 
+            className="input input-bordered w-full pl-10" 
+            placeholder="جستجوی نام محصول..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            disabled={isLoading}
+          />
         </div>
 
-        {/* نمایش فیلدهای سایز فقط وقتی محصول انتخاب شد */}
+        {/* لیست محصولات مشابه لیست مشتریان */}
+        <div className="max-h-48 overflow-y-auto border rounded-xl divide-y bg-slate-50">
+          {isLoading ? (
+            <div className="p-4 text-center text-sm text-slate-400">در حال دریافت محصولات...</div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="p-4 text-center text-sm text-slate-400">محصولی یافت نشد</div>
+          ) : (
+            filteredProducts.map(p => (
+              <div 
+                key={p.id} 
+                onClick={() => setSelectedProduct(p)}
+                className={`p-3 cursor-pointer hover:bg-white flex justify-between items-center transition-colors ${selectedProduct?.id === p.id ? 'bg-primary/10 border-r-4 border-primary' : ''}`}
+              >
+                <div className="text-sm font-bold text-slate-700">{p.name}</div>
+                <div className="text-xs text-slate-500 dir-ltr bg-slate-100 px-2 py-1 rounded">
+                  {new Intl.NumberFormat('fa-IQ').format(p.price)} IQD
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
         {selectedProduct && (
-          <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl animate-in fade-in slide-in-from-top-2">
+          <div className="grid grid-cols-3 gap-2 bg-slate-50 border border-primary/20 p-3 rounded-xl animate-in fade-in slide-in-from-top-2">
             <div className="form-control">
               <label className="label text-[10px]">تعداد</label>
               <input 
                 type="number" 
-                className="input input-sm input-bordered text-center" 
+                className="input input-sm input-bordered text-center focus:border-primary" 
                 value={qty} 
                 onChange={e => setQty(Number(e.target.value))}
                 min={1}
@@ -268,11 +274,11 @@ const StepProductSelection = ({ cartItems, setCartItems }) => {
             </div>
             <div className="form-control">
               <label className="label text-[10px]">عرض (cm)</label>
-              <input type="number" className="input input-sm input-bordered text-center" value={width} onChange={e => setWidth(Number(e.target.value))} placeholder="اختیاری"/>
+              <input type="number" className="input input-sm input-bordered text-center focus:border-primary" value={width} onChange={e => setWidth(Number(e.target.value))} placeholder="اختیاری"/>
             </div>
             <div className="form-control">
               <label className="label text-[10px]">ارتفاع (cm)</label>
-              <input type="number" className="input input-sm input-bordered text-center" value={height} onChange={e => setHeight(Number(e.target.value))} placeholder="اختیاری"/>
+              <input type="number" className="input input-sm input-bordered text-center focus:border-primary" value={height} onChange={e => setHeight(Number(e.target.value))} placeholder="اختیاری"/>
             </div>
           </div>
         )}
@@ -280,7 +286,7 @@ const StepProductSelection = ({ cartItems, setCartItems }) => {
         <button 
           onClick={handleAddItem} 
           disabled={!selectedProduct}
-          className="btn btn-secondary w-full btn-sm"
+          className="btn btn-primary w-full btn-sm shadow-lg shadow-primary/30"
         >
           افزودن به لیست
         </button>
@@ -296,15 +302,15 @@ const StepProductSelection = ({ cartItems, setCartItems }) => {
         ) : (
           <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
             {cartItems.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center bg-white border p-3 rounded-xl shadow-sm">
+              <div key={idx} className="flex justify-between items-center bg-white border border-slate-200 p-3 rounded-xl shadow-sm">
                 <div className="text-sm">
-                  <div className="font-bold">{item.product.name}</div>
-                  <div className="text-xs text-slate-500">
-                    {item.quantity} عدد 
-                    {item.width ? ` | ${item.width}x${item.height} cm` : ''}
+                  <div className="font-bold text-slate-800">{item.product.name}</div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    <span className="bg-slate-100 px-2 py-0.5 rounded">{item.quantity} عدد</span>
+                    {item.width ? <span className="mr-2">| {item.width}x{item.height} cm</span> : ''}
                   </div>
                 </div>
-                <button onClick={() => handleRemoveItem(idx)} className="btn btn-ghost btn-xs text-error btn-square">
+                <button onClick={() => handleRemoveItem(idx)} className="btn btn-ghost btn-xs text-error hover:bg-error/10 btn-square">
                   <Trash2 size={16}/>
                 </button>
               </div>
@@ -315,6 +321,5 @@ const StepProductSelection = ({ cartItems, setCartItems }) => {
     </div>
   );
 };
-
 
 export default OrderCreatePage;
