@@ -4,7 +4,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 
-from core.models import Order
+from core.models import Order, User
 from apps.notification.models import CustomerNotification
 from apps.accounts.models import WalletTransaction
 from .tasks import send_order_status_notification, send_wallet_notification
@@ -82,7 +82,7 @@ def notify_admins_for_new_order(sender, instance, created, **kwargs):
     
     if instance.user:
         sender_user = instance.user
-        sender_name = instance.user.get_full_name() or instance.user.username
+        sender_name = instance.user.customer_profile.fullname() or instance.user.username
         message = f"سفارش جدید با کد '{order_code}' توسط کاربر '{sender_name}' در سیستم ثبت شد."
     else:
         sender_user = None
