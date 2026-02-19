@@ -183,7 +183,7 @@ class ProductPriceCalculator:
         STRAT_INPUT = OptionPricingStrategy.PER_UNIT_INPUT
 
         for val in self.selected_values:
-            if not val.has_pricing:
+            if not val or not getattr(val, 'has_pricing', False):
                 continue
 
             parent_config = val.product_option
