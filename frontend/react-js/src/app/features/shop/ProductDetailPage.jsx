@@ -111,7 +111,10 @@ const ProductDetailPage = () => {
           
           <div className="lg:col-span-4">
              <div className="sticky top-24">
-                <ProductGallery images={data.images} />
+<ProductGallery 
+         images={data.images} 
+         attachments={data.attachments} 
+      />
              </div>
           </div>
 
@@ -141,7 +144,7 @@ const ProductDetailPage = () => {
           </div>
 
           <div className="lg:col-span-3 h-full"> 
-            <div className="sticky top-24 space-y-4 z-20">
+            <div className="sticky top-24 space-y-4  ">
               <div className="bg-white rounded-[24px] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all duration-300">
                 <div className="p-6 bg-slate-900 text-white relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>

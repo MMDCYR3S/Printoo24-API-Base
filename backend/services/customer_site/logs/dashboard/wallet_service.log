@@ -112,3 +112,139 @@ INFO 2026-02-12 12:32:26,492 wallet_service 425 132317465011904 START: Adjust ba
 INFO 2026-02-12 12:32:26,654 wallet_service 425 132317465011904 DEPOSIT SUCCESS: User 3, New Balance: 1106870.00
 INFO 2026-02-12 12:32:34,500 wallet_service 425 132317830084288 START: Adjust balance for User 3. Amount: 8000.00, Type: debit
 INFO 2026-02-12 12:32:34,572 wallet_service 425 132317830084288 DEBIT SUCCESS: User 3, New Balance: 1098870.00
+INFO 2026-02-19 07:28:43,260 wallet_service 170 127619499726528 START: Adjust balance for User 11. Amount: 888888.00, Type: deposit
+ERROR 2026-02-19 07:28:43,281 wallet_service 170 127619499726528 FAILED: Adjust balance for User 11. Error: Invalid field name(s) for model Wallet: 'decimal'.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+apps.accounts.models.Wallet.DoesNotExist: Wallet matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 50, in adjust_balance
+    wallet = self.domain_service.deposit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 30, in deposit
+    wallet = Wallet.objects.get_locked_wallet(user)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/managers.py", line 68, in get_locked_wallet
+    return self.get_queryset().get_locked_wallet(user)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/managers.py", line 50, in get_locked_wallet
+    wallet, _ = self.select_for_update().get_or_create(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 950, in get_or_create
+    params = self._extract_model_params(defaults, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1048, in _extract_model_params
+    raise exceptions.FieldError(
+django.core.exceptions.FieldError: Invalid field name(s) for model Wallet: 'decimal'.
+INFO 2026-02-19 07:28:48,694 wallet_service 170 127619499726528 START: Adjust balance for User 11. Amount: 888888.00, Type: deposit
+ERROR 2026-02-19 07:28:48,706 wallet_service 170 127619499726528 FAILED: Adjust balance for User 11. Error: Invalid field name(s) for model Wallet: 'decimal'.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+apps.accounts.models.Wallet.DoesNotExist: Wallet matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 50, in adjust_balance
+    wallet = self.domain_service.deposit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 30, in deposit
+    wallet = Wallet.objects.get_locked_wallet(user)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/managers.py", line 68, in get_locked_wallet
+    return self.get_queryset().get_locked_wallet(user)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/managers.py", line 50, in get_locked_wallet
+    wallet, _ = self.select_for_update().get_or_create(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 950, in get_or_create
+    params = self._extract_model_params(defaults, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1048, in _extract_model_params
+    raise exceptions.FieldError(
+django.core.exceptions.FieldError: Invalid field name(s) for model Wallet: 'decimal'.
+INFO 2026-02-19 07:28:58,850 wallet_service 170 127619499726528 START: Adjust balance for User 11. Amount: 888888.00, Type: deposit
+ERROR 2026-02-19 07:28:58,863 wallet_service 170 127619499726528 FAILED: Adjust balance for User 11. Error: Invalid field name(s) for model Wallet: 'decimal'.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+apps.accounts.models.Wallet.DoesNotExist: Wallet matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 50, in adjust_balance
+    wallet = self.domain_service.deposit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 30, in deposit
+    wallet = Wallet.objects.get_locked_wallet(user)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/managers.py", line 68, in get_locked_wallet
+    return self.get_queryset().get_locked_wallet(user)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/managers.py", line 50, in get_locked_wallet
+    wallet, _ = self.select_for_update().get_or_create(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 950, in get_or_create
+    params = self._extract_model_params(defaults, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1048, in _extract_model_params
+    raise exceptions.FieldError(
+django.core.exceptions.FieldError: Invalid field name(s) for model Wallet: 'decimal'.
+INFO 2026-02-19 07:29:29,858 wallet_service 170 127619499726528 START: Adjust balance for User 11. Amount: 888888.00, Type: debit
+ERROR 2026-02-19 07:29:29,873 wallet_service 170 127619499726528 FAILED: Adjust balance for User 11. Error: Invalid field name(s) for model Wallet: 'decimal'.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+apps.accounts.models.Wallet.DoesNotExist: Wallet matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/dashboard/services/wallet_service.py", line 54, in adjust_balance
+    wallet = self.domain_service.debit(user, amount)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/services/wallet_service.py", line 56, in debit
+    wallet = Wallet.objects.get_locked_wallet(user)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/managers.py", line 68, in get_locked_wallet
+    return self.get_queryset().get_locked_wallet(user)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/src/apps/accounts/managers.py", line 50, in get_locked_wallet
+    wallet, _ = self.select_for_update().get_or_create(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 950, in get_or_create
+    params = self._extract_model_params(defaults, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1048, in _extract_model_params
+    raise exceptions.FieldError(
+django.core.exceptions.FieldError: Invalid field name(s) for model Wallet: 'decimal'.
