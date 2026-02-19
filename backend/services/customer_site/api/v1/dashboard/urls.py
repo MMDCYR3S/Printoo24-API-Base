@@ -22,9 +22,13 @@ from .views import (
     CityDashboardViewSet,
     ProvinceDashboardViewSet,
     ProductImageViewSet,
+    InvoiceViewSet,
+    QuotationViewSet,
 )
 
 router = DefaultRouter()
+router.register(r'quotations', QuotationViewSet, basename='quotation')
+router.register(r'invoices', InvoiceViewSet, basename='invoice')
 router.register(r'categories', ProductCategoryDashboardViewSet, basename='product_category_dashboard')
 router.register(r'modals', PromotionalModalViewSet, basename='promotional_modal')
 router.register(r'contacts', ContactUsViewSet, basename='contact-us')
