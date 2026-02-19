@@ -62,3 +62,25 @@ class UserOrderListService:
             raise NotFound("سفارش مورد نظر یافت نشد.")
 
         return quotation
+
+    def get_order_invoice(self, user_id: int, order_id: int):
+        """
+        دریافت فاکتور نهایی یک سفارش خاص برای کاربر (فقط در صورت تسویه).
+        """
+        from core.financial.models import Invoice 
+        
+        invoice = Invoice.objects.get_invoice_by_order(order_id)
+
+        if not invoice:
+            logger.warning(f"Invoice not found for order {order_id}")
+            raise NotFound("فاکتوری برای این سفارش یافت نشد.")
+
+        if invoice.order.user_id != user_id:
+            logger.warning(f"Security Alert: User {user_id} tried to access invoice of Order {order_id}")
+            raise NotFound("سفارش مورد نظر یافت نشد.")
+        
+        if not invoice.is_paid:
+            logger.info(f"Invoice for order {order_id} is not fully paid yet.")
+            raise NotFound("فاکتور این سفارش هنوز تسویه کامل نشده است و قابل مشاهده نیست.")
+
+        return invoice

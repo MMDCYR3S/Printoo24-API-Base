@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError, NotFound
 from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.userprofile.services import UserOrderListService
-from ..serializers import OrderWithDetailsSerializer, OrderSerializer, QuotationSerializer
+from ..serializers import OrderWithDetailsSerializer, OrderSerializer, QuotationSerializer, UserInvoiceSerializer
 
 # ===== User Order List APIView ===== #
 @extend_schema(tags=["Profile"])
@@ -181,5 +181,59 @@ class UserOrderQuotationAPIView(APIView):
         except Exception as e:
             return Response(
                 {'detail': 'خطایی در دریافت پیش‌فاکتور رخ داد.', 'error': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+@extend_schema(tags=["Profile"])
+class UserOrderInvoiceAPIView(APIView):
+    """
+    نمایش فاکتور یک سفارش خاص (فقط در صورت تسویه کامل).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._service = UserOrderListService()
+
+    @extend_schema(
+        summary="دریافت فاکتور سفارش",
+        description="این متد فاکتور سفارش را برمی‌گرداند. توجه: فاکتور تنها در صورتی نمایش داده می‌شود که وضعیت آن تسویه کامل (PAID_FULL) یا نهایی شده (FINALIZE) باشد.",
+        responses={200: UserInvoiceSerializer},
+        examples=[
+            OpenApiExample(
+                'Invoice Example',
+                value={
+                    "id": 50,
+                    "invoice_number": "INV-4582-PENDING-CARD-2023",
+                    "items_amount": 2500000,
+                    "services_amount": 0,
+                    "tax_amount": 225000,
+                    "discount_amount": 0,
+                    "final_amount": 2725000,
+                    "paid_amount": 2725000,
+                    "remaining_amount": 0,
+                    "description": "تسویه شده از طریق درگاه پرداخت",
+                    "status": "PAID_FULL",
+                    "status_display": "تسویه کامل",
+                    "issued_at": "2023-11-20T14:00:00Z",
+                    "finalized_at": "2023-11-21T10:00:00Z"
+                }
+            )
+        ]
+    )
+    def get(self, request, order_id):
+        try:
+            # فراخوانی متد جدیدی که در سرویس نوشتیم
+            invoice = self._service.get_order_invoice(request.user.id, order_id)
+            
+            serializer = UserInvoiceSerializer(invoice)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except NotFound as e:
+            # خطای 404 برای زمانی که فاکتور نیست، مال کاربر نیست یا هنوز پرداخت نشده
+            return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(
+                {'detail': 'خطایی در دریافت فاکتور رخ داد.', 'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
