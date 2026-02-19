@@ -95,12 +95,12 @@ const Header = ({ onOpenDrawer }) => {
             
             {/* سبد خرید (همیشه برای همه کاربران نمایش داده می‌شود) */}
             <div className="tooltip tooltip-bottom" data-tip="سبد خرید">
-              <button className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
+              <Link to="/cart" className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
                 <ShoppingCart size={22} />
                 <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-error text-white rounded-full">
                   ۳
                 </span>
-              </button>
+              </Link>
             </div>
 
             {/* رندر شرطی بر اساس لاگین بودن */}
@@ -154,7 +154,7 @@ const Header = ({ onOpenDrawer }) => {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/orders" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
+                      <Link to="/profile/orders" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
                         <ShoppingCart size={18} />
                         سفارش‌های من
                       </Link>
@@ -216,10 +216,10 @@ const Header = ({ onOpenDrawer }) => {
 
             <div className="flex items-center gap-1 mr-2">
               {[
-                { label: '🔥 پرفروش‌ها', to: '/bestsellers' },
-                { label: '💎 جدیدترین‌ها', to: '/new' },
-                { label: '🎁 تخفیف‌ها', to: '/offers' },
-                { label: '📦 پیگیری سفارش', to: '/tracking' },
+                { label: 'همه محصولات', to: '/shop' },
+                { label: ' سفارش های اخیر ', to: '/profile/orders' },
+                { label: ' آدرس های من ', to: '/profile/addresses' },
+                { label: 'پیگیری سفارش', to: 'https://wa.me/9647700000000' },
               ].map((item) => (
                 <Link
                   key={item.to}

@@ -136,10 +136,7 @@ const CartPage = () => {
                    </button>
                 </div>
 
-                <div className="flex items-center justify-center gap-2 text-slate-400 text-sm">
-                   <ShieldCheck size={16} />
-                   <span>پرداخت امن زرین پال</span>
-                </div>
+
              </div>
           </div>
         </div>
