@@ -1,5 +1,5 @@
 // src/app/features/shop/components/OrderWizard.jsx
-import { Ruler, Layers, CheckCircle, PenTool } from 'lucide-react';
+import { Ruler, Layers, CheckCircle, PenTool, Check, Info, AlertCircle } from 'lucide-react';
 import clsx from 'clsx';
 
 const OrderWizard = ({ productData, state, setters }) => {
@@ -10,6 +10,117 @@ const OrderWizard = ({ productData, state, setters }) => {
     const num = parseFloat(val);
     if (!num || num === 0) return null;
     return <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full mr-auto">+{num.toLocaleString()}</span>;
+  };
+
+  // تابع کمکی برای رندر کردن انواع فیلدهای آپشن
+  const renderOptionInput = (opt) => {
+    const val = state.selectedOptions[opt.id];
+
+    switch (opt.type) {
+      // ۱. منو کشویی (Dropdown)
+      case 'select':
+        return (
+          <select
+            className="select select-bordered w-full rounded-xl border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 text-sm"
+            value={val || ''}
+            onChange={(e) => setters.setSelectedOptions(p => ({ ...p, [opt.id]: e.target.value }))}
+          >
+            <option value="" disabled>لطفاً یک گزینه انتخاب کنید...</option>
+            {opt.choices?.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.label} {parseFloat(c.price_impact) > 0 ? `(+${parseFloat(c.price_impact).toLocaleString()} IQD)` : ''}
+              </option>
+            ))}
+          </select>
+        );
+
+      // ۲. چند انتخابی (Checkbox blocks)
+      case 'checkbox':
+        const arrVal = Array.isArray(val) ? val : [];
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {opt.choices?.map(choice => {
+              const isSelected = arrVal.includes(choice.id);
+              return (
+                <div
+                  key={choice.id}
+                  onClick={() => {
+                    const newArr = isSelected ? arrVal.filter(id => id !== choice.id) : [...arrVal, choice.id];
+                    setters.setSelectedOptions(p => ({ ...p, [opt.id]: newArr }));
+                  }}
+                  className={clsx(
+                    "cursor-pointer p-3 rounded-xl border flex items-center gap-3 transition-all duration-200",
+                    isSelected ? "border-orange-500 bg-orange-50 text-orange-900 shadow-sm" : "border-slate-200 hover:border-orange-300 bg-white"
+                  )}
+                >
+                  <div className={clsx(
+                    "w-5 h-5 rounded flex flex-shrink-0 items-center justify-center border transition-all",
+                    isSelected ? "bg-orange-500 border-orange-500 text-white" : "bg-slate-100 border-slate-300"
+                  )}>
+                    {isSelected && <Check size={14} strokeWidth={3} />}
+                  </div>
+                  <span className="text-sm font-medium flex-1">{choice.label}</span>
+                  {renderImpact(choice.price_impact)}
+                </div>
+              );
+            })}
+          </div>
+        );
+
+      // ۴. متن کوتاه (Short Text Input)
+      case 'text':
+        return (
+          <input
+            type="text"
+            className="input input-bordered w-full rounded-xl border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 text-sm"
+            placeholder="متن خود را اینجا وارد کنید..."
+            value={val || ''}
+            onChange={(e) => setters.setSelectedOptions(p => ({ ...p, [opt.id]: e.target.value }))}
+          />
+        );
+
+      // ۵. متن بلند (Textarea)
+      case 'textarea':
+        return (
+          <textarea
+            className="textarea textarea-bordered w-full rounded-xl border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 text-sm min-h-[120px] leading-relaxed"
+            placeholder="توضیحات تکمیلی خود را به صورت کامل بنویسید..."
+            value={val || ''}
+            onChange={(e) => setters.setSelectedOptions(p => ({ ...p, [opt.id]: e.target.value }))}
+          />
+        );
+
+      // ۳. تک انتخابی (Radio blocks) - پیش‌فرض
+      case 'radio':
+      default:
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {opt.choices?.map(choice => (
+              <div
+                key={choice.id}
+                onClick={() => setters.setSelectedOptions(p => ({ ...p, [opt.id]: choice.id }))}
+                className={clsx(
+                  "cursor-pointer p-3 rounded-xl border flex items-center justify-between transition-all duration-200",
+                  val == choice.id
+                    ? "border-orange-500 bg-orange-50 text-orange-900 shadow-sm"
+                    : "border-slate-200 hover:border-orange-300 bg-white"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                   <div className={clsx(
+                     "w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all",
+                     val == choice.id ? "border-orange-500" : "border-slate-300"
+                   )}>
+                      {val == choice.id && <div className="w-2 h-2 bg-orange-500 rounded-full"></div>}
+                   </div>
+                   <span className="text-sm font-medium">{choice.label}</span>
+                </div>
+                {renderImpact(choice.price_impact)}
+              </div>
+            ))}
+          </div>
+        );
+    }
   };
 
   return (
@@ -52,7 +163,6 @@ const OrderWizard = ({ productData, state, setters }) => {
             </div>
           ))}
 
-          {/* گزینه سایز دلخواه */}
           {pricing_config?.accepts_custom_dimensions && (
             <div 
               onClick={() => setters.setSizeType('custom')}
@@ -69,7 +179,6 @@ const OrderWizard = ({ productData, state, setters }) => {
           )}
         </div>
 
-        {/* ورودی‌های سایز دلخواه */}
         {state.sizeType === 'custom' && (
           <div className="mt-5 p-4 bg-slate-50 rounded-2xl grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
             <div>
@@ -106,23 +215,30 @@ const OrderWizard = ({ productData, state, setters }) => {
         </div>
 
         {quantities?.length > 0 ? (
-<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-  {quantities.map(qty => (
-    <button
-      key={qty.id}
-      onClick={() => setters.setSelectedQuantityId(qty.id)}
-      className={clsx(
-        "py-3 px-2 rounded-xl border-2 text-center transition-all",
-        state.selectedQuantityId == qty.id
-          ? "border-primary bg-primary text-white shadow-lg shadow-primary/30 font-bold scale-105"
-          : "border-slate-100 bg-white text-slate-600 hover:border-primary/30"
-      )}
-    >
-      {/* 🔴 این خط آپدیت شد تا جلوی NaN را بگیرد */}
-      {(Number(qty.quantity) || 0).toLocaleString()} <span className="text-[10px] opacity-80">عدد</span>
-    </button>
-  ))}
-</div>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+            {quantities.map(qty => (
+              <button
+                key={qty.id}
+                onClick={() => setters.setSelectedQuantityId(qty.id)}
+                className={clsx(
+                  "py-3 px-2 rounded-xl border-2 text-center transition-all flex flex-col items-center justify-center gap-1",
+                  state.selectedQuantityId == qty.id
+                    ? "border-primary bg-primary text-white shadow-lg shadow-primary/30 font-bold scale-105"
+                    : "border-slate-100 bg-white text-slate-600 hover:border-primary/30"
+                )}
+              >
+                {/* 🔴 اینجا مشکل صفر شدن تیراژ با تغییر به quantity_value حل شد */}
+                <div className="flex items-baseline gap-1">
+                  <span>{(Number(qty.quantity_value) || 0).toLocaleString()}</span>
+                  <span className="text-[10px] opacity-80">عدد</span>
+                </div>
+                {/* در صورت داشتن راهنما روی تیراژ */}
+                {qty.guide_text && (
+                  <span className="text-[9px] opacity-70 truncate w-full px-1">{qty.guide_text}</span>
+                )}
+              </button>
+            ))}
+          </div>
         ) : (
           <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl max-w-md">
             <button 
@@ -146,42 +262,50 @@ const OrderWizard = ({ productData, state, setters }) => {
       {/* --- بخش ۳: آپشن‌ها --- */}
       {options?.length > 0 && (
         <section className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
               <PenTool size={22} />
             </div>
             <h3 className="font-bold text-lg text-slate-800">ویژگی‌های محصول</h3>
           </div>
 
-          <div className="space-y-6">
-            {options.map((opt) => (
-              <div key={opt.id} className="flex flex-col gap-3">
+          <div className="space-y-8 divide-y divide-slate-100">
+            {options.map((opt, index) => (
+              <div key={opt.id} className={clsx("flex flex-col gap-3", index > 0 && "pt-6")}>
+                
+                {/* هدر آپشن و نشانگر اجباری */}
                 <div className="flex justify-between items-center">
-                  <label className="text-sm font-bold text-slate-700">
-                    {opt.label} {opt.is_required && <span className="text-error">*</span>}
+                  <label className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                    {opt.label} 
+                    {opt.is_required && <span className="text-error text-lg leading-none">*</span>}
                   </label>
-                  {state.selectedOptions[opt.id] && (
-                     <span className="text-xs text-primary font-medium bg-primary/5 px-2 py-1 rounded-lg">انتخاب شده</span>
+                  
+                  {/* تگ نشان‌دهنده انتخاب شدن برای فیلدهای غیرمتنی */}
+                  {['radio', 'select', 'checkbox'].includes(opt.type) && state.selectedOptions[opt.id] && (
+                     <span className="text-[10px] text-primary font-bold bg-primary/10 px-2.5 py-1 rounded-full">
+                       پاسخ داده شد
+                     </span>
                   )}
                 </div>
+
+                {/* 🔴 باکس زیبای راهنما (Guide Text) */}
+                {opt.guide_text && (
+                  <div className={clsx(
+                    "flex items-start gap-2 p-3 rounded-xl text-xs leading-relaxed",
+                    opt.guide_type === 'warning' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-blue-50 text-blue-800 border border-blue-100'
+                  )}>
+                    {opt.guide_type === 'warning' ? (
+                      <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-500" />
+                    ) : (
+                      <Info size={16} className="mt-0.5 shrink-0 text-blue-500" />
+                    )}
+                    <p>{opt.guide_text}</p>
+                  </div>
+                )}
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {opt.choices?.map(choice => (
-                    <div
-                      key={choice.id}
-                      onClick={() => setters.setSelectedOptions(prev => ({ ...prev, [opt.id]: choice.id }))}
-                      className={clsx(
-                        "cursor-pointer p-3 rounded-xl border flex items-center justify-between transition-all",
-                        state.selectedOptions[opt.id] == choice.id
-                          ? "border-orange-500 bg-orange-50 text-orange-900"
-                          : "border-slate-200 hover:border-orange-300"
-                      )}
-                    >
-                      <span className="text-sm font-medium">{choice.label}</span>
-                      {renderImpact(choice.price_impact)}
-                    </div>
-                  ))}
-                </div>
+                {/* رندر شدن داینامیک اینپوت‌ها براساس نوع (Type) */}
+                {renderOptionInput(opt)}
+                
               </div>
             ))}
           </div>
