@@ -256,3 +256,8 @@ INFO 2026-02-19 08:15:09,638 customer_service 189 139509504313024 Fetching detai
 DEBUG 2026-02-19 08:21:26,242 customer_service 189 139509504313024 Fetching customer list
 INFO 2026-02-19 08:21:32,957 customer_service 189 139509504313024 Fetching details for Customer 11
 INFO 2026-02-19 08:21:53,668 customer_service 189 139509487527616 Fetching details for Customer 11
+DEBUG 2026-02-19 14:53:45,154 customer_service 805 129516080985792 Fetching customer list
+DEBUG 2026-02-19 14:55:13,304 customer_service 805 129516437661376 Fetching customer list
+DEBUG 2026-02-19 14:55:14,737 customer_service 805 129516080985792 Fetching customer list
+DEBUG 2026-02-19 14:58:09,126 customer_service 805 129516080985792 Fetching customer list
+DEBUG 2026-02-19 14:58:10,988 customer_service 805 129516437661376 Fetching customer list

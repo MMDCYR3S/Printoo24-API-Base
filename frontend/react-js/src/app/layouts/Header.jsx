@@ -1,6 +1,7 @@
 // src/app/layouts/Header.jsx
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { cartService } from '../services/cartService';
 import { 
   Menu, 
   Bell, 
@@ -22,6 +23,23 @@ const Header = ({ onOpenDrawer }) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // استیت بررسی لاگین بودن
   const closeTimeoutRef = useRef(null);
+
+
+const [cartCount, setCartCount] = useState(0);
+
+useEffect(() => {
+    const fetchCartCount = async () => {
+      if (isLoggedIn) {
+        try {
+          const count = await cartService.getTotalNumber();
+          setCartCount(count || 0);
+        } catch (error) {
+          console.error("خطا در دریافت تعداد سبد خرید:", error);
+        }
+      }
+    };
+    fetchCartCount();
+  }, [isLoggedIn]);
 
   // بررسی وضعیت لاگین در زمان مانت شدن کامپوننت
   useEffect(() => {
@@ -94,14 +112,18 @@ const Header = ({ onOpenDrawer }) => {
           <div className="flex items-center gap-2">
             
             {/* سبد خرید (همیشه برای همه کاربران نمایش داده می‌شود) */}
-            <div className="tooltip tooltip-bottom" data-tip="سبد خرید">
+<div className="tooltip tooltip-bottom" data-tip="سبد خرید">
               <Link to="/cart" className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
                 <ShoppingCart size={22} />
-                <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-error text-white rounded-full">
-                  ۳
-                </span>
+                {/* تغییر این بخش برای نمایش داینامیک */}
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-error text-white rounded-full">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
             </div>
+
 
             {/* رندر شرطی بر اساس لاگین بودن */}
             {isLoggedIn ? (

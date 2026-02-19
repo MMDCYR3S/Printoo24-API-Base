@@ -948,3 +948,6 @@ INFO 2026-02-19 07:54:51,848 auth_service 189 139509487527616 User logged in: 1
 DEBUG 2026-02-19 08:26:44,587 auth_service 189 139509512705728 AuthService initialized with UserIdentityService
 INFO 2026-02-19 08:26:44,589 auth_service 189 139509512705728 Login attempt for: admin
 INFO 2026-02-19 08:26:45,397 auth_service 189 139509512705728 User logged in: 1
+DEBUG 2026-02-19 14:47:22,719 auth_service 805 129516429268672 AuthService initialized with UserIdentityService
+INFO 2026-02-19 14:47:22,721 auth_service 805 129516429268672 Login attempt for: admin
+INFO 2026-02-19 14:47:23,366 auth_service 805 129516429268672 User logged in: 1

@@ -48,3 +48,7 @@ INFO 2026-02-12 11:42:13,424 user_address_service 425 132317853161152 Fetching a
 INFO 2026-02-12 11:42:15,514 user_address_service 425 132317853161152 Fetching addresses for User ID: 1
 INFO 2026-02-19 08:23:01,577 user_address_service 189 139509127706304 Fetching addresses for User ID: 1
 INFO 2026-02-19 08:27:51,801 user_address_service 189 139509504313024 Fetching addresses for User ID: 1
+INFO 2026-02-19 14:53:05,534 user_address_service 805 129516072593088 Fetching addresses for User ID: 1
+INFO 2026-02-19 14:53:27,757 user_address_service 805 129516429268672 Fetching addresses for User ID: 1
+INFO 2026-02-19 15:03:21,644 user_address_service 805 129516080985792 Fetching addresses for User ID: 1
+INFO 2026-02-19 15:04:14,893 user_address_service 805 129516429268672 Fetching addresses for User ID: 1
