@@ -140,8 +140,10 @@ class ShopCategoryService:
                 },
                 "sub_categories": [
                     {
+                        "id": child.id,
                         "name": child.name, 
                         "slug": child.slug,
+                        "thumbnail": self._get_image_url(child.banner_box),
                         "link": self._generate_product_filter_url(child.slug)
                     } 
                     for child in category.get_children() if child.is_active
