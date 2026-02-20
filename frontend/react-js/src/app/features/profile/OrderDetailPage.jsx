@@ -1,24 +1,45 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Download, FileText, Layers, MapPin, User, Package, DollarSign } from 'lucide-react';
+import { 
+  ArrowRight, Download, FileText, Layers, MapPin, 
+  User, Package, DollarSign, Calendar, Info 
+} from 'lucide-react';
 import { profileService } from '../../services/profileService';
+import { formatCurrency } from '../../utils/formatters';
 
-// --- Helper Functions ---
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  return new Date(dateString).toLocaleDateString('fa-IR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+// --- Configuration & Constants ---
+const STATUS_MAP = {
+  7:  { label: "در انتظار بررسی", color: "badge-warning", bg: "bg-warning/10" },
+  8:  { label: "در حال طراحی", color: "badge-info", bg: "bg-info/10" },
+  9:  { label: "رد شده توسط طراح", color: "badge-error", bg: "bg-error/10" },
+  10: { label: "در حال چاپ", color: "badge-info", bg: "bg-info/10" },
+  11: { label: "رد شده توسط چاپ", color: "badge-error", bg: "bg-error/10" },
+  12: { label: "ارسال شده به انبار", color: "badge-primary", bg: "bg-primary/10" },
+  13: { label: "دریافت توسط انبار", color: "badge-success", bg: "bg-success/10" },
+  14: { label: "رد شده توسط انبار", color: "badge-error", bg: "bg-error/10" },
+  15: { label: "تحویل‌شده", color: "badge-success", bg: "bg-success/10" },
+  16: { label: "لغو شده", color: "badge-ghost", bg: "bg-slate-100" },
 };
 
-const formatPrice = (price) => {
-  if (!price) return '0';
-  return new Intl.NumberFormat('fa-IQ').format(Number(price));
+const SPEC_LABELS = {
+  size: "ابعاد",
+  paper: "نوع کاغذ",
+  coating: "روکش",
+  cutting: "نوع برش",
+  quantity: "تعداد",
+  color_mode: "حالت رنگی",
+  print_side: "وجه چاپ",
+  category: "دسته بندی"
 };
+
+// --- Sub-Components ---
+
+const SpecBadge = ({ label, value }) => (
+  <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl">
+    <span className="text-[10px] text-slate-400 font-bold">{SPEC_LABELS[label] || label}:</span>
+    <span className="text-xs text-slate-700 font-medium">{value}</span>
+  </div>
+);
 
 const OrderDetailPage = () => {
   const { id } = useParams();
@@ -28,171 +49,154 @@ const OrderDetailPage = () => {
     queryFn: () => profileService.getOrderDetails(id),
   });
 
-  if (isLoading) return <div className="text-center py-20"><span className="loading loading-spinner text-primary loading-lg"></span></div>;
-  if (isError || !order) return <div className="text-center py-20 text-error font-bold">مشکلی در دریافت اطلاعات سفارش پیش آمده است.</div>;
+  if (isLoading) return (
+    <div className="flex justify-center items-center min-h-[400px]">
+      <span className="loading loading-spinner text-primary loading-lg"></span>
+    </div>
+  );
+
+  if (isError || !order) return (
+    <div className="alert alert-error shadow-lg max-w-2xl mx-auto mt-10">
+      <Info />
+      <span>خطا در دریافت اطلاعات سفارش. لطفاً دوباره تلاش کنید.</span>
+    </div>
+  );
+
+  const statusInfo = STATUS_MAP[order.current_status] || { label: "نامشخص", color: "badge-ghost" };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* 1. Header Section */}
-      <header className="flex items-center gap-3 border-b border-slate-100 pb-4">
-        <Link to="/profile/orders" className="btn btn-circle btn-sm btn-ghost hover:bg-slate-100 transition-colors">
-          <ArrowRight size={20} className="text-slate-600"/>
-        </Link>
-        <div>
-          <h1 className="text-xl font-black text-slate-800 flex items-center gap-2">
-            جزئیات سفارش <span className="dir-ltr text-primary">#{order.id}</span>
-          </h1>
-          <div className="text-xs text-slate-400 mt-1">
-             ثبت شده در: <span className="dir-ltr">{formatDate(order.created_at)}</span>
+    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
+      {/* 1. Navigation & Basic Info */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6">
+        <div className="flex items-center gap-4">
+          <Link to="/profile/orders" className="btn btn-circle btn-ghost bg-white shadow-sm border-slate-200">
+            <ArrowRight size={22} className="text-slate-600"/>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+              جزئیات سفارش <span className="text-primary">#{order.order_code}</span>
+            </h1>
+            <p className="text-slate-400 text-sm flex items-center gap-1.5 mt-1">
+              <Calendar size={14} />
+              ثبت شده در: {new Date(order.created_at).toLocaleDateString('fa-IR')}
+            </p>
           </div>
+        </div>
+        <div className={`px-6 py-3 rounded-2xl border-2 flex items-center gap-3 ${statusInfo.bg} ${statusInfo.color.replace('badge-', 'border-')}`}>
+          <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${statusInfo.color.replace('badge-', 'bg-')}`}></div>
+          <span className="font-bold text-slate-800">{statusInfo.label}</span>
         </div>
       </header>
 
-      {/* 2. Info Grid (Status, Address, User) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        
-        {/* Status & Price Card */}
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between gap-4">
-          <div>
-            <div className="text-xs text-slate-400 mb-1 flex items-center gap-1"><Package size={14}/> وضعیت فعلی</div>
-            <div className="text-lg font-bold text-slate-800 badge badge-lg badge-primary badge-outline w-full py-4">
-              {order.current_status}
-            </div>
+      {/* 2. Overview Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Total Price Card */}
+        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center space-y-2">
+          <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+            <DollarSign size={24} />
           </div>
-          <div>
-            <div className="text-xs text-slate-400 mb-1 flex items-center gap-1"><DollarSign size={14}/> مبلغ کل</div>
-            <div className="text-2xl font-black text-primary dir-ltr">
-              {formatPrice(order.total_price)} <span className="text-sm font-bold text-slate-500">IQD</span>
-            </div>
+          <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">مبلغ کل سفارش</span>
+          <div className="text-3xl font-black text-slate-800">
+            {formatCurrency(order.total_price)} <span className="text-sm font-medium text-slate-400">IQD</span>
           </div>
         </div>
 
-        {/* User Info Card */}
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm lg:col-span-2 space-y-4">
-          <h3 className="font-bold text-slate-700 text-sm border-b border-slate-50 pb-2 mb-2 flex items-center gap-2">
-            <User size={16} className="text-primary"/> اطلاعات گیرنده
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            {order.recipient_name && (
-              <div className="flex flex-col">
-                <span className="text-slate-400 text-xs mb-1">نام تحویل گیرنده:</span>
-                <span className="font-medium text-slate-800">{order.recipient_name}</span>
-              </div>
-            )}
-             {order.recipient_phone && (
-              <div className="flex flex-col">
-                <span className="text-slate-400 text-xs mb-1">شماره تماس:</span>
-                <span className="font-medium text-slate-800 dir-ltr text-right">{order.recipient_phone}</span>
-              </div>
-            )}
-             {order.company_name && (
-              <div className="flex flex-col md:col-span-2">
-                <span className="text-slate-400 text-xs mb-1">نام شرکت:</span>
-                <span className="font-medium text-slate-800">{order.company_name}</span>
-              </div>
-            )}
-             {order.address_detail && (
-              <div className="flex flex-col md:col-span-2 bg-slate-50 p-3 rounded-xl">
-                <span className="text-slate-400 text-xs mb-1 flex items-center gap-1"><MapPin size={12}/> آدرس تحویل:</span>
-                <span className="font-medium text-slate-700 leading-6">{order.address_detail}</span>
-              </div>
-            )}
+        {/* Shipping Address Card */}
+        <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm lg:col-span-2 space-y-4">
+          <div className="flex items-center gap-2 text-slate-800 font-bold border-b border-slate-50 pb-3">
+            <MapPin size={18} className="text-primary" />
+            اطلاعات تحویل و گیرنده
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] text-slate-400 font-bold">تحویل‌گیرنده:</span>
+              <span className="text-sm font-semibold flex items-center gap-2"><User size={14} className="text-slate-300"/> کاربر شماره {order.user}</span>
+            </div>
+            <div className="flex flex-col gap-1 md:col-span-2 bg-slate-50 p-4 rounded-2xl">
+              <span className="text-[10px] text-slate-400 font-bold mb-1">آدرس کامل:</span>
+              <p className="text-sm text-slate-600 leading-relaxed">{order.full_address}</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Order Items List */}
-      <div className="space-y-4">
-        <h2 className="font-bold text-slate-700 pr-2 flex items-center gap-2">
-          <Layers size={18} className="text-primary"/> اقلام سفارش
+      {/* 3. Items List */}
+      <section className="space-y-6">
+        <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 px-2">
+          <Layers size={20} className="text-primary" />
+          لیست اقلام سفارش ({order.order_item?.length})
         </h2>
-        
-        {order.items?.map((item) => (
-          <div key={item.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+
+        {order.order_item?.map((item) => (
+          <div key={item.id} className="group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300">
             {/* Item Header */}
-            <div className="bg-slate-50 p-4 border-b border-slate-100 flex flex-wrap justify-between items-center gap-2">
-              <div className="font-bold text-slate-800 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary"></div>
-                {item.product_name || item.name}
+            <div className="bg-slate-50/50 p-6 border-b border-slate-100 flex flex-wrap justify-between items-center gap-4 group-hover:bg-slate-50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-primary border border-slate-100">
+                  <Package size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800">محصول اختصاصی #{item.id}</h3>
+                  <p className="text-xs text-slate-400 mt-0.5 font-medium">تعداد: {item.quantity.toLocaleString()} عدد</p>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                 <span className="badge badge-neutral text-xs px-3">تعداد: {item.quantity}</span>
-                 <span className="font-bold text-primary text-sm dir-ltr">
-                    {formatPrice(item.price)} IQD
-                 </span>
+              <div className="bg-primary px-4 py-2 rounded-xl text-white font-bold text-sm shadow-lg shadow-primary/20">
+                {formatCurrency(item.item_price)} IQD
               </div>
             </div>
-            
-            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left Col: Specifications */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-50 pb-1">مشخصات سفارش</h4>
-                
-                {/* Dimensions */}
-                {(item.specifications?.width > 0 || item.specifications?.height > 0) && (
-                   <div className="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-lg text-sm">
-                      <span className="text-slate-500">ابعاد (cm):</span>
-                      <span className="font-bold dir-ltr text-slate-800">
-                        {item.specifications.width} × {item.specifications.height}
-                      </span>
-                   </div>
-                )}
 
-                {/* Options List - FIXED for Object Handling */}
-                {item.specifications?.options?.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {item.specifications.options.map((opt, i) => {
-                      // FIX: Check if opt is an object {name, value} or a string
-                      const label = typeof opt === 'object' && opt !== null 
-                        ? `${opt.name}: ${opt.value}` 
-                        : opt;
-                        
-                      return (
-                        <span key={i} className="badge badge-ghost badge-sm text-slate-600 bg-slate-100 border-slate-200">
-                          {label}
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
+            {/* Item Content */}
+            <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Specs */}
+              <div>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                  <div className="w-1 h-3 bg-primary rounded-full"></div>
+                  مشخصات فنی تولید
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {item.specs?.specifications && Object.entries(item.specs.specifications).map(([key, value]) => (
+                    <SpecBadge key={key} label={key} value={value} />
+                  ))}
+                </div>
                 
-                {/* Description */}
-                {item.description && (
-                  <div className="text-sm text-slate-500 bg-orange-50/50 p-3 rounded-lg border border-orange-100 mt-2">
-                    <span className="font-bold text-orange-400 block text-xs mb-1">توضیحات:</span>
-                    {item.description}
+                {item.specs?.admin_logs?.length > 0 && (
+                  <div className="mt-6 p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                    <span className="text-[10px] font-bold text-orange-400 block mb-2">یادداشت‌های سیستم:</span>
+                    {item.specs.admin_logs.map((log, idx) => (
+                      <p key={idx} className="text-xs text-orange-700 leading-relaxed">• {log}</p>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Right Col: Files */}
-              <div>
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 border-b border-slate-50 pb-1">فایل‌های ضمیمه</h4>
-                <div className="space-y-2">
-                  {item.files?.length > 0 ? (
-                    item.files.map((file) => (
+              {/* Files */}
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                  <div className="w-1 h-3 bg-blue-500 rounded-full"></div>
+                  فایل‌های طراحی ارسالی
+                </h4>
+                <div className="grid grid-cols-1 gap-3">
+                  {item.design_files?.length > 0 ? (
+                    item.design_files.map((file) => (
                       <a 
                         key={file.id} 
                         href={file.file_url} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:border-primary hover:bg-primary/5 transition-all group bg-slate-50/50"
+                        className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-primary hover:bg-white hover:shadow-md transition-all group/file"
                       >
-                        <div className="p-2 bg-white rounded-lg shadow-sm group-hover:text-primary text-slate-400 transition-colors">
-                          <FileText size={18}/>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-sm text-slate-700 truncate">{file.type_name || 'فایل ضمیمه'}</div>
-                          <div className="text-[10px] text-slate-400">
-                            {formatDate(file.uploaded_at)} • برای دانلود کلیک کنید
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="p-2 bg-white rounded-lg text-slate-400 group-hover/file:text-primary transition-colors">
+                            <FileText size={20} />
                           </div>
+                          <span className="text-xs font-bold text-slate-700 truncate">مشاهده فایل طراحی #{file.id}</span>
                         </div>
-                        <Download size={16} className="text-slate-300 group-hover:text-primary transition-colors"/>
+                        <Download size={18} className="text-slate-300 group-hover/file:text-primary" />
                       </a>
                     ))
                   ) : (
-                    <div className="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-400 text-sm">
-                      فایلی برای این آیتم ثبت نشده است.
+                    <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                      <p className="text-xs text-slate-400 font-medium">فایلی برای این قلم سفارش یافت نشد.</p>
                     </div>
                   )}
                 </div>
@@ -200,7 +204,7 @@ const OrderDetailPage = () => {
             </div>
           </div>
         ))}
-      </div>
+      </section>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 // src/app/layouts/Header.jsx
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { cartService } from '../services/cartService';
 import { 
   Menu, 
   Bell, 
@@ -12,6 +13,8 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import MegaMenu from '../components/layout/MegaMenu';
+import pageText from '../lang/pages.json'
+import globalText from '../lang/global.json'
 
 // ایمپورت‌های جدید (مسیرها را بر اساس پوشه‌بندی خودتان در صورت نیاز تنظیم کنید)
 import { useWalletBalance } from '../hooks/useWalletBalance';
@@ -22,6 +25,23 @@ const Header = ({ onOpenDrawer }) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // استیت بررسی لاگین بودن
   const closeTimeoutRef = useRef(null);
+
+
+const [cartCount, setCartCount] = useState(0);
+
+useEffect(() => {
+    const fetchCartCount = async () => {
+      if (isLoggedIn) {
+        try {
+          const count = await cartService.getTotalNumber();
+          setCartCount(count || 0);
+        } catch (error) {
+          console.error("خطا در دریافت تعداد سبد خرید:", error);
+        }
+      }
+    };
+    fetchCartCount();
+  }, [isLoggedIn]);
 
   // بررسی وضعیت لاگین در زمان مانت شدن کامپوننت
   useEffect(() => {
@@ -46,7 +66,7 @@ const Header = ({ onOpenDrawer }) => {
   };
 
   const handleCreditClick = () => {
-    window.open('https://wa.me/9647700000000?text=درخواست شارژ حساب دارم', '_blank');
+    window.open('https://wa.me/9647700000000', '_blank');
   };
 
   return (
@@ -58,7 +78,7 @@ const Header = ({ onOpenDrawer }) => {
             <button 
               onClick={onOpenDrawer} 
               className="lg:hidden btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary transition-all"
-              aria-label="باز کردن منو"
+              aria-label={pageText.layout.Header.openMenu}
             >
               <Menu size={26} strokeWidth={2.5} />
             </button>
@@ -81,7 +101,7 @@ const Header = ({ onOpenDrawer }) => {
             `}>
               <input 
                 className="w-full py-2 px-5 pr-12 bg-transparent rounded-full text-right focus:outline-none placeholder:text-base-content/40" 
-                placeholder="چی میخوای چاپ کنی؟ اینجا بنویس..."
+                placeholder={pageText.layout.Header.search}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
               />
@@ -94,14 +114,18 @@ const Header = ({ onOpenDrawer }) => {
           <div className="flex items-center gap-2">
             
             {/* سبد خرید (همیشه برای همه کاربران نمایش داده می‌شود) */}
-            <div className="tooltip tooltip-bottom" data-tip="سبد خرید">
+<div className="tooltip tooltip-bottom" data-tip={globalText.cart}>
               <Link to="/cart" className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
                 <ShoppingCart size={22} />
-                <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-error text-white rounded-full">
-                  ۳
-                </span>
+                {/* تغییر این بخش برای نمایش داینامیک */}
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-error text-white rounded-full">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
             </div>
+
 
             {/* رندر شرطی بر اساس لاگین بودن */}
             {isLoggedIn ? (
@@ -110,12 +134,12 @@ const Header = ({ onOpenDrawer }) => {
                 <div 
                   onClick={handleCreditClick}
                   className="tooltip tooltip-bottom cursor-pointer"
-                  data-tip="شارژ کیف پول"
+                  data-tip={pageText.layout.ManinLayout.AccountCharge}
                 >
                   <div className="hidden sm:flex items-center gap-2 bg-gradient-to-l from-emerald-500 to-teal-500 text-white px-2 py-1 rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95">
                     <Wallet size={20} />
                     <div className="flex flex-col items-start leading-tight">
-                      <span className="text-[10px] opacity-80">موجودی</span>
+                      <span className="text-[10px] opacity-80">{pageText.layout.Header.amout}</span>
                       {loading ? (
                         /* انیمیشن لودینگ اسکلتی بجای مبلغ */
                         <div className="h-4 w-16 bg-white/40 animate-pulse rounded mt-0.5"></div>
@@ -128,13 +152,13 @@ const Header = ({ onOpenDrawer }) => {
                   </div>
                 </div>
 
-                {/* اطلاعیه‌ها */}
+                {/* اطلاعیه‌ها
                 <div className="tooltip tooltip-bottom" data-tip="پیام‌ها و اطلاعیه‌ها">
                   <button className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
                     <Bell size={22} />
                     <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full animate-pulse"></span>
                   </button>
-                </div>
+                </div> */}
 
                 {/* حساب کاربری */}
                 <div className="dropdown dropdown-end">
@@ -142,7 +166,7 @@ const Header = ({ onOpenDrawer }) => {
                     tabIndex={0} 
                     role="button" 
                     className="tooltip tooltip-bottom btn btn-circle btn-ghost hover:bg-primary/10 border-2 border-base-300 hover:border-primary transition-colors"
-                    data-tip="حساب کاربری"
+                    data-tip={pageText.layout.Header.account}
                   >
                     <User size={22} />
                   </div>
@@ -150,19 +174,19 @@ const Header = ({ onOpenDrawer }) => {
                     <li>
                       <Link to="/profile" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
                         <User size={18} />
-                        حساب کاربری
+                        {pageText.layout.Header.account}
                       </Link>
                     </li>
                     <li>
                       <Link to="/profile/orders" className="flex items-center gap-3 py-3 hover:bg-primary/10 rounded-xl">
                         <ShoppingCart size={18} />
-                        سفارش‌های من
+                        {pageText.layout.Header.myOrders}
                       </Link>
                     </li>
                     <div className="divider my-1"></div>
                     <li>
                       <button className="flex items-center gap-3 py-3 text-error hover:bg-error/10 rounded-xl">
-                        خروج از حساب
+                        {pageText.layout.Header.logout}
                       </button>
                     </li>
                   </ul>
@@ -175,13 +199,13 @@ const Header = ({ onOpenDrawer }) => {
                   to="/login" 
                   className="btn btn-ghost btn-sm sm:btn-md hover:bg-primary/10 hover:text-primary rounded-xl font-bold transition-colors"
                 >
-                  ورود
+                  {globalText.header.login}
                 </Link>
                 <Link 
                   to="/register" 
                   className="btn btn-primary btn-sm sm:btn-md rounded-xl text-white font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all"
                 >
-                  ثبت‌نام
+                  {globalText.header.register}
                 </Link>
               </div>
             )}
@@ -206,7 +230,7 @@ const Header = ({ onOpenDrawer }) => {
                 `}
               >
                 <LayoutGrid size={20} />
-                <span>همه دسته‌ها</span>
+                <span>{pageText.layout.Header.allCategories}</span>
                 <ChevronDown 
                   size={16} 
                   className={`transition-transform duration-300 ${isMegaMenuOpen ? 'rotate-180' : ''}`}
@@ -216,10 +240,10 @@ const Header = ({ onOpenDrawer }) => {
 
             <div className="flex items-center gap-1 mr-2">
               {[
-                { label: 'همه محصولات', to: '/shop' },
-                { label: ' سفارش های اخیر ', to: '/profile/orders' },
-                { label: ' آدرس های من ', to: '/profile/addresses' },
-                { label: 'پیگیری سفارش', to: 'https://wa.me/9647700000000' },
+                { label: pageText.layout.Header.allProducts , to: '/shop' },
+                { label: pageText.layout.Header.lastOrders , to: '/profile/orders' },
+                  { label: pageText.layout.Header.myAddresses  , to: '/profile/addresses' },
+                { label: pageText.layout.Header.trackingOrder , to: 'https://wa.me/9647700000000' },
               ].map((item) => (
                 <Link
                   key={item.to}
@@ -234,7 +258,9 @@ const Header = ({ onOpenDrawer }) => {
             <div className="mr-auto flex items-center gap-2 text-sm text-base-content/60">
               <span>📞</span>
               <span className="font-bold dir-ltr">0770-000-0000</span>
-              <span className="text-xs">(پشتیبانی ۲۴ ساعته)</span>
+              <span className="text-xs">
+                {pageText.layout.Header.contactUs}
+              </span>
             </div>
           </div>
         </div>
