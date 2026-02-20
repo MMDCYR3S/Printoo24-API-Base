@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { categoryService } from '../../../services/categoryService';
 import { FolderOpen, ChevronDown, Check } from 'lucide-react';
 import clsx from 'clsx';
-
+import globalText from '../../../lang/global.json'
 const ShopSidebar = ({ className, closeMobileMenu }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -65,7 +65,7 @@ const ShopSidebar = ({ className, closeMobileMenu }) => {
       <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
         <h3 className="font-bold text-lg flex items-center gap-2 text-slate-800">
           <FolderOpen className="text-primary w-5 h-5" />
-          دسته‌بندی‌ها
+          {globalText.categories}
         </h3>
       </div>
 

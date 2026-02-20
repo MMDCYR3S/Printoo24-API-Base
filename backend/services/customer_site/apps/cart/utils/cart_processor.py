@@ -38,11 +38,11 @@ class CartProcessor:
         self.result_description = selections.get('description')
         
     def process(self):
-        # 1. تیراژ
+        # 1. مدیریت تیراژ (اصلاح شده)
         final_qty, qty_label, matched_pq_id = self._handle_quantity_logic()
         self.result_quantity = final_qty
 
-        # 2. لود کردن تمام ماتریس قیمت‌های این تیراژ در رم (بهینه‌سازی N+1)
+        # 2. بهینه‌سازی کوئری ماتریس قیمت
         self.matrix_overrides = {}
         if matched_pq_id:
             overrides = OptionValueQuantityPrice.objects.filter(product_quantity_id=matched_pq_id)
@@ -51,10 +51,10 @@ class CartProcessor:
         # 3. پردازش ویژگی‌ها
         self._process_options()
         
-        # 4. ابعاد
+        # 4. ابعاد و سایز
         width, height, size_label = self._resolve_dimensions()
         
-        # 5. ماشین حساب
+        # 5. محاسبه قیمت نهایی
         calculator = ProductPriceCalculator(
             product=self.product,
             quantity=final_qty,
@@ -68,18 +68,18 @@ class CartProcessor:
         calc_result = calculator.calculate()
         self.result_price = Decimal(str(calc_result['final_price']))
         
-        # 6. ساختار JSON شگفت‌انگیز برای فرانت‌اند
+        # 6. ساختار JSON نهایی
         self.result_item_data = {
             "options": self.final_options_data,
             "meta": {
                 "size_info": {
                     "size_id": self.selections.get('size_id', None),
                     "size_name": size_label,
-                    "width": width,
-                    "height": height,
+                    "width": float(width),
+                    "height": float(height),
                 },
                 "quantity_info": {
-                    "quantity_id": self.selections.get('quantity_id'),
+                    "product_quantity_id": matched_pq_id, # ذخیره آیدی واقعی رکورد واسط
                     "quantity_text": qty_label,
                     "quantity_value": final_qty
                 },
@@ -88,37 +88,42 @@ class CartProcessor:
             }
         }
         
-        if 'size_id' in self.selections:
-             self.result_item_data['size_id'] = self.selections['size_id']
-
         return self
 
     # ========== LOGIC METHODS ========== #
     def _handle_quantity_logic(self) -> Tuple[int, str, Optional[int]]:
+        """
+        [FIXED]: استفاده از ID خود ProductQuantity به جای آیدی گلوبال Quantity.
+        """
         final_quantity = self.quantity_input
         quantity_label = str(final_quantity)
         matched_pq_id = None
 
         if self.product.has_quantity:
-            qty_id = self.selections.get('quantity_id')
-            if not qty_id:
-                raise ValidationError(_("برای این محصول انتخاب 'تیراژ' (بسته) الزامی است."))
+            pq_record_id = self.selections.get('quantity_id')
+            if not pq_record_id:
+                raise ValidationError(_("برای این محصول انتخاب 'تیراژ' الزامی است."))
+            
             try:
-                pq = ProductQuantity.objects.select_related('quantity').get(product=self.product, quantity_id=qty_id)
+                # جستجو براساس PK رکورد واسط و اطمینان از تعلق به این محصول
+                pq = ProductQuantity.objects.select_related('quantity').get(
+                    id=pq_record_id, 
+                    product=self.product
+                )
                 final_quantity = pq.quantity.value
                 quantity_label = str(pq.quantity.value)
                 matched_pq_id = pq.id
             except ProductQuantity.DoesNotExist:
                 raise ValidationError(_("تیراژ انتخابی نامعتبر است."))
         else:
-            config = getattr(self.product, 'pricing_config', None)
-            if config:
-                if not config.allow_custom_quantity:
-                     raise ValidationError(_("نمی‌توانید به صورت دلخواه این تیراژ را انتخاب کنید."))
-                if self.quantity_input < config.min_quantity:
-                    raise ValidationError(f"حداقل تعداد سفارش {config.min_quantity} عدد است.")
-                if self.quantity_input > config.max_quantity:
-                    raise ValidationError(f"حداکثر تعداد سفارش {config.max_quantity} عدد است.")
+            # منطق تیراژ دلخواه
+            if self.config:
+                if not self.config.allow_custom_quantity:
+                     raise ValidationError(_("نمی‌توانید به صورت دلخواه تیراژ وارد کنید."))
+                if self.quantity_input < self.config.min_quantity:
+                    raise ValidationError(f"حداقل تعداد سفارش {self.config.min_quantity} عدد است.")
+                if self.quantity_input > self.config.max_quantity:
+                    raise ValidationError(f"حداکثر تعداد سفارش {self.config.max_quantity} عدد است.")
             
         return final_quantity, quantity_label, matched_pq_id
 
@@ -145,21 +150,39 @@ class CartProcessor:
                 
         self._validate_dependencies()
 
-    def _resolve_dimensions(self) -> Tuple[float, float, Optional[str]]:
-        # ... (کد قبلی اینجا بدون تغییر می‌ماند) ...
-        size_id = self.selections.get('size_id', None)
-        custom_width = self.selections.get('width', None)
-        custom_height = self.selections.get('height', None)
+    def _resolve_dimensions(self) -> Tuple[Decimal, Decimal, Optional[str]]:
+        """
+        [FIXED]: استفاده از self.config به جای ارجاع اشتباه.
+        """
+        size_id = self.selections.get('size_id')
+        custom_width = self.selections.get('width')
+        custom_height = self.selections.get('height')
 
+        # ۱. ابعاد ثابت (Fixed Size)
         if size_id:
             try:
-                ps = ProductSize.objects.get(product=self.product, id=size_id)
-                return float(ps.size.width), float(ps.size.height), ps.size.name
+                ps = ProductSize.objects.select_related('size').get(product=self.product, id=size_id)
+                return Decimal(str(ps.size.width)), Decimal(str(ps.size.height)), ps.size.name
             except ProductSize.DoesNotExist:
-                raise ValidationError(_("سایز انتخاب شده نامعتبر است."))
+                raise ValidationError(_("سایز انتخاب شده معتبر نیست."))
+
+        # ۲. ابعاد دلخواه (Custom Dimensions)
         if custom_width and custom_height:
-            return float(custom_width), float(custom_height), f"{custom_width}x{custom_height}"
-        return 0.0, 0.0, None
+            if not self.config or not self.config.accepts_custom_dimensions:
+                raise ValidationError(_("این محصول قابلیت سفارش با ابعاد دلخواه را ندارد."))
+
+            width = Decimal(str(custom_width))
+            height = Decimal(str(custom_height))
+
+            # چک کردن محدوده مجاز
+            if self.config.min_width and width < Decimal(str(self.config.min_width)):
+                raise ValidationError(f"عرض نمی‌تواند کمتر از {self.config.min_width} باشد.")
+            if self.config.max_width and width > Decimal(str(self.config.max_width)):
+                raise ValidationError(f"عرض نمی‌تواند بیشتر از {self.config.max_width} باشد.")
+
+            return width, height, f"ابعاد دلخواه ({width}x{height})"
+
+        return Decimal('0'), Decimal('0'), None
 
     def _handle_input_type(self, prod_opt: ProductOption, user_input: Any) -> Dict:
         itype = prod_opt.input_type

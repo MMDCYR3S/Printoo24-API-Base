@@ -180,3 +180,7 @@ INFO 2026-02-20 10:18:01,497 user_order_service 7 140253956400832 Fetching detai
 INFO 2026-02-20 10:18:35,909 user_order_service 7 140253956400832 Fetching detail Order 28 for User 1
 INFO 2026-02-20 10:19:52,965 user_order_service 7 140253935417024 Fetching detail Order 28 for User 1
 INFO 2026-02-20 10:20:02,026 user_order_service 7 140253935417024 Fetching detail Order 28 for User 1
+INFO 2026-02-20 13:30:42,050 user_order_service 826 139084102092480 Fetching order history for User ID: 1
+INFO 2026-02-20 13:30:46,245 user_order_service 826 139084102092480 Fetching order history for User ID: 1
+INFO 2026-02-20 13:30:50,999 user_order_service 826 139084102092480 Fetching order history for User ID: 1
+INFO 2026-02-20 13:30:52,844 user_order_service 826 139084102092480 Fetching order history for User ID: 1

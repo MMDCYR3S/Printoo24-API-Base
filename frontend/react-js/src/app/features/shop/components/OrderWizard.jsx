@@ -2,6 +2,8 @@
 import { Ruler, Layers, CheckCircle, PenTool, Check, Info, AlertCircle } from 'lucide-react';
 import clsx from 'clsx';
 
+import pageText from '../../../lang/pages.json'
+
 const OrderWizard = ({ productData, state, setters }) => {
   const { sizes, pricing_config, quantities, options } = productData;
 
@@ -25,7 +27,7 @@ const OrderWizard = ({ productData, state, setters }) => {
             value={val || ''}
             onChange={(e) => setters.setSelectedOptions(p => ({ ...p, [opt.id]: e.target.value }))}
           >
-            <option value="" disabled>لطفاً یک گزینه انتخاب کنید...</option>
+            <option value="" disabled>{pageText.shop.productDetail.orderWizard.selectOption}</option>
             {opt.choices?.map(c => (
               <option key={c.id} value={c.id}>
                 {c.label} {parseFloat(c.price_impact) > 0 ? `(+${parseFloat(c.price_impact).toLocaleString()} IQD)` : ''}
@@ -73,7 +75,7 @@ const OrderWizard = ({ productData, state, setters }) => {
           <input
             type="text"
             className="input input-bordered w-full rounded-xl border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 text-sm"
-            placeholder="متن خود را اینجا وارد کنید..."
+            placeholder={pageText.shop.productDetail.orderWizard.writeYourText}
             value={val || ''}
             onChange={(e) => setters.setSelectedOptions(p => ({ ...p, [opt.id]: e.target.value }))}
           />
@@ -84,7 +86,7 @@ const OrderWizard = ({ productData, state, setters }) => {
         return (
           <textarea
             className="textarea textarea-bordered w-full rounded-xl border-slate-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 text-sm min-h-[120px] leading-relaxed"
-            placeholder="توضیحات تکمیلی خود را به صورت کامل بنویسید..."
+            placeholder={pageText.shop.productDetail.orderWizard.writeYourDescription}
             value={val || ''}
             onChange={(e) => setters.setSelectedOptions(p => ({ ...p, [opt.id]: e.target.value }))}
           />
@@ -132,7 +134,7 @@ const OrderWizard = ({ productData, state, setters }) => {
           <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
             <Ruler size={22} />
           </div>
-          <h3 className="font-bold text-lg text-slate-800">ابعاد و سایز</h3>
+          <h3 className="font-bold text-lg text-slate-800">{pageText.shop.productDetail.orderWizard.sizes}</h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -173,8 +175,8 @@ const OrderWizard = ({ productData, state, setters }) => {
                   : "border-slate-100 hover:border-slate-200 border-dashed"
               )}
             >
-              <span className="font-bold text-slate-700 text-center">ابعاد سفارشی</span>
-              <span className="text-xs text-slate-400 text-center">وارد کردن دستی</span>
+              <span className="font-bold text-slate-700 text-center">{pageText.shop.productDetail.orderWizard.customSizes}</span>
+              <span className="text-xs text-slate-400 text-center">{pageText.shop.productDetail.orderWizard.manualInput}</span>
             </div>
           )}
         </div>
@@ -182,21 +184,21 @@ const OrderWizard = ({ productData, state, setters }) => {
         {state.sizeType === 'custom' && (
           <div className="mt-5 p-4 bg-slate-50 rounded-2xl grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
             <div>
-              <label className="label text-xs font-bold text-slate-500">طول (mm)</label>
+              <label className="label text-xs font-bold text-slate-500">{pageText.shop.productDetail.orderWizard.height}</label>
               <input 
                 type="number" 
                 className="input input-bordered w-full rounded-xl"
-                placeholder={`حداقل ${pricing_config.min_width}`}
+                placeholder={ pageText.shop.productDetail.orderWizard.minWidth + pricing_config.min_width}
                 value={state.customDimensions.width}
                 onChange={(e) => setters.setCustomDimensions(p => ({...p, width: e.target.value}))}
               />
             </div>
             <div>
-              <label className="label text-xs font-bold text-slate-500">عرض (mm)</label>
+              <label className="label text-xs font-bold text-slate-500">{pageText.shop.productDetail.orderWizard.width}</label>
               <input 
                 type="number" 
                 className="input input-bordered w-full rounded-xl"
-                placeholder={`حداکثر ${pricing_config.max_width}`}
+                placeholder={ pageText.shop.productDetail.orderWizard.maxWidth + pricing_config.max_width}
                 value={state.customDimensions.height}
                 onChange={(e) => setters.setCustomDimensions(p => ({...p, height: e.target.value}))}
               />
@@ -211,7 +213,7 @@ const OrderWizard = ({ productData, state, setters }) => {
           <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
             <Layers size={22} />
           </div>
-          <h3 className="font-bold text-lg text-slate-800">تیراژ و تعداد</h3>
+          <h3 className="font-bold text-lg text-slate-800">{pageText.shop.productDetail.orderWizard.quantityAndAmount}</h3>
         </div>
 
         {quantities?.length > 0 ? (
@@ -266,7 +268,7 @@ const OrderWizard = ({ productData, state, setters }) => {
             <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
               <PenTool size={22} />
             </div>
-            <h3 className="font-bold text-lg text-slate-800">ویژگی‌های محصول</h3>
+            <h3 className="font-bold text-lg text-slate-800">{pageText.shop.productDetail.orderWizard.productOptions}</h3>
           </div>
 
           <div className="space-y-8 divide-y divide-slate-100">
@@ -283,7 +285,7 @@ const OrderWizard = ({ productData, state, setters }) => {
                   {/* تگ نشان‌دهنده انتخاب شدن برای فیلدهای غیرمتنی */}
                   {['radio', 'select', 'checkbox'].includes(opt.type) && state.selectedOptions[opt.id] && (
                      <span className="text-[10px] text-primary font-bold bg-primary/10 px-2.5 py-1 rounded-full">
-                       پاسخ داده شد
+                       {pageText.shop.productDetail.orderWizard.hasAnswered}
                      </span>
                   )}
                 </div>
