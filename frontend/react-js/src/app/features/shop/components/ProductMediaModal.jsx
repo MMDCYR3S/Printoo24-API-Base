@@ -4,6 +4,8 @@ import { X, ChevronRight, ChevronLeft, Paperclip, Image as ImageIcon, FileText, 
 import clsx from 'clsx';
 import { createPortal } from 'react-dom';
 
+import pageText from '../../../lang/pages.json'
+
 // یک تابع کمکی برای تشخیص نوع فایل از روی فرمت آن و نمایش آیکون مناسب
 const getFileIcon = (url) => {
   if (!url) return <FileText size={24} />;
@@ -48,14 +50,14 @@ const ProductMediaModal = ({
               onClick={() => setActiveTab('images')}
               className={clsx("btn btn-sm rounded-xl font-bold transition-all", activeTab === 'images' ? "btn-primary shadow-lg shadow-primary/30" : "btn-ghost text-slate-500")}
             >
-              <ImageIcon size={18} /> تصاویر
+              <ImageIcon size={18} /> {pageText.shop.productDetail.productGallery.productMediaModal.images}
             </button>
             {attachments?.length > 0 && (
               <button
                 onClick={() => setActiveTab('attachments')}
                 className={clsx("btn btn-sm rounded-xl font-bold transition-all", activeTab === 'attachments' ? "btn-primary shadow-lg shadow-primary/30" : "btn-ghost text-slate-500")}
               >
-                <Paperclip size={18} /> پیوست‌ها ({attachments.length})
+                <Paperclip size={18} /> {pageText.shop.productDetail.productGallery.productMediaModal.attachments} ({attachments.length})
               </button>
             )}
           </div>
@@ -128,7 +130,7 @@ const ProductMediaModal = ({
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="btn btn-circle btn-ghost text-primary hover:bg-primary/10"
-                    title="دانلود / مشاهده"
+                    title={pageText.shop.productDetail.productGallery.productMediaModal.downloadLook}
                   >
                     <Download size={20} />
                   </a>
@@ -137,7 +139,7 @@ const ProductMediaModal = ({
               {attachments.length === 0 && (
                 <div className="col-span-full flex flex-col items-center justify-center py-20 text-slate-400">
                   <Paperclip size={48} className="opacity-20 mb-4" />
-                  <p>هیچ فایل پیوستی برای این محصول وجود ندارد.</p>
+                  <p>{pageText.shop.productDetail.productGallery.productMediaModal.attachmentsNotFound}</p>
                 </div>
               )}
             </div>

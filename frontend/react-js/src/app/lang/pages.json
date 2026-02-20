@@ -74,11 +74,61 @@
     "noAccount": "حساب کاربری ندارید؟ ثبت‌نام کنید"
   },
   "shop": {
-    "filtersTitle": "فیلتر محصولات",
+    "shopTitle": "فروشگاه",
+    "filtersTitle": "فیلترهای فعال:",
+    "searchTitle": "جستجو:",
     "searchPlaceholder": "جستجو در محصولات...",
+    "productNotFound": "محصولی یافت نشد!",
+    "allProductsTitle": "مشاهده همه محصولات",
     "priceRange": "محدوده قیمت",
     "addToCart": "افزودن به سبد خرید",
-    "outOfStock": "ناموجود"
+    "deleteAllFilters": "حذف همه",
+    "productCard": {
+        "products": "محصولات",
+        "notHasImage": "تصویر ندارد",
+        "look": "مشاهده"
+    },
+    "productDetail":{
+        "infoNotComplete": "اطلاعات انتخابی ناقص است",
+        "addToCartError": "خطا در افزودن به سبد",
+        "addToCartSuccess": "به سبد خرید اضافه شد",
+        "minOrderError01": "حداقل سفارش",
+        "minOrderError02": "عدد است",
+        "sizeError": "لطفا ابعاد طول و عرض را وارد کنید",
+        "orderFactor": "فاکتور سفارش",
+        "finalPriceForQty01": "مبلغ نهایی برای ",
+        "finalPriceForQty02": "عدد",
+        "basePrice": "قیمت واحد پایه:",
+        "optionsAndSize": "آپشن‌ها و سایز:",
+        "addToCart": " افزودن به سبد خرید",
+        "physicalHealthProduct": "تضمین سلامت فیزیکی کالا",
+        "sendWithSafety": "ارسال ایمن به سراسر کشور",
+        "productGallery":{
+            "notHasImage" : "تصویر ندارد",
+            "lookAttachments": "مشاهده فایل‌های پیوست",
+            "productMediaModal": {
+                "images": "تصاویر",
+                "attachments": "پیوست‌ها",
+                "downloadLook": "دانلود / مشاهده",
+                "attachmentsNotFound": "هیچ فایل پیوستی برای این محصول وجود ندارد."
+            }
+        },
+        "orderWizard":{
+            "selectOption": "لطفاً یک گزینه انتخاب کنید...",
+            "writeYourText": "متن خود را اینجا وارد کنید...",
+            "writeYourDescription": "توضیحات تکمیلی خود را به صورت کامل بنویسید...",
+            "sizes": "ابعاد و سایز",
+            "customSizes": "ابعاد سفارشی",
+            "manualInput": "وارد کردن دستی",
+            "height": "طول (mm)",
+            "width": "عرض (mm)",
+            "quantityAndAmount": "تیراژ و تعداد",
+            "productOptions": "ویژگی‌های محصول",
+            "hasAnswered": "پاسخ داده شد",
+            "maxWidth": "حداکثر ",
+            "minWidth": "حداقل "
+        }
+    }
   },
   "cart": {
     "pageTitle": "سبد خرید شما",
@@ -99,8 +149,80 @@
     "myOrders": "سفارشات من",
     "myAddresses": "آدرس‌های من",
     "wallet": "کیف پول",
-    "editProfile": "ویرایش اطلاعات کاربری"
-  },
+    "editProfile": "ویرایش اطلاعات کاربری",
+    "infoUpdateSuccess": "اطلاعات با موفقیت بروزرسانی شد",
+    "infoUpdateError": "خطا در ویرایش اطلاعات",
+    "delivered": "تحویل شده",
+    "cancelled": "لغو شده",
+    "profileInfo": "اطلاعات حساب",
+    "username": "نام کاربری (غیرقابل تغییر)",
+    "email": "ایمیل (غیرقابل تغییر)",
+    "firstName": "نام",
+    "lastName": "نام خانوادگی",
+    "companyName": "نام شرکت / فروشگاه",
+    "phoneNumber": "شماره تماس",
+    "saveChanges": "ذخیره تغییرات",
+    "clickToCharge": "برای شارژ کلیک کنید",
+    "active": "فعال",
+    "walletAmount": "موجودی کیف پول",
+    "depositAmount": "افزایش موجودی (واتساپ)",
+    "trackingOrder": "پیگیری وضعیت چاپ",
+    "activeOrders": "سفارش فعال:",
+    "count": "عدد",
+    "addressManagement": "مدیریت آدرس‌ها",
+    "orderAddresses": "آدرس‌های ارسال بار",
+    "item": "مورد",
+    "registeredAddress": "آدرس ثبت شده:",
+    "financeHistory": "سوابق مالی",
+    "yourFinancialHistory": "سوابق مالی حساب شما",
+    "myOrdersPage": {
+        "myOrders": "سفارش‌های من",
+        "order": "سفارش",
+        "notRegisteredOrder": "هنوز سفارشی ثبت نکرده‌اید.",
+        "registerFirstOrder": "ثبت اولین سفارش",
+        "registerPrint": "سفارش چاپ",
+        "notRegisteredAddress": "آدرس ثبت نشده",
+        "totalPrice": "مبلغ کل",
+        "details": "جزئیات"
+    },
+    "orderDetailPage": {
+        "pageTitle": "جزئیات سفارش",
+        "orderId": "شماره سفارش:",
+        "orderDate": "تاریخ ثبت:",
+        "totalAmount": "مبلغ کل:",
+        "paymentStatus": "وضعیت پرداخت:",
+        "shippingAddress": "آدرس ارسال:",
+        "specsTitle": "مشخصات فنی محصول",
+        "filesTitle": "فایل‌های ارسالی",
+        "noFile": "فایلی آپلود نشده است",
+        "downloadFile": "دانلود فایل",
+        "backToList": "بازگشت به لیست سفارشات",
+    
+        "specLabels": {
+            "size": "ابعاد",
+            "paper": "نوع کاغذ",
+            "coating": "روکش",
+            "cutting": "نوع برش",
+            "quantity": "تعداد",
+            "color_mode": "حالت رنگی",
+            "print_side": "وجه چاپ",
+            "category": "دسته‌بندی"
+        },
+
+        "statuses": {
+            "s7": "در انتظار بررسی",
+            "s8": "در حال طراحی",
+            "s9": "رد شده توسط طراح",
+            "s10": "در حال چاپ",
+            "s11": "رد شده توسط چاپ",
+            "s12": "ارسال شده به انبار",
+            "s13": "دریافت توسط انبار",
+            "s14": "رد شده توسط انبار",
+            "s15": "تحویل‌شده",
+            "s16": "لغو شده"
+        }
+    }
+    },
   "layout":{
     "ManinLayout":{
         "AccountCharge": "شارژ سریع حساب"

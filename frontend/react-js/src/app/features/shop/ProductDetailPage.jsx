@@ -12,6 +12,10 @@ import { useProductCalculator } from './hooks/useProductCalculator';
 import ProductGallery from './components/ProductGallery';
 import OrderWizard from './components/OrderWizard';
 
+// فایل ترجمه
+import pageText from '../../lang/pages.json'
+import globalText from '../../lang/global.json'
+
 const ProductDetailPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -30,7 +34,7 @@ const ProductDetailPage = () => {
   const addToCartMutation = useMutation({
     mutationFn: cartService.addToCart,
     onSuccess: (response) => {
-      toast.success('به سبد خرید اضافه شد');
+      toast.success(pageText.shop.productDetail.addToCartSuccess);
       // لاجیک هدایت به صفحه آپلود
       // اگر در پاسخ item_id یا id آمد، هدایت کن
       const itemId = response?.id || response?.item_id;
@@ -42,7 +46,7 @@ const ProductDetailPage = () => {
     },
     onError: (err) => {
         console.error("Cart Error:", err.response?.data);
-        const msg = err.response?.data?.selections ? 'اطلاعات انتخابی ناقص است' : 'خطا در افزودن به سبد';
+        const msg = err.response?.data?.selections ? pageText.shop.productDetail.infoNotComplete : pageText.shop.productDetail.addToCartError;
         toast.error(msg);
     }
   });
@@ -54,12 +58,12 @@ const ProductDetailPage = () => {
     const qty = parseInt(state.customQuantity) || 1;
 
     if (data.pricing_config?.allow_custom_quantity && qty < minQty) {
-      toast.error(`حداقل سفارش ${minQty} عدد است`);
+      toast.error(pageText.shop.productDetail.minOrderError01 + {minQty} + pageText.shop.productDetail.minOrderError02);
       return;
     }
 
     if (state.sizeType === 'custom' && (!state.customDimensions.width || !state.customDimensions.height)) {
-       toast.error('لطفا ابعاد طول و عرض را وارد کنید');
+       toast.error(pageText.shop.productDetail.sizeError);
        return;
     }
 
@@ -90,7 +94,7 @@ const ProductDetailPage = () => {
   };
 
   if (isLoading) return <DetailSkeleton />;
-  if (error || !data) return <div className="text-center py-20">محصول یافت نشد</div>;
+  if (error || !data) return <div className="text-center py-20">{pageText.shop.productNotFound}</div>;
 
   const { product_info } = data;
 
@@ -101,7 +105,7 @@ const ProductDetailPage = () => {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
            <a href="/shop" className="hover:text-primary flex items-center gap-1">
-             <ChevronRight size={16} /> محصولات
+             <ChevronRight size={16} /> {pageText.shop.productCard.products}
            </a>
            <span className="opacity-30">/</span>
            <span className="text-slate-800 font-bold">{product_info.name}</span>
@@ -148,12 +152,14 @@ const ProductDetailPage = () => {
               <div className="bg-white rounded-[24px] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all duration-300">
                 <div className="p-6 bg-slate-900 text-white relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
-                  <h3 className="text-lg font-bold">فاکتور سفارش</h3>
+                  <h3 className="text-lg font-bold">{pageText.shop.productDetail.orderFactor}</h3>
                   <div className="mt-4 flex flex-col gap-1">
-                    <span className="text-xs opacity-70">مبلغ نهایی برای {pricing.finalQuantity.toLocaleString()} عدد</span>
+                    <span className="text-xs opacity-70">
+                     {pageText.shop.productDetail.finalPriceForQty01} {pricing.finalQuantity.toLocaleString()} {pageText.shop.productDetail.finalPriceForQty02}
+                    </span>
                     <div className="flex items-baseline gap-2">
                        <span className="text-3xl font-black tracking-tight">{pricing.totalPrice.toLocaleString()}</span>
-                       <span className="text-sm font-bold text-primary">IQD</span>
+                       <span className="text-sm font-bold text-primary">{globalText.currency}</span>
                     </div>
                   </div>
                 </div>
@@ -161,12 +167,12 @@ const ProductDetailPage = () => {
                 <div className="p-6 space-y-4">
                   <div className="space-y-2 text-sm text-slate-600">
                     <div className="flex justify-between">
-                      <span>قیمت واحد پایه:</span>
+                      <span>{pageText.shop.productDetail.basePrice}</span>
                       <span className="font-medium">{pricing.baseUnitPrice.toLocaleString()}</span>
                     </div>
                     {pricing.extraCosts > 0 && (
                       <div className="flex justify-between text-emerald-600">
-                        <span>آپشن‌ها و سایز:</span>
+                        <span>{pageText.shop.productDetail.optionsAndSize}</span>
                         <span className="font-medium">+{pricing.extraCosts.toLocaleString()}</span>
                       </div>
                     )}
@@ -184,7 +190,7 @@ const ProductDetailPage = () => {
                     ) : (
                       <>
                         <ShoppingCart size={20} />
-                        افزودن به سبد خرید
+                        {pageText.shop.productDetail.addToCart}
                       </>
                     )}
                   </button>
@@ -194,11 +200,11 @@ const ProductDetailPage = () => {
               <div className="bg-white rounded-2xl p-5 border border-slate-100 text-xs text-slate-500 space-y-3 shadow-sm">
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="text-emerald-500" size={18} />
-                  <span>تضمین سلامت فیزیکی کالا</span>
+                  <span>{pageText.shop.productDetail.physicalHealthProduct}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Truck className="text-blue-500" size={18} />
-                  <span>ارسال ایمن به سراسر کشور</span>
+                  <span>{pageText.shop.productDetail.sendWithSafety}</span>
                 </div>
               </div>
             </div>

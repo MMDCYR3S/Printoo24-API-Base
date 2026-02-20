@@ -38,7 +38,7 @@ class Invoice(models.Model):
     )
     
     issued_at = models.DateTimeField(_("تاریخ صدور"), auto_now_add=True)
-    due_date = models.DateTimeField(_("سررسید"), null=True, blank=True)
+    due_date = models.CharField(_("سررسید"), null=True, blank=True, max_length=40)
     finalized_at = models.DateTimeField(_("تاریخ قطعی شدن"), null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)

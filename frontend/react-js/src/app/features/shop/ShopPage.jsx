@@ -8,6 +8,7 @@ import ShopSidebar from './components/ShopSidebar';
 import { Search, Filter, X, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx'; // باگ clsx رفع شد
+import pageText from '../../lang/pages.json'
 
 const ITEMS_PER_PAGE = 12;
 
@@ -126,7 +127,7 @@ const ShopPage = () => {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* هدر موبایل */}
       <div className="flex lg:hidden justify-between items-center mb-4">
-        <h1 className="text-xl font-bold text-slate-800">فروشگاه</h1>
+        <h1 className="text-xl font-bold text-slate-800">{pageText.shop.shopTitle}</h1>
         <button className="btn btn-square btn-ghost" onClick={() => setDrawerOpen(true)}>
           <Filter size={24} />
         </button>
@@ -146,7 +147,7 @@ const ShopPage = () => {
             <form onSubmit={handleSearch} className="relative flex items-center">
               <input 
                 type="text" 
-                placeholder="جستجو در محصولات..." 
+                placeholder={pageText.shop.searchPlaceholder} 
                 className="input input-bordered w-full pr-12 rounded-xl focus:outline-none focus:border-primary bg-slate-50"
                 value={localSearch}
                 onChange={(e) => setLocalSearch(e.target.value)}
@@ -160,11 +161,11 @@ const ShopPage = () => {
               <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-slate-50">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-400 ml-2">
                    <SlidersHorizontal size={14} />
-                   فیلترهای فعال:
+                   {pageText.shop.filtersTitle}
                 </div>
                 {searchQuery && (
                    <div className="badge badge-lg gap-2 bg-primary/10 text-primary border-0 rounded-lg pl-1 pr-3">
-                     <span className="text-xs">جستجو: {searchQuery}</span>
+                     <span className="text-xs">{pageText.shop.searchTitle} {searchQuery}</span>
                      <button onClick={() => { setLocalSearch(''); handleSearch({ preventDefault: ()=>{} }); }} className="hover:bg-primary/20 rounded-full p-0.5"><X size={14} /></button>
                    </div>
                 )}
@@ -175,7 +176,7 @@ const ShopPage = () => {
                   </div>
                 ))}
                 {(activeFilters.length > 1) && (
-                  <button onClick={() => setSearchParams({})} className="text-xs text-red-500 hover:underline mr-auto font-medium">حذف همه</button>
+                  <button onClick={() => setSearchParams({})} className="text-xs text-red-500 hover:underline mr-auto font-medium">{pageText.shop.deleteAllFilters}</button>
                 )}
               </div>
             )}
@@ -233,8 +234,8 @@ const ShopPage = () => {
               <div className="bg-slate-50 p-6 rounded-full mb-4">
                 <Search className="w-12 h-12 text-slate-300" />
               </div>
-              <h3 className="text-xl font-bold text-slate-700">محصولی یافت نشد!</h3>
-              <button onClick={() => setSearchParams({})} className="btn btn-primary btn-sm mt-6 rounded-full px-6">مشاهده همه محصولات</button>
+              <h3 className="text-xl font-bold text-slate-700">{pageText.shop.productNotFound}</h3>
+              <button onClick={() => setSearchParams({})} className="btn btn-primary btn-sm mt-6 rounded-full px-6">{pageText.shop.allProductsTitle}</button>
             </div>
           )}
         </div>

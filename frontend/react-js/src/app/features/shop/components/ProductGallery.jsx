@@ -4,6 +4,10 @@ import clsx from 'clsx';
 import { Image as ImageIcon, Maximize2, Paperclip } from 'lucide-react';
 import ProductMediaModal from './ProductMediaModal'; // ایمپورت کامپوننت جدید
 
+// فایل ترجمه
+import pageText from '../../../lang/pages.json'
+import globalText from '../../../lang/global.json'
+
 const ProductGallery = ({ images = [], attachments = [] }) => {
   const [activeImage, setActiveImage] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -30,7 +34,7 @@ const ProductGallery = ({ images = [], attachments = [] }) => {
     return (
       <div className="aspect-square bg-slate-50 rounded-3xl border border-slate-100 flex flex-col items-center justify-center text-slate-300">
         <ImageIcon size={48} strokeWidth={1.5} />
-        <span className="mt-2 text-sm">تصویر ندارد</span>
+        <span className="mt-2 text-sm">{pageText.shop.productDetail.productGallery.notHasImage}</span>
       </div>
     );
   }
@@ -90,7 +94,7 @@ const ProductGallery = ({ images = [], attachments = [] }) => {
             className="w-full mt-2 flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 font-bold py-3.5 rounded-2xl transition-all hover:shadow-sm"
           >
             <Paperclip size={18} />
-            مشاهده فایل‌های پیوست ({attachments.length})
+            {pageText.shop.productDetail.productGallery.lookAttachments} ({attachments.length})
           </button>
         )}
       </div>
