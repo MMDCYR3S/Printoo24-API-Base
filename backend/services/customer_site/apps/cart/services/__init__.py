@@ -1,6 +1,6 @@
 from .add_to_cart_service import AddToCartService
 from .cart_item_upload_service import CartItemUploadService
 from .update_cart_service import CartItemUpdateService
-from .cart_validator_service import CartDataValidator
+# from .cart_validator_service import CartDataValidator
 from .cart_item_service import CartItemDetailService, CartListService
 from .delete_cart_service import CartItemDeleteService, CartClearService

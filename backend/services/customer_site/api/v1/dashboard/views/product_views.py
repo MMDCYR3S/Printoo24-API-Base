@@ -86,11 +86,13 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                     "quantities": [
                         {
                             "id": 10,
+                            "price": 120000,
                             "guide_text": "پرفروش‌ترین",
                             "guide_type": "tip"
                         },
                         {
                             "id": 11,
+                            "price": 120000,
                             "guide_text": "",
                             "guide_type": "info"
                         }
@@ -166,6 +168,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                     "quantities": [
                         {
                             "id": 10,
+                            "price": 120000,
                             "guide_text": "قیمت جدید",
                             "guide_type": "warning"
                         }
@@ -217,30 +220,78 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         },
         examples=[
             OpenApiExample(
-                'Full Options Scenario',
-                summary='سناریو کامل: ویژگی متصل (بانک) + ویژگی کاملاً اختصاصی',
+                'Fully Custom Scenario with Multiple Conditions',
+                summary='سناریو پیشرفته: کاملاً کاستوم + شناسه موقت (ref_id) + شروط چندگانه',
+                description='در این مثال هیچ ویژگی‌ای در دیتابیس وجود ندارد. فرانت‌اند شناسه‌های موقت (ref_id) می‌سازد و شروط را بر اساس آن‌ها متصل می‌کند.',
                 value={
                     "options": [
-                        {
-                            "option_id": 10, 
-                            "is_required": True,
-                            "guide_text": "انتخاب جنس کاغذ",
-                            "values_config": [
-                                { "global_value_id": 101, "price_impact": 0 },
-                                { "global_value_id": None, "label": "کاغذ خاص", "price_impact": 50000 }
-                            ]
-                        },
+                        # ====== ویژگی سفارشی ۱: جنس اختصاصی ======
                         {
                             "option_id": None, 
-                            "name": "special_packaging",
-                            "label": "نوع بسته‌بندی (اختصاصی)",
+                            "name": "custom_material",
+                            "label": "جنس اختصاصی",
                             "input_type": "radio",
+                            "is_required": True,
                             "values_config": [
                                 {
+                                    "ref_id": "mat_temp_1", # شناسه موقت ۱
                                     "global_value_id": None,
-                                    "label": "جعبه چوبی",
-                                    "value": "wood_box",
-                                    "price_impact": 150000
+                                    "label": "مقوای ضخیم",
+                                    "price_impact": 0
+                                },
+                                {
+                                    "ref_id": "mat_temp_2", # شناسه موقت ۲
+                                    "global_value_id": None,
+                                    "label": "چوب وارداتی",
+                                    "price_impact": 50000
+                                }
+                            ]
+                        },
+                        # ====== ویژگی سفارشی ۲: نوع برش ======
+                        {
+                            "option_id": None,
+                            "name": "cut_type",
+                            "label": "نوع برش",
+                            "input_type": "select",
+                            "is_required": False,
+                            "values_config": [
+                                {
+                                    "ref_id": "cut_temp_1", # شناسه موقت ۳
+                                    "global_value_id": None,
+                                    "label": "برش لیزر دقیق",
+                                    "price_impact": 20000
+                                }
+                            ]
+                        },
+                        # ====== ویژگی سفارشی ۳: با ماتریس قیمت و شروط چندگانه ======
+                        {
+                            "option_id": None,
+                            "name": "special_packing",
+                            "label": "بسته‌بندی ویژه",
+                            "input_type": "checkbox",
+                            "is_required": False,
+                            "values_config": [
+                                {
+                                    "ref_id": "pack_temp_1",
+                                    "global_value_id": None,
+                                    "label": "باکس چوبی مگنت‌دار",
+                                    "price_impact": 150000,
+                                    "quantity_prices": [
+                                        {"quantity_id": 10, "price": 300000},
+                                        {"quantity_id": 11, "price": 500000},
+                                        {"quantity_id": 12, "price": 800000}
+                                    ],
+                                    # شروط چندگانه با ارجاع به شناسه‌های موقت ویژگی‌های بالایی
+                                    "conditions": [
+                                        {
+                                            "required_ref_id": "mat_temp_2", # باید چوب انتخاب شده باشد
+                                            "action": "show"
+                                        },
+                                        {
+                                            "required_ref_id": "cut_temp_1", # و همچنین باید برش لیزر باشد
+                                            "action": "show"
+                                        }
+                                    ]
                                 }
                             ]
                         }
@@ -249,14 +300,57 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 request_only=True
             ),
             OpenApiExample(
-                'Success Response',
+                'Unit-Based Product Scenario (No Quantity Matrix)',
+                summary='سناریو محصول تعدادی (بدون ماتریس قیمت)',
+                description='برای محصولاتی که تیراژ فرمی ندارند (مثل ماگ یا تیشرت). در اینجا آرایه quantity_prices خالی است و سیستم فقط از price_impact به عنوان قیمت پایه ضرب‌در تعداد استفاده می‌کند.',
                 value={
-                    "results": [
-                        {"product_option_id": 105, "source_option_id": 10, "status": "synced"},
-                        {"product_option_id": 106, "source_option_id": None, "status": "synced"}
+                    "options": [
+                        # ====== ویژگی ۱: رنگ محصول (از بانک) ======
+                        {
+                            "option_id": 20, # مثلا شناسه ویژگی 'رنگ ماگ'
+                            "is_required": True,
+                            "values_config": [
+                                {
+                                    "global_value_id": 301, # رنگ سفید
+                                    "price_impact": 0, # بدون هزینه اضافه
+                                    "quantity_prices": [], # <--- خالی (چون تیراژ نداریم)
+                                    "conditions": []
+                                },
+                                {
+                                    "global_value_id": 302, # رنگ طلایی
+                                    "price_impact": 15000, # 15 هزار تومان به ازای هر دونه اضافه می‌شود
+                                    "quantity_prices": [],
+                                    "conditions": []
+                                }
+                            ]
+                        },
+                        # ====== ویژگی ۲: چاپ اختصاصی (کاستوم با شرط) ======
+                        {
+                            "option_id": None,
+                            "name": "custom_print",
+                            "label": "خدمات چاپ اختصاصی",
+                            "input_type": "checkbox",
+                            "is_required": False,
+                            "values_config": [
+                                {
+                                    "ref_id": "print_temp_1",
+                                    "global_value_id": None,
+                                    "label": "چاپ طرح در هر دو طرف ماگ",
+                                    "price_impact": 25000, # 25 هزار تومان اضافه به ازای هر عدد
+                                    "quantity_prices": [],
+                                    "conditions": [
+                                        {
+                                            # این گزینه فقط برای رنگ سفید فعال است
+                                            "required_value_id": 301, 
+                                            "action": "show"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
                     ]
                 },
-                response_only=True
+                request_only=True
             )
         ]
     )
@@ -281,29 +375,70 @@ class ProductDashboardViewSet(viewsets.ViewSet):
     
     # ========== UPDATE OPTION CONFIG ========== #
     @extend_schema(
-        summary="ویرایش تنظیمات یک ویژگی خاص (تکی)",
+        summary="ویرایش تنظیمات یک ویژگی خاص (تکی) + ماتریس قیمت + وابستگی‌ها",
         description="""
-        اگر نخواهید همه آپشن‌ها را دوباره بفرستید و فقط بخواهید قیمت یا تنظیمات یکی را عوض کنید.
+        **معماری جدید:**
+        شما در این اندپوینت می‌توانید برای هر مقدار، هم ماتریس قیمت تیراژ (`quantity_prices`)
+        و هم لیست وابستگی‌ها (`conditions`) را ارسال کنید.
         """,
         request=OptionConfigUpdateSerializer,
         examples=[
             OpenApiExample(
-                'Update Single Option',
-                summary='تغییر قیمت گلاسه',
+                'Comprehensive Update Scenario',
+                summary='سناریو فول ویرایش: آپدیت مقدار قدیمی + افزودن مقادیر جدید وابسته به هم (ref_id)',
+                description='در این مثال پیچیده، یک مقدار قدیمی (id:1200) آپدیت می‌شود. دو مقدار جدید (بدون id) اضافه می‌شوند و یکی از این مقادیر جدید، وابسته به مقدار جدید دیگر است!',
                 value={
                     "product_option_id": 450,
                     "is_required": True,
-                    "guide_text": "قیمت‌ها بروز شد",
-                    "guide_type": "info",
                     "values": [
+                        # ====== آیتم اول: مقداری که از قبل در دیتابیس وجود دارد ======
                         {
-                            "id": 1200,
-                            "price_impact": "8000",
-                            "is_default": True
+                            "id": 1200, 
+                            "price_impact": "0",
+                            "is_default": False,
+                            "quantity_prices": [
+                                {"quantity_id": 1, "price": 50000},
+                                {"quantity_id": 2, "price": 90000}
+                            ],
+                            "conditions": [
+                                {
+                                    "required_value_id": 50, # وابسته به یک آیتم قدیمیِ دیگر
+                                    "action": "show"
+                                }
+                            ]
+                        },
+                        # ====== آیتم دوم: مقدار کاملا جدید (بدون وابستگی) ======
+                        {
+                            "id": None, 
+                            "ref_id": "temp_mat_01", # شناسه موقت ۱
+                            "label": "جنس چرم وارداتی",
+                            "value": "leather_mat",
+                            "price_impact": "25000",
+                            "is_default": False,
+                            "quantity_prices": [],
+                            "conditions": []
+                        },
+                        # ====== آیتم سوم: مقدار کاملا جدید، وابسته به آیتم جدیدِ دوم! ======
+                        {
+                            "id": None, 
+                            "ref_id": "temp_cover_01", # شناسه موقت ۲
+                            "label": "روکش مخمل روی چرم",
+                            "value": "velvet_cover",
+                            "price_impact": "10000",
+                            "is_default": False,
+                            "quantity_prices": [],
+                            "conditions": [
+                                {
+                                    # اینجا فرانت‌اند از شناسه موقتِ آیتم دوم استفاده می‌کند!
+                                    "required_ref_id": "temp_mat_01", 
+                                    "action": "show"
+                                }
+                            ]
                         }
                     ]
-                }
-            )
+                },
+                request_only=True
+            ),
         ]
     )
     @action(detail=True, methods=['patch'], url_path='update-option-config')

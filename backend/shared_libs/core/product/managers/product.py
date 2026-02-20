@@ -21,7 +21,7 @@ class ProductQuerySet(BaseQuerySet):
         from core.product.models import (
             ProductQuantity, ProductSize, ProductOption, 
             ProductOptionValue, ProductImage, Attachment,
-            ProductCategoryRelation
+            ProductCategoryRelation, OptionValueQuantityPrice
         )
 
         return self.select_related(
@@ -40,7 +40,10 @@ class ProductQuerySet(BaseQuerySet):
                 queryset=ProductOption.objects.select_related('option').prefetch_related(
                     Prefetch(
                         'choices', 
-                        queryset=ProductOptionValue.objects.select_related('global_source').order_by('order')
+                        queryset=ProductOptionValue.objects.select_related('global_source').prefetch_related(
+                            # <--- لود کردن ماتریس قیمت برای جلوگیری از N+1
+                            Prefetch('quantity_prices', queryset=OptionValueQuantityPrice.objects.select_related('product_quantity__quantity'))
+                        ).order_by('order')
                     )
                 ).order_by('order')
             ),
