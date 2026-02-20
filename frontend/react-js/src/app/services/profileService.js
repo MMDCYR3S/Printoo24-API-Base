@@ -56,5 +56,11 @@ export const profileService = {
 
   deleteAddress: async (id) => {
     await apiClient.delete(`/profile/addresses/${id}/`);
-  }
+  },
+  // دریافت پیش‌فاکتور بر اساس آیدی سفارش
+  getQuotationByOrder: async (orderId) => {
+    // فرض بر این است که apiClient در فایل شما ایمپورت شده است
+    const response = await apiClient.get(`/dashboard/quotations/by-order/${orderId}/`);
+    return response.data;
+  },
 };
