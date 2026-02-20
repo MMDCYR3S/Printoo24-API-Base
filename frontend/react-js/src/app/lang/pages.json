@@ -361,6 +361,39 @@
     }
   },
 
+  "order": {
+    "invoicePage": {
+        "invoiceNotFound": "فاکتوری یافت نشد!",
+        "invoiceErrorHint": "فاکتور تنها در صورتی نمایش داده می‌شود که وضعیت سفارش تسویه کامل یا نهایی شده باشد.",
+        "backToOrder": "بازگشت به سفارش",
+        "printInvoice": "چاپ فاکتور",
+        "brandName": "پـرینـتـو ۲۴ - Printoo24",
+        "address": "تهران، میدان انقلاب، مجتمع چاپ",
+        "invoiceTitle": "فاکتور فروش",
+        "issuedFor": "صادر شده برای:",
+        "defaultCustomer": "مشتری پرینتو",
+        "contactNumber": "شماره تماس:",
+        "invoiceNumber": "شماره فاکتور:",
+        "issueDate": "تاریخ صدور:",
+        "tableRow": "ردیف",
+        "tableDescription": "شرح خدمات",
+        "tableQuantity": "تعداد",
+        "tableDimensions": "ابعاد",
+        "tableUnitPrice": "فی واحد",
+        "tableTotalPrice": "مبلغ کل",
+        "printOrderDescription": "سفارش چاپ (مجموع اقلام)",
+        "taxAndServices": "هزینه خدمات و مالیات بر ارزش افزوده",
+        "totalAmountsLabel": "جمع مبالغ:",
+        "noticeLabel": "توجه:",
+        "noticeText": "هرگونه ادعا، تعدیل یا مغایرت در ارتباط با این فاکتور باید قبل از تسویه به Printoo24 گزارش شود. از اعتماد شما سپاسگزاریم.",
+        "stampAndSignature": "مهر و امضای",
+        "stampEnglish": "Signature and Stamp",
+        "finalTotalLabel": "مبلغ نهایی (Total):",
+        "paidLabel": "پرداخت شده (Paid):",
+        "remainingLabel": "باقیمانده (To Be Paid):"
+    }
+  },
+
   "layout":{
     "ManinLayout":{
         "AccountCharge": "شارژ سریع حساب"
