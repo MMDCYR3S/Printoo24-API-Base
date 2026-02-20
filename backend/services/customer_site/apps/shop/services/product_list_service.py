@@ -42,3 +42,12 @@ class ShopProductListService:
                 exc_info=True
             )
             raise
+
+    def get_search_results(self, query: str):
+        """
+        دریافت نتایج جستجو با اعمال Eager Loading برای پرفورمنس بالاتر.
+        """
+        return Product.objects.get_queryset().search(query).prefetch_related(
+            'categories',
+            'product_image'
+        )
