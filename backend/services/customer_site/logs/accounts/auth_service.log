@@ -969,3 +969,9 @@ WARNING 2026-02-20 12:14:45,026 auth_service 164 137232350615232 Invalid credent
 DEBUG 2026-02-20 12:14:47,120 auth_service 164 137232350615232 AuthService initialized with UserIdentityService
 INFO 2026-02-20 12:14:47,122 auth_service 164 137232350615232 Login attempt for: mahdi
 INFO 2026-02-20 12:14:47,793 auth_service 164 137232350615232 User logged in: 18
+DEBUG 2026-02-20 12:37:15,446 auth_service 488 123753778378432 AuthService initialized with UserIdentityService
+INFO 2026-02-20 12:37:15,448 auth_service 488 123753778378432 Login attempt for: admin
+INFO 2026-02-20 12:37:16,820 auth_service 488 123753778378432 User logged in: 1
+DEBUG 2026-02-20 13:02:25,379 auth_service 488 123753731659456 AuthService initialized with UserIdentityService
+INFO 2026-02-20 13:02:25,400 auth_service 488 123753731659456 Login attempt for: admin
+INFO 2026-02-20 13:02:26,652 auth_service 488 123753731659456 User logged in: 1

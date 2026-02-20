@@ -116,7 +116,7 @@ const Header = ({ onOpenDrawer }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 // تایم‌اوت برای اینکه کلیک روی نتایج جستجو قبل از بسته شدن انجام شود
-                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+onBlur={() => setTimeout(() => setIsSearchFocused(false), 300)}
               />
               <div className="absolute right-1 flex items-center gap-1">
                 {searchQuery && (

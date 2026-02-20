@@ -426,3 +426,25 @@ INFO 2026-02-20 12:14:48,303 user_transaction_service 164 137232119260864 Fetchi
 WARNING 2026-02-20 12:14:48,329 user_transaction_service 164 137232119260864 No wallet found for User ID: 18
 INFO 2026-02-20 12:14:53,259 user_transaction_service 164 137232119260864 Fetching wallet balance for User ID: 18
 WARNING 2026-02-20 12:14:53,320 user_transaction_service 164 137232119260864 No wallet found for User ID: 18
+INFO 2026-02-20 12:51:49,589 user_transaction_service 488 123753778378432 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 12:51:49,888 user_transaction_service 488 123753778378432 Wallet balance: 30775688.00
+INFO 2026-02-20 12:54:31,705 user_transaction_service 488 123753778378432 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 12:54:31,727 user_transaction_service 488 123753778378432 Wallet balance: 30775688.00
+INFO 2026-02-20 12:55:07,992 user_transaction_service 488 123753731659456 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 12:55:08,024 user_transaction_service 488 123753731659456 Wallet balance: 30775688.00
+INFO 2026-02-20 12:57:23,752 user_transaction_service 488 123753778378432 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 12:57:23,808 user_transaction_service 488 123753778378432 Wallet balance: 30775688.00
+INFO 2026-02-20 13:02:36,647 user_transaction_service 488 123753731659456 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 13:02:36,804 user_transaction_service 488 123753731659456 Wallet balance: 30775688.00
+INFO 2026-02-20 13:05:39,782 user_transaction_service 488 123753756837568 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 13:05:39,802 user_transaction_service 488 123753756837568 Wallet balance: 30775688.00
+INFO 2026-02-20 13:10:41,275 user_transaction_service 488 123753748444864 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 13:10:41,294 user_transaction_service 488 123753748444864 Wallet balance: 30775688.00
+INFO 2026-02-20 13:19:05,248 user_transaction_service 488 123753756837568 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 13:19:05,296 user_transaction_service 488 123753756837568 Wallet balance: 30775688.00
+INFO 2026-02-20 13:24:35,440 user_transaction_service 488 123753778378432 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 13:24:35,565 user_transaction_service 488 123753778378432 Wallet balance: 30775688.00
+INFO 2026-02-20 13:25:31,842 user_transaction_service 488 123753759495872 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 13:25:31,984 user_transaction_service 488 123753759495872 Wallet balance: 30775688.00
+INFO 2026-02-20 13:25:59,818 user_transaction_service 488 123753350547136 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 13:25:59,850 user_transaction_service 488 123753350547136 Wallet balance: 30775688.00

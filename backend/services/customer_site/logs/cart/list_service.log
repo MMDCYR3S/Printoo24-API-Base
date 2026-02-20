@@ -230,3 +230,14 @@ INFO 2026-02-20 12:12:36,354 cart_item_service 164 137232108771008 Fetching cart
 INFO 2026-02-20 12:12:42,985 cart_item_service 164 137231704512192 Fetching cart list for User:1
 INFO 2026-02-20 12:14:48,432 cart_item_service 164 137232108771008 Fetching cart list for User:18
 INFO 2026-02-20 12:14:53,408 cart_item_service 164 137232075200192 Fetching cart list for User:18
+INFO 2026-02-20 12:51:50,348 cart_item_service 488 123753731659456 Fetching cart list for User:1
+INFO 2026-02-20 12:54:31,840 cart_item_service 488 123753740052160 Fetching cart list for User:1
+INFO 2026-02-20 12:55:08,123 cart_item_service 488 123753756837568 Fetching cart list for User:1
+INFO 2026-02-20 12:57:24,029 cart_item_service 488 123753740052160 Fetching cart list for User:1
+INFO 2026-02-20 13:02:36,955 cart_item_service 488 123753756837568 Fetching cart list for User:1
+INFO 2026-02-20 13:05:39,900 cart_item_service 488 123753367332544 Fetching cart list for User:1
+INFO 2026-02-20 13:10:41,416 cart_item_service 488 123753740052160 Fetching cart list for User:1
+INFO 2026-02-20 13:19:05,390 cart_item_service 488 123753367332544 Fetching cart list for User:1
+INFO 2026-02-20 13:24:35,948 cart_item_service 488 123753740052160 Fetching cart list for User:1
+INFO 2026-02-20 13:25:32,074 cart_item_service 488 123753751103168 Fetching cart list for User:1
+INFO 2026-02-20 13:26:00,028 cart_item_service 488 123753367332544 Fetching cart list for User:1
