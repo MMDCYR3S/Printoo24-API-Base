@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Printer, ChevronRight, Receipt, CreditCard, Info } from 'lucide-react';
+import { Printer, ChevronRight, Receipt, Phone, MapPin, Instagram } from 'lucide-react';
 import { profileService } from '../../services/profileService';
 import { formatCurrency } from '../../utils/formatters';
 import globalText from '../../lang/global.json';
@@ -21,7 +21,7 @@ const InvoicePage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-20 print:hidden">
+      <div className="flex justify-center py-20 print:hidden" dir="rtl">
         <span className="loading loading-spinner loading-lg text-primary"></span>
       </div>
     );
@@ -29,7 +29,7 @@ const InvoicePage = () => {
 
   if (isError || !invoice) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-6 max-w-lg mx-auto text-center animate-in fade-in duration-500 print:hidden">
+      <div className="flex flex-col items-center justify-center py-20 gap-6 max-w-lg mx-auto text-center animate-in fade-in duration-500 print:hidden" dir="rtl">
         <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-2">
           <Receipt size={48} />
         </div>
@@ -45,149 +45,185 @@ const InvoicePage = () => {
   }
 
   return (
-    <div className="min-h-screen pb-10 print:pb-0 print:bg-white animate-in fade-in duration-500">
+    <div className="min-h-screen pb-10 print:pb-0 print:bg-white animate-in fade-in duration-500 bg-slate-50 flex flex-col items-center" dir="rtl">
       
-      {/* ترفند چاپ بدون تخریب ظاهر: 
-        این کد تمام استایل‌ها، بک‌گراندها و رنگ‌های ملایم رو دقیقاً همونطور که 
-        روی مانیتور می‌بینی برای چاپ هم حفظ می‌کنه، اما کل سایت (هدر/فوتر) رو مخفی می‌کنه.
-      */}
+      {/* استایل‌های جادویی پرینت سایز A4 */}
       <style type="text/css" media="print">
         {`
-          @page { size: A4 portrait; margin: 15mm; }
+          @page { 
+            size: A4 portrait; 
+            margin: 0; /* حذف کامل هدر/فوتر و لینک‌های مرورگر */
+          }
           body { 
             -webkit-print-color-adjust: exact !important; 
             print-color-adjust: exact !important; 
             background-color: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
           body * { visibility: hidden !important; }
           #printable-invoice, #printable-invoice * { visibility: visible !important; }
+          
           #printable-invoice {
             position: absolute !important;
             left: 0 !important;
             top: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
+            width: 210mm !important; /* دقیقاً عرض A4 */
+            min-height: 297mm !important; /* دقیقاً ارتفاع A4 */
+            margin: 0 auto !important;
+            padding: 10mm 0 !important; /* پدینگ امن داخلی */
             box-shadow: none !important;
+            border: none !important;
+            background: white !important;
           }
         `}
       </style>
 
       {/* اکشن بار (مخفی در چاپ) */}
-      <div className="max-w-4xl mx-auto mb-6 flex justify-between items-center print:hidden">
-        <Link to={`/profile/orders/${id}`} className="btn btn-ghost text-slate-500 hover:bg-slate-100 rounded-xl gap-2">
+      <div className="w-full max-w-[210mm] pt-6 mb-6 flex justify-between items-center print:hidden px-4">
+        <Link to={`/profile/orders/${id}`} className="btn btn-ghost text-slate-500 hover:bg-slate-200 rounded-xl gap-2">
           <ChevronRight size={18} /> بازگشت به سفارش
         </Link>
-        <button onClick={handlePrint} className="btn btn-primary rounded-xl px-6 shadow-lg shadow-primary/20 gap-2">
+        <button onClick={handlePrint} className="btn bg-primary text-primary-content hover:bg-primary/90 rounded-xl px-8 shadow-lg shadow-primary/20 gap-2 border-none">
           <Printer size={18} /> چاپ فاکتور
         </button>
       </div>
 
-      {/* خود فاکتور - تمام کلاس‌های زیباسازی اینجا حفظ شدن */}
+      {/* بدنه اصلی فاکتور 
+        عرض کانتینر روی دسکتاپ همون سایز A4 (حدود 210mm) تنظیم شده تا تو مانیتور همون چیزی رو ببینی که تو پرینت درمیاد
+      */}
       <div 
         id="printable-invoice" 
-        className="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl shadow-slate-200/50 overflow-hidden border border-slate-100"
+        className="w-full max-w-[210mm] min-h-[297mm] mx-auto bg-white shadow-2xl shadow-slate-200/50 relative border border-slate-100 print:border-none flex flex-col"
       >
         
-        {/* هدر فاکتور */}
-        <div className="px-8 py-10 border-b-2 border-slate-50 flex flex-row justify-between items-center gap-6">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-black text-slate-800 tracking-tight">فاکتور نهایی</h1>
-            <p className="text-slate-400 text-sm font-medium">سرویس چاپ آنلاین Printoo24</p>
+        {/* هدر زرد رنگ بالای فاکتور */}
+        <div className="bg-neutral m-4 print:mx-6 rounded-[2rem] p-6 relative flex flex-row items-center justify-between overflow-hidden min-h-[140px] shrink-0">
+          <div className="absolute -right-8 top-1/2 -translate-y-1/2 w-40 h-40 bg-primary rotate-45 border-4 border-white flex items-center justify-center shadow-lg print:shadow-none">
+            <span className="text-primary-content -rotate-45 font-black text-3xl tracking-tighter">P24</span>
           </div>
+          <div className="flex-1 text-center mr-36 text-primary">
+            <h1 className="text-5xl font-black mb-4 tracking-tight">پـرینـتـو ۲۴ - Printoo24</h1>
+            <div className="flex justify-center items-center gap-8 font-bold text-sm">
+              <span className="flex items-center gap-1 dir-ltr"><Phone size={18} className="mr-1"/> 021 - 1234 5678</span>
+              <span className="flex items-center gap-1"><MapPin size={18} className="ml-1"/> تهران، میدان انقلاب، مجتمع چاپ</span>
+            </div>
+          </div>
+        </div>
+
+        {/* اطلاعات خریدار و فاکتور */}
+        <div className="px-12 py-6 flex justify-between items-start shrink-0">
+          <div className="text-right">
+            <h2 className="text-5xl text-red-500 font-normal tracking-wide mb-2">Invoice</h2>
+            <p className="text-slate-700 font-bold text-lg">فاکتور فروش</p>
+          </div>
+          <div className="text-base space-y-3 text-right border-l-4 border-neutral pl-6">
+            <div className="flex gap-3 justify-end items-center">
+              <span className="font-bold text-slate-800">صادر شده برای:</span> 
+              <span className="font-semibold text-slate-600">{invoice?.customer_name || 'مشتری پرینتو'}</span>
+            </div>
+            <div className="flex gap-3 justify-end items-center">
+              <span className="font-bold text-slate-800">شماره تماس:</span> 
+              <span className="font-semibold text-slate-600 dir-ltr">{invoice?.customer_phone || '-'}</span>
+            </div>
+            <div className="flex gap-3 justify-end items-center">
+              <span className="font-bold text-slate-800">شماره فاکتور:</span> 
+              <span className="font-black text-red-500 dir-ltr text-lg">{invoice?.invoice_number}</span>
+            </div>
+            <div className="flex gap-3 justify-end items-center">
+              <span className="font-bold text-slate-800">تاریخ صدور:</span> 
+              <span className="font-semibold text-slate-600 dir-ltr">
+                {new Date(invoice?.issued_at || Date.now()).toLocaleDateString('fa-IR')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* جدول اقلام */}
+        <div className="px-12 mt-2 flex-grow">
+          <table className="w-full text-base text-right border-collapse">
+            <thead>
+              <tr className="border-y-4 border-neutral text-slate-700 bg-slate-50/50">
+                <th className="py-3 px-3 font-black w-12">ردیف</th>
+                <th className="py-3 px-3 font-black">شرح خدمات</th>
+                <th className="py-3 px-3 font-black w-20">تعداد</th>
+                <th className="py-3 px-3 font-black w-24">ابعاد</th>
+                <th className="py-3 px-3 font-black w-32 text-left">فی واحد</th>
+                <th className="py-3 px-3 font-black w-40 text-left">مبلغ کل</th>
+              </tr>
+            </thead>
+            <tbody className="text-slate-800">
+              <tr className="border-b border-slate-200">
+                <td className="py-4 px-3 font-bold">1</td>
+                <td className="py-4 px-3 font-semibold">سفارش چاپ (مجموع اقلام)</td>
+                <td className="py-4 px-3 font-medium">1</td>
+                <td className="py-4 px-3 text-slate-400 font-medium">N/A</td>
+                <td className="py-4 px-3 dir-ltr text-left font-medium">{formatCurrency(invoice?.items_amount)}</td>
+                <td className="py-4 px-3 dir-ltr text-left font-bold">{formatCurrency(invoice?.items_amount)}</td>
+              </tr>
+              {(invoice?.services_amount > 0 || invoice?.tax_amount > 0) && (
+                <tr className="border-b border-slate-200 bg-slate-50/80">
+                  <td className="py-3 px-3"></td>
+                  <td colSpan="4" className="py-3 px-3 text-slate-600 font-medium">هزینه خدمات و مالیات بر ارزش افزوده</td>
+                  <td className="py-3 px-3 dir-ltr text-left font-bold">{formatCurrency((invoice?.services_amount || 0) + (invoice?.tax_amount || 0))}</td>
+                </tr>
+              )}
+              <tr className="border-b-4 border-neutral bg-slate-50/30">
+                <td colSpan="5" className="py-4 px-3 text-left font-black text-slate-800 text-lg">جمع مبالغ:</td>
+                <td className="py-4 px-3 font-black dir-ltr text-left text-slate-800 text-lg">{formatCurrency(invoice?.final_amount)} <span className="text-sm font-medium text-slate-500">{globalText.currency}</span></td>
+              </tr>
+            </tbody>
+          </table>
           
-          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-left min-w-[250px]">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs text-slate-400 font-bold">شماره فاکتور:</span>
-              <span className="text-sm font-black text-slate-700 dir-ltr">{invoice.invoice_number}</span>
-            </div>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs text-slate-400 font-bold">تاریخ صدور:</span>
-              <span className="text-sm font-semibold text-slate-600">
-                {new Date(invoice.issued_at).toLocaleDateString('fa-IR')}
-              </span>
-            </div>
-            <div className="flex justify-between items-center pt-2 border-t border-slate-200 border-dashed">
-              <span className="text-xs text-slate-400 font-bold">وضعیت:</span>
-              <span className="badge badge-success bg-success/10 text-success border-none font-bold text-xs px-3 py-3 rounded-lg">
-                {invoice.status_display}
-              </span>
-            </div>
+          {/* بخش توضیحات */}
+          <div className="mt-6 text-sm bg-slate-50/50 py-3 px-4 rounded-xl border border-slate-100 print:border-none print:bg-transparent">
+            <p className="text-slate-800 font-medium leading-relaxed">
+              <span className="font-black text-primary">توجه:</span> هرگونه ادعا، تعدیل یا مغایرت در ارتباط با این فاکتور باید قبل از تسویه به Printoo24 گزارش شود. از اعتماد شما سپاسگزاریم.
+            </p>
           </div>
         </div>
 
-        {/* بدنه فاکتور (لیست مبالغ) */}
-        <div className="p-8">
-          <div className="space-y-0 text-sm text-slate-600">
-            <div className="flex justify-between items-center py-4 border-b border-dashed border-slate-200 hover:bg-slate-50/50 px-2 transition-colors">
-              <span className="font-semibold text-slate-700">مجموع مبلغ اقلام سفارش</span>
-              <span className="font-bold dir-ltr">
-                {formatCurrency(invoice.items_amount)} <span className="text-xs text-slate-400">{globalText.currency}</span>
-              </span>
+        {/* محافظت از شکسته شدن صفحه (جادوی اصلی اینجاست)
+          کلاس print:break-inside-avoid نمیذاره این دایو وسطش دو تیکه بشه
+        */}
+        <div className="print:break-inside-avoid mt-auto pt-16 shrink-0 relative">
+          
+          {/* بخش پایینی: مهر و امضا + مبالغ نهایی */}
+          <div className="px-12 relative flex justify-between items-end mb-6">
+            {/* خط زرد جداکننده */}
+            <div className="absolute bottom-16 left-12 right-12 h-[3px] bg-neutral print:bg-neutral z-0"></div>
+
+            {/* مهر و امضا */}
+            <div className="z-10 bg-white print:bg-white px-8 text-center pb-2">
+              <div className="w-24 h-24 bg-secondary text-secondary-content rotate-45 mx-auto mb-6 flex items-center justify-center border-4 border-white shadow-sm print:border-2">
+                <span className="-rotate-45 text-xs font-black text-center leading-relaxed">مهر و امضای<br/>Printoo24</span>
+              </div>
+              <p className="font-black text-slate-800 text-sm">Signature and Stamp</p>
             </div>
 
-            <div className="flex justify-between items-center py-4 border-b border-dashed border-slate-200 hover:bg-slate-50/50 px-2 transition-colors">
-              <span className="font-semibold text-slate-700">هزینه خدمات / جانبی</span>
-              <span className="font-bold dir-ltr">
-                {formatCurrency(invoice.services_amount)} <span className="text-xs text-slate-400">{globalText.currency}</span>
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center py-4 border-b border-dashed border-slate-200 hover:bg-slate-50/50 px-2 transition-colors">
-              <span className="font-semibold text-slate-700">مالیات بر ارزش افزوده</span>
-              <span className="font-bold dir-ltr text-slate-500">
-                + {formatCurrency(invoice.tax_amount)} <span className="text-xs text-slate-400">{globalText.currency}</span>
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center py-4 px-2 transition-colors">
-              <span className="font-semibold text-error">تخفیف اعمال شده</span>
-              <span className="font-bold dir-ltr text-error">
-                - {formatCurrency(invoice.discount_amount)} <span className="text-xs text-slate-400">{globalText.currency}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* بخش جمع‌بندی مالی (حفظ بک‌گراندهای ملایم) */}
-        <div className="bg-slate-50 p-8 grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-slate-100">
-          <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-center items-center text-center">
-            <span className="text-xs text-slate-400 font-bold mb-1">مبلغ نهایی فاکتور</span>
-            <span className="text-xl font-black text-slate-800 dir-ltr">
-              {formatCurrency(invoice.final_amount)} <span className="text-sm font-medium text-slate-400">{globalText.currency}</span>
-            </span>
-          </div>
-
-          <div className="bg-success/5 p-5 rounded-2xl border border-success/10 flex flex-col justify-center items-center text-center">
-            <span className="text-xs text-success/70 font-bold mb-1 flex items-center gap-1"><CreditCard size={14} className="print:hidden"/> پرداخت شده</span>
-            <span className="text-xl font-black text-success dir-ltr">
-              {formatCurrency(invoice.paid_amount)} <span className="text-sm font-medium opacity-70">{globalText.currency}</span>
-            </span>
-          </div>
-
-          <div className={`p-5 rounded-2xl border flex flex-col justify-center items-center text-center ${invoice.remaining_amount < 0 ? 'bg-info/5 border-info/10' : invoice.remaining_amount > 0 ? 'bg-error/5 border-error/10' : 'bg-slate-100 border-slate-200'}`}>
-            <span className={`text-xs font-bold mb-1 ${invoice.remaining_amount !== 0 ? 'text-slate-600' : 'text-slate-400'}`}>
-              {invoice.remaining_amount < 0 ? 'بستانکار (اضافه پرداختی)' : invoice.remaining_amount > 0 ? 'بدهی (باقیمانده)' : 'مانده حساب'}
-            </span>
-            <span className={`text-xl font-black dir-ltr ${invoice.remaining_amount < 0 ? 'text-info' : invoice.remaining_amount > 0 ? 'text-error' : 'text-slate-500'}`}>
-              {formatCurrency(Math.abs(invoice.remaining_amount))} <span className="text-sm font-medium opacity-70">{globalText.currency}</span>
-            </span>
-          </div>
-        </div>
-
-        {/* توضیحات */}
-        {invoice.description && (
-          <div className="p-8 bg-white border-t border-slate-50">
-            <div className="flex items-start gap-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
-              <Info size={20} className="text-slate-400 flex-shrink-0 mt-0.5 print:hidden" />
-              <div>
-                <span className="block text-xs font-bold text-slate-500 mb-1">توضیحات فاکتور:</span>
-                <p className="text-sm text-slate-600 leading-relaxed text-justify">
-                  {invoice.description}
-                </p>
+            {/* خلاصه مبالغ */}
+            <div className="z-10 bg-white print:bg-white px-6 text-base w-80 space-y-3 pb-2">
+              <div className="flex justify-between items-center bg-slate-50 p-2 rounded-lg">
+                <span className="font-black text-red-500 text-lg">مبلغ نهایی (Total):</span>
+                <span className="font-black text-red-500 text-xl dir-ltr">{formatCurrency(invoice?.final_amount)} <span className="text-sm">{globalText.currency}</span></span>
+              </div>
+              <div className="flex justify-between items-center px-2">
+                <span className="font-bold text-slate-700">پرداخت شده (Paid):</span>
+                <span className="font-bold text-slate-800 text-lg dir-ltr">{formatCurrency(invoice?.paid_amount)} <span className="text-sm text-slate-500">{globalText.currency}</span></span>
+              </div>
+              <div className="flex justify-between items-center px-2">
+                <span className="font-bold text-slate-700">باقیمانده (To Be Paid):</span>
+                <span className="font-black text-slate-900 text-lg dir-ltr">{formatCurrency(Math.max(0, invoice?.remaining_amount || 0))} <span className="text-sm text-slate-500">{globalText.currency}</span></span>
               </div>
             </div>
           </div>
-        )}
+
+          {/* فوتر زرد پایین */}
+          <div className="bg-neutral text-primary font-black p-4 mx-6 print:mx-6 mb-4 rounded-[1.5rem] text-center flex justify-center items-center gap-2 text-lg">
+            <Instagram size={22} /> <span className="mt-1 tracking-widest uppercase">printoo24_official</span>
+          </div>
+
+        </div>
 
       </div>
     </div>
