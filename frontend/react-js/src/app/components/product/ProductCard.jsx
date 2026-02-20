@@ -17,11 +17,11 @@ const ProductCard = ({ product }) => {
   return (
     <Link 
       to={`/product/${product.slug}`} 
-      className="group bg-white rounded-[24px] p-2 border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col block"
+      className="group  border border-slate-200 rounded-[24px]   bg-base  hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col block"
     >
       
       {/* بخش تصویر */}
-      <div className="relative aspect-video rounded-2xl bg-slate-50 overflow-hidden isolate">
+      <div className="relative aspect-video rounded-2xl  overflow-hidden isolate">
         {imageUrl ? (
           <img 
             src={imageUrl} 
@@ -46,7 +46,7 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* بخش اطلاعات */}
-      <div className="pt-3 px-2 flex flex-col gap-1.5 flex-1">
+      <div className="pt-3 pb-2 px-3 flex flex-col gap-1.5 flex-1">
         
         {/* مسیر دسته‌بندی */}
         <div className="text-[10px] text-gray-400 font-medium flex items-center gap-1 truncate" dir="rtl">
