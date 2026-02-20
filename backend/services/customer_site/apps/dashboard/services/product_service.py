@@ -86,19 +86,40 @@ class ProductDashboardService:
     def bulk_sync_options(self, product_id: int, options_data: List[Dict]):
         """
         دریافت لیستی از آپشن‌ها و اعمال آنها روی محصول.
+        مدیریت شناسه موقت (ref_id) برای رفع مشکل مرغ و تخم‌مرغ در وابستگی‌ها.
         """
+        ref_map = {}
+        
+        pending_conditions = []
         results = []
+
         for opt_data in options_data:
-            try:
-                product_option = self._domain_service.attach_option_with_config(product_id, opt_data)
-                results.append({
-                    'product_option_id': product_option.id,
-                    'source_option_id': opt_data.get('option_id'),
-                    'status': 'synced'
-                })
-            except Exception as e:
-                logger.error(f"Error syncing option data {opt_data.get('name', opt_data.get('option_id'))}: {e}")
-                raise e
+            # ===== ساخت ویژگی و مقادیر ===== #
+            product_option, created_values_with_refs = self._domain_service.attach_option_with_config(product_id, opt_data)
+            
+            # ===== پرکردن دیکشنری ===== #
+            for ref_id, val_obj in created_values_with_refs.items():
+                ref_map[ref_id] = val_obj
+                
+            # ===== جمع‌آوری شرط برای مرحله دوم ===== #
+            for val_config in opt_data.get('values_config', []):
+                val_ref = val_config.get('ref_id')
+                conds = val_config.get('conditions', [])
+                if val_ref and conds:
+                    pending_conditions.append({
+                        'target_ref': val_ref,
+                        'conditions': conds
+                    })
+                    
+            results.append({
+                'product_option_id': product_option.id,
+                'source_option_id': opt_data.get('option_id'),
+                'status': 'synced'
+            })
+
+        if pending_conditions:
+            self._domain_service.create_bulk_conditions(ref_map, pending_conditions)
+
         return results
     
     # ===== تصاویر و فایل های پیوست ===== #

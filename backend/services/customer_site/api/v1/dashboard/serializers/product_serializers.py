@@ -33,11 +33,11 @@ class ProductCategorySerializer(serializers.ModelSerializer):
 
 # ===== 1. اصلاح شده: حذف قیمت از کانفیگ تیراژ ===== #
 class ProductQuantityConfigSerializer(GuideSerializerMixin, serializers.Serializer):
-    """
-    دریافت شناسه تیراژ برای محصول.
-    نکته: قیمت از این بخش حذف شد چون محاسبات بر اساس Price Per Unit انجام می‌شود.
-    """
-    id = serializers.IntegerField(help_text="شناسه تیراژ (Quantity ID)")
+    id = serializers.IntegerField(help_text="شناسه تیراژ (از جدول Quantity)")
+    price = serializers.DecimalField(
+        max_digits=12, decimal_places=0, default=0,
+        help_text="قیمت پایه محصول در این تیراژ"
+    )
 
 # ===== Product Size Serializer ===== #
 class ProductSizeConfigSerializer(GuideSerializerMixin, serializers.Serializer):
@@ -120,18 +120,61 @@ class QuantitySyncSerializer(serializers.Serializer):
         allow_empty=True
     )
 
+class QuantityPriceMatrixSerializer(serializers.Serializer):
+    quantity_id = serializers.IntegerField(help_text="ID تیراژ (از جدول Quantity، نه ProductQuantity)")
+    price = serializers.DecimalField(max_digits=12, decimal_places=0, default=0, help_text="قیمت در این تیراژ")
+
+class OptionConditionOutputSerializer(serializers.Serializer):
+    """
+    نمایش شرط‌های وابستگی به ادمین در داشبورد همراه با جزئیات کامل پیش‌نیاز
+    """
+    required_value_id = serializers.IntegerField(source='required_value.id')
+    action = serializers.CharField()
+    
+    # ===== فیلدهای جدید برای راحتی فرانت‌اند =====
+    required_value_label = serializers.SerializerMethodField(help_text="نام مقداری که باید انتخاب شود")
+    required_option_label = serializers.SerializerMethodField(help_text="نام گروهِ ویژگی‌ای که این مقدار درون آن است")
+
+    def get_required_value_label(self, obj):
+        """ استخراج نام زیرویژگی پیش‌نیاز (مثلاً: چوب وارداتی) """
+        val = obj.required_value
+        if val.label:
+            return val.label
+        if val.global_source:
+            return val.global_source.label
+        return "نامشخص"
+
+    def get_required_option_label(self, obj):
+        """ استخراج نام ویژگی والد پیش‌نیاز (مثلاً: جنس اختصاصی) """
+        opt = obj.required_value.product_option
+        if opt.label:
+            return opt.label
+        if opt.option:
+            return opt.option.label
+        return "نامشخص"
+
+class OptionConditionSerializer(serializers.Serializer):
+    required_value_id = serializers.IntegerField(required=False, allow_null=True)
+    required_ref_id = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    action = serializers.ChoiceField(choices=['show', 'hide'], default='show')
+
 # ===== Option Value Override Serializer ===== #
 class OptionValueOverrideSerializer(GuideSerializerMixin, serializers.Serializer):
-    """
-    اطلاعاتی که ادمین می‌خواهد برای مقادیر اعمال کند.
-    می‌تواند Override روی گلوبال باشد یا یک مقدار کاملاً جدید (Custom).
-    """
+    ref_id = serializers.CharField(required=False, allow_null=True, allow_blank=True, help_text="شناسه موقت فرانت‌اند")
     global_value_id = serializers.IntegerField(required=False, allow_null=True)
     label = serializers.CharField(required=False)
     value = serializers.CharField(required=False)
     price_impact = serializers.DecimalField(max_digits=14, decimal_places=0, default=0)
     is_default = serializers.BooleanField(default=False)
     is_active = serializers.BooleanField(default=True)
+    
+    quantity_prices = QuantityPriceMatrixSerializer(many=True, required=False, allow_empty=True)
+    conditions = OptionConditionSerializer(many=True, required=False, allow_empty=True)
+
+class QuantityPriceMatrixOutputSerializer(serializers.Serializer):
+    quantity_id = serializers.IntegerField(source='product_quantity.quantity.id')
+    quantity_value = serializers.IntegerField(source='product_quantity.quantity.value')
+    price = serializers.DecimalField(max_digits=12, decimal_places=0)
 
 # ===== Option Attach With Price Serializer ===== #
 class OptionAttachWithPriceSerializer(serializers.Serializer):
@@ -166,14 +209,22 @@ class OptionAttachWithPriceSerializer(serializers.Serializer):
                 )
         return data
 
+# ===== Option Value Price Item Serializer ===== #
 class OptionValuePriceItemSerializer(serializers.Serializer):
-    id = serializers.IntegerField(help_text="ID of ProductOptionValue")
-    # ===== فیلدهای مالی و تنظیمی ===== #
+    # ===== شناسه مربوط به ویژگی ===== #
+    id = serializers.IntegerField(help_text="ID of ProductOptionValue", required=False, allow_null=True)
+    # ===== شناسه ویژگی‌های جدید ===== #
+    ref_id = serializers.CharField(required=False, allow_null=True, allow_blank=True, help_text="شناسه موقت برای مقادیر جدید")
+    # ===== اگر نیازمند مقدار جدید بود ===== #
+    label = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    value = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
     price_impact = serializers.DecimalField(max_digits=14, decimal_places=0, required=False)
-    
-    # ===== فیلدهای منطقی و نمایش ===== #
     is_default = serializers.BooleanField(required=False)
     order = serializers.IntegerField(required=False)
+    
+    quantity_prices = QuantityPriceMatrixSerializer(many=True, required=False, allow_empty=True)
+    conditions = OptionConditionSerializer(many=True, required=False, allow_empty=True)
 
 # ===== Option Price Update Serializer =====
 class OptionPriceUpdateSerializer(serializers.Serializer):
@@ -183,37 +234,50 @@ class OptionPriceUpdateSerializer(serializers.Serializer):
 
 # ===== Product Option Value Price Item Serializer ===== #
 class ProductOptionValueOutputSerializer(serializers.ModelSerializer):
-    """
-    سریالایزر برای نمایش مقادیر انتخاب شده (Choices) در صفحه جزئیات محصول.
-    """
     is_custom = serializers.SerializerMethodField()
     label = serializers.SerializerMethodField()
     value = serializers.SerializerMethodField()
+    
+    quantity_prices = QuantityPriceMatrixOutputSerializer(many=True, read_only=True)
+    
+    # ===== اضافه شدن فیلد اختصاصی داشبورد ===== #
+    conditions = OptionConditionOutputSerializer(source='dependency_rules', many=True, read_only=True)
+    
+    isAvailable = serializers.SerializerMethodField()
+    enables_values = serializers.SerializerMethodField()
+    disables_values = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductOptionValue
         fields = [
-            'id', 'label', 'value', 'price_impact', 
-            'is_default', 'is_custom', 'guide_text', 'guide_type', 'order'
+            'id', 'label', 'value', 'price_impact', 'quantity_prices',
+            'is_default', 'is_custom', 'guide_text', 'guide_type', 'order',
+            'isAvailable', 'enables_values', 'disables_values',
+            'conditions'
         ]
 
     def get_is_custom(self, obj):
         return obj.global_source is None
         
     def get_label(self, obj):
-        if obj.label:
-            return obj.label
-        if obj.global_source:
-            return obj.global_source.label
-        return ""
+        return obj.label or (obj.global_source.label if obj.global_source else "")
         
     def get_value(self, obj):
-        if obj.value:
-            return obj.value
-        if obj.global_source:
-            return obj.global_source.value
-        return ""
+        return obj.value or (obj.global_source.value if obj.global_source else "")
 
+    def get_isAvailable(self, obj):
+        """ اگر در قانون 'show' به عنوان هدف باشد، در ابتدا مخفی است تا والد انتخاب شود """
+        return not obj.dependency_rules.filter(action='show').exists()
+
+    def get_enables_values(self, obj):
+        """ لیستی از آیدی‌هایی که با انتخاب این گزینه، روشن می‌شوند """
+        return list(obj.enables_targets.filter(action='show').values_list('target_value_id', flat=True))
+
+    def get_disables_values(self, obj):
+        """ لیستی از آیدی‌هایی که با انتخاب این گزینه، خاموش می‌شوند """
+        return list(obj.enables_targets.filter(action='hide').values_list('target_value_id', flat=True))
+
+# ===== Product Option Output Seralizer ===== #
 class ProductOptionOutputSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     label = serializers.SerializerMethodField()
@@ -317,13 +381,14 @@ class ProductDetailSerializer(serializers.Serializer):
                 for ps in product.product_size.all()
             ]
         }
-    
 
     def get_quantities(self, obj):
         product = obj['product']
         return [
             {
-                "value": pq.quantity.value
+                "id": pq.quantity.id,
+                "value": pq.quantity.value,
+                "price": pq.price
             }
             for pq in product.product_quantity.all()
         ]

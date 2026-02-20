@@ -602,6 +602,61 @@ class ProductOptionValue(BaseOptionValueDefinition):
     def __str__(self):
         return f"{self.product_option.product.name} | {self.label} ({self.price_impact})"
 
+# ====== Option Dependency Rule ====== #
+class ProductOptionCondition(models.Model):
+    """
+    موتور قوانین وابستگی ویژگی‌ها (Dependency Matrix).
+    به جای ساختار درختی (Tree)، ویژگی‌ها کاملاً تخت (Flat) ساخته می‌شوند 
+    و با این جدول به هم وابسته (مشروط) می‌شوند.
+    مثال: گرماژ ۱۳۵ گرم (target) فقط زمانی فعال و قابل انتخاب است که جنس گلاسه (condition) انتخاب شده باشد.
+    """
+    
+    ACTION_CHOICES = [
+        ('show', _('نمایش دادن و فعال کردن (Enable)')),
+        ('hide', _('مخفی کردن و غیرفعال کردن (Disable/Exclude)')),
+    ]
+
+    # ===== فیلدهای زیرویژگی اختصاصی و شرطی ===== #
+    target_value = models.ForeignKey(
+        'ProductOptionValue', 
+        on_delete=models.CASCADE, 
+        related_name='dependency_rules',
+        verbose_name=_("مقدار هدف (وابسته)")
+    )
+    # ===== فیلد پدر که نیازمند زیرویژگی است ===== #
+    required_value = models.ForeignKey(
+        'ProductOptionValue', 
+        on_delete=models.CASCADE, 
+        related_name='enables_targets',
+        verbose_name=_("مقدار پیش‌نیاز (شرط)")
+    )
+
+    action = models.CharField(
+        _("نوع قانون"),
+        max_length=20,
+        choices=ACTION_CHOICES,
+        default='show'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("قانون وابستگی ویژگی")
+        verbose_name_plural = _("قوانین وابستگی ویژگی‌ها")
+        # ===== جلوگیری از ثبت مقادیر تکراری ===== #
+        unique_together = ('target_value', 'required_value')
+
+    def clean(self):
+        """ 
+        جلوگیری از ساخت لوپ بی‌نهایت یا ارجاع به ویژگی یکسان 
+        (مثلاً مقداری از ویژگی 'جنس' نمی‌تونه به مقدار دیگه‌ای از همون ویژگی 'جنس' وابسته باشه)
+        """
+        if self.target_value.product_option == self.required_value.product_option:
+            raise ValidationError(_("یک گزینه نمی‌تواند به گزینه‌ای از همان ویژگی (هم‌گروه خودش) وابسته باشد."))
+
+    def __str__(self):
+        return f"اگر [{self.required_value.label}] انتخاب شد -> نمایش بده: [{self.target_value.label}]"
+
 # ====== Option Value & Quantity Pricing Matrix ====== #
 class OptionValueQuantityPrice(models.Model):
     """

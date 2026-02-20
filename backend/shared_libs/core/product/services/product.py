@@ -11,6 +11,7 @@ from ..models import (
     Product, ProductPricingConfig, ProductQuantity, 
     ProductOption, ProductOptionValue, Option, ProductSize,
     ProductQuantity, Quantity, Size, ProductCategory,
+    OptionValueQuantityPrice, ProductOptionCondition
 )
 
 class ProductService:
@@ -225,6 +226,7 @@ class ProductService:
                 user=user, 
                 product=product, 
                 quantity_id=item['id'], 
+                price=item.get('price', 0),
                 guide_text=item.get('guide_text', ''),
                 guide_type=item.get('guide_type', 'info')
             )
@@ -236,16 +238,21 @@ class ProductService:
 
     # ===== Options Logic ===== #
     @transaction.atomic
-    def attach_option_with_config(self, product_id: int, data: dict) -> ProductOption:
+    def attach_option_with_config(self, product_id: int, data: dict):
         """
-        اتصال یک بانک ویژگی یا ایجاد یک ویژگی با زیر ویژگی به محصول
+        اتصال یک ویژگی (از بانک یا کاستوم) به محصول 
+        + ذخیره ماتریس قیمت تیراژ 
+        + بازگرداندن دیکشنری ref_id ها برای ساخت شرط‌ها در فاز دوم.
         """
+        from ..models import OptionValueQuantityPrice
+        
         product = Product.objects.get_by_id(product_id)
         if not product:
             raise ProductNotFoundException("محصول یافت نشد.")
 
         option_id = data.get('option_id')
         global_option = None
+        
         # ===== حالت ۱: اتصال به بانک (Linked) ===== #
         if option_id:
             if product.options.filter(option_id=option_id).exists():
@@ -256,6 +263,7 @@ class ProductService:
                 raise InvalidProductDataException("ویژگی گلوبال یافت نشد.")
 
         max_order = product.options.aggregate(max_o=Max('order'))['max_o'] or 0
+        
         # ===== فیلدهای ساخت یک ویژگی ===== #
         create_kwargs = {
             "product": product,
@@ -266,76 +274,82 @@ class ProductService:
             "guide_type": data.get('guide_type', 'info')
         }
         
-        # ===== اگر ویژگی فقط مربوط به این محصول هست ===== #
+        # ===== حالت ۲: اگر ویژگی کاملا سفارشی و کاستوم هست ===== #
         if not global_option:
             create_kwargs.update({
                 "name": data.get('name', f'custom_option_{timezone.now().timestamp()}'),
                 "label": data.get('label', 'Custom Option'),
                 "input_type": data.get('input_type', 'select')
             })
+            
         product_option = ProductOption.objects.create(**create_kwargs)
         
         # ===== پردازش مقادیر فیلدها ===== #
         input_configs = data.get('values_config', [])
 
+        # نگاشت برای مقادیری که از بانک آمده‌اند
         linked_configs_map = {
             item.get('global_value_id'): item 
             for item in input_configs if item.get('global_value_id')
         }
         
+        # جداسازی مقادیر کاملاً کاستوم
         custom_configs = [item for item in input_configs if not item.get('global_value_id')]
-        local_values_to_create = []
+        
+        # کش کردن تیراژهای محصول برای استفاده در ماتریس
+        product_quantities = {pq.quantity_id: pq for pq in product.product_quantity.all()}
+        
         current_display_order = 0
         
-        # ===== اگر ویژگی ها بودند و از بانک ویژگی است ===== #
+        # خروجی‌ها برای مرحله دوم (Pass 2)
+        created_values_with_refs = {}
+        matrix_to_create = []
+        
+        # ===== ۱. ساخت مقادیر برگرفته از بانک ===== #
         if global_option:
             global_values = global_option.global_values.all()
             for g_val in global_values:
-                price = 0
-                is_default = False
-                final_label = g_val.label
-                final_value = g_val.value
-                final_guide_text = g_val.guide_text
-                final_guide_type = g_val.guide_type
-                should_create = True 
+                config = linked_configs_map.get(g_val.id, {})
+                should_create = config.get('is_active', True)
             
-                # ===== اگر ویژگی باید ایجاد شود ===== #
-                if g_val.id in linked_configs_map:
-                    config = linked_configs_map[g_val.id]
-
-                    if not config.get('is_active', True):
-                        should_create = False
+                if should_create:
+                    # ساخت و ذخیره تکی مقدار (برای دریافت شناسه واقعی در دیتابیس)
+                    val_obj = ProductOptionValue(
+                        product_option=product_option,
+                        global_source=g_val,
+                        label=config.get('label', g_val.label),  
+                        value=config.get('value', g_val.value),
+                        order=current_display_order,
+                        price_impact=config.get('price_impact', 0),
+                        is_default=config.get('is_default', False),
+                        guide_text=config.get('guide_text', g_val.guide_text),
+                        guide_type=config.get('guide_type', g_val.guide_type)
+                    )
+                    val_obj.save() 
+                    current_display_order += 1
                     
-                    if should_create:
-                        price = config.get('price_impact', 0)
-                        is_default = config.get('is_default', False)
-                        if config.get('label'):
-                            final_label = config['label']
-                        if config.get('value'):
-                            final_value = config['value']
-                        # ===== بخش کادر راهنما  ===== #
-                        final_guide_text = config.get('guide_text', '')
-                        final_guide_type = config.get('guide_type', 'tip')
+                    # ذخیره در دیکشنری رف‌نس‌ها اگر فرانت‌اند ref_id داده باشد
+                    ref_id = config.get('ref_id')
+                    if ref_id:
+                        created_values_with_refs[ref_id] = val_obj
 
-            if should_create:
-                local_values_to_create.append(ProductOptionValue(
-                    product_option=product_option,
-                    global_source=g_val,
-                    label=final_label,  
-                    value=final_value,
-                    order=current_display_order,
-                    price_impact=price,
-                    is_default=is_default,
-                    guide_text=final_guide_text,
-                    guide_type=final_guide_type
-                ))
-                current_display_order += 1
+                    # آماده‌سازی ماتریس قیمت تیراژ برای این مقدار
+                    for qp in config.get('quantity_prices', []):
+                        pq = product_quantities.get(qp['quantity_id'])
+                        if pq:
+                            matrix_to_create.append(OptionValueQuantityPrice(
+                                option_value=val_obj,
+                                product_quantity=pq,
+                                price=qp.get('price', 0)
+                            ))
 
+        # ===== ۲. ساخت مقادیر کاملاً کاستوم ===== #
         for custom_item in custom_configs:
             if not custom_item.get('label'):
                 raise InvalidProductDataException("برای مقادیر سفارشی (Custom)، وارد کردن عنوان (Label) الزامی است.")
 
-            local_values_to_create.append(ProductOptionValue(
+            # ساخت و ذخیره تکی مقدار
+            val_obj = ProductOptionValue(
                 product_option=product_option,
                 global_source=None,
                 label=custom_item['label'],
@@ -345,14 +359,66 @@ class ProductService:
                 is_default=custom_item.get('is_default', False),
                 guide_text=custom_item.get('guide_text', ''),
                 guide_type=custom_item.get('guide_type', 'info')
-            ))
+            )
+            val_obj.save()
             current_display_order += 1
             
-        # ===== ذخیره ویژگی ها ===== #
-        if local_values_to_create:
-            ProductOptionValue.objects.bulk_create(local_values_to_create)
+            # ذخیره در دیکشنری رف‌نس‌ها اگر فرانت‌اند ref_id داده باشد
+            ref_id = custom_item.get('ref_id')
+            if ref_id:
+                created_values_with_refs[ref_id] = val_obj
             
-        return product_option
+            # آماده‌سازی ماتریس قیمت تیراژ برای این مقدار
+            for qp in custom_item.get('quantity_prices', []):
+                pq = product_quantities.get(qp['quantity_id'])
+                if pq:
+                    matrix_to_create.append(OptionValueQuantityPrice(
+                        option_value=val_obj,
+                        product_quantity=pq,
+                        price=qp.get('price', 0)
+                    ))
+                    
+        # ===== ذخیره دسته‌جمعی ماتریس (Performance Boost) ===== #
+        if matrix_to_create:
+            OptionValueQuantityPrice.objects.bulk_create(matrix_to_create)
+            
+        return product_option, created_values_with_refs
+
+    @transaction.atomic
+    def create_bulk_conditions(self, ref_map: dict, pending_conditions: list):
+        """
+        ساخت دسته‌جمعی شرط‌ها بر اساس نگاشت شناسه‌های موقت (ref_id) 
+        به آبجکت‌های واقعی دیتابیس.
+        """
+        from ..models import ProductOptionCondition
+        conditions_to_create = []
+        
+        for item in pending_conditions:
+            target_obj = ref_map.get(item['target_ref'])
+            if not target_obj:
+                continue
+                
+            for cond in item['conditions']:
+                req_ref_id = cond.get('required_ref_id')
+                req_val_id = cond.get('required_value_id')
+                
+                # پیدا کردن پیش‌نیاز (یا از طریق آیدی واقعی دیتابیس یا از طریق شناسه موقت)
+                req_obj = None
+                if req_ref_id:
+                    req_obj = ref_map.get(req_ref_id)
+                elif req_val_id:
+                    req_obj = ProductOptionValue.objects.filter(id=req_val_id).first()
+                
+                # جلوگیری از ساخت شرط به خودش یا هم‌گروه خودش
+                if req_obj and req_obj.product_option_id != target_obj.product_option_id:
+                    conditions_to_create.append(ProductOptionCondition(
+                        target_value=target_obj,
+                        required_value=req_obj,
+                        action=cond.get('action', 'show')
+                    ))
+                    
+        if conditions_to_create:
+            ProductOptionCondition.objects.bulk_create(conditions_to_create)
 
     @transaction.atomic
     def update_product_option_config(self, product_id: int, product_option_id: int, data: dict):
@@ -378,16 +444,33 @@ class ProductService:
 
     @transaction.atomic
     def _update_option_values_pricing_logic(self, product_id: int, product_option_id: int, updates: List[Dict]):
-        current_values = ProductOptionValue.objects.filter(product_option_id=product_option_id)
-        value_map = {v.id: v for v in current_values}
+        from ..models import OptionValueQuantityPrice, ProductOptionCondition
+        
+        # ===== بارگذاری تمامی مقادیر فعلی محصول ===== #
+        all_product_values = ProductOptionValue.objects.filter(product_option__product_id=product_id)
+        
+        # ===== مپ کردن تمامی شناسه ویژگی‌ها ===== #
+        value_map_by_id = {v.id: v for v in all_product_values}
+        
+        # ===== دیکشنری برای ذخیره‌سازی ویژگی‌های جدید ===== #
+        ref_map_new_values = {}
+
+        # ===== تیراژ محصولات ===== #
+        product_quantities = {pq.quantity_id: pq for pq in ProductQuantity.objects.filter(product_id=product_id)}
 
         to_update = []
-        fields_to_update = ['price_impact', 'is_default', 'order', 'guide_text', 'guide_type']
+        fields_to_update = ['price_impact', 'is_default', 'order', 'guide_text', 'guide_type', 'label', 'value']
+        
+        matrix_to_create = []
+        pending_conditions = []
 
         for item in updates:
             val_id = item.get('id')
-            if val_id in value_map:
-                obj = value_map[val_id]
+            ref_id = item.get('ref_id')
+            
+            # ===== آپدیت مقادیر موجود ===== #
+            if val_id and val_id in value_map_by_id:
+                obj = value_map_by_id[val_id]
                 has_change = False
 
                 for field in fields_to_update:
@@ -397,10 +480,87 @@ class ProductService:
                 
                 if has_change:
                     to_update.append(obj)
+                    
+            # ===== اگر مقدار جدید بود ===== #
+            elif not val_id:
+                label = item.get('label', 'Custom Option')
+                obj = ProductOptionValue(
+                    product_option_id=product_option_id,
+                    global_source=None,
+                    label=label,
+                    value=item.get('value', label),
+                    order=item.get('order', 0),
+                    price_impact=item.get('price_impact', 0),
+                    is_default=item.get('is_default', False),
+                    guide_text=item.get('guide_text', ''),
+                    guide_type=item.get('guide_type', 'info')
+                )
+                obj.save()
+                
+                value_map_by_id[obj.id] = obj
+                if ref_id:
+                    ref_map_new_values[ref_id] = obj
+
+            if 'obj' in locals():
+                # ===== تیراژها ===== #
+                if 'quantity_prices' in item:
+                    OptionValueQuantityPrice.objects.filter(option_value=obj).delete()
+                    for qp in item['quantity_prices']:
+                        pq = product_quantities.get(qp['quantity_id'])
+                        if pq:
+                            matrix_to_create.append(OptionValueQuantityPrice(
+                                option_value=obj,
+                                product_quantity=pq,
+                                price=qp.get('price', 0)
+                            ))
+
+                # ===== جمع‌آوری ویژگی‌های شرطی ===== #
+                if 'conditions' in item:
+                    pending_conditions.append({
+                        'target_obj': obj,
+                        'conditions': item['conditions']
+                    })
 
         if to_update:
             ProductOptionValue.objects.bulk_update(to_update, fields_to_update)
+            
+        if matrix_to_create:
+            OptionValueQuantityPrice.objects.bulk_create(matrix_to_create)
 
+        # ==========================================
+        # مرحله دوم (Pass 2): اعمال قوانین وابستگی (Conditions)
+        # ==========================================
+        if pending_conditions:
+            conditions_to_create = []
+            
+            for pending in pending_conditions:
+                target_obj = pending['target_obj']
+                
+                # حذف شروط قبلی که این مقدار هدف آن‌ها بوده است
+                ProductOptionCondition.objects.filter(target_value=target_obj).delete()
+                
+                for cond in pending['conditions']:
+                    req_val_id = cond.get('required_value_id')
+                    req_ref_id = cond.get('required_ref_id')
+                    action = cond.get('action', 'show')
+                    
+                    req_obj = None
+                    # پیدا کردن پیش‌نیاز (یا از مقادیر قبلی با ID، یا مقادیر جدید با ref_id)
+                    if req_val_id and req_val_id in value_map_by_id:
+                        req_obj = value_map_by_id[req_val_id]
+                    elif req_ref_id and req_ref_id in ref_map_new_values:
+                        req_obj = ref_map_new_values[req_ref_id]
+                        
+                    # جلوگیری از وابستگی یک ویژگی به هم‌گروه خودش
+                    if req_obj and req_obj.product_option_id != target_obj.product_option_id:
+                        conditions_to_create.append(ProductOptionCondition(
+                            target_value=target_obj,
+                            required_value=req_obj,
+                            action=action
+                        ))
+                        
+            if conditions_to_create:
+                ProductOptionCondition.objects.bulk_create(conditions_to_create)
     def delete_product(self, product_id: int):
         product = Product.objects.get_by_id(product_id)
         if not product:
