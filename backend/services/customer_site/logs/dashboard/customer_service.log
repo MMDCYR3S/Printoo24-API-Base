@@ -290,3 +290,4 @@ INFO 2026-02-20 12:14:10,914 customer_service 164 137232075200192 User core (Use
 DEBUG 2026-02-20 12:14:10,917 customer_service 164 137232075200192 Wallet initialized for User 18
 INFO 2026-02-20 12:14:10,919 customer_service 164 137232075200192 SUCCESS: Customer 'mahdi' created fully.
 DEBUG 2026-02-20 12:14:10,990 customer_service 164 137232350615232 Fetching customer list
+DEBUG 2026-02-20 14:07:04,188 customer_service 7 137116281468608 Fetching customer list

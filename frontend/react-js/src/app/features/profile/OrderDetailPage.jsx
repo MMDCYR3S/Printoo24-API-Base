@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   ArrowRight, Download, FileText, Layers, MapPin, 
-  User, Package, DollarSign, Calendar, Info , Printer
+  User, Package, DollarSign, Calendar, Info , Printer , FileCheck
 } from 'lucide-react';
 import { profileService } from '../../services/profileService';
 import { formatCurrency } from '../../utils/formatters';
@@ -13,7 +13,7 @@ import globalText from '../../lang/global.json'
 // --- Configuration & Constants ---
 const STATUS_MAP = {
   7:  { label: pageText.profile.orderDetailPage.statuses.s7, color: "badge-warning", bg: "bg-warning/10" },
-  8:  { label: pageText.profile.orderDetailPage.statuses.s8, color, color: "badge-info", bg: "bg-info/10" },
+  8:  { label: pageText.profile.orderDetailPage.statuses.s8, color: "badge-info", bg: "bg-info/10" },
   9:  { label: "رد شده توسط طراح", color: "badge-error", bg: "bg-error/10" },
   10: { label: "در حال چاپ", color: "badge-info", bg: "bg-info/10" },
   11: { label: "رد شده توسط چاپ", color: "badge-error", bg: "bg-error/10" },
@@ -91,6 +91,10 @@ const OrderDetailPage = () => {
       <Printer size={16} className="ml-1" />
       پیش‌فاکتور
     </Link>
+    <Link to={`/profile/orders/${id}/invoice`} className="btn btn-outline bg-white btn-sm h-10 px-4 rounded-xl border-slate-200 text-slate-600 hover:text-success hover:border-success hover:bg-success/5 flex-1 md:flex-none">
+              <FileCheck size={16} className="ml-1" />
+              فاکتور
+            </Link>
 
           <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${statusInfo.color.replace('badge-', 'bg-')}`}></div>
           <span className="font-bold text-slate-800">{statusInfo.label}</span>

@@ -33,6 +33,7 @@ import OrderDetailPage from './app/features/profile/OrderDetailPage';
 import WalletPage from './app/features/profile/WalletPage';
 import AddressPage from './app/features/profile/AddressPage';
 import QuotationPage from './app/features/profile/QuotationPage';
+import InvoicePage from './app/features/profile/InvoicePage'
 
 // --- Admin Pages ---
 import AdminDashboard from './app/features/admin/features/dashboard/AdminDashboard';
@@ -155,6 +156,7 @@ function App() {
               <Route path="wallet" element={<WalletPage />} />
               <Route path="addresses" element={<AddressPage />} />
               <Route path="orders/:id/quotation" element={<QuotationPage />} />
+              <Route path="orders/:id/invoice" element={<InvoicePage />} />
             </Route>
 
 

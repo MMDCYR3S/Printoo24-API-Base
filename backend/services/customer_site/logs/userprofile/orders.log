@@ -184,3 +184,14 @@ INFO 2026-02-20 13:30:42,050 user_order_service 826 139084102092480 Fetching ord
 INFO 2026-02-20 13:30:46,245 user_order_service 826 139084102092480 Fetching order history for User ID: 1
 INFO 2026-02-20 13:30:50,999 user_order_service 826 139084102092480 Fetching order history for User ID: 1
 INFO 2026-02-20 13:30:52,844 user_order_service 826 139084102092480 Fetching order history for User ID: 1
+INFO 2026-02-20 19:03:08,499 user_order_service 279 133099771025088 Invoice for order 76 is not fully paid yet.
+INFO 2026-02-20 19:07:00,219 user_order_service 279 133099771025088 Fetching order history for User ID: 1
+WARNING 2026-02-20 19:11:46,723 user_order_service 279 133099771025088 Invoice not found for order 75
+INFO 2026-02-20 19:29:44,451 user_order_service 279 133099800397504 Fetching order history for User ID: 1
+INFO 2026-02-20 19:29:46,428 user_order_service 279 133099800397504 Fetching order history for User ID: 1
+INFO 2026-02-20 19:29:50,316 user_order_service 279 133099800397504 Fetching order history for User ID: 1
+INFO 2026-02-20 19:29:56,679 user_order_service 279 133099425887936 Fetching order history for User ID: 1
+INFO 2026-02-20 19:30:44,192 user_order_service 279 133099808790208 Fetching order history for User ID: 1
+INFO 2026-02-20 19:30:55,806 user_order_service 279 133099808790208 Fetching order history for User ID: 1
+INFO 2026-02-20 19:31:52,580 user_order_service 279 133099808790208 Fetching order history for User ID: 1
+INFO 2026-02-20 19:33:09,788 user_order_service 279 133099783612096 Fetching order history for User ID: 1

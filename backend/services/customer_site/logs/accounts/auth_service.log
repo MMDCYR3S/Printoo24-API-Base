@@ -975,3 +975,12 @@ INFO 2026-02-20 12:37:16,820 auth_service 488 123753778378432 User logged in: 1
 DEBUG 2026-02-20 13:02:25,379 auth_service 488 123753731659456 AuthService initialized with UserIdentityService
 INFO 2026-02-20 13:02:25,400 auth_service 488 123753731659456 Login attempt for: admin
 INFO 2026-02-20 13:02:26,652 auth_service 488 123753731659456 User logged in: 1
+DEBUG 2026-02-20 13:45:13,716 auth_service 7 137116275173056 AuthService initialized with UserIdentityService
+INFO 2026-02-20 13:45:13,717 auth_service 7 137116275173056 Login attempt for: admin
+INFO 2026-02-20 13:45:14,753 auth_service 7 137116275173056 User logged in: 1
+DEBUG 2026-02-20 13:45:16,640 auth_service 7 137116275173056 AuthService initialized with UserIdentityService
+INFO 2026-02-20 13:45:16,641 auth_service 7 137116275173056 Login attempt for: admin
+INFO 2026-02-20 13:45:17,533 auth_service 7 137116275173056 User logged in: 1
+DEBUG 2026-02-20 19:02:10,780 auth_service 279 133099425887936 AuthService initialized with UserIdentityService
+INFO 2026-02-20 19:02:10,784 auth_service 279 133099425887936 Login attempt for: admin
+INFO 2026-02-20 19:02:11,447 auth_service 279 133099425887936 User logged in: 1

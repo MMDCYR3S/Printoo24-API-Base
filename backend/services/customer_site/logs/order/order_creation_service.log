@@ -167,3 +167,8 @@ INFO 2025-12-31 20:39:17,756 order_create_service 455 140539423004352 Checkout r
 INFO 2025-12-31 20:40:02,773 order_create_service 458 140669486274240 Checkout request. User: admin
 INFO 2026-01-08 07:19:25,223 order_create_service 146 140085914932928 Checkout request. User: GUEST
 INFO 2026-01-08 07:24:18,899 order_create_service 153 140668647409344 Checkout request. User: GUEST
+INFO 2026-02-20 13:49:02,554 order_create_service 7 137116248389312 Checkout Bulk. User: admin, Session: None
+INFO 2026-02-20 13:49:02,556 order_create_service 7 137116248389312 Start BULK checkout. User: admin
+INFO 2026-02-20 13:49:16,298 order_create_service 7 137116248389312 Checkout Bulk. User: admin, Session: None
+INFO 2026-02-20 13:49:16,299 order_create_service 7 137116248389312 Start BULK checkout. User: admin
+INFO 2026-02-20 13:49:16,326 order_create_service 7 137116248389312 User admin doesn't have enough balance but anyways... :)
