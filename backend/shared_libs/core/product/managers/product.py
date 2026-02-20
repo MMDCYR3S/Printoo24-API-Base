@@ -114,6 +114,23 @@ class ProductQuerySet(BaseQuerySet):
             with_quantity=Count('id', filter=Q(has_quantity=True)),
             without_quantity=Count('id', filter=Q(has_quantity=False))
         )
+    
+    def search(self, query: str):
+        """
+        منطق جستجوی Contains بر روی نام، توضیحات، کد و ویژگی‌ها.
+        استفاده از distinct برای جلوگیری از تکرار محصول در صورت تطابق با چندین ویژگی.
+        """
+        if not query:
+            return self.none()
+
+        return self.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query) |
+            Q(code__icontains=query) |
+            Q(options__label__icontains=query) |  # جستجو در نام ویژگی (مثلا: جنس)
+            Q(options__choices__label__icontains=query) | # جستجو در مقدار (مثلا: گلاسه)
+            Q(options__choices__value__icontains=query)
+        ).filter(is_active=True).distinct()
 
 
 # ========== PRODUCT MANAGER ========== #

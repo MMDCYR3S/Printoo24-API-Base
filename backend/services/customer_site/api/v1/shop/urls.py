@@ -5,7 +5,8 @@ from .views import (
     CategoryViewSet,
     SubmitReviewView,
     ProductFeedbacksView,
-    CategoryBannerViewSet
+    CategoryBannerViewSet,
+    ProductSearchView
 )
 
 app_name = "shop"
@@ -18,4 +19,5 @@ urlpatterns = [
     path('products/feedbacks/<slug:slug>/', ProductFeedbacksView.as_view(), name='product-feedbacks'),
     path('categories/landing/', CategoryBannerViewSet.as_view({'get': 'list'}), name='categories-landing-list'),
     path('categories/landing/<slug:slug>/', CategoryBannerViewSet.as_view({'get': 'retrieve'}), name='categories-landing-detail'),
+    path("search/", ProductSearchView.as_view(), name="product-search"),
 ]

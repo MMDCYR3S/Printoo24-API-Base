@@ -4,7 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 from apps.shop.filters import ProductFilter
 from .serializers import (
@@ -200,3 +201,39 @@ class ProductFeedbacksView(APIView):
                 
             except Exception as e:
                 return Response({"error": "محصول یافت نشد یا خطایی رخ داد."}, status=status.HTTP_404_NOT_FOUND)
+
+# ======= Product Search View ======= #
+@extend_schema(
+    tags=["Product Search"],
+    description="جستجوی محصولات در نام، توضیحات و ویژگی‌های فنی (Options).",
+    parameters=[
+        OpenApiParameter(
+            name='q', 
+            type=OpenApiTypes.STR, 
+            location=OpenApiParameter.QUERY, 
+            description='کلمه کلیدی برای جستجو (مثلاً: گلاسه)',
+            required=True
+        ),
+    ]
+)
+class ProductSearchView(ListAPIView):
+    """
+    API اختصاصی برای جستجو با مستندات کامل در Swagger.
+    """
+    permission_classes = [AllowAny]
+    serializer_class = ProductListSerializer
+
+    def get_queryset(self):
+        # دریافت پارامتر q که در OpenApiParameter تعریف کردیم
+        query = self.request.query_params.get('q', '')
+        
+        # رعایت الگوی Service Layer شما
+        service = ShopProductListService()
+        
+        # لود کردن بهینه داده‌ها (Eager Loading)
+        queryset = service.get_search_results(query).prefetch_related(
+            'categories',
+            'product_image'
+        )
+        
+        return queryset
