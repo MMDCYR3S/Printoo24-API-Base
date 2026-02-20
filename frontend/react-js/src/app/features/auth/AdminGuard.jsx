@@ -1,44 +1,49 @@
-import { useEffect } from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAdminAuth } from '../hooks/useAdminAuth';
+import { Navigate, Outlet } from 'react-router-dom';
 
 const AdminGuard = () => {
-  const { isAdmin, isLoading, isAuthenticated, isError } = useAdminAuth();
-  const location = useLocation();
 
-  // 🔄 لاجیک رفرش خودکار (همونی که خواستی)
-  useEffect(() => {
-    // اگر ارور داریم (احتمالا ۴۰۱) یا ادمین نیستیم (چون دیتا لود نشد)
-    if (isError || (!isLoading && isAuthenticated && !isAdmin)) {
-      
-      // چک می‌کنیم که قبلاً تو این ۳ ثانیه رفرش نکرده باشیم که لوپ نشه
-      const lastRefresh = sessionStorage.getItem('last_force_refresh');
-      const now = Date.now();
+  // ۱. خوندن خام دیتا
+  const rawData = localStorage.getItem('userData');
 
-      if (!lastRefresh || (now - lastRefresh > 5000)) {
-        console.log('🔄 Token expired or glitches detected. Force Refreshing...');
-        sessionStorage.setItem('last_force_refresh', now);
-        window.location.reload();
-      }
+  if (!rawData) {
+    console.error("2. NO DATA FOUND IN LOCALSTORAGE! Redirecting to login...");
+    return <Navigate to="/login" replace />;
+  }
+
+  try {
+    // ۲. بررسی اینکه آیا دیتا استرینگ هست یا خودش آبجکت شده
+    let user;
+    if (typeof rawData === 'string') {
+      user = JSON.parse(rawData);
+    } else {
+      user = rawData;
     }
-  }, [isError, isLoading, isAuthenticated, isAdmin]);
 
-  // ۱. لودینگ
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
-      </div>
-    );
+    // ۳. چک کردن فیلدهای حیاتی (دقیقاً بر اساس چیزی که فرستادی)
+    const staffStatus = user.is_staff;
+    const superuserStatus = user.is_superuser;
+    
+
+
+    // شرط ورود: هر کدوم true باشن (چه بولین چه رشته "true")
+    const isAdmin = 
+      staffStatus === true || 
+      staffStatus === "true" || 
+      superuserStatus === true || 
+      superuserStatus === "true";
+
+
+    if (isAdmin) {
+
+      return <Outlet />;
+    } else {
+      return <Navigate to="/" replace />;
+    }
+
+  } catch (err) {
+
+    return <Navigate to="/login" replace />;
   }
-
-  // ۲. احراز هویت
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  // ۳. نمایش نرمال (چون اگه مشکلی باشه کد بالا رفرش میکنه)
-  return <Outlet />;
 };
 
 export default AdminGuard;

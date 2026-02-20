@@ -263,3 +263,30 @@ DEBUG 2026-02-19 14:58:09,126 customer_service 805 129516080985792 Fetching cust
 DEBUG 2026-02-19 14:58:10,988 customer_service 805 129516437661376 Fetching customer list
 DEBUG 2026-02-19 17:00:51,842 customer_service 914 127647855318720 Fetching customer list
 DEBUG 2026-02-19 17:00:52,870 customer_service 914 127647635994304 Fetching customer list
+DEBUG 2026-02-20 10:37:17,607 customer_service 164 137232350615232 Fetching customer list
+DEBUG 2026-02-20 10:40:01,440 customer_service 164 137232102475456 Fetching customer list
+DEBUG 2026-02-20 10:40:02,379 customer_service 164 137232102475456 Fetching customer list
+DEBUG 2026-02-20 10:40:07,885 customer_service 164 137232102475456 Fetching customer list
+DEBUG 2026-02-20 10:40:08,787 customer_service 164 137232102475456 Fetching customer list
+DEBUG 2026-02-20 10:40:36,113 customer_service 164 137232342222528 Fetching customer list
+DEBUG 2026-02-20 10:40:37,046 customer_service 164 137232350615232 Fetching customer list
+INFO 2026-02-20 10:40:37,069 customer_service 164 137232342222528 Fetching details for Customer 11
+DEBUG 2026-02-20 10:40:39,221 customer_service 164 137232350615232 Fetching customer list
+INFO 2026-02-20 10:40:43,609 customer_service 164 137232350615232 Fetching details for Customer 11
+DEBUG 2026-02-20 10:41:18,660 customer_service 164 137232110868160 Fetching customer list
+DEBUG 2026-02-20 10:41:19,291 customer_service 164 137232110868160 Fetching customer list
+DEBUG 2026-02-20 10:46:15,883 customer_service 164 137232110868160 Fetching customer list
+DEBUG 2026-02-20 10:46:16,011 customer_service 164 137232110868160 Fetching customer list
+DEBUG 2026-02-20 10:48:53,560 customer_service 164 137232342222528 Fetching customer list
+DEBUG 2026-02-20 10:48:54,477 customer_service 164 137232342222528 Fetching customer list
+DEBUG 2026-02-20 10:49:05,043 customer_service 164 137232342222528 Fetching customer list
+DEBUG 2026-02-20 10:49:05,669 customer_service 164 137232342222528 Fetching customer list
+DEBUG 2026-02-20 10:57:18,515 customer_service 164 137232110868160 Fetching customer list
+DEBUG 2026-02-20 10:57:19,988 customer_service 164 137232110868160 Fetching customer list
+DEBUG 2026-02-20 11:12:02,165 customer_service 164 137232342222528 Fetching customer list
+DEBUG 2026-02-20 12:13:34,571 customer_service 164 137232083592896 Fetching customer list
+INFO 2026-02-20 12:14:10,105 customer_service 164 137232075200192 START: Creating new customer 'mahdi'
+INFO 2026-02-20 12:14:10,914 customer_service 164 137232075200192 User core (User+Profile+Role) created: ID=18
+DEBUG 2026-02-20 12:14:10,917 customer_service 164 137232075200192 Wallet initialized for User 18
+INFO 2026-02-20 12:14:10,919 customer_service 164 137232075200192 SUCCESS: Customer 'mahdi' created fully.
+DEBUG 2026-02-20 12:14:10,990 customer_service 164 137232350615232 Fetching customer list
