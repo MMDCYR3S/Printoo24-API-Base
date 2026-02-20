@@ -415,6 +415,13 @@ class ProductQuantity(HasGuide, models.Model):
     product = models.ForeignKey(Product, related_name='product_quantity', on_delete=models.CASCADE)
     quantity = models.ForeignKey(Quantity, related_name='quantity_product', on_delete=models.PROTECT)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
+    price = models.DecimalField(
+        _('قیمت پایه در این تیراژ'), 
+        max_digits=12, 
+        decimal_places=0, 
+        default=0,
+        help_text=_("مثال: قیمت پایه ۱۰۰۰ عدد کارت ویزیت بدون هیچ ویژگی اضافه‌ای.")
+    )
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
     def __str__(self):
@@ -423,6 +430,7 @@ class ProductQuantity(HasGuide, models.Model):
     class Meta:
         verbose_name = _('تعداد')
         verbose_name_plural = _('تعداد ها')
+        unique_together = ('product', 'quantity')
         
 # ====== Product Image Model ====== #
 class ProductImage(models.Model):
@@ -547,11 +555,10 @@ class ProductOption(BaseOptionDefinition):
 # ====== PRODUCT OPTION VALUE MODEL ====== #
 class ProductOptionValue(BaseOptionValueDefinition):
     """
-    مقادیر نهایی برای محصول (ارث‌بری از BaseOptionValueDefinition + HasGuide).
+    مقادیر نهایی برای محصول.
     """
     product_option = models.ForeignKey(ProductOption, related_name='choices', on_delete=models.CASCADE)
     
-    # اگر null باشد، یعنی مقدار کاستوم است.
     global_source = models.ForeignKey(
         OptionValue, 
         null=True, blank=True, 
@@ -559,9 +566,13 @@ class ProductOptionValue(BaseOptionValueDefinition):
         verbose_name=_("منبع گلوبال")
     )
 
-    # تنظیمات مالی
-    has_pricing = models.BooleanField(default=True)
-    price_impact = models.DecimalField(max_digits=14, decimal_places=0, default=0)
+    has_pricing = models.BooleanField(_("آیا روی قیمت تاثیر دارد؟"), default=True)
+    
+    price_impact = models.DecimalField(
+        _("قیمت پیش‌فرض (تعدادی)"), 
+        max_digits=14, decimal_places=0, default=0,
+        help_text=_("اگر محصول 'تعدادی' است، این مبلغ با تعداد جمع/ضرب می‌شود. اگر تیراژی است و در ماتریس قیمتی ندارد، از این عدد استفاده می‌شود.")
+    )
     
     is_default = models.BooleanField(default=False)
     order = models.PositiveIntegerField(default=0)
@@ -576,7 +587,7 @@ class ProductOptionValue(BaseOptionValueDefinition):
              raise ValidationError(_("برای مقادیر سفارشی، عنوان الزامی است."))
         
         if not self.has_pricing and self.price_impact != 0:
-             raise ValidationError(_("وقتی گزینه فاقد قیمت است، مبلغ باید ۰ باشد."))
+             raise ValidationError(_("وقتی گزینه فاقد قیمت است، مبلغ پیش‌فرض باید ۰ باشد."))
 
     def save(self, *args, **kwargs):
         if self.global_source and not self.label:
@@ -589,7 +600,43 @@ class ProductOptionValue(BaseOptionValueDefinition):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.label} ({self.price_impact})"
+        return f"{self.product_option.product.name} | {self.label} ({self.price_impact})"
+
+# ====== Option Value & Quantity Pricing Matrix ====== #
+class OptionValueQuantityPrice(models.Model):
+    """
+    ماتریس قیمت‌گذاری ویژگی‌ها براساس تیراژ.
+    عملکرد: Override کردن price_impact پیش‌فرض در یک تیراژ خاص.
+    """
+    option_value = models.ForeignKey(
+        ProductOptionValue, 
+        related_name='quantity_prices', 
+        on_delete=models.CASCADE,
+        verbose_name=_("مقدار ویژگی")
+    )
+    product_quantity = models.ForeignKey(
+        ProductQuantity, 
+        related_name='option_prices', 
+        on_delete=models.CASCADE,
+        verbose_name=_("تیراژ محصول")
+    )
+    
+    price = models.DecimalField(
+        _("مبلغ جایگزین (Override)"), 
+        max_digits=12, decimal_places=0, default=0,
+        help_text=_("این مبلغ در این تیراژ، جایگزین price_impact پیش‌فرض خواهد شد.")
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("قیمت ویژگی در تیراژ")
+        verbose_name_plural = _("ماتریس قیمت ویژگی‌ها")
+        unique_together = ('option_value', 'product_quantity')
+
+    def __str__(self):
+        return f"{self.option_value.label} در تیراژ {self.product_quantity.quantity.value} -> {self.price}"
 
 # ===== Product Rating Model ===== #
 class ProductRating(models.Model):
