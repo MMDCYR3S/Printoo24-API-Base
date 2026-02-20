@@ -63,4 +63,14 @@ export const profileService = {
     const response = await apiClient.get(`/dashboard/quotations/by-order/${orderId}/`);
     return response.data;
   },
+  // دریافت فاکتور نهایی سفارش
+  getInvoiceByOrder: async (orderId) => {
+    try {
+      const response = await apiClient.get(`/profile/orders/invoice/${orderId}/`);
+      return response.data;
+    } catch (error) {
+      // پاس دادن خطا به کامپوننت برای نمایش UI مناسب (مثلاً خطای فاکتور یافت نشد)
+      throw error;
+    }
+  },
 };
