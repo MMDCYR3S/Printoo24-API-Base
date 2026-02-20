@@ -161,27 +161,45 @@ class CartItemUpdateView(GenericAPIView):
                 'ذخیره با سایز و تیراژ پیش‌فرض',
                 summary='ذخیره با سایز و تیراژ پیش‌فرض',
                 value={
-                    "quantity_id": 12,
-                    "size": 23,
-                    "options": {
-                        "10": 101, 
-                        "12": 206
-                    },
-                    "has_design": True
+                    "product_id": 6,
+                    "selections": {
+                        "name": "کارت ویزیت لاکچری مدیرعامل",
+                        "quantity_id": 10,
+                        "size_id": 7,
+                        "has_design": True,
+                        "description": "لطفاً روکش مخمل با دقت زده شود.",
+                        "options": {
+                        "10": 24,         
+                        "54": 131,        
+                        "57": 136,        
+                        "58": 137,        
+                        "59": [138, 140]  
+                        }
+                    }
                 }
             ),
             OpenApiExample(
                 "ذخیره با سایز و تعداد دلخواه",
                 summary='ذخیره با سایز و تعداد دلخواه',
                 value={
-                    "quantity": 100,
-                    "width": 8,
-                    "height": 5,
-                    "options": {
-                        "10": 101, 
-                        "12": 206
-                    },
-                    "has_design": True
+                    "product_id": 6,
+                    "selections": {
+                        "name": "کارت ویزیت با ابعاد اختصاصی",
+                        "description": "لطفاً برش‌ها با دقت میلی‌متری طبق فایل پیوست انجام شود.",
+                        "quantity": 100,
+                        "quantity_id": None,
+                        "size_id": None,
+                        "width": 8.0,
+                        "height": 5.0,
+                        "has_design": True,
+                        "options": {
+                        "10": 24,
+                        "54": 131,
+                        "57": 136,
+                        "58": 137,
+                        "59": [138, 140]
+                        }
+                    }
                 }
             )
         ]

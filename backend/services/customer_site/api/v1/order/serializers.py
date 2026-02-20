@@ -47,69 +47,89 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
     design_files = OrderItemFileSerializer(source='files', many=True, read_only=True)
     
-    # ===== فیلدهای محاسباتی ===== #
-    specs = serializers.SerializerMethodField(help_text="مشخصات فنی استخراج شده از JSON (ابعاد، متریال، آپشن‌ها)")
-    pricing_breakdown = serializers.SerializerMethodField(help_text="جزئیات ریز قیمت")
+    specs = serializers.SerializerMethodField()
+    pricing_breakdown = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
         fields = [
-             'id', 
-             'product_name',
-             'name',
-             'description',
-             'quantity', 
-             'price', 
-             'specs', 
-             'design_files',
-             'pricing_breakdown'
-         ]
-        
+            'id', 'product_name', 'name', 'description',
+            'quantity', 'price', 'specs', 'design_files',
+            'pricing_breakdown'
+        ]
+
     def get_specs(self, obj):
         """
         استخراج و فرمت‌دهی اطلاعات فنی از JSON Field (item.items)
+        شامل ابعاد، تیراژ و تمامی ویژگی‌های انتخابی (حتی وابسته‌ها).
         """
         raw_data = obj.items or {}
-        # ===== استخراج اطلاعات فنی ===== #
         meta = raw_data.get('meta', {})
-        width = meta.get('width') or raw_data.get('width')
-        height = meta.get('height') or raw_data.get('height')
-        has_design = meta.get('has_design', raw_data.get('has_design', False))
-        # ===== دریافت ویژگی ها ===== #
+        
+        # ۱. استخراج اطلاعات ابعاد
+        size_info = meta.get('size_info', {})
+        width = size_info.get('width')
+        height = size_info.get('height')
+        size_name = size_info.get('size_name', 'استاندارد')
+
+        # ۲. استخراج اطلاعات تیراژ
+        qty_info = meta.get('quantity_info', {})
+        qty_text = qty_info.get('quantity_text', str(obj.quantity))
+
+        # ۳. پردازش غنی ویژگی‌ها (Options)
         raw_options = raw_data.get('options', [])
         detailed_options = []
-        
+
         for opt in raw_options:
-            label_display = "N/A"
-            price_impact = 0.0
-            # ===== اگر انتخاب تکی باشد ===== #
-            if opt.get('type') == 'selection':
+            option_label = opt.get('option_label', 'N/A')
+            type_ptr = opt.get('type')
+            
+            choices_list = []
+            
+            if type_ptr == 'selection':
                 val_data = opt.get('value', {})
-                label_display = val_data.get('label', 'N/A')
-                price_impact = val_data.get('price', 0.0)
-            # ===== اگر انتخاب چندتایی باشد ===== #
-            elif opt.get('type') == 'multi_selection':
-                vals = opt.get('values', [])
-                label_display = ", ".join([v.get('label', '') for v in vals])
-                price_impact = sum([v.get('price', 0.0) for v in vals])
-            # ===== اگر انتخاب عدد/متن باشد ===== #
-            elif opt.get('type') == 'raw':
-                label_display = str(opt.get('value', 'N/A'))
-                price_impact = opt.get('price', 0.0)
-            # ===== ایجاد مقادیر در لیست مورد نظر ===== #
+                choices_list.append(self._format_choice(val_data))
+                
+            elif type_ptr == 'multi_selection':
+                for val_data in opt.get('values', []):
+                    choices_list.append(self._format_choice(val_data))
+                    
+            elif type_ptr == 'raw':
+                choices_list.append({
+                    "label": str(opt.get('value', 'N/A')),
+                    "price": 0.0,
+                    "dependencies": []
+                })
+
             detailed_options.append({
-                "option_name": opt.get('option_label', 'N/A'),
-                "value_label": label_display,
-                "price_impact": price_impact
+                "option_group": option_label,
+                "selections": choices_list
             })
-        # ===== بازگردانی لیست ===== #
+
         return {
-            "dimensions": f"{width} x {height} cm" if width and height else "استاندارد",
-            "has_design": has_design,
-            "options": detailed_options
+            "size": {
+                "name": size_name,
+                "dimensions": f"{width} x {height} cm" if width and height else "استاندارد"
+            },
+            "quantity_label": qty_text,
+            "has_design": meta.get('has_design', False),
+            "options_detail": detailed_options
         }
-    
+
+    def _format_choice(self, val_data: dict) -> dict:
+        """ متد کمکی برای تمیز کردن داده‌های هر انتخاب """
+        return {
+            "label": val_data.get('label', 'N/A'),
+            "price": val_data.get('applied_price', 0.0),
+            "is_tiered": val_data.get('is_matrix_price', False),
+            "dependency_text": [
+                f"وابسته به: {d['parent_option_name']} ({d['required_value_name']})" 
+                for d in val_data.get('dependencies', [])
+            ]
+        }
+
     def get_pricing_breakdown(self, obj):
+        """ نمایش ریز محاسبات ماشین‌حساب (هزینه شیت، طراحی، خدمات و ...) """
         raw_data = obj.items or {}
         return raw_data.get('meta', {}).get('price_breakdown', {})
 
