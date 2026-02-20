@@ -29,24 +29,24 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
 
   return (
     <div
-      className={`rounded-2xl overflow-hidden transition-all duration-300 border ${
+      className={`rounded-2xl overflow-hidden  transition-all duration-300  ${
         isOpen 
-          ? 'bg-slate-50 border-primary/30 shadow-lg ring-1 ring-primary/10' 
-          : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'
+          ? '   ring-1 ring-primary/5' 
+          : ' ring-1 ring-primary/5'
       }`}
     >
       <div
         onClick={() => onToggle(category_info.id)}
         className={`relative cursor-pointer h-16 md:h-20 flex items-center px-4 md:px-6 select-none overflow-hidden transition-all ${isOpen ? 'rounded-t-2xl' : 'rounded-2xl'}`}
       >
-        <div className="absolute inset-0 z-0 bg-slate-900">
+        <div className="absolute inset-0 z-0 bg-base">
            <img 
             src={category_info.banners?.wide} 
             alt=""
             loading="lazy"
             className={`w-full h-full object-cover transition-opacity duration-500 ${isOpen ? 'opacity-40' : 'opacity-0 group-hover:opacity-100'}`}
           />
-          <div className={`absolute inset-0 transition-colors duration-300 ${isOpen ? 'bg-slate-900/60' : 'bg-white group-hover:bg-slate-900/70'}`} />
+          <div className={`absolute inset-0 transition-colors duration-300  ${isOpen ? 'bg-primary /90' : ' group-hover:bg-slate-900/70'}`} />
         </div>
 
         <div className={`relative z-10 flex items-center justify-between w-full transition-colors duration-300 ${isOpen ? 'text-white' : 'text-slate-700'}`}>
@@ -63,7 +63,6 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
              <div className="flex flex-col">
                <div className="flex items-center gap-2">
                  <h2 className="text-lg md:text-xl font-black tracking-tight">{category_info.name}</h2>
-                 {isOpen && <span className="badge badge-xs badge-warning font-bold text-[10px] px-2 py-2 hidden md:flex">ویژه همکار</span>}
                </div>
                <p className={`text-xs mt-1 font-medium transition-all duration-300 hidden md:block ${isOpen ? 'text-slate-200 opacity-100' : 'opacity-0 -translate-y-2'}`}>
                  {category_info.description}
@@ -72,7 +71,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
           </div>
 
           <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${isOpen ? 'bg-white text-primary rotate-180' : 'bg-slate-100 text-slate-400'}`}>
-             <ChevronDown size={20} />
+             <ChevronDown size={32} />
           </div>
         </div>
       </div>
@@ -85,7 +84,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <div className="p-4 md:p-6 bg-slate-50 border-t border-slate-100/10 min-h-[200px]">
+            <div className="p-4 md:p-4 bg-base border-t border-slate-100/10 min-h-[200px]">
               
               {!showContent ? (
                  <ContentSkeleton />
@@ -100,15 +99,15 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
                         </div>
                         <h3 className="text-sm font-black text-slate-700">زیر دسته بندی ها</h3>
                       </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-6 gap-3 md:gap-4">
                         {sub_categories.map((sub, idx) => (
                           <Link 
                             key={idx} 
                             to={`/shop?category=${sub.slug}`} 
                             className="group cursor-pointer flex flex-col items-center gap-2"
                           >
-                            <div className="relative w-full aspect-square rounded-2xl bg-white border-2 border-transparent shadow-sm group-hover:border-primary group-hover:shadow-md transition-all duration-300 overflow-hidden">
-                              <img src={sub.thumbnail} alt={sub.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <div className="relative w-full aspect-square rounded-2xl bg-white hover:shadow-xl  shadow-black/10  transition-all duration-300 overflow-hidden">
+                              <img src={sub.thumbnail} alt={sub.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                             </div>
                             <span className="text-[11px] md:text-xs font-bold text-center text-slate-500 group-hover:text-slate-800 transition-colors">
                               {sub.name}

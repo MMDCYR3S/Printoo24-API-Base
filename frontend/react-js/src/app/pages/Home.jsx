@@ -62,7 +62,7 @@ const HomePage = () => {
 const PageHelperPictures = ()=>{
   return(
     <>
-    <div className="grid grid-cols-2 lg:grid-cols-4 items-center justify-center bg-white p-4 m-6 rounded-2xl shadow-sm">
+    <div className="grid grid-cols-2 lg:grid-cols-4 items-center justify-center bg-base p-4 m-6 ">
       <a href="#"><img src={img501} alt="pages logo" className="hover:scale-105 duration-200"/></a>
       <img src={img502} alt="pages logo" className="hover:scale-105 duration-200"/>
       <img src={img503} alt="pages logo" className="hover:scale-105 duration-200"/>
