@@ -7,6 +7,7 @@ import { FreeMode } from 'swiper/modules';
 import { ChevronDown, Sparkles, LayoutGrid, Tag, ArrowLeft } from 'lucide-react';
 import 'swiper/css';
 import 'swiper/css/free-mode';
+import pageText from '../../lang/pages.json'
 
 import { categoryService } from '../../services/categoryService';
 import ProductCard from '../../components/product/ProductCard';
@@ -71,8 +72,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
              <div className="flex flex-col">
                <div className="flex items-center gap-2">
                  <h2 className="text-lg md:text-xl font-black tracking-tight">{category_info.name}</h2>
-                 {isOpen && <span className="badge badge-xs badge-warning font-bold text-[10px] px-2 py-2 hidden md:flex">ویژه همکار</span>}
-               </div>
+=               </div>
                <p className={`text-xs mt-1 font-medium transition-all duration-300 hidden md:block ${isOpen ? 'text-slate-200 opacity-100' : 'opacity-0 -translate-y-2'}`}>
                  {category_info.description}
                </p>
@@ -109,7 +109,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
                         <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
                            <LayoutGrid size={16} />
                         </div>
-                        <h3 className="text-sm font-black text-slate-700">زیر دسته بندی ها</h3>
+                        <h3 className="text-sm font-black text-slate-700">{pageText.home.categoryHero.subC}</h3>
                       </div>
                       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4">
                         {sub_categories.map((sub, idx) => (
@@ -134,10 +134,10 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
                             <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg">
                               <Tag size={16} />
                             </div>
-                            <h3 className="text-sm font-black text-slate-700">محصولات برگزیده</h3>
+                            <h3 className="text-sm font-black text-slate-700"> {pageText.home.categoryHero.recentProducts} </h3>
                         </div>
                         <button className="text-xs font-bold text-primary hover:text-primary-focus flex items-center gap-1">
-                           مشاهده همه <ArrowLeft size={14} />
+                           {pageText.home.categoryHero.showAll} <ArrowLeft size={14} />
                         </button>
                       </div>
 

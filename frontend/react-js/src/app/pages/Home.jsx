@@ -5,7 +5,7 @@ import HomeSlider from "../features/home/HomeSlider";
 import { ShieldCheck, Truck, Headset, FileCheck,Plus, Minus, HelpCircle, Phone, MapPin, Mail, Send, Instagram } from "lucide-react";
 import InfoModal from "../components/common/InfoModal";
 import ContactSection from "../features/home/ContactSection"; 
-
+import pageText from '../lang/pages.json'
 
 
 import img501  from "../../assets/images/home/501.webp"
@@ -23,10 +23,10 @@ const HomePage = () => {
 
   return (
     <>
-      <title>Printoo24 | پنل تخصصی چاپ همکاران کردستان</title>
+      <title>{pageText.home.title}</title>
       <meta
         name="description"
-        content="سامانه آنلاین سفارش چاپ بنر، کارت ویزیت و تراکت با تحویل فوری در سلیمانیه و اربیل."
+        content= {pageText.home.fullTitle}
       />
 
       {/* کانتینر اصلی صفحه */}
@@ -80,29 +80,29 @@ const TrustSection = () => {
         {
           id: 1,
           icon: <FileCheck size={32} />,
-          title: "بررسی رایگان فایل",
-          desc: "قبل از چاپ، فایل شما توسط طراح چک می‌شود تا خراب نشود.",
+          title: pageText.home.cards.id1.title,
+          desc: pageText.home.cards.id1.value ,
           color: "bg-blue-50 text-blue-600 border-blue-100",
         },
         {
           id: 2,
           icon: <Truck size={32} />,
-          title: "ارسال مستقیم به عراق",
-          desc: "تحویل در سلیمانیه و اربیل با باربری‌های معتبر و سریع.",
+          title: pageText.home.cards.id2.title,
+          desc: pageText.home.cards.id2.value,
           color: "bg-orange-50 text-orange-600 border-orange-100",
         },
         {
           id: 3,
           icon: <Headset size={32} />,
-          title: "پشتیبانی به زبان کوردی",
-          desc: "پاسخگویی لحظه‌ای در واتساپ برای پیگیری سفارشات.",
+          title: pageText.home.cards.id3.title  ,
+          desc: pageText.home.cards.id3.value ,
           color: "bg-emerald-50 text-emerald-600 border-emerald-100",
         },
         {
           id: 4,
           icon: <ShieldCheck size={32} />,
-          title: "ضمانت کیفیت چاپ",
-          desc: "اگر چاپ مشکلی داشته باشد، با هزینه خودمان تجدید می‌کنیم.",
+          title: pageText.home.cards.id4.title ,
+          desc: pageText.home.cards.id4.value ,
           color: "bg-purple-50 text-purple-600 border-purple-100",
         },
       ];
@@ -150,20 +150,20 @@ const FAQSection = () => {
   // دیتای استاتیک (بعداً می‌تونه از API بیاد)
   const faqs = [
     {
-      question: "سفارش‌ها چند روزه به دستم می‌رسد؟",
-      answer: "برای شهرهای سلیمانیه و اربیل معمولاً بین ۲۴ تا ۴۸ ساعت کاری زمان می‌برد. برای سایر شهرها بسته به باربری بین ۳ تا ۴ روز.",
+      question: pageText.home.faq.question1.title,
+      answer: pageText.home.faq.question1.value ,
     },
     {
-      question: "آیا امکان پرداخت در محل وجود دارد؟",
-      answer: "بله، برای مشتریان تأیید شده و همکاران قدیمی امکان تسویه در محل (COD) وجود دارد. همچنین می‌توانید از طریق FastPay پرداخت کنید.",
+      question:  pageText.home.faq.question2.title,
+      answer: pageText.home.faq.question2.value ,
     },
     {
-      question: "اگر چاپ کیفیت لازم را نداشت چه می‌شود؟",
-      answer: "ما کیفیت را تضمین می‌کنیم. اگر ایراد از سمت ما (دستگاه یا متریال) باشد، بدون هیچ هزینه‌ای مجدداً چاپ و ارسال می‌شود.",
+      question: pageText.home.faq.question3.title ,
+      answer: pageText.home.faq.question3.value ,
     },
     {
-      question: "فایل‌ها را با چه فرمتی ارسال کنم؟",
-      answer: "بهترین فرمت برای چاپ لارج فرمت TIFF با مد رنگی CMYK است. فایل‌های PDF و JPG با رزولوشن حداقل 72dpi هم پذیرفته می‌شوند.",
+      question: pageText.home.faq.question4.title ,
+      answer: pageText.home.faq.question4.value ,
     },
   ];
 
@@ -173,9 +173,8 @@ const FAQSection = () => {
       <div className="text-center mb-8">
         <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-2 flex items-center justify-center gap-2">
           <HelpCircle className="text-primary" />
-          سوالات متداول
+           {pageText.home.faqTitle}
         </h2>
-        <p className="text-slate-500">پاسخ به پرسش‌هایی که شاید برای شما هم پیش بیاید</p>
       </div>
 
       <div className="grid gap-3 max-w-3xl mx-auto">

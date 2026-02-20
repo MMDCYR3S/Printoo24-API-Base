@@ -110,7 +110,7 @@ const InfoModal = () => {
                 onClick={handleClose}
                 className="mt-4 text-xs text-slate-400 hover:text-slate-600 font-medium"
               >
-                بستن پنجره
+                close
               </button>
             </div>
           </motion.div>
