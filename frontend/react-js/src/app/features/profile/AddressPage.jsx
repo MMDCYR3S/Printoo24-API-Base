@@ -5,6 +5,9 @@ import toast from 'react-hot-toast';
 import { MapPin, Plus, Trash2, X, AlertCircle } from 'lucide-react';
 import { profileService } from '../../services/profileService';
 
+import pageText from '../../lang/pages.json';
+import globalText from '../../lang/global.json';
+
 const AddressPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -55,14 +58,14 @@ const AddressPage = () => {
   const addMutation = useMutation({
     mutationFn: profileService.addAddress,
     onSuccess: () => {
-      toast.success('آدرس جدید با موفقیت ثبت شد');
+      toast.success(pageText.profile.addressPage.registeredAddressSuccess);
       queryClient.invalidateQueries(['addresses']);
       queryClient.invalidateQueries(['profile-addresses']);
       setIsModalOpen(false);
       reset();
     },
     onError: (err) => {
-      const msg = err?.response?.data?.detail || 'خطا در ثبت آدرس. لطفا ورودی‌ها را بررسی کنید.';
+      const msg = err?.response?.data?.detail || pageText.profile.addressPage.checkInputsError;
       toast.error(msg);
     }
   });
@@ -74,7 +77,7 @@ const AddressPage = () => {
       queryClient.invalidateQueries(['addresses']);
       queryClient.invalidateQueries(['profile-addresses']);
     },
-    onError: () => toast.error('خطا در حذف آدرس')
+    onError: () => toast.error(pageText.profile.addressPage.deleteAddressError)
   });
 
   const onSubmit = (data) => {
@@ -95,15 +98,15 @@ const AddressPage = () => {
       <div className="flex justify-between items-center border-b border-slate-100 pb-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
-            <MapPin className="text-primary" /> آدرس‌های من
+            <MapPin className="text-primary" /> {pageText.profile.addressPage.myAddresses}
           </h1>
-          <p className="text-xs text-slate-400 mt-1">مدیریت آدرس‌های ارسال سفارش</p>
+          <p className="text-xs text-slate-400 mt-1">{pageText.profile.addressPage.orderAddressManagement}</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)} 
           className="btn btn-primary btn-sm gap-2 rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
         >
-          <Plus size={18} /> افزودن آدرس
+          <Plus size={18} /> {pageText.profile.addressPage.addAddress}
         </button>
       </div>
 
@@ -111,8 +114,8 @@ const AddressPage = () => {
       {addresses.length === 0 ? (
         <div className="text-center py-16 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
           <MapPin size={48} className="mx-auto text-slate-300 mb-4" />
-          <p className="text-slate-500 font-bold">هنوز آدرسی ثبت نکرده‌اید</p>
-          <button onClick={() => setIsModalOpen(true)} className="btn btn-ghost btn-sm mt-2 text-primary">ثبت اولین آدرس</button>
+          <p className="text-slate-500 font-bold">{pageText.profile.addressPage.addressNotRegistered}</p>
+          <button onClick={() => setIsModalOpen(true)} className="btn btn-ghost btn-sm mt-2 text-primary">{pageText.profile.addressPage.addingTheFirstAddress}</button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -140,7 +143,7 @@ const AddressPage = () => {
                   disabled={deleteMutation.isPending}
                   className="btn btn-ghost btn-xs text-error hover:bg-error/10"
                 >
-                  {deleteMutation.isPending ? <span className="loading loading-spinner loading-xs"></span> : <><Trash2 size={14} /> حذف</>}
+                  {deleteMutation.isPending ? <span className="loading loading-spinner loading-xs"></span> : <><Trash2 size={14} /> {globalText.delete}</>}
                 </button>
               </div>
             </div>
@@ -155,8 +158,8 @@ const AddressPage = () => {
             
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="font-black text-xl text-slate-800">ثبت آدرس جدید</h3>
-                <span className="text-xs text-slate-400">اطلاعات پستی را دقیق وارد کنید</span>
+                <h3 className="font-black text-xl text-slate-800">{pageText.profile.addressPage.addNewAddress}</h3>
+                <span className="text-xs text-slate-400">{pageText.profile.addressPage.enterFullAddressTitle}</span>
               </div>
               <button onClick={() => { setIsModalOpen(false); reset(); }} className="btn btn-circle btn-sm btn-ghost text-slate-500 hover:bg-slate-100"><X size={20}/></button>
             </div>
@@ -168,32 +171,32 @@ const AddressPage = () => {
                 
                 {/* استان */}
                 <div className="form-control">
-                  <label className="label text-xs font-bold text-slate-600">استان</label>
+                  <label className="label text-xs font-bold text-slate-600">{pageText.profile.addressPage.province}</label>
                   <select 
                     className={`select select-bordered rounded-xl w-full ${errors.province_id ? 'select-error' : ''}`} 
-                    {...register('province_id', { required: 'انتخاب استان الزامی است' })}
+                    {...register('province_id', { required: pageText.profile.addressPage.selectProvinceIsNessessary })}
                     disabled={isProvincesLoading}
                   >
-                    <option value="">انتخاب استان...</option>
+                    <option value="">{pageText.profile.addressPage.selectAddress}</option>
                     {provinces?.map((p) => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
-                  {isProvincesLoading && <span className="text-[10px] text-primary mt-1">در حال بارگذاری استان‌ها...</span>}
+                  {isProvincesLoading && <span className="text-[10px] text-primary mt-1">{pageText.profile.addressPage.loadingProvinces}</span>}
                 </div>
 
                 {/* شهر */}
                 <div className="form-control">
-                  <label className="label text-xs font-bold text-slate-600">شهر</label>
+                  <label className="label text-xs font-bold text-slate-600">{pageText.profile.addressPage.city}</label>
                   <select 
                     className={`select select-bordered rounded-xl w-full ${errors.city_id ? 'select-error' : ''}`} 
-                    {...register('city_id', { required: 'انتخاب شهر الزامی است' })}
+                    {...register('city_id', { required: pageText.profile.addressPage.selectCityIsNessessary })}
                     disabled={!selectedProvinceId || isCitiesLoading}
                   >
                     <option value="">
                       {!selectedProvinceId 
-                        ? 'اول استان را انتخاب کنید' 
-                        : (isCitiesLoading ? 'در حال دریافت...' : 'انتخاب شهر...')}
+                        ? pageText.profile.addressPage.pleaseSelectProvinceFirst
+                        : (isCitiesLoading ? pageText.profile.addressPage.loading : pageText.profile.addressPage.selectCity)}
                     </option>
                     {cities?.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
@@ -203,10 +206,10 @@ const AddressPage = () => {
               </div>
 
               {/* کد پستی */}
-              <div className="form-control">
+              {/* <div className="form-control">
                 <label className="label text-xs font-bold text-slate-600">
                   کد پستی
-                  <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">حتما ۱۰ رقم</span>
+                  <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{pageText.profile.addressPage.onlyTen}</span>
                 </label>
                 <input 
                   type="text" 
@@ -220,15 +223,15 @@ const AddressPage = () => {
                   })} 
                 />
                 {errors.postal_code && <span className="text-error text-[10px] mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.postal_code.message}</span>}
-              </div>
+              </div> */}
 
               {/* آدرس دقیق */}
               <div className="form-control">
-                <label className="label text-xs font-bold text-slate-600">آدرس دقیق پستی</label>
+                <label className="label text-xs font-bold text-slate-600">{pageText.profile.addressPage.detailedAddress}</label>
                 <textarea 
                   className={`textarea textarea-bordered rounded-xl h-24 leading-relaxed ${errors.address ? 'textarea-error' : ''}`} 
-                  placeholder="نام خیابان، نام کوچه، پلاک، واحد..."
-                  {...register('address', { required: 'آدرس دقیق الزامی است' })}
+                  placeholder={pageText.profile.addressPage.detailedAddressPlaceHolder}
+                  {...register('address', { required: pageText.profile.addressPage.detailedAddressIsNessessary })}
                 ></textarea>
                  {errors.address && <span className="text-error text-[10px] mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.address.message}</span>}
               </div>
@@ -239,7 +242,7 @@ const AddressPage = () => {
                   className="btn btn-primary w-full rounded-xl shadow-lg shadow-primary/20 text-base" 
                   disabled={addMutation.isPending}
                 >
-                  {addMutation.isPending ? <span className="loading loading-spinner"></span> : 'ثبت و ذخیره آدرس'}
+                  {addMutation.isPending ? <span className="loading loading-spinner"></span> : pageText.profile.addressPage.saveAddress}
                 </button>
               </div>
 

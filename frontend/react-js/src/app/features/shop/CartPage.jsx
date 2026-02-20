@@ -5,6 +5,9 @@ import { cartService } from '../../services/cartService';
 import CartItem from './components/CartItem';
 import { toast } from 'react-hot-toast';
 
+import pageText from '../../lang/pages.json';
+import globalText from '../../lang/global.json';
+
 const CartPage = () => {
   const [cartData, setCartData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,7 +21,7 @@ const CartPage = () => {
       setCartData(data);
     } catch (err) {
       console.error(err);
-      toast.error('خطا در دریافت سبد خرید');
+      toast.error(pageText.cart.cartPage.fetchCartError);
     } finally {
       setLoading(false);
     }
@@ -29,14 +32,14 @@ const CartPage = () => {
   }, []);
 
   const handleDeleteItem = async (itemId) => {
-    if (!window.confirm('آیا از حذف این آیتم مطمئن هستید؟')) return;
+    if (!window.confirm(pageText.cart.cartPage.deleteConfirm)) return;
     setDeletingId(itemId);
     try {
       await cartService.deleteItem(itemId);
-      toast.success('آیتم حذف شد');
+      toast.success(pageText.cart.cartPage.deleteSuccess);
       fetchCart();
     } catch (err) {
-      toast.error('خطا در حذف آیتم');
+      toast.error(pageText.cart.cartPage.deleteError);
     } finally {
       setDeletingId(null);
     }
@@ -56,8 +59,8 @@ const CartPage = () => {
         <div className="w-24 h-24 bg-slate-200 rounded-full flex items-center justify-center text-slate-400 mb-6">
           <ShoppingBag size={48} />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">سبد خرید خالی است</h1>
-        <Link to="/shop" className="btn btn-primary px-8 rounded-xl mt-4">مشاهده محصولات</Link>
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">{pageText.cart.cartPage.emptyCartTitle}</h1>
+        <Link to="/shop" className="btn btn-primary px-8 rounded-xl mt-4">{pageText.cart.cartPage.viewProducts}</Link>
       </div>
     );
   }
@@ -70,9 +73,9 @@ const CartPage = () => {
       <div className="container mx-auto px-4 max-w-7xl">
         
         <div className="flex items-center gap-3 mb-8">
-          <h1 className="text-3xl font-black text-slate-800">سبد خرید</h1>
+          <h1 className="text-3xl font-black text-slate-800">{pageText.cart.cartPage.pageTitle}</h1>
           <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">
-            {cartData.items.length} محصول
+            {pageText.cart.cartPage.productUnit.replace('{{count}}', cartData.items.length)}
           </span>
         </div>
 
@@ -93,28 +96,28 @@ const CartPage = () => {
                 <div className="bg-white rounded-3xl p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
                    <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
                      <CreditCard size={20} className="text-blue-600"/>
-                     خلاصه سفارش
+                     {pageText.cart.cartPage.summaryTitle}
                    </h2>
 
                    <div className="space-y-3 text-sm text-slate-600 mb-6">
                       <div className="flex justify-between">
-                        <span>تعداد اقلام</span>
+                        <span>{pageText.cart.cartPage.itemCountLabel}</span>
                         <span className="font-bold">{cartData.items.length}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>جمع کل</span>
-                        <span className="font-bold text-slate-800">{cartData.total_price?.toLocaleString()} تومان</span>
+                        <span>{pageText.cart.cartPage.subtotalLabel}</span>
+                        <span className="font-bold text-slate-800">{cartData.total_price?.toLocaleString()} {pageText.cart.cartPage.currency}</span>
                       </div>
                    </div>
 
                    <div className="border-t border-slate-100 py-4 mb-4">
                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-slate-800">مبلغ قابل پرداخت</span>
+                        <span className="font-bold text-slate-800">{pageText.cart.cartPage.totalPayableLabel}</span>
                         <div className="text-right">
-                           <span className="block text-2xl font-black text-blue-600">
-                             {cartData.total_price?.toLocaleString()}
-                           </span>
-                           <span className="text-xs text-slate-400">تومان</span>
+                            <span className="block text-2xl font-black text-blue-600">
+                              {cartData.total_price?.toLocaleString()}
+                            </span>
+                            <span className="text-xs text-slate-400">{pageText.cart.cartPage.currency}</span>
                         </div>
                      </div>
                    </div>
@@ -123,7 +126,7 @@ const CartPage = () => {
                    {itemsWithoutFiles.length > 0 && (
                      <div className="bg-blue-50 text-blue-800 text-xs p-3 rounded-xl mb-4 flex items-start gap-2">
                        <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                       <p>شما برای {itemsWithoutFiles.length} محصول فایلی آپلود نکرده‌اید. می‌توانید بدون فایل ادامه دهید و بعداً ارسال کنید.</p>
+                       <p>{pageText.cart.cartPage.noFileWarning.replace('{{count}}', itemsWithoutFiles.length)}</p>
                      </div>
                    )}
 
@@ -132,7 +135,7 @@ const CartPage = () => {
                      onClick={() => navigate('/checkout')} // هنوز صفحه چک‌اوت نداریم ولی آماده‌اش میکنیم
                      className="w-full py-4 bg-primary text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-primary/30 transition-all"
                    >
-                     تکمیل خرید و پرداخت
+                     {pageText.cart.cartPage.checkoutBtn}
                    </button>
                 </div>
 
