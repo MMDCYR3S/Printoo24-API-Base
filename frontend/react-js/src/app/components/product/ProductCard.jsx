@@ -1,12 +1,14 @@
 // src/app/components/product/ProductCard.jsx
 import { Link } from 'react-router-dom';
 import { Eye } from 'lucide-react';
+import pageText from '../../lang/pages.json'
+import globalText from '../../lang/global.json'
 
 const ProductCard = ({ product }) => {
   const formattedPrice = new Intl.NumberFormat('fa-IQ').format(parseFloat(product.price) || 0);
 
   // استخراج نام دسته‌ها (با پشتیبانی از حالت‌های بدون دسته مثل لندینگ)
-  const parentCategory = product.category?.parent_category || 'محصولات';
+  const parentCategory = product.category?.parent_category || pageText.shop.productCard.products;
   const childCategory = product.category?.children_category;
 
   // دریافت آدرس عکس با پشتیبانی از هر دو حالت API (شاپ و لندینگ)
@@ -30,7 +32,7 @@ const ProductCard = ({ product }) => {
           />
         ) : (
           <div className="flex items-center justify-center h-full text-slate-300 text-xs font-medium">
-             تصویر ندارد
+             {pageText.shop.productCard.notHasImage}
           </div>
         )}
 
@@ -38,7 +40,7 @@ const ProductCard = ({ product }) => {
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[1px]">
            <button className="btn btn-sm btn-primary glass text-white rounded-full px-5 font-bold shadow-lg text-xs">
             <Eye size={14} className="mr-1" />
-            مشاهده
+            {pageText.shop.productCard.look}
            </button>
         </div>
       </div>
@@ -70,7 +72,7 @@ const ProductCard = ({ product }) => {
         {/* قیمت */}
         <div className="mt-auto flex items-center justify-end text-emerald-600 gap-1">
           <span className="text-lg font-black tracking-tight">{formattedPrice}</span>
-          <span className="text-[10px] font-bold opacity-80 pt-1">IQD</span>
+          <span className="text-[10px] font-bold opacity-80 pt-1">{globalText.currency}</span>
         </div>
 
       </div>

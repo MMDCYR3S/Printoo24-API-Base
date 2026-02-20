@@ -9,6 +9,11 @@ import {
 import { Link } from 'react-router-dom';
 import { profileService } from '../../services/profileService';
 
+// فایل ترجمه
+import pageText from '../../lang/pages.json'
+import globalText from '../../lang/global.json'
+
+
 const ProfileDashboard = () => {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -47,12 +52,12 @@ const ProfileDashboard = () => {
   const updateMutation = useMutation({
     mutationFn: profileService.updateProfileInfo,
     onSuccess: () => {
-      toast.success('اطلاعات با موفقیت بروزرسانی شد');
+      toast.success(pageText.profile.infoUpdateSuccess);
       setIsEditing(false);
       queryClient.invalidateQueries(['profile-info']); // رفرش دیتا
     },
     onError: () => {
-      toast.error('خطا در ویرایش اطلاعات');
+      toast.error(pageText.profile.infoUpdateError);
     }
   });
 
@@ -72,7 +77,7 @@ const { data: orders } = useQuery({
 
   // فلت کردن دیتا برای گرفتن تعداد صحیح (چون API آرایه تو در تو برمی‌گرداند)
   const ordersList = Array.isArray(orders?.[0]) ? orders[0] : (orders || []);
-  const activeOrdersCount = ordersList.filter(o => o.status !== 'تحویل شده' && o.status !== 'لغو شده').length;
+  const activeOrdersCount = ordersList.filter(o => o.status !== pageText.profile.delivered && o.status !== pageText.profile.cancelled).length;
   
   const addressesList = Array.isArray(addresses?.[0]) ? addresses[0] : (addresses || []);
   const addressCount = addressesList.length;
@@ -80,7 +85,7 @@ const { data: orders } = useQuery({
 
 
   const handleWalletClick = () => {
-    window.open('https://wa.me/9647700805867?text=درخواست شارژ حساب دارم', '_blank');
+    window.open('https://wa.me/9647700805867', '_blank');
   };
 
   if (isUserLoading || isWalletLoading) {
@@ -98,7 +103,7 @@ const { data: orders } = useQuery({
           <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
             <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
               <User className="text-primary" />
-              اطلاعات حساب
+              {pageText.profile.profileInfo}
             </h2>
             <button 
               onClick={() => {
@@ -107,7 +112,7 @@ const { data: orders } = useQuery({
               }}
               className={`btn btn-sm btn-ghost gap-2 ${isEditing ? 'text-error' : 'text-slate-400'}`}
             >
-              {isEditing ? <><X size={16}/> انصراف</> : <><Edit2 size={16}/> ویرایش</>}
+              {isEditing ? <><X size={16}/> {globalText.buttons.cancel}</> : <><Edit2 size={16}/> {globalText.buttons.edit}</>}
             </button>
           </div>
 
@@ -116,17 +121,17 @@ const { data: orders } = useQuery({
               
               {/* فیلدهای غیر قابل ویرایش */}
               <div className="form-control">
-                <label className="label mx-2  text-xs text-slate-400">نام کاربری (غیرقابل تغییر)</label>
+                <label className="label mx-2  text-xs text-slate-400">{pageText.profile.username}</label>
                 <input type="text" value={user?.username} disabled className="input input-bordered  bg-white text-slate-400" />
               </div>
               <div className="form-control">
-                <label className="label mx-2  text-xs text-slate-400">ایمیل (غیرقابل تغییر)</label>
+                <label className="label mx-2  text-xs text-slate-400">{pageText.profile.email}</label>
                 <input type="text" value={user?.email} disabled className="input input-bordered  bg-white text-slate-400 dir-ltr text-right" />
               </div>
 
               {/* فیلدهای قابل ویرایش */}
               <div className="form-control">
-                <label className="label mx-2  text-xs text-slate-500 font-bold">نام</label>
+                <label className="label mx-2  text-xs text-slate-500 font-bold">{pageText.profile.firstName}</label>
                 <br/>
                 <input 
                   type="text" 
@@ -136,7 +141,7 @@ const { data: orders } = useQuery({
                 />
               </div>
               <div className="form-control">
-                <label className="label mx-2  text-xs text-slate-500 font-bold">نام خانوادگی</label>
+                <label className="label mx-2  text-xs text-slate-500 font-bold">{pageText.profile.lastName}</label>
                 <br/>
                 <input 
                   type="text" 
@@ -146,7 +151,7 @@ const { data: orders } = useQuery({
                 />
               </div>
               <div className="form-control">
-                <label className="label mx-2  text-xs text-slate-500 font-bold">نام شرکت / فروشگاه</label>
+                <label className="label mx-2  text-xs text-slate-500 font-bold">{pageText.profile.companyName}</label>
                 <br/>
                 <input 
                   type="text" 
@@ -156,7 +161,7 @@ const { data: orders } = useQuery({
                 />
               </div>
               <div className="form-control">
-                <label className="label mx-2  text-xs text-slate-500 font-bold">شماره تماس</label>
+                <label className="label mx-2  text-xs text-slate-500 font-bold">{pageText.profile.phoneNumber}</label>
                 <br/>
                 <input 
                   type="text" 
@@ -176,7 +181,7 @@ const { data: orders } = useQuery({
                   disabled={updateMutation.isPending}
                   className="btn btn-primary px-8 shadow-lg shadow-primary/20"
                 >
-                  {updateMutation.isPending ? <span className="loading loading-spinner"></span> : <><Check size={18} /> ذخیره تغییرات</>}
+                  {updateMutation.isPending ? <span className="loading loading-spinner"></span> : <><Check size={18} /> {pageText.profile.saveChanges}</>}
                 </button>
               </div>
             )}
@@ -187,7 +192,7 @@ const { data: orders } = useQuery({
         <div 
           onClick={handleWalletClick}
           className="xl:col-span-1 bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden group cursor-pointer tooltip tooltip-bottom w-full"
-          data-tip="برای شارژ کلیک کنید"
+          data-tip={pageText.profile.clickToCharge}
         >
            {/* پترن پس‌زمینه */}
            <div className="absolute top-0 right-0 w-40 h-40 bg-gray-100/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 group-hover:bg-gray-100/10 transition-colors"></div>
@@ -199,21 +204,21 @@ const { data: orders } = useQuery({
                  <Wallet size={28} className="text-emerald-400" />
                </div>
                <span className="bg-emerald-500/20 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/20">
-                 فعال
+                 {pageText.profile.active}
                </span>
              </div>
              
              <div className="space-y-1 text-center py-4">
-               <span className="text-slate-400 text-sm font-medium block">موجودی کیف پول</span>
+               <span className="text-slate-400 text-sm font-medium block">{pageText.profile.walletAmount}</span>
                <div className="text-4xl font-black tracking-tight text-white drop-shadow-lg flex items-center justify-center gap-2 dir-ltr">
                  {formattedBalance}
-                 <span className="text-lg opacity-60 font-medium">IQD</span>
+                 <span className="text-lg opacity-60 font-medium">{globalText.currency}</span>
                </div>
              </div>
              
              <button className="w-full py-3 bg-gray-100/10 hover:bg-gray-100/20 active:scale-95 transition-all rounded-xl font-bold flex items-center justify-center gap-2 backdrop-blur-sm border border-white/5 group-hover:border-white/20">
                <TrendingUp size={18} />
-               افزایش موجودی (واتساپ)
+               {pageText.profile.depositAmount}
              </button>
            </div>
         </div>
@@ -229,13 +234,13 @@ const { data: orders } = useQuery({
               <Package size={24} />
             </div>
             <div>
-              <h3 className="font-bold text-slate-700">سفارش‌های من</h3>
-              <span className="text-xs text-slate-400">پیگیری وضعیت چاپ</span>
+              <h3 className="font-bold text-slate-700">{pageText.profile.myOrders}</h3>
+              <span className="text-xs text-slate-400">{pageText.profile.trackingOrder}</span>
             </div>
           </div>
           <div className="text-sm text-slate-500 flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-             <span>سفارش فعال:</span>
-             <span className="font-bold text-slate-800">{activeOrdersCount} عدد</span>
+             <span>{pageText.profile.activeOrders}</span>
+             <span className="font-bold text-slate-800">{activeOrdersCount} {pageText.profile.count}</span>
           </div>
         </Link>
 
@@ -246,13 +251,13 @@ const { data: orders } = useQuery({
               <MapPin size={24} />
             </div>
             <div>
-              <h3 className="font-bold text-slate-700">مدیریت آدرس‌ها</h3>
-              <span className="text-xs text-slate-400">آدرس‌های ارسال بار</span>
+              <h3 className="font-bold text-slate-700">{pageText.profile.addressManagement}</h3>
+              <span className="text-xs text-slate-400">{pageText.profile.orderAddresses}</span>
             </div>
           </div>
           <div className="text-sm text-slate-500 flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-             <span>آدرس ثبت شده:</span>
-             <span className="font-bold text-slate-800">{addressCount} مورد</span>
+             <span>{pageText.profile.registeredAddress}</span>
+             <span className="font-bold text-slate-800">{addressCount} {pageText.profile.item}</span>
           </div>
         </Link>
 
@@ -263,8 +268,8 @@ const { data: orders } = useQuery({
                                <Wallet size={24} className="" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-700">سوابق مالی</h3>
-              <span className="text-xs text-slate-400">سوابق مالی حساب شما</span>
+              <h3 className="font-bold text-slate-700">{pageText.profile.financeHistory}</h3>
+              <span className="text-xs text-slate-400">{pageText.profile.yourFinancialHistory}</span>
             </div>
           </div>
 
