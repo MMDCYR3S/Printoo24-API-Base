@@ -2,6 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { profileService } from '../../services/profileService';
 import { ArrowUpRight, ArrowDownLeft, Calendar, Wallet } from 'lucide-react';
 
+import pageText from '../../lang/pages.json';
+import globalText from '../../lang/global.json';
+
 const WalletPage = () => {
   const { data: history, isLoading } = useQuery({
     queryKey: ['wallet-history'],
@@ -20,7 +23,7 @@ const WalletPage = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
         <Wallet className="text-primary" />
-        تاریخچه تراکنش‌ها
+        {pageText.profile.walletPage.transactionHistory}
       </h1>
 
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
@@ -29,10 +32,10 @@ const WalletPage = () => {
             <table className="table w-full">
               <thead className="bg-slate-50 text-slate-500">
                 <tr>
-                  <th>نوع تراکنش</th>
-                  <th>مبلغ (IQD)</th>
-                  <th>موجودی پس از تراکنش</th>
-                  <th>تاریخ</th>
+                  <th>{pageText.profile.walletPage.transactionType}</th>
+                  <th>{pageText.profile.walletPage.price} ({globalText.currency})</th>
+                  <th>{pageText.profile.walletPage.amountAfterTransaction}</th>
+                  <th>{pageText.profile.walletPage.date}</th>
                 </tr>
               </thead>
               <tbody>
@@ -67,7 +70,7 @@ const WalletPage = () => {
             </table>
           </div>
         ) : (
-          <div className="p-10 text-center text-slate-400">هیچ تراکنشی یافت نشد.</div>
+          <div className="p-10 text-center text-slate-400">{pageText.profile.walletPage.transactionNotFound}</div>
         )}
       </div>
     </div>

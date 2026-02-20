@@ -2,6 +2,10 @@ import React from 'react';
 import { Trash2, UploadCloud, CheckCircle, Plus, ImageIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// وارد کردن فایل‌های ترجمه
+import pageText from '../../../lang/pages.json';
+import globalText from '../../../lang/global.json';
+
 const CartItem = ({ item, onDelete, isDeleting }) => {
   const specs = item.items || {}; 
   const uploads = item.uploads || [];
@@ -40,7 +44,7 @@ const CartItem = ({ item, onDelete, isDeleting }) => {
                 {item.product?.name || item.name}
               </h3>
               <div className="flex items-center gap-2 text-xs text-slate-400 font-mono mb-4">
-                <span>CODE: {item.product?.slug}</span>
+                <span>{pageText.cart.cartItem.productCode} {item.product?.slug}</span>
               </div>
             </div>
             
@@ -55,20 +59,20 @@ const CartItem = ({ item, onDelete, isDeleting }) => {
 
           <div className="bg-slate-50 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-8 text-sm">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2 md:border-0 md:pb-0">
-              <span className="text-slate-500">سایز:</span>
+              <span className="text-slate-500">{pageText.cart.cartItem.sizeLabel}</span>
               <span className="font-medium text-slate-700">{specs.size_label}</span>
             </div>
 
             <div className="flex items-center justify-between border-b border-slate-200 pb-2 md:border-0 md:pb-0">
-              <span className="text-slate-500">تعداد:</span>
+              <span className="text-slate-500">{pageText.cart.cartItem.quantityLabel}</span>
               <span className="font-medium text-slate-700">
-                {item.quantity.toLocaleString()} عدد
+                {item.quantity.toLocaleString()} {pageText.cart.cartItem.unit}
               </span>
             </div>
 
             {specs.dimensions && specs.dimensions !== "0.0x0.0" && (
               <div className="flex items-center justify-between text-blue-600">
-                <span className="opacity-70">ابعاد دقیق:</span>
+                <span className="opacity-70">{pageText.cart.cartItem.exactDimensionsLabel}</span>
                 <span className="font-mono dir-ltr">{specs.dimensions}</span>
               </div>
             )}
@@ -87,25 +91,25 @@ const CartItem = ({ item, onDelete, isDeleting }) => {
               <>
                  <div className="flex items-center gap-2 text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">
                     <CheckCircle size={14} />
-                    <span>{uploads.length} فایل آپلود شده</span>
+                    <span>{pageText.cart.cartItem.filesUploaded.replace('{{count}}', uploads.length)}</span>
                  </div>
                  {/* دکمه افزودن فایل بیشتر */}
                  <Link 
-                   to={`/cart/upload/${item.id}`}
-                   className="flex items-center gap-1 text-xs text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
+                    to={`/cart/upload/${item.id}`}
+                    className="flex items-center gap-1 text-xs text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
                  >
-                   <Plus size={14} />
-                   مدیریت / افزودن فایل
+                    <Plus size={14} />
+                    {pageText.cart.cartItem.manageFiles}
                  </Link>
               </>
             ) : (
               <div className="flex items-center gap-2 w-full sm:w-auto">
                  <Link 
-                   to={`/cart/upload/${item.id}`}
-                   className="flex items-center justify-center gap-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg border border-slate-200 transition-colors flex-1 sm:flex-none"
+                    to={`/cart/upload/${item.id}`}
+                    className="flex items-center justify-center gap-2 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-lg border border-slate-200 transition-colors flex-1 sm:flex-none"
                  >
-                   <UploadCloud size={14} />
-                   آپلود فایل طراحی (اختیاری)
+                    <UploadCloud size={14} />
+                    {pageText.cart.cartItem.uploadDesignOptional}
                  </Link>
               </div>
             )}
@@ -115,12 +119,12 @@ const CartItem = ({ item, onDelete, isDeleting }) => {
         {/* بخش قیمت و حذف (دسکتاپ) */}
         <div className="flex flex-col justify-between items-end min-w-[140px] border-t sm:border-t-0 border-slate-100 pt-4 sm:pt-0 mt-4 sm:mt-0">
           <div className="text-left">
-            <span className="block text-xs text-slate-400 mb-1">قیمت کل آیتم</span>
+            <span className="block text-xs text-slate-400 mb-1">{pageText.cart.cartItem.itemTotalPriceLabel}</span>
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-black text-slate-800 tracking-tight">
                 {parseFloat(item.price).toLocaleString()}
               </span>
-              <span className="text-xs text-slate-500">تومان</span>
+              <span className="text-xs text-slate-500">{pageText.cart.cartItem.currency}</span>
             </div>
           </div>
 
@@ -130,7 +134,7 @@ const CartItem = ({ item, onDelete, isDeleting }) => {
             className="hidden sm:flex items-center gap-2 text-slate-400 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-all text-sm mt-4"
           >
             <Trash2 size={16} />
-            <span>حذف آیتم</span>
+            <span>{pageText.cart.cartItem.deleteItemBtn}</span>
           </button>
         </div>
 
