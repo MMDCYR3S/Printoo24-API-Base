@@ -1,119 +1,111 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Fuse from 'fuse.js'; // برای جستجوی هوشمند
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { adminOrderService } from '../services/adminOrderService';
 
 export const useAdminOrders = () => {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   
-  // --- States ---
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all'); // all, paid, pending, cancelled, ...
-  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  // --- States (Syncing with URL params for better UX) ---
+  const initialPage = parseInt(searchParams.get('page')) || 1;
+  const initialStatus = searchParams.get('status_id') || 'all';
+  const initialSearch = searchParams.get('search') || '';
+  const initialDate = searchParams.get('date') || ''; // فرمت YYYY-MM-DD
 
-  // --- 1. Fetch Data ---
-  const { data: rawOrders = [], isLoading, isError, refetch } = useQuery({
-    queryKey: ['admin-orders'],
-    queryFn: adminOrderService.getAll,
-    staleTime: 1000 * 60 * 2, // 2 دقیقه کش
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [statusIdFilter, setStatusIdFilter] = useState(initialStatus);
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+  const [dateFilter, setDateFilter] = useState(initialDate);
+
+  // Debounce Search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      if (searchQuery !== initialSearch) setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery, initialSearch]);
+
+  // Update URL Params when filters change
+  useEffect(() => {
+    const params = {};
+    if (currentPage > 1) params.page = currentPage;
+    if (statusIdFilter !== 'all') params.status_id = statusIdFilter;
+    if (debouncedSearch) params.search = debouncedSearch;
+    if (dateFilter) params.date = dateFilter;
+    setSearchParams(params, { replace: true });
+  }, [currentPage, statusIdFilter, debouncedSearch, dateFilter, setSearchParams]);
+
+  // --- Fetch Data ---
+  const queryParams = {
+    page: currentPage,
+    ...(debouncedSearch && { search: debouncedSearch }),
+    ...(statusIdFilter !== 'all' && { status_id: statusIdFilter }),
+    ...(dateFilter && { date: dateFilter })
+  };
+
+  const { data = {}, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['admin-orders', queryParams],
+    queryFn: () => adminOrderService.getAll(queryParams),
+    staleTime: 1000 * 30, // 30 ثانیه کش
   });
 
-  // --- Mutations ---
-  
-  // حذف تکی
+  const orders = Array.isArray(data) ? data : (data.results || []);
+  const totalCount = data.count || orders.length;
+  const itemsPerPage = 10;
+  const totalPages = data.total_pages || Math.ceil(totalCount / itemsPerPage) || 1;
+
+// --- Mutations ---
   const deleteMutation = useMutation({
     mutationFn: adminOrderService.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries(['admin-orders']);
-      toast.success('سفارش با موفقیت حذف شد');
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      refetch();
+      toast.success('سفارش حذف شد');
     },
-    onError: () => toast.error('خطا در حذف سفارش (شاید فاکتور شده باشد)'),
+    onError: () => toast.error('خطا در حذف سفارش'),
   });
 
-  // حذف گروهی
   const bulkDeleteMutation = useMutation({
     mutationFn: adminOrderService.bulkDelete,
     onSuccess: () => {
-      queryClient.invalidateQueries(['admin-orders']);
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      refetch();
       toast.success('سفارشات انتخاب شده حذف شدند');
     },
     onError: () => toast.error('خطا در حذف گروهی'),
   });
 
-  // --- 2. Processing Data (Search -> Filter -> Sort) ---
-  const processedOrders = useMemo(() => {
-    let result = [...rawOrders];
-
-    // الف) فیلتر وضعیت (Status)
-    if (statusFilter !== 'all') {
-      // فرض بر این است که status_name یا یک فیلد مشابه برای وضعیت داریم
-      // اینجا باید با دیتای واقعی چک کنی که دقیقاً چه استرینگی برمی‌گردد
-      result = result.filter(order => order.status_name === statusFilter);
-    }
-
-    // ب) جستجو (Fuzzy Search)
-    if (searchQuery.trim()) {
-      const fuse = new Fuse(result, {
-        keys: ['id', 'username', 'user_info', 'total_price'],
-        threshold: 0.3,
-      });
-      result = fuse.search(searchQuery).map(r => r.item);
-    }
-
-    // ج) سورت (Sorting)
-    result.sort((a, b) => {
-      let aValue = a[sortConfig.key];
-      let bValue = b[sortConfig.key];
-
-      // هندل کردن قیمت و اعداد
-      if (sortConfig.key === 'total_price' || sortConfig.key === 'id') {
-        aValue = parseFloat(aValue) || 0;
-        bValue = parseFloat(bValue) || 0;
-      }
-
-      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    return result;
-  }, [rawOrders, searchQuery, statusFilter, sortConfig]);
-
-  // --- 3. Pagination ---
-  const totalPages = Math.ceil(processedOrders.length / itemsPerPage);
-  const paginatedOrders = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return processedOrders.slice(start, start + itemsPerPage);
-  }, [processedOrders, currentPage]);
-
-  // --- Handlers ---
-  const handleSort = (key) => {
-    setSortConfig(current => ({
-      key,
-      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc',
-    }));
-  };
+  const changeStatusMutation = useMutation({
+    mutationFn: ({ id, data }) => adminOrderService.changeStatus(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      refetch(); // این باعث میشه جدول درجا بدون نیاز به F5 زدن آپدیت بشه
+      toast.success('وضعیت با موفقیت تغییر کرد');
+    },
+    onError: () => toast.error('خطا در تغییر وضعیت'),
+  });
 
   return {
-    orders: paginatedOrders,
-    totalCount: processedOrders.length,
-    rawCount: rawOrders.length,
+    orders,
+    totalCount,
     totalPages,
     currentPage,
     setCurrentPage,
     searchQuery,
     setSearchQuery,
-    statusFilter,
-    setStatusFilter,
-    sortConfig,
-    handleSort,
+    statusIdFilter,
+    setStatusIdFilter,
+    dateFilter,
+    setDateFilter,
     isLoading,
-    isError,
+    isFetching, // برای نشان دادن لودینگ‌های ریز (مثلاً هنگام تایپ)
     refetch,
     deleteMutation,
-    bulkDeleteMutation
+    bulkDeleteMutation,
+    changeStatusMutation
   };
 };

@@ -1,164 +1,193 @@
-import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Printer, ArrowRight, Download, FileText } from 'lucide-react';
+import { Printer, ChevronRight, AlertCircle } from 'lucide-react';
 import { profileService } from '../../services/profileService';
+
+const formatCurrency = (val) => new Intl.NumberFormat('fa-IQ').format(val);
 
 const QuotationPage = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
-  const { data: quote, isLoading, isError } = useQuery({
+  const { data: quotation, isLoading, isError } = useQuery({
     queryKey: ['quotation', id],
-    queryFn: () => profileService.getQuotation(id),
+    queryFn: () => profileService.getQuotationByOrder(id),
     retry: 1,
   });
 
-  // هندل کردن پرینت
   const handlePrint = () => {
     window.print();
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
-        <p className="text-slate-500 animate-pulse">در حال صدور پیش‌فاکتور...</p>
-      </div>
-    );
-  }
-
-  if (isError || !quote) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
-        <FileText size={64} className="text-slate-200 mb-4" />
-        <h2 className="text-xl font-bold text-slate-800">پیش‌فاکتور یافت نشد</h2>
-        <p className="text-slate-500 mt-2 mb-6">ممکن است شناسه سفارش اشتباه باشد یا دسترسی نداشته باشید.</p>
-        <button onClick={() => navigate(-1)} className="btn btn-outline">بازگشت</button>
-      </div>
-    );
-  }
+  if (isLoading) return <div className="flex justify-center py-20"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
+  
+  if (isError || !quotation) return (
+    <div className="flex flex-col items-center justify-center py-20 gap-4">
+      <AlertCircle size={48} className="text-slate-300" />
+      <p className="text-slate-500 font-bold">پیش‌فاکتوری برای این سفارش یافت نشد.</p>
+      <Link to={`/profile/orders/${id}`} className="btn btn-outline">بازگشت به سفارش</Link>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans">
+    <div className="bg-slate-100 min-h-screen py-8">
       
-      {/* نوار ابزار بالا (در پرینت حذف می‌شود) */}
-      <div className="max-w-4xl mx-auto mb-6 flex justify-between items-center print:hidden">
-        <button 
-          onClick={() => navigate(-1)}
-          className="btn btn-ghost btn-sm gap-2 text-slate-600"
-        >
-          <ArrowRight size={18} /> بازگشت
-        </button>
-        <button 
-          onClick={handlePrint}
-          className="btn btn-primary gap-2 shadow-lg shadow-primary/20"
-        >
-          <Printer size={18} /> چاپ / دانلود PDF
+      {/* دکمه‌های کنترلی - خارج از ناحیه چاپ */}
+      <div className="max-w-[210mm] mx-auto mb-6 flex justify-between items-center px-4 no-print">
+        <Link to={`/profile/orders/${id}`} className="btn btn-ghost bg-white shadow-sm border border-slate-200">
+          <ChevronRight size={18} /> بازگشت
+        </Link>
+        <button onClick={handlePrint} className="btn btn-primary px-8">
+          <Printer size={18} /> چاپ رسمی (A4)
         </button>
       </div>
 
-      {/* کاغذ A4 فاکتور */}
-      <div className="max-w-4xl mx-auto bg-white shadow-2xl print:shadow-none print:w-full print:max-w-none rounded-none md:rounded-3xl overflow-hidden relative">
+      {/* ناحیه مخصوص چاپ */}
+      <div id="printable-area" className="max-w-[210mm] min-h-[297mm] mx-auto bg-white p-[15mm] shadow-xl border border-gray-300 text-black">
         
-        {/* هدر رنگی */}
-        <div className="h-3 bg-primary w-full print:bg-black"></div>
+        {/* استایل‌های اجباری برای خنثی کردن Layout سایت هنگام پرینت */}
+        <style dangerouslySetInnerHTML={{__html: `
+          @media print {
+            /* پنهان کردن کل اجزای سایت (هدر، فوتر، واتساپ و...) */
+            body * {
+              visibility: hidden;
+            }
+            /* نمایش اختصاصی فقط برای فاکتور ما */
+            #printable-area, #printable-area * {
+              visibility: visible;
+            }
+            #printable-area {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 210mm;
+              margin: 0 !important;
+              padding: 10mm !important;
+              border: none !important;
+              box-shadow: none !important;
+            }
+            .no-print {
+              display: none !important;
+            }
+            @page {
+              size: A4;
+              margin: 0;
+            }
+            /* جلوگیری از شکستن جدول در صفحات */
+            table { page-break-inside:auto; }
+            tr    { page-break-inside:avoid; page-break-after:auto; }
+          }
+        `}} />
 
-        <div className="p-8 md:p-12 print:p-0">
+        {/* --- شروع طراحی رسمی فاکتور --- */}
+        <div className="w-full text-sm">
           
-          {/* سربرگ */}
-          <div className="flex justify-between items-start border-b-2 border-slate-100 pb-8 mb-8">
-            <div>
-              <h1 className="text-3xl font-black text-slate-900 mb-2">پیش‌فاکتور خدمات چاپ</h1>
-              <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded text-sm font-bold print:border print:border-slate-300">
-                وضعیت: {quote.status_display || 'صادر شده'}
-              </span>
+          {/* هدر رسمی فاکتور */}
+          <div className="flex justify-between items-start mb-6 border-b-2 border-black pb-4">
+            <div className="w-1/3 text-right">
+              {/* جایگاه لوگو یا اطلاعات شرکت */}
+              <h2 className="font-black text-lg">چاپخانه Printoo24</h2>
+              <p className="text-xs mt-1">ارائه دهنده خدمات چاپ و تبلیغات</p>
             </div>
-            <div className="text-left text-slate-500 text-sm space-y-1">
-              <div className="flex items-center gap-2 justify-end">
-                <span className="font-bold text-slate-800">شماره:</span>
-                <span className="font-mono text-lg">{quote.quotation_number}</span>
-              </div>
-              <div className="flex items-center gap-2 justify-end">
-                <span className="font-bold text-slate-800">تاریخ صدور:</span>
-                <span className="dir-ltr">{new Date(quote.created_at).toLocaleDateString('fa-IR')}</span>
-              </div>
+            
+            <div className="w-1/3 text-center">
+              <h1 className="text-2xl font-black">پیش‌فاکتور</h1>
             </div>
-          </div>
-
-          {/* مشخصات طرفین */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 print:bg-transparent print:border-slate-300">
-              <h3 className="text-slate-400 text-xs font-bold mb-3 uppercase tracking-wider">مشخصات خریدار</h3>
-              <p className="text-xl font-bold text-slate-800 mb-1">{quote.customer_name}</p>
-              {/* اگر آدرس یا تلفن در آبجکت باشد اینجا اضافه شود */}
-            </div>
-            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 print:bg-transparent print:border-slate-300">
-              <h3 className="text-slate-400 text-xs font-bold mb-3 uppercase tracking-wider">مشخصات محصول</h3>
-              <p className="text-xl font-bold text-slate-800 mb-1">{quote.product_name}</p>
-              <div className="flex gap-4 mt-2 text-sm text-slate-600">
-                 <span>تراژ: <strong className="text-slate-900">{quote.quantity} عدد</strong></span>
-              </div>
-            </div>
-          </div>
-
-          {/* جدول جزئیات فنی */}
-          <div className="mb-12">
-            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-primary"></span>
-              مشخصات فنی سفارش
-            </h3>
-            <div className="overflow-hidden border border-slate-200 rounded-xl print:border-slate-300">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50 text-slate-500 print:bg-slate-100">
+            
+            <div className="w-1/3 text-left">
+              <table className="w-full text-xs float-left max-w-[150px]">
+                <tbody>
                   <tr>
-                    <th className="py-4 px-6 text-right font-bold">عنوان مشخصه</th>
-                    <th className="py-4 px-6 text-left font-bold">مقدار / توضیحات</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  <tr>
-                    <td className="py-4 px-6 text-slate-600">ابعاد</td>
-                    <td className="py-4 px-6 text-left font-bold text-slate-800 dir-ltr">
-                      {quote.snapshot_details?.dimensions || '-'}
-                    </td>
+                    <td className="text-right py-1">شماره:</td>
+                    <td className="font-bold dir-ltr py-1">{quotation.quotation_number}</td>
                   </tr>
                   <tr>
-                    <td className="py-4 px-6 text-slate-600">جنس کاغذ / متریال</td>
-                    <td className="py-4 px-6 text-left font-bold text-slate-800">
-                      {quote.snapshot_details?.material || '-'}
-                    </td>
+                    <td className="text-right py-1">تاریخ:</td>
+                    <td className="font-bold py-1">{new Date(quotation.created_at).toLocaleDateString('fa-IR')}</td>
                   </tr>
-                  {quote.snapshot_details?.features?.map((feature, idx) => (
-                    <tr key={idx}>
-                      <td className="py-4 px-6 text-slate-600">آپشن {idx + 1}</td>
-                      <td className="py-4 px-6 text-left font-bold text-slate-800">{feature}</td>
-                    </tr>
-                  ))}
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* جمع کل */}
-          <div className="flex justify-end mb-16">
-            <div className="w-full md:w-1/2 lg:w-1/3 bg-slate-900 text-white p-6 rounded-2xl print:bg-white print:text-black print:border-2 print:border-black">
-              <div className="flex justify-between items-center text-lg">
-                <span className="opacity-80">مبلغ قابل پرداخت:</span>
-                <span className="font-black text-2xl dir-ltr">
-                  {Number(quote.total_price).toLocaleString()} <span className="text-sm font-normal opacity-70">IQD</span>
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mt-2 text-center print:hidden">
-                این مبلغ شامل مالیات و عوارض قانونی می‌باشد.
-              </p>
+          {/* باکس مشخصات خریدار */}
+          <div className="border border-black rounded-sm mb-6">
+            <div className="bg-gray-100 border-b border-black font-bold p-2 text-center text-xs">
+              مشخصات خریدار
+            </div>
+            <div className="p-3">
+              <span className="text-xs">نام شخص حقیقی / حقوقی: </span>
+              <span className="font-bold">{quotation.customer_name}</span>
             </div>
           </div>
 
-          {/* فوتر */}
-          <div className="border-t border-slate-100 pt-8 text-center text-slate-400 text-sm print:text-xs">
-            <p>این سند به صورت سیستمی صادر شده و فاقد مهر فیزیکی معتبر است.</p>
-            <p className="mt-1 dir-ltr">www.printoo24.com</p>
+          {/* جدول اقلام (با خطوط کاملا مشخص و اداری) */}
+          <table className="w-full border-collapse border border-black mb-6 text-xs text-center">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border border-black p-2 w-12">ردیف</th>
+                <th className="border border-black p-2 text-right">شرح کالا / خدمات</th>
+                <th className="border border-black p-2 w-20">تعداد</th>
+                <th className="border border-black p-2 w-32">مبلغ واحد (IQD)</th>
+                <th className="border border-black p-2 w-32">مبلغ کل (IQD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-black p-3">۱</td>
+                <td className="border border-black p-3 text-right">
+                  <span className="font-bold block mb-1">{quotation.product_name}</span>
+                  {quotation.product_snapshot?.meta?.size_info && (
+                    <span className="text-[10px] text-gray-600 ml-2">
+                      ابعاد: {quotation.product_snapshot.meta.size_info.size_name}
+                    </span>
+                  )}
+                  {quotation.product_snapshot?.options?.map((opt, idx) => (
+                    <span key={idx} className="text-[10px] text-gray-600 ml-2 block mt-1">
+                      - {opt.option_label}: {opt.value.label}
+                    </span>
+                  ))}
+                </td>
+                <td className="border border-black p-3 font-bold">{quotation.quantity}</td>
+                {/* محاسبه قیمت واحد (قیمت کل تقسیم بر تعداد - بر اساس دیتای شما) */}
+                <td className="border border-black p-3 dir-ltr">
+                  {formatCurrency(quotation.total_price / quotation.quantity)}
+                </td>
+                <td className="border border-black p-3 font-bold dir-ltr">
+                  {formatCurrency(quotation.total_price)}
+                </td>
+              </tr>
+              {/* ردیف‌های خالی برای پر کردن فرم فاکتور در صورت نیاز (انتخابی) */}
+              <tr>
+                <td className="border border-black p-4"></td><td className="border border-black p-4"></td>
+                <td className="border border-black p-4"></td><td className="border border-black p-4"></td>
+                <td className="border border-black p-4"></td>
+              </tr>
+            </tbody>
+            {/* جمع فاکتور */}
+            <tfoot>
+              <tr>
+                <td colSpan="4" className="border border-black p-2 text-left font-bold">جمع کل قابل پرداخت:</td>
+                <td className="border border-black p-2 font-black text-sm dir-ltr bg-gray-50">
+                  {formatCurrency(quotation.total_price)}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+
+          {/* فوتر فاکتور (توضیحات و امضا) */}
+          <div className="flex border border-black rounded-sm h-32 text-xs">
+            <div className="w-2/3 p-3 border-l border-black">
+              <strong className="block mb-2">توضیحات:</strong>
+              <p className="text-gray-600 leading-relaxed">
+                ۱. این پیش‌فاکتور صرفاً جهت اطلاع از برآورد هزینه‌ها صادر شده است. <br/>
+                ۲. اعتبار قیمت‌های مندرج تا پایان زمان اعلام شده معتبر می‌باشد.
+              </p>
+            </div>
+            <div className="w-1/3 flex flex-col justify-between p-3">
+              <span className="font-bold text-center block">مهر و امضای فروشنده</span>
+              {/* جای خالی برای امضا */}
+            </div>
           </div>
 
         </div>

@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   ArrowRight, Download, FileText, Layers, MapPin, 
-  User, Package, DollarSign, Calendar, Info 
+  User, Package, DollarSign, Calendar, Info , Printer
 } from 'lucide-react';
 import { profileService } from '../../services/profileService';
 import { formatCurrency } from '../../utils/formatters';
@@ -86,6 +86,12 @@ const OrderDetailPage = () => {
           </div>
         </div>
         <div className={`px-6 py-3 rounded-2xl border-2 flex items-center gap-3 ${statusInfo.bg} ${statusInfo.color.replace('badge-', 'border-')}`}>
+
+<Link to={`/profile/orders/${id}/quotation`} className="btn btn-outline btn-sm h-12 px-4 rounded-2xl border-slate-200 text-slate-600 hover:text-primary hover:border-primary hover:bg-primary/5">
+      <Printer size={16} className="ml-1" />
+      پیش‌فاکتور
+    </Link>
+
           <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${statusInfo.color.replace('badge-', 'bg-')}`}></div>
           <span className="font-bold text-slate-800">{statusInfo.label}</span>
         </div>

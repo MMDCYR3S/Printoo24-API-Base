@@ -32,6 +32,7 @@ import MyOrdersPage from './app/features/profile/MyOrdersPage';
 import OrderDetailPage from './app/features/profile/OrderDetailPage';
 import WalletPage from './app/features/profile/WalletPage';
 import AddressPage from './app/features/profile/AddressPage';
+import QuotationPage from './app/features/profile/QuotationPage';
 
 // --- Admin Pages ---
 import AdminDashboard from './app/features/admin/features/dashboard/AdminDashboard';
@@ -153,6 +154,7 @@ function App() {
               <Route path="orders/:id" element={<OrderDetailPage />} />
               <Route path="wallet" element={<WalletPage />} />
               <Route path="addresses" element={<AddressPage />} />
+              <Route path="orders/:id/quotation" element={<QuotationPage />} />
             </Route>
 
 

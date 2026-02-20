@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Package, Calendar, MapPin, ChevronLeft, AlertCircle } from 'lucide-react';
+import { Package, Calendar, MapPin, ChevronLeft, AlertCircle , Printer} from 'lucide-react';
 import { profileService } from '../../services/profileService';
 
 import pageText from '../../lang/pages.json'
@@ -78,6 +78,9 @@ const MyOrdersPage = () => {
                         {new Intl.NumberFormat('fa-IQ').format(order.total_price)} <span className="text-xs font-medium text-slate-400">{globalText.currency}</span>
                       </span>
                    </div>
+                   <Link to={`/profile/orders/${order.id}/quotation`} className="btn btn-outline border-slate-200 text-slate-500 hover:text-primary hover:border-primary hover:bg-primary/5 rounded-xl px-4 tooltip tooltip-top" data-tip="پیش‌فاکتور">
+      <Printer size={18} />
+    </Link>
                    <Link to={`/profile/orders/${order.id}`} className="btn btn-primary rounded-xl px-6 shadow-lg shadow-primary/20">
                      {pageText.profile.myOrdersPage.details} <ChevronLeft size={16} />
                    </Link>
