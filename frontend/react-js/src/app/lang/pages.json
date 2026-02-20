@@ -65,6 +65,7 @@
         
     }
   },
+  
   "auth": {
     "loginTitle": "ورود به حساب کاربری",
     "registerTitle": "ایجاد حساب کاربری",
@@ -73,6 +74,7 @@
     "forgetPassword": "رمز عبور خود را فراموش کرده‌اید؟",
     "noAccount": "حساب کاربری ندارید؟ ثبت‌نام کنید"
   },
+
   "shop": {
     "shopTitle": "فروشگاه",
     "filtersTitle": "فیلترهای فعال:",
@@ -130,21 +132,102 @@
         }
     }
   },
+
   "cart": {
-    "pageTitle": "سبد خرید شما",
-    "emptyCart": "سبد خرید شما خالی است.",
-    "totalPrice": "قیمت کل",
-    "discount": "تخفیف",
-    "finalPrice": "مبلغ قابل پرداخت",
-    "continueShopping": "ادامه خرید",
-    "checkout": "تسویه حساب"
+    "designUploadPage": {
+        "pageTitle": "مدیریت فایل‌های سفارش",
+        "orderId": "شناسه سفارش:",
+        "refreshList": "بروزرسانی لیست",
+        "addNewFile": "افزودن فایل جدید",
+        "dropzoneTitle": "فایل‌ها را اینجا رها کنید",
+        "dropzoneHint": "پشتیبانی از JPG, PNG, PDF, ZIP (تعداد نامحدود)",
+        "pendingFilesTitle": "فایل‌های آماده ارسال ({{count}})",
+        "uploadingStatus": "در حال آپلود...",
+        "errorStatus": "خطا",
+        "startUploadBtn": "شروع آپلود فایل‌ها",
+        "registeredFilesTitle": "فایل‌های ثبت شده ({{count}})",
+        "noFilesRegistered": "هنوز فایلی برای این سفارش ثبت نشده است",
+        "registeredStatus": "ثبت شده",
+        "viewLarger": "مشاهده بزرگتر",
+        "deleteFile": "حذف این فایل",
+        "readyForPrint": "{{count}} فایل برای چاپ آماده است.",
+        "noFilesUploadedYet": "هنوز فایلی آپلود نکرده‌اید.",
+        "uploadPendingWarning": "لطفا ابتدا فایل‌های جدید را آپلود کنید",
+        "finalConfirmAndBack": "تایید نهایی و بازگشت به سبد خرید",
+        "receivedFileInfoError": "خطا در دریافت اطلاعات فایل‌ها",
+        "uploadFailed": "خطا در آپلود: ",
+        "uploadSuccess": " فایل با موفقیت ذخیره شد",
+        "approveDeletionFile": "آیا از حذف این فایل طراحی اطمینان دارید؟",
+        "deleteSuccess": "فایل با موفقیت حذف شد",
+        "deleteFailed": "خطا در حذف:",
+        "deleteFileError": "مشکلی در حذف فایل پیش آمد"
+    },
+    "cartPage": {
+        "fetchCartError": "خطا در دریافت سبد خرید",
+        "deleteConfirm": "آیا از حذف این آیتم مطمئن هستید؟",
+        "deleteSuccess": "آیتم حذف شد",
+        "deleteError": "خطا در حذف آیتم",
+        "emptyCartTitle": "سبد خرید خالی است",
+        "viewProducts": "مشاهده محصولات",
+        "pageTitle": "سبد خرید",
+        "productUnit": "{{count}} محصول",
+        "summaryTitle": "خلاصه سفارش",
+        "itemCountLabel": "تعداد اقلام",
+        "subtotalLabel": "جمع کل",
+        "totalPayableLabel": "مبلغ قابل پرداخت",
+        "currency": "تومان",
+        "noFileWarning": "شما برای {{count}} محصول فایلی آپلود نکرده‌اید. می‌توانید بدون فایل ادامه دهید و بعداً ارسال کنید.",
+        "checkoutBtn": "تکمیل خرید و پرداخت"
+    },
+    "cartItem": {
+        "productCode": "CODE:",
+        "sizeLabel": "سایز:",
+        "quantityLabel": "تعداد:",
+        "unit": "عدد",
+        "exactDimensionsLabel": "ابعاد دقیق:",
+        "filesUploaded": "{{count}} فایل آپلود شده",
+        "manageFiles": "مدیریت / افزودن فایل",
+        "uploadDesignOptional": "آپلود فایل طراحی (اختیاری)",
+        "itemTotalPriceLabel": "قیمت کل آیتم",
+        "currency": "تومان",
+        "deleteItemBtn": "حذف آیتم"
+    }
   },
+
   "checkout": {
-    "pageTitle": "تسویه حساب",
-    "addressDetails": "مشخصات آدرس",
-    "paymentMethod": "روش پرداخت",
-    "pay": "پرداخت نهایی"
+    "fetchError": "خطا در بارگذاری اطلاعات",
+    "invalidAddress": "آدرس انتخاب شده معتبر نیست",
+    "fillRequiredFields": "لطفا استان، شهر و آدرس دقیق را وارد کنید",
+    "orderSuccess": "سفارش شما با موفقیت ثبت شد!",
+    "orderSubmitError": "خطا در ثبت سفارش. لطفا ورودی‌ها را بررسی کنید.",
+    "pageTitle": "تکمیل سفارش",
+    "receiverSpecs": "مشخصات گیرنده (اختیاری)",
+    "receiverHint": "اگر این فیلدها را خالی بگذارید، مشخصات حساب کاربری شما استفاده می‌شود.",
+    "firstName": "نام",
+    "lastName": "نام خانوادگی",
+    "phone": "شماره تماس (اختیاری)",
+    "deliveryAddress": "آدرس تحویل",
+    "chooseFromList": "انتخاب از لیست",
+    "addNewAddress": "ثبت آدرس جدید",
+    "postalCode": "کد پستی:",
+    "province": "استان *",
+    "chooseProvince": "انتخاب استان...",
+    "city": "شهر *",
+    "chooseCity": "انتخاب شهر...",
+    "addressDetails": "آدرس پستی دقیق *",
+    "addressPlaceholder": "خیابان، کوچه، پلاک، واحد...",
+    "postalCodeLabel": "کد پستی",
+    "postalCodePlaceholder": "۱۰ رقمی (اختیاری)",
+    "finalInvoice": "فاکتور نهایی",
+    "itemsTotal": "جمع کل اقلام",
+    "shippingCost": "هزینه ارسال",
+    "postPaid": "پس کرایه",
+    "payableAmount": "مبلغ قابل پرداخت",
+    "currency": "تومان",
+    "submitting": "در حال ثبت...",
+    "confirmAndPay": "تایید و پرداخت"
   },
+
   "profile": {
     "myOrders": "سفارشات من",
     "myAddresses": "آدرس‌های من",
@@ -197,6 +280,8 @@
         "noFile": "فایلی آپلود نشده است",
         "downloadFile": "دانلود فایل",
         "backToList": "بازگشت به لیست سفارشات",
+        "quotation": "پیش‌فاکتور",
+        "invoice": "فاکتور",
     
         "specLabels": {
             "size": "ابعاد",
@@ -220,9 +305,95 @@
             "s14": "رد شده توسط انبار",
             "s15": "تحویل‌شده",
             "s16": "لغو شده"
-        }
-    }
+        },
+        "errorGettingOrder": "خطا در دریافت اطلاعات سفارش. لطفاً دوباره تلاش کنید.",
+        "unknown": "نامشخص",
+        "orderDetail": "جزئیات سفارش",
+        "registeredAt": "ثبت شده در:",
+        "totalPrice": "مبلغ کل سفارش",
+        "receiver": "تحویل‌گیرنده:",
+        "fullAddress": "آدرس کامل:",
+        "orderItemList": "لیست اقلام سفارش",
+        "receiverInfo": "اطلاعات تحویل و گیرنده",
+        "userCountOf": "کاربر شماره",
+        "specialProduct": "محصول اختصاصی",
+        "count": "تعداد:",
+        "productionTechnicalInfo": "مشخصات فنی تولید",
+        "systemNotes": "یادداشت‌های سیستم:",
+        "sendingDesignFiles": "فایل‌های طراحی ارسالی",
+        "lookDesignFiles": "مشاهده فایل طراحی",
+        "fileDidNotFound": "فایلی برای این قلم سفارش یافت نشد.",
+        "number": "عدد"
     },
+    "walletPage": {
+        "transactionHistory": "تاریخچه تراکنش‌ها",
+        "transactionType": "نوع تراکنش",
+        "price": "مبلغ",
+        "amountAfterTransaction": "موجودی پس از تراکنش",
+        "date": "تاریخ",
+        "transactionNotFound": "هیچ تراکنشی یافت نشد."
+    },
+    "addressPage":{
+        "registeredAddressSuccess": "آدرس جدید با موفقیت ثبت شد",
+        "checkInputsError": "خطا در ثبت آدرس. لطفا ورودی‌ها را بررسی کنید.",
+        "deleteAddressError": "خطا در حذف آدرس",
+        "myAddresses": "آدرس‌های من",
+        "orderAddressManagement": "مدیریت آدرس‌های ارسال سفارش",
+        "addAddress": "افزودن آدرس",
+        "addressNotRegistered": "هنوز آدرسی ثبت نکرده‌اید",
+        "addingTheFirstAddress": "ثبت اولین آدرس",
+        "addNewAddress": "ثبت آدرس جدید",
+        "enterFullAddressTitle": "اطلاعات آدرس را دقیق وارد کنید",
+        "province": "استان",
+        "city": "شهر",
+        "selectAddress": "انتخاب استان...",
+        "loadingProvinces": "در حال بارگذاری استان‌ها...",
+        "selectProvinceIsNessessary": "انتخاب استان الزامی است",
+        "selectCityIsNessessary": "انتخاب شهر الزامی است",
+        "pleaseSelectProvinceFirst": "اول استان را انتخاب کنید",
+        "loading": "در حال دریافت...",
+        "selecftCity": "انتخاب شهر...",
+        "onlyTen": "حتما ۱۰ رقم",
+        "detailedAddress": "آدرس دقیق پستی",
+        "detailedAddressPlaceHolder": "نام خیابان، نام کوچه، پلاک، واحد...",
+        "detailedAddressIsNessessary": "آدرس دقیق الزامی است",
+        "saveAddress": "ثبت و ذخیره آدرس"
+    }
+  },
+
+  "order": {
+    "invoicePage": {
+        "invoiceNotFound": "فاکتوری یافت نشد!",
+        "invoiceErrorHint": "فاکتور تنها در صورتی نمایش داده می‌شود که وضعیت سفارش تسویه کامل یا نهایی شده باشد.",
+        "backToOrder": "بازگشت به سفارش",
+        "printInvoice": "چاپ فاکتور",
+        "brandName": "پـرینـتـو ۲۴ - Printoo24",
+        "address": "تهران، میدان انقلاب، مجتمع چاپ",
+        "invoiceTitle": "فاکتور فروش",
+        "issuedFor": "صادر شده برای:",
+        "defaultCustomer": "مشتری پرینتو",
+        "contactNumber": "شماره تماس:",
+        "invoiceNumber": "شماره فاکتور:",
+        "issueDate": "تاریخ صدور:",
+        "tableRow": "ردیف",
+        "tableDescription": "شرح خدمات",
+        "tableQuantity": "تعداد",
+        "tableDimensions": "ابعاد",
+        "tableUnitPrice": "فی واحد",
+        "tableTotalPrice": "مبلغ کل",
+        "printOrderDescription": "سفارش چاپ (مجموع اقلام)",
+        "taxAndServices": "هزینه خدمات و مالیات بر ارزش افزوده",
+        "totalAmountsLabel": "جمع مبالغ:",
+        "noticeLabel": "توجه:",
+        "noticeText": "هرگونه ادعا، تعدیل یا مغایرت در ارتباط با این فاکتور باید قبل از تسویه به Printoo24 گزارش شود. از اعتماد شما سپاسگزاریم.",
+        "stampAndSignature": "مهر و امضای",
+        "stampEnglish": "Signature and Stamp",
+        "finalTotalLabel": "مبلغ نهایی (Total):",
+        "paidLabel": "پرداخت شده (Paid):",
+        "remainingLabel": "باقیمانده (To Be Paid):"
+    }
+  },
+
   "layout":{
     "ManinLayout":{
         "AccountCharge": "شارژ سریع حساب"

@@ -7,6 +7,10 @@ import { locationService } from '../../services/locationService';
 import { orderService } from '../../services/orderService';
 import clsx from 'clsx';
 
+// وارد کردن فایل‌های ترجمه
+import pageText from '../../lang/pages.json';
+import globalText from '../../lang/global.json';
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
   
@@ -72,7 +76,7 @@ const CheckoutPage = () => {
 
       } catch (err) {
         console.error(err);
-        toast.error('خطا در بارگذاری اطلاعات');
+        toast.error(pageText.checkout.fetchError);
       } finally {
         setLoading(false);
       }
@@ -119,7 +123,7 @@ const CheckoutPage = () => {
             // پیدا کردن آدرس انتخاب شده از لیست
             const selectedAddr = addresses.find(a => a.id === selectedAddressId);
             if (!selectedAddr) {
-                toast.error('آدرس انتخاب شده معتبر نیست');
+                toast.error(pageText.checkout.invalidAddress);
                 setSubmitting(false);
                 return;
             }
@@ -131,7 +135,7 @@ const CheckoutPage = () => {
         } else {
             // حالت آدرس جدید
             if (!formData.province_id || !formData.city_id || !formData.address_text) {
-                toast.error('لطفا استان، شهر و آدرس دقیق را وارد کنید');
+                toast.error(pageText.checkout.fillRequiredFields);
                 setSubmitting(false);
                 return;
             }
@@ -144,12 +148,12 @@ const CheckoutPage = () => {
         // ارسال به سرور
         await orderService.checkout(payload);
         
-        toast.success('سفارش شما با موفقیت ثبت شد!');
+        toast.success(pageText.checkout.orderSuccess);
         navigate('/profile/orders'); // هدایت به لیست سفارشات
 
     } catch (err) {
         console.error("Checkout Error:", err);
-        const msg = err.response?.data?.detail || 'خطا در ثبت سفارش. لطفا ورودی‌ها را بررسی کنید.';
+        const msg = err.response?.data?.detail || pageText.checkout.orderSubmitError;
         toast.error(msg);
     } finally {
         setSubmitting(false);
@@ -166,7 +170,7 @@ const CheckoutPage = () => {
         
         <h1 className="text-3xl font-black text-slate-800 mb-8 flex items-center gap-3">
           <CheckCircle className="text-emerald-500" />
-          تکمیل سفارش
+          {pageText.checkout.pageTitle}
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -178,10 +182,10 @@ const CheckoutPage = () => {
             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
                 <h2 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
                     <User size={20} className="text-blue-500"/>
-                    مشخصات گیرنده (اختیاری)
+                    {pageText.checkout.receiverSpecs}
                 </h2>
                 <p className="text-xs text-slate-400 mb-4">
-                    اگر این فیلدها را خالی بگذارید، مشخصات حساب کاربری شما استفاده می‌شود.
+                    {pageText.checkout.receiverHint}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <input 
@@ -190,7 +194,7 @@ const CheckoutPage = () => {
                         onChange={handleInputChange} 
                         type="text" 
                         className="input input-bordered rounded-xl bg-slate-50" 
-                        placeholder="نام"
+                        placeholder={pageText.checkout.firstName}
                     />
                     <input 
                         name="last_name" 
@@ -198,7 +202,7 @@ const CheckoutPage = () => {
                         onChange={handleInputChange} 
                         type="text" 
                         className="input input-bordered rounded-xl bg-slate-50" 
-                        placeholder="نام خانوادگی"
+                        placeholder={pageText.checkout.lastName}
                     />
                     <div className="relative sm:col-span-2">
                         <input 
@@ -207,7 +211,7 @@ const CheckoutPage = () => {
                             onChange={handleInputChange} 
                             type="tel" 
                             className="input input-bordered rounded-xl bg-slate-50 w-full pl-10 dir-ltr text-right" 
-                            placeholder="شماره تماس (اختیاری)"
+                            placeholder={pageText.checkout.phone}
                         />
                         <Phone size={18} className="absolute left-3 top-3.5 text-slate-400" />
                     </div>
@@ -218,7 +222,7 @@ const CheckoutPage = () => {
             <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
                 <h2 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
                     <MapPin size={20} className="text-orange-500"/>
-                    آدرس تحویل
+                    {pageText.checkout.deliveryAddress}
                 </h2>
 
                 {/* تب‌بندی: انتخاب یا جدید */}
@@ -231,7 +235,7 @@ const CheckoutPage = () => {
                                 addressMode === 'existing' ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"
                             )}
                         >
-                            <Home size={16}/> انتخاب از لیست
+                            <Home size={16}/> {pageText.checkout.chooseFromList}
                         </button>
                         <button
                             onClick={() => setAddressMode('new')}
@@ -240,7 +244,7 @@ const CheckoutPage = () => {
                                 addressMode === 'new' ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"
                             )}
                         >
-                            <Plus size={16}/> ثبت آدرس جدید
+                            <Plus size={16}/> {pageText.checkout.addNewAddress}
                         </button>
                     </div>
                 )}
@@ -272,7 +276,7 @@ const CheckoutPage = () => {
                                 </div>
                                 {addr.postal_code && (
                                     <span className="text-xs text-slate-400 mt-2 block font-mono">
-                                        کد پستی: {addr.postal_code}
+                                        {pageText.checkout.postalCode} {addr.postal_code}
                                     </span>
                                 )}
                             </div>
@@ -285,21 +289,21 @@ const CheckoutPage = () => {
                     <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             <div className="form-control">
-                                <label className="label"><span className="label-text">استان *</span></label>
+                                <label className="label"><span className="label-text">{pageText.checkout.province}</span></label>
                                 <select 
                                     name="province_id" 
                                     value={formData.province_id} 
                                     onChange={handleProvinceChange}
                                     className="select select-bordered rounded-xl bg-slate-50"
                                 >
-                                    <option value="">انتخاب استان...</option>
+                                    <option value="">{pageText.checkout.chooseProvince}</option>
                                     {provinces.map(p => (
                                         <option key={p.id} value={p.id}>{p.name}</option>
                                     ))}
                                 </select>
                             </div>
                             <div className="form-control">
-                                <label className="label"><span className="label-text">شهر *</span></label>
+                                <label className="label"><span className="label-text">{pageText.checkout.city}</span></label>
                                 <select 
                                     name="city_id" 
                                     value={formData.city_id} 
@@ -307,7 +311,7 @@ const CheckoutPage = () => {
                                     className="select select-bordered rounded-xl bg-slate-50"
                                     disabled={!formData.province_id}
                                 >
-                                    <option value="">انتخاب شهر...</option>
+                                    <option value="">{pageText.checkout.chooseCity}</option>
                                     {cities.map(c => (
                                         <option key={c.id} value={c.id}>{c.name}</option>
                                     ))}
@@ -316,25 +320,25 @@ const CheckoutPage = () => {
                         </div>
 
                         <div className="form-control mb-4">
-                            <label className="label"><span className="label-text">آدرس پستی دقیق *</span></label>
+                            <label className="label"><span className="label-text">{pageText.checkout.addressDetails}</span></label>
                             <textarea 
                                 name="address_text" 
                                 value={formData.address_text} 
                                 onChange={handleInputChange}
                                 className="textarea textarea-bordered rounded-xl bg-slate-50 h-24" 
-                                placeholder="خیابان، کوچه، پلاک، واحد..."
+                                placeholder={pageText.checkout.addressPlaceholder}
                             ></textarea>
                         </div>
 
                         <div className="form-control sm:w-1/2">
-                            <label className="label"><span className="label-text">کد پستی</span></label>
+                            <label className="label"><span className="label-text">{pageText.checkout.postalCodeLabel}</span></label>
                             <input 
                                 name="postal_code" 
                                 value={formData.postal_code} 
                                 onChange={handleInputChange} 
                                 type="text" 
                                 className="input input-bordered rounded-xl bg-slate-50 dir-ltr text-right" 
-                                placeholder="۱۰ رقمی (اختیاری)"
+                                placeholder={pageText.checkout.postalCodePlaceholder}
                             />
                         </div>
                     </div>
@@ -346,7 +350,7 @@ const CheckoutPage = () => {
           <div className="lg:col-span-4">
              <div className="sticky top-8 space-y-4">
                 <div className="bg-white rounded-3xl p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
-                   <h3 className="font-bold text-slate-800 mb-4 border-b pb-3">فاکتور نهایی</h3>
+                   <h3 className="font-bold text-slate-800 mb-4 border-b pb-3">{pageText.checkout.finalInvoice}</h3>
                    
                    <div className="space-y-3 mb-6 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
                       {cartSummary.items.map(item => (
@@ -362,18 +366,18 @@ const CheckoutPage = () => {
 
                    <div className="bg-slate-50 rounded-xl p-4 space-y-2 mb-6">
                        <div className="flex justify-between text-slate-600">
-                           <span>جمع کل اقلام</span>
+                           <span>{pageText.checkout.itemsTotal}</span>
                            <span className="font-bold">{cartSummary.total_price?.toLocaleString()}</span>
                        </div>
                        <div className="flex justify-between text-slate-400 text-sm">
-                           <span>هزینه ارسال</span>
-                           <span>پس کرایه</span>
+                           <span>{pageText.checkout.shippingCost}</span>
+                           <span>{pageText.checkout.postPaid}</span>
                        </div>
                        <div className="divider my-1"></div>
                        <div className="flex justify-between items-center">
-                           <span className="text-lg font-bold text-slate-800">مبلغ قابل پرداخت</span>
+                           <span className="text-lg font-bold text-slate-800">{pageText.checkout.payableAmount}</span>
                            <span className="text-2xl font-black text-blue-600">
-                               {cartSummary.total_price?.toLocaleString()} <span className="text-xs font-normal">تومان</span>
+                               {cartSummary.total_price?.toLocaleString()} <span className="text-xs font-normal">{pageText.checkout.currency}</span>
                            </span>
                        </div>
                    </div>
@@ -386,12 +390,12 @@ const CheckoutPage = () => {
                      {submitting ? (
                         <>
                             <span className="loading loading-spinner"></span>
-                            در حال ثبت...
+                            {pageText.checkout.submitting}
                         </>
                      ) : (
                         <>
                             <CreditCard size={20} />
-                            تایید و پرداخت
+                            {pageText.checkout.confirmAndPay}
                         </>
                      )}
                    </button>

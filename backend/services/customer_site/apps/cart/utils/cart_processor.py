@@ -24,6 +24,8 @@ class CartProcessor:
         self.product = product
         self.selections = selections
         self.quantity_input = int(quantity_input)
+
+        self.config = getattr(product, 'pricing_config', None)
         
         # خروجی‌ها
         self.final_options_data = [] # این همان لیستی است که در JSON ذخیره می‌شود
