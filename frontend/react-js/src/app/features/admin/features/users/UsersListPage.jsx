@@ -1,15 +1,21 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useCustomers } from '../../hooks/useCustomers';
-import { Plus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Search } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Search, Users, ShieldCheck } from 'lucide-react';
 import CustomerModal from './components/CustomerModal';
-import WalletAdjustModal from '../../components/WalletAdjustModal'; // ایمپورت مودال جدید
+import WalletAdjustModal from '../../components/WalletAdjustModal'; 
 import CustomerRow from './components/CustomerRow';
 import CustomerFilters from './components/CustomerFilters';
 import BulkActionsBar from './components/BulkActionsBar';
 
+// کامپوننت تب کارمندان (که در فایل مجزا میسازیم)
+import StaffTab from './components/StaffTab';
+
 const ITEMS_PER_PAGE = 10;
 
-const CustomerList = () => {
+// ==========================================
+// 1. کدهای اورجینال شما بدون هیچ تغییری (فقط اسمش شد CustomersTab)
+// ==========================================
+const CustomersTab = () => {
   const { usersQuery, bulkStatusMutation, bulkDeleteMutation } = useCustomers();
   
   // Data States
@@ -24,7 +30,7 @@ const CustomerList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
 
-  // Wallet Modal States (جدید)
+  // Wallet Modal States
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [walletUser, setWalletUser] = useState(null);
 
@@ -112,7 +118,7 @@ const CustomerList = () => {
     setIsModalOpen(true);
   }, []);
 
-  // Wallet Handler (جدید)
+  // Wallet Handler
   const handleWalletAction = useCallback((user) => {
     setWalletUser(user);
     setWalletModalOpen(true);
@@ -251,7 +257,7 @@ const CustomerList = () => {
                     isSelected={selectedIds.includes(user.id)}
                     onToggle={handleToggleOne}
                     onEdit={handleEdit}
-                    onWalletAction={handleWalletAction} // پراپ اتصال به مودال والت
+                    onWalletAction={handleWalletAction} 
                   />
                 ))
               )}
@@ -314,4 +320,41 @@ const CustomerList = () => {
   );
 };
 
-export default CustomerList;
+
+// ==========================================
+// 2. کامپوننت پوشه‌بندی و تب‌ها (حالا به درستی دور کدهای شما قرار گرفت)
+// ==========================================
+const UsersListPage = () => {
+  const [activeTab, setActiveTab] = useState('customers'); // 'customers' or 'staff'
+
+  return (
+    <div className="w-full relative">
+      {/* هدر تب‌ها در بالاترین سطح صفحه قرار می‌گیرد */}
+      <div className="pt-6 px-6 md:px-8 max-w-[1920px] mx-auto">
+        <div className="tabs tabs-boxed bg-slate-100 p-1 w-fit border border-slate-200 shadow-sm rounded-xl">
+          <button 
+            onClick={() => setActiveTab('customers')}
+            className={`tab tab-md md:tab-lg gap-2 transition-all rounded-lg ${activeTab === 'customers' ? 'tab-active !bg-white !text-primary shadow-sm font-bold' : 'text-slate-500 font-medium'}`}
+          >
+            <Users size={18} />
+            کاربران
+          </button>
+          <button 
+            onClick={() => setActiveTab('staff')}
+            className={`tab tab-md md:tab-lg gap-2 transition-all rounded-lg ${activeTab === 'staff' ? 'tab-active !bg-white !text-secondary shadow-sm font-bold' : 'text-slate-500 font-medium'}`}
+          >
+            <ShieldCheck size={18} />
+            کارمندان
+          </button>
+        </div>
+      </div>
+
+      {/* محتوای تب انتخاب شده */}
+      <div className="transition-all duration-300">
+        {activeTab === 'customers' ? <CustomersTab /> : <StaffTab />}
+      </div>
+    </div>
+  );
+};
+
+export default UsersListPage;
