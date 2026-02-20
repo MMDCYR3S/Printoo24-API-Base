@@ -1097,3 +1097,6 @@ INFO 2026-02-20 12:26:46,407 user_detail_service 164 137232066807488 Fetching pr
 INFO 2026-02-20 12:28:31,225 user_detail_service 164 137232342222528 Fetching profile details for User ID: 1
 INFO 2026-02-20 12:29:22,422 user_detail_service 164 137232108771008 Fetching profile details for User ID: 1
 INFO 2026-02-20 12:29:53,309 user_detail_service 164 137232108771008 Fetching profile details for User ID: 1
+INFO 2026-02-20 13:02:27,035 user_detail_service 488 123753350547136 Fetching profile details for User ID: 1
+INFO 2026-02-20 13:08:17,529 user_detail_service 488 123753723266752 Fetching profile details for User ID: 1
+INFO 2026-02-20 13:10:24,730 user_detail_service 488 123753748444864 Fetching profile details for User ID: 1

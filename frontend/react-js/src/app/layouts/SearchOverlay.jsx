@@ -30,7 +30,7 @@ const SearchOverlay = ({ results, loading, hasMore, onLoadMore, isVisible, onClo
           <Link
             key={product.id}
             to={`/product/${product.slug}`}
-            onClick={onClose}
+            // onClick={onClose}
             className="flex items-center gap-4 p-3 hover:bg-primary/5 rounded-xl transition-colors group"
           >
             <div className="w-14 h-14 rounded-lg bg-base-100 overflow-hidden border border-base-200 shrink-0">
