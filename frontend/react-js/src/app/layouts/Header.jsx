@@ -1,4 +1,3 @@
-// src/app/layouts/Header.jsx
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { cartService } from '../services/cartService';
@@ -10,26 +9,34 @@ import {
   Search, 
   ChevronDown,
   Wallet,
-  ShoppingCart
+  ShoppingCart,
+  X
 } from 'lucide-react';
 import MegaMenu from '../components/layout/MegaMenu';
 import pageText from '../lang/pages.json'
 import globalText from '../lang/global.json'
 
-// ایمپورت‌های جدید (مسیرها را بر اساس پوشه‌بندی خودتان در صورت نیاز تنظیم کنید)
+// ایمپورت‌های مربوط به کیف پول و فرمت‌کننده
 import { useWalletBalance } from '../hooks/useWalletBalance';
 import { formatCurrency } from '../utils/formatters';
+
+// ایمپورت‌های جدید برای سیستم جستجو (ماژولار)
+import { useSearch } from '../hooks/useSearch';
+import SearchOverlay from './SearchOverlay';
 
 const Header = ({ onOpenDrawer }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // استیت بررسی لاگین بودن
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState(''); // استیت متن جستجو
   const closeTimeoutRef = useRef(null);
 
+  // استفاده از هوک جستجو برای مدیریت منطق و اسکرول بی‌نهایت
+  const { results, loading, hasMore, loadMore } = useSearch(searchQuery);
 
-const [cartCount, setCartCount] = useState(0);
-
-useEffect(() => {
+  // دریافت تعداد آیتم‌های سبد خرید
+  useEffect(() => {
     const fetchCartCount = async () => {
       if (isLoggedIn) {
         try {
@@ -43,15 +50,16 @@ useEffect(() => {
     fetchCartCount();
   }, [isLoggedIn]);
 
-  // بررسی وضعیت لاگین در زمان مانت شدن کامپوننت
+  // بررسی وضعیت لاگین
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     setIsLoggedIn(!!token);
   }, []);
 
-  // استفاده از هوک اختصاصی کیف پول
-  const { balance, loading } = useWalletBalance(isLoggedIn);
+  // استفاده از هوک اختصاصی کیف پول (موجود در کد شما)
+  const { balance, loading: walletLoading } = useWalletBalance(isLoggedIn);
 
+  // مدیریت باز و بسته شدن مگامنو
   const handleMouseEnter = () => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
@@ -74,6 +82,7 @@ useEffect(() => {
       <div className="container mx-auto px-4 relative">
         <div className="h-14 py-3 flex items-center justify-between gap-3">
           
+          {/* بخش لوگو و منوی موبایل */}
           <div className="flex items-center gap-3">
             <button 
               onClick={onOpenDrawer} 
@@ -91,7 +100,8 @@ useEffect(() => {
             </Link>
           </div>
 
-          <div className="flex-1 max-w-xl hidden md:block">
+          {/* بخش جستجوی دسکتاپ (تغییر یافته برای جستجوی هوشمند) */}
+          <div className="flex-1 max-w-xl hidden md:block relative group">
             <div className={`
               relative flex items-center rounded-full border-2 transition-all duration-300
               ${isSearchFocused 
@@ -100,24 +110,46 @@ useEffect(() => {
               }
             `}>
               <input 
-                className="w-full py-2 px-5 pr-12 bg-transparent rounded-full text-right focus:outline-none placeholder:text-base-content/40" 
+                className="w-full py-2 px-5 pr-24 bg-transparent rounded-full text-right focus:outline-none placeholder:text-base-content/40" 
                 placeholder={pageText.layout.Header.search}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
+                // تایم‌اوت برای اینکه کلیک روی نتایج جستجو قبل از بسته شدن انجام شود
+                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
               />
-              <button className="absolute right-1 p-2 rounded-full bg-primary text-white hover:bg-primary-focus transition-colors cursor-pointer">
-                <Search size={18} />
-              </button>
+              <div className="absolute right-1 flex items-center gap-1">
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="p-1 hover:bg-base-200 rounded-full transition-colors text-base-content/40"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+                <button className="p-2 rounded-full bg-primary text-white hover:bg-primary-focus transition-colors cursor-pointer">
+                  <Search size={18} />
+                </button>
+              </div>
             </div>
+
+            {/* کامپوننت ماژولار نمایش نتایج */}
+            <SearchOverlay 
+              isVisible={isSearchFocused && searchQuery.length >= 2}
+              results={results}
+              loading={loading}
+              hasMore={hasMore}
+              onLoadMore={loadMore}
+              onClose={() => setIsSearchFocused(false)}
+            />
           </div>
 
+          {/* بخش ابزارها (سبد خرید، کیف پول، حساب کاربری) */}
           <div className="flex items-center gap-2">
             
-            {/* سبد خرید (همیشه برای همه کاربران نمایش داده می‌شود) */}
-<div className="tooltip tooltip-bottom" data-tip={globalText.cart}>
+            <div className="tooltip tooltip-bottom" data-tip={globalText.cart}>
               <Link to="/cart" className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
                 <ShoppingCart size={22} />
-                {/* تغییر این بخش برای نمایش داینامیک */}
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-5 h-5 flex items-center justify-center text-xs font-bold bg-error text-white rounded-full">
                     {cartCount}
@@ -126,11 +158,9 @@ useEffect(() => {
               </Link>
             </div>
 
-
-            {/* رندر شرطی بر اساس لاگین بودن */}
             {isLoggedIn ? (
               <>
-                {/* کیف پول */}
+                {/* بخش کیف پول */}
                 <div 
                   onClick={handleCreditClick}
                   className="tooltip tooltip-bottom cursor-pointer"
@@ -140,8 +170,7 @@ useEffect(() => {
                     <Wallet size={20} />
                     <div className="flex flex-col items-start leading-tight">
                       <span className="text-[10px] opacity-80">{pageText.layout.Header.amout}</span>
-                      {loading ? (
-                        /* انیمیشن لودینگ اسکلتی بجای مبلغ */
+                      {walletLoading ? (
                         <div className="h-4 w-16 bg-white/40 animate-pulse rounded mt-0.5"></div>
                       ) : (
                         <span className="font-bold text-sm dir-ltr">
@@ -152,15 +181,7 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* اطلاعیه‌ها
-                <div className="tooltip tooltip-bottom" data-tip="پیام‌ها و اطلاعیه‌ها">
-                  <button className="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary relative">
-                    <Bell size={22} />
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full animate-pulse"></span>
-                  </button>
-                </div> */}
-
-                {/* حساب کاربری */}
+                {/* بخش حساب کاربری */}
                 <div className="dropdown dropdown-end">
                   <div 
                     tabIndex={0} 
@@ -193,7 +214,6 @@ useEffect(() => {
                 </div>
               </>
             ) : (
-              /* دکمه‌های ورود و ثبت‌نام برای کاربران مهمان */
               <div className="flex items-center gap-1 sm:gap-2 mr-1">
                 <Link 
                   to="/login" 
@@ -213,7 +233,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* نوار دسته‌بندی (بدون تغییر) */}
+        {/* نوار دسته‌بندی و لینک‌های سریع */}
         <div className="hidden lg:block border-t border-base-200">
           <div className="flex items-center gap-1 py-2">
             
@@ -242,7 +262,7 @@ useEffect(() => {
               {[
                 { label: pageText.layout.Header.allProducts , to: '/shop' },
                 { label: pageText.layout.Header.lastOrders , to: '/profile/orders' },
-                  { label: pageText.layout.Header.myAddresses  , to: '/profile/addresses' },
+                { label: pageText.layout.Header.myAddresses  , to: '/profile/addresses' },
                 { label: pageText.layout.Header.trackingOrder , to: 'https://wa.me/9647700000000' },
               ].map((item) => (
                 <Link
@@ -265,12 +285,13 @@ useEffect(() => {
           </div>
         </div>
 
+        {/* مگامنو با انیمیشن و وضعیت هوشمند */}
         <div 
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           className={`
             absolute top-full right-0 left-0
-            transition-all durationorigin-top ease-out z-50
+            transition-all duration-300 ease-out z-50
             ${isMegaMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2 pointer-events-none'}
           `}
         >
