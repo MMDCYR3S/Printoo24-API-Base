@@ -307,7 +307,7 @@ const Header = ({ onOpenDrawer }) => {
                     </li>
                     <div className="my-1 mx-3 border-t border-slate-200" />
                     <li>
-                      <button className="flex items-center gap-3 py-2.5 px-3 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors w-full">
+                      <button  className="flex items-center gap-3 py-2.5 px-3 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors w-full">
                         <LogOut size={17} strokeWidth={1.8} />
                         {pageText.layout.Header.logout}
                       </button>
@@ -393,6 +393,7 @@ const Header = ({ onOpenDrawer }) => {
                     flex items-center gap-1.5
                   "
                 >
+                { <item.icon  size={20} /> }
                   {item.label}
                 </Link>
               ))}

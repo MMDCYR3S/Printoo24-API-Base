@@ -5,6 +5,20 @@
   themes: light --default;
 }
 
+/* import NRT-Bd from './assets/fonts/NRT-Bd.ttf'; */
+
+@font-face {
+  font-family: 'NRT-Bd';
+  src: url('./assets/fonts/NRT-Bd.ttf')  ,
+
+
+}
+
+/* حالا فونت سراسری اعمال میشه */
+:root {
+  font-family: 'NRT-Bd' !important;
+}
+
 /* تنظیمات تم */
 @plugin "daisyui/theme" {
   name: "light";
@@ -32,7 +46,6 @@
 }
 
 :root {
-  font-family: system-ui, -apple-system, sans-serif;
   direction: rtl; 
 }
 
@@ -42,6 +55,7 @@ html, body {
   overflow-x: clip; /* حذف اسکرول افقی و فضای سفید اضافه */
   margin: 0;
   padding: 0;
+  font-family: 'NRT-Bd';
 
 }
 
