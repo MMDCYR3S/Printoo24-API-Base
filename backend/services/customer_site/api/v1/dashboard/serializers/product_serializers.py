@@ -82,7 +82,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id', 'name', 'slug', 'category', 'description', 
-            'code', 'is_active', 'price', 'has_price', 'has_quantity', 
+            'code', 'is_active', 'price', 'show_price', 'has_price', 'has_quantity',  # <--- show_price اضافه شد
             'price_per_unit', 'detail_url', 'images', 'created_at'
         ]
         read_only_fields = ['id', 'code', 'slug', 'detail_url']
@@ -90,6 +90,7 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_category(self, obj):
         cat = obj.categories.first()
         return cat.name if cat else "Uncategorized"
+
 
 # =====Product Shell Serializer ===== #
 class ProductShellSerializer(serializers.ModelSerializer):
@@ -103,7 +104,7 @@ class ProductShellSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'slug', 'category_id', 'category_info', 'description', 
             'code', 'is_active', 'has_price', 'has_quantity', 
-            'price', 'price_per_unit', 'created_at',
+            'price', 'show_price', 'price_per_unit', 'created_at',
             'guide_text', 'guide_type'
         ]
         read_only_fields = ['id', 'code', 'slug']

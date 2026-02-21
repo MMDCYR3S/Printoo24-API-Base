@@ -235,6 +235,12 @@ class Product(HasGuide, models.Model):
     )
     slug = models.SlugField(_('اسلاگ'), unique=True, blank=True, null=True)
     has_price = models.BooleanField(_('دارای قیمت'), default=True)
+    show_price = models.DecimalField(
+        _("قیمت نمایشی"),
+        max_digits=14,
+        decimal_places=2,
+        default=0.0
+    )
     price = models.DecimalField(
         _('قیمت'),
         max_digits=12, 

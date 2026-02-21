@@ -69,9 +69,10 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                     "shell": {
                         "name": "کارت ویزیت لمینت براق",
                         "category_id": 1,
-                        "description": "...",
+                        "description": ".......",
                         "has_price": True,
-                        "price": "0",
+                        "price": 20000,
+                        "show_price": 100000,
                         "has_quantity": True,
                         "is_active": True,
                         "guide_text": "زمان تحویل این محصول ۷ روز کاری است.",
