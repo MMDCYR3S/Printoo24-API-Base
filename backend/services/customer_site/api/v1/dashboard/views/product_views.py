@@ -471,7 +471,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             )
         ]
     )
-    @action(detail=True, methods=['post'], url_path='options/sync')
+    @action(detail=True, methods=['post'], url_path='options')
     def sync_options(self, request, id=None):
         """
         یکپارچه: ایجاد (بدون id) و ویرایش (با id) ویژگی‌ها در یک درخواست

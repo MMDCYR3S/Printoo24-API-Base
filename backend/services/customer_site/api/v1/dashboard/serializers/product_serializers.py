@@ -177,6 +177,12 @@ class OptionConditionSerializer(serializers.Serializer):
 
 # ===== Option Value Override Serializer ===== #
 class OptionValueOverrideSerializer(GuideSerializerMixin, serializers.Serializer):
+    # ==== این فیلد باید حتماً اضافه شود ==== #
+    id = serializers.IntegerField(
+        required=False, 
+        allow_null=True, 
+        help_text="شناسه زیرویژگی (برای آپدیت مقادیر موجود)"
+    )
     ref_id = serializers.CharField(required=False, allow_null=True, allow_blank=True, help_text="شناسه موقت فرانت‌اند")
     global_value_id = serializers.IntegerField(required=False, allow_null=True)
     label = serializers.CharField(required=False)

@@ -589,3 +589,10 @@ class ProductService:
             "archived_count": archived_count,
             "total_processed": len(product_ids)
         }
+
+    def get_product_quantities_by_id(self, product_id: int):
+        """
+        دریافت لیست تیراژهای اختصاصی یک محصول خاص (با جوین به جدول مرجع Quantity)
+        """
+        from ..models import ProductQuantity
+        return ProductQuantity.objects.filter(product_id=product_id).select_related('quantity')
