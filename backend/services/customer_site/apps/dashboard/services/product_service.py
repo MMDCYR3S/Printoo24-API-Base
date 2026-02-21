@@ -12,6 +12,8 @@ from django.core.files import File
 
 # ===== سرویس های دامنه ===== #x
 from core.product.services import ProductService, ProductMediaService
+from core.models import ProductOption
+from core.product.exceptions import InvalidProductDataException
 
 try:
     from apps.dashboard.tasks import upload_product_image_task, upload_attachment_library_task
@@ -81,47 +83,49 @@ class ProductDashboardService:
     
         return self._domain_service.get_product_detail_by_id(product_id)
     
-    # ===== ویرایش آپشن ها ===== #
     @transaction.atomic
     def bulk_sync_options(self, product_id: int, options_data: List[Dict]):
         """
-        دریافت لیستی از آپشن‌ها و اعمال آنها روی محصول.
-        مدیریت شناسه موقت (ref_id) برای رفع مشکل مرغ و تخم‌مرغ در وابستگی‌ها.
+        یکپارچه: مدیریت ایجاد و ویرایش + ذخیره تمامی شروط در انتهای عملیات.
         """
         ref_map = {}
-        
-        pending_conditions = []
+        all_pending_conditions = []  # لیست جامع برای تمام شروط کل ویژگی‌ها
         results = []
 
         for opt_data in options_data:
-            # ===== ساخت ویژگی و مقادیر ===== #
-            product_option, created_values_with_refs = self._domain_service.attach_option_with_config(product_id, opt_data)
-            
-            # ===== پرکردن دیکشنری ===== #
-            for ref_id, val_obj in created_values_with_refs.items():
-                ref_map[ref_id] = val_obj
-                
-            # ===== جمع‌آوری شرط برای مرحله دوم ===== #
-            for val_config in opt_data.get('values_config', []):
-                val_ref = val_config.get('ref_id')
-                conds = val_config.get('conditions', [])
-                if val_ref and conds:
-                    pending_conditions.append({
-                        'target_ref': val_ref,
-                        'conditions': conds
-                    })
-                    
+            product_option_id = opt_data.get('id')
+
+            if product_option_id:
+                # ===== حالت آپدیت ===== #
+                # حالا انتظار داریم هر سه خروجی را از دامنه بگیریم
+                product_option, created_refs, pending_conds = self._domain_service.update_product_option_config(
+                    product_id=product_id,
+                    product_option_id=product_option_id,
+                    data=opt_data
+                )
+                status_label = 'updated'
+            else:
+                # ===== حالت ایجاد ===== #
+                product_option, created_refs, pending_conds = self._domain_service.attach_option_with_config(
+                    product_id, opt_data
+                )
+                status_label = 'created'
+
+            # آپدیت دیکشنری جامع رفرنس‌ها و لیست جامع شروط
+            ref_map.update(created_refs)
+            all_pending_conditions.extend(pending_conds)
+
             results.append({
                 'product_option_id': product_option.id,
                 'source_option_id': opt_data.get('option_id'),
-                'status': 'synced'
+                'status': status_label
             })
 
-        if pending_conditions:
-            self._domain_service.create_bulk_conditions(ref_map, pending_conditions)
+        if all_pending_conditions:
+            self._domain_service.create_bulk_conditions(ref_map, all_pending_conditions)
 
         return results
-    
+        
     # ===== تصاویر و فایل های پیوست ===== #
     @transaction.atomic
     def sync_media_assets(self):
@@ -227,19 +231,29 @@ class ProductDashboardService:
     def remove_option_from_product(self, product_id: int, product_option_id: int):
         self._domain_service.detach_option(product_id, product_option_id)
 
-    def update_option_configuration(self, product_id: int, option_id: int, data: dict):
-        logger.info(f"Updating option config {option_id} for product {product_id}")
+    @transaction.atomic
+    def update_product_option_config(self, product_id: int, product_option_id: int, data: dict):
         try:
-            result = self._domain_service.update_product_option_config(
-                product_id=product_id, 
-                product_option_id=option_id,
-                data=data
+            prod_opt = ProductOption.objects.get(id=product_option_id, product_id=product_id)
+        except ProductOption.DoesNotExist:
+            raise InvalidProductDataException(f"ID نامعتبر: {product_option_id}")
+
+        if 'is_required' in data: prod_opt.is_required = data['is_required']
+        if 'guide_text' in data: prod_opt.guide_text = data['guide_text']
+        if 'guide_type' in data: prod_opt.guide_type = data['guide_type']
+        if 'label' in data: prod_opt.label = data['label']
+        if 'order' in data: prod_opt.order = data['order']
+        prod_opt.save()
+
+        created_values_with_refs = {}
+
+        if 'values_config' in data and data['values_config']:
+            created_values_with_refs = self._update_option_values_pricing_logic(
+                product_id, product_option_id, data['values_config']
             )
-            logger.info(f"Option config updated successfully")
-            return result
-        except Exception as e:
-            logger.error(f"Failed to update option config: {str(e)}")
-            raise e
+
+        # ← حالا تاپل برمی‌گردونه مثل attach_option_with_config
+        return prod_opt, created_values_with_refs
         
     # ========== BULK ACTIONS ========== #
     def bulk_update_product_status(self, product_ids: List[int], is_active: bool) -> int:
