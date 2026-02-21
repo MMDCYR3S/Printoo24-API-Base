@@ -92,6 +92,9 @@ class SiteMediaManager(models.Manager):
     def get_queryset(self):
         return SiteMediaQuerySet(self.model, using=self._db)
 
+    def get_all_media(self):
+        return self.get_queryset().get_all_media()
+
     def deactivate_all(self):
         return self.get_queryset().deactivate_all()
         
