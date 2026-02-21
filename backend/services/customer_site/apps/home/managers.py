@@ -78,3 +78,23 @@ class SliderManager(models.Manager):
         
     def create_slider(self, data: dict):
         return self.create(**data)
+
+# ========== QUERYSET ========== #
+class SiteMediaQuerySet(BaseQuerySet):
+    def get_all_media(self):
+        return self.order_by('-created_at')
+        
+    def deactivate_all(self):
+        """تمام رکوردها را در یک کوئری سریع غیرفعال می‌کند"""
+        return self.update(is_active=False)
+
+class SiteMediaManager(models.Manager):
+    def get_queryset(self):
+        return SiteMediaQuerySet(self.model, using=self._db)
+
+    def deactivate_all(self):
+        return self.get_queryset().deactivate_all()
+        
+    def get_active_media(self):
+        """فقط رکورد فعال را برمی‌گرداند"""
+        return self.get_queryset().filter(is_active=True).first()

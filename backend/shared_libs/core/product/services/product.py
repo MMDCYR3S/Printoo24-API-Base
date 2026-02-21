@@ -68,16 +68,6 @@ class ProductService:
             # "structured_options": self._format_product_options(product)
         }
 
-    def get_product_quantities_by_id(self, product_id: int):
-        """
-        واکشی تیراژهای اختصاص یافته به یک محصول.
-        این متد مستقیماً با مدل ProductQuantity کار می‌کند.
-        """
-        # استفاده از select_related برای جلوگیری از N+1 Query
-        return ProductQuantity.objects.filter(
-            product_id=product_id
-        ).select_related('quantity').order_by('quantity__value')
-
     @transaction.atomic
     def sync_sizes(self, product_id: int, user, size_configs: List[Dict]):
         """
@@ -314,6 +304,7 @@ class ProductService:
         # خروجی‌ها برای مرحله دوم (Pass 2)
         created_values_with_refs = {}
         matrix_to_create = []
+        pending_conditions = []
         
         # ===== ۱. ساخت مقادیر برگرفته از بانک ===== #
         if global_option:
@@ -387,44 +378,52 @@ class ProductService:
                         product_quantity=pq,
                         price=qp.get('price', 0)
                     ))
+
+            conds = custom_item.get('conditions', [])
+            if conds:
+                pending_conditions.append({
+                    'target_obj': val_obj,
+                    'conditions': conds
+                })
                     
         # ===== ذخیره دسته‌جمعی ماتریس (Performance Boost) ===== #
         if matrix_to_create:
             OptionValueQuantityPrice.objects.bulk_create(matrix_to_create)
             
-        return product_option, created_values_with_refs
+        return product_option, created_values_with_refs, pending_conditions
 
     @transaction.atomic
     def create_bulk_conditions(self, ref_map: dict, pending_conditions: list):
         """
-        ساخت دسته‌جمعی شرط‌ها بر اساس نگاشت شناسه‌های موقت (ref_id) 
-        به آبجکت‌های واقعی دیتابیس.
+        ساخت نهایی تمامی شروط. در این مرحله target_obj را به جای رفرنس از قبل داریم.
         """
-        from ..models import ProductOptionCondition
+        from ..models import ProductOptionCondition, ProductOptionValue
         conditions_to_create = []
         
         for item in pending_conditions:
-            target_obj = ref_map.get(item['target_ref'])
+            target_obj = item.get('target_obj')
             if not target_obj:
                 continue
+                
+            ProductOptionCondition.objects.filter(target_value=target_obj).delete()
                 
             for cond in item['conditions']:
                 req_ref_id = cond.get('required_ref_id')
                 req_val_id = cond.get('required_value_id')
+                action = cond.get('action', 'show')
                 
-                # پیدا کردن پیش‌نیاز (یا از طریق آیدی واقعی دیتابیس یا از طریق شناسه موقت)
                 req_obj = None
-                if req_ref_id:
-                    req_obj = ref_map.get(req_ref_id)
+                
+                if req_ref_id and req_ref_id in ref_map:
+                    req_obj = ref_map[req_ref_id]
                 elif req_val_id:
                     req_obj = ProductOptionValue.objects.filter(id=req_val_id).first()
                 
-                # جلوگیری از ساخت شرط به خودش یا هم‌گروه خودش
                 if req_obj and req_obj.product_option_id != target_obj.product_option_id:
                     conditions_to_create.append(ProductOptionCondition(
                         target_value=target_obj,
                         required_value=req_obj,
-                        action=cond.get('action', 'show')
+                        action=action
                     ))
                     
         if conditions_to_create:
@@ -432,66 +431,75 @@ class ProductService:
 
     @transaction.atomic
     def update_product_option_config(self, product_id: int, product_option_id: int, data: dict):
-        """
-        [UPDATED] آپدیت تکی یک کانفیگ
-        """
         try:
             prod_opt = ProductOption.objects.get(id=product_option_id, product_id=product_id)
         except ProductOption.DoesNotExist:
             raise InvalidProductDataException(f"ID نامعتبر: {product_option_id}")
-        
+
+        # آپدیت فیلدهای پایه‌ای
         if 'is_required' in data: prod_opt.is_required = data['is_required']
         if 'guide_text' in data: prod_opt.guide_text = data['guide_text']
         if 'guide_type' in data: prod_opt.guide_type = data['guide_type']
-        
+        if 'label' in data: prod_opt.label = data['label']
+        if 'order' in data: prod_opt.order = data['order']
         prod_opt.save()
 
-        # آپدیت مقادیر (Values)
-        if 'values' in data and data['values']:
-            self._update_option_values_pricing_logic(product_id, product_option_id, data['values'])
-            
-        return prod_opt
+        created_values_with_refs = {}
+        pending_conditions = []
 
+        if 'values_config' in data and data['values_config']:
+            created_values_with_refs, pending_conditions = self._update_option_values_pricing_logic(
+                product_id, product_option_id, data['values_config']
+            )
+
+        return prod_opt, created_values_with_refs, pending_conditions
     @transaction.atomic
     def _update_option_values_pricing_logic(self, product_id: int, product_option_id: int, updates: List[Dict]):
-        from ..models import OptionValueQuantityPrice, ProductOptionCondition
+        from ..models import OptionValueQuantityPrice
         
-        # ===== بارگذاری تمامی مقادیر فعلی محصول ===== #
-        all_product_values = ProductOptionValue.objects.filter(product_option__product_id=product_id)
-        
-        # ===== مپ کردن تمامی شناسه ویژگی‌ها ===== #
-        value_map_by_id = {v.id: v for v in all_product_values}
-        
-        # ===== دیکشنری برای ذخیره‌سازی ویژگی‌های جدید ===== #
-        ref_map_new_values = {}
+        # ===== ۱. بارگذاری داده‌های پایه =====
+        existing_values = ProductOptionValue.objects.filter(product_option_id=product_option_id)
+        value_map_by_id = {v.id: v for v in existing_values}
 
-        # ===== تیراژ محصولات ===== #
         product_quantities = {pq.quantity_id: pq for pq in ProductQuantity.objects.filter(product_id=product_id)}
+
+        incoming_ids = [item.get('id') for item in updates if item.get('id')]
+
+        ids_to_delete = set(value_map_by_id.keys()) - set(incoming_ids)
+        
+        if ids_to_delete:
+            ProductOptionValue.objects.filter(id__in=ids_to_delete).delete()
+            for deleted_id in ids_to_delete:
+                del value_map_by_id[deleted_id]
+
+        ref_map_new_values = {}
+        pending_conditions = []
 
         to_update = []
         fields_to_update = ['price_impact', 'is_default', 'order', 'guide_text', 'guide_type', 'label', 'value']
-        
         matrix_to_create = []
-        pending_conditions = []
 
+        # ===== ۲. پردازش لیست مقادیر (Values) =====
         for item in updates:
             val_id = item.get('id')
             ref_id = item.get('ref_id')
-            
-            # ===== آپدیت مقادیر موجود ===== #
+            obj = None
+
+            # --- حالت الف: آپدیت مقدار موجود ---
             if val_id and val_id in value_map_by_id:
                 obj = value_map_by_id[val_id]
                 has_change = False
-
+                
+                # بررسی فیلد به فیلد برای آپدیت
                 for field in fields_to_update:
                     if field in item and getattr(obj, field) != item[field]:
                         setattr(obj, field, item[field])
                         has_change = True
-                
+                        
                 if has_change:
                     to_update.append(obj)
-                    
-            # ===== اگر مقدار جدید بود ===== #
+
+            # --- حالت ب: ساخت مقدار جدید ---
             elif not val_id:
                 label = item.get('label', 'Custom Option')
                 obj = ProductOptionValue(
@@ -505,72 +513,48 @@ class ProductService:
                     guide_text=item.get('guide_text', ''),
                     guide_type=item.get('guide_type', 'info')
                 )
-                obj.save()
+                obj.save()  # ذخیره در لحظه برای دریافت ID
                 
+                # اضافه کردن به مپ‌ها
                 value_map_by_id[obj.id] = obj
                 if ref_id:
                     ref_map_new_values[ref_id] = obj
 
-            if 'obj' in locals():
-                # ===== تیراژها ===== #
+            # ===== ۳. پردازش وابسته‌ها (ماتریس قیمت و شروط) =====
+            if obj is not None:
+                
+                # پردازش ماتریس قیمت (Quantity Prices)
                 if 'quantity_prices' in item:
+                    # ابتدا تمام ماتریس‌های قبلی این مقدار را پاک می‌کنیم (Overwrite)
                     OptionValueQuantityPrice.objects.filter(option_value=obj).delete()
+                    
                     for qp in item['quantity_prices']:
                         pq = product_quantities.get(qp['quantity_id'])
                         if pq:
                             matrix_to_create.append(OptionValueQuantityPrice(
-                                option_value=obj,
-                                product_quantity=pq,
+                                option_value=obj, 
+                                product_quantity=pq, 
                                 price=qp.get('price', 0)
                             ))
 
-                # ===== جمع‌آوری ویژگی‌های شرطی ===== #
+                # جمع‌آوری شروط (Conditions) برای پردازش نهایی در لایه App Service
                 if 'conditions' in item:
                     pending_conditions.append({
                         'target_obj': obj,
                         'conditions': item['conditions']
                     })
 
+        # ===== ۴. اجرای درخواست‌های Bulk به دیتابیس =====
         if to_update:
             ProductOptionValue.objects.bulk_update(to_update, fields_to_update)
-            
+
         if matrix_to_create:
             OptionValueQuantityPrice.objects.bulk_create(matrix_to_create)
 
-        # ==========================================
-        # مرحله دوم (Pass 2): اعمال قوانین وابستگی (Conditions)
-        # ==========================================
-        if pending_conditions:
-            conditions_to_create = []
-            
-            for pending in pending_conditions:
-                target_obj = pending['target_obj']
-                
-                # حذف شروط قبلی که این مقدار هدف آن‌ها بوده است
-                ProductOptionCondition.objects.filter(target_value=target_obj).delete()
-                
-                for cond in pending['conditions']:
-                    req_val_id = cond.get('required_value_id')
-                    req_ref_id = cond.get('required_ref_id')
-                    action = cond.get('action', 'show')
-                    
-                    req_obj = None
-                    # پیدا کردن پیش‌نیاز (یا از مقادیر قبلی با ID، یا مقادیر جدید با ref_id)
-                    if req_val_id and req_val_id in value_map_by_id:
-                        req_obj = value_map_by_id[req_val_id]
-                    elif req_ref_id and req_ref_id in ref_map_new_values:
-                        req_obj = ref_map_new_values[req_ref_id]
-                        
-                    # جلوگیری از وابستگی یک ویژگی به هم‌گروه خودش
-                    if req_obj and req_obj.product_option_id != target_obj.product_option_id:
-                        conditions_to_create.append(ProductOptionCondition(
-                            target_value=target_obj,
-                            required_value=req_obj,
-                            action=action
-                        ))
-                        
-            if conditions_to_create:
-                ProductOptionCondition.objects.bulk_create(conditions_to_create)
+        # ===== ۵. بازگشت خروجی‌ها =====
+        return ref_map_new_values, pending_conditions
+    
+    # ===== ساخت بخش مربوط به محصولات ===== #
     def delete_product(self, product_id: int):
         product = Product.objects.get_by_id(product_id)
         if not product:
@@ -614,3 +598,10 @@ class ProductService:
             "archived_count": archived_count,
             "total_processed": len(product_ids)
         }
+
+    def get_product_quantities_by_id(self, product_id: int):
+        """
+        دریافت لیست تیراژهای اختصاصی یک محصول خاص (با جوین به جدول مرجع Quantity)
+        """
+        from ..models import ProductQuantity
+        return ProductQuantity.objects.filter(product_id=product_id).select_related('quantity')

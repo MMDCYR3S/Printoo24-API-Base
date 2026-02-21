@@ -12,6 +12,7 @@ from core.users.services import CustomerService
 # ===== Logger ===== #
 logger = logging.getLogger('dashboard.services.wallet')
 
+# ========== WALLET DASHBOARD SERVICE ========== #
 class WalletDashboardService:
     """
     سرویس مدیریت کیف پول مخصوص داشبورد ادمین.
@@ -25,10 +26,9 @@ class WalletDashboardService:
         """
         لیست کیف پول‌ها را با بهینه‌سازی (select_related) برمی‌گرداند.
         """
-        # اینجا لاگ نمیگذاریم چون یک کوئری ساده خواندنی است
         return Wallet.objects.select_related('user__customer_profile').all().order_by('-updated_at')
 
-    # ===== عملیات اصلاح موجودی (Adjustment) ===== #
+    # ===== ADJUST BALANCE ===== #
     @transaction.atomic
     def adjust_balance(self, user_id: int, amount: Decimal, action_type: str) -> Wallet:
         """

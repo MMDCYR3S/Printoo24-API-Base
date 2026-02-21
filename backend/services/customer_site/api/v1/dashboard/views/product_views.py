@@ -14,8 +14,10 @@ from ..serializers import (
     ProductDetailSerializer,
     OptionConfigUpdateSerializer,
     ProductSerializer,
-    ProductQuantityOutputSerializer
+    ProductQuantityOutputSerializer,
+    ProductOptionsBulkSyncSerializer
 )
+from core.product.exceptions import InvalidProductDataException
 
 # ===== Product Dashboard View Set ===== #
 @extend_schema(tags=['Dashboard-Product-Refactored'])
@@ -191,7 +193,6 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         return Response({'status': 'Product core updated'})
 
     # ========== OPTIONS ========== #
-     # ========== OPTIONS ========== #
     @extend_schema(
         summary="مرحله ۲: همگام‌سازی ویژگی‌ها (Options)",
         description="""
@@ -300,6 +301,122 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 request_only=True
             ),
             OpenApiExample(
+                'Update Existing Options Scenario',
+                summary='سناریو ویرایش: آپدیت ویژگی‌های موجود + اضافه کردن مقدار جدید',
+                description='''
+                در این مثال:
+                - ویژگی "جنس" (id=5) آپدیت می‌شود → مقدار موجود (id=12) ویرایش + یک مقدار جدید اضافه می‌شود
+                - ویژگی "نوع برش" (id=6) فقط تنظیمات پایه‌اش عوض می‌شود
+                - یک ویژگی کاملاً جدید (بدون id) اضافه می‌شود
+                ''',
+                value={
+                    "options": [
+
+                        # ====== ویرایش ویژگی موجود: جنس ======
+                        {
+                            "id": 5,              # ← وجود id یعنی آپدیت
+                            "label": "جنس کاغذ (ویرایش شده)",
+                            "is_required": True,
+                            "guide_text": "لطفاً جنس مناسب را انتخاب کنید.",
+                            "values_config": [
+                                {
+                                    # مقدار موجود: فقط قیمت و ماتریس تیراژ عوض می‌شه
+                                    "id": 12,
+                                    "label": "گلاسه ۱۳۵ گرم",
+                                    "price_impact": 5000,
+                                    "quantity_prices": [
+                                        {"quantity_id": 10, "price": 120000},
+                                        {"quantity_id": 11, "price": 200000}
+                                    ]
+                                },
+                                {
+                                    # مقدار موجود: فقط شرط جدید اضافه می‌شه
+                                    "id": 13,
+                                    "label": "گلاسه ۱۷۰ گرم",
+                                    "price_impact": 12000,
+                                    "quantity_prices": [
+                                        {"quantity_id": 10, "price": 180000},
+                                        {"quantity_id": 11, "price": 290000}
+                                    ]
+                                },
+                                {
+                                    # مقدار جدید (بدون id): به این ویژگی موجود اضافه می‌شه
+                                    "ref_id": "mat_new_1",
+                                    "label": "کتان ۲۵۰ گرم",
+                                    "price_impact": 25000,
+                                    "quantity_prices": [
+                                        {"quantity_id": 10, "price": 300000},
+                                        {"quantity_id": 11, "price": 480000}
+                                    ],
+                                    "conditions": []
+                                }
+                            ]
+                        },
+
+                        # ====== ویرایش ویژگی موجود: نوع برش ======
+                        {
+                            "id": 6,              # ← آپدیت
+                            "is_required": False,
+                            "guide_text": "برش لیزر دقت بیشتری دارد.",
+                            "values_config": [
+                                {
+                                    # این مقدار به مقدار جدید "کتان ۲۵۰ گرم" وابسته می‌شه
+                                    "id": 20,
+                                    "label": "برش لیزر",
+                                    "price_impact": 30000,
+                                    "quantity_prices": [],
+                                    "conditions": [
+                                        {
+                                            # وابستگی به مقدار جدید از طریق ref_id
+                                            "required_ref_id": "mat_new_1",
+                                            "action": "show"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id": 21,
+                                    "label": "برش معمولی",
+                                    "price_impact": 0,
+                                    "quantity_prices": [],
+                                    "conditions": []
+                                }
+                            ]
+                        },
+
+                        # ====== ویژگی کاملاً جدید (بدون id) ======
+                        {
+                            # ← بدون id یعنی ایجاد جدید
+                            "option_id": None,
+                            "name": "uv_coating",
+                            "label": "روکش UV",
+                            "input_type": "radio",
+                            "is_required": False,
+                            "values_config": [
+                                {
+                                    "ref_id": "uv_temp_1",
+                                    "label": "UV مات",
+                                    "price_impact": 8000,
+                                    "quantity_prices": [
+                                        {"quantity_id": 10, "price": 90000}
+                                    ],
+                                    "conditions": []
+                                },
+                                {
+                                    "ref_id": "uv_temp_2",
+                                    "label": "UV براق",
+                                    "price_impact": 10000,
+                                    "quantity_prices": [
+                                        {"quantity_id": 10, "price": 110000}
+                                    ],
+                                    "conditions": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                request_only=True
+            ),
+            OpenApiExample(
                 'Unit-Based Product Scenario (No Quantity Matrix)',
                 summary='سناریو محصول تعدادی (بدون ماتریس قیمت)',
                 description='برای محصولاتی که تیراژ فرمی ندارند (مثل ماگ یا تیشرت). در اینجا آرایه quantity_prices خالی است و سیستم فقط از price_impact به عنوان قیمت پایه ضرب‌در تعداد استفاده می‌کند.',
@@ -356,22 +473,23 @@ class ProductDashboardViewSet(viewsets.ViewSet):
     )
     @action(detail=True, methods=['post'], url_path='options')
     def sync_options(self, request, id=None):
-        """ مرحله دوم: ارسال لیست تمام آپشن‌ها و قیمت‌هایشان """
-        serializer = ProductOptionsBulkSerializer(data=request.data)
+        """
+        یکپارچه: ایجاد (بدون id) و ویرایش (با id) ویژگی‌ها در یک درخواست
+        """
+        serializer = ProductOptionsBulkSyncSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         try:
             results = self.app_service.bulk_sync_options(
-                product_id=id, 
+                product_id=id,
                 options_data=serializer.validated_data['options']
             )
             return Response({'results': results}, status=status.HTTP_200_OK)
-            
+
+        except InvalidProductDataException as e:
+            return Response({"detail": str(e), "code": "invalid_data"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response(
-                {"detail": str(e), "code": "sync_failed"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": str(e), "code": "sync_failed"}, status=status.HTTP_400_BAD_REQUEST)
     
     # ========== UPDATE OPTION CONFIG ========== #
     @extend_schema(

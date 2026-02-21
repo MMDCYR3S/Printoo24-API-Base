@@ -24,7 +24,8 @@ from .views import (
     ProductImageViewSet,
     InvoiceViewSet,
     QuotationViewSet,
-    StaffViewSet
+    StaffViewSet,
+    SiteMediaDashboardViewSet
 )
 
 router = DefaultRouter()
@@ -45,6 +46,7 @@ router.register(r'cart', CartDashboardViewSet, basename='cart')
 router.register(r'cart-files', CartFileUploadViewSet, basename='cart-files')
 router.register(r'orders', OrderDashboardViewSet, basename='orders')
 router.register(r'sliders', SliderDashboardViewSet, basename='sliders')
+router.register(r'site-media', SiteMediaDashboardViewSet, basename='site-media')
 router.register(r'provinces', ProvinceDashboardViewSet, basename='provinces')
 router.register(r'cities', CityDashboardViewSet, basename='cities')
 router.register(r'staffs', StaffViewSet, basename='staff')

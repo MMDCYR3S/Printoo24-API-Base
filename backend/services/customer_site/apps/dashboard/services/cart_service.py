@@ -58,7 +58,7 @@ class CartDashboardService:
             'session_key': cart.session_key
         }
 
-    # ===== Write Operations (Commands) ===== #
+    # ===== CREATE ITEM ===== #
     @transaction.atomic
     def add_item_to_cart(self, cart_id: int, data: Dict[str, Any]):
         """
@@ -90,6 +90,7 @@ class CartDashboardService:
             logger.error(f"Failed to add item via Admin: {e}")
             raise e
 
+    # ===== UPDATE ITEM ===== #
     @transaction.atomic
     def update_cart_item(self, cart_id: int, item_id: int, data: Dict[str, Any]):
         """ ویرایش آیتم توسط ادمین در یک سبد خاص """
@@ -123,7 +124,7 @@ class CartDashboardService:
         service = CartClearService(user=cart.user, session_key=cart.session_key)
         service.clear()
 
-    # ===== Helper Methods (Mapper) ===== #
+    # ===== HELPER METHOD ===== #
     def _map_admin_data_to_selections(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         این متد حیاتی است!

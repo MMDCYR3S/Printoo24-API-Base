@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from core.models import User
 from core.users.services import UserAdminService
 
-# ===== Staff Dashboard Service ===== #
+# ===== STAFF DASHBOARD SERVICE ===== #
 class StaffDashboardService:
     """
     سرویس اپلیکیشن برای مدیریت کارمندان در داشبورد ادمین.
@@ -37,7 +37,7 @@ class StaffDashboardService:
     def delete_staff(self, user_id: int):
         self.domain_service.delete_staff(user_id)
 
-    # ===== عملیات گروهی (Bulk Actions) ===== #
+    # ===== عملیات گروهی ===== #
     def bulk_toggle_status(self, user_ids: List[int], is_active: bool) -> int:
         return self.domain_service.bulk_toggle_active(user_ids, is_active)
 
