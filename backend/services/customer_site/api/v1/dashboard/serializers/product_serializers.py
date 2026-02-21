@@ -248,6 +248,42 @@ class OptionPriceUpdateSerializer(serializers.Serializer):
     product_option_id = serializers.IntegerField(help_text="ID of the Local ProductOption")
     values = serializers.ListField(child=OptionValuePriceItemSerializer())
     
+class ProductOptionSyncItemSerializer(serializers.Serializer):
+    """
+    سریالایزر یکپارچه برای سینک ویژگی‌ها (ایجاد و ویرایش همزمان)
+    """
+    id = serializers.IntegerField(
+        required=False, 
+        allow_null=True, 
+        help_text="اگر آیدی داشته باشد یعنی آپدیت است (ProductOption ID)"
+    )
+    option_id = serializers.IntegerField(
+        required=False, 
+        allow_null=True,
+        help_text="شناسه ویژگی گلوبال (از بانک)"
+    )
+    name = serializers.CharField(required=False, allow_blank=True)
+    label = serializers.CharField(required=False, allow_blank=True)
+    input_type = serializers.CharField(required=False, default='select')
+    is_required = serializers.BooleanField(default=False)
+    guide_text = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    guide_type = serializers.CharField(required=False, default='info')
+    
+    # مقادیر این ویژگی (Option Values)
+    values_config = serializers.ListField(
+        child=OptionValueOverrideSerializer(), # (از همان سریالایزر قبلی خودتان استفاده کنید)
+        required=False,
+        allow_empty=True
+    )
+    
+    # فیلد order برای حفظ ترتیب ویژگی‌ها
+    order = serializers.IntegerField(required=False, default=0)
+
+class ProductOptionsBulkSyncSerializer(serializers.Serializer):
+    options = serializers.ListField(
+        child=ProductOptionSyncItemSerializer(),
+        allow_empty=True
+    )
 
 # ===== Product Option Value Price Item Serializer ===== #
 class ProductOptionValueOutputSerializer(serializers.ModelSerializer):
