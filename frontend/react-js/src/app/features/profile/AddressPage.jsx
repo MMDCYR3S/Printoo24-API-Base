@@ -92,7 +92,7 @@ const AddressPage = () => {
   if (isAddressesLoading) return <div className="flex justify-center py-20"><span className="loading loading-spinner loading-lg text-primary"></span></div>;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-[90vw] mx-auto">
       
       {/* هدر صفحه */}
       <div className="flex justify-between items-center border-b border-slate-100 pb-4">

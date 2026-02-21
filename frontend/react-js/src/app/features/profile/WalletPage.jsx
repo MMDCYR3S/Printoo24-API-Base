@@ -20,7 +20,7 @@ const WalletPage = () => {
   const transactions = Array.isArray(history?.[0]) ? history[0] : (history || []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-[90vw] mx-auto ">
       <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
         <Wallet className="text-primary" />
         {pageText.profile.walletPage.transactionHistory}

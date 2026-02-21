@@ -1,73 +1,128 @@
 // src/app/features/layout/MainLayout.jsx
+import { useState, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Layers, Headphones } from 'lucide-react';
+
 import Header from './Header';
 import Footer from './Footer';
-import MobileMenu from '../components/layout/MobileMenu'; // اطمینان از ایمپورت
-import { X } from 'lucide-react';
+import MobileMenu from '../components/layout/MobileMenu';
 import SupportFloat from '../components/common/SupportFloat';
-import pageText from '../lang/pages.json'
+import pageText from '../lang/pages.json';
 
 const MainLayout = () => {
-  
-  // ✅ تعریف تابعی که فراموش شده بود
-  const closeDrawer = () => {
-    const drawerCheckbox = document.getElementById('main-drawer');
-    if (drawerCheckbox) {
-      drawerCheckbox.checked = false;
-    }
-  };
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
 
-  const openDrawer = () => {
-    const drawerCheckbox = document.getElementById('main-drawer');
-    if (drawerCheckbox) {
-      drawerCheckbox.checked = true;
-    }
-  };
+  const openDrawer = useCallback(() => setDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   return (
-    <div className="drawer ">
-      <input id="main-drawer" type="checkbox" className="drawer-toggle" />
-      
-      <div className="drawer-content flex flex-col min-h-screen bg-base-200">
-        <Header onOpenDrawer={openDrawer} />
-        
-        <main className="flex-1 mx-auto  py-6">
-          <Outlet />
-        </main>
-        
-        <Footer />
+    <div className="relative min-h-screen flex flex-col bg-white">
 
-        <SupportFloat />
-      </div>
+      {/* ── هدر ── */}
+      <Header onOpenDrawer={openDrawer} />
 
-      <div className="drawer-side z-50 " >
-        <label htmlFor="main-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
-        
-        <div className="menu p-0 w-80 min-h-full bg-base-100 text-base-content flex flex-col shadow-2xl">
-          
-          <div className="p-4 flex justify-between items-center border-b border-base-200 sticky top-0 bg-base-100 z-10">
-            <span className="text-xl font-black text-primary">دسته‌بندی‌ها</span>
-            <button onClick={closeDrawer} className="btn btn-ghost btn-circle btn-sm hover:bg-error/10 hover:text-error transition-colors">
-                <X size={24} />
-            </button>
+      {/* ── محتوای اصلی ── */}
+      <main className="flex-1 mx-auto py-6 w-full">
+        <Outlet />
+      </main>
+
+      {/* ── فوتر ── */}
+      <Footer />
+
+      {/* ── دکمه پشتیبانی ── */}
+      <SupportFloat />
+
+      {/* ════════════════ دراور موبایل ════════════════ */}
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+
+            {/* اورلی */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+              onClick={closeDrawer}
+            />
+
+            {/* پنل سایدبار */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+              className="
+                absolute inset-y-0 right-0 w-[300px]
+                bg-white
+                shadow-[−24px_0_48px_−12px_rgba(0,0,0,0.15)]
+                flex flex-col
+                overflow-hidden
+              "
+            >
+              {/* ── هدر سایدبار ── */}
+              <div className="
+                shrink-0 px-5 py-4
+                flex items-center justify-between
+                border-b border-slate-100
+                bg-gradient-to-l from-primary/5 to-transparent
+              ">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Layers size={17} className="text-primary" />
+                  </div>
+                  <span className="text-base font-extrabold text-slate-800">
+                    دسته‌بندی‌ها
+                  </span>
+                </div>
+                <button
+                  onClick={closeDrawer}
+                  className="
+                    w-8 h-8 flex items-center justify-center
+                    rounded-lg
+                    text-slate-400 hover:text-red-500
+                    hover:bg-red-50
+                    active:scale-95
+                    transition-all duration-200
+                  "
+                >
+                  <X size={18} strokeWidth={2.2} />
+                </button>
+              </div>
+
+              {/* ── محتوای منو ── */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <MobileMenu onClose={closeDrawer} />
+              </div>
+
+              {/* ── فوتر سایدبار ── */}
+              <div className="shrink-0 border-t border-slate-100 bg-slate-50/50 p-4 space-y-3">
+                <button className="
+                  w-full flex items-center justify-center gap-2
+                  py-2.5 rounded-xl
+                  bg-gradient-to-l from-secondary to-secondary/90
+                  text-white text-sm font-bold
+                  shadow-md shadow-secondary/20
+                  hover:shadow-lg hover:shadow-secondary/30
+                  active:scale-[0.98]
+                  transition-all duration-200
+                ">
+                  <Headphones size={16} />
+                  {pageText.layout.MainLaouy}
+                </button>
+                <div className="
+                  text-center text-[10px] text-slate-400/60
+                  font-mono tracking-wider
+                " dir="ltr">
+                  Printoo24 v1.0.0
+                </div>
+              </div>
+            </motion.div>
           </div>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-             <MobileMenu onClose={closeDrawer} />
-          </div>
-          
-          {/* فوتر سایدبار */}
-          <div className="p-4 border-t border-base-200 mt-auto bg-base-50">
-             <button className="btn btn-secondary w-full mb-3 shadow-md font-bold text-lg">
-               {pageText.layout.MainLaouy}
-             </button>
-             <div className="text-center text-xs text-base-content/40 font-mono" dir="ltr">
-               Printoo24 v1.0.0
-             </div>
-          </div>
-
-        </div>
-      </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
