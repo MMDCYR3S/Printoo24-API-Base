@@ -458,10 +458,19 @@ class ProductService:
         from ..models import OptionValueQuantityPrice
         
         # ===== ۱. بارگذاری داده‌های پایه =====
-        all_product_values = ProductOptionValue.objects.filter(product_option__product_id=product_id)
-        value_map_by_id = {v.id: v for v in all_product_values}
-        
+        existing_values = ProductOptionValue.objects.filter(product_option_id=product_option_id)
+        value_map_by_id = {v.id: v for v in existing_values}
+
         product_quantities = {pq.quantity_id: pq for pq in ProductQuantity.objects.filter(product_id=product_id)}
+
+        incoming_ids = [item.get('id') for item in updates if item.get('id')]
+
+        ids_to_delete = set(value_map_by_id.keys()) - set(incoming_ids)
+        
+        if ids_to_delete:
+            ProductOptionValue.objects.filter(id__in=ids_to_delete).delete()
+            for deleted_id in ids_to_delete:
+                del value_map_by_id[deleted_id]
 
         ref_map_new_values = {}
         pending_conditions = []

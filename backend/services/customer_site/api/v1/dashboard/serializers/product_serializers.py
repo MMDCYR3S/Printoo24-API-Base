@@ -177,7 +177,6 @@ class OptionConditionSerializer(serializers.Serializer):
 
 # ===== Option Value Override Serializer ===== #
 class OptionValueOverrideSerializer(GuideSerializerMixin, serializers.Serializer):
-    # ==== این فیلد باید حتماً اضافه شود ==== #
     id = serializers.IntegerField(
         required=False, 
         allow_null=True, 
