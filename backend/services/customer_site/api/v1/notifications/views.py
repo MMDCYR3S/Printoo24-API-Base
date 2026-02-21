@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes
 
+from core.infrastructure.messages import msg_provider
 from apps.notification.services import NotificationAppService
 from .serializers import NotificationSerializer, NotificationListResponseSerializer
 
@@ -88,7 +89,7 @@ class NotificationReadView(APIView):
     def post(self, request, pk):
         service = NotificationAppService(request.user)
         service.mark_as_read(pk)
-        return Response({"detail": "اعلان خوانده شد."}, status=status.HTTP_200_OK)
+        return Response({"message": msg_provider.get("notification.S6006")}, status=status.HTTP_200_OK)
 
 # ===== Notification Read All View ===== #
 @extend_schema(tags=["Notification"])
@@ -110,4 +111,4 @@ class NotificationReadAllView(APIView):
     def post(self, request):
         service = NotificationAppService(request.user)
         service.mark_all_read()
-        return Response({"detail": "تمام اعلان‌ها خوانده شدند."}, status=status.HTTP_200_OK)
+        return Response({"message": msg_provider.get("notification.S6007")}, status=status.HTTP_200_OK)

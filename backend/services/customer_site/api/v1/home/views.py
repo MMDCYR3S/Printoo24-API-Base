@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiTypes
 from apps.home.services import SliderService
 from apps.home.models import PromotionalModal
 from .serializers import SliderSerializer, PromotionalModalSerializer, ContactUsSerializer
+from core.infrastructure.messages import msg_provider
 
 # ===== Slider ViewSet (Customer Side) ===== #
 @extend_schema(tags=['General - Content'])
@@ -127,7 +128,7 @@ class ContactUsView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(
-                {"message": "پیام شما با موفقیت دریافت شد. کارشناسان ما به زودی با شما تماس می‌گیرند."}, 
+                {"message": msg_provider.get("home.S5001")}, 
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -11,11 +11,10 @@ from ..serializers import (
     ProductCoreCreateSerializer,
     ProductOptionsBulkSerializer,
     ProductMediaSyncSerializer,
-    ProductImageSerializer,
-    AttachmentLibrarySerializer,
     ProductDetailSerializer,
     OptionConfigUpdateSerializer,
     ProductSerializer,
+    ProductQuantityOutputSerializer
 )
 
 # ===== Product Dashboard View Set ===== #
@@ -758,6 +757,17 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         try:
             self.app_service.remove_option_from_product(id, option_id)
             return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'], url_path='quantities')
+    def get_quantities(self, request, id=None):
+        """ لیست تیراژهای اختصاصی محصول """
+        try:
+            # فراخوانی سرویس اصلاح شده
+            quantities = self.app_service.get_product_quantities(product_id=id)
+            serializer = ProductQuantityOutputSerializer(quantities, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -47,7 +47,7 @@ def assign_default_role_to_new_user(sender, instance, created, **kwargs):
             from .models import Role, UserRole
             
             # ===== پیدا کردن نقش کاربر ===== #
-            default_role, _ = Role.objects.get_or_create(name="مشتری" ,type='normal', is_customer=True)
+            default_role, _ = Role.objects.get_or_create(name="موشته‌ری" ,type='normal', is_customer=True)
             
             if default_role:
                 UserRole.objects.create(

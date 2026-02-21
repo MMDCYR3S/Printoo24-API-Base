@@ -1,0 +1,26 @@
+{
+    "quotationPage": {
+        "notFound": "پیش‌فاکتوری برای این سفارش یافت نشد.",
+        "backToOrder": "بازگشت به سفارش",
+        "backBtn": "بازگشت",
+        "printBtn": "چاپ رسمی (A4)",
+        "brandName": "چاپخانه Printoo24",
+        "brandSub": "ارائه دهنده خدمات چاپ و تبلیغات",
+        "pageTitle": "پیش‌فاکتور",
+        "numberLabel": "شماره:",
+        "dateLabel": "تاریخ:",
+        "customerInfoTitle": "مشخصات خریدار",
+        "customerNameLabel": "نام شخص حقیقی / حقوقی: ",
+        "tableRow": "ردیف",
+        "tableDescription": "شرح کالا / خدمات",
+        "tableQuantity": "تعداد",
+        "tableUnitPrice": "مبلغ واحد (تومان)",
+        "tableTotalPrice": "مبلغ کل (تومان)",
+        "dimensions": "ابعاد:",
+        "totalPayable": "جمع کل قابل پرداخت:",
+        "notesTitle": "توضیحات:",
+        "note1": "۱. این پیش‌فاکتور صرفاً جهت اطلاع از برآورد هزینه‌ها صادر شده است.",
+        "note2": "۲. اعتبار قیمت‌های مندرج تا پایان زمان اعلام شده معتبر می‌باشد.",
+        "sellerStamp": "مهر و امضای فروشنده"
+    }
+}

@@ -68,6 +68,16 @@ class ProductService:
             # "structured_options": self._format_product_options(product)
         }
 
+    def get_product_quantities_by_id(self, product_id: int):
+        """
+        واکشی تیراژهای اختصاص یافته به یک محصول.
+        این متد مستقیماً با مدل ProductQuantity کار می‌کند.
+        """
+        # استفاده از select_related برای جلوگیری از N+1 Query
+        return ProductQuantity.objects.filter(
+            product_id=product_id
+        ).select_related('quantity').order_by('quantity__value')
+
     @transaction.atomic
     def sync_sizes(self, product_id: int, user, size_configs: List[Dict]):
         """

@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.users.services import UserIdentityService
+from core.infrastructure.messages import msg_provider
 # from .verify_service import VerificationService
 
 # ====== Logger Configuration ====== #
@@ -87,12 +88,12 @@ class AuthService:
             
             if not user:
                 logger.warning(f"Invalid credentials for: {username}")
-                raise ValidationError("نام کاربری یا رمز عبور اشتباه است.")
+                raise ValidationError(msg_provider.get("auth.E1001"))
             
             # ===== حساب کاربری فعال باشد ===== #
             if not user.is_active:
                 logger.warning(f"Login blocked - Inactive user: {username}")
-                raise ValidationError("حساب کاربری شما غیرفعال است.")
+                raise ValidationError(msg_provider.get("auth.E1002"))
             
             # ===== تولید توکن ===== #
             tokens = self._generate_tokens(user)
@@ -108,4 +109,4 @@ class AuthService:
             raise
         except Exception as e:
             logger.error(f"Login error for {username}: {e}", exc_info=True)
-            raise ValidationError("خطای سیستمی در ورود.")
+            raise ValidationError(msg_provider.get("auth.E1003"))

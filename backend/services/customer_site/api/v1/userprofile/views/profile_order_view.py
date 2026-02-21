@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.userprofile.services import UserOrderListService
 from ..serializers import OrderWithDetailsSerializer, OrderSerializer, QuotationSerializer, UserInvoiceSerializer
+from core.infrastructure.messages import msg_provider
 
 # ===== User Order List APIView ===== #
 @extend_schema(tags=["Profile"])
@@ -125,7 +126,7 @@ class UserOrderDetailAPIView(APIView):
             )
         except Exception as e:
             return Response(
-                {'detail': 'خطایی رخ داد.', 'error': str(e)}, 
+                {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -180,7 +181,7 @@ class UserOrderQuotationAPIView(APIView):
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response(
-                {'detail': 'خطایی در دریافت پیش‌فاکتور رخ داد.', 'error': str(e)}, 
+                {'error': str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

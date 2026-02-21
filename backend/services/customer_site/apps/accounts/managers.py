@@ -4,6 +4,8 @@ from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from .exceptions import WalletNotFoundException
 
+from core.infrastructure.messages import msg_provider
+
 # ===== Base QuerySet ===== #
 class BaseQuerySet(models.QuerySet):
     """
@@ -30,7 +32,7 @@ class WalletQuerySet(BaseQuerySet):
         try:
             return self.get(user=user)
         except ObjectDoesNotExist:
-            raise WalletNotFoundException("کیف پول برای این کاربر یافت نشد.")
+            raise WalletNotFoundException(msg_provider.get("wallet.E3003"))
 
     def get_for_update_custom(self, user_id: int):
         """

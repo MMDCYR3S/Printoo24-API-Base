@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 from .models import ContactUs, PromotionalModal, SliderIndex
+from core.infrastructure.messages import msg_provider
 
 # ========== CONTACT SERVICE ========== #
 class ContactService:
@@ -22,15 +23,16 @@ class ContactService:
         پاسخ به پیام کاربر و ارسال ایمیل.
         """
         message = ContactUs.objects.get_by_id(message_id)
-        if not message:
-            raise ValidationError("پیام مورد نظر یافت نشد.")
             
+        if not message:
+            raise ValidationError(msg_provider.get("home.E5001"))
+        
         # ===== جلوگیری از پاسخ مجدد ===== #
         if message.admin_reply:
-            raise ValidationError("به این پیام قبلاً پاسخ داده شده است.")
+            raise ValidationError(msg_provider.get("home.E5002"))
 
         if not message.email:
-             raise ValidationError("کاربر ایمیل ندارد، امکان ارسال پاسخ نیست.")
+             raise ValidationError(msg_provider.get("home.E5003"))
 
         # ===== ذخیره پاسخ و تغییر وضعیت ===== #
         message.is_read = True
@@ -95,7 +97,7 @@ class ModalService:
         """
         modal = PromotionalModal.objects.get_by_id(modal_id)
         if not modal:
-            raise ValidationError("مودال یافت نشد.")
+            raise ValidationError(msg_provider.get("home.E5004"))
 
         # ===== اگر قرار است فعال شود، بقیه باید غیرفعال شوند ===== #
         if data.get('is_active') is True:
@@ -114,7 +116,7 @@ class ModalService:
         """
         modal = PromotionalModal.objects.get_by_id(modal_id)
         if not modal:
-            raise ValidationError("مودال یافت نشد.")
+            raise ValidationError(msg_provider.get("home.E5004"))
 
         if not modal.is_active:
             PromotionalModal.objects.deactivate_all()
@@ -142,7 +144,7 @@ class SliderService:
     def get_detail(self, pk: int) -> SliderIndex:
         slider = SliderIndex.objects.get_by_id(pk)
         if not slider:
-            raise ValidationError("اسلایدر مورد نظر یافت نشد.")
+            raise ValidationError(msg_provider.get("home.E5005"))
         return slider
 
     @transaction.atomic

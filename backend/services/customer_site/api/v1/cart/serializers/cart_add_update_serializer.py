@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from core.infrastructure.messages import msg_provider
 
 # ===== Selections Serializer (Base) ===== #
 class SelectionsSerializer(serializers.Serializer):
@@ -15,7 +16,7 @@ class SelectionsSerializer(serializers.Serializer):
     def validate(self, data):
         # ===== چک کردن تضاد سایز ===== #
         if data.get('size_id') and (data.get('width') or data.get('height')):
-            raise serializers.ValidationError("نمی‌توانید همزمان سایز استاندارد و ابعاد دلخواه را وارد کنید.")
+            raise serializers.ValidationError(msg_provider.get("cart.E4029"))
         return data
 
 # ===== Add To Cart Serializer ===== #
@@ -36,5 +37,5 @@ class CartItemUpdateSerializer(serializers.Serializer):
     def validate(self, data):
         # ===== چک کردن تضاد سایز ===== #
         if data.get('size_id') and (data.get('width') or data.get('height')):
-            raise serializers.ValidationError("تضاد در انتخاب سایز و ابعاد.")
+            raise serializers.ValidationError(msg_provider.get("cart.E4029"))
         return data

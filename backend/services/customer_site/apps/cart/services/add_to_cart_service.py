@@ -8,6 +8,8 @@ from core.models import User, Product
 from apps.cart.models import Cart, CartItem
 from apps.cart.utils import CartProcessor
 
+from core.infrastructure.messages import msg_provider
+
 logger = logging.getLogger('cart.services.add_to_cart')
 
 # ========== ADD TO CART SERVICE ========== #
@@ -26,7 +28,7 @@ class AddToCartService:
         
         # گارد: حداقل یکی باید باشد
         if not self.user and not self.session_key:
-             raise ValidationError("شناسه کاربر یا شناسه مهمان الزامی است.")
+             raise ValidationError(msg_provider.get("cart.E4019"))
         
     @transaction.atomic
     def execute(self, product_id: int, selections: Dict[str, Any]) -> CartItem:
@@ -36,7 +38,7 @@ class AddToCartService:
             # ===== دریافت محصول ===== #
             product = Product.objects.get(id=product_id, is_active=True)
         except Product.DoesNotExist:
-            raise ValidationError("محصول یافت نشد یا غیرفعال است.")
+            raise ValidationError(msg_provider.get("cart.E4020"))
         
         # ===== دریافت تیراژ یا تعداد ===== #
         quantity_input = int(selections.get('quantity', None) or selections.get('quantity_id', None) or 1)
