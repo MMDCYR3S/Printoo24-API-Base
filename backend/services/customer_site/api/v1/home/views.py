@@ -8,6 +8,8 @@ from apps.home.services import SliderService
 from apps.home.models import PromotionalModal
 from .serializers import SliderSerializer, PromotionalModalSerializer, ContactUsSerializer
 from core.infrastructure.messages import msg_provider
+from apps.home.services import SiteMediaService
+from api.v1.dashboard.serializers import SiteMediaSerializer
 
 # ===== Slider ViewSet (Customer Side) ===== #
 @extend_schema(tags=['General - Content'])
@@ -132,4 +134,48 @@ class ContactUsView(APIView):
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@extend_schema(tags=["SiteMedia"])
+class ActiveSiteMediaPublicView(APIView):
+    """
+    دریافت تنها رسانه (فایل/عکس) فعال سیستم برای نمایش به همه کاربران.
+    """
+    permission_classes = [AllowAny] # در دسترس برای همه (حتی بدون توکن)
     
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = SiteMediaService()
+
+    @extend_schema(
+        tags=['Public-Media'],
+        summary="دریافت رسانه فعال",
+        description="این API مستقیماً عکس یا گیف فعالی که ادمین مشخص کرده را برمی‌گرداند. نیازی به توکن ندارد.",
+        responses={200: SiteMediaSerializer},
+        examples=[
+            OpenApiExample(
+                name="خروجی موفق (وقتی عکسی فعال است)",
+                value={
+                    "id": 5,
+                    "file_url": "http://api.printoo24.com/media/site_media/banner.gif",
+                    "is_active": True,
+                    "created_at": "2023-12-01T12:00:00Z",
+                    "updated_at": "2023-12-01T12:00:00Z"
+                },
+                response_only=True
+            )
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        # گرفتن تنها یک عکس از سرویس
+        active_media = self.service.get_active_for_display()
+        
+        # اگر هیچ عکسی در پنل فعال نبود
+        if not active_media:
+            return Response(
+                {"detail": "هیچ رسانه فعالی وجود ندارد.", "data": None}, 
+                status=status.HTTP_200_OK
+            )
+            
+        # اگر عکس بود، سریالایز می‌کنیم
+        serializer = SiteMediaSerializer(active_media, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)

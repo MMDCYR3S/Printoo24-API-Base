@@ -1,10 +1,14 @@
+import os
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 
 from .managers import (
     ContactUsManager, 
     ModalManager, 
-    SliderManager
+    SliderManager,
+    SiteMediaManager,
 )
 
 # ===== Contact Us ===== #
@@ -128,6 +132,7 @@ class SliderIndex(models.Model):
     """
     name = models.CharField(_("نام"), max_length=255, blank=True, null=True)
     image = models.ImageField(_("تصویر"), upload_to='slider/')
+    link = models.CharField(_("لینک مربوطه"), blank=True, null=True, max_length=500)
     created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
     updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True)
     
@@ -142,3 +147,38 @@ class SliderIndex(models.Model):
         verbose_name_plural = _("اسلایدرها")
         ordering = ['-created_at']
 
+# ========== Site Media ========== #
+def validate_file_size_5mb(file):
+    max_size_kb = 5120 # 5 MB
+    if file.size > max_size_kb * 1024:
+        raise ValidationError(_("حجم فایل نمی‌تواند بیشتر از ۵ مگابایت باشد."))
+
+def validate_image_and_gif_extension(file):
+    ext = os.path.splitext(file.name)[1].lower()
+    valid_extensions = ['.jpg', '.jpeg', '.png', '.gif']
+    if ext not in valid_extensions:
+        raise ValidationError(_("فقط فایل‌های عکس (jpg, png) و گیف (gif) مجاز هستند."))
+
+class SiteMedia(models.Model):
+    """
+    مدل ذخیره‌سازی فایل‌های تصویری و گیف
+    """
+    file = models.FileField(
+        _("فایل رسانه"), 
+        upload_to='site_media/',
+        validators=[validate_file_size_5mb, validate_image_and_gif_extension]
+    )
+    is_active = models.BooleanField(_("وضعیت نمایش"), default=False)
+    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True)
+    
+    objects = SiteMediaManager()
+    
+    class Meta:
+        db_table = 'customer_site_media'
+        verbose_name = _("رسانه سایت")
+        verbose_name_plural = _("رسانه‌های سایت")
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Media {self.id} - {self.file.name}"

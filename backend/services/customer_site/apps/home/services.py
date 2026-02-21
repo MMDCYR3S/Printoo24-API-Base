@@ -3,7 +3,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 
-from .models import ContactUs, PromotionalModal, SliderIndex
+from .models import ContactUs, PromotionalModal, SliderIndex, SiteMedia
 from core.infrastructure.messages import msg_provider
 
 # ========== CONTACT SERVICE ========== #
@@ -148,40 +148,83 @@ class SliderService:
         return slider
 
     @transaction.atomic
-    def create_slider(self, data: dict, file_obj=None) -> SliderIndex:
+    def create_slider(self, data: dict) -> SliderIndex:
         """
-        ایجاد اسلایدر جدید.
+        ایجاد اسلایدر جدید. فایل تصویر داخل خود data وجود دارد.
         """
-        if file_obj:
-            data['image'] = file_obj
-            
         return SliderIndex.objects.create_slider(data)
 
     @transaction.atomic
-    def update_slider(self, pk: int, data: dict, file_obj=None) -> SliderIndex:
+    def update_slider(self, instance_or_pk, data: dict) -> SliderIndex:
         """
         ویرایش اسلایدر با مدیریت جایگزینی تصویر.
+        برای جلوگیری از کوئری مجدد، می‌تواند خود آبجکت را به جای pk دریافت کند.
         """
-        slider = self.get_detail(pk)
+        slider = instance_or_pk if isinstance(instance_or_pk, SliderIndex) else self.get_detail(instance_or_pk)
 
-        if file_obj:
-            # ===== حذف تصویر قبلی از حافظه ===== #
-            if slider.image:
-                slider.image.delete(save=False)
-            
-            data['image'] = file_obj
+        new_image = data.get('image')
 
-        # آپدیت دستی
+        # ===== حذف تصویر قبلی از حافظه در صورت ارسال تصویر جدید ===== #
+        if new_image and slider.image:
+            slider.image.delete(save=False)
+
         for key, value in data.items():
             setattr(slider, key, value)
+            
         slider.save()
-        
         return slider
 
-    def delete_slider(self, pk: int):
-        slider = self.get_detail(pk)
+    def delete_slider(self, instance_or_pk):
+        """
+        حذف اسلایدر و فایل متصل به آن
+        """
+        slider = instance_or_pk if isinstance(instance_or_pk, SliderIndex) else self.get_detail(instance_or_pk)
+        
         if slider.image:
             slider.image.delete(save=False)
             
         slider.delete()
 
+# ========== SITE MEDIA SERVICE ========== #
+class SiteMediaService:
+    """سرویس مدیریت رسانه‌های سایت"""
+
+    def get_all(self):
+        return SiteMedia.objects.get_all_media()
+
+    def get_detail(self, pk: int) -> SiteMedia:
+        media = SiteMedia.objects.get_by_id(pk)
+        if not media:
+            raise ValidationError("رسانه مورد نظر یافت نشد.")
+        return media
+
+    def get_active_for_display(self) -> SiteMedia:
+        """متدی که ویوی پابلیک برای گرفتن عکس فعال صدا می‌زند"""
+        return SiteMedia.objects.get_active_media()
+
+    @transaction.atomic
+    def create_media(self, data: dict) -> SiteMedia:
+        if data.get('is_active') is True:
+            SiteMedia.objects.deactivate_all()
+    @transaction.atomic
+    def update_media(self, instance_or_pk, data: dict) -> SiteMedia:
+        media = instance_or_pk if isinstance(instance_or_pk, SiteMedia) else self.get_detail(instance_or_pk)
+
+        if data.get('is_active') is True:
+            SiteMedia.objects.exclude(pk=media.pk).deactivate_all()
+
+        new_file = data.get('file')
+        if new_file and media.file:
+            media.file.delete(save=False)
+
+        for key, value in data.items():
+            setattr(media, key, value)
+            
+        media.save()
+        return media
+
+    def delete_media(self, instance_or_pk):
+        media = instance_or_pk if isinstance(instance_or_pk, SiteMedia) else self.get_detail(instance_or_pk)
+        if media.file:
+            media.file.delete(save=False)
+        media.delete()

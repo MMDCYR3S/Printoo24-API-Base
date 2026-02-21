@@ -7,7 +7,8 @@ class SliderDashboardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SliderIndex
-        fields = ['id', 'name', 'image', 'image_url', 'created_at', 'updated_at']
+        # فیلد link به لیست اضافه شد
+        fields = ['id', 'name', 'image', 'image_url', 'link', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at', 'image_url']
         extra_kwargs = {
             'image': {'write_only': True}
