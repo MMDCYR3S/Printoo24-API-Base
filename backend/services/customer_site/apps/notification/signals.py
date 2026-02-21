@@ -83,11 +83,11 @@ def notify_admins_for_new_order(sender, instance, created, **kwargs):
     title = msg_provider.get("notification.I6009")['text']
     
     if instance.user:
-        sender_name = instance.user.customer_profile.fullname() or instance.user.username
-        message = msg_provider.get("notification.I6010", order_code=order_code, sender_name=sender_name)['text']
+        sender_user = instance.user.customer_profile.fullname() or instance.user.username
+        message = msg_provider.get("notification.I6010", order_code=order_code, sender_name=sender_user)['text']
     else:
-        sender_name = instance.recipient_name or "مهمان"
-        message = msg_provider.get("notification.I6011", order_code=order_code, sender_name=sender_name)['text']
+        sender_user = instance.recipient_name or "مهمان"
+        message = msg_provider.get("notification.I6011", order_code=order_code, sender_name=sender_user)['text']
 
     # ===== ۴. ذخیره گروهی (Bulk Create) اعلان‌ها ===== #
     content_type = ContentType.objects.get_for_model(instance)
