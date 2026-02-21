@@ -92,10 +92,12 @@ def notify_admins_for_new_order(sender, instance, created, **kwargs):
     # ===== ۴. ذخیره گروهی (Bulk Create) اعلان‌ها ===== #
     content_type = ContentType.objects.get_for_model(instance)
     
+    actual_sender = instance.user if instance.user else None
+
     notifications = [
         CustomerNotification(
             recipient=admin,
-            sender=sender_user,
+            sender=actual_sender,
             name="ثبت سفارش جدید",
             message=message,
             content_type=content_type,
