@@ -174,7 +174,7 @@
       "itemCountLabel": "ژمارەی بڕگەکان",
       "subtotalLabel": "کۆی گشتی",
       "totalPayableLabel": "بڕی پارەی پێویست بۆ دانەوه",
-      "currency": "IQD",
+      "currency": "تمەن",
       "noFileWarning": "تۆ بۆ {{count}} بەرهەم هیچ فایلێکت بار نەکردووە. دەتوانیت بەبێ فایل بەردەوام بیت و دواتر بینێریت.",
       "checkoutBtn": "تەواوکردنی کڕین و پارەدان"
     },
@@ -188,7 +188,7 @@
       "manageFiles": "بەڕێوەبردن / زیادکردنی فایل",
       "uploadDesignOptional": "بارکردنی فایلی دیزاین (ئارەزوومەندانە)",
       "itemTotalPriceLabel": "نرخی گشتی بڕگە",
-      "currency": "IQD",
+      "currency": "تمەن",
       "deleteItemBtn": "سڕینەوەی بڕگە"
     }
   },
@@ -218,11 +218,11 @@
     "postalCodeLabel": "کۆدی پۆستە",
     "postalCodePlaceholder": "١٠ ژمارەیی (ئارەزوومەندانە)",
     "finalInvoice": "فاکتۆری کۆتایی",
-    "itemsTotal": "کۆی گشتی",
+    "itemsTotal": "کۆی گشتی بڕگەکان",
     "shippingCost": "تێچووی ناردن",
     "postPaid": "کرێ لە کاتی وەرگرتن",
     "payableAmount": "بڕی پارەی پێویست بۆ دانەوه",
-    "currency": "IQD",
+    "currency": "تمەن",
     "submitting": "لە تۆمارکردندایە...",
     "confirmAndPay": "پشتڕاستکردنەوە و پارەدان"
   },
