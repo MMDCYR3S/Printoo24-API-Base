@@ -1158,3 +1158,16 @@ INFO 2026-02-21 11:25:14,750 user_detail_service 382 126666748712640 Fetching pr
 INFO 2026-02-21 11:26:02,904 user_detail_service 382 126666748712640 Fetching profile details for User ID: 1
 INFO 2026-02-21 11:28:53,861 user_detail_service 382 126666757105344 Fetching profile details for User ID: 1
 INFO 2026-02-21 11:29:08,857 user_detail_service 382 126666757105344 Fetching profile details for User ID: 1
+INFO 2026-02-21 12:04:42,786 user_detail_service 382 126666353399488 Fetching profile details for User ID: 1
+INFO 2026-02-21 12:07:32,203 user_detail_service 382 126666370184896 Fetching profile details for User ID: 1
+INFO 2026-02-21 12:12:56,163 user_detail_service 382 126666715141824 Fetching profile details for User ID: 1
+INFO 2026-02-21 12:29:46,713 user_detail_service 382 126666715141824 Fetching profile details for User ID: 1
+INFO 2026-02-21 12:29:58,313 user_detail_service 382 126666370184896 Fetching profile details for User ID: 1
+INFO 2026-02-21 12:54:37,031 user_detail_service 382 126666715141824 Fetching profile details for User ID: 1
+INFO 2026-02-21 13:28:26,344 user_detail_service 382 126666715141824 Fetching profile details for User ID: 1
+INFO 2026-02-21 13:49:13,828 user_detail_service 382 126666715141824 Fetching profile details for User ID: 1
+INFO 2026-02-21 13:49:24,559 user_detail_service 382 126666715141824 Fetching profile details for User ID: 1
+INFO 2026-02-21 13:51:20,497 user_detail_service 382 126666361792192 Fetching profile details for User ID: 1
+INFO 2026-02-21 13:51:23,458 user_detail_service 382 126666715141824 Fetching profile details for User ID: 1
+INFO 2026-02-21 13:51:26,059 user_detail_service 382 126666724583104 Fetching profile details for User ID: 1
+INFO 2026-02-21 13:51:57,781 user_detail_service 382 126666715141824 Fetching profile details for User ID: 1
