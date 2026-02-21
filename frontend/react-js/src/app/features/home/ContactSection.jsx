@@ -44,9 +44,9 @@ const ContactSection = () => {
       <div className="grid grid-cols-1 lg:grid-cols-5 bg-white rounded-3xl shadow-xl overflow-hidden border border-base-200">
         
         {/* === بخش اطلاعات تماس (ستون سمت راست/بالا) === */}
-        <div className="lg:col-span-2 bg-primary text-white p-8 md:p-12 flex flex-col justify-between relative overflow-hidden">
+        <div className="lg:col-span-2 bg-radial from-primary to-secondary text-white p-8 md:p-12 flex flex-col justify-between relative overflow-hidden">
           {/* پترن پس‌زمینه تزئینی */}
-          <div className="absolute top-0 left-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute top-0 left-0 w-32 h-32  rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-40 h-40 bg-secondary/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
 
           <div className="relative z-10">
@@ -110,7 +110,7 @@ const ContactSection = () => {
         </div>
 
         {/* === بخش فرم تماس (ستون سمت چپ/پایین) === */}
-        <div className="lg:col-span-3 p-8 md:p-12 bg-white">
+        <div className="lg:col-span-3 p-8 md:p-12 bg-radial from-white from-35% to-slate-200">
           <div className="max-w-lg mx-auto lg:max-w-none">
             <h2 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-2">
               <Send className="text-primary rotate-180" size={24} />

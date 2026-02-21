@@ -1,15 +1,53 @@
 // src/app/components/layout/MegaMenu.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useNavigate } from 'react-router-dom'; // useNavigate اضافه شد
-import { ChevronLeft, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ArrowLeft, Image as ImageIcon, Layers } from 'lucide-react';
 import { categoryService } from '../../services/categoryService';
 
-// prop onClose اضافه شد تا وقتی کلیک شد منو بسته شود
+/* ─────────────────────────────────────────────
+   انیمیشن‌های stagger برای آیتم‌های گرید
+   ───────────────────────────────────────────── */
+const gridContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.025, delayChildren: 0.05 },
+  },
+};
+
+const gridItem = {
+  hidden: { opacity: 0, y: 10, scale: 0.96 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 300, damping: 26 },
+  },
+};
+
+const sidebarItem = {
+  hidden: { opacity: 0, x: 12 },
+  show: { opacity: 1, x: 0 },
+};
+
+const sidebarContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.03, delayChildren: 0.08 },
+  },
+};
+
+/* ─────────────────────────────────────────────
+   MegaMenu — کامپوننت اصلی
+   ───────────────────────────────────────────── */
 const MegaMenu = ({ isOpen, onClose }) => {
   const [activeId, setActiveId] = useState(null);
   const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
-  const navigate = useNavigate(); // هوک برای نویگیشن دستی
+  const navigate = useNavigate();
+  const contentRef = useRef(null);
 
   useEffect(() => {
     if (isOpen && !hasOpenedOnce) setHasOpenedOnce(true);
@@ -26,134 +64,272 @@ const MegaMenu = ({ isOpen, onClose }) => {
     if (categories?.length > 0 && !activeId) setActiveId(categories[0].id);
   }, [categories, activeId]);
 
+  // اسکرول به بالا هنگام تغییر دسته‌بندی
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeId]);
+
+  const handleParentClick = useCallback(
+    (slug) => {
+      navigate(`/shop?category=${slug}`);
+      if (onClose) onClose();
+    },
+    [navigate, onClose]
+  );
+
   if (!hasOpenedOnce && !categories) return null;
 
-  const activeCategory = categories?.find(c => c.id === activeId) || categories?.[0];
-
-  // هندلر برای کلیک روی دسته مادر در سایدبار
-  const handleParentClick = (slug) => {
-    navigate(`/shop?category=${slug}`);
-    if (onClose) onClose();
-  };
+  const activeCategory =
+    categories?.find((c) => c.id === activeId) || categories?.[0];
 
   return (
-    // ارتفاع کمتر (450px) برای جمع‌وجور شدن کل منو
-    <div className={`
-      absolute top-full right-0 left-0 bg-white shadow-xl rounded-b-xl border-t border-base-200 overflow-hidden flex h-[70vh] z-50 transition-all duration-300
-      ${isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}
-    `}>
-      {/* نکته: کلاس‌های انیمیشن بالا رو اضافه کردم که روی صفحه ظاهر بشه، چون تو کد قبلی فقط div خالی بود */}
-      
-      {isLoading ? (
-        <MegaMenuSkeleton />
-      ) : (
-        <>
-          {/* --- سایدبار فشرده و لیست‌وار --- */}
-          <div className="w-[220px] flex-shrink-0 bg-gray-50/80 border-l border-gray-100 py-3 overflow-y-auto custom-scrollbar">
-            <ul className="space-y-0 px-2">
-              {categories?.map((cat) => (
-                <li key={cat.id}>
-                  <button
-                    onMouseEnter={() => setActiveId(cat.id)}
-                    onClick={() => handleParentClick(cat.slug)} // قابلیت کلیک روی دسته مادر
-                    className={`
-                      w-full flex items-center justify-between px-3 py-2.5 rounded-md text-xs md:text-sm transition-all duration-200
-                      ${activeId === cat.id 
-                        ? 'bg-primary text-white font-bold shadow-sm ring-1 ring-gray-100' 
-                        : 'text-gray-500 hover:bg-gray-100 font-medium'
-                      }
-                    `}
-                  >
-                    <span className="truncate">{cat.name}</span>
-                    {activeId === cat.id && <ChevronLeft size={14} className="text-white" />}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          className="
+            absolute top-full right-0 left-0 z-50
+            bg-white/[0.98] backdrop-blur-xl
+            shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)]
+            rounded-b-2xl
+            border-t border-slate-200/60
+            overflow-hidden flex h-[70vh]
+          "
+        >
+          {isLoading ? (
+            <MegaMenuSkeleton />
+          ) : (
+            <>
+              {/* ── سایدبار ── */}
+              <div className="w-[230px] flex-shrink-0 bg-radial from-white to-slate-200 border-l border-slate-200/40 overflow-y-auto custom-scrollbar">
+                <div className="py-3 px-2.5">
+                  {/* عنوان سایدبار */}
+                  <div className="flex items-center gap-2 px-3 py-2 mb-1">
+                    <Layers size={14} className="text-primary" />
+                    <span className="text-[11px] font-bold text-primary tracking-wide">
+                      دسته‌بندی‌ها
+                    </span>
+                  </div>
 
-          {/* --- بدنه اصلی: گرید متراکم (Compact Grid) --- */}
-          <div className="flex-1 p-6 bg-white overflow-y-auto custom-scrollbar">
-            
-            {activeCategory && (
-              <div className="animate-in fade-in duration-200">
-                
-                {/* هدر کوچک شده */}
-                <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
-                  <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <span className="w-1 h-5 bg-primary rounded-full"></span>
-                    {activeCategory.name}
-                  </h3>
-                  <Link 
-                    to={`/shop?category=${activeCategory.slug}`} // اصلاح لینک
-                    onClick={onClose} // بستن منو
-                    className="text-xs font-bold text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors flex items-center gap-1"
+                  <motion.ul
+                    variants={sidebarContainer}
+                    initial="hidden"
+                    animate="show"
+                    className="space-y-0.5"
                   >
-                    مشاهده همه
-                    <ArrowLeft size={14} />
-                  </Link>
-                </div>
-
-                {/* گرید دست نخورده باقی ماند */}
-                {activeCategory.children?.length > 0 ? (
-                  <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
-                    {activeCategory.children.map((sub) => (
-                      <Link 
-                        key={sub.id} 
-                        to={`/shop?category=${sub.slug}`} // اصلاح لینک زیر دسته
-                        onClick={onClose} // بستن منو
-                        className="group flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
-                      >
-                        {/* کانتینر تصویر */}
-                        <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-white border border-gray-100 group-hover:border-primary/30 shadow-sm transition-all">
-                          {sub.thumbnail ? (
-                            <img 
-                              src={sub.thumbnail} 
-                              alt={sub.name} 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                    {categories?.map((cat) => {
+                      const isActive = activeId === cat.id;
+                      return (
+                        <motion.li key={cat.id} variants={sidebarItem}>
+                          <button
+                            onMouseEnter={() => setActiveId(cat.id)}
+                            onClick={() => handleParentClick(cat.slug)}
+                            className={`
+                              group w-full flex items-center justify-between
+                              px-3 py-2.5 rounded-xl text-[13px]
+                              transition-all duration-200 ease-out
+                              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30
+                              ${isActive
+                                ? 'bg-primary text-white font-bold shadow-md shadow-primary/20'
+                                : 'text-slate-600 hover:bg-white hover:shadow-sm font-medium'
+                              }
+                            `}
+                          >
+                            <span className="truncate">{cat.name}</span>
+                            <ChevronLeft
+                              size={13}
+                              className={`
+                                transition-all duration-200
+                                ${isActive
+                                  ? 'text-white/80 opacity-100'
+                                  : 'text-slate-300 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0'
+                                }
+                              `}
                             />
-                          ) : (
-                            <div className="absolute inset-0 flex items-center justify-center text-gray-300">
-                              <ImageIcon size={20} />
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* متن */}
-                        <span className="text-xs font-medium text-center text-gray-600 group-hover:text-primary line-clamp-2 h-8 leading-4 flex items-center justify-center">
-                          {sub.name}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-48 text-gray-300 text-sm">
-                    <p>بدون زیرمجموعه</p>
-                  </div>
-                )}
+                          </button>
+                        </motion.li>
+                      );
+                    })}
+                  </motion.ul>
+                </div>
               </div>
-            )}
-          </div>
-        </>
+
+              {/* ── بدنه اصلی ── */}
+              <div
+                ref={contentRef}
+                className="flex-1 overflow-y-auto custom-scrollbar"
+              >
+                <AnimatePresence mode="wait">
+                  {activeCategory && (
+                    <motion.div
+                      key={activeCategory.id}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 12 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className="p-6"
+                    >
+                      {/* هدر */}
+                      <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                        <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2.5">
+                          <span className="w-1 h-5 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
+                          {activeCategory.name}
+                          {activeCategory.children?.length > 0 && (
+                            <span className="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                              {activeCategory.children.length} زیرمجموعه
+                            </span>
+                          )}
+                        </h3>
+                        <Link
+                          to={`/shop?category=${activeCategory.slug}`}
+                          onClick={onClose}
+                          className="
+                            text-xs font-bold text-primary/70 hover:text-primary
+                            flex items-center gap-1.5
+                            px-3 py-1.5 rounded-lg
+                            hover:bg-primary/5
+                            transition-all duration-200
+                          "
+                        >
+                          مشاهده همه
+                          <ArrowLeft size={13} />
+                        </Link>
+                      </div>
+
+                      {/* گرید زیردسته‌ها */}
+                      {activeCategory.children?.length > 0 ? (
+                        <motion.div
+                          variants={gridContainer}
+                          initial="hidden"
+                          animate="show"
+                          className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3"
+                        >
+                          {activeCategory.children.map((sub) => (
+                            <motion.div key={sub.id} variants={gridItem}>
+                              <Link
+                                to={`/shop?category=${sub.slug}`}
+                                onClick={onClose}
+                                className="
+                                  group flex flex-col items-center gap-2.5
+                                  p-2.5 rounded-2xl
+                                  transition-all duration-300 ease-out
+                                  hover:bg-slate-50
+                                  border border-transparent hover:border-slate-200/80
+                                  hover:shadow-sm
+                                "
+                              >
+                                {/* تصویر */}
+                                <div className="
+                                  relative w-full aspect-square overflow-hidden rounded-xl
+                                  bg-gradient-to-br from-slate-50 to-slate-100
+                                  ring-1 ring-black/[0.04]
+                                  group-hover:ring-primary/20
+                                  group-hover:shadow-md group-hover:shadow-primary/5
+                                  transition-all duration-300
+                                ">
+                                  {sub.thumbnail ? (
+                                    <img
+                                      src={sub.thumbnail}
+                                      alt={sub.name}
+                                      loading="lazy"
+                                      className="
+                                        w-full h-full object-cover
+                                        transition-transform duration-500 ease-out
+                                        group-hover:scale-[1.06]
+                                      "
+                                    />
+                                  ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <ImageIcon
+                                        size={20}
+                                        className="text-slate-300 group-hover:text-slate-400 transition-colors"
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* اسم */}
+                                <span className="
+                                  text-[11px] font-semibold text-center leading-[1.4]
+                                  text-slate-500 group-hover:text-slate-800
+                                  transition-colors duration-200
+                                  line-clamp-2 h-8 flex items-center justify-center
+                                ">
+                                  {sub.name}
+                                </span>
+                              </Link>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="flex flex-col items-center justify-center h-48 gap-3"
+                        >
+                          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+                            <Layers size={24} className="text-slate-300" />
+                          </div>
+                          <p className="text-sm text-slate-400 font-medium">
+                            بدون زیرمجموعه
+                          </p>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </>
+          )}
+        </motion.div>
       )}
-    </div>
+    </AnimatePresence>
   );
 };
 
+/* ─────────────────────────────────────────────
+   Skeleton — با افکت shimmer
+   ───────────────────────────────────────────── */
+const shimmer =
+  'relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.8s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent';
+
 const MegaMenuSkeleton = () => (
-    <div className="flex w-full h-full animate-pulse bg-white">
-        <div className="w-[220px] bg-gray-50 border-l p-3 space-y-2">
-            {[...Array(12)].map((_,i) => <div key={i} className="h-8 bg-gray-200 rounded"></div>)}
-        </div>
-        <div className="flex-1 p-6 space-y-4">
-            <div className="h-6 w-32 bg-gray-200 rounded"></div>
-            <div className="grid grid-cols-6 gap-3">
-                {[...Array(18)].map((_,i) => (
-                    <div key={i} className="aspect-square bg-gray-100 rounded-lg"></div>
-                ))}
-            </div>
-        </div>
+  <div className="flex w-full h-full bg-white/[0.98]">
+    {/* سایدبار */}
+    <div className="w-[230px] bg-slate-50/80 border-l border-slate-200/40 p-3 space-y-1.5">
+      <div className={`h-4 w-20 bg-slate-100 rounded-lg mb-3 ${shimmer}`} />
+      {[...Array(10)].map((_, i) => (
+        <div
+          key={i}
+          className={`h-9 bg-slate-100/80 rounded-xl ${shimmer}`}
+          style={{ animationDelay: `${i * 80}ms`, width: `${70 + Math.random() * 30}%` }}
+        />
+      ))}
     </div>
+    {/* بدنه */}
+    <div className="flex-1 p-6 space-y-5">
+      <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+        <div className={`h-5 w-36 bg-slate-100 rounded-lg ${shimmer}`} />
+        <div className={`h-4 w-20 bg-slate-50 rounded-lg ${shimmer}`} />
+      </div>
+      <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
+        {[...Array(14)].map((_, i) => (
+          <div key={i} className="flex flex-col items-center gap-2.5 p-2.5">
+            <div
+              className={`w-full aspect-square bg-slate-100/80 rounded-xl ${shimmer}`}
+              style={{ animationDelay: `${i * 50}ms` }}
+            />
+            <div className={`h-3 w-14 bg-slate-100/60 rounded ${shimmer}`} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
 );
 
 export default MegaMenu;

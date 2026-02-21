@@ -10,15 +10,15 @@
   name: "light";
   default: true;    
   color-scheme: light;
-  --color-primary: #164A41;
+  --color-primary: #5A108F;
   --color-primary-content: #ffffff;
-  --color-secondary: #4D774E;
+  --color-secondary: #3C0663;
   --color-secondary-content: #BEE3BF;
-  --color-accent: #9DC88D;
+  --color-accent: lightgray ;
   --color-accent-content: #164A41;
-  --color-neutral: #F1B24A;
-  --color-base: #F1F1F1;
-  --color-neutral-content: #3E290C;
+  --color-neutral: #5A108F;
+  --color-base: white;
+  --color-neutral-content: white ;
   --color-base-100: #ffffff;
   --color-base-200: #f9fafb;
   --color-base-300: #d1d5db;
@@ -42,7 +42,7 @@ html, body {
   overflow-x: clip; /* حذف اسکرول افقی و فضای سفید اضافه */
   margin: 0;
   padding: 0;
-  
+
 }
 
 /* استایل اسکرول بار باریک و شیک */
@@ -51,14 +51,14 @@ html, body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: white;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: white;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: white;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
