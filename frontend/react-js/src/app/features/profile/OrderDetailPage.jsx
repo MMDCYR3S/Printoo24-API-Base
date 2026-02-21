@@ -13,7 +13,7 @@ import globalText from '../../lang/global.json'
 // --- Configuration & Constants ---
 const STATUS_MAP = {
   7:  { label: pageText.profile.orderDetailPage.statuses.s7, color: "badge-warning", bg: "bg-warning/10" },
-  8:  { label: pageText.profile.orderDetailPage.statuses.s8, color, color: "badge-info", bg: "bg-info/10" },
+  8:  { label: pageText.profile.orderDetailPage.statuses.s8, color: "badge-info", bg: "bg-info/10" },
   9:  { label: "رد شده توسط طراح", color: "badge-error", bg: "bg-error/10" },
   10: { label: "در حال چاپ", color: "badge-info", bg: "bg-info/10" },
   11: { label: "رد شده توسط چاپ", color: "badge-error", bg: "bg-error/10" },
