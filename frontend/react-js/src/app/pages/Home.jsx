@@ -19,9 +19,9 @@ import ContactSection from '../features/home/ContactSection';
 import pageText from '../lang/pages.json';
 
 import img501 from '../../assets/images/home/501.webp';
-import img502 from '../../assets/images/home/502.webp';
+
 import img503 from '../../assets/images/home/503.webp';
-import img504 from '../../assets/images/home/504.webp';
+
 
 /* ─────────────────────────────────────────────
    انیمیشن‌های مشترک
@@ -121,9 +121,9 @@ const PageHelperPictures = () => {
 
   const images = [
     { src: img501, alt: 'بنر ۱', link: '#' },
-    { src: img502, alt: 'بنر ۲' },
+
     { src: img503, alt: 'بنر ۳' },
-    { src: img504, alt: 'بنر ۴' },
+
   ];
 
   return (
@@ -134,7 +134,7 @@ const PageHelperPictures = () => {
       animate={isInView ? 'show' : 'hidden'}
       className="container mx-auto px-4 my-6"
     >
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 max-w-lg mx-auto gap-4">
         {images.map((img, idx) => {
           const Inner = (
             <motion.div
