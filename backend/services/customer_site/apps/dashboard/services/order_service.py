@@ -28,11 +28,13 @@ except ImportError:
 
 logger = logging.getLogger('dashboard.services.order_dashboard')
 
+# ========== ORDER DASHBOARD SERVICE ========== #
 class OrderDashboardService:
     def __init__(self):
         self.order_domain = OrderService()
         self.temp_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_order_uploads'))
 
+    # ===== GET ORDERS LIST ===== #
     def get_orders_list(self):
         """
         لیست تمام سفارشات با جزئیات لازم برای جدول داشبورد.
@@ -41,7 +43,7 @@ class OrderDashboardService:
             .prefetch_related('order_item_order')\
             .order_by('-created_at').filter(type="1")
 
-    # ===== لیست و جزئیات ===== #
+    # ===== GET ALL ORDERS ===== #
     def get_all_orders_queryset(self):
         """
         لیست تمام سفارشات با جزئیات لازم برای جدول داشبورد.
@@ -50,13 +52,14 @@ class OrderDashboardService:
             .prefetch_related('order_item_order')\
             .order_by('-created_at').filter(type="1")
 
+    # ===== GET ORDER DETAIL ===== #
     def get_order_detail(self, order_id: int):
         """
         دریافت جزئیات کامل سفارش (با فایل‌ها و آیتم‌ها).
         """
         return self.order_domain.get_order_by_id(order_id) 
 
-    # ===== ایجاد سفارش مستقیم (Direct Order) ===== #
+    # ===== CREATE ORDER ===== #
     def create_admin_order(self,
                            user_id: int,
                            items_data: List[Dict],
@@ -106,7 +109,7 @@ class OrderDashboardService:
             type="1"
         )
 
-    # ===== ویرایش سفارش (Update) ===== #
+    # ===== UPDATE ORDER ===== #
     @transaction.atomic
     def update_order_details(self, order_id: int, data: Dict):
         """
@@ -131,8 +134,7 @@ class OrderDashboardService:
         logger.info(f"Order {order_id} updated successfully")
         return order
 
-    # ===== مدیریت آیتم‌های سفارش (Add/Remove Item) ===== #
-    
+    # ===== CREATE ORDER ITEM ===== #
     @transaction.atomic
     def add_item_to_order(self, order_id: int, item_data: Dict):
         """ افزودن آیتم جدید به سفارش موجود """
@@ -150,7 +152,7 @@ class OrderDashboardService:
             if 'item_price' in item_data and item_data['item_price'] is not None:
                 line_total = Decimal(str(item_data['item_price']))
             else:
-                line_total = product.price * quantity # ساده
+                line_total = product.price * quantity
 
             specs_json = {
                 'size_id': selections.get('size_id'),
@@ -160,7 +162,7 @@ class OrderDashboardService:
                 'has_design': selections.get('has_design', True)
             }
 
-            # ایجاد آیتم
+            # ===== ایجاد آیتم ===== #
             item = OrderItem.objects.create(
                 order=order,
                 product=product,
@@ -171,7 +173,7 @@ class OrderDashboardService:
                 description=item_description
             )
             
-            # آپدیت قیمت کل سفارش (جمع زدن با قیمت قبلی)
+            # ===== ویرایش قیمت کل سفارش ===== #
             order.total_price += line_total
             order.save()
             
@@ -257,14 +259,14 @@ class OrderDashboardService:
                 raise sync_error
 
 
-    # ===== Get All Status ===== #
+    # ===== GET ALL STATUS ===== #
     def get_all_order_statuses(self):
         """
         دریافت لیست وضعیت‌ها مرتب شده بر اساس sort_order
         """
         return OrderStatus.objects.all().order_by('sort_order')
 
-    # ===== تغییر وضعیت سفارش ===== #
+    # ===== CHANGE STATUS ===== #
     @transaction.atomic
     def change_order_status(self, order_id: int, status_code: str, description: str = None):
         """
@@ -291,7 +293,7 @@ class OrderDashboardService:
         
         return order
 
-    # ===== Bulk Operations ===== #
+    # ===== BULK DELETE ===== #
     def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, int]:
         """
         حذف گروهی سفارشات با فراخوانی سرویس دامنه.

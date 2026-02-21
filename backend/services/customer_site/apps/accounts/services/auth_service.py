@@ -9,7 +9,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.users.services import UserIdentityService
 from core.infrastructure.messages import msg_provider
-# from .verify_service import VerificationService
 
 # ====== Logger Configuration ====== #
 logger = logging.getLogger('accounts.services.auth')

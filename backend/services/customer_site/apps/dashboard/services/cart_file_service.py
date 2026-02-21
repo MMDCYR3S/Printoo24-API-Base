@@ -20,7 +20,6 @@ logger = logging.getLogger('cart.services.file_upload')
 # ===== Cart File Service ===== #
 class CartFileService:
     def __init__(self):
-        # مطمئن می‌شویم پوشه وجود دارد
         self.temp_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_cart_uploads'))
 
     def _save_temp_file(self, file_obj) -> str:
@@ -50,7 +49,6 @@ class CartFileService:
             logger.error(f"FAILED: Could not save temp file. Error: {e}", exc_info=True)
             raise e
 
-        # تلاش برای ارسال به سلری
         try:
             if upload_cart_item_file_task:
                 logger.info(f"Queuing async task for CartItem {cart_item_id}")
@@ -91,16 +89,15 @@ class CartFileService:
                         file=django_file
                     )
                 
-                # حذف فایل موقت
+                # ===== حذف فایل موقت ===== #
                 os.remove(temp_path)
                 logger.info(f"SUCCESS: Sync upload completed. ID: {instance.id}")
                 return {"status": "completed", "id": instance.id}
                 
             except Exception as sync_error:
-                # لاگ حیاتی برای فهمیدن دلیل خرابی نهایی
                 logger.critical(f"SYNC FAILED: Could not upload file. Error: {str(sync_error)}", exc_info=True)
                 
-                # تلاش برای پاک کردن فایل موقت در صورت خرابی
+                # ===== در صورت وجود فایل - حذف آن ===== #
                 if os.path.exists(temp_path):
                     os.remove(temp_path)
                     

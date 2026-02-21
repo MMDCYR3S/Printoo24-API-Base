@@ -117,4 +117,4 @@ class SliderDashboardViewSet(viewsets.ModelViewSet):
         
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-
+f

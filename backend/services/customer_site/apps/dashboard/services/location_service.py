@@ -12,14 +12,11 @@ class LocationDashboardService:
     def __init__(self):
         self.geo_service = GeoService()
 
-    # ==========================
-    # ===== Province Logic =====
-    # ==========================
+    # ===== Province Logic ===== #
     def get_all_provinces(self):
         return self.geo_service.get_all_provinces()
 
     def get_province_detail(self, province_id: int) -> Province:
-        # اصلاح شد: get_by_id -> get_province_by_id
         province = self.geo_service.get_province_by_id(province_id)
         if not province:
             raise ValidationError("استان مورد نظر یافت نشد.")
@@ -41,22 +38,17 @@ class LocationDashboardService:
 
     @transaction.atomic
     def bulk_delete_provinces(self, ids: List[int]) -> int:
-        # اصلاح شد: bulk_delete -> bulk_delete_provinces
         return self.geo_service.bulk_delete_provinces(ids)
 
-    # ======================
-    # ===== City Logic =====
-    # ======================
+    # ===== City Logic ===== #
     def get_all_cities(self):
-        # اصلاح شد: متد صریح
+        # ===== دریافت تمامی شهرها ===== #
         return self.geo_service.get_all_cities()
     
     def get_cities_by_province(self, province_id: int):
-        # اصلاح شد: get_by_province -> get_cities_by_province
         return self.geo_service.get_cities_by_province(province_id)
 
     def get_city_detail(self, city_id: int) -> City:
-        # اصلاح شد: get_by_id -> get_city_by_id
         city = self.geo_service.get_city_by_id(city_id)
         if not city:
             raise ValidationError("شهر مورد نظر یافت نشد.")
@@ -80,5 +72,4 @@ class LocationDashboardService:
 
     @transaction.atomic
     def bulk_delete_cities(self, ids: List[int]) -> int:
-        # اصلاح شد: bulk_delete -> bulk_delete_cities
         return self.geo_service.bulk_delete_cities(ids)
