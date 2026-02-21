@@ -183,7 +183,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug', 'price', 'has_price', 'category', 'thumbnail', 'detail_url']
+        fields = ['id', 'name', 'slug', 'price', 'show_price', 'has_price', 'category', 'thumbnail', 'detail_url']
 
     def get_category(self, obj):
         """
@@ -308,6 +308,7 @@ class ProductDetailSerializer(serializers.Serializer):
             "slug": product.slug,
             "description": product.description,
             "price": product.price,
+            'show_price': product.show_price,
             "has_price": product.has_price,
             "code": product.code,
             "guide_text": product.guide_text,
