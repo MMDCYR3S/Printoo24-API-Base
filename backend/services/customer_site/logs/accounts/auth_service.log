@@ -984,3 +984,12 @@ INFO 2026-02-20 13:45:17,533 auth_service 7 137116275173056 User logged in: 1
 DEBUG 2026-02-20 19:02:10,780 auth_service 279 133099425887936 AuthService initialized with UserIdentityService
 INFO 2026-02-20 19:02:10,784 auth_service 279 133099425887936 Login attempt for: admin
 INFO 2026-02-20 19:02:11,447 auth_service 279 133099425887936 User logged in: 1
+DEBUG 2026-02-21 06:42:09,518 auth_service 7 135300623873728 AuthService initialized with UserIdentityService
+INFO 2026-02-21 06:42:09,525 auth_service 7 135300623873728 Login attempt for: admin
+INFO 2026-02-21 06:42:10,790 auth_service 7 135300623873728 User logged in: 1
+DEBUG 2026-02-21 08:41:16,448 auth_service 221 128056616457920 AuthService initialized with UserIdentityService
+INFO 2026-02-21 08:41:16,450 auth_service 221 128056616457920 Login attempt for: admin
+INFO 2026-02-21 08:41:17,163 auth_service 221 128056616457920 User logged in: 1
+DEBUG 2026-02-21 08:58:13,311 auth_service 221 128056608065216 AuthService initialized with UserIdentityService
+INFO 2026-02-21 08:58:13,315 auth_service 221 128056608065216 Login attempt for: admin
+INFO 2026-02-21 08:58:14,082 auth_service 221 128056608065216 User logged in: 1

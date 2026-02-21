@@ -1,13 +1,46 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState, createContext, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 
-// تابع کمکی برای تولید شناسه‌های موقت (ref_id) برای شروط و وابستگی‌ها
+// 👇 ایمپورت کردن سرویس خودت دقیقاً مثل فایل useProductEditor.js 👇
+import { adminProductService } from '../services/adminProductService';
+
+export const Step2Context = createContext({});
+export const useStep2Data = () => useContext(Step2Context);
+
 export const generateRefId = (prefix = 'ref') => {
     return `${prefix}_${Math.random().toString(36).substr(2, 8)}`;
 };
 
-export const useStep2Form = (initialData, onSave) => {
-    // تبدیل دیتای بک‌اند به ساختاری که فرانت‌اند نیاز دارد
+export const useStep2Form = (productId, initialData, onSave) => {
+    const [productQuantities, setProductQuantities] = useState([]);
+    const [isLoadingQuantities, setIsLoadingQuantities] = useState(false);
+
+    // فچ کردن تیراژها با استفاده از apiClient خودت
+    useEffect(() => {
+        if (!productId || productId === 'new' || productId === 'undefined') {
+            return;
+        }
+
+        const fetchQuantities = async () => {
+            try {
+                setIsLoadingQuantities(true);
+                
+                // 🎯 الان دیگه از فایل سرویس خودت میره و توکن‌ها رو apiClient هندل میکنه
+                const data = await adminProductService.getProductQuantities(productId);
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    setProductQuantities(data);
+                }
+            } catch (error) {
+                console.error("❌ خطا در دریافت تیراژها از سرویس:", error);
+            } finally {
+                setIsLoadingQuantities(false);
+            }
+        };
+
+        fetchQuantities();
+    }, [productId]);
+
     const mappedInitialData = useMemo(() => {
         if (!initialData || !initialData.options) return { options: [] };
         
@@ -22,31 +55,24 @@ export const useStep2Form = (initialData, onSave) => {
         };
     }, [initialData]);
 
-    // راه‌اندازی React Hook Form
     const methods = useForm({
         defaultValues: mappedInitialData,
-        mode: 'onChange' // ولیدیشن در لحظه تایپ
+        mode: 'onChange'
     });
 
     const { reset, handleSubmit } = methods;
 
-    // همگام‌سازی فرم در صورت تغییر دیتای اولیه (مثلاً بعد از فچ شدن از API)
     useEffect(() => {
-        if (initialData) {
-            reset(mappedInitialData);
-        }
+        if (initialData) reset(mappedInitialData);
     }, [mappedInitialData, reset]);
 
-    // مدیریت سابمیت نهایی فرم
     const onSubmit = (data) => {
-        console.log("🚀 Payload آماده ارسال به بک‌اند:", data);
-        if (onSave) {
-            onSave(data);
-        }
+        if (onSave) onSave(data);
     };
 
     return {
         methods,
         onSubmit: handleSubmit(onSubmit),
+        step2ContextValue: { productQuantities, isLoadingQuantities }
     };
 };

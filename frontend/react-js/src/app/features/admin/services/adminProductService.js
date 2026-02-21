@@ -67,4 +67,10 @@ export const adminProductService = {
     const { data } = await apiClient.patch(`${BASE_URL}bulk-status/`, { product_ids, is_active });
     return data;
   },
+
+  getProductQuantities: async (id) => {
+    // آدرس دقیق: /dashboard/products/{id}/quantities/
+    const { data } = await apiClient.get(`${BASE_URL}${id}/quantities/`);
+    return data;
+  },
 };

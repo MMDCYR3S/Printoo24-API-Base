@@ -153,6 +153,7 @@ const ProductEditorPage = () => {
 
            {activeTab === 'options' && product && (
               <ProductStep2Options 
+              productId={productId}
                  initialData={product} 
                  onSave={saveStep2} 
                  isSaving={isSavingStep2}

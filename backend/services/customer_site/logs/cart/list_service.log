@@ -302,3 +302,10 @@ INFO 2026-02-21 05:14:20,935 cart_item_service 7 135300612331200 Fetching cart l
 INFO 2026-02-21 05:42:13,049 cart_item_service 7 135300623873728 Fetching cart list for User:1
 INFO 2026-02-21 05:50:40,253 cart_item_service 7 135300623873728 Fetching cart list for User:1
 INFO 2026-02-21 05:54:24,878 cart_item_service 7 135300612331200 Fetching cart list for User:1
+INFO 2026-02-21 06:13:37,504 cart_item_service 7 135300623873728 Fetching cart list for User:1
+INFO 2026-02-21 06:31:57,854 cart_item_service 7 135300612331200 Fetching cart list for User:1
+INFO 2026-02-21 06:59:31,757 cart_item_service 7 135300612331200 Fetching cart list for User:1
+INFO 2026-02-21 10:19:31,304 cart_item_service 382 126666732975808 Fetching cart list for User:1
+INFO 2026-02-21 10:30:39,575 cart_item_service 382 126666732975808 Fetching cart list for User:1
+INFO 2026-02-21 10:38:36,640 cart_item_service 382 126666732975808 Fetching cart list for User:1
+INFO 2026-02-21 11:12:10,790 cart_item_service 382 126666732975808 Fetching cart list for User:1

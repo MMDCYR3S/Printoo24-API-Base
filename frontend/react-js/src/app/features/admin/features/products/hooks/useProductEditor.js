@@ -1,3 +1,4 @@
+// src/app/features/admin/products/hooks/useProductEditor.js
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -30,36 +31,69 @@ export const useProductEditor = () => {
 
   // --- ساخت Payload طبق مستندات API ---
   const prepareStep1Payload = (formData) => {
-    // تبدیل مقادیر فرم به فرمت دقیق JSON
+    const isTirazhi = formData.shell.has_quantity; // وضعیت تیراژی یا تعدادی
+
+    // 1. ساختن کانفیگ قیمت پایه (مشترک بین هر دو حالت)
+    const pricingConfig = {
+      base_setup_price: Number(formData.pricing_config.base_setup_price || 0),
+      design_service_available: formData.pricing_config.design_service_available || false,
+      design_fee: Number(formData.pricing_config.design_fee || 0),
+    };
+
+    // 2. اعمال فیلدهای اختصاصی حالت تعدادی/متری
+    if (!isTirazhi) {
+      // این مقادیر از فرم خوانده می‌شوند (با پیش‌فرض‌های امن)
+      pricingConfig.allow_custom_quantity = formData.pricing_config.allow_custom_quantity ?? true;
+      pricingConfig.min_quantity = Number(formData.pricing_config.min_quantity || 1);
+      
+      if (formData.pricing_config.max_quantity) {
+        pricingConfig.max_quantity = Number(formData.pricing_config.max_quantity);
+      }
+      
+      // اگر در فرم، ابعاد سفارشی هندل شده بود اینجا اضافه می‌شود
+      if (formData.pricing_config.accepts_custom_dimensions) {
+         pricingConfig.accepts_custom_dimensions = formData.pricing_config.accepts_custom_dimensions;
+         pricingConfig.min_width = Number(formData.pricing_config.min_width || 0);
+         pricingConfig.max_width = Number(formData.pricing_config.max_width || 0);
+      }
+    }
+
     return {
       shell: {
         name: formData.shell.name,
         category_id: Number(formData.shell.category_id), // تبدیل به عدد (حیاتی)
         description: formData.shell.description || "",
-        has_price: true, // طبق مثال همیشه true
-        price: String(formData.shell.price || "0"),
-        has_quantity: formData.shell.has_quantity,
+        has_price: true, // طبق داکیومنت همیشه true است
+        
+        show_price: String(formData.shell.show_price || "0"),
+
+        // 🔴 منطق قیمت پایه: اگر تیراژی است 0 می‌رود، در غیر این صورت قیمت وارد شده
+        price: isTirazhi ? "0" : String(formData.shell.price || "0"),
+        
+        has_quantity: isTirazhi,
+        
+        // اگر تعدادی/متری است، معمولاً price_per_unit باید ست شود (طبق داکیومنت سواگر)
+        ...(!isTirazhi && { price_per_unit: 1 }), 
+
         is_active: formData.shell.is_active,
         guide_text: formData.shell.guide_text || "",
         guide_type: formData.shell.guide_type || "info"
       },
-      pricing_config: {
-        base_setup_price: Number(formData.pricing_config.base_setup_price || 0),
-        design_service_available: formData.pricing_config.design_service_available,
-        design_fee: Number(formData.pricing_config.design_fee || 0),
-        // اگر تیراژدار نیست، مینیمم و ماکسیمم را بفرست
-        ...( !formData.shell.has_quantity && {
-            min_quantity: Number(formData.pricing_config.min_quantity || 1),
-            max_quantity: formData.pricing_config.max_quantity ? Number(formData.pricing_config.max_quantity) : null
-        })
-      },
-      // آرایه quantities فقط شامل id و guide (طبق مثال)
-      quantities: formData.quantities?.map(q => ({
-        id: Number(q.id),
-        guide_text: q.guide_text || "",
-        guide_type: q.guide_type || "info"
-      })) || [],
-      // آرایه sizes
+      
+      pricing_config: pricingConfig,
+      
+      // 🔴 منطق تیراژها: اگر تعدادی است، آرایه خالی می‌شود تا دیتای سرور پاک شود.
+      // اگر تیراژی است، مپ می‌شود و فیلد "price" حتماً ارسال می‌گردد.
+      quantities: isTirazhi 
+        ? (formData.quantities?.map(q => ({
+            id: Number(q.id),
+            price: Number(q.price || 0), // این فیلد در نسخه قبل جا افتاده بود
+            guide_text: q.guide_text || "",
+            guide_type: q.guide_type || "info"
+          })) || [])
+        : [],
+      
+      // آرایه sizes (بدون تغییر، مستقل از استراتژی قیمت‌گذاری)
       sizes: formData.sizes?.map(s => ({
         id: Number(s.id),
         price_impact: Number(s.price_impact || 0),
@@ -74,7 +108,6 @@ export const useProductEditor = () => {
     mutationFn: (rawFormData) => {
       const payload = prepareStep1Payload(rawFormData);
       
-      // اگر در حالت ادیت هستیم، متد update، اگر جدید است create
       return isEditMode 
         ? adminProductService.update(id, payload) 
         : adminProductService.create(payload);
@@ -90,9 +123,7 @@ export const useProductEditor = () => {
       toast.success(isEditMode ? 'تغییرات ذخیره شد' : 'محصول با موفقیت ایجاد شد');
 
       if (!isEditMode) {
-         // ریدایرکت به صفحه ویرایش محصول جدید
          navigate(`/admin/products/edit/${targetId}`, { replace: true });
-         // رفتن به تب بعدی
          setTimeout(() => setActiveTab('options'), 500);
       } else {
          queryClient.invalidateQueries(['admin-product', id]);
@@ -101,7 +132,6 @@ export const useProductEditor = () => {
     },
     onError: (err) => {
       console.error("Save Error:", err);
-      // نمایش خطای دقیق سرور
       const msg = err.response?.data?.message || err.response?.data?.detail;
       if (msg) {
           toast.error(`خطا: ${JSON.stringify(msg)}`);
@@ -122,7 +152,6 @@ export const useProductEditor = () => {
     onError: () => toast.error('خطا در ذخیره ویژگی‌ها')
   });
 
-  // توابع آپلود مدیا (جداگانه برای استفاده در کامپوننت مدیا)
   const uploadImageMutation = useMutation({
     mutationFn: (formData) => adminProductService.uploadImage(id, formData),
   });
@@ -131,12 +160,8 @@ export const useProductEditor = () => {
     mutationFn: (formData) => adminProductService.uploadAttachment(formData),
   });
 
-  // ذخیره نهایی (در واقع همان آپدیت مرحله ۱ است که شامل مدیا هم می‌شود اگر در Payload باشد)
-  // اما چون مدیا جدا آپلود می‌شود، اینجا فقط برای تغییر وضعیت نهایی یا ریدایرکت استفاده می‌شود
   const finalSaveMutation = useMutation({
     mutationFn: async (payload) => {
-        // اینجا می‌توان یک درخواست نهایی آپدیت زد که مثلاً وضعیت را فعال کند
-        // فعلاً فقط ریدایرکت می‌کنیم چون آپلودها انجام شده‌اند
         return true; 
     },
     onSuccess: () => {
@@ -149,7 +174,7 @@ export const useProductEditor = () => {
   return {
     isEditMode,
     productId: id,
-    product,
+    product, // این دیتا همون چیزیه که تو فرم برای Edit لود میشه
     isLoading,
     isError,
     queryError,
@@ -163,7 +188,6 @@ export const useProductEditor = () => {
     saveStep2: step2Mutation.mutate,
     isSavingStep2: step2Mutation.isPending,
 
-    // اکسپوز کردن توابع آپلود
     uploadImageAsync: uploadImageMutation.mutateAsync, 
     uploadAttachmentAsync: uploadAttachmentMutation.mutateAsync,
     isUploading: uploadImageMutation.isPending || uploadAttachmentMutation.isPending,

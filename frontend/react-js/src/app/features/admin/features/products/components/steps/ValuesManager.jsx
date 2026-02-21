@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormContext, useFieldArray, useWatch } from 'react-hook-form';
 import { Plus, Trash2, GripVertical, Settings2, ListPlus, Link2, Calculator } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
-import { generateRefId } from '../../../../hooks/useStep2Form';
+
+// ایمپورت توابع و کانتکست از هوک اصلی
+import { generateRefId, useStep2Data } from '../../../../hooks/useStep2Form';
 
 const underlineInputClass = "w-full bg-transparent border-b-2 border-slate-200 px-2 py-2 text-slate-800 focus:border-primary focus:outline-none transition-all duration-300";
 
@@ -17,7 +19,7 @@ const ValuesManager = ({ optionIndex }) => {
     const handleAddValue = () => {
         append({
             id: null,
-            ref_id: generateRefId('val'), // شناسه موقت برای برقراری وابستگی‌ها
+            ref_id: generateRefId('val'),
             label: "",
             price_impact: 0,
             is_default: false,
@@ -63,22 +65,16 @@ const ValuesManager = ({ optionIndex }) => {
     );
 };
 
-// --- کامپوننت داخلی: یک سطر از مقادیر به همراه تنظیمات پیشرفته ---
 const ValueRow = ({ optionIndex, valueIndex, remove }) => {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const { register, control } = useFormContext();
-    
-    // گرفتن مقادیر برای استایل‌دهی در لحظه
     const price = useWatch({ control, name: `options.${optionIndex}.values_config.${valueIndex}.price_impact` });
     
     return (
         <div className="flex flex-col bg-slate-50/80 rounded-2xl border border-slate-100 shadow-sm group hover:bg-white hover:border-slate-200 transition-all relative">
-            
-            {/* شناسه مخفی برای بک‌اند */}
             <input type="hidden" {...register(`options.${optionIndex}.values_config.${valueIndex}.id`)} />
             <input type="hidden" {...register(`options.${optionIndex}.values_config.${valueIndex}.ref_id`)} />
 
-            {/* بخش اصلی سطر (همیشه نمایان) */}
             <div className="flex flex-col sm:flex-row items-center gap-4 p-4 relative overflow-hidden z-10">
                 <button type="button" onClick={remove} className="absolute top-0 right-0 h-full w-10 bg-error text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all translate-x-full group-hover:translate-x-0 z-20">
                     <Trash2 size={16}/>
@@ -118,18 +114,12 @@ const ValueRow = ({ optionIndex, valueIndex, remove }) => {
                 </button>
             </div>
 
-            {/* بخش تنظیمات پیشرفته (وابستگی‌ها و قیمت تیراژ) */}
             <AnimatePresence>
                 {showAdvanced && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                         <div className="p-5 border-t border-slate-200 bg-slate-100/50 rounded-b-2xl grid grid-cols-1 xl:grid-cols-2 gap-6">
-                            
-                            {/* ستون راست: شروط و وابستگی‌ها */}
                             <ConditionManager optionIndex={optionIndex} valueIndex={valueIndex} />
-
-                            {/* ستون چپ: ماتریس قیمت تیراژ */}
                             <QuantityPriceManager optionIndex={optionIndex} valueIndex={valueIndex} />
-
                         </div>
                     </motion.div>
                 )}
@@ -138,7 +128,6 @@ const ValueRow = ({ optionIndex, valueIndex, remove }) => {
     );
 };
 
-// --- کامپوننت مدیریت شروط (وابستگی به سایر ویژگی‌ها) ---
 const ConditionManager = ({ optionIndex, valueIndex }) => {
     const { control, register } = useFormContext();
     const allOptions = useWatch({ control, name: 'options' }) || [];
@@ -148,9 +137,8 @@ const ConditionManager = ({ optionIndex, valueIndex }) => {
         name: `options.${optionIndex}.values_config.${valueIndex}.conditions`
     });
 
-    // استخراج تمام مقادیر از سایر ویژگی‌ها برای لیست کشویی شروط
     const availableDependencies = allOptions.reduce((acc, opt, idx) => {
-        if (idx === optionIndex) return acc; // ویژگی فعلی را در لیست شروط نمی‌آوریم
+        if (idx === optionIndex) return acc;
         const values = opt.values_config || [];
         values.forEach(val => {
             if (val.label) {
@@ -161,57 +149,111 @@ const ConditionManager = ({ optionIndex, valueIndex }) => {
     }, []);
 
     return (
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 h-full">
             <div className="flex justify-between items-center mb-4">
                 <span className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5"><Link2 size={14} className="text-primary"/> شروط نمایش (وابستگی)</span>
                 <button type="button" onClick={() => appendCond({ required_ref_id: "", action: "show" })} className="text-[10px] text-primary font-bold hover:underline">+ افزودن شرط</button>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-y-auto custom-scrollbar max-h-40 pr-1">
                 {condFields.map((cond, k) => (
                     <div key={cond.id} className="flex gap-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-100">
                         <span className="text-[10px] text-slate-500 font-bold whitespace-nowrap">نمایش بده اگر:</span>
-                        <select {...register(`options.${optionIndex}.values_config.${valueIndex}.conditions.${k}.required_ref_id`)} className="flex-1 bg-white border border-slate-200 text-xs rounded px-2 py-1">
+                        <select {...register(`options.${optionIndex}.values_config.${valueIndex}.conditions.${k}.required_ref_id`)} className="flex-1 bg-white border border-slate-200 text-xs rounded px-2 py-1.5 focus:border-primary outline-none">
                             <option value="">انتخاب کنید...</option>
                             {availableDependencies.map((dep, i) => (
                                 <option key={i} value={dep.ref}>{dep.optLabel} ➔ {dep.valLabel}</option>
                             ))}
                         </select>
                         <input type="hidden" {...register(`options.${optionIndex}.values_config.${valueIndex}.conditions.${k}.action`)} value="show" />
-                        <button type="button" onClick={() => removeCond(k)} className="text-error/70 hover:text-error"><Trash2 size={14}/></button>
+                        <button type="button" onClick={() => removeCond(k)} className="text-error/70 hover:text-error p-1"><Trash2 size={14}/></button>
                     </div>
                 ))}
-                {condFields.length === 0 && <p className="text-[10px] text-slate-400">همیشه نمایش داده می‌شود (بدون شرط)</p>}
+                {condFields.length === 0 && (
+                    <div className="text-center py-4">
+                        <p className="text-[10px] text-slate-400">همیشه نمایش داده می‌شود (بدون شرط)</p>
+                    </div>
+                )}
             </div>
         </div>
     );
 };
 
-// --- کامپوننت ماتریس قیمت تیراژ (محصولات خاص) ---
 const QuantityPriceManager = ({ optionIndex, valueIndex }) => {
     const { control, register } = useFormContext();
-    const { fields: qpFields, append: appendQp, remove: removeQp } = useFieldArray({
+    const { productQuantities, isLoadingQuantities } = useStep2Data(); 
+
+    // چاپ لاگ‌های حیاتی برای دیباگ کردن این بخش
+    useEffect(() => {
+        console.log(`🛠️ [DEBUG - Component Render] QuantityPriceManager [opt:${optionIndex}][val:${valueIndex}] rendered.`);
+        console.log("🛠️ [DEBUG] Context Data received -> isLoading:", isLoadingQuantities, "Quantities:", productQuantities);
+    }, [productQuantities, isLoadingQuantities, optionIndex, valueIndex]);
+
+    const { fields: qpFields, replace } = useFieldArray({
         control,
         name: `options.${optionIndex}.values_config.${valueIndex}.quantity_prices`
     });
 
+    useEffect(() => {
+        if (productQuantities && productQuantities.length > 0) {
+            if (qpFields.length === 0) {
+                console.log("🛠️ [DEBUG] Setting default price fields for quantities...");
+                const defaultPrices = productQuantities.map(q => ({
+                    quantity_id: q.quantity_id,
+                    price: 0
+                }));
+                replace(defaultPrices);
+            }
+        }
+    }, [productQuantities, qpFields.length, replace]);
+
+    if (isLoadingQuantities) {
+        return (
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 text-center flex flex-col items-center justify-center h-full">
+                <span className="loading loading-spinner loading-md text-purple-400 mb-2"></span>
+                <span className="text-xs font-bold text-slate-400">در حال دریافت تیراژهای محصول...</span>
+            </div>
+        );
+    }
+
+    if (!productQuantities || productQuantities.length === 0) {
+        return (
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 text-center flex items-center justify-center h-full">
+                <span className="text-xs font-bold text-slate-400 leading-relaxed">این محصول دارای تیراژ ثابت نیست.<br/>(ماتریس قیمت غیرفعال)</span>
+            </div>
+        );
+    }
+
     return (
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 h-full flex flex-col">
             <div className="flex justify-between items-center mb-4">
-                <span className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5"><Calculator size={14} className="text-purple-500"/> ماتریس قیمت تیراژ</span>
-                <button type="button" onClick={() => appendQp({ quantity_id: "", price: 0 })} className="text-[10px] text-purple-600 font-bold hover:underline">+ افزودن قیمت تیراژ</button>
+                <span className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5"><Calculator size={14} className="text-purple-500"/> ماتریس قیمت افزوده بر اساس تیراژ</span>
             </div>
 
-            <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
-                {qpFields.map((qp, k) => (
-                    <div key={qp.id} className="flex gap-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-100">
-                        <input {...register(`options.${optionIndex}.values_config.${valueIndex}.quantity_prices.${k}.quantity_id`)} placeholder="ID تیراژ" className="w-1/3 bg-white border border-slate-200 text-xs rounded px-2 py-1 text-center font-mono"/>
-                        <span className="text-[10px] text-slate-400">=</span>
-                        <input type="number" {...register(`options.${optionIndex}.values_config.${valueIndex}.quantity_prices.${k}.price`)} placeholder="قیمت (IQD)" className="flex-1 bg-white border border-slate-200 text-xs rounded px-2 py-1 text-left dir-ltr font-mono text-emerald-600"/>
-                        <button type="button" onClick={() => removeQp(k)} className="text-error/70 hover:text-error"><Trash2 size={14}/></button>
-                    </div>
-                ))}
-                {qpFields.length === 0 && <p className="text-[10px] text-slate-400 leading-relaxed">برای محصولات عادی خالی بگذارید.<br/>فقط برای محصولات تیراژی پر شود.</p>}
+            <div className="space-y-2 overflow-y-auto custom-scrollbar pr-1 max-h-40 flex-1">
+                {qpFields.map((qp, k) => {
+                    const qData = productQuantities.find(q => q.quantity_id === qp.quantity_id);
+                    const displayValue = qData ? qData.value : qp.quantity_id;
+
+                    return (
+                        <div key={qp.id} className="flex gap-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-100 transition-colors hover:border-purple-200">
+                            <div className="w-1/3 bg-slate-200/50 border border-slate-200 text-xs rounded px-2 py-1.5 text-center font-extrabold text-slate-600">
+                                تیراژ: {displayValue}
+                            </div>
+                            <input type="hidden" {...register(`options.${optionIndex}.values_config.${valueIndex}.quantity_prices.${k}.quantity_id`)} />
+                            <span className="text-[10px] text-slate-400 font-bold">=</span>
+                            <div className="flex-1 relative group">
+                                <input 
+                                    type="number" 
+                                    {...register(`options.${optionIndex}.values_config.${valueIndex}.quantity_prices.${k}.price`)} 
+                                    placeholder="0" 
+                                    className="w-full bg-white border border-slate-200 text-xs rounded px-2 py-1.5 pl-8 text-left dir-ltr font-mono text-emerald-600 font-black focus:border-purple-400 focus:ring-1 focus:ring-purple-400 focus:shadow-sm transition-all outline-none"
+                                />
+                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400 group-focus-within:text-purple-500 transition-colors">IQD</span>
+                            </div>
+                        </div>
+                    )
+                })}
             </div>
         </div>
     );

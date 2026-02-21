@@ -16,7 +16,6 @@ import toast from 'react-hot-toast';
 
 // --- UI Components (Modernized) ---
 
-// کامپوننت تایتل با پشتیبانی از استپ عددی مدرن
 const SectionTitle = ({ step, icon: Icon, title, desc }) => (
   <div className="flex items-start gap-5 mb-10 pb-6 border-b border-slate-200/60">
     <div className="relative flex-shrink-0 mt-1">
@@ -36,7 +35,6 @@ const SectionTitle = ({ step, icon: Icon, title, desc }) => (
   </div>
 );
 
-// استایل مدرن ارورها
 const FormError = ({ message }) => (
   message ? (
     <div className="text-error text-xs mt-2 flex items-center gap-1.5 font-bold animate-in fade-in slide-in-from-top-1">
@@ -45,7 +43,6 @@ const FormError = ({ message }) => (
   ) : null
 );
 
-// سلکتور راهنما با طراحی جدید
 const GuideTypeSelector = ({ register, name }) => (
     <select {...register(name)} className="bg-transparent border-b-2 border-slate-200 text-xs font-bold text-slate-600 focus:border-primary focus:outline-none transition-colors px-2 py-2 cursor-pointer hover:border-slate-300">
         <option value="info">آبی (Info)</option>
@@ -56,7 +53,6 @@ const GuideTypeSelector = ({ register, name }) => (
     </select>
 );
 
-// کلاس‌های استایل مشترک برای اینپوت‌های زیرخط‌دار (Underline Inputs)
 const underlineInputClass = "w-full bg-transparent border-b-2 border-slate-200 px-1 py-3 text-slate-800 placeholder-slate-300 focus:border-primary focus:outline-none transition-all duration-300 hover:border-slate-300";
 
 const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
@@ -88,7 +84,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
   });
 
   // --- 3. Form Setup ---
-  const { register, control, handleSubmit, watch, setValue, getValues, reset, formState: { errors } } = useForm({
+  const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
     resolver: zodResolver(ProductStep1Schema),
     defaultValues: {
       shell: { has_quantity: true, is_active: true, guide_type: 'info', price: "0", name: "", category_id: "" },
@@ -98,7 +94,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
     }
   });
 
-  // --- 4. Initialization Logic (بدون تغییر) ---
+  // --- 4. Initialization Logic (لود اطلاعات برای ادیت) ---
   useEffect(() => {
     const isMasterDataReady = standardSizes.length > 0 && systemQuantities.length > 0;
 
@@ -116,13 +112,15 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             }).catch(console.error);
         }
 
+        // مپ کردن تیراژها (حالا شامل فیلد قیمت هم می‌شود)
         let normalizedQuantities = [];
         if (Array.isArray(initialData.quantities)) {
             normalizedQuantities = initialData.quantities.map(q => {
-                const matchedQty = systemQuantities.find(sq => Number(sq.value) === Number(q.value));
+                const matchedQty = systemQuantities.find(sq => Number(sq.id) === Number(q.id) || Number(sq.value) === Number(q.value));
                 if (matchedQty) {
                     return {
                         id: matchedQty.id,
+                        price: Number(q.price || 0), // 🔴 لود شدن قیمت ثبت شده برای تیراژ
                         guide_text: q.guide_text || "",
                         guide_type: q.guide_type || "info"
                     };
@@ -133,14 +131,12 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
 
         let normalizedSizes = [];
         const sizesArray = initialData.sizes?.sizes || (Array.isArray(initialData.sizes) ? initialData.sizes : []);
-        
         if (sizesArray.length > 0) {
             normalizedSizes = sizesArray.map(s => {
                 const matchedSize = standardSizes.find(ss => 
                     Number(ss.width) === Number(s.width) && 
                     Number(ss.height) === Number(s.height)
                 );
-
                 if (matchedSize) {
                     return {
                         id: matchedSize.id,
@@ -158,7 +154,9 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                 ...initialData.shell,
                 name: initialData.shell.name,
                 category_id: currentCatId || "",
+                show_price: String(initialData.shell.show_price || "0"),
                 price: String(initialData.shell.price || "0"),
+                has_quantity: initialData.shell.has_quantity,
                 guide_text: initialData.shell.guide_text || "",
                 guide_type: initialData.shell.guide_type || "info"
             },
@@ -181,7 +179,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
           }
       }
   }, [parentDetails, targetSubCategoryId, setValue]);
-
 
   // Watchers
   const hasQuantity = watch('shell.has_quantity');
@@ -210,8 +207,19 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
         return;
     }
 
-    appendQty({ id: Number(qtyId), guide_text: "", guide_type: "info" });
+    // 🔴 افزودن تیراژ جدید همراه با جایگاه قیمت
+    appendQty({ id: Number(qtyId), price: 0, guide_text: "", guide_type: "info" });
     e.target.value = ""; 
+  };
+
+  // 🔴 مدیریت هوشمند سوییچ استراتژی
+  const setPricingStrategy = (isTirazhi) => {
+      setValue('shell.has_quantity', isTirazhi);
+      if (isTirazhi) {
+          setValue('shell.price', "0"); // ریست قیمت پایه
+      } else {
+          setValue('quantities', []); // پاکسازی تیراژها
+      }
   };
 
   return (
@@ -223,7 +231,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
               <div className="md:col-span-2 group">
-                  <label className="block text-sm font-extrabold text-slate-800 mb-2 transition-colors group-focus-within:text-primary">نام محصول <span className="text-error">*</span></label>
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2">نام محصول <span className="text-error">*</span></label>
                   <input 
                       {...register('shell.name')} 
                       className={clsx(underlineInputClass, "text-xl font-black py-4")}
@@ -232,9 +240,8 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                   <FormError message={errors.shell?.name?.message} />
               </div>
 
-              {/* دسته بندی - والد */}
               <div className="group">
-                  <label className="block text-sm font-extrabold text-slate-800 mb-2 transition-colors group-focus-within:text-primary">۱. گروه اصلی</label>
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2">۱. گروه اصلی</label>
                   <select 
                      className={clsx(underlineInputClass, "text-base font-bold text-slate-700 cursor-pointer")}
                      onChange={handleParentChange}
@@ -245,9 +252,8 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                   </select>
               </div>
 
-              {/* دسته بندی - فرزند */}
               <div className="group relative">
-                  <label className="block text-sm font-extrabold text-slate-800 mb-2 transition-colors group-focus-within:text-primary flex items-center gap-2">
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2 flex items-center gap-2">
                       ۲. زیر دسته (محصول نهایی) <span className="text-error">*</span>
                       {isLoadingChildren && <span className="loading loading-spinner loading-xs text-primary"></span>}
                   </label>
@@ -269,9 +275,8 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                   <FormError message={errors.shell?.category_id?.message} />
               </div>
 
-              {/* توضیحات */}
               <div className="md:col-span-2 group">
-                  <label className="block text-sm font-extrabold text-slate-800 mb-2 transition-colors group-focus-within:text-primary">توضیحات محصول</label>
+                  <label className="block text-sm font-extrabold text-slate-800 mb-2">توضیحات محصول</label>
                   <textarea 
                       {...register('shell.description')}
                       className="w-full bg-slate-50/50 border-b-2 border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-primary focus:bg-white focus:outline-none transition-all duration-300 rounded-t-2xl resize-none h-28"
@@ -279,7 +284,6 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                   ></textarea>
               </div>
 
-              {/* تنظیمات اضافی */}
               <div className="md:col-span-2 bg-slate-50/80 p-6 rounded-2xl flex flex-col md:flex-row gap-8 items-end border border-slate-100/50">
                    <div className="w-full group">
                         <label className="block text-xs font-bold text-slate-500 mb-2">متن راهنما (مثل: زمان تحویل)</label>
@@ -303,9 +307,9 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
           <SectionTitle step="2" icon={Calculator} title="استراتژی قیمت‌گذاری" desc="نحوه فروش و محاسبه قیمت برای این محصول" />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-               {/* کارت انتخاب تیراژی */}
+               {/* 🔴 کارت انتخاب تیراژی */}
                <div 
-                  onClick={() => setValue('shell.has_quantity', true)}
+                  onClick={() => setPricingStrategy(true)}
                   className={clsx(
                       "cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300 flex items-start gap-5 relative overflow-hidden group",
                       hasQuantity ? "border-primary bg-primary/5 shadow-md shadow-primary/10" : "border-slate-100 bg-white hover:border-slate-300 hover:bg-slate-50"
@@ -323,9 +327,9 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                    </div>
                </div>
 
-               {/* کارت انتخاب تعدادی/متری */}
+               {/* 🔴 کارت انتخاب تعدادی/متری */}
                <div 
-                  onClick={() => setValue('shell.has_quantity', false)}
+                  onClick={() => setPricingStrategy(false)}
                   className={clsx(
                       "cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300 flex items-start gap-5 relative overflow-hidden group",
                       !hasQuantity ? "border-emerald-500 bg-emerald-50/50 shadow-md shadow-emerald-500/10" : "border-slate-100 bg-white hover:border-slate-300 hover:bg-slate-50"
@@ -338,28 +342,59 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                        <MousePointerClick size={28} />
                    </div>
                    <div className="pt-1">
-                       <h4 className={clsx("font-black text-lg mb-1", !hasQuantity ? "text-emerald-700" : "text-slate-700")}>تعدادی / متری</h4>
+                       <h4 className={clsx("font-black text-lg mb-1", !hasQuantity ? "text-emerald-700" : "text-slate-700")}>تعدادی / دونه‌ای</h4>
                        <p className="text-sm text-slate-500 font-medium leading-relaxed">مثل بنر، استیکر یا کارهای سفارشی (تعداد دلخواه مشتری)</p>
                    </div>
                </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-8 rounded-[1.5rem] bg-gradient-to-br from-slate-50 to-white border border-slate-100/80 shadow-inner">
-              <div className="group">
-                  <label className="block text-sm font-extrabold text-slate-800 mb-3">قیمت پایه (تومان)</label>
+              
+{/* 🔴 فیلد جدید: قیمت نمایشی (همیشه ثابت برای هر دو حالت) */}
+              <div className="group animate-in fade-in zoom-in duration-300">
+                  <label className="block text-sm font-extrabold text-slate-800 mb-3">قیمت نمایشی کارت محصول (تومان) <span className="text-error">*</span></label>
                   <div className="relative flex items-center">
                       <input 
-                          {...register('shell.price')}
-                          className={clsx(underlineInputClass, "pl-12 font-mono text-2xl font-black text-emerald-600 dir-ltr")}
-                          placeholder="0"
+                          type="number"
+                          {...register('shell.show_price')}
+                          className={clsx(underlineInputClass, "pl-12 font-mono text-xl font-black text-indigo-600 dir-ltr")}
+                          placeholder="مثال: 120000"
                       />
-                      <DollarSign className="absolute left-2 text-emerald-400 group-focus-within:text-emerald-600 transition-colors" size={24}/>
+                      <DollarSign className="absolute left-2 text-indigo-400" size={24}/>
                   </div>
-                  <FormError message={errors.shell?.price?.message} />
+                  <FormError message={errors.shell?.show_price?.message} />
+                  <p className="text-xs text-slate-400 mt-2 font-medium">این قیمت فقط در لیست محصولات به کاربر نمایش داده می‌شود.</p>
               </div>
 
+              
+
+
+              {/* 🔴 رندر شرطی قیمت پایه */}
+              {!hasQuantity ? (
+                  <div className="group animate-in fade-in zoom-in duration-300">
+                      <label className="block text-sm font-extrabold text-slate-800 mb-3">قیمت پایه هر عدد (تومان)</label>
+                      <div className="relative flex items-center">
+                          <input 
+                              type="number"
+                              {...register('shell.price')}
+                              className={clsx(underlineInputClass, "pl-12 font-mono text-2xl font-black text-emerald-600 dir-ltr")}
+                              placeholder="0"
+                          />
+                          <DollarSign className="absolute left-2 text-emerald-400" size={24}/>
+                      </div>
+                      <FormError message={errors.shell?.price?.message} />
+                  </div>
+              ) : (
+                  <div className="flex items-center justify-center p-4 bg-slate-100/50 border border-dashed border-slate-200 rounded-2xl animate-in fade-in duration-300">
+                      <p className="text-xs font-bold text-slate-400 text-center leading-loose">
+                          محصول تیراژی قیمت پایه (دونه‌ای) ندارد.<br/>
+                          قیمت‌گذاری در کادر تیراژها در پایین انجام می‌شود.
+                      </p>
+                  </div>
+              )}
+
               {!hasQuantity && (
-                  <div className="md:col-span-2 group">
+                  <div className="md:col-span-2 group animate-in fade-in duration-300">
                       <label className="block text-sm font-extrabold text-slate-800 mb-3">محدوده تعداد سفارش (حداقل و حداکثر)</label>
                       <div className="flex items-center gap-4">
                           <input type="number" {...register('pricing_config.min_quantity')} className={clsx(underlineInputClass, "text-center font-mono text-lg")} placeholder="حداقل (Min)"/>
@@ -370,7 +405,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
               )}
           </div>
 
-          <div className="mt-8 pt-6 flex flex-wrap items-center justify-between gap-6">
+          <div className="mt-8 pt-6 flex flex-wrap items-center justify-between gap-6 border-t border-slate-100">
                <div className="flex items-center gap-4 bg-purple-50/50 px-5 py-3 rounded-2xl border border-purple-100">
                    <div className="p-2.5 bg-purple-100 text-purple-600 rounded-xl shadow-sm"><Palette size={20}/></div>
                    <h5 className="font-extrabold text-slate-800 text-sm">امکان سفارش طراحی آنلاین دارد؟</h5>
@@ -390,7 +425,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           
           {/* Sizes */}
-          <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 p-8 md:p-10 rounded-[2rem] border border-white hover:shadow-primary/5 transition-all flex flex-col h-full">
+          <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 p-8 md:p-10 rounded-[2rem] border border-white transition-all flex flex-col h-full">
               <div className="flex justify-between items-start mb-6">
                   <SectionTitle step={hasQuantity ? "3" : "3"} icon={Ruler} title="سایزهای مجاز" desc="ابعاد قابل انتخاب برای مشتری" />
                   <button type="button" onClick={() => appendSize({ id: "", price_impact: 0 })} className="btn btn-primary btn-sm rounded-full shadow-lg shadow-primary/20 hover:scale-105 mt-2 px-6">
@@ -409,7 +444,7 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                               </select>
                               <div className="relative w-1/3">
                                   <input type="number" {...register(`sizes.${index}.price_impact`)} className={clsx(underlineInputClass, "font-mono text-emerald-600 font-bold pl-8")} placeholder="+ افزایش قیمت" />
-                                  <span className="absolute left-1 top-3 text-[10px] text-slate-400">IQD</span>
+                                  <span className="absolute left-1 top-3 text-[10px] text-slate-400">تومان</span>
                               </div>
                           </div>
                           
@@ -428,11 +463,11 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
               </div>
           </div>
 
-          {/* Quantities */}
+          {/* Quantities (🔴 فقط در حالت تیراژی) */}
           {hasQuantity ? (
-              <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 p-8 md:p-10 rounded-[2rem] border border-white hover:shadow-primary/5 transition-all flex flex-col h-full animate-in fade-in slide-in-from-bottom-4">
+              <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 p-8 md:p-10 rounded-[2rem] border border-white transition-all flex flex-col h-full animate-in fade-in slide-in-from-bottom-4">
                   <div className="flex justify-between items-start mb-6">
-                      <SectionTitle step="4" icon={Hash} title="تیراژهای مجاز" desc="تعدادهای قابل سفارش (پک)" />
+                      <SectionTitle step="4" icon={Hash} title="تیراژهای مجاز" desc="قیمت‌گذاری دقیق بر اساس هر پکیج" />
                       <div className="w-48 mt-2 relative">
                            <select 
                                 className="w-full bg-primary/10 text-primary border-none rounded-full px-4 py-2 font-bold text-sm cursor-pointer outline-none hover:bg-primary/20 transition-colors appearance-none text-center"
@@ -446,7 +481,10 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                       </div>
                   </div>
 
-                  <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar flex-1">
+                  {/* 🔴 نمایش ارورهای مربوط به خالی بودن آرایه تیراژ از Zod Schema */}
+                  <FormError message={errors.quantities?.root?.message || errors.quantities?.message} />
+
+                  <div className="space-y-4 mt-2 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar flex-1">
                       {qtyFields.map((field, index) => {
                          const rowId = watch(`quantities.${index}.id`);
                          const foundQty = systemQuantities.find(q => String(q.id) === String(rowId));
@@ -454,14 +492,27 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                          
                          return (
                               <div key={field.id} className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm relative group hover:shadow-md hover:border-primary/30 transition-all">
-                                  <button onClick={() => removeQty(index)} className="absolute top-1/2 -translate-y-1/2 left-4 w-8 h-8 text-slate-300 hover:bg-error hover:text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={16}/></button>
+                                  <button type="button" onClick={() => removeQty(index)} className="absolute top-1/2 -translate-y-1/2 left-4 w-8 h-8 text-slate-300 hover:bg-error hover:text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={16}/></button>
                                   
                                   <div className="flex flex-col gap-3 pr-2">
                                       <span className="font-black text-2xl text-slate-800 tracking-tight">{displayValue} <span className="text-sm font-bold text-slate-400">عدد</span></span>
                                       
-                                      <div className="flex gap-4 border-t border-slate-50 pt-3">
-                                          <input {...register(`quantities.${index}.guide_text`)} className={clsx(underlineInputClass, "text-xs py-1")} placeholder="برچسب (مثل: پیشنهاد ویژه)"/>
-                                          <GuideTypeSelector register={register} name={`quantities.${index}.guide_type`} />
+                                      <div className="flex flex-col xl:flex-row gap-4 border-t border-slate-50 pt-3">
+                                          {/* 🔴 اینپوت دریافت قیمت مخصوص همین تیراژ */}
+                                          <div className="relative w-full xl:w-1/2">
+                                              <input 
+                                                  type="number" 
+                                                  {...register(`quantities.${index}.price`)} 
+                                                  className={clsx(underlineInputClass, "font-mono text-primary font-black text-lg pl-10 bg-slate-50 rounded-lg border-none px-3 py-2")} 
+                                                  placeholder="قیمت این پکیج" 
+                                              />
+                                              <span className="absolute left-3 top-3.5 text-xs text-slate-400 font-bold">تومان</span>
+                                          </div>
+
+                                          <div className="flex w-full xl:w-1/2 gap-2 items-center">
+                                              <input {...register(`quantities.${index}.guide_text`)} className={clsx(underlineInputClass, "text-xs py-2 w-full")} placeholder="برچسب (مثل: پیشنهاد ویژه)"/>
+                                              <GuideTypeSelector register={register} name={`quantities.${index}.guide_type`} />
+                                          </div>
                                       </div>
                                   </div>
                               </div>
@@ -476,11 +527,11 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                   </div>
               </div>
           ) : (
-              <div className="hidden xl:block"></div> /* Empty div to keep grid layout clean if quantities are hidden */
+              <div className="hidden xl:block"></div>
           )}
       </div>
 
-      {/* === Footer Actions (Glassmorphism) === */}
+      {/* === Footer Actions === */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex justify-center w-full px-6 pointer-events-none">
          <div className="bg-white/80 backdrop-blur-md p-3 rounded-full shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] border border-white/50 pointer-events-auto">
              <button type="submit" disabled={isSaving} className="btn btn-primary h-14 px-12 rounded-full shadow-lg shadow-primary/40 text-lg font-black hover:scale-[1.02] active:scale-95 transition-all gap-3 border-none">
