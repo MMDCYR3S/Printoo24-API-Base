@@ -116,5 +116,3 @@ class SliderDashboardViewSet(viewsets.ModelViewSet):
         self.service.delete_slider(instance_or_pk=instance)
         
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
-f
