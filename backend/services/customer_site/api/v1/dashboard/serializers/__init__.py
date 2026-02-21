@@ -11,3 +11,4 @@ from .location_serializers import *
 from .invoice_serializers import *
 from .quotation_serializers import *
 from .staff_serialziers import *
+from .site_media_serializers import *
