@@ -108,7 +108,7 @@ const OrderDetailPage = () => {
           <div className="p-3 bg-primary/10 rounded-2xl text-primary">
             <DollarSign size={24} />
           </div>
-          <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">{pageText.profile.OrderDetailPage.totalPrice}</span>
+          <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">{pageText.profile.orderDetailPage.totalPrice}</span>
           <div className="text-3xl font-black text-slate-800">
             {formatCurrency(order.total_price)} <span className="text-sm font-medium text-slate-400">{globalText.currency}</span>
           </div>
@@ -126,7 +126,7 @@ const OrderDetailPage = () => {
               <span className="text-sm font-semibold flex items-center gap-2"><User size={14} className="text-slate-300"/> {pageText.profile.orderDetailPage.userCountOf} {order.user}</span>
             </div>
             <div className="flex flex-col gap-1 md:col-span-2 bg-slate-50 p-4 rounded-2xl">
-              <span className="text-[10px] text-slate-400 font-bold mb-1">{pageText.profile.OrderDetailPage.fullAddress}</span>
+              <span className="text-[10px] text-slate-400 font-bold mb-1">{pageText.profile.orderDetailPage.fullAddress}</span>
               <p className="text-sm text-slate-600 leading-relaxed">{order.full_address}</p>
             </div>
           </div>
