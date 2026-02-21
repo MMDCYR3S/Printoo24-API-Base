@@ -3,61 +3,61 @@ from django.db import transaction, connection
 from django.utils import timezone
 from decimal import Decimal
 
-# ایمپورت مدل‌ها (مسیرها را طبق پروژه خودتان چک کنید)
+# هێنانەناوەوەی مۆدێلەکان (ڕێڕەوەکان بەپێی پرۆژەکەت بپشکنە)
 from core.models import (
     User, Role, UserRole, CustomerProfile,
     Province, City, Address,
     OrderStatusGroup, OrderStatus, Invoice
 )
-# اگر مدل‌ها در اپ‌های دیگر هستند، ایمپورت‌های زیر را فعال کنید:
+# ئەگەر مۆدێلەکان لە ئەپەکانی دیکەدان، ئەم هێنانەناوەوانەی خوارەوە چالاک بکە:
 # from apps.financial.models import Transaction, Invoice
 # from apps.order.models import Order, OrderCostCategory ...
 
 class Command(BaseCommand):
-    help = 'بازنشانی کامل سیستم: پاکسازی وضعیت‌ها و ایجاد داده‌های ۱۰ مرحله‌ای جدید'
+    help = 'نوێکردنەوەی تەواوی سیستەم: سڕینەوەی بارودۆخەکان و دروستکردنی داتای ١٠ قۆناغی نوێ'
 
     def handle(self, *args, **kwargs):
-        self.stdout.write("⚠️ در حال آماده‌سازی برای بازنشانی داده‌ها...")
+        self.stdout.write("⚠️ لە ئامادەکاریدایە بۆ نوێکردنەوەی داتاکان...")
 
         try:
             with transaction.atomic():
-                # 1. پاکسازی داده‌های قدیمی (سفارشات و وضعیت‌ها)
+                # ١. سڕینەوەی داتا کۆنەکان (داواکارییەکان و بارودۆخەکان)
                 self._clean_existing_data()
 
-                # 2. ایجاد/بروزرسانی زیرساخت (استان و شهر) - رفع خطای Integrity
+                # ٢. دروستکردن/نوێکردنەوەی ژێرخان (پارێزگا و شار) - چارەسەرکردنی هەڵەی Integrity
                 self._create_infrastructure()
 
-                # 3. ایجاد گروه‌ها و ۱۰ وضعیت جدید
+                # ٣. دروستکردنی گرووپەکان و ١٠ بارودۆخی نوێ
                 self._create_status_groups_and_statuses()
                 
-                # 4. ایجاد نقش‌ها
+                # ٤. دروستکردنی ڕۆڵەکان
                 self._create_roles()
                 
-                # 5. ایجاد کاربران
+                # ٥. دروستکردنی بەکارهێنەران
                 self._create_users()
                 
-                # 6. (اختیاری) ایجاد سفارش تست برای دیدن جریان کار
+                # ٦. (ئارەزوومەندانە) دروستکردنی داواکاری تاقیکاری بۆ بینینی ڕەوتی کار
                 # self._create_sample_order()
 
-                self.stdout.write(self.style.SUCCESS("✅ عملیات با موفقیت انجام شد. وضعیت‌های جدید جایگزین شدند."))
+                self.stdout.write(self.style.SUCCESS("✅ پرۆسەکە بە سەرکەوتووی ئەنجام درا. بارودۆخە نوێیەکان جێگیر کران."))
         
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f"❌ خطا: {e}"))
+            self.stdout.write(self.style.ERROR(f"❌ هەڵە: {e}"))
             import traceback
             traceback.print_exc()
 
     def _clean_existing_data(self):
         """
-        پاک کردن داده‌های قدیمی برای جلوگیری از تداخل.
-        ترتیب پاک کردن مهم است (بخاطر Foreign Key).
+        سڕینەوەی داتا کۆنەکان بۆ ڕێگریکردن لە تێکەڵبوون.
+        ڕیزبەندی سڕینەوە گرنگە (بەهۆی Foreign Key).
         """
-        self.stdout.write("🧹 در حال پاکسازی داده‌های قدیمی...")
+        self.stdout.write("🧹 لە سڕینەوەی داتا کۆنەکاندایە...")
         
-        # ابتدا سفارشات و لاگ‌ها باید پاک شوند چون به وضعیت‌ها متصل هستند
-        # فرض بر این است که مدل Order در core است یا ایمپورت شده
+        # سەرەتا دەبێت داواکارییەکان و لۆگەکان بسڕێنەوە چونکە بەسترابوونەوە بە بارودۆخەکانەوە
+        # وا گریمانە دەکرێت کە مۆدێلی Order لە core دایە یان هێنراوەتە ناوەوە
         from core.models import Order, OrderItem, OrderStateLog
         
-        # اگر مدل‌های مالی دارید، اول آن‌ها را پاک کنید
+        # ئەگەر مۆدێلی داراییت هەیە، سەرەتا ئەوان بسڕەوە
         # Transaction.objects.all().delete()
         # Invoice.objects.all().delete()
         
@@ -65,42 +65,42 @@ class Command(BaseCommand):
         OrderItem.objects.all().delete()
         Order.objects.all().delete()
         
-        # حالا وضعیت‌ها را پاک می‌کنیم
+        # ئێستا بارودۆخەکان دەسڕینەوە
         count_status = OrderStatus.objects.all().delete()[0]
         count_groups = OrderStatusGroup.objects.all().delete()[0]
         
-        self.stdout.write(f"   - {count_status} وضعیت حذف شد.")
-        self.stdout.write(f"   - {count_groups} گروه وضعیت حذف شد.")
+        self.stdout.write(f"   - {count_status} بارودۆخ سڕایەوە.")
+        self.stdout.write(f"   - {count_groups} گرووپی بارودۆخ سڕایەوە.")
 
     def _create_infrastructure(self):
         """
-        ایجاد استان و شهر با متد update_or_create برای جلوگیری از خطای Duplicate Key
+        دروستکردنی پارێزگا و شار بە مێتۆدی update_or_create بۆ ڕێگریکردن لە هەڵەی Duplicate Key
         """
-        self.stdout.write("🏗 ایجاد زیرساخت (استان/شهر)...")
+        self.stdout.write("🏗 دروستکردنی ژێرخان (پارێزگا/شار)...")
         
-        # استفاده از update_or_create بجای create خالی
-        # این خطای شما را برطرف می‌کند چون اگر slug وجود داشته باشد، فقط آپدیت می‌کند.
+        # بەکارهێنانی update_or_create لەجیاتی create ی بەتاڵ
+        # ئەم هەڵەیەت بۆ چارەسەر دەکات چونکە ئەگەر slug بوونی هەبێت، تەنها نوێی دەکاتەوە.
         self.province, _ = Province.objects.update_or_create(
-            slug='esfahan', # یا 'thrn' اگر در دیتابیس شما اینطور است
-            defaults={'name': 'اصفهان'}
+            slug='sulaymaniyah', # گۆڕدرا بۆ سلێمانی بەپێی سیستەمەکە
+            defaults={'name': 'سلێمانی'}
         )
         
         self.city, _ = City.objects.update_or_create(
-            slug='esfahan',
-            defaults={'name': 'اصفهان', 'province': self.province}
+            slug='sulaymaniyah',
+            defaults={'name': 'سلێمانی', 'province': self.province}
         )
 
     def _create_status_groups_and_statuses(self):
-        self.stdout.write("🔄 در حال ایجاد ۱۰ وضعیت جدید...")
+        self.stdout.write("🔄 لە دروستکردنی ١٠ بارودۆخی نوێدایە...")
         
-        # ===== 1. گروه‌ها =====
+        # ===== ١. گرووپەکان =====
         groups_def = [
-            {"code": "admin", "name": "ادمین سیستم"},
-            {"code": "designer", "name": "واحد طراحی"},
-            {"code": "print", "name": "واحد چاپ"},
-            {"code": "logistics", "name": "واحد انبار"},
-            {"code": "financial", "name": "واحد مالی"},
-            {"code": "customer", "name": "مشتری"},
+            {"code": "admin", "name": "ئەدمینی سیستەم"},
+            {"code": "designer", "name": "یەکەی دیزاین"},
+            {"code": "print", "name": "یەکەی چاپ"},
+            {"code": "logistics", "name": "یەکەی کۆگا"},
+            {"code": "financial", "name": "یەکەی دارایی"},
+            {"code": "customer", "name": "کڕیار"},
         ]
 
         self.groups_map = {}
@@ -110,33 +110,33 @@ class Command(BaseCommand):
                 defaults={
                     'name': g['name'],
                     'is_system': True,
-                    'description': f"گروه کاری {g['name']}"
+                    'description': f"گرووپی کاری {g['name']}"
                 }
             )
             self.groups_map[g['code']] = group
 
-        # ===== 2. وضعیت‌ها (۱۰ مرحله دقیق) =====
+        # ===== ٢. بارودۆخەکان (١٠ قۆناغی ورد) =====
         statuses_def = [
             # 1
-            {"sort": 1, "name": "در انتظار بررسی", "code": "PENDING_INITIAL_ADMIN", "type": "initial", "group": "admin"},
+            {"sort": 1, "name": "چاوەڕێی پشکنین", "code": "PENDING_INITIAL_ADMIN", "type": "initial", "group": "admin"},
             # 2
-            {"sort": 2, "name": "در حال طراحی", "code": "DESIGNING_PROGRESS_DESIGNER", "type": "progress", "group": "designer"},
+            {"sort": 2, "name": "لە قۆناغی دیزایندایە", "code": "DESIGNING_PROGRESS_DESIGNER", "type": "progress", "group": "designer"},
             # 3
-            {"sort": 3, "name": "رد شده توسط طراح", "code": "DESIGN_REJECTED_REJECT_DESIGNER", "type": "reject", "group": "designer"},
+            {"sort": 3, "name": "ڕەتکرایەوە لەلایەن دیزاینەرەوە", "code": "DESIGN_REJECTED_REJECT_DESIGNER", "type": "reject", "group": "designer"},
             # 4
-            {"sort": 4, "name": "در حال چاپ", "code": "PRINTING_PROGRESS_PRINT", "type": "progress", "group": "print"},
+            {"sort": 4, "name": "لە چاپکردندایە", "code": "PRINTING_PROGRESS_PRINT", "type": "progress", "group": "print"},
             # 5
-            {"sort": 5, "name": "رد شده توسط چاپ", "code": "PRINT_REJECTED_REJECT_PRINT", "type": "reject", "group": "print"},
+            {"sort": 5, "name": "ڕەتکرایەوە لەلایەن چاپەوە", "code": "PRINT_REJECTED_REJECT_PRINT", "type": "reject", "group": "print"},
             # 6
-            {"sort": 6, "name": "ارسال شده به انبار", "code": "SENT_TO_WAREHOUSE_PROGRESS_LOGISTICS", "type": "progress", "group": "logistics"},
+            {"sort": 6, "name": "نێردرا بۆ کۆگا", "code": "SENT_TO_WAREHOUSE_PROGRESS_LOGISTICS", "type": "progress", "group": "logistics"},
             # 7
-            {"sort": 7, "name": "دریافت توسط انبار", "code": "RECEIVED_IN_WAREHOUSE_APPROVE_LOGISTICS", "type": "approve", "group": "logistics"},
+            {"sort": 7, "name": "وەرگیرا لەلایەن کۆگاوە", "code": "RECEIVED_IN_WAREHOUSE_APPROVE_LOGISTICS", "type": "approve", "group": "logistics"},
             # 8
-            {"sort": 8, "name": "رد شده توسط انبار", "code": "WAREHOUSE_REJECTED_REJECT_LOGISTICS", "type": "reject", "group": "logistics"},
+            {"sort": 8, "name": "ڕەتکرایەوە لەلایەن کۆگاوە", "code": "WAREHOUSE_REJECTED_REJECT_LOGISTICS", "type": "reject", "group": "logistics"},
             # 9
-            {"sort": 9, "name": "تحویل‌شده", "code": "DELIVERED_APPROVE_LOGISTICS", "type": "approve", "group": "logistics"},
+            {"sort": 9, "name": "گەیەندراوە", "code": "DELIVERED_APPROVE_LOGISTICS", "type": "approve", "group": "logistics"},
             # 10
-            {"sort": 10, "name": "لغو شده", "code": "CANCELLED_CANCEL_ADMIN", "type": "cancel", "group": "admin"},
+            {"sort": 10, "name": "هەڵوەشاوەتەوە", "code": "CANCELLED_CANCEL_ADMIN", "type": "cancel", "group": "admin"},
         ]
 
         for s in statuses_def:
@@ -148,21 +148,21 @@ class Command(BaseCommand):
                     'status_type': s['type'],
                     'group': self.groups_map[s['group']],
                     'is_system': True,
-                    'description': f"وضعیت شماره {s['sort']}"
+                    'description': f"بارودۆخی ژمارە {s['sort']}"
                 }
             )
 
     def _create_roles(self):
-        self.stdout.write("👤 ایجاد نقش‌ها...")
+        self.stdout.write("👤 دروستکردنی ڕۆڵەکان...")
         
-        # تعریف نقش‌ها با دسترسی‌های خاص
+        # پێناسەکردنی ڕۆڵەکان بە دەسەڵاتی تایبەتەوە
         roles_data = [
-            ('admin', 'مدیر کل', 'admin', False, self.groups_map.values()),
-            ('designer', 'طراح', 'normal', False, [self.groups_map['designer']]),
-            ('print', 'اپراتور چاپ', 'normal', False, [self.groups_map['print']]),
-            ('logistics', 'انباردار', 'normal', False, [self.groups_map['logistics']]),
-            ('financial', 'حسابدار', 'normal', False, [self.groups_map['financial']]),
-            ('customer', 'مشتری', 'normal', True, [self.groups_map['customer']]),
+            ('admin', 'بەڕێوەبەری گشتی', 'admin', False, self.groups_map.values()),
+            ('designer', 'دیزاینەر', 'normal', False, [self.groups_map['designer']]),
+            ('print', 'ئۆپەراتۆری چاپ', 'normal', False, [self.groups_map['print']]),
+            ('logistics', 'کۆگادار', 'normal', False, [self.groups_map['logistics']]),
+            ('financial', 'ژمێریار', 'normal', False, [self.groups_map['financial']]),
+            ('customer', 'کڕیار', 'normal', True, [self.groups_map['customer']]),
         ]
 
         self.roles_map = {}
@@ -179,7 +179,7 @@ class Command(BaseCommand):
             self.roles_map[slug] = role
 
     def _create_users(self):
-        self.stdout.write("👥 ایجاد کاربران تستی...")
+        self.stdout.write("👥 دروستکردنی بەکارهێنەرانی تاقیکاری...")
         
         users = [
             ('admin', 'admin@printoo.ir', 'admin'),
@@ -204,10 +204,10 @@ class Command(BaseCommand):
                 user.set_password('123456')
                 user.save()
             
-            # اتصال نقش
+            # بەستنەوەی ڕۆڵ
             UserRole.objects.get_or_create(user=user, role=self.roles_map[role_slug])
             
-            # اگر مشتری است، پروفایل بسازیم
+            # ئەگەر کڕیارە، پرۆفایل دروست بکەین
             if role_slug == 'customer':
                 CustomerProfile.objects.update_or_create(
                     user=user,
@@ -218,7 +218,7 @@ class Command(BaseCommand):
                     defaults={
                         'province': self.province,
                         'city': self.city,
-                        'address': 'تست',
+                        'address': 'تاقیکاری',
                         'postal_code': '11111111'
                     }
                 )

@@ -145,8 +145,8 @@ class OrderStatus(models.Model):
 class Order(models.Model):
     """ مدل سفارش  - این مدل، نقطه ثقل سیستم هستش. """
     ORDER_TYPE = [
-        ("1", _("سفارش معمولی")),
-        ("2", _("سفارش اختصاصی"))
+        ("1", _("داواکاریی ئاسایی")),
+        ("2", _("داواکاریی تایبەت"))
     ]
     
     user = models.ForeignKey(
