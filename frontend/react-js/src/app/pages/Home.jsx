@@ -106,7 +106,7 @@ const HomePage = () => {
         <FAQSection />
 
         {/* 6. تماس */}
-        <ContactSection />
+        {/* <ContactSection /> */}
       </div>
     </>
   );
