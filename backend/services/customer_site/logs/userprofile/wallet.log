@@ -496,3 +496,71 @@ INFO 2026-02-20 19:34:23,844 user_transaction_service 279 133099808790208 Fetchi
 DEBUG 2026-02-20 19:34:23,869 user_transaction_service 279 133099808790208 Wallet balance: -8986588.00
 INFO 2026-02-20 19:36:50,047 user_transaction_service 279 133099771025088 Fetching wallet balance for User ID: 1
 DEBUG 2026-02-20 19:36:50,068 user_transaction_service 279 133099771025088 Wallet balance: -8986588.00
+INFO 2026-02-20 19:48:48,822 user_transaction_service 279 133099409102528 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 19:48:48,902 user_transaction_service 279 133099409102528 Wallet balance: -8986588.00
+INFO 2026-02-20 20:02:41,409 user_transaction_service 279 133099788859072 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:02:41,482 user_transaction_service 279 133099788859072 Wallet balance: -8986588.00
+INFO 2026-02-20 20:03:03,216 user_transaction_service 279 133099771025088 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:03:03,300 user_transaction_service 279 133099771025088 Wallet balance: -8986588.00
+INFO 2026-02-20 20:04:07,602 user_transaction_service 279 133099788859072 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:04:07,720 user_transaction_service 279 133099788859072 Wallet balance: -8986588.00
+INFO 2026-02-20 20:06:14,316 user_transaction_service 279 133099425887936 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:06:14,379 user_transaction_service 279 133099425887936 Wallet balance: -8986588.00
+INFO 2026-02-20 20:09:59,386 user_transaction_service 279 133099417495232 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:09:59,413 user_transaction_service 279 133099417495232 Wallet balance: -8986588.00
+INFO 2026-02-20 20:11:18,018 user_transaction_service 279 133099771025088 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:11:18,096 user_transaction_service 279 133099771025088 Wallet balance: -8986588.00
+INFO 2026-02-20 20:14:21,669 user_transaction_service 279 133099797251776 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:14:21,721 user_transaction_service 279 133099797251776 Wallet balance: -8986588.00
+INFO 2026-02-20 20:14:54,140 user_transaction_service 279 133099797251776 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:14:54,224 user_transaction_service 279 133099797251776 Wallet balance: -8986588.00
+INFO 2026-02-20 20:18:43,355 user_transaction_service 279 133099797251776 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:18:43,398 user_transaction_service 279 133099797251776 Wallet balance: -8986588.00
+INFO 2026-02-20 20:18:59,133 user_transaction_service 279 133099417495232 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:18:59,214 user_transaction_service 279 133099417495232 Wallet balance: -8986588.00
+INFO 2026-02-20 20:21:17,333 user_transaction_service 279 133099788859072 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:21:17,444 user_transaction_service 279 133099788859072 Wallet balance: -8986588.00
+INFO 2026-02-20 20:21:36,394 user_transaction_service 279 133099788859072 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:21:36,472 user_transaction_service 279 133099788859072 Wallet balance: -8986588.00
+INFO 2026-02-20 20:22:40,777 user_transaction_service 279 133099417495232 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:22:40,811 user_transaction_service 279 133099417495232 Wallet balance: -8986588.00
+INFO 2026-02-20 20:23:01,769 user_transaction_service 279 133099417495232 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 20:23:01,826 user_transaction_service 279 133099417495232 Wallet balance: -8986588.00
+INFO 2026-02-20 21:17:06,821 user_transaction_service 279 133099425887936 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 21:17:06,921 user_transaction_service 279 133099425887936 Wallet balance: -8986588.00
+INFO 2026-02-20 21:17:07,148 user_transaction_service 279 133099425887936 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-20 21:17:07,226 user_transaction_service 279 133099425887936 Wallet balance: -8986588.00
+INFO 2026-02-21 04:50:12,192 user_transaction_service 7 135300638557888 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 04:50:12,293 user_transaction_service 7 135300638557888 Wallet balance: -8986588.00
+INFO 2026-02-21 04:51:37,259 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 04:51:38,057 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 04:51:57,047 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 04:51:57,078 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 04:51:58,431 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 04:51:58,478 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 04:51:59,505 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 04:51:59,551 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 04:52:00,784 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 04:52:00,847 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 04:52:35,031 user_transaction_service 7 135300646950592 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 04:52:35,096 user_transaction_service 7 135300646950592 Wallet balance: -8986588.00
+INFO 2026-02-21 05:03:58,885 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:03:58,942 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 05:07:38,122 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:07:38,177 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 05:09:56,047 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:09:56,058 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 05:10:20,792 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:10:20,848 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 05:10:58,682 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:10:58,710 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 05:11:49,745 user_transaction_service 7 135300663736000 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:11:49,794 user_transaction_service 7 135300663736000 Wallet balance: -8986588.00
+INFO 2026-02-21 05:14:20,858 user_transaction_service 7 135300621772480 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:14:20,867 user_transaction_service 7 135300621772480 Wallet balance: -8986588.00
+INFO 2026-02-21 05:42:12,520 user_transaction_service 7 135300655343296 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:42:12,813 user_transaction_service 7 135300655343296 Wallet balance: -8986588.00
+INFO 2026-02-21 05:50:40,145 user_transaction_service 7 135300646950592 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:50:40,176 user_transaction_service 7 135300646950592 Wallet balance: -8986588.00
+INFO 2026-02-21 05:54:24,741 user_transaction_service 7 135300623873728 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 05:54:24,779 user_transaction_service 7 135300623873728 Wallet balance: -8986588.00
