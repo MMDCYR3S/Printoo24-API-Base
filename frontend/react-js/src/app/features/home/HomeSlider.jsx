@@ -63,7 +63,7 @@ const HomeSlider = () => {
       >
         {sliders.map((slide) => (
           <SwiperSlide key={slide.id}>
-            <div className="relative w-full aspect-[16/9] md:aspect-[3/1] bg-slate-800">
+            <div className="relative w-full aspect-[16/4] md:aspect-[16/4] bg-slate-800">
               {/* تصویر اسلایدر */}
               <img
                 src={slide.image_url}
