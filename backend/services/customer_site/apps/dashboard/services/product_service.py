@@ -254,3 +254,10 @@ class ProductDashboardService:
         خروجی: تعداد حذف شده‌های واقعی و تعداد غیرفعال شده‌ها (Soft Delete).
         """
         return self._domain_service.bulk_delete_products(product_ids)
+
+    def get_product_quantities(self, product_id: int):
+        """
+        دریافت تیراژهای محصول برای نمایش در داشبورد.
+        """
+        # مستقیماً از متد لایه کور استفاده می‌کنیم
+        return self._domain_service.get_product_quantities_by_id(product_id)

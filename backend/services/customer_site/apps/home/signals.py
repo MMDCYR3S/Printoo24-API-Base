@@ -44,7 +44,7 @@ def create_customer_role(sender, instance, created, **kwargs):
     """
     if created and not instance.is_superuser and not instance.is_staff:
         try:
-            customer_role, _ = Role.objects.get_or_create(name="مشتری", description="نقش مشتری", is_customer=True, type="normal")
+            customer_role, _ = Role.objects.get_or_create(name="موشته‌ری", description="نقش مشتری", is_customer=True, type="normal")
             UserRole.objects.create(user=instance, role=customer_role)
         except Role.DoesNotExist:
             pass

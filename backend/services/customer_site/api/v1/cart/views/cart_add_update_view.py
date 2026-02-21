@@ -6,7 +6,7 @@ from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParamete
 
 from ..serializers import AddToCartSerializer, CartItemUpdateSerializer
 from apps.cart.services import AddToCartService, CartItemUpdateService
-
+from core.infrastructure.messages import msg_provider
 def get_session_key(request):
     """
     اگر کاربر سشن ندارد، برایش می‌سازیم و کلیدش را برمی‌گردانیم.
@@ -126,7 +126,7 @@ class AddToCartView(GenericAPIView):
                 product_id=data["product_id"],
                 selections=data["selections"]
             )
-            return Response({"id": cart_item.id, "message": "محصول به سبد خرید اضافه شد"}, status=status.HTTP_201_CREATED)
+            return Response({"id": cart_item.id, "message": msg_provider.get("cart.S4001")}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -222,7 +222,7 @@ class CartItemUpdateView(GenericAPIView):
                 cart_item_id=item_id,
                 raw_data=serializer.validated_data
             )
-            return Response({"id": updated_item.id, "message": "Updated"}, status=status.HTTP_200_OK)
+            return Response({"id": updated_item.id, "message": msg_provider.get("cart.S4005")}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -1,8 +1,4 @@
 import logging
-from decimal import Decimal
-
-from django.db import transaction
-from django.core.exceptions import ValidationError
 
 from core.models import User
 from apps.accounts.services import WalletService, WalletTransactionService

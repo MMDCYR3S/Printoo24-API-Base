@@ -5,6 +5,7 @@ from rest_framework.exceptions import NotFound
 from core.models import User
 from apps.notification.models import CustomerNotification
 from apps.notification.domain_services import NotificationService
+from core.infrastructure.messages import msg_provider
 
 # ===== تعریف لاگر اختصاصی ===== #
 logger = logging.getLogger('userprofile.services.notification')
@@ -60,8 +61,8 @@ class NotificationAppService:
             
         except CustomerNotification.DoesNotExist:
             logger.warning(f"Notification {notification_id} not found for User ID: {self.user.id}")
-            raise NotFound("اعلان یافت نشد.")
-            
+            raise NotFound(msg_provider.get("notification.E6001"))
+        
         except Exception as e:
             logger.exception(f"Error updating notification {notification_id}")
             raise e

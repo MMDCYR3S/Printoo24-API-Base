@@ -190,4 +190,5 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
 }
 
-
+# ======= Message Json File ======= #
+MESSAGES_JSON_FILE = os.path.join(BASE_DIR, 'locale/messages.json')

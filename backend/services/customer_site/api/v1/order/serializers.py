@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from core.models import Order, OrderItem, OrderItemFile, Product, City, Province, Address
+from core.infrastructure.messages import msg_provider
 
 # ===== Province List ===== #
 class ProvinceSerialzier(serializers.ModelSerializer):
@@ -212,29 +213,29 @@ class OrderSerializer(serializers.ModelSerializer):
         # ===== سناریو مهمان ===== #
         if not user:
             if not has_profile_info:
-                raise ValidationError("برای سفارش مهمان، وارد کردن نام، نام خانوادگی و شماره تماس الزامی است.")
+                raise ValidationError(msg_provider.get("order.E7009"))
             if not has_new_address:
-                raise ValidationError("برای سفارش مهمان، وارد کردن استان، شهر و آدرس دقیق الزامی است.")
+                raise ValidationError(msg_provider.get("order.E7010"))
             if addr_id:
-                raise ValidationError("کاربر مهمان نمی‌تواند از آدرس‌های ذخیره شده استفاده کند.")
+                raise ValidationError(msg_provider.get("order.E7011"))
 
         # ===== برای کاربری که ثبت نام کرده ===== #
         else:
             if not addr_id and not has_new_address:
-                raise ValidationError("لطفاً یا یک آدرس انتخاب کنید یا فرم آدرس جدید را کامل پر کنید.")
+                raise ValidationError(msg_provider.get("order.E7012"))
 
         # ===== دریافت استان و شهر ===== #
         if attrs.get('province_id'):
             try:
                 attrs['province_name'] = Province.objects.get(pk=attrs['province_id']).name
             except Province.DoesNotExist:
-                raise ValidationError({"province_id": "استان نامعتبر است."})
+                raise ValidationError({"province_id": msg_provider.get("order.E7013")})
         
         if attrs.get('city_id'):
             try:
                 attrs['city_name'] = City.objects.get(pk=attrs['city_id']).name
             except City.DoesNotExist:
-                raise ValidationError({"city_id": "شهر نامعتبر است."})
+                raise ValidationError({"city_id": msg_provider.get("order.E7014")})
 
         return attrs
 

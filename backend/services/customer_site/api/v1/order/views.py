@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExampl
 
 from core.models import Province, City
 from core.users.services import AddressService
+from core.infrastructure.messages import msg_provider
 from apps.order.services import CreateOrderFromCartService
 from apps.order.exceptions import EmptyCartError, InsufficientFundsError
 from .serializers import OrderSerializer, CitySerialzier, ProvinceSerialzier, AddressListSerializer
@@ -318,7 +319,7 @@ class CityView(GenericAPIView):
         
         if not province_id:
             return Response(
-                {"error": "province_id parameter is required"},
+                {"message": msg_provider.get("order.E7016")},
                 status=status.HTTP_400_BAD_REQUEST
             )
         

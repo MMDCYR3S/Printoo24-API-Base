@@ -10,6 +10,7 @@ from core.models import (
     ProductOptionValue, ProductSize,
     ProductQuantity, OptionValueQuantityPrice
 )
+from core.infrastructure.messages import msg_provider
 
 # ========== CART PROCESSOR ========== #
 class CartProcessor:
@@ -104,7 +105,7 @@ class CartProcessor:
         if self.product.has_quantity:
             pq_record_id = self.selections.get('quantity_id')
             if not pq_record_id:
-                raise ValidationError(_("برای این محصول انتخاب 'تیراژ' الزامی است."))
+                raise ValidationError(msg_provider.get("cart.E4003"))
             
             try:
                 # جستجو براساس PK رکورد واسط و اطمینان از تعلق به این محصول
@@ -116,16 +117,16 @@ class CartProcessor:
                 quantity_label = str(pq.quantity.value)
                 matched_pq_id = pq.id
             except ProductQuantity.DoesNotExist:
-                raise ValidationError(_("تیراژ انتخابی نامعتبر است."))
+                raise ValidationError(msg_provider.get("cart.E4004"))
         else:
             # منطق تیراژ دلخواه
             if self.config:
                 if not self.config.allow_custom_quantity:
-                     raise ValidationError(_("نمی‌توانید به صورت دلخواه تیراژ وارد کنید."))
+                     raise ValidationError(msg_provider.get("cart.E4005"))
                 if self.quantity_input < self.config.min_quantity:
-                    raise ValidationError(f"حداقل تعداد سفارش {self.config.min_quantity} عدد است.")
+                    raise ValidationError(msg_provider.get("cart.E4006", min_qty=self.config.min_quantity))
                 if self.quantity_input > self.config.max_quantity:
-                    raise ValidationError(f"حداکثر تعداد سفارش {self.config.max_quantity} عدد است.")
+                    raise ValidationError(msg_provider.get("cart.E4007", max_qty=self.config.max_quantity))
             
         return final_quantity, quantity_label, matched_pq_id
 
@@ -140,7 +141,8 @@ class CartProcessor:
             
             # ===== چک کردن اجباری بودن ویژگی ===== #
             if prod_opt.is_required and user_input in [None, "", []]:
-                raise ValidationError(f"انتخاب ویژگی '{prod_opt.label or prod_opt.name}' الزامی است.")
+                label = prod_opt.label or prod_opt.name
+                raise ValidationError(msg_provider.get("cart.E4008", label=label))
             
             if user_input in [None, "", []]:
                 continue
@@ -166,21 +168,21 @@ class CartProcessor:
                 ps = ProductSize.objects.select_related('size').get(product=self.product, id=size_id)
                 return Decimal(str(ps.size.width)), Decimal(str(ps.size.height)), ps.size.name
             except ProductSize.DoesNotExist:
-                raise ValidationError(_("سایز انتخاب شده معتبر نیست."))
+                raise ValidationError(msg_provider.get("cart.E4009"))
 
         # ۲. ابعاد دلخواه (Custom Dimensions)
         if custom_width and custom_height:
             if not self.config or not self.config.accepts_custom_dimensions:
-                raise ValidationError(_("این محصول قابلیت سفارش با ابعاد دلخواه را ندارد."))
+                raise ValidationError(msg_provider.get("cart.E4010"))
 
             width = Decimal(str(custom_width))
             height = Decimal(str(custom_height))
 
             # چک کردن محدوده مجاز
             if self.config.min_width and width < Decimal(str(self.config.min_width)):
-                raise ValidationError(f"عرض نمی‌تواند کمتر از {self.config.min_width} باشد.")
+                raise ValidationError(msg_provider.get("cart.E4011", min_width=self.config.min_width))
             if self.config.max_width and width > Decimal(str(self.config.max_width)):
-                raise ValidationError(f"عرض نمی‌تواند بیشتر از {self.config.max_width} باشد.")
+                raise ValidationError(msg_provider.get("cart.E4012", max_width=self.config.max_width))
 
             return width, height, f"ابعاد دلخواه ({width}x{height})"
 
@@ -229,7 +231,8 @@ class CartProcessor:
         try:
             choice = prod_opt.choices.get(id=value_id)
         except ProductOptionValue.DoesNotExist:
-            raise ValidationError(f"گزینه انتخاب شده برای '{prod_opt.label}' نامعتبر است.")
+            label = prod_opt.label or prod_opt.name
+            raise ValidationError(msg_provider.get("cart.E4013", label=label))
         
         self.selected_option_values.append(choice)
         
@@ -303,14 +306,10 @@ class CartProcessor:
                         break
 
                 if not has_prerequisite:
-                    raise ValidationError(
-                        f"امکان انتخاب زیرویژگی '{val.label}' وجود ندارد، زیرا ویژگی پیش‌نیاز آن انتخاب نشده است."
-                    )
+                    raise ValidationError(msg_provider.get("cart.E4017", label=val.label))
 
             hide_conditions = val.dependency_rules.filter(action='hide')
             if hide_conditions.exists():
                 for cond in hide_conditions:
                     if cond.required_value_id in selected_ids:
-                        raise ValidationError(
-                            f"انتخاب همزمان '{val.label}' و پیش‌نیاز متضاد آن امکان‌پذیر نیست."
-                        )
+                        raise ValidationError(msg_provider.get("cart.E4018", label=val.label))

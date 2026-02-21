@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from .exceptions import InsufficientFundsException
+from core.infrastructure.messages import msg_provider
 from .managers import (WalletManager, WalletTransactionManager)
 
 # ====== Wallet Model ====== #
@@ -22,7 +23,7 @@ class Wallet(models.Model):
         هیچ ذخیره‌سازی (save) یا تراکنشی اینجا انجام نمی‌شود.
         """
         if amount <= 0:
-            raise ValidationError("مبلغ واریز باید مثبت باشد.")
+            raise ValidationError(msg_provider.get("wallet.E3001"))
         self.balance += amount
 
     def withdraw(self, amount: Decimal):
@@ -30,7 +31,7 @@ class Wallet(models.Model):
         منطق خالص دامین: چک کردن قوانین و کسر موجودی.
         """
         if amount <= 0:
-            raise ValidationError("مبلغ برداشت باید مثبت باشد.")
+            raise ValidationError(msg_provider.get("wallet.E3001"))
         if self.balance < amount:
             pass
         self.balance -= amount

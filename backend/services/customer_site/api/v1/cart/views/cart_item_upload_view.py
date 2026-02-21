@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiExample
 
 from ..serializers import CartItemFileUploadSerializer
 from apps.cart.services import CartItemUploadService
+from core.infrastructure.messages import msg_provider
 
 # ========== FILE UPLOAD VIEW ========== #
 @extend_schema(tags=["Cart"])
@@ -69,7 +70,7 @@ class CartItemFileUploadView(GenericAPIView):
             )
             
             return Response({
-                "message": "فایل با موفقیت آپلود شد.",
+                "message": msg_provider.get("cart.S4003"),
                 "upload_id": upload_instance.id,
                 "file_name": upload_instance.file.name,
                 "requirement_id": requirement_id
@@ -117,7 +118,7 @@ class CartItemFileDeleteView(GenericAPIView):
             )
             # در REST استاندارد، کد 204 برای حذف موفق برگردانده می‌شود
             return Response(
-                {"message": "فایل با موفقیت حذف شد."}, 
+                {"message": msg_provider.get("cart.S4004")}, 
                 status=status.HTTP_204_NO_CONTENT
             )
             

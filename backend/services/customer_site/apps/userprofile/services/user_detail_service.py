@@ -4,6 +4,7 @@ from typing import Dict, Any
 from django.db import transaction
 
 from core.users.services import CustomerService, CustomerProfileService
+from core.infrastructure.messages import msg_provider
 
 # ===== تعریف لاگر اختصاصی برای سرویس پروفایل ===== #
 logger = logging.getLogger('userprofile.services.profile')
@@ -31,7 +32,7 @@ class ProfileDetailService:
         user = self._user_domain.get_customer_by_id(user_id)
         if not user:
             logger.warning(f"User ID {user_id} not found.")
-            raise ValueError("کاربر یافت نشد.")
+            raise ValueError(msg_provider.get("profile.E8005"))
         
         profile = self._profile_domain.get_or_create_profile(user)
         

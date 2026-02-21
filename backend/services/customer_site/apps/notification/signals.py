@@ -8,6 +8,7 @@ from core.models import Order, User
 from apps.notification.models import CustomerNotification
 from apps.accounts.models import WalletTransaction
 from .tasks import send_order_status_notification, send_wallet_notification
+from core.infrastructure.messages import msg_provider
 
 logger = logging.getLogger(__name__)
 
@@ -78,16 +79,15 @@ def notify_admins_for_new_order(sender, instance, created, **kwargs):
         return
 
     # ===== تولید محتوای پیام بر اساس نوع کاربر (لاگین شده یا مهمان) ===== #
-    order_code = instance.order_code or "نامشخص"
+    order_code = instance.order_code or "---"
+    title = msg_provider.get("notification.I6009")['text']
     
     if instance.user:
-        sender_user = instance.user
         sender_name = instance.user.customer_profile.fullname() or instance.user.username
-        message = f"سفارش جدید با کد '{order_code}' توسط کاربر '{sender_name}' در سیستم ثبت شد."
+        message = msg_provider.get("notification.I6010", order_code=order_code, sender_name=sender_name)['text']
     else:
-        sender_user = None
-        sender_name = instance.recipient_name or "کاربر مهمان"
-        message = f"سفارش جدید با کد '{order_code}' توسط '{sender_name}' (مهمان) در سیستم ثبت شد."
+        sender_name = instance.recipient_name or "مهمان"
+        message = msg_provider.get("notification.I6011", order_code=order_code, sender_name=sender_name)['text']
 
     # ===== ۴. ذخیره گروهی (Bulk Create) اعلان‌ها ===== #
     content_type = ContentType.objects.get_for_model(instance)

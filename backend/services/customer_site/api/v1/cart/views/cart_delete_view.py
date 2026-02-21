@@ -6,6 +6,7 @@ from rest_framework import status
 from drf_spectacular.views import extend_schema
 
 from apps.cart.services import CartItemDeleteService, CartClearService
+from core.infrastructure.messages import msg_provider
 
 # ===== Cart Item Delete View ===== #
 @extend_schema(
@@ -59,7 +60,7 @@ class CartClearView(GenericAPIView):
             # ===== سرویس پاکسازی ===== #
             service = CartClearService(user=user, session_key=session_key)
             service.clear()
-            return Response({"detail": "سبد خرید خالی شد."}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"detail": msg_provider.get("cart.S4002")}, status=status.HTTP_204_NO_CONTENT)
             
         # ===== اگر کاربر وجود نداشت ===== #
         except NotFound as e:

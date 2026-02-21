@@ -4,7 +4,9 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 
 from core.models import User
+from core.infrastructure.messages import msg_provider
 from apps.cart.models import Cart, CartItem
+
 
 # ===== تعریف لاگرهای اختصاصی با پیشوند cart ===== #
 logger_list = logging.getLogger('cart.services.list')
@@ -94,7 +96,7 @@ class CartItemDetailService:
         
         # ===== اگر کاربر یا سشن وجود نداشته باشد ===== #
         if not user and not session_key:
-             raise ObjectDoesNotExist("شناسه معتبری برای یافتن آیتم وجود ندارد.")
+             raise ObjectDoesNotExist(msg_provider.get("cart.E4021"))
         
         # ===== دریافت آیتم ===== # 
         query = Q(id=item_id)
@@ -110,5 +112,5 @@ class CartItemDetailService:
             
         except CartItem.DoesNotExist:
             logger_detail.warning(f"Access denied or not found: Item {item_id}")
-            raise ObjectDoesNotExist("آیتم مورد نظر یافت نشد.")
+            raise ObjectDoesNotExist(msg_provider.get("cart.E4002"))
          

@@ -67,4 +67,4 @@ class PasswordResetConfirmAPIView(GenericAPIView):
         except ValidationError as e:
             return Response({'detail': e.messages}, status=status.HTTP_400_BAD_REQUEST)
             
-        return Response({"detail": "رمز عبور شما با موفقیت تغییر کرد."}, status=status.HTTP_200_OK)
+        return Response({"detail": msg_provider.get("auth.S1003")}, status=status.HTTP_200_OK)

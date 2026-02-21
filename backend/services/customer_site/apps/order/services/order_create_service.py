@@ -5,6 +5,7 @@ from rest_framework.exceptions import ValidationError
 
 from ..exceptions import EmptyCartError, ItemNotFoundException
 from core.models import User, Address, Order, CustomerProfile
+from core.infrastructure.messages import msg_provider
 from apps.cart.models import Cart, CartItem
 from apps.accounts.services import WalletService
 from apps.order.domain_services import CheckoutService
@@ -36,7 +37,7 @@ class CreateOrderFromCartService:
         
         # ===== اعتبارسنجی وجود اطلاعات ===== #
         if not (province and city and addr_text):
-            raise ValidationError("استان، شهر و آدرس دقیق الزامی هستند.")
+            raise ValidationError(msg_provider.get("order.E7001"))
 
         return f"{province} - {city} - {addr_text} - کدپستی: {postal}"
     
@@ -53,7 +54,7 @@ class CreateOrderFromCartService:
             try:
                 return Address.objects.get(id=address_id, user=user)
             except Address.DoesNotExist:
-                raise ValidationError("آدرس انتخاب شده نامعتبر است.")
+                raise ValidationError(msg_provider.get("order.E7002"))
 
         # ===== دریافت اطلاعات کاربر ===== #
         province_id = data.get('province_id')
@@ -62,7 +63,7 @@ class CreateOrderFromCartService:
         address_text = data.get('address_text')
 
         if not (province_id and city_id and address_text):
-             raise ValidationError("در صورت عدم انتخاب آدرس، وارد کردن استان، شهر و نشانی الزامی است.")
+            raise ValidationError(msg_provider.get("order.E7003"))
         
         # ===== بررسی وجود آدرس قدیمی ===== #
         existing_address = Address.objects.filter(
@@ -98,8 +99,8 @@ class CreateOrderFromCartService:
         company = data.get('company_name', '')
 
         if not (first_name and last_name and phone_number):
-             raise ValidationError("نام، نام خانوادگی و شماره تماس الزامی است.")
-
+             raise ValidationError(msg_provider.get("order.E7004"))
+        
         # ===== دریافت اطلاعات کاربر ===== #
         profile, created = CustomerProfile.objects.get_or_create(user=user, defaults={
             'first_name': first_name,
@@ -170,10 +171,10 @@ class CreateOrderFromCartService:
             elif session_key:
                 cart_item = CartItem.objects.get(id=cart_item_id, cart__session_key=session_key)
             else:
-                raise ItemNotFoundException("دسترسی غیرمجاز")
+                raise ItemNotFoundException(msg_provider.get("order.E7005"))
                 
         except CartItem.DoesNotExist:
-             raise ItemNotFoundException("آیتم سبد خرید یافت نشد.")
+            raise ItemNotFoundException(msg_provider.get("order.E7006"))
 
         if user and user.is_authenticated:
             user_balance = self._wallet_service.get_user_balance(user)

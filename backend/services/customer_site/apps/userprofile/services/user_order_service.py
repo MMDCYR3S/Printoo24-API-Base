@@ -4,6 +4,7 @@ from rest_framework.exceptions import NotFound
 
 from core.models import Order, Quotation
 from core.order.services import OrderService
+from core.infrastructure.messages import msg_provider
 
 logger = logging.getLogger('userprofile.services.orders')
 
@@ -39,7 +40,7 @@ class UserOrderListService:
             
             if not order:
                 logger.warning(f"Order {order_id} not found for user {user_id}")
-                raise NotFound("سفارش مورد نظر یافت نشد.")
+                raise NotFound(msg_provider.get("profile.E8006"))
             
             return order
             
@@ -55,11 +56,11 @@ class UserOrderListService:
 
         if not quotation:
             logger.warning(f"Quotation not found for order {order_id}")
-            raise NotFound("پیش‌فاکتور برای این سفارش صادر نشده است.")
+            raise NotFound(msg_provider.get("profile.E8007"))
 
         if quotation.converted_order.user_id != user_id:
             logger.warning(f"Security Alert: User {user_id} tried to access quotation of Order {order_id}")
-            raise NotFound("سفارش مورد نظر یافت نشد.")
+            raise NotFound(msg_provider.get("profile.E8007"))
 
         return quotation
 
@@ -73,14 +74,14 @@ class UserOrderListService:
 
         if not invoice:
             logger.warning(f"Invoice not found for order {order_id}")
-            raise NotFound("فاکتوری برای این سفارش یافت نشد.")
+            raise NotFound(msg_provider.get("profile.E8008"))
 
         if invoice.order.user_id != user_id:
             logger.warning(f"Security Alert: User {user_id} tried to access invoice of Order {order_id}")
-            raise NotFound("سفارش مورد نظر یافت نشد.")
+            raise NotFound(msg_provider.get("profile.E8008"))
         
         if not invoice.is_paid:
             logger.info(f"Invoice for order {order_id} is not fully paid yet.")
-            raise NotFound("فاکتور این سفارش هنوز تسویه کامل نشده است و قابل مشاهده نیست.")
+            raise NotFound(msg_provider.get("profile.E8009"))
 
         return invoice

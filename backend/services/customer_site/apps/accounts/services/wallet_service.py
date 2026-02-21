@@ -3,6 +3,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from core.models import User
+from core.infrastructure.messages import msg_provider
 from ..models import Wallet, WalletTransaction
 from ..exceptions import InsufficientFundsException, WalletNotFoundException
 
@@ -50,7 +51,7 @@ class WalletService:
         """
         
         if amount <= 0:
-            raise ValidationError("مبلغ کسر شده باید مثبت باشد.")
+            raise ValidationError(msg_provider.get("wallet.E3001"))
         
         # ===== استفاده از select for update برای جلوگیری از شرایط رقابتی ===== #
         wallet = Wallet.objects.get_locked_wallet(user)

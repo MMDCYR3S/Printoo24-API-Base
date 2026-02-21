@@ -1,5 +1,7 @@
 from typing import Dict
 from django.db import models
+
+from core.infrastructure.messages import msg_provider
 from .exceptions import CartNotFoundException, ItemNotFoundException
 
 # ========== BASE QUERYSET ========== #
@@ -36,7 +38,7 @@ class CartManager(models.Manager):
     def get_cart_by_user(self, user):
         cart = self.get_queryset().get_cart_by_user(user)
         if not cart:
-            raise CartNotFoundException("سبد خرید برای کاربر پیدا نشد.")
+            raise CartNotFoundException(msg_provider.get("cart.E4001"))
         return cart
 
     def get_or_create_cart(self, user):
@@ -57,7 +59,7 @@ class CartItemQuerySet(BaseQuerySet):
                 cart__user=user
             )
         except self.model.DoesNotExist:
-            raise ItemNotFoundException("آیتمی با شناسه وارد شده یافت نشد.")
+            raise ItemNotFoundException(msg_provider.get("cart.E4002"))
 
     def find_item_in_cart(self, cart, product, items: Dict):
         """

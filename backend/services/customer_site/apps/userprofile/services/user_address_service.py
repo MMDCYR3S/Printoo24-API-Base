@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from core.users.services import AddressService
 from core.models import City, Province
+from core.infrastructure.messages import msg_provider
 
 # ===== تعریف لاگر اختصاصی برای سرویس آدرس ===== #
 logger = logging.getLogger('userprofile.services.address')
@@ -33,10 +34,10 @@ class UserAddressService:
                 city = City.objects.get(id=city_id)
                 if city.province_id != province_id:
                     logger.warning(f"Location mismatch: City {city_id} does not belong to Province {province_id}")
-                    raise ValidationError({"city": "شهر انتخاب شده با استان مطابقت ندارد."})
+                    raise ValidationError(msg_provider.get("profile.E8001"))
             except City.DoesNotExist:
                 logger.warning(f"Invalid City ID provided: {city_id}")
-                raise ValidationError({"city": "شهر انتخاب شده نامعتبر است."})
+                raise ValidationError(msg_provider.get("profile.E8002"))
 
     def get_all_addresses(self, user_id: int):
         """
@@ -63,8 +64,7 @@ class UserAddressService:
         except ValidationError as e:
             raise e
         except Exception as e:
-            logger.exception(f"Unexpected error adding address for User ID: {user_id}")
-            raise ValidationError("خطای سیستمی در ثبت آدرس.")
+            raise ValidationError(msg_provider.get("profile.E8004"))
 
     def edit_address(self, user_id: int, address_id: int, data: dict):
         """
@@ -82,7 +82,7 @@ class UserAddressService:
             
             if not address:
                 logger.warning(f"Address ID {address_id} not found or access denied for User ID: {user_id}")
-                raise ValidationError("آدرس یافت نشد.")
+                raise ValidationError(msg_provider.get("profile.E8003"))
             
             logger.info(f"Address ID: {address_id} updated successfully.")
             return address
@@ -91,7 +91,7 @@ class UserAddressService:
             raise e
         except Exception as e:
             logger.exception(f"Unexpected error editing address {address_id}")
-            raise ValidationError("خطای سیستمی در ویرایش آدرس.")
+            raise ValidationError(msg_provider.get("profile.E8004"))
 
     def remove_address(self, user_id: int, address_id: int):
         """

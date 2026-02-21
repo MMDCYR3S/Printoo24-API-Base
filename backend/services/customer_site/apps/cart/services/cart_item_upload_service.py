@@ -3,6 +3,7 @@ from django.db.models import Q
 from rest_framework.exceptions import ValidationError, NotFound
 
 from core.models import User
+from core.infrastructure.messages import msg_provider
 from apps.cart.models import CartItem, CartItemUpload
 
 logger = logging.getLogger('cart.services.item_upload')
@@ -24,7 +25,7 @@ class CartItemUploadService:
 
         # ==== اعتبارسنجی ===== #
         if not user and not session_key:
-             raise ValidationError("نشست کاربر معتبر نیست. لطفاً صفحه را رفرش کنید.")
+             raise ValidationError(msg_provider.get("cart.E4022"))
 
         # ===== یافتن ایمن سبد خرید و آیتم ===== #
         query = Q(id=cart_item_id)
@@ -36,7 +37,7 @@ class CartItemUploadService:
         try:
             cart_item = CartItem.objects.get(query)
         except CartItem.DoesNotExist:
-            raise NotFound("آیتم مورد نظر در سبد خرید یافت نشد (یا دسترسی ندارید).")
+            raise NotFound(msg_provider.get("cart.E4023"))
 
         # ===== ایجاد عکس آیتم ===== #
         upload_instance = CartItemUpload.objects.create(
@@ -60,7 +61,7 @@ class CartItemUploadService:
         logger.info(f"Attempting to delete upload {upload_id}")
 
         if not user and not session_key:
-             raise ValidationError("نشست کاربر معتبر نیست. لطفاً صفحه را رفرش کنید.")
+             raise ValidationError(msg_provider.get("cart.E4022"))
 
         # ===== کوئری ایمن برای بررسی مالکیت فایل ===== #
         query = Q(id=upload_id)
@@ -72,7 +73,7 @@ class CartItemUploadService:
         try:
             upload_instance = CartItemUpload.objects.get(query)
         except CartItemUpload.DoesNotExist:
-            raise NotFound("فایل مورد نظر یافت نشد یا شما اجازه حذف آن را ندارید.")
+            raise NotFound(msg_provider.get("cart.E4024"))
 
         # ===== پاکسازی فیزیکی فایل از ===== #
         if upload_instance.file:

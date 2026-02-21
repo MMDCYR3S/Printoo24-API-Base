@@ -1,9 +1,12 @@
 import logging
 from celery import shared_task
 from django.contrib.auth import get_user_model
+
 from core.models import Order
+from core.infrastructure.messages import msg_provider
 from apps.accounts.models import WalletTransaction
 from apps.notification.domain_services import NotificationService
+
 
 logger = logging.getLogger('celery.notification')
 User = get_user_model()
@@ -18,8 +21,12 @@ def send_order_status_notification(order_id, old_status_id, new_status_id):
         user = order.user
         # ===== نام تغییر وضعیت برای نام اعلان ===== #
         new_status_name = order.order_status.name
-        title = "تغییر وضعیت سفارش"
-        message = f"وضعیت سفارش شما با شناسه {order.id} به «{new_status_name}» تغییر یافت."
+        title = msg_provider.get("notification.I6001")['text']
+        message = msg_provider.get(
+            "notification.I6002", 
+            order_id=order.id, 
+            status_name=order.order_status.name
+        )['text']
         
         # ===== ساخت سرویس اعلان ===== #
         service = NotificationService()

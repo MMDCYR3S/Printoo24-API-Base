@@ -4,6 +4,7 @@ from django.db.models import Q
 from rest_framework.exceptions import NotFound
 
 from core.models import User
+from core.infrastructure.messages import msg_provider
 from apps.cart.models import CartItem, Cart
 from ..exceptions import ItemNotFoundException
 
@@ -21,7 +22,7 @@ class CartItemDeleteService:
         self.session_key = session_key
 
         if not self.user and not self.session_key:
-            raise NotFound("نشست کاربری نامعتبر است.")
+            raise NotFound(msg_provider.get("cart.E4025"))
         
     def delete(self, item_id: int) -> None:
         """
@@ -47,7 +48,7 @@ class CartItemDeleteService:
         # ===== اگر آیتم یافت نشد ===== #
         except CartItem.DoesNotExist:
             logger.warning(f"Item {item_id} not found or access denied.")
-            raise NotFound("آیتم یافت نشد یا متعلق به شما نیست.")
+            raise NotFound(msg_provider.get("cart.E4026"))
         
 class CartClearService:
     """
@@ -61,7 +62,7 @@ class CartClearService:
         
         # ===== اگر کاربری وجود نداشت ===== #    
         if not self.user and not self.session_key:
-             raise NotFound("نشست کاربری نامعتبر است.")
+            raise NotFound(msg_provider.get("cart.E4025"))
          
     def clear(self) -> None:
         """

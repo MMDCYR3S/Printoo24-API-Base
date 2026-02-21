@@ -2,8 +2,24 @@ from rest_framework import serializers
 from core.models import (
     Product, ProductPricingConfig, ProductCategory,
     ProductImage, Attachment, ProductOption,
-    ProductOptionValue, GuideType, OptionInputType
+    ProductOptionValue, GuideType, OptionInputType,
+    ProductQuantity
 )
+
+class ProductQuantityOutputSerializer(serializers.ModelSerializer):
+    quantity_id = serializers.IntegerField(source='quantity.id', read_only=True)
+    value = serializers.IntegerField(source='quantity.value', read_only=True)
+
+    class Meta:
+        model = ProductQuantity
+        fields = [
+            'id',
+            'quantity_id',
+            'value',
+            'price',
+            'guide_text', 
+            'guide_type'
+        ]
 
 # ===== Upload Image Product ===== #
 class ProductImageOrderSerializer(serializers.Serializer):
