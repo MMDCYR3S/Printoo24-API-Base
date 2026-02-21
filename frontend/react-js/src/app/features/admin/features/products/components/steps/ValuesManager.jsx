@@ -3,8 +3,6 @@ import { useFormContext, useFieldArray, useWatch } from 'react-hook-form';
 import { Plus, Trash2, GripVertical, Settings2, ListPlus, Link2, Calculator } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
-
-// ایمپورت توابع و کانتکست از هوک اصلی
 import { generateRefId, useStep2Data } from '../../../../hooks/useStep2Form';
 
 const underlineInputClass = "w-full bg-transparent border-b-2 border-slate-200 px-2 py-2 text-slate-800 focus:border-primary focus:outline-none transition-all duration-300";
@@ -19,7 +17,7 @@ const ValuesManager = ({ optionIndex }) => {
     const handleAddValue = () => {
         append({
             id: null,
-            ref_id: generateRefId('val'),
+            ref_id: generateRefId('val'), // الزامی طبق داکیومنت برای شروط
             label: "",
             price_impact: 0,
             is_default: false,
@@ -65,13 +63,16 @@ const ValuesManager = ({ optionIndex }) => {
     );
 };
 
+// --- کامپوننت سطر هر مقدار ---
 const ValueRow = ({ optionIndex, valueIndex, remove }) => {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const { register, control } = useFormContext();
+    
     const price = useWatch({ control, name: `options.${optionIndex}.values_config.${valueIndex}.price_impact` });
     
     return (
         <div className="flex flex-col bg-slate-50/80 rounded-2xl border border-slate-100 shadow-sm group hover:bg-white hover:border-slate-200 transition-all relative">
+            
             <input type="hidden" {...register(`options.${optionIndex}.values_config.${valueIndex}.id`)} />
             <input type="hidden" {...register(`options.${optionIndex}.values_config.${valueIndex}.ref_id`)} />
 
@@ -128,6 +129,7 @@ const ValueRow = ({ optionIndex, valueIndex, remove }) => {
     );
 };
 
+// --- کامپوننت شروط ---
 const ConditionManager = ({ optionIndex, valueIndex }) => {
     const { control, register } = useFormContext();
     const allOptions = useWatch({ control, name: 'options' }) || [];
@@ -141,8 +143,8 @@ const ConditionManager = ({ optionIndex, valueIndex }) => {
         if (idx === optionIndex) return acc;
         const values = opt.values_config || [];
         values.forEach(val => {
-            if (val.label) {
-                acc.push({ optLabel: opt.label, valLabel: val.label, ref: val.ref_id || val.id });
+            if (val.label && val.ref_id) {
+                acc.push({ optLabel: opt.label, valLabel: val.label, ref: val.ref_id });
             }
         });
         return acc;
@@ -179,15 +181,10 @@ const ConditionManager = ({ optionIndex, valueIndex }) => {
     );
 };
 
+// --- کامپوننت ماتریس تیراژ ---
 const QuantityPriceManager = ({ optionIndex, valueIndex }) => {
     const { control, register } = useFormContext();
     const { productQuantities, isLoadingQuantities } = useStep2Data(); 
-
-    // چاپ لاگ‌های حیاتی برای دیباگ کردن این بخش
-    useEffect(() => {
-        console.log(`🛠️ [DEBUG - Component Render] QuantityPriceManager [opt:${optionIndex}][val:${valueIndex}] rendered.`);
-        console.log("🛠️ [DEBUG] Context Data received -> isLoading:", isLoadingQuantities, "Quantities:", productQuantities);
-    }, [productQuantities, isLoadingQuantities, optionIndex, valueIndex]);
 
     const { fields: qpFields, replace } = useFieldArray({
         control,
@@ -197,7 +194,6 @@ const QuantityPriceManager = ({ optionIndex, valueIndex }) => {
     useEffect(() => {
         if (productQuantities && productQuantities.length > 0) {
             if (qpFields.length === 0) {
-                console.log("🛠️ [DEBUG] Setting default price fields for quantities...");
                 const defaultPrices = productQuantities.map(q => ({
                     quantity_id: q.quantity_id,
                     price: 0

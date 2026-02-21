@@ -155,3 +155,10 @@ INFO 2026-02-19 14:00:06,150 product_service 591 124649844225728 Attempting asyn
 INFO 2026-02-19 14:00:06,550 product_service 591 124649844225728 Attempting async upload for product 39
 INFO 2026-02-19 14:00:20,092 product_service 591 124649844225728 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
 INFO 2026-02-19 14:00:27,253 product_service 591 124649844225728 Attempting async attachment upload: Smart_Stone_Costing_Engine.pdf
+INFO 2026-02-21 11:28:05,407 product_service 382 126666757105344 Attempting async upload for product 41
+INFO 2026-02-21 11:28:05,827 product_service 382 126666757105344 Attempting async upload for product 41
+INFO 2026-02-21 11:28:05,974 product_service 382 126666757105344 Attempting async upload for product 41
+INFO 2026-02-21 11:28:06,206 product_service 382 126666757105344 Attempting async upload for product 41
+INFO 2026-02-21 11:28:35,702 product_service 382 126666757105344 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
+INFO 2026-02-21 11:28:45,175 product_service 382 126666757105344 Attempting async attachment upload: گزارش_تحلیلی_پرسنل_IT.pdf
+INFO 2026-02-21 11:29:07,208 product_service 382 126666757105344 Attempting async attachment upload: گزارش_تحلیلی_پرسنل_IT.pdf

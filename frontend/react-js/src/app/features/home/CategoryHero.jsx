@@ -1,5 +1,5 @@
 // src/app/features/home/CategoryHero.jsx
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -12,142 +12,245 @@ import 'swiper/css/free-mode';
 import { categoryService } from '../../services/categoryService';
 import ProductCard from '../../components/product/ProductCard';
 
-const CategoryItem = memo(({ category, isOpen, onToggle }) => {
+/* ─────────────────────────────────────────────
+   Staggered fade-in variants for child items
+   ───────────────────────────────────────────── */
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06, delayChildren: 0.1 },
+  },
+};
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 14, scale: 0.95 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 260, damping: 24 } },
+};
+
+/* ─────────────────────────────────────────────
+   CategoryItem — single accordion card
+   ───────────────────────────────────────────── */
+const CategoryItem = memo(({ category, isOpen, onToggle, index }) => {
   const { category_info, sub_categories, products } = category;
-  
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
     let timer;
     if (isOpen && !showContent) {
-      timer = setTimeout(() => {
-        setShowContent(true);
-      }, 350);
+      timer = setTimeout(() => setShowContent(true), 320);
     }
+    if (!isOpen) setShowContent(false);
     return () => clearTimeout(timer);
   }, [isOpen, showContent]);
 
   return (
-    <div
-      className={`rounded-2xl overflow-hidden  transition-all duration-300  ${
-        isOpen 
-          ? '   ring-1 ring-primary/5' 
-          : ' ring-1 ring-primary/5'
-      }`}
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.07, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      className={`
+        relative rounded-[20px] overflow-hidden transition-all duration-500
+        ${isOpen
+          ? 'shadow-[0_8px_40px_-8px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.04]'
+          : 'shadow-sm ring-1 ring-black/[0.06] hover:shadow-md hover:ring-black/[0.08]'
+        }
+      `}
     >
-      <div
+      {/* ── Header / Toggle ── */}
+      <button
         onClick={() => onToggle(category_info.id)}
-        className={`relative cursor-pointer h-16 md:h-20 flex items-center px-4 md:px-6 select-none overflow-hidden transition-all ${isOpen ? 'rounded-t-2xl' : 'rounded-2xl'}`}
+        aria-expanded={isOpen}
+        className={`
+          relative w-full cursor-pointer flex items-center gap-4 px-4 md:px-6
+          h-[68px] md:h-[76px] select-none overflow-hidden
+          transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
+          ${isOpen ? 'rounded-t-[20px]' : 'rounded-[20px]'}
+        `}
       >
-        <div className="absolute inset-0 z-0 bg-base">
-           <img 
-            src={category_info.banners?.wide} 
+        {/* Background layer */}
+        <div className="absolute inset-0 z-0">
+          <div className={`absolute inset-0 transition-colors duration-500 ${isOpen ? 'bg-primary' : 'bg-base'}`} />
+          <img
+            src={category_info.banners?.wide}
             alt=""
             loading="lazy"
-            className={`w-full h-full object-cover transition-opacity duration-500 ${isOpen ? 'opacity-40' : 'opacity-0 group-hover:opacity-100'}`}
+            className={`
+              absolute inset-0 w-full h-full object-cover
+              transition-all duration-700 ease-out
+              ${isOpen ? 'opacity-30 scale-105 blur-[1px]' : 'opacity-0'}
+            `}
           />
-          <div className={`absolute inset-0 transition-colors duration-300  ${isOpen ? 'bg-primary /90' : ' group-hover:bg-slate-900/70'}`} />
+          <div className={`absolute inset-0 transition-all duration-500 ${isOpen ? 'bg-gradient-to-l from-secondary to-primary' : ''}`} />
         </div>
 
-        <div className={`relative z-10 flex items-center justify-between w-full transition-colors duration-300 ${isOpen ? 'text-white' : 'text-slate-700'}`}>
-          <div className="flex items-center gap-4">
-             <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center overflow-hidden border transition-all ${isOpen ? 'border-white/30 bg-white/10 backdrop-blur-sm' : 'border-slate-100 bg-slate-50'}`}>
-               <img 
-                 src={category_info.banners?.box} 
-                 className="w-full h-full object-cover"
-                 alt=""
-                 onError={(e) => { e.target.style.display='none'; }}
-               />
-             </div>
-             
-             <div className="flex flex-col">
-               <div className="flex items-center gap-2">
-                 <h2 className="text-lg md:text-xl font-black tracking-tight">{category_info.name}</h2>
-               </div>
-               <p className={`text-xs mt-1 font-medium transition-all duration-300 hidden md:block ${isOpen ? 'text-slate-200 opacity-100' : 'opacity-0 -translate-y-2'}`}>
-                 {category_info.description}
-               </p>
-             </div>
+        {/* Content */}
+        <div className="relative z-10 flex items-center justify-between w-full">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            {/* Thumbnail */}
+            <div className={`
+              shrink-0 w-11 h-11 md:w-[50px] md:h-[50px] rounded-2xl overflow-hidden
+              flex items-center justify-center
+              transition-all duration-500
+              ${isOpen
+                ? 'bg-white/15 backdrop-blur-md ring-1 ring-white/20 shadow-lg shadow-black/10'
+                : 'bg-slate-50 ring-1 ring-slate-200/60'
+              }
+            `}>
+              <img
+                src={category_info.banners?.box}
+                className="w-full h-full object-cover"
+                alt=""
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+
+            {/* Text */}
+            <div className="flex flex-col min-w-0">
+              <h2 className={`
+                text-[15px] md:text-lg font-extrabold tracking-tight truncate
+                transition-colors duration-400
+                ${isOpen ? 'text-white' : 'text-slate-800'}
+              `}>
+                {category_info.name}
+              </h2>
+              <motion.p
+                initial={false}
+                animate={{
+                  opacity: isOpen ? 1 : 0,
+                  y: isOpen ? 0 : -4,
+                  height: isOpen ? 'auto' : 0,
+                }}
+                transition={{ duration: 0.35 }}
+                className="text-[11px] md:text-xs font-medium text-white/70 leading-relaxed hidden md:block overflow-hidden"
+              >
+                {category_info.description}
+              </motion.p>
+            </div>
           </div>
 
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${isOpen ? 'bg-white text-primary rotate-180' : 'bg-slate-100 text-slate-400'}`}>
-             <ChevronDown size={32} />
+          {/* Chevron */}
+          <div className={`
+            shrink-0 w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center
+            transition-all duration-500 ease-out
+            ${isOpen
+              ? 'bg-white text-primary rotate-180 shadow-md shadow-black/10'
+              : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+            }
+          `}>
+            <ChevronDown size={18} strokeWidth={2.5} />
           </div>
         </div>
-      </div>
+      </button>
 
+      {/* ── Expandable Content ── */}
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
           >
-            <div className="p-4 md:p-4 bg-base border-t border-slate-100/10 min-h-[200px]">
-              
+            <div className="p-4 md:p-6 bg-base border-t border-slate-100 min-h-[180px]">
               {!showContent ? (
-                 <ContentSkeleton />
+                <ContentSkeleton />
               ) : (
-                <div className="flex flex-col gap-8 animate-in fade-in duration-500">
-                  
+                <div className="flex flex-col gap-7">
+
+                  {/* ── Sub-categories Grid ── */}
                   {sub_categories?.length > 0 && (
                     <section>
-                      <div className="flex items-center gap-2 mb-4 px-1">
-                        <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
-                           <LayoutGrid size={16} />
+                      <div className="flex items-center gap-2.5 mb-4 px-0.5">
+                        <div className="p-1.5 bg-blue-50 text-blue-500 rounded-lg">
+                          <LayoutGrid size={15} strokeWidth={2.2} />
                         </div>
-                        <h3 className="text-sm font-black text-slate-700">زیر دسته بندی ها</h3>
+                        <h3 className="text-[13px] font-bold text-slate-600">زیر دسته بندی ها</h3>
                       </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-6 gap-3 md:gap-4">
+
+                      <motion.div
+                        variants={staggerContainer}
+                        initial="hidden"
+                        animate="show"
+                        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-6 gap-3 md:gap-4"
+                      >
                         {sub_categories.map((sub, idx) => (
-                          <Link 
-                            key={idx} 
-                            to={`/shop?category=${sub.slug}`} 
-                            className="group cursor-pointer flex flex-col items-center gap-2"
-                          >
-                            <div className="relative w-full aspect-square rounded-2xl bg-white hover:shadow-xl  shadow-black/10  transition-all duration-300 overflow-hidden">
-                              <img src={sub.thumbnail} alt={sub.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            </div>
-                            <span className="text-[11px] md:text-xs font-bold text-center text-slate-500 group-hover:text-slate-800 transition-colors">
-                              {sub.name}
-                            </span>
-                          </Link>
+                          <motion.div key={idx} variants={staggerItem}>
+                            <Link
+                              to={`/shop?category=${sub.slug}`}
+                              className="group flex flex-col items-center gap-2"
+                            >
+                              <div className="
+                                relative w-full aspect-square rounded-2xl bg-white overflow-hidden
+                                ring-1 ring-black/[0.05]
+                                transition-all duration-300
+                                group-hover:shadow-lg group-hover:shadow-black/8 group-hover:ring-primary/20
+                                group-hover:-translate-y-0.5
+                              ">
+                                <img
+                                  src={sub.thumbnail}
+                                  alt={sub.name}
+                                  loading="lazy"
+                                  className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]"
+                                />
+                              </div>
+                              <span className="
+                                text-[11px] md:text-xs font-semibold text-center
+                                text-slate-500 group-hover:text-slate-800
+                                transition-colors duration-200 leading-tight
+                              ">
+                                {sub.name}
+                              </span>
+                            </Link>
+                          </motion.div>
                         ))}
-                      </div>
+                      </motion.div>
                     </section>
                   )}
 
+                  {/* ── Featured Products Carousel ── */}
                   {products?.length > 0 && (
-                    <section className="relative">
-                      <div className="flex items-center justify-between mb-4 px-1">
-                        <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg">
-                              <Tag size={16} />
-                            </div>
-                            <h3 className="text-sm font-black text-slate-700">محصولات برگزیده</h3>
+                    <section>
+                      <div className="flex items-center justify-between mb-4 px-0.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 bg-emerald-50 text-emerald-500 rounded-lg">
+                            <Tag size={15} strokeWidth={2.2} />
+                          </div>
+                          <h3 className="text-[13px] font-bold text-slate-600">محصولات برگزیده</h3>
                         </div>
-                        <Link 
-                          to={`/shop?category=${category_info.slug}`} 
-                          className="text-xs font-bold text-primary hover:text-primary-focus flex items-center gap-1"
+                        <Link
+                          to={`/shop?category=${category_info.slug}`}
+                          className="
+                            text-xs font-bold text-primary/80 hover:text-primary
+                            flex items-center gap-1 transition-colors duration-200
+                            hover:gap-2
+                          "
+                          style={{ transition: 'gap 0.3s ease, color 0.2s ease' }}
                         >
-                           مشاهده همه <ArrowLeft size={14} />
+                          مشاهده همه <ArrowLeft size={13} />
                         </Link>
                       </div>
 
-                      <div className="-mr-4 md:mr-0 pr-4 md:pr-0">
+                      <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: 0.15 }}
+                        className="-mr-4 md:mr-0 pr-4 md:pr-0"
+                      >
                         <Swiper
                           modules={[FreeMode]}
-                          spaceBetween={16}
-                          slidesPerView={1.3}
-                          freeMode={true}
+                          spaceBetween={14}
+                          slidesPerView={1.35}
+                          freeMode={{ enabled: true, momentum: true, momentumRatio: 0.6 }}
                           breakpoints={{
-                            500: { slidesPerView: 2.2 },
-                            768: { slidesPerView: 3.2 },
-                            1024: { slidesPerView: 4.2 },
-                            1280: { slidesPerView: 5.2 },
+                            500: { slidesPerView: 2.2, spaceBetween: 14 },
+                            768: { slidesPerView: 3.2, spaceBetween: 16 },
+                            1024: { slidesPerView: 4.2, spaceBetween: 16 },
+                            1280: { slidesPerView: 5.2, spaceBetween: 18 },
                           }}
-                          className="!pb-6 !pt-2 px-1"
+                          className="!pb-4 !pt-1 px-0.5"
                         >
                           {products.map((product) => (
                             <SwiperSlide key={product.id} className="h-auto">
@@ -155,7 +258,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
                             </SwiperSlide>
                           ))}
                         </Swiper>
-                      </div>
+                      </motion.div>
                     </section>
                   )}
                 </div>
@@ -164,10 +267,13 @@ const CategoryItem = memo(({ category, isOpen, onToggle }) => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 });
 
+/* ─────────────────────────────────────────────
+   CategoryHero — parent controller
+   ───────────────────────────────────────────── */
 const CategoryHero = () => {
   const [expandedId, setExpandedId] = useState(null);
 
@@ -176,25 +282,28 @@ const CategoryHero = () => {
     queryFn: categoryService.getCategoriesLanding,
   });
 
-  if (expandedId === null && categories?.length > 0) {
-    setExpandedId(categories[0].category_info.id);
-  }
+  useEffect(() => {
+    if (expandedId === null && categories?.length > 0) {
+      setExpandedId(categories[0].category_info.id);
+    }
+  }, [categories, expandedId]);
 
-  const handleToggle = (id) => {
-    setExpandedId(prev => prev === id ? null : id);
-  };
+  const handleToggle = useCallback((id) => {
+    setExpandedId((prev) => (prev === id ? null : id));
+  }, []);
 
   if (isLoading) return <HeroSkeleton />;
 
   return (
-    <section className="container mx-auto px-4 my-6">
-      <div className="flex flex-col gap-4">
-        {categories?.map((catData) => (
-          <CategoryItem 
-            key={catData.category_info.id} 
-            category={catData} 
+    <section className="container mx-auto px-4 my-8">
+      <div className="flex flex-col gap-3 md:gap-4">
+        {categories?.map((catData, index) => (
+          <CategoryItem
+            key={catData.category_info.id}
+            category={catData}
             isOpen={expandedId === catData.category_info.id}
             onToggle={handleToggle}
+            index={index}
           />
         ))}
       </div>
@@ -202,35 +311,53 @@ const CategoryHero = () => {
   );
 };
 
+/* ─────────────────────────────────────────────
+   Skeletons
+   ───────────────────────────────────────────── */
+const shimmer = 'relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.8s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/40 before:to-transparent';
+
 const ContentSkeleton = () => (
-  <div className="flex flex-col gap-8 animate-pulse">
+  <div className="flex flex-col gap-7">
     <div className="space-y-4">
-       <div className="h-6 w-32 bg-slate-200 rounded"></div>
-       <div className="grid grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => <div key={i} className="aspect-square bg-slate-200 rounded-2xl"></div>)}
-       </div>
+      <div className={`h-5 w-28 bg-slate-100 rounded-lg ${shimmer}`} />
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex flex-col items-center gap-2">
+            <div className={`w-full aspect-square bg-slate-100 rounded-2xl ${shimmer}`} />
+            <div className={`h-3 w-12 bg-slate-100 rounded ${shimmer}`} />
+          </div>
+        ))}
+      </div>
     </div>
     <div className="space-y-4">
-       <div className="flex justify-between">
-          <div className="h-6 w-40 bg-slate-200 rounded"></div>
-       </div>
-       <div className="flex gap-4 overflow-hidden">
-          {[1,2,3].map(i => <div key={i} className="w-60 h-40 shrink-0 bg-slate-200 rounded-2xl"></div>)}
-       </div>
+      <div className="flex justify-between">
+        <div className={`h-5 w-32 bg-slate-100 rounded-lg ${shimmer}`} />
+        <div className={`h-4 w-16 bg-slate-100 rounded ${shimmer}`} />
+      </div>
+      <div className="flex gap-3.5 overflow-hidden">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className={`w-56 h-44 shrink-0 bg-slate-100 rounded-2xl ${shimmer}`} />
+        ))}
+      </div>
     </div>
   </div>
 );
 
 const HeroSkeleton = () => (
-  <section className="container mx-auto px-4 my-6 space-y-4">
+  <section className="container mx-auto px-4 my-8 space-y-3 md:space-y-4">
     {[1, 2, 3].map((i) => (
-      <div key={i} className="rounded-2xl bg-white border border-slate-200 overflow-hidden">
-        <div className="h-20 bg-slate-100 animate-pulse flex items-center px-6 gap-4">
-           <div className="w-12 h-12 bg-slate-300 rounded-xl"></div>
-           <div className="flex-1 space-y-2">
-              <div className="h-4 w-40 bg-slate-300 rounded"></div>
-              <div className="h-3 w-64 bg-slate-200 rounded hidden md:block"></div>
-           </div>
+      <div
+        key={i}
+        className="rounded-[20px] bg-base ring-1 ring-black/[0.06] overflow-hidden"
+        style={{ animationDelay: `${i * 120}ms` }}
+      >
+        <div className="h-[68px] md:h-[76px] flex items-center px-4 md:px-6 gap-3 md:gap-4">
+          <div className={`w-11 h-11 md:w-[50px] md:h-[50px] bg-slate-100 rounded-2xl ${shimmer}`} />
+          <div className="flex-1 space-y-2.5">
+            <div className={`h-4 w-36 bg-slate-100 rounded-lg ${shimmer}`} />
+            <div className={`h-3 w-56 bg-slate-50 rounded hidden md:block ${shimmer}`} />
+          </div>
+          <div className={`w-8 h-8 md:w-9 md:h-9 bg-slate-100 rounded-full ${shimmer}`} />
         </div>
       </div>
     ))}

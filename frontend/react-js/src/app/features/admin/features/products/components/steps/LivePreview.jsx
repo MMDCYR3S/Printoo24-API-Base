@@ -5,30 +5,38 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const LivePreview = () => {
     const { control } = useFormContext();
-    // مانیتور کردن کل گزینه‌ها برای رندر زنده
     const options = useWatch({ control, name: "options" }) || [];
     
     // استیت محلی برای شبیه‌سازی انتخاب‌های مشتری در پیش‌نمایش
-    // آرایه‌ای از ref_id یا id های انتخاب شده
     const [mockSelections, setMockSelections] = useState([]);
 
-    // تابع هندل کردن انتخاب‌های کاربر در محیط پیش‌نمایش
+    // هندل کردن انتخاب‌های کاربر در محیط شبیه‌ساز
     const handleSelect = (optionIndex, valueRefId, isMultiple = false) => {
         if (!valueRefId) return;
 
         setMockSelections(prev => {
             if (isMultiple) {
-                // برای چک‌باکس (چند انتخابی)
+                // برای چک‌باکس
                 return prev.includes(valueRefId) 
                     ? prev.filter(id => id !== valueRefId)
                     : [...prev, valueRefId];
             } else {
-                // برای رادیو و سلکت (تک انتخابی): باید انتخاب قبلی این ویژگی رو پاک کنیم و جدید رو بذاریم
-                const currentOptionValues = options[optionIndex]?.values_config.map(v => v.ref_id || v.id) || [];
+                // برای رادیو و سلکت: انتخاب قبلی این ویژگی رو پاک میکنیم
+                const currentOptionValues = options[optionIndex]?.values_config.map(v => v.ref_id) || [];
                 const filtered = prev.filter(id => !currentOptionValues.includes(id));
                 return [...filtered, valueRefId];
             }
         });
+    };
+
+    // بررسی اینکه آیا یک گزینه (value) با توجه به شروطش باید نمایش داده شود یا نه؟
+    const isValueVisible = (val) => {
+        if (!val.conditions || val.conditions.length === 0) return true; // بدون شرط = همیشه نمایان
+        
+        // اگر شرط داشت، چک میکنیم آیا required_ref_id در انتخاب‌های فعلی هست؟
+        return val.conditions.some(cond => 
+            cond.required_ref_id && mockSelections.includes(cond.required_ref_id)
+        );
     };
 
     // محاسبه قیمت تخمینی بر اساس انتخاب‌های شبیه‌سازی شده
@@ -36,21 +44,14 @@ const LivePreview = () => {
         let total = 0;
         options.forEach(opt => {
             opt.values_config?.forEach(val => {
-                const valId = val.ref_id || val.id;
-                if (mockSelections.includes(valId) && val.price_impact) {
+                // فقط در صورتی که انتخاب شده باشه و شرط نمایشش هم پاس شده باشه
+                if (mockSelections.includes(val.ref_id) && val.price_impact && isValueVisible(val)) {
                     total += Number(val.price_impact);
                 }
             });
         });
         return total;
     }, [options, mockSelections]);
-
-    // بررسی اینکه آیا یک مقدار (value) با توجه به شروطش باید نمایش داده شود یا نه؟
-    const isValueVisible = (val) => {
-        if (!val.conditions || val.conditions.length === 0) return true; // بدون شرط = همیشه نمایان
-        // اگر شرط داشت، چک میکنیم آیا required_ref_id در انتخاب‌های فعلی (mockSelections) هست؟
-        return val.conditions.some(cond => mockSelections.includes(cond.required_ref_id));
-    };
 
     return (
         <div className="relative">
@@ -75,7 +76,7 @@ const LivePreview = () => {
                 {/* محتوای داخل صفحه موبایل */}
                 <div className="w-full h-full bg-[#f8fafc] overflow-y-auto custom-scrollbar pt-12 pb-8 relative">
                     
-                    {/* هدر اپلیکیشن/سایت در موبایل */}
+                    {/* هدر اپلیکیشن در موبایل */}
                     <div className="px-6 mb-4 pb-6 border-b border-slate-200/60 flex items-center gap-4">
                         <div className="w-16 h-16 bg-white shadow-sm rounded-2xl flex items-center justify-center shrink-0">
                             <ImageIcon className="text-slate-300" size={28}/>
@@ -122,7 +123,6 @@ const LivePreview = () => {
                                                 {opt.guide_text && <span className="block text-[10px] font-bold text-slate-500 mt-1">{opt.guide_text}</span>}
                                             </label>
 
-                                            {/* رندر بر اساس نوع ورودی */}
                                             {opt.input_type === 'select' && (
                                                 <div className="relative">
                                                     <select 
@@ -131,7 +131,7 @@ const LivePreview = () => {
                                                     >
                                                         <option value="">انتخاب کنید...</option>
                                                         {visibleValues.map((val, idx) => (
-                                                            <option key={idx} value={val.ref_id || val.id}>
+                                                            <option key={idx} value={val.ref_id}>
                                                                 {val.label} {val.price_impact > 0 ? `(+${Number(val.price_impact).toLocaleString()})` : ''}
                                                             </option>
                                                         ))}
@@ -142,40 +142,34 @@ const LivePreview = () => {
 
                                             {opt.input_type === 'radio' && (
                                                 <div className="flex flex-col gap-2.5">
-                                                    {visibleValues.map((val, idx) => {
-                                                        const valId = val.ref_id || val.id;
-                                                        return (
-                                                            <label key={idx} className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-primary/50 hover:bg-slate-50 transition-colors shadow-sm">
-                                                                <input 
-                                                                    type="radio" 
-                                                                    name={`preview_${i}`} 
-                                                                    className="radio radio-xs radio-primary"
-                                                                    onChange={() => handleSelect(i, valId)}
-                                                                />
-                                                                <span className="text-xs font-bold text-slate-700 flex-1">{val.label || "گزینه خالی"}</span>
-                                                                {val.price_impact > 0 && <span className="text-[10px] font-mono text-emerald-600 font-black bg-emerald-50 px-2 py-1 rounded-md">+{Number(val.price_impact).toLocaleString()}</span>}
-                                                            </label>
-                                                        )
-                                                    })}
+                                                    {visibleValues.map((val, idx) => (
+                                                        <label key={idx} className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-primary/50 hover:bg-slate-50 transition-colors shadow-sm">
+                                                            <input 
+                                                                type="radio" 
+                                                                name={`preview_${i}`} 
+                                                                className="radio radio-xs radio-primary"
+                                                                onChange={() => handleSelect(i, val.ref_id)}
+                                                            />
+                                                            <span className="text-xs font-bold text-slate-700 flex-1">{val.label || "گزینه خالی"}</span>
+                                                            {val.price_impact > 0 && <span className="text-[10px] font-mono text-emerald-600 font-black bg-emerald-50 px-2 py-1 rounded-md">+{Number(val.price_impact).toLocaleString()}</span>}
+                                                        </label>
+                                                    ))}
                                                 </div>
                                             )}
 
                                             {opt.input_type === 'checkbox' && (
                                                 <div className="flex flex-col gap-2.5">
-                                                    {visibleValues.map((val, idx) => {
-                                                        const valId = val.ref_id || val.id;
-                                                        return (
-                                                            <label key={idx} className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-primary/50 hover:bg-slate-50 transition-colors shadow-sm">
-                                                                <input 
-                                                                    type="checkbox" 
-                                                                    className="checkbox checkbox-xs checkbox-primary rounded-md"
-                                                                    onChange={() => handleSelect(i, valId, true)}
-                                                                />
-                                                                <span className="text-xs font-bold text-slate-700 flex-1">{val.label || "گزینه خالی"}</span>
-                                                                {val.price_impact > 0 && <span className="text-[10px] font-mono text-emerald-600 font-black bg-emerald-50 px-2 py-1 rounded-md">+{Number(val.price_impact).toLocaleString()}</span>}
-                                                            </label>
-                                                        )
-                                                    })}
+                                                    {visibleValues.map((val, idx) => (
+                                                        <label key={idx} className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-primary/50 hover:bg-slate-50 transition-colors shadow-sm">
+                                                            <input 
+                                                                type="checkbox" 
+                                                                className="checkbox checkbox-xs checkbox-primary rounded-md"
+                                                                onChange={() => handleSelect(i, val.ref_id, true)}
+                                                            />
+                                                            <span className="text-xs font-bold text-slate-700 flex-1">{val.label || "گزینه خالی"}</span>
+                                                            {val.price_impact > 0 && <span className="text-[10px] font-mono text-emerald-600 font-black bg-emerald-50 px-2 py-1 rounded-md">+{Number(val.price_impact).toLocaleString()}</span>}
+                                                        </label>
+                                                    ))}
                                                 </div>
                                             )}
 
