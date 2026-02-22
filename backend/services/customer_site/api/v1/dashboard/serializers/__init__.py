@@ -1,6 +1,4 @@
 from .general_serializers import *
-from .attribute_product_serializers import *
-from .options_serializers import *
 from .product_serializers import *
 from .cart_serializers import *
 from .order_serializers import *

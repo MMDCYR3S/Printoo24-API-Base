@@ -1,102 +1,71 @@
 from datetime import datetime
-from typing import Optional, Dict, Any, List
-
 from django.db import models
-from django.db.models import Prefetch, Q, Count, Max
+from django.db.models import Prefetch, Q, Count
 from .base import BaseQuerySet
 
 # ========== PRODUCT QUERYSET ========== #
 class ProductQuerySet(BaseQuerySet):
     """
-    کوئری‌های مربوط به مدل Product
+    کوئری‌های مربوط به مدل Product با معماری جدید فیلدساز و فرمول‌ساز
     """
 
-    # ===== Internal Helpers ===== #
     def _get_detail_queryset(self):
         """
-        یک کوئری‌ست پایه و سنگین که تمام روابط مورد نیاز را بارگذاری می‌کند (Eager Loading).
-        این نسخه اصلاح شده برای مدیریت روابط اختیاری است.
+        کوئری‌ست پایه برای دریافت جزئیات کامل محصول همراه با تمام فیلدها، شروط و فرمول‌ها (Eager Loading).
         """
-        # ===== ایمپورت محلی برای جلوگیری از خطا ===== #
         from core.product.models import (
-            ProductQuantity, ProductSize, ProductOption, 
-            ProductOptionValue, ProductImage, Attachment,
-            ProductCategoryRelation, OptionValueQuantityPrice
+            ProductField, ProductFieldChoice, ProductFieldCondition,
+            ProductFormula, ProductImage, Attachment
         )
 
-        return self.select_related(
-            'pricing_config'
-        ).prefetch_related(
-            # ===== بارگذاری مقادیر ثابت ===== #
+        return self.prefetch_related(
+            'categories',
+            # ===== بارگذاری فیلدها، گزینه‌ها و شروط وابستگی (Form Builder) ===== #
             Prefetch(
-                'category_relations',
-                queryset=ProductCategoryRelation.objects.select_related('category')
-            ),
-            Prefetch('product_quantity', queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')),
-            Prefetch('product_size', queryset=ProductSize.objects.select_related('size').order_by('size__width')),
-            # ===== بارگذاری ویژگی ها (بخش حساس) ===== #
-            Prefetch(
-                'options', 
-                queryset=ProductOption.objects.select_related('option').prefetch_related(
-                    Prefetch(
-                        'choices', 
-                        queryset=ProductOptionValue.objects.select_related('global_source').prefetch_related(
-                            # <--- لود کردن ماتریس قیمت برای جلوگیری از N+1
-                            Prefetch('quantity_prices', queryset=OptionValueQuantityPrice.objects.select_related('product_quantity__quantity'))
-                        ).order_by('order')
-                    )
+                'fields', 
+                queryset=ProductField.objects.prefetch_related(
+                    Prefetch('choices', queryset=ProductFieldChoice.objects.order_by('order')),
+                    # 🌟 اصلاح شد: استفاده از نام صحیح related_name که در مدل تعریف شده است
+                    Prefetch('applied_conditions', queryset=ProductFieldCondition.objects.all())
                 ).order_by('order')
             ),
-            
+            # ===== بارگذاری فرمول‌های قیمت‌گذاری (Formula Builder) ===== #
+            Prefetch('formulas', queryset=ProductFormula.objects.all()),
             # ===== بارگذاری تصاویر و فایل های پیوست ===== #
             Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
-            Prefetch('product_attachment')
+            Prefetch('product_attachment', queryset=Attachment.objects.all())
         )
 
     def _get_optimized_queryset(self):
         """
-        کوئری‌ست پایه با بارگذاری روابط اصلی (بدون آپشن‌ها و فایل‌ها).
+        کوئری‌ست سبک برای لیست محصولات (بدون لود کردن فیلدها و شروط سنگین).
         """
-        from ..models import ProductQuantity, ProductImage
-        return self.select_related(
-            'pricing_config'
-        ).prefetch_related(
+        from core.product.models import ProductImage
+        return self.prefetch_related(
             'categories',
-            Prefetch(
-                'product_quantity', 
-                queryset=ProductQuantity.objects.select_related('quantity').order_by('quantity__value')
-            ),
-            Prefetch('product_image', queryset=ProductImage.objects.order_by('order')),
+            Prefetch('product_image', queryset=ProductImage.objects.order_by('order'))
         )
 
     # ===== Read Methods ===== #
     def get_all_active(self):
-        """دریافت لیست تمام محصولات فعال"""
-        return self.filter(is_active=True).prefetch_related('categories')
+        return self._get_optimized_queryset().filter(is_active=True)
     
     def get_all(self):
-        """دریافت تمام محصولات"""
-        return self.prefetch_related('categories').order_by('-created_at')
+        return self._get_optimized_queryset().order_by('-created_at')
 
     def get_by_category_ids(self, category_ids: list):
-        """دریافت محصولات فعال بر اساس لیست دسته‌بندی‌ها"""
-        return self.filter(
+        return self._get_optimized_queryset().filter(
             categories__id__in=category_ids, 
             is_active=True
-        ).prefetch_related(
-            'categories', 
-            'product_image'
         ).distinct().order_by('-created_at')
 
     def get_detail_by_slug(self, slug: str):
-        """دریافت جزئیات کامل با اسلاگ"""
         try:
             return self._get_detail_queryset().get(slug=slug, is_active=True)
         except self.model.DoesNotExist:
             return None
 
     def get_detail_by_id(self, id: int):
-        """دریافت جزئیات کامل با ID"""
         return self._get_detail_queryset().get(pk=id)
 
     # ===== Stats Methods ===== #
@@ -108,17 +77,10 @@ class ProductQuerySet(BaseQuerySet):
             active=Count('id', filter=Q(is_active=True)),
             inactive=Count('id', filter=Q(is_active=False))
         )
-
-    def get_quantity_status_breakdown(self) -> dict:
-        return self.aggregate(
-            with_quantity=Count('id', filter=Q(has_quantity=True)),
-            without_quantity=Count('id', filter=Q(has_quantity=False))
-        )
     
     def search(self, query: str):
         """
-        منطق جستجوی Contains بر روی نام، توضیحات، کد و ویژگی‌ها.
-        استفاده از distinct برای جلوگیری از تکرار محصول در صورت تطابق با چندین ویژگی.
+        جستجو بر اساس نام، توضیحات، کد و نام/مقادیر فیلدساز جدید
         """
         if not query:
             return self.none()
@@ -127,9 +89,8 @@ class ProductQuerySet(BaseQuerySet):
             Q(name__icontains=query) |
             Q(description__icontains=query) |
             Q(code__icontains=query) |
-            Q(options__label__icontains=query) |  # جستجو در نام ویژگی (مثلا: جنس)
-            Q(options__choices__label__icontains=query) | # جستجو در مقدار (مثلا: گلاسه)
-            Q(options__choices__value__icontains=query)
+            Q(fields__title__icontains=query) |           # جستجو در نام فیلدهای داینامیک
+            Q(fields__choices__title__icontains=query)    # جستجو در گزینه‌های فیلدهای انتخابی
         ).filter(is_active=True).distinct()
 
 
@@ -143,9 +104,6 @@ class ProductManager(models.Manager):
     
     def get_all(self):
         return self.get_queryset().get_all()
-    
-    def get_all_products(self):
-        return self.get_queryset().get_all()
 
     def get_products_by_category_ids(self, category_ids: list):
         return self.get_queryset().get_by_category_ids(category_ids)
@@ -157,9 +115,9 @@ class ProductManager(models.Manager):
         return self.get_queryset().get_detail_by_id(id)
 
     def get_by_id(self, pk: int):
-        return self.get_queryset().get_by_id(pk)
+        return self.get_queryset().get_detail_by_id(pk)
 
-    # ===== متد های مربوط به داشبورد ===== #
+    # ===== Dashboard Stats ===== #
     def get_total_count(self) -> int:
         return self.count()
 
@@ -168,6 +126,3 @@ class ProductManager(models.Manager):
 
     def get_status_breakdown(self):
         return self.get_queryset().get_status_breakdown()
-
-    def get_quantity_status_breakdown(self):
-        return self.get_queryset().get_quantity_status_breakdown()

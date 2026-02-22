@@ -3,16 +3,13 @@ import logging
 import uuid
 from typing import Dict, Any, List
 from kombu.exceptions import OperationalError
-
 from django.db import transaction
 from django.conf import settings
-from rest_framework.exceptions import ValidationError
 from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 
-# ===== سرویس های دامنه ===== #x
+# فرض بر این است که متدهای مربوط به EAV را در Domain Service نوشته‌اید
 from core.product.services import ProductService, ProductMediaService
-from core.models import ProductOption
 from core.product.exceptions import InvalidProductDataException
 
 try:
@@ -23,123 +20,66 @@ except ImportError:
 
 logger = logging.getLogger('dashboard.services.product_dashboard')
 
-# ========== PRODUCT DASHBOARD SERVICE ========== #
 class ProductDashboardService:
     """
-    سرویس اپلیکیشن (Application Service) مخصوص داشبورد.
+    سرویس اپلیکیشن داشبورد با معماری جدید فیلدساز و فرمول‌ساز
     """
     def __init__(self):
         self._domain_service = ProductService()
         self.media_service = ProductMediaService()
         self.temp_storage = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp_uploads'))
-    # ===== CREATE CORE PRODUCT INFORMATION ===== #
-    @transaction.atomic
-    def create_full_product_core(self, user, data: Dict[str, Any]):
-        """
-        ایجاد محصول + کانفیگ قیمت + متریال + تیراژ + فایل‌های مورد نیاز
-        همه در یک تراکنش واحد.
-        """
-        # ===== تفکیک داده ها ===== #
-        shell_data = data.get('shell')
-        pricing_data = data.get('pricing_config', {})
-        quantities_data = data.get('quantities', [])
-        sizes_data = data.get('sizes', [])
-        
-        # ===== ایجاد محصول ===== #
-        product = self._domain_service.create_product_shell(user, shell_data)
-        
-        # ===== ایجاد کانفیگ قیمت ===== #
-        if pricing_data:
-            self._domain_service.update_pricing_config(product.id, pricing_data)
-            
-        if sizes_data:
-            self._domain_service.sync_sizes(product.id, user, sizes_data)
-            
-        # ===== هماهنگی بین وابستگی ها ===== #
-        if quantities_data:
-            self._domain_service.sync_quantities(product.id, user, quantities_data)
 
-        return product
-    
-    # ===== UPDATE CORE PRODUCT INFORMATION ===== #
+    # ===== CREATE & UPDATE CORE PRODUCT ===== #
     @transaction.atomic
-    def update_full_product_core(self, product_id: int, user, data: Dict[str, Any]):
-        """ ویرایش تجمیعی اطلاعات پایه """
-        shell_data = data.get('shell')
-        
-        # ===== ویرایش اطلاعات پایه ===== #
-        if shell_data:
-            self._domain_service.update_product_shell(product_id, shell_data)
-            
-        # ===== بروزرسانی سایر بخش ها در صورت وجود ===== #
-        if 'pricing_config' in data:
-            self._domain_service.update_pricing_config(product_id, data['pricing_config'])
+    def create_product_core(self, user, data: Dict[str, Any]):
+        """ ساخت اطلاعات پایه و شناسنامه‌ای محصول """
+        return self._domain_service.create_product_shell(user, data)
 
-        if 'quantities' in data:
-            self._domain_service.sync_quantities(product_id, user, data['quantities'])
-            
-        if 'sizes' in data:
-            self._domain_service.sync_sizes(product_id, user, data['sizes'])
-    
+    @transaction.atomic
+    def update_product_core(self, product_id: int, user, data: Dict[str, Any]):
+        """ ویرایش اطلاعات پایه محصول """
+        self._domain_service.update_product_shell(product_id, data)
         return self._domain_service.get_product_detail_by_id(product_id)
 
-    # ===== CREATE & UPDATE OPTIONS ===== #    
+    # ===== SYNC FIELDS (FORM BUILDER) ===== #
     @transaction.atomic
-    def bulk_sync_options(self, product_id: int, options_data: List[Dict]):
+    def sync_product_fields(self, product_id: int, fields_data: List[Dict]):
         """
-        یکپارچه: مدیریت ایجاد و ویرایش + ذخیره تمامی شروط در انتهای عملیات.
+        دریافت تمام فیلدها، گزینه‌ها و شروط از فرانت‌اند و همگام‌سازی کامل با دیتابیس
+        (این متد باید در Domain Service شما پیاده‌سازی شده باشد تا دیتای قبلی را پاک یا آپدیت کند)
         """
-        ref_map = {}
-        all_pending_conditions = []
-        results = []
+        # فرض بر این است که متد sync_fields در دامنه، لاجیک ساخت/ویرایش مدل‌های ProductField را هندل می‌کند
+        return self._domain_service.sync_fields(product_id, fields_data)
 
-        for opt_data in options_data:
-            product_option_id = opt_data.get('id')
-
-            if product_option_id:
-                # ===== حالت آپدیت ===== #
-                product_option, created_refs, pending_conds = self._domain_service.update_product_option_config(
-                    product_id=product_id,
-                    product_option_id=product_option_id,
-                    data=opt_data
-                )
-                status_label = 'updated'
-            else:
-                # ===== حالت ایجاد ===== #
-                product_option, created_refs, pending_conds = self._domain_service.attach_option_with_config(
-                    product_id, opt_data
-                )
-                status_label = 'created'
-
-            # ===== آپدیت کردن ارجاع‌های مربوط به ویژگی‌های وابسته ===== #
-            ref_map.update(created_refs)
-            all_pending_conditions.extend(pending_conds)
-
-            results.append({
-                'product_option_id': product_option.id,
-                'source_option_id': opt_data.get('option_id'),
-                'status': status_label
-            })
-
-        if all_pending_conditions:
-            self._domain_service.create_bulk_conditions(ref_map, all_pending_conditions)
-
-        return results
-        
-    # ===== SYNC MEDIA(NOT USED IN UPDATED VERSION) ===== #
+    # ===== SYNC FORMULAS (FORMULA BUILDER) ===== #
     @transaction.atomic
-    def sync_media_assets(self):
+    def sync_product_formulas(self, product_id: int, formulas_data: List[Dict]):
         """
-        مدیریت لینک پیوست‌ها و ترتیب تصاویر.
+        دریافت و همگام‌سازی فرمول‌های قیمت‌گذاری
         """
-        return
+        return self._domain_service.sync_formulas(product_id, formulas_data)
 
-    # ===== متد کمکی ذخیره موقت ===== #
+    # ===== FETCH METHODS ===== #
+    def get_all_products(self):
+        return self._domain_service.get_all_products()
+
+    def get_product_detail(self, product_id):
+        return self._domain_service.get_product_detail_by_id(product_id) 
+
+    # ===== BULK & DELETE ===== #
+    def delete_product(self, product_id: int):
+        self._domain_service.delete_product(product_id)
+
+    def bulk_update_product_status(self, product_ids: List[int], is_active: bool) -> int:
+        return self._domain_service.bulk_update_status(product_ids, is_active)
+
+    def bulk_delete_products(self, product_ids: List[int]) -> Dict[str, int]:
+        return self._domain_service.bulk_delete_products(product_ids)
+
+    # ===== UPLOAD MEDIA (مبقی ماندن کدهای رسانه بدون تغییر) ===== #
     def _save_temp_file(self, file_obj) -> str:
-        """ ذخیره فایل در مسیر موقت و بازگرداندن آدرس کامل آن """
         if not os.path.exists(self.temp_storage.location):
             os.makedirs(self.temp_storage.location)
-            
         ext = os.path.splitext(file_obj.name)[1]
         unique_name = f"{uuid.uuid4()}{ext}"
         saved_path = self.temp_storage.save(unique_name, file_obj)
@@ -230,37 +170,6 @@ class ProductDashboardService:
     # ===== DELETE PRODUCT ===== #
     def delete_product(self, product_id: int):
         self._domain_service.delete_product(product_id)
-
-    # ===== REMOVE OPTION(NOT USED IN UPDATED VERSION) ===== #
-    def remove_option_from_product(self, product_id: int, product_option_id: int):
-        self._domain_service.detach_option(product_id, product_option_id)
-
-    # ===== UPDATE OPTIONS ===== #
-    @transaction.atomic
-    def update_product_option_config(self, product_id: int, product_option_id: int, data: dict):
-        try:
-            prod_opt = ProductOption.objects.get(id=product_option_id, product_id=product_id)
-        except ProductOption.DoesNotExist:
-            raise InvalidProductDataException(f"ID نامعتبر: {product_option_id}")
-
-        # ===== اگر دارای مقادیر زیر بود ===== #
-        if 'is_required' in data: prod_opt.is_required = data['is_required']
-        if 'guide_text' in data: prod_opt.guide_text = data['guide_text']
-        if 'guide_type' in data: prod_opt.guide_type = data['guide_type']
-        if 'label' in data: prod_opt.label = data['label']
-        if 'order' in data: prod_opt.order = data['order']
-        prod_opt.save()
-
-        created_values_with_refs = {}
-
-        # ===== اگر دارای زیرویژگی بود، ایجاد آن ===== #
-        if 'values_config' in data and data['values_config']:
-            created_values_with_refs = self._update_option_values_pricing_logic(
-                product_id, product_option_id, data['values_config']
-            )
-
-        # ===== بازگردانی  ===== #
-        return prod_opt, created_values_with_refs
         
     # ========== BULK ACTIONS ========== #
     def bulk_update_product_status(self, product_ids: List[int], is_active: bool) -> int:
@@ -276,9 +185,3 @@ class ProductDashboardService:
         """
         return self._domain_service.bulk_delete_products(product_ids)
 
-    def get_product_quantities(self, product_id: int):
-        """
-        دریافت تیراژهای محصول برای نمایش در داشبورد.
-        """
-        # ===== بازگردانی تیراژهای انتخاب‌شده برای یک محصول ===== #
-        return self._domain_service.get_product_quantities_by_id(product_id)

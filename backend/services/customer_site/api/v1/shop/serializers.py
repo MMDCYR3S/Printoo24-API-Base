@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from core.models import (
-    Product, ProductCategory, ProductQuantity, ProductSize, 
-    ProductOption, ProductOptionValue, ProductImage, 
-    ProductComment, ProductPricingConfig, Attachment ,GuideType
+    Product, ProductCategory, 
+    ProductImage, ProductComment, Attachment
 )
 
 # ==========================================
@@ -13,18 +12,6 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = ['id', 'name', 'slug']
-
-class ProductPricingConfigSerializer(serializers.ModelSerializer):
-    """
-    حیاتی برای فرانت‌‌اند: قوانین سفارش (بازه تیراژ، ابعاد دلخواه، هزینه ستاپ).
-    """
-    class Meta:
-        model = ProductPricingConfig
-        fields = [
-            'allow_custom_quantity', 'min_quantity', 'max_quantity',
-            'accepts_custom_dimensions', 'min_width', 'max_width',
-            'base_setup_price', 'design_service_available', 'design_fee'
-        ]
 
 # ==========================================
 # 2. LEGACY SUPPORT SERIALIZERS
@@ -37,118 +24,12 @@ class QuantityPriceMatrixOutputSerializer(serializers.Serializer):
     quantity_value = serializers.IntegerField(source='product_quantity.quantity.value')
     price = serializers.DecimalField(max_digits=12, decimal_places=0)
 
-
-class QuantityDetailSerializer(serializers.ModelSerializer):
-    guide_text = serializers.CharField()
-    guide_type = serializers.CharField()
-    
-    # ===== اضافه شدن آیدی واقعی و قیمت پایه تیراژ ===== #
-    quantity_id = serializers.IntegerField(source="quantity.id", read_only=True)
-    quantity_value = serializers.IntegerField(source="quantity.value", read_only=True)
-    price = serializers.DecimalField(max_digits=12, decimal_places=0, read_only=True)
-
-    class Meta:
-        model = ProductQuantity
-        fields = ['id', 'quantity_id', 'quantity_value', 'price', 'guide_text', 'guide_type']
-
-class SizeDetailSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='size.name', read_only=True)
-    width = serializers.FloatField(source='size.width', read_only=True)
-    height = serializers.FloatField(source='size.height', read_only=True)
-    guide_text = serializers.CharField()
-    guide_type = serializers.CharField()
-    
-    class Meta:
-        model = ProductSize
-        fields = ['id', 'name', 'width', 'height', 'price_impact', 'guide_text', 'guide_type']
-
 class OptionRequirementSerializer(serializers.Serializer):
     """
     نمایش نیازمندی‌های یک گزینه به فرانت‌اند (ماشین‌حساب مشتری)
     """
     required_value_id = serializers.IntegerField(source='required_value_id')
     action = serializers.CharField()
-
-# ==========================================
-# 3. NEW OPTION SYSTEM SERIALIZERS
-# ==========================================
-class ProductOptionValueSerializer(serializers.ModelSerializer):
-    is_custom = serializers.SerializerMethodField()
-    label = serializers.SerializerMethodField()
-    value = serializers.SerializerMethodField()
-    
-    quantity_prices = QuantityPriceMatrixOutputSerializer(many=True, read_only=True)
-    
-    isAvailable = serializers.SerializerMethodField()
-    
-    # ===== تبدیل به فیلدهای غنی (Rich Fields) ===== #
-    enables_values = serializers.SerializerMethodField()
-    disables_values = serializers.SerializerMethodField()
-
-    class Meta:
-        model = ProductOptionValue
-        fields = [
-            'id', 'label', 'value', 'price_impact', 'quantity_prices', 
-            'is_default', 'is_custom', 'order',
-            'guide_text', 'guide_type',
-            'isAvailable', 'enables_values', 'disables_values'
-        ]
-
-    def get_is_custom(self, obj):
-        return obj.global_source is None
-
-    def get_label(self, obj):
-        return obj.label or (obj.global_source.label if obj.global_source else "")
-        
-    def get_value(self, obj):
-        return obj.value or (obj.global_source.value if obj.global_source else "")
-
-    def get_isAvailable(self, obj):
-        return not obj.dependency_rules.filter(action='show').exists()
-
-    # ====================================================
-    # متدهای جدید و حرفه‌ای برای استخراج مشخصات وابسته‌ها
-    # ====================================================
-    def _get_rich_condition_data(self, rules):
-        """ متد کمکی برای استخراج دیتای تمیز از قوانین """
-        data = []
-        for rule in rules:
-            target = rule.target_value
-            # استخراج نام زیرویژگی (مثلا: باکس چوبی مگنت‌دار)
-            val_label = target.label or (target.global_source.label if target.global_source else "نامشخص")
-            
-            # استخراج نام گروهِ والد (مثلا: بسته‌بندی ویژه)
-            opt = target.product_option
-            opt_label = opt.label or (opt.option.label if opt.option else "نامشخص")
-            
-            data.append({
-                "target_id": target.id,
-                "target_label": val_label,
-                "option_id": opt.id,
-                "option_label": opt_label
-            })
-        return data
-
-    def get_enables_values(self, obj):
-        """ لیست ویژگی‌هایی که با انتخاب این گزینه، روشن می‌شوند همراه با جزئیات """
-        # استفاده از select_related برای جلوگیری از N+1 Query
-        rules = obj.enables_targets.filter(action='show').select_related(
-            'target_value', 
-            'target_value__global_source', 
-            'target_value__product_option', 
-            'target_value__product_option__option'
-        )
-        return self._get_rich_condition_data(rules)
-
-    def get_disables_values(self, obj):
-        """ لیست ویژگی‌هایی که با انتخاب این گزینه، خاموش می‌شوند همراه با جزئیات """
-        rules = obj.enables_targets.filter(action='hide').select_related(
-            'target_value', 
-            'target_value__global_source', 
-            'target_value__product_option', 
-            'target_value__product_option__option'
-        )
-        return self._get_rich_condition_data(rules)
 
 # ==========================================
 # 4. MEDIA & FILES SERIALIZERS
@@ -231,41 +112,6 @@ class AttachmentSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.file.url) if request else obj.file.url
         return None
 
-class ProductOptionSerializer(serializers.ModelSerializer):
-    name = serializers.SerializerMethodField()
-    label = serializers.SerializerMethodField()
-    type = serializers.SerializerMethodField()
-    choices = ProductOptionValueSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = ProductOption
-        fields = [
-            'id', 'name', 'label', 'type', 
-            'is_required', 'choices', 'order',
-            'guide_text', 'guide_type'
-        ]
-
-    def get_name(self, obj):
-        if obj.name:
-            return obj.name
-        if obj.option:
-            return obj.option.name
-        return ""
-
-    def get_label(self, obj):
-        if obj.label:
-            return obj.label
-        if obj.option:
-            return obj.option.label
-        return ""
-
-    def get_type(self, obj):
-        if obj.input_type:
-            return obj.input_type
-        if obj.option:
-            return obj.option.input_type
-        return 'select'
-
 #‌ ========== PRODUCT DETAIL SERIALIEZER ========== #
 class ProductDetailSerializer(serializers.Serializer):
     """
@@ -276,8 +122,7 @@ class ProductDetailSerializer(serializers.Serializer):
     
     quantities = serializers.SerializerMethodField()
     sizes = serializers.SerializerMethodField()
-    
-    options = ProductOptionSerializer(many=True)
+
     images = ProductImageSerializer(source='product_image', many=True)
     # اضافه کردن فایل‌های پیوست اگر نیاز است
     attachments = AttachmentSerializer(source='product_attachment', many=True, read_only=True)
@@ -319,14 +164,6 @@ class ProductDetailSerializer(serializers.Serializer):
         if hasattr(obj, 'pricing_config'):
             return ProductPricingConfigSerializer(obj.pricing_config).data
         return None
-
-    def get_quantities(self, obj):
-        qs = obj.product_quantity.all().select_related('quantity')
-        return QuantityDetailSerializer(qs, many=True).data
-
-    def get_sizes(self, obj):
-        qs = obj.product_size.all().select_related('size')
-        return SizeDetailSerializer(qs, many=True).data
 
 # ==========================================
 # 6. FEEDBACK & OTHER SERIALIZERS
