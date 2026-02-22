@@ -1,4 +1,6 @@
-from typing import List, Optional, Dict, Any
+import ast
+from typing import List, Optional, Dict, Any, Set
+
 from django.db.models import Max, ProtectedError
 from django.db import transaction
 from django.utils import timezone
@@ -259,17 +261,60 @@ class ProductService:
     # ========================================== #
     # 2. موتور همگام‌ساز فرمول‌ها (Formula Builder Sync)
     # ========================================== #
+    def _validate_math_expression(self, expression: str, valid_variables: Set[str]):
+        """
+        هسته اعتبارسنجی امن فرمول. 
+        فقط اجازه ورود متغیرهای مجاز و عملگرهای ریاضی را می‌دهد.
+        """
+        if not expression:
+            return
+
+        try:
+            # ===== بررسی اعتبار رشته براساس قواعد ریاضیاتی ===== #
+            tree = ast.parse(expression, mode='eval')
+        except SyntaxError:
+            raise InvalidProductDataException(f"ساختار فرمول نامعتبر است (لطفاً علائم ریاضی را چک کنید): {expression}")
+
+        # پیمایش تمام اجزای فرمول
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Name):
+                var_name = node.id
+                # ===== در صورت عدم انتخاب فیلدهای معتبر یک محصول، خطا دادن ===== #
+                if var_name not in valid_variables:
+                    raise InvalidProductDataException(
+                        f"متغیر ناشناخته '{var_name}' در فرمول. شما فقط مجاز به استفاده از شناسه‌های فیلد همین محصول هستید (مثلاً: field_12)."
+                    )
+            elif isinstance(node, ast.Call):
+                # ===== خطا در صورت استفاده از توابع ===== #
+                raise InvalidProductDataException("استفاده از توابع (Functions) در فرمول مجاز نیست.")
+
     @transaction.atomic
     def sync_formulas(self, product_id: int, formulas_data: List[Dict]):
         """
-        ذخیره‌سازی فرمول‌های ریاضی محصول
+        ذخیره‌سازی فرمول‌های ریاضی محصول همراه با اعتبارسنجی شدید
         """
         try:
-            product = Product.objects.get(id=product_id)
+            product = Product.objects.prefetch_related('fields').get(id=product_id)
         except Product.DoesNotExist:
             raise ProductNotFoundException("محصول یافت نشد.")
 
-        # پاک کردن فرمول‌هایی که ادمین از لیست حذف کرده
+        # ===== استخراج فیلدهای مجاز با field_{id} ===== # 
+        valid_variables = {f"field_{f.id}" for f in product.fields.all()}
+
+        # ===== اعتبارسنجی فرمول‌ها ===== #
+        for form_data in formulas_data:
+            calc_expr = form_data.get('calculation_expression', '')
+            cond_expr = form_data.get('condition_expression', '')
+
+            if not calc_expr:
+                raise InvalidProductDataException("عبارت محاسباتی (calculation_expression) نمی‌تواند خالی باشد.")
+
+            # ===== اعتبارسنجی فرمول‌ها اصلی و فرعی ===== #
+            self._validate_math_expression(calc_expr, valid_variables)
+            if cond_expr:
+                self._validate_math_expression(cond_expr, valid_variables)
+
+        # ===== ذخیره‌سازی فرمول‌ها در دیتابیس ===== #
         incoming_ids = [f['id'] for f in formulas_data if f.get('id')]
         ProductFormula.objects.filter(product=product).exclude(id__in=incoming_ids).delete()
         
@@ -287,4 +332,3 @@ class ProductService:
                 ProductFormula.objects.create(product=product, **defaults)
                 
         return True
-
