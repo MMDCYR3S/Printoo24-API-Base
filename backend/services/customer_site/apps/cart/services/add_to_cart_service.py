@@ -6,80 +6,65 @@ from django.core.exceptions import ValidationError
 
 from core.models import User, Product
 from apps.cart.models import Cart, CartItem
-from apps.cart.utils import CartProcessor
-
+from apps.cart.utils.cart_processor import CartProcessor
 from core.infrastructure.messages import msg_provider
 
 logger = logging.getLogger('cart.services.add_to_cart')
 
-# ========== ADD TO CART SERVICE ========== #
 class AddToCartService:
     """
     سرویس افزودن آیتم به سبد خرید.
-    مسئولیت‌ها:
-    1. فراخوانی Processor برای محاسبات
-    2. مدیریت سبد خرید (ایجاد/دریافت)
-    3. مدیریت تکراری بودن آیتم (Merge)
-    4. ذخیره نهایی
     """
     def __init__(self, user: User = None, session_key: str = None):
         self.user = user if (user and user.is_authenticated) else None
         self.session_key = session_key
         
-        # گارد: حداقل یکی باید باشد
         if not self.user and not self.session_key:
-             raise ValidationError(msg_provider.get("cart.E4019"))
+             raise ValidationError(msg_provider.get("cart.E4019", default="نشست کاربری یا سشن یافت نشد."))
         
     @transaction.atomic
     def execute(self, product_id: int, selections: Dict[str, Any]) -> CartItem:
-        logger.info(f"Start adding product {product_id} for user")
+        logger.info(f"Start adding product {product_id} to cart")
 
         try:
-            # ===== دریافت محصول ===== #
             product = Product.objects.get(id=product_id, is_active=True)
         except Product.DoesNotExist:
-            raise ValidationError(msg_provider.get("cart.E4020"))
+            raise ValidationError(msg_provider.get("cart.E4020", default="محصول مورد نظر یافت نشد یا غیرفعال است."))
         
-        # ===== دریافت تیراژ یا تعداد ===== #
-        quantity_input = int(selections.get('quantity', None) or selections.get('quantity_id', None) or 1)
-
-        # ===== پردازش منطقی سبد خرید ===== #
-        processor = CartProcessor(product, selections, quantity_input).process()
+        # ===== پردازش منطقی سبد خرید و محاسبه قیمت ===== #
+        processor = CartProcessor(product, selections).process()
 
         # ===== دریافت یا ایجاد سبد خرید ===== #
         cart = self._get_or_create_cart()
 
-        # ===== چک کردن تکراری بودن آیتم ===== #
+        # ===== چک کردن تکراری بودن آیتم (بر اساس JSON کانفیگ) ===== #
         existing_item = CartItem.objects.find_duplicate_item(
             cart=cart, 
             product=product, 
             items_data=processor.result_item_data
         )
         
-        # ===== اگر آیتم وجود داشت، فقط تیراژ و قیمت رو افزایش بده ===== #
         if existing_item:
             logger.info(f"Merging with existing item {existing_item.id}")
-            existing_item.quantity += processor.result_quantity
-            existing_item.price = processor.result_price
-
+            existing_item.quantity += 1
+            existing_item.price = processor.result_price * existing_item.quantity 
             existing_item.save()
             return existing_item
+            
         else:
-            # ===== ایجاد آیتم جدید ===== #
             logger.info("Creating new cart item")
             new_item = CartItem.objects.create(
                 cart=cart,
                 product=product,
                 name=processor.result_name,
-                quantity=processor.result_quantity,
+                quantity=1,
                 price=processor.result_price,
-                items=processor.result_item_data,
+                items=processor.result_item_data, 
                 description=processor.result_description
             )
             return new_item
 
     def _get_or_create_cart(self) -> Cart:
-        """ یافتن سبد خرید بر اساس اولویت: کاربر لاگین > سشن مهمان """
         if self.user:
             cart, _ = Cart.objects.get_or_create(user=self.user)
             return cart

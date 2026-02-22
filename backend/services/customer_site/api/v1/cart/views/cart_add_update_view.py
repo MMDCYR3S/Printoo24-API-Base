@@ -5,8 +5,9 @@ from rest_framework.permissions import AllowAny
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter, OpenApiTypes
 
 from ..serializers import AddToCartSerializer, CartItemUpdateSerializer
-from apps.cart.services import AddToCartService, CartItemUpdateService
+from apps.cart.services import AddToCartService, CartItemUpdateService # فرض بر این است که سرویس آپدیت را هم مشابه Add نوشته‌اید
 from core.infrastructure.messages import msg_provider
+
 def get_session_key(request):
     """
     اگر کاربر سشن ندارد، برایش می‌سازیم و کلیدش را برمی‌گردانیم.
@@ -25,15 +26,18 @@ class AddToCartView(GenericAPIView):
     serializer_class = AddToCartSerializer
     
     @extend_schema(
-        summary="افزودن آیتم به سبد خرید",
+        summary="افزودن محصول داینامیک به سبد خرید",
         description="""
-        این متد محصول را با تمام تنظیمات (تعداد، سایز، آپشن‌ها) به سبد اضافه می‌کند.
+        **معماری جدید (Dynamic Form Builder):**
+        لطفاً متغیرهای هاردکد مثل `size_id` یا `quantity` را فراموش کنید!
+        کافیست فرمی که از API جزئیات محصول گرفته‌اید را رندر کنید و هرچه کاربر انتخاب کرد را به صورت کلید-مقدار در آبجکت `selections` بفرستید.
+        سیستم هوشمند بک‌اند، بر اساس فرمول‌های ادمین، قیمت کل را محاسبه করে و به سبد اضافه می‌کند.
         
         **نکات مهم:**
-        1. برای **کاربر مهمان**، ارسال هدر `X-Guest-Token` (یک رشته یکتا مثل UUID) الزامی است.
-        2. اگر محصول تیراژ ثابت دارد، `quantity_id` بفرستید.
+        1. کلیدهای دیکشنری `selections` همان `id` فیلدهایی است که از سرور گرفته‌اید.
+        2. اگر فیلدی چندانتخابی (Multi Select) است، مقدار آن را به صورت لیست (Array) بفرستید.
+        3. می‌توانید مقادیر متنی `name` و `description` را مستقیماً داخل `selections` بفرستید تا روی سفارش ذخیره شوند.
         """,
-        # ===== اضافه کردن پارامتر هدر به سواگر ===== #
         parameters=[
             OpenApiParameter(
                 name='X-Guest-Token',
@@ -43,65 +47,35 @@ class AddToCartView(GenericAPIView):
                 required=False
             )
         ],
-        request=AddToCartSerializer,
         responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT},
         examples=[
             OpenApiExample(
-                'Scenario 1: Fixed Quantity (Business Card)',
-                summary='سناریو ۱: محصول با تیراژ ثابت (کارت ویزیت)',
-                description='انتخاب تیراژ ۱۰۰۰ تایی (ID: 50) + سایز استاندارد + دو آپشن انتخابی.',
+                '1. Standard Print (Business Card)',
+                summary='سناریو ۱: چاپ استاندارد (کارت ویزیت با آپشن و تیراژ)',
+                description='فرض کنید فیلد ۱۰ (جنس کاغذ) و فیلد ۱۲ (تیراژ) و فیلد ۱۵ (خدمات-چندانتخابی) است.',
                 value={
                     "product_id": 105,
                     "selections": {
-                        "name": "کارت ویزیت علی بابا",
-                        "quantity_id": 50,
-                        "size_id": 5,
-                        "has_design": True,
-                        "options": {
-                            "10": 101,
-                            "12": 205
-                        },
-                        "description": "توضیحات تکمیلی"
+                        "name": "کارت ویزیت شخصی علی",      # فیلد ثابت برای نام‌گذاری سفارش
+                        "description": "گوشه‌ها دقیق گرد شود", # فیلد ثابت برای یادداشت
+                        "10": 45,                           # کاربر گزینه "گلاسه مات" (id:45) را انتخاب کرده
+                        "12": 25,                         # کاربر تیراژ ۱۰۰۰ را وارد کرده
+                        "15": [88, 92]                      # کاربر دو چک‌باکس طلاکوب(88) و دورگرد(92) را تیک زده
                     }
                 },
                 request_only=True
             ),
             OpenApiExample(
-                'Scenario 2: Custom Quantity & Text Option',
-                summary='سناریو ۲: محصول تعدادی با ورودی متن (لیوان سرامیکی)',
-                description='انتخاب ۵ عدد لیوان + نوشتن متن دلخواه روی لیوان.',
-                value={
-                    "product_id": 200,
-                    "selections": {
-                        "name": "لیوان سرامیکی",
-                        "quantity": 5,
-                        "size_id": None,
-                        "has_design": False,
-                        "options": {
-                            "15": "Happy Birthday Sarah",
-                            "18": 302
-                        },
-                        "description": "توضیحات تکمیلی"
-                    }
-                },
-                request_only=True
-            ),
-            OpenApiExample(
-                'Scenario 3: Custom Dimensions (Banner)',
-                summary='سناریو ۳: محصول متراژی (بنر)',
-                description='سفارش بنر ۳ در ۱ متر (بدون سایز استاندارد).',
+                '2. Banner (Dimensional Product)',
+                summary='سناریو ۲: محصول متراژی (بنر)',
+                description='فرض کنید فیلد ۲۰ (طول)، فیلد ۲۱ (عرض) و فیلد ۲۲ (نوع پانچ) است.',
                 value={
                     "product_id": 300,
                     "selections": {
-                        "name": "بنر تبلیغاتی شرکت موز پروران",
-                        "quantity": 1, 
-                        "width": 300,
-                        "height": 100,
-                        "has_design": True,
-                        "options": {
-                            "20": 401
-                        },
-                        "description": "توضیحات تکمیلی"
+                        "name": "بنر سر در مغازه",
+                        "20": 3,                          # کاربر طول را 3.5 متر وارد کرده
+                        "21": 5,                          # کاربر عرض را 1.2 متر وارد کرده
+                        "22": 12                          # انتخاب گزینه "پانچ ۴ گوشه" (id:110)
                     }
                 },
                 request_only=True
@@ -126,7 +100,10 @@ class AddToCartView(GenericAPIView):
                 product_id=data["product_id"],
                 selections=data["selections"]
             )
-            return Response({"id": cart_item.id, "message": msg_provider.get("cart.S4001")}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"id": cart_item.id, "message": msg_provider.get("cart.S4001", default="محصول با موفقیت به سبد اضافه شد.")}, 
+                status=status.HTTP_201_CREATED
+            )
 
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -140,14 +117,15 @@ class CartItemUpdateView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = CartItemUpdateSerializer
 
-    extend_schema(
-        summary="ویرایش آیتم (تعداد یا آپشن‌ها)",
+    @extend_schema(
+        summary="ویرایش کانفیگ و ویژگی‌های یک آیتم در سبد خرید",
         description="""
-        هر فیلدی که ارسال شود، جایگزین مقدار قبلی می‌شود.
-        اگر آپشن‌ها تغییر کنند، قیمت مجدداً محاسبه می‌شود.
+        اگر مشتری خواست ویژگی محصولی که در سبد خرید است را تغییر دهد (مثلاً تیراژ را از ۱۰۰۰ به ۲۰۰۰ تغییر دهد)، 
+        کل دیکشنری `selections` جدید را به این اندپوینت بفرستید. 
+        بک‌اند قیمت را مجدداً با فرمول محاسبه کرده و سبد را آپدیت می‌کند.
         """,
         parameters=[
-            OpenApiParameter("item_id", OpenApiTypes.INT, OpenApiParameter.PATH, description="شناسه آیتم"),
+            OpenApiParameter("item_id", OpenApiTypes.INT, OpenApiParameter.PATH, description="شناسه ردیف سبد خرید (CartItem ID)"),
             OpenApiParameter(
                 name='X-Guest-Token',
                 type=OpenApiTypes.UUID,
@@ -158,47 +136,15 @@ class CartItemUpdateView(GenericAPIView):
         ],
         examples=[
             OpenApiExample(
-                'ذخیره با سایز و تیراژ پیش‌فرض',
-                summary='ذخیره با سایز و تیراژ پیش‌فرض',
+                'Update Config',
+                summary='تغییر تیراژ و یادداشت',
                 value={
-                    "product_id": 6,
                     "selections": {
-                        "name": "کارت ویزیت لاکچری مدیرعامل",
-                        "quantity_id": 10,
-                        "size_id": 7,
-                        "has_design": True,
-                        "description": "لطفاً روکش مخمل با دقت زده شود.",
-                        "options": {
-                        "10": 24,         
-                        "54": 131,        
-                        "57": 136,        
-                        "58": 137,        
-                        "59": [138, 140]  
-                        }
-                    }
-                }
-            ),
-            OpenApiExample(
-                "ذخیره با سایز و تعداد دلخواه",
-                summary='ذخیره با سایز و تعداد دلخواه',
-                value={
-                    "product_id": 6,
-                    "selections": {
-                        "name": "کارت ویزیت با ابعاد اختصاصی",
-                        "description": "لطفاً برش‌ها با دقت میلی‌متری طبق فایل پیوست انجام شود.",
-                        "quantity": 100,
-                        "quantity_id": None,
-                        "size_id": None,
-                        "width": 8.0,
-                        "height": 5.0,
-                        "has_design": True,
-                        "options": {
-                        "10": 24,
-                        "54": 131,
-                        "57": 136,
-                        "58": 137,
-                        "59": [138, 140]
-                        }
+                        "name": "کارت ویزیت شخصی علی",
+                        "description": "گوشه‌ها دقیق گرد شود (اصلاحیه: تیراژ بالا رفت)", 
+                        "10": 45,       
+                        "12": 2000,     # <--- این عدد توسط کاربر تغییر کرده است
+                        "15": [88, 92]
                     }
                 }
             )
@@ -216,13 +162,16 @@ class CartItemUpdateView(GenericAPIView):
             session_key = get_session_key(request)
 
         try:
-            # ===== اجرای سرویس ===== #
+            # ===== اجرای سرویس (فرض بر اینکه CartItemUpdateService از منطق CartProcessor استفاده می‌کند) ===== #
             service = CartItemUpdateService(user=user, session_key=session_key)
             updated_item = service.update(
                 cart_item_id=item_id,
-                raw_data=serializer.validated_data
+                selections=serializer.validated_data['selections']
             )
-            return Response({"id": updated_item.id, "message": msg_provider.get("cart.S4005")}, status=status.HTTP_200_OK)
+            return Response(
+                {"id": updated_item.id, "message": msg_provider.get("cart.S4005", default="سبد خرید بروزرسانی شد.")}, 
+                status=status.HTTP_200_OK
+            )
 
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
