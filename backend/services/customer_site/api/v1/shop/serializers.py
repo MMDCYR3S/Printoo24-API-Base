@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from core.models import (
-    Product, ProductCategory, 
-    ProductImage, ProductComment, Attachment
+    Product, ProductCategory,
+    ProductImage, ProductComment, Attachment,
+    ProductField, ProductFieldChoice, ProductFieldCondition, ProductFormula
 )
 
 # ==========================================
@@ -13,35 +14,18 @@ class CategorySerializer(serializers.ModelSerializer):
         model = ProductCategory
         fields = ['id', 'name', 'slug']
 
-# ==========================================
-# 2. LEGACY SUPPORT SERIALIZERS
-# ==========================================
-class QuantityPriceMatrixOutputSerializer(serializers.Serializer):
-    """
-    نمایش ماتریس قیمت‌ها به فرانت‌اند مشتری
-    """
-    quantity_id = serializers.IntegerField(source='product_quantity.quantity.id')
-    quantity_value = serializers.IntegerField(source='product_quantity.quantity.value')
-    price = serializers.DecimalField(max_digits=12, decimal_places=0)
-
-class OptionRequirementSerializer(serializers.Serializer):
-    """
-    نمایش نیازمندی‌های یک گزینه به فرانت‌اند (ماشین‌حساب مشتری)
-    """
-    required_value_id = serializers.IntegerField(source='required_value_id')
-    action = serializers.CharField()
 
 # ==========================================
-# 4. MEDIA & FILES SERIALIZERS
+# 2. MEDIA SERIALIZERS
 # ==========================================
 
 class ProductImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ProductImage
         fields = ['id', 'image_url', 'order']
-    
+
     def get_image_url(self, obj):
         request = self.context.get('request')
         if obj.image:
@@ -49,9 +33,68 @@ class ProductImageSerializer(serializers.ModelSerializer):
         return None
 
 
+class AttachmentSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Attachment
+        fields = ['id', 'name', 'file_url', 'created_at']
+
+    def get_file_url(self, obj):
+        request = self.context.get('request')
+        if obj.file:
+            return request.build_absolute_uri(obj.file.url) if request else obj.file.url
+        return None
+
 
 # ==========================================
-# 5. MAIN PRODUCT SERIALIZERS (REFACTORED for M2M)
+# 3. FIELD BUILDER SERIALIZERS (Read-Only)
+# ==========================================
+
+class ProductFieldChoiceOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductFieldChoice
+        fields = ['id', 'title', 'numeric_value', 'order']
+
+
+class ProductFieldConditionOutputSerializer(serializers.ModelSerializer):
+    trigger_field_id = serializers.IntegerField(source='trigger_field.id')
+    trigger_choice_id = serializers.IntegerField(
+        source='trigger_choice.id', allow_null=True
+    )
+
+    class Meta:
+        model = ProductFieldCondition
+        fields = ['id', 'trigger_field_id', 'operator', 'trigger_choice_id', 'trigger_value_text', 'action']
+
+
+class ProductFieldOutputSerializer(serializers.ModelSerializer):
+    choices = ProductFieldChoiceOutputSerializer(many=True, read_only=True)
+    conditions = ProductFieldConditionOutputSerializer(
+        source='applied_conditions', many=True, read_only=True
+    )
+
+    class Meta:
+        model = ProductField
+        fields = [
+            'id', 'title', 'description', 'field_type',
+            'numeric_value', 'is_required', 'is_active',
+            'is_quantity_field', 'order', 'choices', 'conditions'
+        ]
+
+
+# ==========================================
+# 4. FORMULA SERIALIZER (Read-Only)
+# ==========================================
+
+class ProductFormulaOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductFormula
+        fields = ['id', 'title', 'condition_expression', 'calculation_expression', 'currency']
+
+
+# ==========================================
+# 5. PRODUCT LIST SERIALIZER
 # ==========================================
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -67,25 +110,13 @@ class ProductListSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'price', 'show_price', 'has_price', 'category', 'thumbnail', 'detail_url']
 
     def get_category(self, obj):
-        """
-        بازگرداندن نام والد و فرزند به صورت دیکشنری مسطح (مانند Detail).
-        """
         assigned_cat = obj.categories.first()
-        
-        parent_name = None
-        category_name = None
-        
-        if assigned_cat:
-            category_name = assigned_cat.name
+        if not assigned_cat:
+            return {"parent_category": None, "children_category": None}
 
-            if assigned_cat.parent:
-                parent_name = assigned_cat.parent.name
-            else:
-                parent_name = assigned_cat.name
-        # ===== بازگشت اطلاعات ===== #
         return {
-            "parent_category": parent_name,
-            "children_category": category_name
+            "parent_category": assigned_cat.parent.name if assigned_cat.parent else assigned_cat.name,
+            "children_category": assigned_cat.name
         }
 
     def get_thumbnail(self, obj):
@@ -95,78 +126,46 @@ class ProductListSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(img.image.url) if request else img.image.url
         return None
 
-#‌ ========== ATTACHMENT SERAILZIER ========== #
-class AttachmentSerializer(serializers.ModelSerializer):
-    """
-    سریالایزر مربوط به فایل‌های پیوست
-    """
-    file_url = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Attachment
-        fields = ['id', 'name', 'file', 'file_url', 'created_at']
-        
-    def get_file_url(self, obj):
-        request = self.context.get('request')
-        if obj.file:
-            return request.build_absolute_uri(obj.file.url) if request else obj.file.url
-        return None
-
-#‌ ========== PRODUCT DETAIL SERIALIEZER ========== #
-class ProductDetailSerializer(serializers.Serializer):
-    """
-    سریالایزر نهایی صفحه محصول (ترکیب تمام اطلاعات).
-    """
-    product_info = serializers.SerializerMethodField()
-    pricing_config = serializers.SerializerMethodField()
-    
-    quantities = serializers.SerializerMethodField()
-    sizes = serializers.SerializerMethodField()
-
-    images = ProductImageSerializer(source='product_image', many=True)
-    # اضافه کردن فایل‌های پیوست اگر نیاز است
-    attachments = AttachmentSerializer(source='product_attachment', many=True, read_only=True)
-
-    def get_product_info(self, obj):
-        product = obj
-        
-        # ===== لاجیک استخراج دسته‌بندی (بدون is_primary) ===== #
-        assigned_cat = product.categories.first()
-        
-        parent_name = None
-        category_name = None
-        
-        if assigned_cat:
-            category_name = assigned_cat.name
-
-            if assigned_cat.parent:
-                parent_name = assigned_cat.parent.name
-            else:
-                parent_name = assigned_cat.name
-
-        return {
-            "id": product.id,
-            "name": product.name,
-            "parent_category": parent_name, 
-            "children_category": category_name,
-            
-            "slug": product.slug,
-            "description": product.description,
-            "price": product.price,
-            'show_price': product.show_price,
-            "has_price": product.has_price,
-            "code": product.code,
-            "guide_text": product.guide_text,
-            "guide_type": product.guide_type
-        }
-
-    def get_pricing_config(self, obj):
-        if hasattr(obj, 'pricing_config'):
-            return ProductPricingConfigSerializer(obj.pricing_config).data
-        return None
 
 # ==========================================
-# 6. FEEDBACK & OTHER SERIALIZERS
+# 6. PRODUCT DETAIL SERIALIZER
+# ==========================================
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    """
+    سریالایزر صفحه جزئیات محصول برای مشتری.
+    شامل اطلاعات پایه، فیلدهای داینامیک، فرمول‌ها و رسانه.
+    """
+    category = serializers.SerializerMethodField()
+    images = ProductImageSerializer(source='product_image', many=True, read_only=True)
+    attachments = AttachmentSerializer(source='product_attachment', many=True, read_only=True)
+    fields = ProductFieldOutputSerializer(many=True, read_only=True)
+    formulas = ProductFormulaOutputSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'name', 'slug', 'code', 'description',
+            'has_price', 'price', 'show_price', 'price_per_unit',
+            'has_quantity', 'is_active',
+            'guide_text', 'guide_type',
+            'category', 'fields', 'formulas', 'images', 'attachments',
+        ]
+
+    def get_category(self, obj):
+        assigned_cat = obj.categories.first()
+        if not assigned_cat:
+            return {"parent_category": None, "children_category": None}
+
+        return {
+            "parent_category": assigned_cat.parent.name if assigned_cat.parent else assigned_cat.name,
+            "children_category": assigned_cat.name,
+            "slug": assigned_cat.slug,
+        }
+
+
+# ==========================================
+# 7. FEEDBACK SERIALIZERS
 # ==========================================
 
 class SubmitReviewSerializer(serializers.Serializer):
@@ -178,32 +177,34 @@ class SubmitReviewSerializer(serializers.Serializer):
             raise serializers.ValidationError("لطفاً حداقل یک امتیاز یا متن نظر وارد کنید.")
         return data
 
+
 class ReplySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductComment
         fields = ['id', 'name', 'message', 'created_at']
 
+
 class CommentListSerializer(serializers.ModelSerializer):
     replies = ReplySerializer(many=True, read_only=True)
-    created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = ProductComment
         fields = ['id', 'name', 'message', 'created_at', 'replies']
+
 
 class ProductFeedbackStatsSerializer(serializers.Serializer):
     average_rating = serializers.FloatField()
     total_ratings = serializers.IntegerField()
     comments = CommentListSerializer(many=True)
 
-# ===== Summary & Landing Serializers ===== #
+
+# ==========================================
+# 8. CATEGORY & LANDING SERIALIZERS
+# ==========================================
 
 class ProductSummarySerializer(serializers.ModelSerializer):
-    """
-    نمایش خلاصه محصول در لیست‌های طولانی.
-    """
     image = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Product
         fields = ['id', 'name', 'slug', 'price', 'image']
@@ -215,11 +216,13 @@ class ProductSummarySerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(first_image.image.url) if request else first_image.image.url
         return None
 
+
 class SubCategoryTinySerializer(serializers.Serializer):
     name = serializers.CharField()
     slug = serializers.CharField()
-    thumbnail = serializers.URLField(allow_null=True, required=False) 
+    thumbnail = serializers.URLField(allow_null=True, required=False)
     link = serializers.CharField(allow_null=True, required=False)
+
 
 class CategoryInfoSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -228,6 +231,7 @@ class CategoryInfoSerializer(serializers.Serializer):
     description = serializers.CharField(allow_null=True)
     banners = serializers.DictField()
     breadcrumbs = serializers.ListField(child=serializers.DictField(), required=False)
+
 
 class CategoryLandingPageSerializer(serializers.Serializer):
     category_info = CategoryInfoSerializer()

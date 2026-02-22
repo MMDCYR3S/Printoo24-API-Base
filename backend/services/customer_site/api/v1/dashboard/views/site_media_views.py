@@ -2,14 +2,109 @@ from django.db import transaction
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse, OpenApiExample
 
 from apps.home.models import SiteMedia
 from ..serializers import SiteMediaSerializer
 
+
 # ==========================================
 # 1. View داشبورد (مخصوص مدیریت - CRUD کامل)
 # ==========================================
+@extend_schema_view(
+    list=extend_schema(
+        tags=['Dashboard-Media'],
+        summary="لیست تمام رسانه‌ها",
+        description="دریافت لیست کامل رسانه‌های سایت. فقط برای ادمین.",
+        responses={
+            200: SiteMediaSerializer(many=True),
+            401: OpenApiResponse(description="احراز هویت نشده"),
+        },
+    ),
+    retrieve=extend_schema(
+        tags=['Dashboard-Media'],
+        summary="دریافت یک رسانه",
+        description="دریافت جزئیات یک رسانه خاص بر اساس ID.",
+        responses={
+            200: SiteMediaSerializer,
+            401: OpenApiResponse(description="احراز هویت نشده"),
+            404: OpenApiResponse(description="رسانه یافت نشد"),
+        },
+    ),
+    create=extend_schema(
+        tags=['Dashboard-Media'],
+        summary="آپلود رسانه جدید",
+        description="""
+        آپلود فایل تصویری یا گیف جدید.
+        - حداکثر حجم فایل: 5MB
+        - فرمت‌های مجاز: jpg, jpeg, png, gif, webp
+        - در صورت فعال بودن `is_active`، سایر رسانه‌ها غیرفعال می‌شوند.
+        """,
+        request=SiteMediaSerializer,
+        responses={
+            201: SiteMediaSerializer,
+            400: OpenApiResponse(description="داده‌های نامعتبر"),
+            401: OpenApiResponse(description="احراز هویت نشده"),
+        },
+        examples=[
+            OpenApiExample(
+                name="آپلود رسانه فعال",
+                summary="آپلود یک رسانه و فعال کردن آن",
+                description="با ارسال is_active=true رسانه‌های قبلی غیرفعال می‌شوند.",
+                value={"file": "<binary>", "link": "https://example.com", "is_active": True},
+                request_only=True,
+            ),
+            OpenApiExample(
+                name="آپلود رسانه غیرفعال",
+                summary="آپلود رسانه بدون فعال‌سازی",
+                value={"file": "<binary>", "link": "", "is_active": False},
+                request_only=True,
+            ),
+        ],
+    ),
+    update=extend_schema(
+        tags=['Dashboard-Media'],
+        summary="ویرایش کامل رسانه",
+        description="""
+        به‌روزرسانی کامل اطلاعات رسانه (PUT).
+        - در صورت ارسال فایل جدید، فایل قبلی از هارد حذف می‌شود.
+        - در صورت فعال‌سازی، سایر رسانه‌ها غیرفعال می‌شوند.
+        """,
+        request=SiteMediaSerializer,
+        responses={
+            200: SiteMediaSerializer,
+            400: OpenApiResponse(description="داده‌های نامعتبر"),
+            401: OpenApiResponse(description="احراز هویت نشده"),
+            404: OpenApiResponse(description="رسانه یافت نشد"),
+        },
+    ),
+    partial_update=extend_schema(
+        tags=['Dashboard-Media'],
+        summary="ویرایش جزئی رسانه",
+        description="""
+        به‌روزرسانی بخشی از اطلاعات رسانه (PATCH).
+        - فقط فیلدهای ارسال‌شده به‌روز می‌شوند.
+        - در صورت ارسال فایل جدید، فایل قبلی از هارد حذف می‌شود.
+        """,
+        request=SiteMediaSerializer,
+        responses={
+            200: SiteMediaSerializer,
+            400: OpenApiResponse(description="داده‌های نامعتبر"),
+            401: OpenApiResponse(description="احراز هویت نشده"),
+            404: OpenApiResponse(description="رسانه یافت نشد"),
+        },
+    ),
+    destroy=extend_schema(
+        tags=['Dashboard-Media'],
+        summary="حذف رسانه",
+        description="حذف رسانه و فایل فیزیکی مربوطه از سرور.",
+        responses={
+            204: OpenApiResponse(description="رسانه با موفقیت حذف شد"),
+            401: OpenApiResponse(description="احراز هویت نشده"),
+            404: OpenApiResponse(description="رسانه یافت نشد"),
+        },
+    ),
+)
 @extend_schema(tags=['Dashboard-Media'])
 class SiteMediaDashboardViewSet(viewsets.ModelViewSet):
     """
@@ -19,47 +114,25 @@ class SiteMediaDashboardViewSet(viewsets.ModelViewSet):
     serializer_class = SiteMediaSerializer
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated]
-    
-    # جایگزین get_queryset
     queryset = SiteMedia.objects.all()
 
     def perform_create(self, serializer):
-        """
-        مدیریت منطق ذخیره‌سازی هنگام ساخت مدیای جدید
-        """
         with transaction.atomic():
-            # اگر قرار است فعال باشد، بقیه رکوردها را غیرفعال می‌کنیم
             if serializer.validated_data.get('is_active') is True:
-                # استفاده از ORM جنگو به جای متد کاستوم منیجر برای اطمینان
                 SiteMedia.objects.update(is_active=False)
-            
-            # ذخیره رکورد جدید
             serializer.save()
 
     def perform_update(self, serializer):
-        """
-        مدیریت آپدیت و جایگزینی فایل
-        """
         instance = self.get_object()
-        
         with transaction.atomic():
-            # اگر این مدیا دارد فعال می‌شود، بقیه (به جز خودش) را غیرفعال کن
             if serializer.validated_data.get('is_active') is True:
                 SiteMedia.objects.exclude(pk=instance.pk).update(is_active=False)
-
-            # بررسی اینکه آیا فایل جدیدی ارسال شده است یا خیر
             new_file = serializer.validated_data.get('file')
-            # در صورتی که فایل جدیدی آمده باشد، فایل قبلی را از هارد پاک کن
             if new_file and instance.file and new_file != instance.file:
                 instance.file.delete(save=False)
-
-            # اعمال تغییرات روی دیتابیس
             serializer.save()
 
     def perform_destroy(self, instance):
-        """
-        حذف فایل فیزیکی قبل از حذف رکورد از دیتابیس
-        """
         if instance.file:
             instance.file.delete(save=False)
         instance.delete()
@@ -68,6 +141,25 @@ class SiteMediaDashboardViewSet(viewsets.ModelViewSet):
 # ==========================================
 # 2. View پابلیک (مخصوص کاربران ثبت‌نام نکرده)
 # ==========================================
+@extend_schema_view(
+    list=extend_schema(
+        tags=['Public-Media'],
+        summary="لیست رسانه‌های عمومی",
+        description="دریافت لیست تمام رسانه‌های سایت برای کاربران عمومی.",
+        responses={
+            200: SiteMediaSerializer(many=True),
+        },
+    ),
+    retrieve=extend_schema(
+        tags=['Public-Media'],
+        summary="دریافت یک رسانه عمومی",
+        description="دریافت جزئیات یک رسانه خاص برای کاربران عمومی.",
+        responses={
+            200: SiteMediaSerializer,
+            404: OpenApiResponse(description="رسانه یافت نشد"),
+        },
+    ),
+)
 @extend_schema(tags=['Public-Media'])
 class SiteMediaPublicViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -77,9 +169,4 @@ class SiteMediaPublicViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        """
-        در سرویس شما برای متد get_all همان لیست کل داده‌ها برگردانده می‌شد.
-        اگر می‌خواهید برای پابلیک 'فقط عکس‌های فعال' نمایش داده شوند (مانند get_active_for_display):
-        return SiteMedia.objects.filter(is_active=True)
-        """
-        return SiteMedia.objects.all() # در صورت داشتن متد اختصاصی در منیجر: SiteMedia.objects.get_all_media()
+        return SiteMedia.objects.all()
