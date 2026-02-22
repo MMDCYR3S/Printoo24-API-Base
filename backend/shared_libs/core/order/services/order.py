@@ -7,7 +7,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
-from core.models import User, Invoice, Order, OrderStatus, Product, OrderItem, ProductSize, ProductOptionValue, Address
+from core.models import User, Invoice, Order, OrderStatus, Product, OrderItem, Address
 from ..exceptions import OrderNotFoundException
 
 # ========== ORDER SERVICE ========== #
@@ -174,55 +174,8 @@ class OrderService:
         order.save()
                 
         return order
-        
-    def _prepare_item_specs_json(self, product, selections) -> Dict:
-        """
-        تبدیل ورودی‌های خام (IDها) به ساختار استاندارد JSON برای فیلد items.
-        """
-        size_id = selections.get('size_id')
-        width = selections.get('custom_width', 0)
-        height = selections.get('custom_height', 0)
-        # ===== دریافت اطلاعات سایز ===== #
-        size_name = "Custom"
-        if size_id:
-            try:
-                ps = ProductSize.objects.get(product=product, id=size_id)
-                width = float(ps.size.width)
-                height = float(ps.size.height)
-                size_name = ps.size.name
-            except ProductSize.DoesNotExist:
-                pass
-        # ===== دریافت اطلاعات گزینه ===== #
-        option_ids = selections.get('option_value_ids', [])
-        options_list = []
-        # ===== ایجاد آیتم ===== #
-        if option_ids:
-            values = ProductOptionValue.objects.filter(id__in=option_ids).select_related('product_option__option')
-            for val in values:
-                opt_name = val.product_option.label
-                if not opt_name and val.product_option.option:
-                    opt_name = val.product_option.option.label
-                # ===== ایجاد لیست ویژگی ها ===== #
-                options_list.append({
-                    'option_id': val.product_option.id,
-                    'option_label': opt_name or "Unknown Option",
-                    'type': 'selection',
-                    'value': {
-                        'id': val.id,
-                        'label': val.label,
-                        'price': float(val.price_impact)
-                    }
-                })
-        # ===== بازگشت ===== #
-        return {
-            "options": options_list,
-            "meta": {
-                "width": float(width),
-                "height": float(height),
-                "size_id": size_id,
-                "has_design": selections.get('has_design', True)
-            }
-        }
+    
+    ###################################
         
     @transaction.atomic
     def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, int]:

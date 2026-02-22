@@ -7,7 +7,6 @@ from rest_framework import status
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
-from apps.shop.filters import ProductFilter
 from .serializers import (
     ProductListSerializer,
     ProductDetailSerializer,
@@ -33,7 +32,6 @@ class ProductListView(ListAPIView):
     """
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
-    filterset_class = ProductFilter
     lookup_field = 'slug'
     
     def get_queryset(self):

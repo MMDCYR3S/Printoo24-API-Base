@@ -168,6 +168,7 @@ class SiteMedia(models.Model):
         upload_to='site_media/',
         validators=[validate_file_size_5mb, validate_image_and_gif_extension]
     )
+    link = models.CharField(_("لینک"), max_length=500, blank=True, null=True)
     is_active = models.BooleanField(_("وضعیت نمایش"), default=False)
     created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
     updated_at = models.DateTimeField(_("تاریخ به روزرسانی"), auto_now=True)

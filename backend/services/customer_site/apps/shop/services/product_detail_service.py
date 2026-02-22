@@ -4,7 +4,6 @@ from collections import defaultdict
 from django.db.models import QuerySet
 
 from core.product.services import ProductService
-from core.models import ProductOption
 
 # ====== Logger Configuration ====== #
 logger = logging.getLogger('shop.services.product_detail')
