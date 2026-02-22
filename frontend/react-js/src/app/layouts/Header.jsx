@@ -77,7 +77,7 @@ const Header = ({ onOpenDrawer }) => {
   }, []);
 
   const handleCreditClick = () => {
-    window.open('https://wa.me/9647700000000', '_blank');
+    window.open('https://wa.me/9647762278666', '_blank');
   };
 
   // بستن جستجو با Escape
@@ -380,7 +380,7 @@ const Header = ({ onOpenDrawer }) => {
                 { label: pageText.layout.Header.allProducts, to: '/shop', icon: Store },
                 { label: pageText.layout.Header.lastOrders, to: '/profile/orders', icon: Package },
                 { label: pageText.layout.Header.myAddresses, to: '/profile/addresses', icon: MapPin },
-                { label: pageText.layout.Header.trackingOrder, to: 'https://wa.me/9647700000000', icon: Headphones },
+                { label: pageText.layout.Header.trackingOrder, to: 'https://wa.me/9647762278666', icon: Headphones },
               ].map((item) => (
                 <Link
                   key={item.to}
@@ -404,7 +404,7 @@ const Header = ({ onOpenDrawer }) => {
               <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg">
                 <Phone size={13} strokeWidth={2} className="text-slate-400" />
                 <span className="font-bold text-slate-500 dir-ltr text-xs tracking-wide">
-                  0770-000-0000
+                  0770-6227-8666
                 </span>
               </div>
               <span className="text-[11px] text-slate-400 hidden xl:inline">

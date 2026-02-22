@@ -380,7 +380,7 @@ const FAQSection = () => {
 
   const faqs = [
     {
-      question: pageText.home.faq.question1.title,
+      question: pageText.home.faq.question1.title ,
       answer: pageText.home.faq.question1.value,
     },
     {
@@ -407,7 +407,7 @@ const FAQSection = () => {
       <AnimatedSection className="text-center mb-10">
         <div className="inline-flex items-center gap-2 bg-primary/8 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-4">
           <MessageCircleQuestion size={14} />
-          پرسش و پاسخ
+          پرسیارە باوەکان 
         </div>
         <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">
           {pageText.home.faqTitle}
