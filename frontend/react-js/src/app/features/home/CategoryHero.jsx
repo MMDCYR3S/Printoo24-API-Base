@@ -82,7 +82,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle, index }) => {
               ${isOpen ? 'opacity-30 scale-105 blur-[1px]' : 'opacity-0'}
             `}
           />
-          <div className={`absolute inset-0 transition-all duration-500 ${isOpen ? 'bg-gradient-to-l from-secondary to-primary' : ''}`} />
+          <div className={`absolute inset-0 transition-all duration-500 ${isOpen ? 'bg-primary' : ''}`} />
         </div>
 
         {/* Content */}

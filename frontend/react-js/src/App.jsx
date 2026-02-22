@@ -66,6 +66,7 @@ import CustomerDetailPage from './app/features/admin/features/users/CustomerDeta
 import MessageListPage from './app/features/admin/features/messages/MessageListPage';
 import SliderSettingsPage from './app/features/admin/features/settings/SliderSettingsPage';
 import ModalSettingsPage from './app/features/admin/features/settings/ModalSettingsPage';
+import SiteMediaPage from './app/features/admin/features/settings/SiteMediaPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -133,6 +134,7 @@ function App() {
               <Route path="messages" element={<MessageListPage />} />
               <Route path="settings/sliders" element={<SliderSettingsPage />} />
               <Route path="settings/modals" element={<ModalSettingsPage />} />
+              <Route path="settings/media" element={<SiteMediaPage />} />
             </Route>
           </Route>
 
