@@ -48,9 +48,8 @@ class ProductListView(ListAPIView):
             'categories',
             'product_image'
         )
-        filterset = self.filterset_class(self.request.GET, queryset=queryset)
 
-        return filterset.qs.distinct()
+        return queryset
 
 # ======= Product Detail View ======= #
 @extend_schema(tags=["Product"])
