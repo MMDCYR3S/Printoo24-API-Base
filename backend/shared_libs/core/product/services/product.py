@@ -165,6 +165,7 @@ class ProductService:
                 'is_active': field_data.get('is_active', True),
                 'is_quantity_field': field_data.get('is_quantity_field', False),
                 'order': field_data.get('order', 0),
+                'multi_select_operator': field_data.get('multi_select_operator', 'add'),
             }
 
             if field_id:

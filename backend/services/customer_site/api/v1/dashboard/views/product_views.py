@@ -43,7 +43,13 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== CREATE ========== #
     @extend_schema(
-        summary="مرحله ۱: ایجاد محصول",
+        summary="مرحله ۱: ایجاد هسته محصول",
+        description="""
+        **مقادیر مجاز (Enums) برای guide_type:**
+        - `info` : اطلاعات (پیش‌فرض)
+        - `warning` : هشدار
+        - `tip` : نکته
+        """,
         request=ProductCoreCreateSerializer,
         responses={201: inline_serializer('CreateResponse', fields={
             'id': serializers.IntegerField(),
@@ -64,7 +70,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                         "has_quantity": True,
                         "is_active": True,
                         "guide_text": "زمان تحویل ۷ روز کاری است.",
-                        "guide_type": "warning"
+                        "guide_type": "warning"  # <--- Enum
                     }
                 },
                 request_only=True,
@@ -138,9 +144,35 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         summary="مرحله ۲: همگام‌سازی فیلدها و شرط‌ها",
         description="""
         ارسال کل ساختار فرم (فیلدها، گزینه‌ها، شرط‌های وابستگی) در یک درخواست.
-        - فیلدهایی که `id` ندارند **ایجاد** می‌شوند.
-        - فیلدهایی که `id` دارند **ویرایش** می‌شوند.
-        - فیلدهایی که در لیست نیستند **حذف** می‌شوند.
+        
+        **📌 مقادیر مجاز (Enums) که فرانت‌اند باید رعایت کند:**
+        
+        **۱. انواع فیلد (`field_type`):**
+        - `text` : متن کوتاه
+        - `textarea` : متن چندخطی
+        - `number` : عدد
+        - `single_select` : تک انتخابی (Radio)
+        - `multi_select` : چند انتخابی (Checkbox)
+        - `dropdown` : کشویی (Select)
+
+        **۲. عملگر داخلی چندانتخابی (`multi_select_operator`):**
+        *(فقط زمانی کاربرد دارد که نوع فیلد multi_select یا checkbox باشد)*
+        - `add` : جمع (+)
+        - `sub` : تفریق (-)
+        - `mul` : ضرب (*)
+        - `div` : تقسیم (/)
+
+        **۳. عملگر شرط (`operator`):**
+        - `equals` : برابر با
+        - `not_equals` : به غیر از
+        - `is_empty` : خالی باشد
+        - `is_not_empty` : خالی نباشد
+
+        **۴. عملیات شرط (`action`):**
+        - `show` : آشکار شود
+        - `hide` : پنهان شود
+        - `enable` : فعال شود
+        - `disable` : غیرفعال شود
         """,
         request=ProductFieldsBulkSyncSerializer,
         responses={200: inline_serializer('SyncFieldsResponse', fields={
@@ -253,10 +285,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
         **مثال کاربردی:**
         اگر فیلد "سایز" دارای `id=12` و فیلد "تیراژ" دارای `id=15` و فیلد "روکش" دارای `id=18` باشد:
-        فرمول می‌تواند اینطور باشد: `((field_12 * field_15) + field_18) * 1.09` (که 1.09 همان ۹٪ مالیات است).
-
-        - اگر فرمولی `id` داشته باشد آپدیت می‌شود و در غیر این صورت ایجاد می‌گردد.
-        - فرمول‌هایی که در این لیست فرستاده نشوند، به طور خودکار از دیتابیس **حذف** خواهند شد.
+        فرمول می‌تواند اینطور باشد: `((field_12 * field_15) + field_18) * 1.09`
         """,
         request=ProductFormulasBulkSyncSerializer,
         responses={200: inline_serializer('SyncFormulasResponse', fields={

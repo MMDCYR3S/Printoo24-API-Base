@@ -327,12 +327,24 @@ class ConditionAction(models.TextChoices):
     ENABLE = 'enable', _('فعال شود')
     DISABLE = 'disable', _('غیرفعال شود')
 
+class MultiSelectOperator(models.TextChoices):
+    ADD = 'add', _('جمع (+)')
+    SUBTRACT = 'sub', _('تفریق (-)')
+    MULTIPLY = 'mul', _('ضرب (*)')
+    DIVIDE = 'div', _('تقسیم (/)')
+
 # ======== 1. فرم‌ساز (مدل فیلدها) ======== #
 class ProductField(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='fields', verbose_name=_("محصول"))
     title = models.CharField(_("عنوان فیلد"), max_length=150)
     description = models.TextField(_("توضیحات"), blank=True, null=True)
-    
+    multi_select_operator = models.CharField(
+        _("عملگر داخلی چندانتخابی"),
+        max_length=10,
+        choices=MultiSelectOperator.choices,
+        default=MultiSelectOperator.ADD,
+        help_text=_("اگر فیلد چندانتخابی است، مقادیرِ تیک‌خورده با چه عملگری با هم محاسبه شوند؟")
+    )
     field_type = models.CharField(_("نوع فیلد"), max_length=20, choices=FieldType.choices, default=FieldType.DROPDOWN)
     
     # اضافه شدن مقدار عددی به خود فیلد (طبق دستور شما)
