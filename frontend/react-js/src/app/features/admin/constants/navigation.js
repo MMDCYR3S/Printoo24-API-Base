@@ -65,6 +65,7 @@ export const ADMIN_NAVIGATION = [
     children: [
       { title: 'اسلایدر صفحه اصلی', path: '/admin/settings/sliders', icon: Layers },
       { title: 'مودال‌های اطلاع‌رسانی', path: '/admin/settings/modals', icon: MessageSquare },
+      {  title: 'نوار هدر', path: '/admin/settings/media', icon: Settings }
     ]
   },
 ];

@@ -11,7 +11,7 @@ const SupportFloat = () => {
         target="_blank"
         rel="noreferrer"
         className="tooltip tooltip-right before:!bg-accent before:!text-accent-content"
-        data-tip="پشتیبانی تلگرام"
+        data-tip="Telegram"
       >
         <button className="btn btn-circle w-14 h-14 bg-[#229ED9] hover:bg-[#1e8dbf] border-none shadow-lg shadow-[#229ED9]/40 hover:-translate-y-1 transition-all">
           <svg viewBox="0 0 24 24" className="w-8 h-8 fill-white" xmlns="http://www.w3.org/2000/svg">
@@ -22,11 +22,11 @@ const SupportFloat = () => {
 
       {/* دکمه واتساپ */}
       <a
-        href="https://wa.me/9647700000000" // شماره واتساپ خود را جایگزین کنید
+        href="https://wa.me/9647762278666" // شماره واتساپ خود را جایگزین کنید
         target="_blank"
         rel="noreferrer"
         className="tooltip tooltip-right before:!bg-accent before:!text-accent-content"
-        data-tip="پشتیبانی واتساپ"
+        data-tip="WhatsApp"
       >
         <button className=" btn btn-circle w-14 h-14 bg-[#25D366] hover:bg-[#20bd5a] border-none shadow-lg shadow-[#25D366]/40 hover:-translate-y-1 transition-all">
           <svg viewBox="0 0 24 24" className="w-8 h-8 fill-white" xmlns="http://www.w3.org/2000/svg">
