@@ -1,41 +1,33 @@
 from rest_framework import serializers
-from core.infrastructure.messages import msg_provider
-
-# ===== Selections Serializer (Base) ===== #
-class SelectionsSerializer(serializers.Serializer):
-    name = serializers.CharField(required=False, allow_blank=True, max_length=255)
-    description = serializers.CharField(required=False, allow_blank=True)
-    quantity = serializers.IntegerField(required=False, min_value=1)
-    quantity_id = serializers.IntegerField(required=False)
-    size_id = serializers.IntegerField(required=False, allow_null=True)
-    width = serializers.FloatField(required=False, min_value=0.1)
-    height = serializers.FloatField(required=False, min_value=0.1)
-    options = serializers.DictField(required=False, default={})
-    has_design = serializers.BooleanField(required=False, default=True)
-
-    def validate(self, data):
-        # ===== چک کردن تضاد سایز ===== #
-        if data.get('size_id') and (data.get('width') or data.get('height')):
-            raise serializers.ValidationError(msg_provider.get("cart.E4029"))
-        return data
 
 # ===== Add To Cart Serializer ===== #
 class AddToCartSerializer(serializers.Serializer):
-    product_id = serializers.IntegerField(required=True)
-    selections = SelectionsSerializer()
+    product_id = serializers.IntegerField(required=True, help_text="شناسه محصولی که قرار است به سبد اضافه شود")
+    
+    # استفاده از DictField برای دریافت ساختار کاملاً داینامیک فیلدساز
+    selections = serializers.DictField(
+        child=serializers.JSONField(), # به کلاینت اجازه می‌دهد عدد، رشته یا لیست (برای چک‌باکس‌ها) بفرستد
+        help_text="""
+        دیکشنری انتخاب‌های کاربر.
+        - کلیدها: آیدی فیلدهای داینامیک (مثلاً "10")
+        - مقادیر: مقدار تایپ شده یا آیدیِ گزینه انتخاب شده.
+        - فیلدهای رزرو شده (اختیاری): "name" (نام پروژه) و "description" (توضیحات مشتری).
+        """
+    )
+
+    def validate_selections(self, value):
+        """
+        اینجا یک گارد اولیه می‌گذاریم تا مطمئن شویم فرانت‌اند دیتای پرت‌وپلا نمی‌فرستد.
+        ولیدیشن اصلی و وابستگی‌ها در Domain Service (CartProcessor) انجام می‌شود.
+        """
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("فرمت selections باید یک آبجکت JSON (دیکشنری) باشد.")
+        return value
 
 # ===== Cart Item Update Serializer ===== #
 class CartItemUpdateSerializer(serializers.Serializer):
-    quantity = serializers.IntegerField(required=False, min_value=1)
-    quantity_id = serializers.IntegerField(required=False)
-    size_id = serializers.IntegerField(required=False, allow_null=True)
-    width = serializers.FloatField(required=False, min_value=0.1)
-    height = serializers.FloatField(required=False, min_value=0.1)
-    options = serializers.DictField(required=False, default={})
-    has_design = serializers.BooleanField(required=False)
-
-    def validate(self, data):
-        # ===== چک کردن تضاد سایز ===== #
-        if data.get('size_id') and (data.get('width') or data.get('height')):
-            raise serializers.ValidationError(msg_provider.get("cart.E4029"))
-        return data
+    # در زمان آپدیت، نیازی به product_id نیست، چون خود آیتم مشخص است
+    selections = serializers.DictField(
+        child=serializers.JSONField(),
+        help_text="دیکشنری آپدیت شده از انتخاب‌های کاربر. هر چیزی که بفرستید، جایگزین قبلی می‌شود و قیمت مجدداً محاسبه می‌گردد."
+    )
