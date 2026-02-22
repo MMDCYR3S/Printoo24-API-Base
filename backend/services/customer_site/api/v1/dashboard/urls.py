@@ -6,11 +6,7 @@ from .views import (
     ContactUsViewSet,
     CustomerViewSet,
     WalletViewSet,
-    SizeViewSet, 
-    QuantityViewSet,
-    OptionViewSet,
     ProductDashboardViewSet,
-    AttachmentLibraryViewSet,
     CartDashboardViewSet,
     CartFileUploadViewSet,
     OrderDashboardViewSet,
@@ -21,7 +17,6 @@ from .views import (
     FinancialDashboardStatsView,
     CityDashboardViewSet,
     ProvinceDashboardViewSet,
-    ProductImageViewSet,
     InvoiceViewSet,
     QuotationViewSet,
     StaffViewSet,
@@ -36,12 +31,7 @@ router.register(r'modals', PromotionalModalViewSet, basename='promotional_modal'
 router.register(r'contacts', ContactUsViewSet, basename='contact-us')
 router.register(r'customers', CustomerViewSet, basename='customer')
 router.register(r'wallets', WalletViewSet, basename='wallet')
-router.register(r'sizes', SizeViewSet, basename='sizes')
-router.register(r'quantities', QuantityViewSet, basename='quantities')
-router.register(r'options', OptionViewSet, basename='options')
 router.register(r'products', ProductDashboardViewSet, basename='products')
-router.register(r'attachments', AttachmentLibraryViewSet, basename='attachments')
-router.register(r'images', ProductImageViewSet, basename='images')
 router.register(r'cart', CartDashboardViewSet, basename='cart')
 router.register(r'cart-files', CartFileUploadViewSet, basename='cart-files')
 router.register(r'orders', OrderDashboardViewSet, basename='orders')

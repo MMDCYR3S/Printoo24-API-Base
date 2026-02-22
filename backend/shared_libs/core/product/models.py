@@ -13,10 +13,6 @@ from .managers import (
     ProductManager, 
     ProductImageManager, 
     AttachmentManager,
-    OptionManager,
-    OptionValueManager,
-    SizeManager,
-    QuantityManager,
     ProductCategoryManager,
     ProductRatingManager, 
     ProductCommentManager
@@ -310,133 +306,126 @@ class Product(HasGuide, models.Model):
     def __str__(self):
         return f"{self.name} - {self.code}"
 
-# ======== Product Pricing & Config Logic ======== #
-class ProductPricingConfig(models.Model):
-    """
-    تنظیمات پیشرفته محاسبه قیمت و قوانین سفارش.
-    این مدل جلوی چاق شدن مدل Product را می‌گیرد.
-    """
-    product = models.OneToOneField(
-        Product, 
-        on_delete=models.CASCADE,
-        related_name='pricing_config',
-        verbose_name=_("محصول مرتبط")
-    )
-    
-    # ===== تنظیمات تیراژ و ابعاد ===== #
-    allow_custom_quantity = models.BooleanField(_("امکان تیراژ دلخواه"), default=False)
-    min_quantity = models.PositiveIntegerField(_("حداقل تیراژ"), default=100)
-    max_quantity = models.PositiveIntegerField(_("حداکثر تیراژ"), default=10000)
-    
-    accepts_custom_dimensions = models.BooleanField(_("پذیرش ابعاد دلخواه"), default=False)
-    min_width = models.FloatField(_("حداقل عرض (cm)"), default=0)
-    max_width = models.FloatField(_("حداکثر عرض (cm)"), default=0)
-    
-    # ===== تنظیمات مالی ===== #
-    base_setup_price = models.DecimalField(
-        _("هزینه ثابت اولیه (Setup)"), 
-        max_digits=12, decimal_places=0, default=0,
-        help_text=_("هزینه زینک، قالب یا تنظیم دستگاه که ربطی به تیراژ ندارد.")
-    )
-    
-    # ===== تنظیمات خدمات طراحی ===== #
-    design_service_available = models.BooleanField(_("ارائه خدمات طراحی"), default=True)
-    design_fee = models.DecimalField(
-        _("هزینه طراحی پایه"),
-        max_digits=12, decimal_places=0, default=0,
-        help_text=_("اگر کاربر فایل نداشت، این مبلغ اضافه می‌شود.")
-    )
-    
-    class Meta:
-        verbose_name = _("تنظیمات قیمت و سفارش")
-        verbose_name_plural = _("تنظیمات قیمت و سفارش")
+# ======== ENUMS ======== #
+class FieldType(models.TextChoices):
+    TEXT = 'text', _('متن کوتاه')
+    TEXTAREA = 'textarea', _('متن چندخطی')
+    NUMBER = 'number', _('عدد')
+    SINGLE_SELECT = 'single_select', _('تک انتخابی (Radio)')
+    MULTI_SELECT = 'multi_select', _('چند انتخابی (Checkbox)')
+    DROPDOWN = 'dropdown', _('کشویی (Select)')
 
-    def __str__(self):
-        return f"Config for {self.product.name}"
+class ConditionOperator(models.TextChoices):
+    EQUALS = 'equals', _('برابر با')
+    NOT_EQUALS = 'not_equals', _('به غیر از')
+    IS_EMPTY = 'is_empty', _('خالی باشد')
+    IS_NOT_EMPTY = 'is_not_empty', _('خالی نباشد')
 
-# ======== Size ======== #
-class Size(models.Model):
-    """ مدل سایز با طول و عرض """
-    user = models.ForeignKey("core.User", related_name='size_user', on_delete=models.PROTECT)
-    name = models.CharField(_("نام"), max_length=150)
-    width = models.FloatField(_("عرض"), default=0)
-    height = models.FloatField(_("طول"), default=0)
-    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
+class ConditionAction(models.TextChoices):
+    SHOW = 'show', _('آشکار شود')
+    HIDE = 'hide', _('پنهان شود')
+    ENABLE = 'enable', _('فعال شود')
+    DISABLE = 'disable', _('غیرفعال شود')
+
+# ======== 1. فرم‌ساز (مدل فیلدها) ======== #
+class ProductField(models.Model):
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='fields', verbose_name=_("محصول"))
+    title = models.CharField(_("عنوان فیلد"), max_length=150)
+    description = models.TextField(_("توضیحات"), blank=True, null=True)
     
-    objects = SizeManager()
-
-    def __str__(self):
-        return f"{self.name}({self.width} - {self.height})"
+    field_type = models.CharField(_("نوع فیلد"), max_length=20, choices=FieldType.choices, default=FieldType.DROPDOWN)
     
-    class Meta:
-        verbose_name = _("سایز")
-        verbose_name_plural = _("سایزها")
-
-# ====== Product Size Model ====== #
-class ProductSize(HasGuide, models.Model):
-    """ مدل واسط بین سایز و محصول"""
-    user = models.ForeignKey("core.User", related_name='product_size', on_delete=models.PROTECT)
-    product = models.ForeignKey(Product, related_name='product_size', on_delete=models.CASCADE)
-    size = models.ForeignKey(Size, related_name='size_product', on_delete=models.PROTECT)
-    # ==== قیمت هر سایز ==== #
-    price_impact = models.DecimalField(
-        _("تأثیر بر قیمت"), 
-        max_digits=10, 
+    # اضافه شدن مقدار عددی به خود فیلد (طبق دستور شما)
+    numeric_value = models.DecimalField(
+        _("مقدار عددی پایه (برای فرمول)"), 
+        max_digits=14, 
         decimal_places=2, 
-        default=0,
-        help_text=_("مبلغی که به قیمت پایه اضافه یا از آن کسر می‌شود (به تومان).")
+        default=0.0,
+        help_text=_("اگر خود فیلد به تنهایی دارای ارزش عددی/قیمتی در فرمول است (مستقل از زیرمجموعه‌ها)")
     )
-    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
-    def __str__(self):
-        return f"{self.product.name} - {self.size.name}"
+    is_required = models.BooleanField(_("اجباری بودن"), default=False)
+    is_active = models.BooleanField(_("فعال بودن"), default=True)
+    is_quantity_field = models.BooleanField(_("آیا این فیلد همان تیراژ است؟"), default=False)
+    
+    order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
 
     class Meta:
-        verbose_name = _('محصول سایز')
-        verbose_name_plural = _('محصولات سایز')
+        ordering = ['order']
 
-# ====== Quantity Model ====== #
-class Quantity(models.Model):
-    """ مدل تیراژ """
-    user = models.ForeignKey("core.User", related_name='quantity_user', on_delete=models.PROTECT)
-    value = models.PositiveIntegerField(_('تیراژ'), unique=True)
-    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
-    
-    objects = QuantityManager()
-    
     def __str__(self):
-        return str(self.value)
-    
-    class Meta:
-        verbose_name = _('تیراژ')
-        verbose_name_plural = _('تیراژ ها')
+        return f"{self.product.name} - {self.title} (ID: {self.id})"
 
-# ====== Product Quantity Model ====== #
-class ProductQuantity(HasGuide, models.Model):
-    """ کلاس واسط بین مدل محصول و تیراژ """
-    user = models.ForeignKey('core.User', related_name='product_quantity_user', on_delete=models.PROTECT)
-    product = models.ForeignKey(Product, related_name='product_quantity', on_delete=models.CASCADE)
-    quantity = models.ForeignKey(Quantity, related_name='quantity_product', on_delete=models.PROTECT)
-    created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
-    price = models.DecimalField(
-        _('قیمت پایه در این تیراژ'), 
-        max_digits=12, 
-        decimal_places=0, 
-        default=0,
-        help_text=_("مثال: قیمت پایه ۱۰۰۰ عدد کارت ویزیت بدون هیچ ویژگی اضافه‌ای.")
+
+# ======== 2. مقادیر زیرمجموعه ======== #
+class ProductFieldChoice(models.Model):
+    field = models.ForeignKey(ProductField, on_delete=models.CASCADE, related_name='choices')
+    title = models.CharField(_("عنوان مقدار"), max_length=150)
+    
+    numeric_value = models.DecimalField(
+        _("مقدار عددی (برای فرمول)"), 
+        max_digits=14, 
+        decimal_places=2, 
+        default=0.0
     )
-    updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
-    def __str__(self):
-        return f"{self.product.name} - {self.quantity}"
-    
+    order = models.PositiveIntegerField(_("ترتیب"), default=0)
+
     class Meta:
-        verbose_name = _('تعداد')
-        verbose_name_plural = _('تعداد ها')
-        unique_together = ('product', 'quantity')
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.field.title} -> {self.title} (Value: {self.numeric_value})"
+
+
+# ======== 3. شرط‌ساز ======== #
+class ProductFieldCondition(models.Model):
+    target_field = models.ForeignKey(ProductField, on_delete=models.CASCADE, related_name='applied_conditions', verbose_name=_("فیلد هدف"))
+    
+    trigger_field = models.ForeignKey(ProductField, on_delete=models.CASCADE, related_name='triggering_conditions', verbose_name=_("فیلد شرط"))
+    operator = models.CharField(_("عملگر"), max_length=20, choices=ConditionOperator.choices)
+    
+    trigger_choice = models.ForeignKey(ProductFieldChoice, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("مقدار شرط (برای لیست‌ها)"))
+    trigger_value_text = models.CharField(_("مقدار شرط (برای متن/عدد)"), max_length=255, null=True, blank=True)
+    
+    action = models.CharField(_("عملیات"), max_length=20, choices=ConditionAction.choices)
+
+    def clean(self):
+        if self.target_field == self.trigger_field:
+            raise ValidationError(_("یک فیلد نمی‌تواند به خودش وابسته باشد."))
+
+    def __str__(self):
+        return f"If {self.trigger_field.title} {self.operator} -> {self.action} {self.target_field.title}"
+
+
+# ======== 4. فرمول‌ساز نهایی ======== #
+class ProductFormula(models.Model):
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='formulas')
+    title = models.CharField(_("عنوان فرمول"), max_length=150)
+    
+    condition_expression = models.CharField(
+        _("شرط اجرای فرمول"), 
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text=_("مثال: field_15 > 1000")
+    )
+    
+    # تغییر Help Text بر اساس استفاده از ID
+    calculation_expression = models.TextField(
+        _("عبارت محاسباتی"),
+        help_text=_("فرمول ریاضی با استفاده از ID فیلدها. مثال: (field_12 * field_15) + 500")
+    )
+    
+    currency = models.CharField(
+        _("واحد پولی"), 
+        max_length=10, 
+        default='IQD', 
+        editable=False
+    )
+
+    def __str__(self):
+        return f"{self.product.name} - {self.title}"
         
 # ====== Product Image Model ====== #
 class ProductImage(models.Model):
@@ -475,229 +464,6 @@ class Attachment(models.Model):
     class Meta:
         verbose_name = _('فایل پیوست')
         verbose_name_plural = _('فایل های پیوست')
-
-# ====== Option Pricing Strategy Model ====== #
-class OptionPricingStrategy(models.TextChoices):
-    """
-    استراتژی محاسبه قیمت.
-    مشخص می‌کند عدد قیمت (Rate) در چه چیزی ضرب شود.
-    """
-    FIXED = 'fixed', _('مبلغ ثابت (Fixed Amount)')
-    PERCENTAGE = 'percentage', _('درصدی از قیمت پایه (Percentage)')
-    
-    # ===== فرمول‌های وابسته به ابعاد ===== #
-    PER_SQM = 'per_sqm', _('براساس متر مربع (Area * Rate)')
-    PER_METER_PERIMETER = 'per_perimeter', _('براساس متر محیط (Perimeter * Rate)')
-    # ===== فرمول‌های وابسته به ورودی ===== #
-    PER_UNIT_INPUT = 'per_unit', _('براساس عدد ورودی کاربر (Input * Rate)')
-    
-# ====== Option Model ====== #
-class Option(BaseOptionDefinition):
-    """
-    بانک ویژگی‌ها (ارث‌بری از BaseOptionDefinition + HasGuide).
-    """
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    objects = OptionManager()
-
-    def __str__(self):
-        return f"{self.label} ({self.get_input_type_display()})"
-    
-    class Meta:
-        verbose_name = _("بانک ویژگی")
-        verbose_name_plural = _("بانک ویژگی‌ها")
-
-# ====== Option Value Model ====== #
-class OptionValue(BaseOptionValueDefinition):
-    """ 
-    مقادیر پیش‌فرض در بانک (ارث‌بری از BaseOptionValueDefinition + HasGuide).
-    """
-    option = models.ForeignKey(Option, related_name='global_values', on_delete=models.PROTECT)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    objects = OptionValueManager()
-    
-    def __str__(self):
-        return f"{self.option.label}: {self.label}"
-    
-    class Meta:
-        verbose_name = _("الگوی مقدار ویژگی")
-        verbose_name_plural = _("الگوهای مقادیر ویژگی")
-
-# ====== PRODUCT OPTION MODEL ====== #
-class ProductOption(BaseOptionDefinition):
-    """
-    اتصال ویژگی به محصول.
-    خودش دارای input_type است (از BaseOptionDefinition).
-    """
-    product = models.ForeignKey(Product, related_name='options', on_delete=models.CASCADE)
-    option = models.ForeignKey(Option, related_name='product_configs', on_delete=models.PROTECT, null=True, blank=True)
-    
-    is_required = models.BooleanField(_("اجباری؟"), default=False)
-    order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
-
-    class Meta:
-        verbose_name = _("پیکربندی ویژگی محصول")
-        verbose_name_plural = _("پیکربندی ویژگی‌های محصولات")
-        ordering = ['order']
-
-    def save(self, *args, **kwargs):
-        # [LOGIC]: کپی اطلاعات از بانک (Snapshot) در صورت وجود لینک
-        if self.option:
-            if not self.name:
-                self.name = self.option.name
-            if not self.label:
-                self.label = self.option.label
-            if not self.input_type:
-                self.input_type = self.option.input_type
-        
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.product.name} | {self.label}"
-
-# ====== PRODUCT OPTION VALUE MODEL ====== #
-class ProductOptionValue(BaseOptionValueDefinition):
-    """
-    مقادیر نهایی برای محصول.
-    """
-    product_option = models.ForeignKey(ProductOption, related_name='choices', on_delete=models.CASCADE)
-    
-    global_source = models.ForeignKey(
-        OptionValue, 
-        null=True, blank=True, 
-        on_delete=models.SET_NULL,
-        verbose_name=_("منبع گلوبال")
-    )
-
-    has_pricing = models.BooleanField(_("آیا روی قیمت تاثیر دارد؟"), default=True)
-    
-    price_impact = models.DecimalField(
-        _("قیمت پیش‌فرض (تعدادی)"), 
-        max_digits=14, decimal_places=0, default=0,
-        help_text=_("اگر محصول 'تعدادی' است، این مبلغ با تعداد جمع/ضرب می‌شود. اگر تیراژی است و در ماتریس قیمتی ندارد، از این عدد استفاده می‌شود.")
-    )
-    
-    is_default = models.BooleanField(default=False)
-    order = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        verbose_name = _("گزینه انتخابی نهایی")
-        verbose_name_plural = _("گزینه‌های انتخابی نهایی")
-        ordering = ['order']
-
-    def clean(self):
-        if not self.global_source and not self.label:
-             raise ValidationError(_("برای مقادیر سفارشی، عنوان الزامی است."))
-        
-        if not self.has_pricing and self.price_impact != 0:
-             raise ValidationError(_("وقتی گزینه فاقد قیمت است، مبلغ پیش‌فرض باید ۰ باشد."))
-
-    def save(self, *args, **kwargs):
-        if self.global_source and not self.label:
-            self.label = self.global_source.label
-            self.value = self.global_source.value
-        
-        if not self.has_pricing:
-            self.price_impact = 0
-            
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.product_option.product.name} | {self.label} ({self.price_impact})"
-
-# ====== Option Dependency Rule ====== #
-class ProductOptionCondition(models.Model):
-    """
-    موتور قوانین وابستگی ویژگی‌ها (Dependency Matrix).
-    به جای ساختار درختی (Tree)، ویژگی‌ها کاملاً تخت (Flat) ساخته می‌شوند 
-    و با این جدول به هم وابسته (مشروط) می‌شوند.
-    مثال: گرماژ ۱۳۵ گرم (target) فقط زمانی فعال و قابل انتخاب است که جنس گلاسه (condition) انتخاب شده باشد.
-    """
-    
-    ACTION_CHOICES = [
-        ('show', _('نمایش دادن و فعال کردن (Enable)')),
-        ('hide', _('مخفی کردن و غیرفعال کردن (Disable/Exclude)')),
-    ]
-
-    # ===== فیلدهای زیرویژگی اختصاصی و شرطی ===== #
-    target_value = models.ForeignKey(
-        'ProductOptionValue', 
-        on_delete=models.CASCADE, 
-        related_name='dependency_rules',
-        verbose_name=_("مقدار هدف (وابسته)")
-    )
-    # ===== فیلد پدر که نیازمند زیرویژگی است ===== #
-    required_value = models.ForeignKey(
-        'ProductOptionValue', 
-        on_delete=models.CASCADE, 
-        related_name='enables_targets',
-        verbose_name=_("مقدار پیش‌نیاز (شرط)")
-    )
-
-    action = models.CharField(
-        _("نوع قانون"),
-        max_length=20,
-        choices=ACTION_CHOICES,
-        default='show'
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = _("قانون وابستگی ویژگی")
-        verbose_name_plural = _("قوانین وابستگی ویژگی‌ها")
-        # ===== جلوگیری از ثبت مقادیر تکراری ===== #
-        unique_together = ('target_value', 'required_value')
-
-    def clean(self):
-        """ 
-        جلوگیری از ساخت لوپ بی‌نهایت یا ارجاع به ویژگی یکسان 
-        (مثلاً مقداری از ویژگی 'جنس' نمی‌تونه به مقدار دیگه‌ای از همون ویژگی 'جنس' وابسته باشه)
-        """
-        if self.target_value.product_option == self.required_value.product_option:
-            raise ValidationError(_("یک گزینه نمی‌تواند به گزینه‌ای از همان ویژگی (هم‌گروه خودش) وابسته باشد."))
-
-    def __str__(self):
-        return f"اگر [{self.required_value.label}] انتخاب شد -> نمایش بده: [{self.target_value.label}]"
-
-# ====== Option Value & Quantity Pricing Matrix ====== #
-class OptionValueQuantityPrice(models.Model):
-    """
-    ماتریس قیمت‌گذاری ویژگی‌ها براساس تیراژ.
-    عملکرد: Override کردن price_impact پیش‌فرض در یک تیراژ خاص.
-    """
-    option_value = models.ForeignKey(
-        ProductOptionValue, 
-        related_name='quantity_prices', 
-        on_delete=models.CASCADE,
-        verbose_name=_("مقدار ویژگی")
-    )
-    product_quantity = models.ForeignKey(
-        ProductQuantity, 
-        related_name='option_prices', 
-        on_delete=models.CASCADE,
-        verbose_name=_("تیراژ محصول")
-    )
-    
-    price = models.DecimalField(
-        _("مبلغ جایگزین (Override)"), 
-        max_digits=12, decimal_places=0, default=0,
-        help_text=_("این مبلغ در این تیراژ، جایگزین price_impact پیش‌فرض خواهد شد.")
-    )
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _("قیمت ویژگی در تیراژ")
-        verbose_name_plural = _("ماتریس قیمت ویژگی‌ها")
-        unique_together = ('option_value', 'product_quantity')
-
-    def __str__(self):
-        return f"{self.option_value.label} در تیراژ {self.product_quantity.quantity.value} -> {self.price}"
 
 # ===== Product Rating Model ===== #
 class ProductRating(models.Model):

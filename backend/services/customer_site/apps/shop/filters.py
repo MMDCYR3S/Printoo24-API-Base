@@ -1,7 +1,7 @@
 # customer_site/shop/filters.py
 
 import django_filters
-from core.models import Product, ProductCategory, Size, OptionValue
+from core.models import Product, ProductCategory
 
 class ProductFilter(django_filters.FilterSet):
     """
@@ -14,20 +14,6 @@ class ProductFilter(django_filters.FilterSet):
     
     # ===== فیلتر براساس دسته بندی ===== #
     category = django_filters.CharFilter(method='filter_by_category_hierarchy')
-    
-    # ===== فیلتر براساس سایز ===== #
-    sizes = django_filters.ModelMultipleChoiceFilter(
-        field_name='productsize__size__id',
-        to_field_name='id',
-        queryset=Size.objects.all()
-    )
-
-    # ====== فیلتر براساس ویژگی های منحصر به فرد محصول ===== #
-    options = django_filters.ModelMultipleChoiceFilter(
-        field_name='productoption__option_value__id',
-        to_field_name='id',
-        queryset=OptionValue.objects.all()
-    )
 
     class Meta:
         model = Product

@@ -7,10 +7,6 @@ from .options import (
     OptionManager, OptionQuerySet,
     OptionValueManager, OptionValueQuerySet
 )
-from .attributes import (
-    SizeManager, SizeQuerySet,
-    QuantityManager, QuantityQuerySet
-)
 from .category import ProductCategoryManager, ProductCategoryQuerySet
 from .feedback import (
     ProductRatingManager, ProductRatingQuerySet,
