@@ -1,7 +1,7 @@
 import ast
 import operator
 from decimal import Decimal
-from typing import Dict, Any, Tuple, List, Set
+from typing import Dict, Any, Tuple, Set
 
 from django.db.models import Prefetch
 from django.core.exceptions import ValidationError
@@ -48,7 +48,7 @@ class SafeMathEvaluator:
             
             if isinstance(result, bool):
                 return result
-                s
+                
             return Decimal(str(result)).quantize(Decimal('0.00'))
             
         except ZeroDivisionError:
@@ -128,12 +128,6 @@ class ProductPricingDomainService:
     def calculate_final_price(cls, product_id: int, user_selections: Dict[str, Any]) -> Tuple[Decimal, Dict[str, Any]]:
         """
         دریافت ورودی‌های کاربر، تجمیع مقادیر فیلدها و اجرای فرمول.
-        نمونه ورودی فرانت‌اند: 
-        {
-            "10": 45,       # تک انتخابی (id=10, choice_id=45)
-            "12": [88, 89], # چند انتخابی (id=12, choices=[88, 89])
-            "15": 1000      # عددی (id=15, value=1000)
-        }
         """
         try:
             product = Product.objects.prefetch_related(
@@ -153,13 +147,13 @@ class ProductPricingDomainService:
         formula_variables = {}
         configuration_summary = {}
 
-        # ۲. منطق تجمیع ارزش فیلدها (همان چیزی که درخواست کردید!)
+        # ۲. منطق تجمیع ارزش فیلدها
         for f_id in active_field_ids:
             field = fields_map[f_id]
             str_f_id = str(f_id)
             var_name = f"field_{f_id}"
             
-            # مقدار پایه خود فیلد (اگر ادمین هزینه‌ای برای خود فیلد در نظر گرفته باشد)
+            # مقدار پایه خود فیلد
             numeric_val = field.numeric_value 
             
             if str_f_id in user_selections and user_selections[str_f_id] not in [None, '', [], 'null']:
@@ -174,17 +168,32 @@ class ProductPricingDomainService:
                     numeric_val += choice.numeric_value
                     configuration_summary[field.title] = choice.title
 
-                # -------- حالت دوم: فیلدهای چند انتخابی (شاهکار تجمیع) -------- #
+                # -------- حالت دوم: فیلدهای چند انتخابی (پیاده‌سازی عملگر داخلی) -------- #
                 elif field.field_type in ['multi_select', 'checkbox']:
                     if not isinstance(user_val, list):
-                        user_val = [user_val] # اگر فرانت‌اند اشتباها لیست نفرستاد
+                        user_val = [user_val]
                     
                     selected_choices = [c for c in field.choices.all() if str(c.id) in map(str, user_val)]
                     if not selected_choices:
-                        raise InvalidProductDataException(f"مقادیر ارسالی برای فیلد '{field.title}' در سیستم وجود ندارد.")
+                        raise InvalidProductDataException(f"مقادیر ارسالی برای فیلد '{field.title}' معتبر نیست.")
                     
-                    # جمع بستن ارزش تمام گزینه‌های انتخاب شده
-                    numeric_val += sum(c.numeric_value for c in selected_choices)
+                    # 🌟 هسته جدید: محاسبه گزینه‌های انتخاب شده بر اساس عملگر ادمین
+                    internal_result = selected_choices[0].numeric_value
+                    operator_choice = getattr(field, 'multi_select_operator', 'add') # دیفالت روی جمع
+
+                    for c in selected_choices[1:]:
+                        if operator_choice == 'add':
+                            internal_result += c.numeric_value
+                        elif operator_choice == 'sub':
+                            internal_result -= c.numeric_value
+                        elif operator_choice == 'mul':
+                            internal_result *= c.numeric_value
+                        elif operator_choice == 'div':
+                            if c.numeric_value == 0:
+                                raise InvalidProductDataException(f"خطا: تقسیم بر صفر در گزینه‌های '{field.title}'.")
+                            internal_result /= c.numeric_value
+
+                    numeric_val += internal_result
                     configuration_summary[field.title] = " ، ".join([c.title for c in selected_choices])
 
                 # -------- حالت سوم: فیلدهای عددی و تیراژ -------- #
@@ -199,14 +208,12 @@ class ProductPricingDomainService:
                 else:
                     configuration_summary[field.title] = str(user_val)
             
-            # اگر فیلد اجباری است ولی کاربر مقداری نفرستاده
             elif field.is_required:
                 raise InvalidProductDataException(f"تکمیل فیلد '{field.title}' الزامی است.")
             
-            # ثبت مقدار نهایی این فیلد در متغیرهای فرمول
             formula_variables[var_name] = numeric_val
 
-        # فیلدهایی که در سیستم هستند اما مخفی شده‌اند را 0 در نظر می‌گیریم تا فرمول خطا ندهد
+        # فیلدهای مخفی شده را 0 در نظر می‌گیریم تا فرمول خطا ندهد
         for f_id in fields_map.keys():
             var_name = f"field_{f_id}"
             if var_name not in formula_variables:
@@ -221,8 +228,8 @@ class ProductPricingDomainService:
         for formula in formulas:
             if not formula.condition_expression:
                 active_formula = formula
-                break # فرمول پیش‌فرض
-            # اجرای شرط فرمول (مثلاً اگر field_15 > 1000 بود این فرمول اجرا بشه)
+                break 
+            
             if SafeMathEvaluator.evaluate(formula.condition_expression, formula_variables):
                 active_formula = formula
                 break
@@ -236,7 +243,6 @@ class ProductPricingDomainService:
             variables=formula_variables
         )
 
-        # جلوگیری از قیمت‌های منفی
         if final_price < 0:
             final_price = Decimal('0.00')
 

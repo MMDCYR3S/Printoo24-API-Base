@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from core.models import (
     Product, ProductImage, Attachment, GuideType,
-    FieldType, ConditionOperator, ConditionAction,
+    FieldType, ConditionOperator, ConditionAction, MultiSelectOperator
 )
 
 
@@ -83,6 +83,10 @@ class ProductFieldSerializer(serializers.Serializer):
     title = serializers.CharField()
     description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     field_type = serializers.ChoiceField(choices=FieldType.choices)
+    multi_select_operator = serializers.ChoiceField(
+        choices=MultiSelectOperator.choices, 
+        default='add'
+    )
     numeric_value = serializers.DecimalField(max_digits=14, decimal_places=2, default=0.0)
     is_required = serializers.BooleanField(default=False)
     is_active = serializers.BooleanField(default=True)
@@ -165,6 +169,7 @@ class ProductFieldReadSerializer(serializers.Serializer):
     is_active = serializers.BooleanField()
     is_quantity_field = serializers.BooleanField()
     order = serializers.IntegerField()
+    multi_select_operator = serializers.CharField()
     choices = ProductFieldChoiceReadSerializer(many=True)
     conditions = ProductFieldConditionReadSerializer(source='applied_conditions', many=True)
 
