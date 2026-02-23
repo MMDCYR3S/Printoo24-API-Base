@@ -11,7 +11,6 @@ const underlineInputClass = "w-full bg-transparent border-b-2 border-slate-200 p
 
 const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
     
-    // گرفتن کل دسته‌بندی‌ها به صورت خام (بدون صفحه‌بندی)
     const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
         queryKey: ['admin-all-categories-dropdown'],
         queryFn: () => adminCategoryService.getRoots(),
@@ -22,8 +21,8 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
         defaultValues: {
             shell: {
                 name: "",
-                parent_category_id: "",
-                child_category_id: "",
+                category_id: "",
+                subcategory_id: "",
                 description: "",
                 has_price: true,
                 show_price: "",
@@ -40,34 +39,31 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
 
     const hasPrice = useWatch({ control, name: 'shell.has_price' });
     const hasQuantity = useWatch({ control, name: 'shell.has_quantity' });
-    const selectedParentId = useWatch({ control, name: 'shell.parent_category_id' });
+    const selectedCategoryId = useWatch({ control, name: 'shell.category_id' });
 
-    // لیست فرزندان بر اساس پدر انتخاب شده
-    const availableChildren = useMemo(() => {
-        if (!selectedParentId || !categories?.length) return [];
-        const parent = categories.find(c => c.id.toString() === selectedParentId.toString());
+    // لیست فرزندان بر اساس دسته اصلی انتخاب شده
+    const availableSubcategories = useMemo(() => {
+        if (!selectedCategoryId || !categories?.length) return [];
+        const parent = categories.find(c => c.id.toString() === selectedCategoryId.toString());
         return parent?.children || [];
-    }, [selectedParentId, categories]);
+    }, [selectedCategoryId, categories]);
 
-    // 🎯 لاجیک هوشمند برای پر کردن فرم در حالت ویرایش
+    // پر کردن فرم در حالت ویرایش
     useEffect(() => {
         if (initialData?.shell && categories?.length > 0) {
             const s = initialData.shell;
             
-            let pId = "";
-            let cId = "";
+            let pId = s.category_id || "";
+            let cId = s.subcategory_id || "";
 
-            // خواندن آیدی نهایی از ریسپانس بک‌اند
-            const targetId = s.category_info?.id;
-
-            if (targetId) {
+            // در صورتی که بک‌اند هنوز فرمت قدیمی رو تو GET برمی‌گردوند (محض اطمینان)
+            if (!pId && s.category_info?.id) {
+                const targetId = s.category_info.id;
                 for (const parent of categories) {
-                    // آیا این آیدی مربوط به خود پدر است؟
                     if (parent.id.toString() === targetId.toString()) {
                         pId = parent.id.toString();
                         break;
                     }
-                    // آیا این آیدی مربوط به یکی از فرزندان این پدر است؟
                     const foundChild = parent.children?.find(c => c.id.toString() === targetId.toString());
                     if (foundChild) {
                         pId = parent.id.toString();
@@ -80,8 +76,8 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
             reset({
                 shell: {
                     name: s.name || "",
-                    parent_category_id: pId,
-                    child_category_id: cId,
+                    category_id: pId,
+                    subcategory_id: cId,
                     description: s.description || "",
                     has_price: s.has_price !== undefined ? Boolean(s.has_price) : true,
                     show_price: s.show_price || "",
@@ -100,10 +96,10 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
     // وقتی تو حالت ایجاد محصول هستیم و دسته پدر عوض میشه، زیردسته رو ریست کن
     useEffect(() => {
         if (!isEditMode) {
-            setValue('shell.child_category_id', '');
+            setValue('shell.subcategory_id', '');
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedParentId, isEditMode]);
+    }, [selectedCategoryId, isEditMode]);
 
     const onSubmit = (data) => {
         onSave(data);
@@ -134,11 +130,11 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                         />
                     </div>
                     
-                    {/* دراپ داون اول: دسته پدر */}
+                    {/* دراپ داون اول: دسته اصلی */}
                     <div className="relative">
                         <label className="block text-sm font-extrabold text-slate-800 mb-2">دسته‌بندی اصلی <span className="text-error">*</span></label>
                         <select 
-                            {...register('shell.parent_category_id', { required: true })} 
+                            {...register('shell.category_id', { required: true })} 
                             className={clsx(underlineInputClass, "cursor-pointer font-bold text-sm", isCategoriesLoading && "opacity-50")}
                             disabled={isCategoriesLoading}
                         >
@@ -154,12 +150,12 @@ const ProductStep1Form = ({ initialData, onSave, isSaving, isEditMode }) => {
                     <div>
                         <label className="block text-sm font-extrabold text-slate-800 mb-2">زیردسته <span className="text-error">*</span></label>
                         <select 
-                            {...register('shell.child_category_id')} 
+                            {...register('shell.subcategory_id', { required: true })} 
                             className={clsx(underlineInputClass, "cursor-pointer font-bold text-sm")}
-                            disabled={!selectedParentId || availableChildren.length === 0}
+                            disabled={!selectedCategoryId || availableSubcategories.length === 0}
                         >
                             <option value="">انتخاب زیردسته...</option>
-                            {availableChildren.map(child => (
+                            {availableSubcategories.map(child => (
                                 <option key={child.id} value={child.id}>{child.name}</option>
                             ))}
                         </select>

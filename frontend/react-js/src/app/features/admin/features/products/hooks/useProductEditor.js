@@ -27,22 +27,21 @@ export const useProductEditor = () => {
 
   const isLoading = isEditMode ? isQueryLoading : false;
 
-  // 🎯 آماده‌سازی پی‌لود استپ ۱
+  // 🎯 آماده‌سازی پی‌لود استپ ۱ طبق داکیومنت جدید بک‌اند
   const prepareStep1Payload = (formData) => {
     const s = formData.shell;
     
-    // بک‌اند فقط یک آیدی می‌خواد. اگر زیردسته انتخاب شده بود همون رو می‌دیم، وگرنه دسته اصلی
-    const finalCategoryId = s.child_category_id ? Number(s.child_category_id) : Number(s.parent_category_id);
-
     const payload = {
       shell: {
         name: s.name,
-        category_ids: [finalCategoryId], // ارسال بصورت آرایه تک‌عضوی طبق Swagger
-        description: s.description || "",
+        // ارسال مستقیم آیدی پدر و فرزند
+        category_id: s.category_id ? Number(s.category_id) : null,
+        subcategory_id: s.subcategory_id ? Number(s.subcategory_id) : null,
         
+        description: s.description || "",
         has_price: Boolean(s.has_price),
         
-        // price همیشه 0، بقیه مقادیر از فرم
+        // قیمت همیشه 0، بقیه مقادیر از فرم
         price: "0",
         show_price: s.has_price ? String(s.show_price || "0") : "0",
         price_per_unit: s.has_price ? Number(s.price_per_unit || 0) : 0,
@@ -55,6 +54,7 @@ export const useProductEditor = () => {
       }
     };
 
+    // اضافه کردن مین و مکس در صورت تعدادی بودن
     if (payload.shell.has_quantity) {
         payload.shell.min_quantity = Number(s.min_quantity || 1);
         if (s.max_quantity) {
@@ -69,6 +69,7 @@ export const useProductEditor = () => {
     mutationFn: (rawFormData) => {
       const payload = prepareStep1Payload(rawFormData);
       console.log("🚀 Payload ارسالی استپ ۱:", JSON.stringify(payload, null, 2));
+      // گفتی این API نقش همه رو بازی میکنه، پس هم تو کریت و هم تو آپدیت میشه همینو فرستاد
       return isEditMode 
         ? adminProductService.update(id, payload) 
         : adminProductService.create(payload);
@@ -149,4 +150,4 @@ export const useProductEditor = () => {
     uploadAttachmentAsync: uploadAttachmentMutation.mutateAsync,
     isUploading: uploadImageMutation.isPending || uploadAttachmentMutation.isPending,
   };
-}; 
+};
