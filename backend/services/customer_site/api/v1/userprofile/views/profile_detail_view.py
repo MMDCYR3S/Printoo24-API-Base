@@ -61,8 +61,7 @@ class CustomerProfileAPIView(APIView):
             combined_data = {
                 # ===== اطلاعات کاربر ===== #
                 'id': user.id,
-                'username': user.username,
-                'email': user.email,
+                'phone_number': user.phone_number if user else '',
                 'is_active': user.is_active,
                 'is_verified': user.is_verified,
                 'is_staff': user.is_staff,
@@ -70,7 +69,6 @@ class CustomerProfileAPIView(APIView):
                 # ===== اطلاعات پروفایل ===== # 
                 'first_name': profile.first_name if profile else '',
                 'last_name': profile.last_name if profile else '',
-                'phone_number': profile.phone_number if profile else '',
                 'company': profile.company if profile else '',
                 'bio': profile.bio if profile else '',
                 'created_at': profile.created_at if profile else user.created_at,
@@ -124,11 +122,9 @@ class CustomerProfileAPIView(APIView):
                 
                 # ===== ارسال پاسخ ===== #
                 response_data = {
-                    'username': user.username,
-                    'email': user.email,
+                    'phone_number': user.phone_number,
                     'first_name': profile.first_name,
                     'last_name': profile.last_name,
-                    'phone_number': profile.phone_number,
                     'company': profile.company,
                     'bio': profile.bio,
                     'msg': 'پروفایل با موفقیت بروزرسانی شد.'

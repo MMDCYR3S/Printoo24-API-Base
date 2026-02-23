@@ -46,17 +46,12 @@ class CustomerService:
         4. ایجاد کیف پول
         """
         # ===== دریافت کاربر ===== #
-        username = data.get('username')
-        email = data.get('email')
+        phone_number = data.get('phone_number')
         password = data.get('password')
-        
-        if User.objects.filter(email=email).exists():
-            raise ValidationError("این ایمیل قبلاً ثبت شده است.")
 
         # ===== ایجاد یوزر ===== #
         user = User.objects.create_user(
-            username=username,
-            email=email,
+            phone_number=phone_number,
             password=password,
             is_active=data.get('is_active', True)
         )
@@ -66,7 +61,6 @@ class CustomerService:
             'user': user,
             'first_name': data.get('first_name', ''),
             'last_name': data.get('last_name', ''),
-            'phone_number': data.get('phone_number', ''),
             'company': data.get('company', ''),
             'bio': data.get('bio', '')
         }
@@ -89,12 +83,6 @@ class CustomerService:
         """
         user = self.get_customer_by_id_admin(user_id)
         profile = getattr(user, 'customer_profile', None)
-
-        # 1. آپدیت اطلاعات یوزر
-        if 'email' in data and data['email'] != user.email:
-            if User.objects.filter(email=data['email']).exists():
-                raise ValidationError("این ایمیل تکراری است.")
-            user.email = data['email']
         
         if 'is_active' in data:
             user.is_active = data['is_active']

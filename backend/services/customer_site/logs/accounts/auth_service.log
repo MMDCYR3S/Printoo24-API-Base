@@ -948,3 +948,48 @@ INFO 2026-02-19 07:54:51,848 auth_service 189 139509487527616 User logged in: 1
 DEBUG 2026-02-19 08:26:44,587 auth_service 189 139509512705728 AuthService initialized with UserIdentityService
 INFO 2026-02-19 08:26:44,589 auth_service 189 139509512705728 Login attempt for: admin
 INFO 2026-02-19 08:26:45,397 auth_service 189 139509512705728 User logged in: 1
+DEBUG 2026-02-23 22:15:32,146 auth_service 185 136086130169536 AuthService initialized with UserIdentityService
+INFO 2026-02-23 22:15:32,148 auth_service 185 136086130169536 Login attempt for: 09137555555
+INFO 2026-02-23 22:15:32,399 auth_service 185 136086130169536 User logged in: 10
+DEBUG 2026-02-23 22:16:12,972 auth_service 188 140681799702208 AuthService initialized with UserIdentityService
+INFO 2026-02-23 22:16:12,975 auth_service 188 140681799702208 Login attempt for: 09137555555
+INFO 2026-02-23 22:16:13,311 auth_service 188 140681799702208 User logged in: 10
+DEBUG 2026-02-23 22:16:47,863 auth_service 188 140681799702208 AuthService initialized with UserIdentityService
+INFO 2026-02-23 22:16:47,866 auth_service 188 140681799702208 Starting registration process for: None
+ERROR 2026-02-23 22:16:48,169 auth_service 188 140681799702208 Critical error during registration for None: 'User' object has no attribute 'username'
+Traceback (most recent call last):
+  File "/app/shared_libs/core/signals.py", line 184, in assign_default_role_to_new_user
+    logger.info(f"نقش 'مشتری' با موفقیت به کاربر {instance.username} اختصاص یافت.")
+                                                  ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'username'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/accounts/services/auth_service.py", line 49, in register_customer
+    user = self._identity_service.register_new_customer(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/services/identity.py", line 31, in register_new_customer
+    user = User.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/managers/users.py", line 81, in create_user
+    user.save(using=self._db)
+  File "/usr/local/lib/python3.11/site-packages/django/contrib/auth/base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1023, in save_base
+    post_save.send(
+  File "/usr/local/lib/python3.11/site-packages/django/dispatch/dispatcher.py", line 189, in send
+    response = receiver(signal=self, sender=sender, **named)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/signals.py", line 188, in assign_default_role_to_new_user
+    logger.error(f"خطا در تخصیص نقش مشتری به کاربر {instance.username}: {str(e)}")
+                                                    ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'username'
+DEBUG 2026-02-23 22:18:31,517 auth_service 191 124674589759168 AuthService initialized with UserIdentityService
+INFO 2026-02-23 22:18:31,521 auth_service 191 124674589759168 Starting registration process for: None
+INFO 2026-02-23 22:18:31,776 auth_service 191 124674589759168 User created in DB - ID: 13

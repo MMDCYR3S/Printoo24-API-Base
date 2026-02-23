@@ -28,7 +28,7 @@ class Cart(models.Model):
     objects = CartManager()
     
     def __str__(self):
-        return f"{self.user.username if self.user else self.session_key}"
+        return f"{self.user.phone_number if self.user else self.session_key}"
     
     class Meta:
         db_table = 'customer_carts'

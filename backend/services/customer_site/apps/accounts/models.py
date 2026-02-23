@@ -3,7 +3,6 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from .exceptions import InsufficientFundsException
 from core.infrastructure.messages import msg_provider
 from .managers import (WalletManager, WalletTransactionManager)
 
@@ -43,7 +42,7 @@ class Wallet(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return self.user.username
+        return self.user.phone_number
     
 # ====== Wallet Transaction Model ====== #
 class  WalletTransaction(models.Model):

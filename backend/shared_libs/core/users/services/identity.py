@@ -14,41 +14,31 @@ class UserIdentityService:
     سرویس دامنه مربوط به هویت و عملیات‌های سمت مشتری (Customer-Facing).
     """
 
-    def check_uniqueness(self, username: str = None, email: str = None, exclude_user_id: int = None):
-        """
-        بررسی یکتایی نام کاربری و ایمیل.
-        """
-        if username:
-            query = User.objects.filter(username=username)
-            if exclude_user_id:
-                query = query.exclude(id=exclude_user_id)
-            if query.exists():
-                raise UsernameAlreadyExistsException("نام کاربری از قبل وجود دارد.")
-
-        if email:
-            query = User.objects.filter(email=email)
-            if exclude_user_id:
-                query = query.exclude(id=exclude_user_id)
-            if query.exists():
-                raise EmailAlreadyExistsException("ایمیل از قبل وجود دارد.")
+    def check_uniqueness(self, phone_number: str, exclude_user_id: int = None):
+        query = User.objects.filter(phone_number=phone_number)
+        if exclude_user_id:
+            query = query.exclude(id=exclude_user_id)
+        if query.exists():
+            raise UsernameAlreadyExistsException("این شماره تماس قبلاً ثبت شده است.")
 
     # ========== REGISTRATION ========== #
     @transaction.atomic
     def register_new_customer(self, data: Dict[str, Any]) -> User:
-        """
-        ثبت نام مشتری جدید.
-        """
-        # ===== اعتبارسنجی ===== #
-        self.check_uniqueness(username=data.get("username"), email=data.get("email"))
+        # ===== بررسی یکتا بودن شماره تلفن ===== #
+        self.check_uniqueness(phone_number=data.get("phone_number"))
 
-        # ===== ایجاد کاربر ===== #
-        create_kwargs = {k: v for k, v in data.items() if k not in ['username', 'email', 'password']}
-        
+        # ===== ایجاد کاربر اصلی ===== #
         user = User.objects.create_user(
-            username=data["username"],
-            email=data["email"],
-            password=data["password"],
-            **create_kwargs
+            phone_number=data["phone_number"],
+            password=data["password"]
+        )
+        
+        # ===== ایجاد پروفایل با نام و نام خانوادگی ===== #
+        from core.users.models import CustomerProfile
+        CustomerProfile.objects.create(
+            user=user,
+            first_name=data.get("first_name", ""),
+            last_name=data.get("last_name", "")
         )
         
         return user
@@ -69,18 +59,16 @@ class UserIdentityService:
         """
         ویرایش اطلاعات حساس (نام کاربری/ایمیل) توسط خود کاربر.
         """
-        new_username = data.get('username')
-        new_email = data.get('email')
+        new_username = data.get('phone_number')
 
         # ===== بررسی یکتایی ===== #
-        if (new_username and new_username != user.username) or (new_email and new_email != user.email):
+        if (new_username and new_username != user.username):
             self.check_uniqueness(
                 username=new_username if new_username != user.username else None,
-                email=new_email if new_email != user.email else None
             )
 
         # ===== ویرایش اطلاعات ===== #
-        allowed_fields = ['username', 'email', 'first_name', 'last_name'] # مثال
+        allowed_fields = ['phone_number', 'first_name', 'last_name'] # مثال
         for field in allowed_fields:
             if field in data:
                 setattr(user, field, data[field])

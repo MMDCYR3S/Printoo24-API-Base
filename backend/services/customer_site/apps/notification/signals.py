@@ -83,7 +83,7 @@ def notify_admins_for_new_order(sender, instance, created, **kwargs):
     title = msg_provider.get("notification.I6009")['text']
     
     if instance.user:
-        sender_user = instance.user.customer_profile.fullname() or instance.user.username
+        sender_user = instance.user.customer_profile.fullname() or instance.user.phone_number
         message = msg_provider.get("notification.I6010", order_code=order_code, sender_name=sender_user)['text']
     else:
         sender_user = instance.recipient_name or "مهمان"
