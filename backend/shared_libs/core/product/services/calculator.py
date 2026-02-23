@@ -219,6 +219,8 @@ class ProductPricingDomainService:
             if var_name not in formula_variables:
                 formula_variables[var_name] = Decimal('0.0')
 
+        formula_variables["price_per_unit"] = Decimal(str(product.price_per_unit))
+
         # ۳. پیدا کردن فرمول مناسب
         formulas = product.formulas.all()
         if not formulas:

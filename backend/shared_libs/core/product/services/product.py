@@ -301,6 +301,7 @@ class ProductService:
 
         # ===== استخراج فیلدهای مجاز با field_{id} ===== # 
         valid_variables = {f"field_{f.id}" for f in product.fields.all()}
+        valid_variables.add("price_per_unit")
 
         # ===== اعتبارسنجی فرمول‌ها ===== #
         for form_data in formulas_data:
