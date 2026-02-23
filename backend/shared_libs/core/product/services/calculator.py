@@ -145,7 +145,7 @@ class ProductPricingDomainService:
         active_field_ids = cls._evaluate_field_conditions(fields_map, user_selections)
 
         formula_variables = {}
-        configuration_summary = {}
+        configuration_summary = []
 
         # ۲. منطق تجمیع ارزش فیلدها
         for f_id in active_field_ids:
@@ -166,7 +166,12 @@ class ProductPricingDomainService:
                         raise InvalidProductDataException(f"مقدار انتخابی برای '{field.title}' نامعتبر است.")
                     
                     numeric_val += choice.numeric_value
-                    configuration_summary[field.title] = choice.title
+                    configuration_summary.append({
+                        "field_id": field.id,
+                        "field_title": field.title,
+                        "value": choice.title,
+                        "choice_id": choice.id
+                    })
 
                 # -------- حالت دوم: فیلدهای چند انتخابی (پیاده‌سازی عملگر داخلی) -------- #
                 elif field.field_type in ['multi_select', 'checkbox']:
@@ -194,19 +199,34 @@ class ProductPricingDomainService:
                             internal_result /= c.numeric_value
 
                     numeric_val += internal_result
-                    configuration_summary[field.title] = " ، ".join([c.title for c in selected_choices])
+                    configuration_summary.append({
+                        "field_id": field.id,
+                        "field_title": field.title,
+                        "value": " ، ".join([c.title for c in selected_choices]),
+                        "choice_ids": [c.id for c in selected_choices]
+                    })
 
                 # -------- حالت سوم: فیلدهای عددی و تیراژ -------- #
                 elif field.field_type == 'number':
                     try:
                         numeric_val += Decimal(str(user_val))
-                        configuration_summary[field.title] = str(user_val)
+                        configuration_summary.append({
+                            "field_id": field.id,
+                            "field_title": field.title,
+                            "value": str(user_val),
+                            "choice_id": None
+                        })
                     except Exception:
                         raise InvalidProductDataException(f"مقدار وارد شده در فیلد '{field.title}' باید عدد باشد.")
                 
                 # -------- حالت چهارم: فیلدهای متنی -------- #
                 else:
-                    configuration_summary[field.title] = str(user_val)
+                    configuration_summary.append({
+                        "field_id": field.id,
+                        "field_title": field.title,
+                        "value": str(user_val),
+                        "choice_id": None
+                    })
             
             elif field.is_required:
                 raise InvalidProductDataException(f"تکمیل فیلد '{field.title}' الزامی است.")
@@ -218,6 +238,8 @@ class ProductPricingDomainService:
             var_name = f"field_{f_id}"
             if var_name not in formula_variables:
                 formula_variables[var_name] = Decimal('0.0')
+
+        formula_variables["price_per_unit"] = Decimal(str(product.price_per_unit))
 
         # ۳. پیدا کردن فرمول مناسب
         formulas = product.formulas.all()

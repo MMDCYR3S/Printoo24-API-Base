@@ -1038,3 +1038,6 @@ INFO 2026-02-23 02:48:27,421 auth_service 21 128653351618240 User logged in: 1
 DEBUG 2026-02-23 02:49:25,299 auth_service 21 128653111318208 AuthService initialized with UserIdentityService
 INFO 2026-02-23 02:49:25,300 auth_service 21 128653111318208 Login attempt for: admin
 INFO 2026-02-23 02:49:25,935 auth_service 21 128653111318208 User logged in: 1
+DEBUG 2026-02-23 14:42:28,601 auth_service 7 125158390138560 AuthService initialized with UserIdentityService
+INFO 2026-02-23 14:42:28,615 auth_service 7 125158390138560 Login attempt for: admin
+INFO 2026-02-23 14:42:28,951 auth_service 7 125158390138560 User logged in: 1

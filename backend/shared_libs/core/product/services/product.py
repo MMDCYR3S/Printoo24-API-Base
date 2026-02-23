@@ -58,17 +58,14 @@ class ProductService:
     @transaction.atomic
     def create_product_shell(self, user, data: Dict[str, Any]) -> Product:
         category_id = data.pop('category_id', None)
-        category_ids = data.pop('category_ids', [])
-        
-        if category_id and category_id not in category_ids:
-            category_ids.append(category_id)
+        subcategory_id = data.pop('subcategory_id', None)
         
         data['user'] = user
         product = Product.objects.create(**data)
-        
-        if category_ids:
-            # استفاده از متد استاندارد ManyToMany جنگو
-            product.categories.set(category_ids)
+
+        valid_ids = [id for id in (category_id, subcategory_id) if id]
+        if valid_ids:
+            product.categories.set(valid_ids)
         
         return product
 
@@ -78,20 +75,56 @@ class ProductService:
         if not product:
             raise ProductNotFoundException("محصول یافت نشد.")
         
+        has_category_update = 'category_id' in data or 'subcategory_id' in data
         category_id = data.pop('category_id', None)
-        category_ids = data.pop('category_ids', None)
+        subcategory_id = data.pop('subcategory_id', None)
         
         for key, value in data.items():
             setattr(product, key, value)
         product.save()
         
-        # مدیریت آپدیت دسته‌بندی‌ها
-        if category_ids is not None:
-             product.categories.set(category_ids)
-        elif category_id is not None:
-             product.categories.set([category_id])
+        # اگر آپدیت دسته‌بندی داشتیم، لیست جدید را set کن
+        if has_category_update:
+            valid_ids = [id for id in (category_id, subcategory_id) if id]
+            product.categories.set(valid_ids)
         
         return product
+    
+    def _sync_categories(self, product, primary_category_id, subcategory_id):
+        """ مدیریت صریح یک دسته اصلی و یک زیردسته """
+        from core.models import ProductCategoryRelation 
+
+        valid_ids = []
+        if primary_category_id:
+            valid_ids.append(primary_category_id)
+        if subcategory_id and subcategory_id != primary_category_id:
+            valid_ids.append(subcategory_id)
+
+        # ===== حذف روابطی که در لیست نیستند ===== #
+        if valid_ids:
+            ProductCategoryRelation.objects.filter(product=product).exclude(category_id__in=valid_ids).delete()
+        else:
+            ProductCategoryRelation.objects.filter(product=product).delete()
+
+        # ===== ایجاد دسته‌بندی اصلی ===== #
+        if primary_category_id:
+            rel, _ = ProductCategoryRelation.objects.get_or_create(
+                product=product, category_id=primary_category_id,
+                defaults={'is_primary': True}
+            )
+            if not rel.is_primary:
+                rel.is_primary = True
+                rel.save(update_fields=['is_primary'])
+
+        # ===== ایجاد رابطه با محصول ===== #
+        if subcategory_id and subcategory_id != primary_category_id:
+            rel, _ = ProductCategoryRelation.objects.get_or_create(
+                product=product, category_id=subcategory_id,
+                defaults={'is_primary': False}
+            )
+            if rel.is_primary:
+                rel.is_primary = False
+                rel.save(update_fields=['is_primary'])
 
     # ===== ساخت بخش مربوط به محصولات ===== #
     def delete_product(self, product_id: int):
@@ -301,6 +334,7 @@ class ProductService:
 
         # ===== استخراج فیلدهای مجاز با field_{id} ===== # 
         valid_variables = {f"field_{f.id}" for f in product.fields.all()}
+        valid_variables.add("price_per_unit")
 
         # ===== اعتبارسنجی فرمول‌ها ===== #
         for form_data in formulas_data:

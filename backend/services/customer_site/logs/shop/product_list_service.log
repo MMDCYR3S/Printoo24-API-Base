@@ -6410,3 +6410,13 @@ DEBUG 2026-02-23 02:48:11,702 product_list_service 21 128653111318208 Queryset d
 DEBUG 2026-02-23 02:58:36,327 product_list_service 21 128653102925504 ShopProductListService initialized
 DEBUG 2026-02-23 02:58:39,859 product_list_service 21 128653102925504 ShopProductListService initialized
 DEBUG 2026-02-23 02:58:46,000 product_list_service 21 128653102925504 ShopProductListService initialized
+DEBUG 2026-02-23 14:42:19,697 product_list_service 7 125158390138560 ShopProductListService initialized
+INFO 2026-02-23 14:42:19,715 product_list_service 7 125158390138560 Fetching base queryset for product list
+INFO 2026-02-23 14:42:19,732 product_list_service 7 125158390138560 Base queryset retrieved successfully - Total active products: 34
+DEBUG 2026-02-23 14:42:19,736 product_list_service 7 125158390138560 Queryset details: SELECT "core_product"."id", "core_product"."guide_text", "core_product"."guide_type", "core_product"."user_id", "core_product"."name", "core_product"."slug", "core_product"."has_price", "core_product"."show_price", "core_product"."price", "core_product"."price_per_unit", "core_product"."description", "core_product"."code", "core_product"."is_active", "core_product"."created_at", "core_product"."has_quantity", "core_product"."updated_at" FROM "core_product" WHERE "core_product"."is_active"
+DEBUG 2026-02-23 14:42:19,740 product_list_service 7 125158390138560 ShopProductListService initialized
+INFO 2026-02-23 14:42:19,743 product_list_service 7 125158390138560 Fetching base queryset for product list
+INFO 2026-02-23 14:42:19,747 product_list_service 7 125158390138560 Base queryset retrieved successfully - Total active products: 34
+DEBUG 2026-02-23 14:42:19,749 product_list_service 7 125158390138560 Queryset details: SELECT "core_product"."id", "core_product"."guide_text", "core_product"."guide_type", "core_product"."user_id", "core_product"."name", "core_product"."slug", "core_product"."has_price", "core_product"."show_price", "core_product"."price", "core_product"."price_per_unit", "core_product"."description", "core_product"."code", "core_product"."is_active", "core_product"."created_at", "core_product"."has_quantity", "core_product"."updated_at" FROM "core_product" WHERE "core_product"."is_active"
+DEBUG 2026-02-23 14:42:19,781 product_list_service 7 125158390138560 ShopProductListService initialized
+DEBUG 2026-02-23 14:42:19,783 product_list_service 7 125158390138560 ShopProductListService initialized

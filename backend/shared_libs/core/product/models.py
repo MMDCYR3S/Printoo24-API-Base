@@ -197,12 +197,6 @@ class ProductCategoryRelation(models.Model):
         تضمین یکپارچگی داده‌ها (Data Integrity):
         اگر این رکورد به عنوان Primary ست شود، بقیه رکوردهای این محصول باید False شوند.
         """
-        if self.is_primary:
-            ProductCategoryRelation.objects.filter(
-                product=self.product,
-                is_primary=True
-            ).exclude(pk=self.pk).update(is_primary=False)
-            
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -115,27 +115,48 @@ class ProductFormulasBulkSyncSerializer(serializers.Serializer):
 # ===== Product Shell Serializer ===== #
 class ProductShellSerializer(GuideSerializerMixin, serializers.ModelSerializer):
     category_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
-    category_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        write_only=True,
-        required=False,
-        allow_empty=True
-    )
+    subcategory_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     category_info = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'slug', 'category_id', 'category_ids', 'category_info',
+            'id', 'name', 'slug', 'category_id', 'subcategory_id', 'category_info',
             'description', 'code', 'is_active', 'has_price', 'has_quantity',
             'price', 'show_price', 'price_per_unit', 'guide_text', 'guide_type'
         ]
         read_only_fields = ['id', 'code', 'slug']
 
-    def get_category_info(self, obj):
-        cat = obj.categories.first()
-        return {"id": cat.id, "name": cat.name} if cat else None
+    def validate(self, attrs):
+        category_id = attrs.get('category_id')
+        subcategory_id = attrs.get('subcategory_id')
 
+        if category_id and subcategory_id and category_id == subcategory_id:
+            raise serializers.ValidationError({
+                "subcategory_id": "دسته‌بندی اصلی و زیردسته نمی‌توانند یکسان باشند."
+            })
+            
+        return attrs
+
+    def get_category_info(self, obj):
+        categories = list(obj.categories.select_related('parent').all())
+        if not categories:
+            return None
+
+
+        selected_cat = categories[0]
+
+        for cat in categories:
+            if cat.parent_id is not None:
+                selected_cat = cat
+                break
+
+        return {
+            "id": selected_cat.id, 
+            "name": selected_cat.name,
+            "parent_id": selected_cat.parent.id if selected_cat.parent else None,
+            "parent_name": selected_cat.parent.name if selected_cat.parent else None,
+        }
 
 # ===== Core Create/Update Serializer ===== #
 class ProductCoreCreateSerializer(serializers.Serializer):
