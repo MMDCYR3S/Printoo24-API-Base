@@ -78,6 +78,14 @@ class ProductQuerySet(BaseQuerySet):
             inactive=Count('id', filter=Q(is_active=False))
         )
     
+    def get_quantity_status_breakdown(self) -> dict:
+        return self.aggregate(
+            with_quantity=Count('id', filter=Q(has_quantity=True)),
+            without_quantity=Count('id', filter=Q(has_quantity=False))
+        )
+    
+
+    
     def search(self, query: str):
         """
         جستجو بر اساس نام، توضیحات، کد و نام/مقادیر فیلدساز جدید
@@ -126,3 +134,6 @@ class ProductManager(models.Manager):
 
     def get_status_breakdown(self):
         return self.get_queryset().get_status_breakdown()
+    
+    def get_quantity_status_breakdown(self):
+        return self.get_queryset().get_quantity_status_breakdown()
