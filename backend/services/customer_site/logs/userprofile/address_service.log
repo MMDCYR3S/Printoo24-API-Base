@@ -71,3 +71,5 @@ INFO 2026-02-21 13:51:23,467 user_address_service 382 126666732975808 Fetching a
 INFO 2026-02-21 13:51:26,058 user_address_service 382 126666361792192 Fetching addresses for User ID: 1
 INFO 2026-02-21 13:51:57,782 user_address_service 382 126666361792192 Fetching addresses for User ID: 1
 INFO 2026-02-21 16:19:11,494 user_address_service 382 126666715141824 Fetching addresses for User ID: 1
+INFO 2026-02-23 02:41:48,846 user_address_service 21 128653360010944 Fetching addresses for User ID: 1
+INFO 2026-02-23 02:48:38,630 user_address_service 21 128653128103616 Fetching addresses for User ID: 1
