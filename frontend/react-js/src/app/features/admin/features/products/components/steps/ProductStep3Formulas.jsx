@@ -115,10 +115,10 @@ const ProductStep3Formulas = ({ initialData, onSave, isSaving }) => {
                                                 {/* شرط فرمول */}
                                                 <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                                                     <label className="block text-xs font-extrabold text-blue-800 mb-2">شرط اجرا (اختیاری)</label>
-                                                    <input 
+                                                    <input  dir='ltr'
                                                         {...register(`formulas.${index}.condition_expression`)} 
                                                         className={underlineInputClass} 
-                                                        placeholder="e.g. field_15 >= 1000" 
+                                                        placeholder="e.g.field_15>= 1000" 
                                                     />
                                                     <p className="text-[10px] text-blue-600/70 mt-2 font-medium">اگر خالی باشد، همیشه اجرا می‌شود.</p>
                                                 </div>
@@ -126,10 +126,10 @@ const ProductStep3Formulas = ({ initialData, onSave, isSaving }) => {
                                                 {/* محاسبه فرمول */}
                                                 <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
                                                     <label className="block text-xs font-extrabold text-emerald-800 mb-2">فرمول ریاضی (الزامی)</label>
-                                                    <input 
+                                                    <input  dir='ltr'
                                                         {...register(`formulas.${index}.calculation_expression`, { required: true })} 
                                                         className={clsx(underlineInputClass, "border-emerald-200 focus:border-emerald-500 font-black text-emerald-700")} 
-                                                        placeholder="e.g. (field_10 * field_12) * 1.5" 
+                                                        placeholder="e.g.(field_10 * field_12)* 1.5" 
                                                     />
                                                     <p className="text-[10px] text-emerald-600/70 mt-2 font-medium">از عملگرهای + - * / ( ) استفاده کنید.</p>
                                                 </div>
