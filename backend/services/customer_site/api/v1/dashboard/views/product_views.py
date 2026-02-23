@@ -42,13 +42,12 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # ========== CREATE ========== #
+    # ========== CREATE ========== #
     @extend_schema(
         summary="مرحله ۱: ایجاد هسته محصول",
         description="""
-        **مقادیر مجاز (Enums) برای guide_type:**
-        - `info` : اطلاعات (پیش‌فرض)
-        - `warning` : هشدار
-        - `tip` : نکته
+        ایجاد ساختار اولیه محصول.
+        در این مرحله یک `category_id` (دسته اصلی) و یک `subcategory_id` (زیردسته) ارسال می‌شود.
         """,
         request=ProductCoreCreateSerializer,
         responses={201: inline_serializer('CreateResponse', fields={
@@ -57,11 +56,13 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         })},
         examples=[
             OpenApiExample(
-                'ایجاد محصول ساده',
+                name='ایجاد محصول ساده',
+                summary='ارسال مشخصات به همراه دسته والد و فرزند',
                 value={
                     "shell": {
                         "name": "کارت ویزیت لمینت براق",
-                        "category_ids": [1],
+                        "category_id": 5,             # <--- شناسه دسته اصلی
+                        "subcategory_id": 12,         # <--- شناسه زیردسته
                         "description": "چاپ افست با کیفیت بالا",
                         "has_price": True,
                         "price": "20000.00",
@@ -70,7 +71,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                         "has_quantity": True,
                         "is_active": True,
                         "guide_text": "زمان تحویل ۷ روز کاری است.",
-                        "guide_type": "warning"  # <--- Enum
+                        "guide_type": "info"
                     }
                 },
                 request_only=True,
@@ -92,18 +93,46 @@ class ProductDashboardViewSet(viewsets.ViewSet):
 
     # ========== UPDATE ========== #
     @extend_schema(
-        summary="ویرایش اطلاعات پایه محصول",
+        summary="ویرایش اطلاعات پایه (هسته) محصول",
+        description="""
+        شما می‌توانید کل فیلدها یا فقط فیلدهایی که تغییر کرده‌اند را ارسال کنید (Partial Update).
+        اگر قصد تغییر دسته‌بندی را دارید، باید `category_id` و `subcategory_id` را ارسال کنید.
+        """,
         request=ProductCoreCreateSerializer,
         responses={200: inline_serializer('UpdateResponse', fields={
             'message': serializers.CharField(),
         })},
         examples=[
             OpenApiExample(
-                'غیرفعال کردن موقت محصول',
+                name='۱. ویرایش کامل (Full Update)',
+                summary='تغییر کامل هسته از جمله دسته‌بندی‌ها',
+                description='تمامی فیلدها ارسال شده و مقادیر جایگزین می‌شوند.',
+                value={
+                    "shell": {
+                        "name": "کارت ویزیت لمینت براق (ویرایش شده)",
+                        "category_id": 8,             # <--- تغییر دسته اصلی
+                        "subcategory_id": 15,         # <--- تغییر زیردسته
+                        "description": "توضیحات جدید محصول",
+                        "has_price": True,
+                        "price": "25000.00",
+                        "show_price": "120000.00",
+                        "price_per_unit": 1000,
+                        "has_quantity": True,
+                        "is_active": True,
+                        "guide_text": "زمان تحویل به ۱۰ روز کاری تغییر یافت.",
+                        "guide_type": "warning"
+                    }
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                name='۲. ویرایش جزئی (Partial Update)',
+                summary='فقط غیرفعال کردن محصول و تغییر پیام',
+                description='در این حالت بقیه اطلاعات از جمله دسته‌بندی‌ها در دیتابیس دست‌نخورده باقی می‌مانند.',
                 value={
                     "shell": {
                         "is_active": False,
-                        "guide_text": "به علت نوسانات ارز، فروش متوقف است.",
+                        "guide_text": "فروش این محصول موقتاً متوقف شده است.",
                         "guide_type": "warning"
                     }
                 },
@@ -120,7 +149,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             user=request.user,
             data=serializer.validated_data.get('shell', {})
         )
-        return Response({'message': 'محصول با موفقیت ویرایش شد.'})
+        return Response({'message': 'محصول با موفقیت ویرایش شد.'}, status=status.HTTP_200_OK)
 
     # ========== RETRIEVE ========== #
     @extend_schema(summary="جزئیات کامل محصول", responses=ProductDetailSerializer)

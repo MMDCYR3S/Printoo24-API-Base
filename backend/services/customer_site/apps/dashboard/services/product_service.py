@@ -10,7 +10,6 @@ from django.core.files import File
 
 # فرض بر این است که متدهای مربوط به EAV را در Domain Service نوشته‌اید
 from core.product.services import ProductService, ProductMediaService
-from core.product.exceptions import InvalidProductDataException
 
 try:
     from apps.dashboard.tasks import upload_product_image_task, upload_attachment_library_task
