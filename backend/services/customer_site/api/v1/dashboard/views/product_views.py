@@ -281,11 +281,14 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         description="""
         **معماری فرمول‌ساز:**
         در این بخش شما با استفاده از شناسه (`id`) فیلدهایی که در مرحله قبل ساخته‌اید، فرمول ریاضی محصول را تعریف می‌کنید.
-        کافیست از پیشوند `field_` قبل از شناسه استفاده کنید.
-
+        
+        **متغیرهای مجاز:**
+        - `field_{id}`: ارجاع به هر فیلد داینامیک محصول (مثال: `field_12`)
+        - `price_per_unit`: ارجاع به گام شمارش / تیراژ مبنای خود محصول
+        - `base_price`: ارجاع به قیمت پایه خود محصول
+        
         **مثال کاربردی:**
-        اگر فیلد "سایز" دارای `id=12` و فیلد "تیراژ" دارای `id=15` و فیلد "روکش" دارای `id=18` باشد:
-        فرمول می‌تواند اینطور باشد: `((field_12 * field_15) + field_18) * 1.09`
+        فرمول: `((field_12 * field_15) + price_per_unit) + base_price`
         """,
         request=ProductFormulasBulkSyncSerializer,
         responses={200: inline_serializer('SyncFormulasResponse', fields={
