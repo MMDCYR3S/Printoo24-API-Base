@@ -134,7 +134,12 @@ class ProductShellSerializer(GuideSerializerMixin, serializers.ModelSerializer):
 
     def get_category_info(self, obj):
         cat = obj.categories.first()
-        return {"id": cat.id, "name": cat.name} if cat else None
+        return {
+            "id": cat.id, 
+            "name": cat.name,
+            "parent_id": cat.parent.id if cat.parent else None,
+            "parent_name": cat.parent.name if cat.parent else  None,
+        } if cat else None
 
 
 # ===== Core Create/Update Serializer ===== #
