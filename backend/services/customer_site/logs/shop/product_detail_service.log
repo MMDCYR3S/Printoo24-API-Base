@@ -768,3 +768,13 @@ DEBUG 2026-02-21 16:16:10,769 product_detail_service 382 126666715141824 ShopPro
 DEBUG 2026-02-21 17:00:40,707 product_detail_service 382 126666724583104 ShopProductDetailService initialized
 DEBUG 2026-02-21 17:02:49,686 product_detail_service 382 126666715141824 ShopProductDetailService initialized
 DEBUG 2026-02-21 17:13:17,503 product_detail_service 382 126666757105344 ShopProductDetailService initialized
+DEBUG 2026-02-23 02:47:31,571 product_detail_service 21 128653111318208 ShopProductDetailService initialized
+ERROR 2026-02-23 02:47:31,617 product_detail_service 21 128653111318208 Error fetching product: column core_productfield.multi_select_operator does not exist
+LINE 1: ...ield"."title", "core_productfield"."description", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-23 02:47:32,704 product_detail_service 21 128653111318208 ShopProductDetailService initialized
+ERROR 2026-02-23 02:47:32,726 product_detail_service 21 128653111318208 Error fetching product: column core_productfield.multi_select_operator does not exist
+LINE 1: ...ield"."title", "core_productfield"."description", "core_prod...
+                                                             ^
+

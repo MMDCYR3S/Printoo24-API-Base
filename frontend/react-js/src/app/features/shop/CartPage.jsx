@@ -316,10 +316,7 @@ const OrderSummary = ({ cartData, formattedTotal, itemsWithoutFiles, onCheckout,
       </button>
 
       {/* اعتماد */}
-      <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
-        <ShieldCheck size={13} className="text-emerald-500" />
-        <span>پرداخت امن و مطمئن</span>
-      </div>
+
     </div>
   </motion.div>
 );
