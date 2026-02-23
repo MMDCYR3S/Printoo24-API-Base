@@ -40,9 +40,9 @@ class CartProcessor:
             self.result_item_data = configuration_summary
             
             # ===== ساخت یک رشته توضیحات ===== #
-            desc_parts = [f"{key}: {val}" for key, val in configuration_summary.items()]
+            desc_parts = [f"{item['field_title']}: {item['value']}" for item in configuration_summary]
             self.result_description = " | ".join(desc_parts)
-
+            
         except InvalidProductDataException as e:
             raise ValidationError(str(e))
         except Exception as e:
