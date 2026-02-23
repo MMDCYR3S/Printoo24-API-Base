@@ -23,21 +23,29 @@ const Footer = () => {
             
             {/* نقشه */}
             <div className="rounded-2xl overflow-hidden h-64 bg-slate-700 relative border-2 border-slate-600">
+
+
+
+
+
+              
                {/* در اینجا لینک iframe لوکیشن خودت را قرار بده */}
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3239.962073919865!2d51.388973!3d35.689197!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzXCsDQxJzIxLjEiTiA1McKwMjMnMjAuMyJF!5e0!3m2!1sen!2s!4v1631234567890!5m2!1sen!2s" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3994.105881779756!2d45.435895800000004!3d35.5536155!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40002d8e47edf19d%3A0x5871e7ebda7ead5d!2sprintoo24!5e1!3m2!1sfa!2s!4v1771812768190!5m2!1sfa!2s" 
                 width="100%" 
                 height="100%" 
                 style={{border:0}} 
                 allowFullScreen="" 
                 loading="lazy" 
-                className="opacity-80 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+                className="opacity-80 hover:opacity-100 transition-opacity grayscale-30 hover:grayscale-0"
               ></iframe>
               <div className="absolute bottom-4 right-4 bg-white text-slate-900 px-4 py-2 rounded-lg text-sm font-bold shadow-lg pointer-events-none">
                 {pageText.layout.footer.office}
               </div>
             </div>
           </div>
+
+
 
           {/* ستون دوم: اطلاعات تماس */}
           <div>

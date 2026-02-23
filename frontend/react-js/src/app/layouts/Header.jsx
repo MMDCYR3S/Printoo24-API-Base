@@ -29,6 +29,7 @@ import { formatCurrency } from '../utils/formatters';
 import { useSearch } from '../hooks/useSearch';
 import SearchOverlay from './SearchOverlay';
 
+import { useNavigate } from 'react-router-dom';
 /* ─────────────────────────────────────────────
    Header — نوار بالای صفحه
    ───────────────────────────────────────────── */
@@ -42,6 +43,26 @@ const Header = ({ onOpenDrawer }) => {
   const searchInputRef = useRef(null);
 
   const { results, loading, hasMore, loadMore } = useSearch(searchQuery);
+
+
+const navigate = useNavigate();
+
+  // 1. تعریف تابع خروج
+  const handleLogout = () => {
+    // پاک کردن توکن از لوکال استوریج
+    localStorage.removeItem('accessToken') 
+    localStorage.removeItem('guest_token') 
+    localStorage.removeItem('refreshToken') 
+    localStorage.removeItem('userData') 
+    localStorage.removeItem('userId') 
+    
+    // هدایت کاربر به صفحه لاگین
+    // refresh page
+    window.location.reload();
+    navigate('/');
+  };
+
+
 
   // دریافت تعداد سبد خرید
   useEffect(() => {
@@ -307,7 +328,7 @@ const Header = ({ onOpenDrawer }) => {
                     </li>
                     <div className="my-1 mx-3 border-t border-slate-200" />
                     <li>
-                      <button  className="flex items-center gap-3 py-2.5 px-3 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors w-full">
+                      <button onClick={handleLogout}  className="flex items-center gap-3 py-2.5 px-3 text-sm font-medium text-red-500 hover:bg-red-50 rounded-xl transition-colors w-full">
                         <LogOut size={17} strokeWidth={1.8} />
                         {pageText.layout.Header.logout}
                       </button>

@@ -5,6 +5,7 @@ import { authService } from '../../../services/authService';
 import SidebarItem from './SidebarItem';
 import AdminHeader from './AdminHeader';
 import { ADMIN_NAVIGATION } from '../constants/navigation';
+import {Link} from 'react-router-dom';
 
 const AdminLayout = () => {
   const handleLogout = () => {
@@ -17,7 +18,7 @@ const AdminLayout = () => {
     <div className="flex flex-col h-full bg-white text-base-content border-l border-base-200 min-h-screen">
       {/* هدر سایدبار */}
       <div className="h-16 flex items-center gap-2 px-6 border-b border-base-100 shrink-0">
-        <span className="text-2xl font-black text-slate-800">Printoo</span>
+        <Link to="/" className="text-2xl font-black text-slate-800">Printoo</Link>
         <span className="badge badge-primary badge-outline text-xs font-bold">Admin</span>
       </div>
 

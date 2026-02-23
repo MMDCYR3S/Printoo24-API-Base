@@ -1,18 +1,20 @@
-// src/app/features/admin/products/ProductEditorPage.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Layers, Settings, Image as ImageIcon, Check, AlertTriangle, Loader2 } from 'lucide-react';
+import { ArrowRight, Layers, Settings, Calculator, Image as ImageIcon, Check, AlertTriangle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 
 import { useProductEditor } from './hooks/useProductEditor';
+
 import ProductStep1Form from './components/steps/ProductStep1Form';
-import ProductStep2Options from './components/steps/ProductStep2Options';
-import ProductStep3Media from './components/steps/ProductStep3Media';
+import ProductStep2Fields from './components/steps/ProductStep2Fields'; 
+import ProductStep3Formulas from './components/steps/ProductStep3Formulas'; 
+import ProductStep4Media from './components/steps/ProductStep4Media'; 
 
 const steps = [
   { id: 'basic', label: 'اطلاعات پایه', icon: Layers },
-  { id: 'options', label: 'ویژگی‌ها', icon: Settings },
+  { id: 'fields', label: 'فرم‌ساز', icon: Settings },
+  { id: 'formulas', label: 'فرمول‌های قیمت', icon: Calculator },
   { id: 'media', label: 'مدیا و فایل', icon: ImageIcon },
 ];
 
@@ -37,9 +39,9 @@ const ProductEditorPage = () => {
   if (isLoading) {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 relative overflow-hidden">
-            <div className="absolute w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
+            <div className="absolute w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] animate-pulse"></div>
             <div className="relative z-10 flex flex-col items-center gap-6 bg-white/50 backdrop-blur-xl p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-white">
-                <Loader2 size={48} className="text-primary animate-spin" />
+                <Loader2 size={48} className="text-blue-500 animate-spin" />
                 <div className="flex flex-col items-center gap-1">
                     <span className="font-black text-xl text-slate-800">در حال دریافت اطلاعات</span>
                     <span className="text-slate-500 text-sm font-medium">لطفاً چند لحظه صبر کنید...</span>
@@ -74,7 +76,7 @@ const ProductEditorPage = () => {
 
   // --- UI: Main Content ---
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-32 font-sans selection:bg-primary/20">
+    <div className="min-h-screen bg-[#f8fafc] pb-32 font-sans selection:bg-blue-500/20">
       
       {/* Modern Glassmorphic Header */}
       <div className="sticky top-0 z-40 bg-white/70 backdrop-blur-2xl border-b border-white shadow-[0_4px_30px_rgba(0,0,0,0.03)] px-6 py-4 flex justify-between items-center transition-all">
@@ -83,7 +85,7 @@ const ProductEditorPage = () => {
         <div className="flex items-center gap-5">
           <button 
              onClick={() => navigate('/admin/products')} 
-             className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 text-slate-600 rounded-full shadow-sm hover:bg-slate-50 hover:text-primary transition-all active:scale-95"
+             className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 text-slate-600 rounded-full shadow-sm hover:bg-slate-50 hover:text-blue-600 transition-all active:scale-95"
           >
             <ArrowRight size={20} />
           </button>
@@ -110,7 +112,7 @@ const ProductEditorPage = () => {
                  className={clsx(
                    "relative flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-500",
                    isActive 
-                      ? "bg-primary text-white shadow-lg shadow-primary/30 scale-100" 
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-100" 
                       : isPast 
                       ? "text-emerald-600 hover:bg-emerald-50/50 cursor-pointer scale-95 hover:scale-100" 
                       : canNavigate 
@@ -121,9 +123,9 @@ const ProductEditorPage = () => {
                  {isPast ? <Check size={18} strokeWidth={2.5}/> : <step.icon size={18} strokeWidth={isActive ? 2 : 1.5} />}
                  <span>{step.label}</span>
                  
-                 {/* Active Indicator Dot (Optional UX flair) */}
+                 {/* Active Indicator Dot */}
                  {isActive && (
-                    <motion.div layoutId="activeTabIndicator" className="absolute inset-0 border-2 border-primary rounded-full z-[-1]"></motion.div>
+                    <motion.div layoutId="activeTabIndicator" className="absolute inset-0 border-2 border-blue-600 rounded-full z-[-1]"></motion.div>
                  )}
                </button>
              )
@@ -151,26 +153,30 @@ const ProductEditorPage = () => {
               />
            )}
 
-           {activeTab === 'options' && product && (
-              <ProductStep2Options 
+           {activeTab === 'fields' && product && (
+              <ProductStep2Fields 
                  initialData={product} 
                  onSave={saveStep2} 
                  isSaving={isSavingStep2}
               />
            )}
 
+           {activeTab === 'formulas' && product && (
+              <ProductStep3Formulas 
+                 initialData={product} 
+                 onSave={saveStep3} 
+                 isSaving={isSavingStep3}
+              />
+           )}
+
            {activeTab === 'media' && product && (
-              <ProductStep3Media 
+              <ProductStep4Media 
                  initialData={product} 
                  productId={productId} 
-                 
-                 // اتصال توابع آپلود مدیا
-                 onSave={saveStep3} 
                  onUploadImage={uploadImageAsync}
                  onUploadAttachment={uploadAttachmentAsync}
-                 
-                 isSaving={isSavingStep3}
                  isUploading={isUploading}
+                 onFinish={() => navigate('/admin/products')} 
               />
            )}
         </motion.div>

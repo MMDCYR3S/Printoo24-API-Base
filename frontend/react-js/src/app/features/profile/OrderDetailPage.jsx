@@ -204,7 +204,7 @@ const OrderDetailPage = () => {
           "
         >
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <DollarSign size={22} className="text-primary" />
+            <span className='text-primary font-extralight text-lg pt-1' >IQD</span>
           </div>
           <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">
             {pageText.profile.orderDetailPage.totalPrice}
