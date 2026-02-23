@@ -349,20 +349,7 @@ const navigate = useNavigate();
                 >
                   {globalText.header.login}
                 </Link>
-                <Link
-                  to="/register"
-                  className="
-                    px-4 py-2 text-sm font-bold
-                    bg-primary text-white rounded-xl
-                    shadow-md shadow-primary/25
-                    hover:shadow-lg hover:shadow-primary/35
-                    hover:-translate-y-[1px]
-                    active:translate-y-0 active:shadow-md
-                    transition-all duration-200
-                  "
-                >
-                  {globalText.header.register}
-                </Link>
+
               </div>
             )}
           </div>

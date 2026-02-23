@@ -265,3 +265,15 @@ INFO 2026-02-23 02:54:05,928 user_order_service 21 128653102925504 Fetching deta
 INFO 2026-02-23 02:54:09,574 user_order_service 21 128653102925504 Fetching detail Order 78 for User 1
 INFO 2026-02-23 02:54:10,437 user_order_service 21 128653102925504 Fetching detail Order 78 for User 1
 INFO 2026-02-23 02:54:18,479 user_order_service 21 128653102925504 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:08,916 user_order_service 153 135163080079040 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:10,250 user_order_service 153 135163063293632 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:16,380 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:18,239 user_order_service 153 135163080079040 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:22,845 user_order_service 153 135163063293632 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:24,691 user_order_service 153 135163080079040 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:36,239 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:38,133 user_order_service 153 135163063293632 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:47,254 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:52,767 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:54,238 user_order_service 153 135163063293632 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:18:33,290 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1

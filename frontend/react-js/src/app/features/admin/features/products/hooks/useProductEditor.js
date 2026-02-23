@@ -10,10 +10,8 @@ export const useProductEditor = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   
-  // شروع همیشه از تب اول است
   const [activeTab, setActiveTab] = useState('basic');
 
-  // دریافت اطلاعات کامل محصول برای حالت ویرایش
   const { 
     data: product, 
     isLoading: isQueryLoading, 
@@ -29,10 +27,48 @@ export const useProductEditor = () => {
 
   const isLoading = isEditMode ? isQueryLoading : false;
 
-  // --- Step 1: Core (اطلاعات پایه) ---
+  // 🎯 آماده‌سازی پی‌لود استپ ۱
+  const prepareStep1Payload = (formData) => {
+    const s = formData.shell;
+    
+    // بک‌اند فقط یک آیدی می‌خواد. اگر زیردسته انتخاب شده بود همون رو می‌دیم، وگرنه دسته اصلی
+    const finalCategoryId = s.child_category_id ? Number(s.child_category_id) : Number(s.parent_category_id);
+
+    const payload = {
+      shell: {
+        name: s.name,
+        category_ids: [finalCategoryId], // ارسال بصورت آرایه تک‌عضوی طبق Swagger
+        description: s.description || "",
+        
+        has_price: Boolean(s.has_price),
+        
+        // price همیشه 0، بقیه مقادیر از فرم
+        price: "0",
+        show_price: s.has_price ? String(s.show_price || "0") : "0",
+        price_per_unit: s.has_price ? Number(s.price_per_unit || 0) : 0,
+        
+        has_quantity: Boolean(s.has_quantity),
+        is_active: Boolean(s.is_active),
+        
+        guide_text: s.guide_text || "",
+        guide_type: s.guide_type || "info"
+      }
+    };
+
+    if (payload.shell.has_quantity) {
+        payload.shell.min_quantity = Number(s.min_quantity || 1);
+        if (s.max_quantity) {
+            payload.shell.max_quantity = Number(s.max_quantity);
+        }
+    }
+
+    return payload;
+  };
+
   const step1Mutation = useMutation({
-    mutationFn: (payload) => {
-      // پی‌لود این مرحله از ProductStep1Form میاد (همان لاجیک قبلی که دادی درسته)
+    mutationFn: (rawFormData) => {
+      const payload = prepareStep1Payload(rawFormData);
+      console.log("🚀 Payload ارسالی استپ ۱:", JSON.stringify(payload, null, 2));
       return isEditMode 
         ? adminProductService.update(id, payload) 
         : adminProductService.create(payload);
@@ -45,43 +81,42 @@ export const useProductEditor = () => {
          return;
       }
 
-      toast.success(isEditMode ? 'اطلاعات پایه ذخیره شد' : 'محصول ایجاد شد');
+      toast.success(isEditMode ? 'اطلاعات پایه ذخیره شد' : 'هسته محصول ایجاد شد');
 
       if (!isEditMode) {
          navigate(`/admin/products/edit/${targetId}`, { replace: true });
-         setTimeout(() => setActiveTab('fields'), 500); // هدایت به مرحله ۲
+         setTimeout(() => setActiveTab('fields'), 500);
       } else {
          queryClient.invalidateQueries(['admin-product', id]);
          setActiveTab('fields');
       }
     },
-    onError: (err) => toast.error('خطا در ذخیره اطلاعات پایه')
+    onError: (err) => {
+      const msg = err.response?.data?.message || err.response?.data?.detail;
+      toast.error(msg ? `خطا: ${JSON.stringify(msg)}` : 'خطا در ذخیره اطلاعات پایه');
+    }
   });
 
-  // --- Step 2: Sync Fields (همگام‌سازی فیلدها) ---
   const step2Mutation = useMutation({
     mutationFn: (payload) => adminProductService.syncFields(id, payload),
     onSuccess: () => {
-      // 🎯 بعد از ذخیره فیلدها، باید دیتای محصول رفرش بشه تا id های واقعی رو بگیریم
       queryClient.invalidateQueries(['admin-product', id]);
       toast.success('ساختار فرم ذخیره شد');
-      setActiveTab('formulas'); // هدایت به فرمول‌ساز
+      setActiveTab('formulas'); 
     },
     onError: () => toast.error('خطا در ذخیره فیلدها')
   });
 
-  // --- Step 3: Sync Formulas (فرمول‌ساز) ---
   const step3Mutation = useMutation({
     mutationFn: (payload) => adminProductService.syncFormulas(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries(['admin-product', id]);
       toast.success('فرمول‌های قیمت‌گذاری ذخیره شد');
-      setActiveTab('media'); // هدایت به بخش رسانه
+      setActiveTab('media'); 
     },
     onError: () => toast.error('خطا در ذخیره فرمول‌ها')
   });
 
-  // --- Step 4: Media ---
   const uploadImageMutation = useMutation({
     mutationFn: (formData) => adminProductService.uploadImage(id, formData),
   });
@@ -114,4 +149,4 @@ export const useProductEditor = () => {
     uploadAttachmentAsync: uploadAttachmentMutation.mutateAsync,
     isUploading: uploadImageMutation.isPending || uploadAttachmentMutation.isPending,
   };
-};
+}; 
