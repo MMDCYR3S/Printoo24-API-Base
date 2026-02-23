@@ -24,7 +24,7 @@ class CustomerProfileService:
         profile = self.get_or_create_profile(user)
         
         # ===== بررسی قوانین بیزنس (فیلترینگ فیلدها) ===== #
-        editable_fields = ['first_name', 'last_name', 'phone_number', 'company', 'bio']
+        editable_fields = ['first_name', 'last_name', 'company', 'bio']
 
         clean_data = {k: v for k, v in data.items() if k in editable_fields}
 

@@ -57,7 +57,7 @@ class RegisterAPIView(GenericAPIView):
             OpenApiExample(
                 'Login Example',
                 value={
-                    "username": "admin",
+                    "phone_number": "09137555555",
                     "password": "admin"
                 },
                 request_only=True
@@ -83,7 +83,7 @@ class LoginAPIView(GenericAPIView):
         
         # ===== دریافت اطلاعات از سمت کاربر ===== #
         validated_data = serializer.validated_data
-        username = validated_data.get('username')
+        phone_number = validated_data.get('phone_number')
         password = validated_data.get('password')
         
         # ===== ایجاد سرویس برای ورود ===== #
@@ -91,7 +91,7 @@ class LoginAPIView(GenericAPIView):
         
         try:
             # ==== اعتبارسنجی و ورود کاربر با اطلاعات داده شده ==== #
-            login_data = auth_service.login_customer({"username": username, "password": password})
+            login_data = auth_service.login_customer({"phone_number": phone_number, "password": password})
             user_instance = login_data["user"]
             tokens = login_data["tokens"]
             user_data = UserDetailSerializer(user_instance).data

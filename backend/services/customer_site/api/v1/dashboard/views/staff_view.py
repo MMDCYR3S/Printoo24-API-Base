@@ -54,7 +54,7 @@ class StaffViewSet(viewsets.ViewSet):
             OpenApiExample(
                 "ایجاد کارمند",
                 value={
-                    "username": "designer_ali",
+                    "phone_number": "09137555555",
                     "email": "ali@printoo.ir",
                     "password": "StrongPassword123!",
                     "role_id": 2

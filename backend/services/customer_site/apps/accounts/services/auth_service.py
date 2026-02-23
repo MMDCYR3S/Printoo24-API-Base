@@ -76,22 +76,22 @@ class AuthService:
         """
         ورود مشتری.
         """
-        username = data.get('username') or data.get('email')
+        phone_number = data.get('phone_number')
         password = data.get('password')
         
-        logger.info(f"Login attempt for: {username}")
+        logger.info(f"Login attempt for: {phone_number}")
         
         try:
             # ===== اعتبارسنجی ===== #
-            user = authenticate(username=username, password=password)
+            user = authenticate(phone_number=phone_number, password=password)
             
             if not user:
-                logger.warning(f"Invalid credentials for: {username}")
+                logger.warning(f"Invalid credentials for: {phone_number}")
                 raise ValidationError(msg_provider.get("auth.E1001"))
             
             # ===== حساب کاربری فعال باشد ===== #
             if not user.is_active:
-                logger.warning(f"Login blocked - Inactive user: {username}")
+                logger.warning(f"Login blocked - Inactive user: {phone_number}")
                 raise ValidationError(msg_provider.get("auth.E1002"))
             
             # ===== تولید توکن ===== #
@@ -107,5 +107,5 @@ class AuthService:
         except ValidationError:
             raise
         except Exception as e:
-            logger.error(f"Login error for {username}: {e}", exc_info=True)
+            logger.error(f"Login error for {phone_number}: {e}", exc_info=True)
             raise ValidationError(msg_provider.get("auth.E1003"))

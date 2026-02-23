@@ -179,7 +179,7 @@ class CreateOrderFromCartService:
         if user and user.is_authenticated:
             user_balance = self._wallet_service.get_user_balance(user)
             if user_balance < cart_item.price:
-                 logger.info(f"User {user.username} doesn't have enough balance but anyways... :)")
+                 logger.info(f"User {user.phone_number} doesn't have enough balance but anyways... :)")
             self._wallet_service.debit(user=user, amount=cart_item.price)
 
         # ===== ایجاد سفارش مربوطه ===== #
@@ -241,7 +241,7 @@ class CreateOrderFromCartService:
         if user and user.is_authenticated:
             user_balance = self._wallet_service.get_user_balance(user)
             if user_balance < total_price:
-                logger.info(f"User {user.username} doesn't have enough balance but anyways... :)")
+                logger.info(f"User {user.phone_number} doesn't have enough balance but anyways... :)")
             self._wallet_service.debit(user=user, amount=total_price)
             
         # ===== ایجاد سفارشات ===== #

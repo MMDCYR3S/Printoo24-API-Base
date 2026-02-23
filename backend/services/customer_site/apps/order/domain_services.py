@@ -15,9 +15,9 @@ class CheckoutService:
     سرویس تبدیل سبد خرید به سفارش (Checkout Logic)
     """
 
-    def _generate_order_code(self, username="UNK"):
+    def _generate_order_code(self, phone_number="UNK"):
         """ تولید کد پیگیری خوانا و یکتا """
-        return f"ORD-{str(uuid.uuid4().hex[:8]).upper()}-{str(username[:5]).upper()}"
+        return f"ORD-{str(uuid.uuid4().hex[:8]).upper()}-{str(phone_number[:5]).upper()}"
     
     def _transfer_files(self, cart_item: CartItem, order_item: OrderItem):
         """ ===== انتقال فایل‌های طراحی از Cart Item به Order Item ===== """
@@ -69,7 +69,7 @@ class CheckoutService:
         except OrderStatus.DoesNotExist:
             initial_status = OrderStatus.objects.first()
             
-        username = user.username if user else "UNK"
+        phone_number = user.phone_number if user else "UNK"
 
         #‌ ===== ایجاد سفارش ===== #
         order = Order.objects.create(
@@ -78,7 +78,7 @@ class CheckoutService:
             total_price=cart_item.price,
             base_products_price=cart_item.price, 
             type=final_order_type,
-            order_code=self._generate_order_code(username=username),
+            order_code=self._generate_order_code(phone_number=phone_number),
             
             #‌ ===== نام و اطلاعات کاربر ===== #
             recipient_name=recipient_name,

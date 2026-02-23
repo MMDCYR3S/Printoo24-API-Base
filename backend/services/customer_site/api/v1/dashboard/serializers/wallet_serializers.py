@@ -4,12 +4,12 @@ from apps.accounts.models import Wallet, WalletTransaction
 # ===== سریالایزر لیست کیف پول ===== #
 class WalletListSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source='user.id')
-    username = serializers.CharField(source='user.username')
+    phone_number = serializers.CharField(source='user.phone_number')
     full_name = serializers.SerializerMethodField()
     
     class Meta:
         model = Wallet
-        fields = ['id', 'user_id', 'username', 'full_name', 'balance', 'updated_at']
+        fields = ['id', 'user_id', 'phone_number', 'full_name', 'balance', 'updated_at']
 
     def get_full_name(self, obj):
         try:

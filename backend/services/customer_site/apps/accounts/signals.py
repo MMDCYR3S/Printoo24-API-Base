@@ -15,7 +15,7 @@ def create_wallet_for_new_user(sender, instance, created, **kwargs):
             from .models import Wallet
             Wallet.objects.create(user=instance)
         except Exception as e:
-            print(f"خطا در ایجاد کیف پول برای کاربر {instance.username}: {e}")
+            print(f"خطا در ایجاد کیف پول برای کاربر {instance.phone_number}: {e}")
 
 
 @receiver(post_save, sender=User)
@@ -33,7 +33,7 @@ def create_customer_profile_for_new_user(sender, instance, created, **kwargs):
                 phone_number=''
             )
         except Exception as e:
-            print(f"خطا در ایجاد پروفایل مشتری برای کاربر {instance.username}: {e}")
+            print(f"خطا در ایجاد پروفایل مشتری برای کاربر {instance.phone_number}: {e}")
 
 
 @receiver(post_save, sender=User)
@@ -55,4 +55,4 @@ def assign_default_role_to_new_user(sender, instance, created, **kwargs):
                     role=default_role
                 )
         except Exception as e:
-            print(f"خطا در تخصیص نقش به کاربر {instance.username}: {e}")
+            print(f"خطا در تخصیص نقش به کاربر {instance.phone_number}: {e}")

@@ -14,7 +14,7 @@ class StaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'is_active', 
+            'id', 'is_active', 
             'is_staff', 'is_superuser', 'created_at', 'role'
         ]
 
@@ -27,15 +27,13 @@ class StaffSerializer(serializers.ModelSerializer):
 
 # ===== Create Staff Input ===== #
 class StaffCreateSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150, required=True)
-    email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
+    phone_number = serializers.CharField(max_length=150, required=True)
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     role_id = serializers.IntegerField(required=True, help_text="شناسه نقش کارمند")
 
 # ===== Update Staff Input ===== #
 class StaffUpdateSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150, required=False)
-    email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
+    phone_number = serializers.CharField(max_length=150, required=False)
     password = serializers.CharField(write_only=True, required=False, style={'input_type': 'password'})
     role_id = serializers.IntegerField(required=False, help_text="شناسه نقش جدید")
     is_active = serializers.BooleanField(required=False)

@@ -231,7 +231,7 @@ class ContactUsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactUs
         fields = [
-            'id', 'full_name', 'email', 'phone_number', 'subject', 'message', 
+            'id', 'full_name', 'phone_number', 'subject', 'message', 
             'is_read', 'admin_reply', 'replied_at', 'created_at', 'status_display'
         ]
         read_only_fields = ['is_read', 'admin_reply', 'replied_at', 'created_at']
@@ -328,7 +328,6 @@ class CustomerReadSerializer(serializers.ModelSerializer):
     """
     first_name = serializers.CharField(source='customer_profile.first_name', read_only=True)
     last_name = serializers.CharField(source='customer_profile.last_name', read_only=True)
-    phone_number = serializers.CharField(source='customer_profile.phone_number', read_only=True)
     company = serializers.CharField(source='customer_profile.company', read_only=True)
     bio = serializers.CharField(source='customer_profile.bio', read_only=True)
     
@@ -341,7 +340,7 @@ class CustomerReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'is_active', 
+            'id', 'is_active', 
             'first_name', 'last_name', 'phone_number', 'company', 'bio', 
             'addresses', 'wallet_balance', 'created_at'
         ]
@@ -353,7 +352,6 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
     """
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
-    phone_number = serializers.CharField(required=False, allow_blank=True)
     company = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     bio = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
@@ -362,29 +360,13 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'password', 'is_active', 
+            'id', 'password', 'is_active', 
             'first_name', 'last_name', 'phone_number', 'company', 'bio', 
             'addresses'
         ]
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
-            'username': {'required': True},
-            'email': {'required': False, 'allow_blank': True},
         }
-
-    def validate_email(self, value):
-        """
-        جلوگیری از خطای Unique Constraint برای رشته‌های خالی.
-        اگر ایمیل خالی بود، آن را None کن تا دیتابیس ارور ندهد.
-        """
-        if not value:
-            return None
-
-        user_id = self.instance.id if self.instance else None
-        if User.objects.filter(email=value).exclude(id=user_id).exists():
-            raise serializers.ValidationError("این ایمیل قبلا ثبت شده است.")
-            
-        return value
 
 # ===== سریالایزر نمایش تراکنش‌ها ===== #
 class WalletTransactionSerializer(serializers.ModelSerializer):
@@ -397,11 +379,11 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
 class WalletDetailSerializer(serializers.ModelSerializer):
     # ===== نمایش اطلاعات کامل کیف پول ===== #
     user_full_name = serializers.CharField(source='user.customer_profile.full_name', read_only=True, default='-')
-    username = serializers.CharField(source='user.username', read_only=True)
+    phone_number = serializers.CharField(source='user.phone_number', read_only=True)
     
     class Meta:
         model = Wallet
-        fields = ['id', 'user_id', 'username', 'user_full_name', 'decimal', 'updated_at']
+        fields = ['id', 'user_id', 'phone_number', 'user_full_name', 'decimal', 'updated_at']
 
 
 # ===== سریالایزر تغییر موجودی (Action) ===== #

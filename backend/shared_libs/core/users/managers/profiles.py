@@ -17,7 +17,7 @@ class CustomerProfileQuerySet(BaseQuerySet):
         """
         دریافت پروفایل بر اساس نام کاربری
         """
-        return self.filter(user__username=username).first()
+        return self.filter(user__phone_number=username).first()
 
 
 # ===== Customer Profile Manager ===== #

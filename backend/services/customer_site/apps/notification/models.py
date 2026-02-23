@@ -43,7 +43,7 @@ class CustomerNotification(models.Model):
     objects = NotificationManager()
     
     def __str__(self):
-        return f"{self.name} -> {self.recipient.username}"
+        return f"{self.name} -> {self.recipient.phone_number}"
     
     class Meta:
         db_table = 'customer_notification'

@@ -55,7 +55,7 @@ class ProfileDetailService:
         # ===== 1. دریافت آبجکت‌ها ===== #
         user = self._user_domain.get_customer_by_id(user_id)
         
-        if 'username' in data or 'email' in data:
+        if 'phone_number' in data:
             self._user_domain.update_customer(user, data)
             
         profile_data = {k:v for k,v in data.items() if k in ['first_name', 'last_name', 'phone_number', 'company', 'bio']}

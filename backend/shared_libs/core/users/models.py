@@ -24,8 +24,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name='شناسه',
         help_text='شناسه کاربری',
     )
-    username = models.CharField(_("نام کاربری"), max_length=150, unique=True)
-    email = models.EmailField(_('آدرس ایمیل'), unique=True, null=True, blank=True)
+    phone_number = models.CharField(_("شماره تماس"), max_length=15, unique=True)
     is_active = models.BooleanField(_('فعال'), default=True)
     is_staff = models.BooleanField(_('کاربری'), default=False)
     is_superuser = models.BooleanField(_('ادمین'), default=False)
@@ -34,18 +33,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(_('تاریخ عضویت'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
-    USERNAME_FIELD = 'username'
+    # قرار دادن شماره تماس به عنوان فیلد اصلی لاگین
+    USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = []
     
     objects = UserManager()
     
     def __str__(self):
-        return f"{self.username}"
-    
-    class Meta:
-        app_label = 'core'
-        verbose_name = _('کاربر')
-        verbose_name_plural = _('کاربران')
+        return f"{self.phone_number}"
 
 # ========= Role Model ========= #
 class Role(models.Model):
@@ -113,7 +108,7 @@ class CustomerProfile(models.Model):
     user = models.OneToOneField("core.User", related_name='customer_profile', on_delete=models.CASCADE)
     first_name = models.CharField(_('نام'), max_length=150)
     last_name = models.CharField(_('نام خانوادگی'), max_length=150)
-    phone_number = models.CharField(_('شماره تماس'), max_length=150)
+    # phone_number = models.CharField(_('شماره تماس'), max_length=150)
     company = models.CharField(_('نام شرکت'), max_length=150, blank=True, null=True)
     bio = models.TextField(_('بیوگرافی'), blank=True, null=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)

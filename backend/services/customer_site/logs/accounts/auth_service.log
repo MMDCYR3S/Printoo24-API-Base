@@ -948,99 +948,48 @@ INFO 2026-02-19 07:54:51,848 auth_service 189 139509487527616 User logged in: 1
 DEBUG 2026-02-19 08:26:44,587 auth_service 189 139509512705728 AuthService initialized with UserIdentityService
 INFO 2026-02-19 08:26:44,589 auth_service 189 139509512705728 Login attempt for: admin
 INFO 2026-02-19 08:26:45,397 auth_service 189 139509512705728 User logged in: 1
-DEBUG 2026-02-19 14:47:22,719 auth_service 805 129516429268672 AuthService initialized with UserIdentityService
-INFO 2026-02-19 14:47:22,721 auth_service 805 129516429268672 Login attempt for: admin
-INFO 2026-02-19 14:47:23,366 auth_service 805 129516429268672 User logged in: 1
-DEBUG 2026-02-20 09:52:38,101 auth_service 7 140253968987840 AuthService initialized with UserIdentityService
-INFO 2026-02-20 09:52:38,103 auth_service 7 140253968987840 Login attempt for: admin
-INFO 2026-02-20 09:52:38,774 auth_service 7 140253968987840 User logged in: 1
-DEBUG 2026-02-20 10:11:55,844 auth_service 7 140253935417024 AuthService initialized with UserIdentityService
-INFO 2026-02-20 10:11:55,847 auth_service 7 140253935417024 Login attempt for: admin
-INFO 2026-02-20 10:11:56,522 auth_service 7 140253935417024 User logged in: 1
-DEBUG 2026-02-20 10:24:01,217 auth_service 164 137232350615232 AuthService initialized with UserIdentityService
-INFO 2026-02-20 10:24:01,218 auth_service 164 137232350615232 Login attempt for: admin
-INFO 2026-02-20 10:24:02,069 auth_service 164 137232350615232 User logged in: 1
-DEBUG 2026-02-20 12:14:39,074 auth_service 164 137232350615232 AuthService initialized with UserIdentityService
-INFO 2026-02-20 12:14:39,076 auth_service 164 137232350615232 Login attempt for: mahdi
-WARNING 2026-02-20 12:14:39,789 auth_service 164 137232350615232 Invalid credentials for: mahdi
-DEBUG 2026-02-20 12:14:44,315 auth_service 164 137232350615232 AuthService initialized with UserIdentityService
-INFO 2026-02-20 12:14:44,316 auth_service 164 137232350615232 Login attempt for: mahdi
-WARNING 2026-02-20 12:14:45,026 auth_service 164 137232350615232 Invalid credentials for: mahdi
-DEBUG 2026-02-20 12:14:47,120 auth_service 164 137232350615232 AuthService initialized with UserIdentityService
-INFO 2026-02-20 12:14:47,122 auth_service 164 137232350615232 Login attempt for: mahdi
-INFO 2026-02-20 12:14:47,793 auth_service 164 137232350615232 User logged in: 18
-DEBUG 2026-02-20 12:37:15,446 auth_service 488 123753778378432 AuthService initialized with UserIdentityService
-INFO 2026-02-20 12:37:15,448 auth_service 488 123753778378432 Login attempt for: admin
-INFO 2026-02-20 12:37:16,820 auth_service 488 123753778378432 User logged in: 1
-DEBUG 2026-02-20 13:02:25,379 auth_service 488 123753731659456 AuthService initialized with UserIdentityService
-INFO 2026-02-20 13:02:25,400 auth_service 488 123753731659456 Login attempt for: admin
-INFO 2026-02-20 13:02:26,652 auth_service 488 123753731659456 User logged in: 1
-DEBUG 2026-02-20 13:45:13,716 auth_service 7 137116275173056 AuthService initialized with UserIdentityService
-INFO 2026-02-20 13:45:13,717 auth_service 7 137116275173056 Login attempt for: admin
-INFO 2026-02-20 13:45:14,753 auth_service 7 137116275173056 User logged in: 1
-DEBUG 2026-02-20 13:45:16,640 auth_service 7 137116275173056 AuthService initialized with UserIdentityService
-INFO 2026-02-20 13:45:16,641 auth_service 7 137116275173056 Login attempt for: admin
-INFO 2026-02-20 13:45:17,533 auth_service 7 137116275173056 User logged in: 1
-DEBUG 2026-02-20 19:02:10,780 auth_service 279 133099425887936 AuthService initialized with UserIdentityService
-INFO 2026-02-20 19:02:10,784 auth_service 279 133099425887936 Login attempt for: admin
-INFO 2026-02-20 19:02:11,447 auth_service 279 133099425887936 User logged in: 1
-DEBUG 2026-02-21 06:42:09,518 auth_service 7 135300623873728 AuthService initialized with UserIdentityService
-INFO 2026-02-21 06:42:09,525 auth_service 7 135300623873728 Login attempt for: admin
-INFO 2026-02-21 06:42:10,790 auth_service 7 135300623873728 User logged in: 1
-DEBUG 2026-02-21 08:41:16,448 auth_service 221 128056616457920 AuthService initialized with UserIdentityService
-INFO 2026-02-21 08:41:16,450 auth_service 221 128056616457920 Login attempt for: admin
-INFO 2026-02-21 08:41:17,163 auth_service 221 128056616457920 User logged in: 1
-DEBUG 2026-02-21 08:58:13,311 auth_service 221 128056608065216 AuthService initialized with UserIdentityService
-INFO 2026-02-21 08:58:13,315 auth_service 221 128056608065216 Login attempt for: admin
-INFO 2026-02-21 08:58:14,082 auth_service 221 128056608065216 User logged in: 1
-DEBUG 2026-02-21 22:23:03,988 auth_service 889 138103582873280 AuthService initialized with UserIdentityService
-INFO 2026-02-21 22:23:03,991 auth_service 889 138103582873280 Login attempt for: admin
-INFO 2026-02-21 22:23:04,694 auth_service 889 138103582873280 User logged in: 1
-DEBUG 2026-02-21 22:23:26,728 auth_service 889 138103582873280 AuthService initialized with UserIdentityService
-INFO 2026-02-21 22:23:26,729 auth_service 889 138103582873280 Login attempt for: admin
-INFO 2026-02-21 22:23:27,364 auth_service 889 138103582873280 User logged in: 1
-DEBUG 2026-02-21 22:23:54,122 auth_service 889 138103599658688 AuthService initialized with UserIdentityService
-INFO 2026-02-21 22:23:54,123 auth_service 889 138103599658688 Login attempt for: admin
-INFO 2026-02-21 22:23:54,732 auth_service 889 138103599658688 User logged in: 1
-DEBUG 2026-02-21 22:24:18,454 auth_service 889 138103560844992 AuthService initialized with UserIdentityService
-INFO 2026-02-21 22:24:18,457 auth_service 889 138103560844992 Login attempt for: admin
-INFO 2026-02-21 22:24:19,225 auth_service 889 138103560844992 User logged in: 1
-DEBUG 2026-02-21 22:26:52,747 auth_service 889 138103591265984 AuthService initialized with UserIdentityService
-INFO 2026-02-21 22:26:52,749 auth_service 889 138103591265984 Login attempt for: admin
-INFO 2026-02-21 22:26:53,459 auth_service 889 138103591265984 User logged in: 1
-DEBUG 2026-02-21 22:29:35,336 auth_service 889 138103591265984 AuthService initialized with UserIdentityService
-INFO 2026-02-21 22:29:35,337 auth_service 889 138103591265984 Login attempt for: admin
-INFO 2026-02-21 22:29:35,963 auth_service 889 138103591265984 User logged in: 1
-DEBUG 2026-02-21 23:07:26,151 auth_service 1117 137138788271808 AuthService initialized with UserIdentityService
-INFO 2026-02-21 23:07:26,152 auth_service 1117 137138788271808 Login attempt for: admin
-INFO 2026-02-21 23:07:26,909 auth_service 1117 137138788271808 User logged in: 1
-DEBUG 2026-02-22 05:13:47,615 auth_service 7 133155617150656 AuthService initialized with UserIdentityService
-INFO 2026-02-22 05:13:47,617 auth_service 7 133155617150656 Login attempt for: admin
-INFO 2026-02-22 05:13:48,933 auth_service 7 133155617150656 User logged in: 1
-DEBUG 2026-02-22 05:13:52,846 auth_service 7 133155617150656 AuthService initialized with UserIdentityService
-INFO 2026-02-22 05:13:52,847 auth_service 7 133155617150656 Login attempt for: admin
-INFO 2026-02-22 05:13:54,078 auth_service 7 133155617150656 User logged in: 1
-DEBUG 2026-02-22 10:06:14,552 auth_service 7 127477605185216 AuthService initialized with UserIdentityService
-INFO 2026-02-22 10:06:14,554 auth_service 7 127477605185216 Login attempt for: admin
-INFO 2026-02-22 10:06:15,377 auth_service 7 127477605185216 User logged in: 1
-DEBUG 2026-02-23 02:03:34,243 auth_service 21 128653360010944 AuthService initialized with UserIdentityService
-INFO 2026-02-23 02:03:34,250 auth_service 21 128653360010944 Login attempt for: admin
-INFO 2026-02-23 02:03:34,926 auth_service 21 128653360010944 User logged in: 1
-DEBUG 2026-02-23 02:46:37,975 auth_service 21 128653360010944 AuthService initialized with UserIdentityService
-INFO 2026-02-23 02:46:37,979 auth_service 21 128653360010944 Login attempt for: admin
-INFO 2026-02-23 02:46:38,648 auth_service 21 128653360010944 User logged in: 1
-DEBUG 2026-02-23 02:47:13,974 auth_service 21 128653360010944 AuthService initialized with UserIdentityService
-INFO 2026-02-23 02:47:13,976 auth_service 21 128653360010944 Login attempt for: admin
-INFO 2026-02-23 02:47:14,709 auth_service 21 128653360010944 User logged in: 1
-DEBUG 2026-02-23 02:48:26,724 auth_service 21 128653351618240 AuthService initialized with UserIdentityService
-INFO 2026-02-23 02:48:26,726 auth_service 21 128653351618240 Login attempt for: admin
-INFO 2026-02-23 02:48:27,421 auth_service 21 128653351618240 User logged in: 1
-DEBUG 2026-02-23 02:49:25,299 auth_service 21 128653111318208 AuthService initialized with UserIdentityService
-INFO 2026-02-23 02:49:25,300 auth_service 21 128653111318208 Login attempt for: admin
-INFO 2026-02-23 02:49:25,935 auth_service 21 128653111318208 User logged in: 1
-DEBUG 2026-02-23 14:42:28,601 auth_service 7 125158390138560 AuthService initialized with UserIdentityService
-INFO 2026-02-23 14:42:28,615 auth_service 7 125158390138560 Login attempt for: admin
-INFO 2026-02-23 14:42:28,951 auth_service 7 125158390138560 User logged in: 1
-DEBUG 2026-02-23 18:44:37,220 auth_service 277 130100329707200 AuthService initialized with UserIdentityService
-INFO 2026-02-23 18:44:37,222 auth_service 277 130100329707200 Login attempt for: admin
-INFO 2026-02-23 18:44:38,226 auth_service 277 130100329707200 User logged in: 1
+DEBUG 2026-02-23 22:15:32,146 auth_service 185 136086130169536 AuthService initialized with UserIdentityService
+INFO 2026-02-23 22:15:32,148 auth_service 185 136086130169536 Login attempt for: 09137555555
+INFO 2026-02-23 22:15:32,399 auth_service 185 136086130169536 User logged in: 10
+DEBUG 2026-02-23 22:16:12,972 auth_service 188 140681799702208 AuthService initialized with UserIdentityService
+INFO 2026-02-23 22:16:12,975 auth_service 188 140681799702208 Login attempt for: 09137555555
+INFO 2026-02-23 22:16:13,311 auth_service 188 140681799702208 User logged in: 10
+DEBUG 2026-02-23 22:16:47,863 auth_service 188 140681799702208 AuthService initialized with UserIdentityService
+INFO 2026-02-23 22:16:47,866 auth_service 188 140681799702208 Starting registration process for: None
+ERROR 2026-02-23 22:16:48,169 auth_service 188 140681799702208 Critical error during registration for None: 'User' object has no attribute 'username'
+Traceback (most recent call last):
+  File "/app/shared_libs/core/signals.py", line 184, in assign_default_role_to_new_user
+    logger.info(f"نقش 'مشتری' با موفقیت به کاربر {instance.username} اختصاص یافت.")
+                                                  ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'username'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/accounts/services/auth_service.py", line 49, in register_customer
+    user = self._identity_service.register_new_customer(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/services/identity.py", line 31, in register_new_customer
+    user = User.objects.create_user(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/users/managers/users.py", line 81, in create_user
+    user.save(using=self._db)
+  File "/usr/local/lib/python3.11/site-packages/django/contrib/auth/base_user.py", line 65, in save
+    super().save(*args, **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 902, in save
+    self.save_base(
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/base.py", line 1023, in save_base
+    post_save.send(
+  File "/usr/local/lib/python3.11/site-packages/django/dispatch/dispatcher.py", line 189, in send
+    response = receiver(signal=self, sender=sender, **named)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/signals.py", line 188, in assign_default_role_to_new_user
+    logger.error(f"خطا در تخصیص نقش مشتری به کاربر {instance.username}: {str(e)}")
+                                                    ^^^^^^^^^^^^^^^^^
+AttributeError: 'User' object has no attribute 'username'
+DEBUG 2026-02-23 22:18:31,517 auth_service 191 124674589759168 AuthService initialized with UserIdentityService
+INFO 2026-02-23 22:18:31,521 auth_service 191 124674589759168 Starting registration process for: None
+INFO 2026-02-23 22:18:31,776 auth_service 191 124674589759168 User created in DB - ID: 13

@@ -137,7 +137,7 @@ def log_order_state_change(sender, instance, created, **kwargs):
 #             # ===== استخراج نام کاربر ===== #
 #             customer_name = instance.recipient_name
 #             if not customer_name and getattr(instance, 'user', None):
-#                 customer_name = instance.user.get_full_name() or instance.user.username
+#                 customer_name = instance.user.get_full_name() or instance.user.phone_number
             
 #             # ===== ایجاد پیش‌فاکتور ===== #
 #             Quotation.objects.create(
@@ -181,8 +181,8 @@ def assign_default_role_to_new_user(sender, instance, created, **kwargs):
                     role=customer_role
                 )
                 
-                logger.info(f"نقش 'مشتری' با موفقیت به کاربر {instance.username} اختصاص یافت.")
+                logger.info(f"نقش 'مشتری' با موفقیت به کاربر {instance.phone_number} اختصاص یافت.")
                 
             except Exception as e:
                 # ===== لاگ کردن خطا در صورت بروز مشکل سیستمی ===== #
-                logger.error(f"خطا در تخصیص نقش مشتری به کاربر {instance.username}: {str(e)}")
+                logger.error(f"خطا در تخصیص نقش مشتری به کاربر {instance.phone_number}: {str(e)}")

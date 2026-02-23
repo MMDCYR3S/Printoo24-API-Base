@@ -34,8 +34,8 @@ class CustomerOrchestratorService:
     # ===== شاهکار: ایجاد اتمیک مشتری ===== #
     @transaction.atomic
     def create_customer(self, data: Dict[str, Any]) -> User:
-        username = data.get('username')
-        logger.info(f"START: Creating new customer '{username}'")
+        phone_number = data.get('phone_number')
+        logger.info(f"START: Creating new customer '{phone_number}'")
         
         try:
             # ===== تفکیک داده های ورودی ===== #
@@ -56,11 +56,11 @@ class CustomerOrchestratorService:
                     self.address_service.create_address(user_id=user.id, data=addr)
                 logger.debug(f"{len(addresses_data)} addresses created for User {user.id}")
             
-            logger.info(f"SUCCESS: Customer '{username}' created fully.")
+            logger.info(f"SUCCESS: Customer '{phone_number}' created fully.")
             return user
 
         except Exception as e:
-            logger.error(f"FAILED: Create customer '{username}'. Error: {str(e)}", exc_info=True)
+            logger.error(f"FAILED: Create customer '{phone_number}'. Error: {str(e)}", exc_info=True)
             raise e
 
     # ===== ویرایش اتمیک مشتری ===== #

@@ -20,9 +20,7 @@ class UserAdminService:
     def create_staff(self, data: Dict[str, Any], role_id: int) -> User:
         """استخدام کارمند جدید"""
         # ===== اعتبارسنجی ===== #
-        if User.objects.filter(email=data.get('email')).exists():
-            raise EmailAlreadyExistsException("این ایمیل قبلا ثبت شده است.")
-        if User.objects.filter(username=data.get('username')).exists():
+        if User.objects.filter(phone_number=data.get('phone_number')).exists():
             raise UsernameAlreadyExistsException("نام کاربری تکراری است.")
 
         # ===== اعتبارسنجی ===== #
@@ -33,8 +31,7 @@ class UserAdminService:
 
         # ===== ایجاد کاربر===== #
         user = User.objects.create_user(
-            username=data['username'],
-            email=data.get("email", None),
+            phone_number=data['phone_number'],
             password=data.get('password'),
             is_staff=True,
             is_active=True
@@ -56,8 +53,8 @@ class UserAdminService:
             raise ValidationError("کارمند یافت نشد.")
 
         # ===== اعتبارسنجی نام کاربری ===== #
-        if 'username' in data and data['username'] != user.username:
-            if User.objects.filter(username=data['username']).exists():
+        if 'phone_number' in data and data['phone_number'] != user.phone_number:
+            if User.objects.filter(phone_number=data['phone_number']).exists():
                 raise UsernameAlreadyExistsException("نام کاربری تکراری است.")
 
         # ===== مدیریت رمز عبور (Crucial Step) ===== #
@@ -66,7 +63,7 @@ class UserAdminService:
             user.set_password(password)
 
         # ===== ویرایش فیلدهای مجاز مدل User ===== #
-        allowed_fields = ['username', 'email', 'is_active']
+        allowed_fields = ['phone_number', 'is_active']
         for field in allowed_fields:
             if field in data:
                 setattr(user, field, data[field])

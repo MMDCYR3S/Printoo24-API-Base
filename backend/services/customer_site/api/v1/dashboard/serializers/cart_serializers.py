@@ -23,13 +23,13 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
 
 # ===== User Cart Detail Serializer ===== #
 class UserCartDetailSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', allow_null=True)
+    phone_number = serializers.CharField(source='user.phone_number', allow_null=True)
     items = CartItemDetailSerializer(source='cart_items', many=True)
     total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Cart
-        fields = ['id', 'user_id', 'username', 'session_key', 'items', 'total_price', 'updated_at']
+        fields = ['id', 'user_id', 'phone_number', 'session_key', 'items', 'total_price', 'updated_at']
 
     def get_total_price(self, obj):
         return sum(item.price for item in obj.cart_items.all())
@@ -73,7 +73,7 @@ class CartListSerializer(serializers.ModelSerializer):
     سریالایزر برای نمایش لیست سبدها در جدول داشبورد.
     """
     user_id = serializers.SerializerMethodField()
-    username = serializers.SerializerMethodField()
+    phone_number = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     items_count = serializers.IntegerField(read_only=True)
     total_amount = serializers.DecimalField(max_digits=14, decimal_places=0, read_only=True)
@@ -81,16 +81,16 @@ class CartListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['id', 'user_id', 'username', 'full_name', 'items_count', 'total_amount', 'last_update']
+        fields = ['id', 'user_id', 'phone_number', 'full_name', 'items_count', 'total_amount', 'last_update']
 
     def get_user_id(self, obj):
         # ===== بازگردانی شناسه کاربر ===== #
         return obj.user.id if obj.user else None
 
-    def get_username(self, obj):
+    def get_phone_number(self, obj):
         # ===== کاربر مهمان ===== #
         if obj.user:
-            return obj.user.username
+            return obj.user.phone_number
         return f"مهمان ({obj.session_key[:8]}...)" if obj.session_key else "ناشناس"
 
     def get_full_name(self, obj):
@@ -103,7 +103,7 @@ class CartListSerializer(serializers.ModelSerializer):
             except Exception:
                 pass
             # ===== در صورت نبود کاربر و مهمان بودن ===== #
-            return obj.user.username 
+            return obj.user.phone_number 
         return f"مهمان ({obj.session_key[:8]}...)" if obj.session_key else "ناشناس"
 
 # ===== Cart File Upload Serializer ===== #
