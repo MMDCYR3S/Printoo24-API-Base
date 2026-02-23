@@ -4,7 +4,6 @@ from apps.cart.models import Cart, CartItem, CartItemUpload
 
 # ===== Product Serializer ===== #
 class ProductSerializer(serializers.ModelSerializer):
-    # ===== عکس مورد نظر  ===== #
     image = serializers.SerializerMethodField()
 
     class Meta:
@@ -12,18 +11,12 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'has_quantity', 'image']
 
     def get_image(self, obj):
-        # ===== دریافت اولین عکس ===== #
         first_img = obj.product_image.order_by('order', 'id').first()
-        
-        # ===== اگر عکس بود ===== #
         if first_img and first_img.image:
             request = self.context.get('request')
-            
-            # ===== نمایش آدرس آن ===== #
             if request:
                 return request.build_absolute_uri(first_img.image.url)
             return first_img.image.url
-            
         return None
 
 # ===== Uploaded Files Serializer ===== #
@@ -35,17 +28,17 @@ class CartItemUploadSerializer(serializers.ModelSerializer):
     
     def get_file_url(self, obj):
         request = self.context.get('request')
-        return request.build_absolute_uri(obj.file.url) if request else obj.file.url
+        return request.build_absolute_uri(obj.file.url) if request and obj.file else None
 
-# ===== Cart Item Detail Serializer ===== #
 class CartItemDetailSerializer(serializers.ModelSerializer):
     """
-    سریالایزر هوشمند که داده‌های JSON ذخیره شده در آیتم را پارس می‌کند.
+    سریالایزر هوشمند که داده‌های JSON را مستقیماً برای فرانت‌اند آماده می‌کند.
     """
     product = ProductSerializer(read_only=True)
     uploads = CartItemUploadSerializer(many=True, read_only=True)
-    # ===== ریز جزئیات آیتم و محصول انتخابی ===== #
-    items = serializers.SerializerMethodField(help_text="مشخصات فنی (سایز، متریال و ...)")
+    
+    # 🌟 تغییر کلیدی: items مستقیماً خروجی داده می‌شود (چون ما آن را به صورت Dict ذخیره کردیم)
+    configuration = serializers.JSONField(source='items', help_text="مشخصات فنی و انتخاب‌های کاربر")
 
     class Meta:
         model = CartItem
@@ -54,28 +47,12 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
             'product',
             'name',
             'description',
-            'quantity',
-            'price',
-            'items',
+            'quantity',  # تعداد این پکیج خاص در سبد (مثلاً 2 تا از این بنر)
+            'price',     # قیمت نهایی محاسبه شده با فرمول
+            'configuration', # جایگزین items قبلی برای خوانایی بهتر
             'uploads',
             'created_at'
         ]
-
-    def get_items(self, obj):
-        """
-        استخراج داده‌های قابل نمایش از فیلد JSON `items`
-        """
-        raw = obj.items or {}
-        meta = raw.get('meta', {})
-        
-        # ===== ساخت دیکشنری ===== #
-        return {
-            "size_label": meta.get('size_info', {}).get('size_name') or "سایز اختصاصی",
-            "quantity_label": meta.get('quantity_info', {}).get('quantity_text') or str(obj.quantity),
-            "dimensions": f"{meta.get('size_info', {}).get('width')}x{meta.get('size_info', {}).get('height')}",
-            "options": raw.get('options', []),
-            "has_design": meta.get('has_design', True)
-        }
 
 # ===== Cart List Serializer ===== #
 class CartListSerializer(serializers.ModelSerializer):

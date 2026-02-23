@@ -14,7 +14,7 @@ logger = logging.getLogger('cart.services.update')
 
 class CartItemUpdateService:
     """
-    سرویس ویرایش آیتم سبد خرید با پشتیبانی از کاربر مهمان و عضو.
+    سرویس ویرایش آیتم سبد خرید (پشتیبانی از فرمول‌ساز جدید).
     """
     def __init__(self, user: User = None, session_key: str = None):
         self.user = user if (user and user.is_authenticated) else None
@@ -24,18 +24,10 @@ class CartItemUpdateService:
             raise ValidationError("شناسه کاربر یا نشست مهمان برای ویرایش الزامی است.")
 
     def _get_cart_item(self, item_id: int) -> CartItem:
-        """
-        یافتن ایمن آیتم.
-        آیتم باید متعلق به User باشد (اگر لاگین است)
-        یا متعلق به SessionKey باشد (اگر مهمان است).
-        """
         query = Q(id=item_id)
-        
         if self.user:
-            # اگر کاربر لاگین است، آیتم باید مال خودش باشد
             query &= Q(cart__user=self.user)
         else:
-            # اگر مهمان است، آیتم باید مال سشن خودش باشد و User نداشته باشد
             query &= Q(cart__session_key=self.session_key, cart__user__isnull=True)
 
         try:
@@ -44,22 +36,17 @@ class CartItemUpdateService:
             raise ItemNotFoundException("آیتم مورد نظر یافت نشد یا دسترسی غیرمجاز است.")
 
     @transaction.atomic
-    def update(self, cart_item_id: int, raw_data: Dict[str, Any]) -> CartItem:
+    def update(self, cart_item_id: int, selections: Dict[str, Any]) -> CartItem:
         logger.info(f"Updating Item {cart_item_id} (User: {self.user}, Session: {self.session_key})")
 
-        # ===== دریافت آیتم یا از کاربر و یا از نشست ===== #
         current_item = self._get_cart_item(cart_item_id)
 
-        # ===== وارد کردن تیراژ ===== #
-        quantity_input = int(raw_data.pop('quantity', current_item.quantity))
-        
+        # 🌟 استفاده از پراسسور جدید که قبلاً نوشتیم (فقط product و selections می‌گیرد)
         processor = CartProcessor(
             product=current_item.product, 
-            selections=raw_data, 
-            quantity_input=quantity_input
+            selections=selections
         ).process()
 
-        # ===== ادغام دو محصول یکسان ===== #
         cart = current_item.cart
 
         duplicate_item = CartItem.objects.find_duplicate_item(
@@ -68,16 +55,16 @@ class CartItemUpdateService:
             items_data=processor.result_item_data
         )
         
-        # ===== چک کردن تکراری بود آیتم ===== #
         if duplicate_item and duplicate_item.id != current_item.id:
             logger.info(f"Merge required: Deleting {current_item.id}, Merging into {duplicate_item.id}")
             
-            # ===== انتقال تعداد و قیمت ===== #
-            duplicate_item.quantity += processor.result_quantity
-            duplicate_item.price = processor.result_price 
+            # در صورت ادغام با یک آیتم دیگر، Quantity (ردیف سبد خرید) را جمع می‌زنیم
+            duplicate_item.quantity += current_item.quantity 
+            
+            # قیمت نهایی فرمول ضربدر تعداد ردیف‌ها
+            duplicate_item.price = processor.result_price * duplicate_item.quantity 
             duplicate_item.save()
             
-            # ===== آپدیت فایل ها ===== #
             for upload in current_item.uploads.all():
                 upload.cart_item = duplicate_item
                 upload.save()
@@ -86,13 +73,14 @@ class CartItemUpdateService:
             return duplicate_item
             
         else:
-            # ===== آپدیت یکجا ===== #
             logger.info("In-place update executed")
             current_item.name = processor.result_name
             current_item.description = processor.result_description
-            current_item.quantity = processor.result_quantity
-            current_item.price = processor.result_price
+            
+            # در آپدیتِ درجا (In-place)، تعداد (quantity) همانی می‌ماند که بود، فقط قیمت جدید روی آن اعمال می‌شود
+            current_item.price = processor.result_price * current_item.quantity
             current_item.items = processor.result_item_data
             current_item.save()
             
             return current_item
+        
