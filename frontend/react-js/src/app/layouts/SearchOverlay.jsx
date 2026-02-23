@@ -70,15 +70,15 @@ const SearchOverlay = ({ results, loading, hasMore, onLoadMore, isVisible, onClo
               </div>
               <span className="text-xs font-bold text-slate-500">
                 {loading && results.length === 0
-                  ? 'در حال جستجو...'
+                  ? 'Serching ...'
                   : results.length > 0
-                    ? `${results.length} نتیجه`
-                    : 'نتایج جستجو'}
+                    ? `${results.length} resault`
+                    : 'resault'}
               </span>
             </div>
             {results.length > 0 && (
               <span className="text-[10px] text-slate-400 font-medium">
-                اسکرول برای بیشتر
+                
               </span>
             )}
           </div>
@@ -189,7 +189,7 @@ const SearchOverlay = ({ results, loading, hasMore, onLoadMore, isVisible, onClo
                         />
                       ))}
                     </div>
-                    <span className="text-xs text-slate-400 font-medium">بارگذاری...</span>
+                    <span className="text-xs text-slate-400 font-medium">Searching ...</span>
                   </div>
                 </motion.div>
               )}
@@ -206,8 +206,7 @@ const SearchOverlay = ({ results, loading, hasMore, onLoadMore, isVisible, onClo
                 <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
                   <PackageOpen size={28} className="text-slate-300" />
                 </div>
-                <p className="text-sm font-bold text-slate-400">نتیجه‌ای یافت نشد</p>
-                <p className="text-[11px] text-slate-300 mt-1">عبارت دیگه‌ای رو جستجو کنید</p>
+                <p className="text-sm font-bold text-slate-400">not found</p>
               </motion.div>
             )}
           </div>
@@ -219,7 +218,7 @@ const SearchOverlay = ({ results, loading, hasMore, onLoadMore, isVisible, onClo
                 <kbd className="px-1.5 py-0.5 bg-white rounded text-[10px] font-mono ring-1 ring-slate-200 text-slate-500">
                   Esc
                 </kbd>
-                <span>برای بستن</span>
+                <span>close</span>
               </div>
             </div>
           )}

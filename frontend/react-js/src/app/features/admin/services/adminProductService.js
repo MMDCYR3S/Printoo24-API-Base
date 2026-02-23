@@ -3,7 +3,7 @@ import apiClient from '../../../services/apiClient';
 const BASE_URL = '/dashboard/products/';
 
 export const adminProductService = {
-  // --- Read ---
+  // --- Read (خواندن اطلاعات) ---
   getAll: async () => {
     const { data } = await apiClient.get(BASE_URL);
     return data;
@@ -14,35 +14,30 @@ export const adminProductService = {
     return data;
   },
 
-  getStandardSizes: async () => {
-    const { data } = await apiClient.get('/dashboard/sizes/');
-    return data;
-  },
-
-  getQuantitiesList: async () => {
-    const { data } = await apiClient.get('/dashboard/quantities/');
-    return data;
-  },
-
-  // --- Write (Step 1: Core) ---
+  // --- Step 1: Core (مدیریت هسته محصول) ---
   create: async (payload) => {
-    // طبق مستندات: POST /api/v1/dashboard/products/
     const { data } = await apiClient.post(BASE_URL, payload);
     return data;
   },
 
   update: async (id, payload) => {
-    // برای ویرایش معمولاً PUT روی ID محصول است
     const { data } = await apiClient.put(`${BASE_URL}${id}/`, payload);
     return data;
   },
 
-  syncOptions: async (id, payload) => {
-    const { data } = await apiClient.post(`${BASE_URL}${id}/options/`, payload);
+  // --- Step 2: Form Builder (همگام‌سازی فیلدها و شرط‌ها) ---
+  syncFields: async (id, payload) => {
+    const { data } = await apiClient.post(`${BASE_URL}${id}/sync-fields/`, payload);
     return data;
   },
 
-  // --- Media (Steps 3 & 4) ---
+  // --- Step 3: Formula Builder (همگام‌سازی فرمول‌های قیمت) ---
+  syncFormulas: async (id, payload) => {
+    const { data } = await apiClient.post(`${BASE_URL}${id}/sync-formulas/`, payload);
+    return data;
+  },
+
+  // --- Step 4: Media & Attachments (مدیریت رسانه) ---
   uploadImage: async (id, formData) => {
     const { data } = await apiClient.post(`${BASE_URL}${id}/upload-image/`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -51,13 +46,14 @@ export const adminProductService = {
   },
 
   uploadAttachment: async (formData) => {
+    // طبق سواگر برای اتچمنت آیدی محصول در بدنه ارسال می‌شود نه در URL
     const { data } = await apiClient.post(`${BASE_URL}upload-attachment/`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data;
   },
 
-  // --- Bulk ---
+  // --- Bulk Actions (عملیات گروهی) ---
   bulkDelete: async (product_ids) => {
     const { data } = await apiClient.delete(`${BASE_URL}bulk-delete/`, { data: product_ids });
     return data;
@@ -66,11 +62,5 @@ export const adminProductService = {
   bulkStatus: async ({ product_ids, is_active }) => {
     const { data } = await apiClient.patch(`${BASE_URL}bulk-status/`, { product_ids, is_active });
     return data;
-  },
-
-  getProductQuantities: async (id) => {
-    // آدرس دقیق: /dashboard/products/{id}/quantities/
-    const { data } = await apiClient.get(`${BASE_URL}${id}/quantities/`);
-    return data;
-  },
+  }
 };

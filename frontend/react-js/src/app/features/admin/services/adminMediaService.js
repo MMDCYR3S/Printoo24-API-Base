@@ -1,12 +1,9 @@
 import apiClient from '../../../services/apiClient';
 
-// تغییر مهم: اسلش آخر رو برداشتم تا اگر مشکل ریدایرکت 301 بود حل شود
-// اگر با حذف اسلش ارور 404 یا 301 گرفتید، مجدد اسلش را بگذارید
-const BASE_URL = '/dashboard/site-media'; 
+const BASE_URL = '/dashboard/site-media';
 
 export const adminMediaService = {
   getAll: async () => {
-    // برای GET معمولا اسلش آخر در انتهای URL قرار می‌گیرد
     const { data } = await apiClient.get(`${BASE_URL}/`);
     return data;
   },
@@ -18,12 +15,15 @@ export const adminMediaService = {
 
   create: async (data) => {
     const formData = new FormData();
-    
-    // تبدیل امن بولین برای بک‌اند
     formData.append('is_active', data.is_active ? 'True' : 'False');
     
-    if (data.file) {
+    if (data.file instanceof File) {
       formData.append('file', data.file);
+    }
+    
+    // اگر لینک وارد شده بود
+    if (data.link) {
+      formData.append('link', data.link);
     }
 
     const response = await apiClient.post(`${BASE_URL}/`, formData, {
@@ -39,10 +39,17 @@ export const adminMediaService = {
       formData.append('is_active', data.is_active ? 'True' : 'False');
     }
     
-    if (data.file && typeof data.file !== 'string') {
+    // در متد PATCH، فقط در صورتی فیلد file ارسال می‌شود که کاربر واقعا یک فایل جدید انتخاب کرده باشد
+    if (data.file instanceof File) {
       formData.append('file', data.file);
     }
 
+    if (data.link !== undefined) {
+      // اگر کاربر لینک را پاک کرده بود، رشته خالی می‌فرستیم تا در بک‌اند null/خالی شود
+      formData.append('link', data.link || '');
+    }
+
+    // استفاده از متد PATCH طبق داکیومنت برای ویرایش جزئی
     const response = await apiClient.patch(`${BASE_URL}/${id}/`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });

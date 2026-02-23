@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ArrowLeft, Image as ImageIcon, Layers } from 'lucide-react';
 import { categoryService } from '../../services/categoryService';
+import pageText from '../../lang/pages.json';
 
 /* ─────────────────────────────────────────────
    انیمیشن‌های stagger برای آیتم‌های گرید
@@ -112,7 +113,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
                   <div className="flex items-center gap-2 px-3 py-2 mb-1">
                     <Layers size={14} className="text-primary" />
                     <span className="text-[11px] font-bold text-primary tracking-wide">
-                      دسته‌بندی‌ها
+                      {pageText.profile.orderDetailPage.specLabels.category}
                     </span>
                   </div>
 
@@ -181,7 +182,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
                           {activeCategory.name}
                           {activeCategory.children?.length > 0 && (
                             <span className="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                              {activeCategory.children.length} زیرمجموعه
+                              {activeCategory.children.length} {pageText.home.categoryHero.subC}
                             </span>
                           )}
                         </h3>
@@ -276,7 +277,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
                             <Layers size={24} className="text-slate-300" />
                           </div>
                           <p className="text-sm text-slate-400 font-medium">
-                            بدون زیرمجموعه
+                            {pageText.home.categoryHero.subC} 0
                           </p>
                         </motion.div>
                       )}

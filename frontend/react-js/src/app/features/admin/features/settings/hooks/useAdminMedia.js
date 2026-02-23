@@ -6,23 +6,20 @@ export const useAdminMedia = () => {
   const queryClient = useQueryClient();
   const QUERY_KEY = ['admin-site-media'];
 
-  // دریافت لیست رسانه‌ها
   const { data: mediaList = [], isLoading } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: adminMediaService.getAll,
   });
 
-  // ایجاد رسانه جدید
   const createMutation = useMutation({
     mutationFn: adminMediaService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-      toast.success('رسانه جدید با موفقیت افزوده شد');
+      toast.success('رسانه جدید با موفقیت ایجاد شد');
     },
-    onError: () => toast.error('خطا در ایجاد رسانه'),
+    onError: () => toast.error('خطا در آپلود رسانه'),
   });
 
-  // ویرایش رسانه (و تغییر وضعیت فعال/غیرفعال)
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => adminMediaService.update(id, data),
     onSuccess: () => {
@@ -32,21 +29,14 @@ export const useAdminMedia = () => {
     onError: () => toast.error('خطا در ثبت تغییرات'),
   });
 
-  // حذف رسانه
   const deleteMutation = useMutation({
     mutationFn: adminMediaService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-      toast.success('رسانه حذف شد');
+      toast.success('رسانه با موفقیت حذف شد');
     },
     onError: () => toast.error('خطا در حذف رسانه'),
   });
 
-  return {
-    mediaList,
-    isLoading,
-    createMutation,
-    updateMutation,
-    deleteMutation,
-  };
+  return { mediaList, isLoading, createMutation, updateMutation, deleteMutation };
 };
