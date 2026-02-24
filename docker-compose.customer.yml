@@ -52,6 +52,9 @@ services:
     volumes:
       - ./frontend/react-js/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./certs:/etc/nginx/certs:ro
+      # والیوم‌های جدید برای گواهینامه و تاییدیه
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
       - customer_static:/app/src/staticfiles
       - customer_media:/app/src/media
     networks: 
@@ -59,6 +62,15 @@ services:
     depends_on:
       - customer_site
     restart: always
+
+  # ====== Certbot ====== #
+  certbot:
+    image: certbot/certbot
+    container_name: printoo_certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 12h & wait $${!}; done;'"
 
 networks:
   customer_net:
