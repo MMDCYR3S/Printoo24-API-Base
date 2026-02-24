@@ -49,90 +49,36 @@ class OrderItemDetailSerializer(serializers.ModelSerializer):
     design_files = OrderItemFileSerializer(source='files', many=True, read_only=True)
     
     specs = serializers.SerializerMethodField()
-    pricing_breakdown = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
         fields = [
             'id', 'product_name', 'name', 'description',
             'quantity', 'price', 'specs', 'design_files',
-            'pricing_breakdown'
         ]
 
     def get_specs(self, obj):
         """
         استخراج و فرمت‌دهی اطلاعات فنی از JSON Field (item.items)
-        شامل ابعاد، تیراژ و تمامی ویژگی‌های انتخابی (حتی وابسته‌ها).
+        منطبق با معماری جدید: دریافت لیستی از ویژگی‌های داینامیک انتخاب شده
         """
-        raw_data = obj.items or {}
-        meta = raw_data.get('meta', {})
+        raw_data = obj.items if isinstance(obj.items, list) else []
         
-        # ۱. استخراج اطلاعات ابعاد
-        size_info = meta.get('size_info', {})
-        width = size_info.get('width')
-        height = size_info.get('height')
-        size_name = size_info.get('size_name', 'استاندارد')
-
-        # ۲. استخراج اطلاعات تیراژ
-        qty_info = meta.get('quantity_info', {})
-        qty_text = qty_info.get('quantity_text', str(obj.quantity))
-
-        # ۳. پردازش غنی ویژگی‌ها (Options)
-        raw_options = raw_data.get('options', [])
         detailed_options = []
-
-        for opt in raw_options:
-            option_label = opt.get('option_label', 'N/A')
-            type_ptr = opt.get('type')
-            
-            choices_list = []
-            
-            if type_ptr == 'selection':
-                val_data = opt.get('value', {})
-                choices_list.append(self._format_choice(val_data))
-                
-            elif type_ptr == 'multi_selection':
-                for val_data in opt.get('values', []):
-                    choices_list.append(self._format_choice(val_data))
-                    
-            elif type_ptr == 'raw':
-                choices_list.append({
-                    "label": str(opt.get('value', 'N/A')),
-                    "price": 0.0,
-                    "dependencies": []
-                })
-
+        for opt in raw_data:
             detailed_options.append({
-                "option_group": option_label,
-                "selections": choices_list
+                "option_group": opt.get('field_title', 'نامشخص'),
+                "selections": [{
+                    "label": str(opt.get('value', '---')),
+                    "is_tiered": False,
+                }]
             })
 
         return {
-            "size": {
-                "name": size_name,
-                "dimensions": f"{width} x {height} cm" if width and height else "استاندارد"
-            },
-            "quantity_label": qty_text,
-            "has_design": meta.get('has_design', False),
+            "quantity_label": str(obj.quantity),
+            "has_design": obj.files.exists(),
             "options_detail": detailed_options
         }
-
-    def _format_choice(self, val_data: dict) -> dict:
-        """ متد کمکی برای تمیز کردن داده‌های هر انتخاب """
-        return {
-            "label": val_data.get('label', 'N/A'),
-            "price": val_data.get('applied_price', 0.0),
-            "is_tiered": val_data.get('is_matrix_price', False),
-            "dependency_text": [
-                f"وابسته به: {d['parent_option_name']} ({d['required_value_name']})" 
-                for d in val_data.get('dependencies', [])
-            ]
-        }
-
-    def get_pricing_breakdown(self, obj):
-        """ نمایش ریز محاسبات ماشین‌حساب (هزینه شیت، طراحی، خدمات و ...) """
-        raw_data = obj.items or {}
-        return raw_data.get('meta', {}).get('price_breakdown', {})
 
 # ===== Order Serializer (Main) ===== #
 class OrderSerializer(serializers.ModelSerializer):

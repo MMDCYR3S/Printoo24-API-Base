@@ -7,6 +7,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from apps.cart.services import CartListService, CartItemDetailService
 from ..serializers import CartListSerializer, CartItemDetailSerializer
+from core.infrastructure.messages import msg_provider
 
 # ======== Cart List View ======== #
 @extend_schema(tags=['Cart'])

@@ -95,17 +95,15 @@ class CreateOrderFromCartService:
         """
         first_name = data.get('first_name')
         last_name = data.get('last_name')
-        phone_number = data.get('phone_number')
         company = data.get('company_name', '')
 
-        if not (first_name and last_name and phone_number):
+        if not (first_name and last_name):
              raise ValidationError(msg_provider.get("order.E7004"))
         
         # ===== دریافت اطلاعات کاربر ===== #
         profile, created = CustomerProfile.objects.get_or_create(user=user, defaults={
             'first_name': first_name,
             'last_name': last_name,
-            'phone_number': phone_number,
             'company': company
         })
 
@@ -118,9 +116,6 @@ class CreateOrderFromCartService:
             if not profile.last_name:
                 profile.last_name = last_name
                 updated = True
-            if not profile.phone_number:
-                profile.phone_number = phone_number
-                updated = True
             if not profile.company and company:
                 profile.company = company
                 updated = True
@@ -131,7 +126,7 @@ class CreateOrderFromCartService:
         # ===== بازگردانی اطلاعات کاربر ===== #
         return {
             'recipient_name': f"{first_name} {last_name}",
-            'recipient_phone': phone_number,
+            'recipient_phone': user.phone_number,
             'company_name': company
         }
         
