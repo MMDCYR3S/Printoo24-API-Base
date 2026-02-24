@@ -2,14 +2,15 @@ import { z } from 'zod';
 
 // 🔐 اسکیما برای فرم ورود
 export const loginSchema = z.object({
-  username: z.string().min(1, 'نام کاربری الزامی است'),
+  phone_number: z.string().min(1, 'شماره تلفن الزامی است'),
   password: z.string().min(1, 'رمز عبور الزامی است'),
 });
 
 // 📝 اسکیما برای فرم ثبت نام
 export const registerSchema = z.object({
-  email: z.string().email('فرمت ایمیل صحیح نیست'),
-  username: z.string().min(3, 'نام کاربری باید حداقل ۳ کاراکتر باشد'),
+  first_name: z.string().min(2, 'نام باید حداقل ۲ کاراکتر باشد'),
+  last_name: z.string().min(2, 'نام خانوادگی باید حداقل ۲ کاراکتر باشد'),
+  phone_number: z.string().regex(/^09[0-9]{9}$/, 'شماره تلفن باید ۱۱ رقم شروع شود'),
   password: z.string()
     .min(8, 'رمز عبور باید حداقل ۸ کاراکتر باشد')
     .regex(/[A-Z]/, 'باید شامل یک حرف بزرگ باشد')
@@ -20,10 +21,9 @@ export const registerSchema = z.object({
   path: ["password_2"],
 });
 
-// ✅ اسکیما برای تایید کد (Verify)
+// ✅ اسکیما برای تایید کد (در صورت نیاز در آینده)
 export const verifySchema = z.object({
-  email: z.string().email('ایمیل نامعتبر است').optional(), // اختیاری چون شاید از URL بیاید
   code: z.string()
-    .length(6, 'کد تایید باید ۴ رقم باشد')
+    .length(6, 'کد تایید باید ۶ رقم باشد')
     .regex(/^\d+$/, 'فقط عدد وارد کنید'),
 });
