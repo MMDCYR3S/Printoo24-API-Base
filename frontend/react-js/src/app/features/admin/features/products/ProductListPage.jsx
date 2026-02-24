@@ -1,11 +1,10 @@
-// src/app/features/admin/products/ProductListPage.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Package, Search, Filter, Plus, Edit, Eye, // Eye اضافه شد
+  Package, Search, Filter, Plus, Edit, Eye, 
   ArrowUp, ArrowDown, Image as ImageIcon, 
-  CheckCircle2, XCircle, Trash2, RefreshCw, Box, Layers, MoreHorizontal
+  CheckCircle2, XCircle, Trash2, RefreshCw, Box, Layers, Clock
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAdminProducts } from './hooks/useAdminProducts';
@@ -36,13 +35,13 @@ const ProductListPage = () => {
   };
 
   const handleDeleteOne = (id) => {
-    if (confirm('آیا از حذف این محصول اطمینان دارید؟')) {
+    if (window.confirm('آیا از حذف این محصول اطمینان دارید؟')) {
         bulkDeleteMutation.mutate([id]);
     }
   };
 
   const handleBulkDelete = () => {
-    if (confirm(`آیا از حذف ${selectedIds.length} محصول اطمینان دارید؟`)) {
+    if (window.confirm(`آیا از حذف ${selectedIds.length} محصول اطمینان دارید؟`)) {
       bulkDeleteMutation.mutate(selectedIds, { onSuccess: () => setSelectedIds([]) });
     }
   };
@@ -51,25 +50,9 @@ const ProductListPage = () => {
     bulkStatusMutation.mutate({ product_ids: selectedIds, is_active: isActive }, { onSuccess: () => setSelectedIds([]) });
   };
 
-  const formatPrice = (price) => new Intl.NumberFormat('fa-IR').format(Number(price));
+  const formatPrice = (price) => new Intl.NumberFormat('fa-IR').format(Number(price || 0));
 
   // --- Components ---
-  const SortableTh = ({ label, sortKey, className }) => (
-    <th 
-      onClick={() => sortKey && handleSort(sortKey)}
-      className={clsx("py-4 text-xs font-bold text-slate-500 uppercase cursor-pointer hover:bg-slate-100 transition-colors select-none", className)}
-    >
-      <div className="flex items-center gap-1">
-        {label}
-        {sortKey && sortConfig.key === sortKey && (
-          <span className="text-primary animate-in fade-in zoom-in">
-            {sortConfig.direction === 'asc' ? <ArrowUp size={14}/> : <ArrowDown size={14}/>}
-          </span>
-        )}
-      </div>
-    </th>
-  );
-
   const StatCard = ({ title, value, icon: Icon, colorClass }) => (
     <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 transition-transform hover:scale-[1.02]">
       <div className={`p-3 rounded-xl ${colorClass}`}>
@@ -85,7 +68,7 @@ const ProductListPage = () => {
   return (
     <div className="min-h-screen bg-slate-50/50 p-6 md:p-8 pb-32 font-sans space-y-6">
       
-      {/* Header & Stats ... (مثل قبل) */}
+      {/* Header & Stats */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
@@ -113,7 +96,7 @@ const ProductListPage = () => {
          <StatCard title="غیرفعال / ناموجود" value={stats?.inactive || 0} icon={Box} colorClass="bg-red-50 text-red-600" />
       </div>
 
-      {/* Filters Bar ... (مثل قبل) */}
+      {/* Filters Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col xl:flex-row gap-4 items-center justify-between sticky top-2 z-30 backdrop-blur-xl bg-white/95">
         <div className="relative w-full xl:w-96 group">
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={20} />
@@ -130,7 +113,7 @@ const ProductListPage = () => {
                 className="select select-bordered w-full pr-10 rounded-xl text-sm font-medium h-12"
                 value={categoryFilterId} onChange={(e) => { setCategoryFilterId(e.target.value); setCurrentPage(1); }}
              >
-                <option value="all">همه دسته‌بندی‌ها</option>
+                <option value="all">همه دسته‌های اصلی</option>
                 {categories.map(cat => (<option key={cat.id} value={cat.id}>{cat.name}</option>))}
              </select>
            </div>
@@ -164,19 +147,35 @@ const ProductListPage = () => {
                   <label><input type="checkbox" className="checkbox checkbox-sm checkbox-primary rounded-md" checked={products.length > 0 && selectedIds.length === products.length} onChange={handleSelectAll}/></label>
                 </th>
                 <th className="px-4 py-4 w-24">تصویر</th>
-                <SortableTh label="نام محصول" sortKey="name" />
-                <SortableTh label="دسته‌بندی" sortKey="category" />
-                <SortableTh label="کد محصول" sortKey="code" />
-                <SortableTh label="قیمت پایه" sortKey="price" />
-                <SortableTh label="وضعیت" sortKey="is_active" className="text-center" />
-                <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase">عملیات</th>
+                <th className="py-4 text-xs font-bold text-slate-500 uppercase">نام محصول</th>
+                <th className="py-4 text-xs font-bold text-slate-500 uppercase">دسته‌بندی</th>
+                {/* 🎯 اینجا به جای قیمت پایه تغییر کرد به قیمت نمایشی */}
+                <th className="py-4 text-xs font-bold text-slate-500 uppercase text-center">قیمت نمایشی</th>
+                <th className="py-4 text-xs font-bold text-slate-500 uppercase text-center">وضعیت</th>
+                <th 
+                  onClick={() => handleSort('created_at')}
+                  className="py-4 text-xs font-bold text-slate-500 uppercase cursor-pointer hover:bg-slate-100 transition-colors select-none text-center"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <Clock size={14}/> زمان ایجاد
+                    {sortConfig.key === 'created_at' && (
+                      <span className="text-primary animate-in fade-in zoom-in">
+                        {sortConfig.direction === 'asc' ? <ArrowUp size={14}/> : <ArrowDown size={14}/>}
+                      </span>
+                    )}
+                  </div>
+                </th>
+                <th className="px-4 py-4 text-center text-xs font-bold text-slate-500 uppercase">دسترسی سریع</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {products.length === 0 && !isLoading ? (
-                  <tr><td colSpan="8" className="text-center py-32 text-slate-400">هیچ محصولی یافت نشد!</td></tr>
+                  <tr><td colSpan="8" className="text-center py-32 text-slate-400 font-bold">هیچ محصولی یافت نشد!</td></tr>
               ) : (
-                  products.map((product) => (
+                  products.map((product) => {
+                    const imgSrc = product.images?.length > 0 ? product.images[0].image : null;
+                    
+                    return (
                     <motion.tr 
                         key={product.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                         className={clsx("group hover:bg-slate-50 transition-colors duration-200", selectedIds.includes(product.id) && "bg-blue-50/50")}
@@ -187,8 +186,8 @@ const ProductListPage = () => {
                       <td>
                         <div className="avatar">
                             <div className="w-14 h-14 rounded-2xl ring-1 ring-slate-100 bg-white p-1 shadow-sm group-hover:scale-105 transition-transform">
-                                {product.images && product.images.length > 0 ? (
-                                    <img src={product.images[0].image} alt={product.name} className="object-cover rounded-xl" />
+                                {imgSrc ? (
+                                    <img src={imgSrc} alt={product.name} className="object-cover rounded-xl w-full h-full" />
                                 ) : (
                                     <div className="w-full h-full bg-slate-50 flex items-center justify-center rounded-xl text-slate-300"><ImageIcon size={20}/></div>
                                 )}
@@ -197,11 +196,12 @@ const ProductListPage = () => {
                       </td>
                       <td>
                         <div className="flex flex-col">
-                            {/* لینک نام به صفحه جزئیات */}
-                            <Link to={`${product.id}`} className="font-bold text-slate-700 text-sm group-hover:text-primary transition-colors">
+                            <Link to={`edit/${product.id}`} className="font-bold text-slate-800 text-sm group-hover:text-primary transition-colors">
                                 {product.name}
                             </Link>
-                            <span className="text-[10px] text-slate-400 font-mono mt-1 opacity-70 dir-ltr text-right truncate w-fit">/{product.slug}</span>
+                            <span className="text-[11px] text-slate-400 font-mono mt-1 opacity-80 dir-ltr text-right truncate w-fit">
+                                {product.code?.split('-')[0] || '---'} / {product.slug}
+                            </span>
                         </div>
                       </td>
                       <td>
@@ -209,13 +209,13 @@ const ProductListPage = () => {
                            <Layers size={12} className="opacity-50"/><span className="text-xs font-bold">{product.category || 'بدون دسته'}</span>
                         </div>
                       </td>
-                      <td><span className="font-mono text-xs text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">{product.code?.split('-')[0] || '---'}</span></td>
-                      <td>
-                        {product.has_price ? (
-                            <div className="flex items-center gap-1 font-bold text-slate-700 dir-ltr text-right">
-                                {formatPrice(product.price)} <span className="text-[10px] text-slate-400 font-normal">IQD</span>
+                      <td className="text-center">
+                        {/* 🎯 اینجا دقیقاً شد show_price */}
+                        {product.has_price || parseFloat(product.show_price) > 0 ? (
+                            <div className="flex items-center justify-center gap-1 font-bold text-slate-700 dir-ltr">
+                                {formatPrice(product.show_price)} <span className="text-[10px] text-slate-400 font-normal">IQD</span>
                             </div>
-                        ) : <span className="badge badge-xs badge-warning badge-outline">تماس بگیرید</span>}
+                        ) : <span className="badge badge-xs badge-warning badge-outline p-2 font-bold">تماس بگیرید</span>}
                       </td>
                       <td className="text-center">
                          {product.is_active ? (
@@ -224,24 +224,28 @@ const ProductListPage = () => {
                             <div className="badge badge-error badge-sm gap-1 text-white shadow-lg shadow-error/20 py-3"><XCircle size={12}/> غیرفعال</div>
                          )}
                       </td>
+                      <td className="text-center">
+                          <span className="text-xs text-slate-500 font-medium">
+                              {new Date(product.created_at).toLocaleDateString('fa-IR')}
+                          </span>
+                      </td>
                       <td>
                         <div className="flex justify-center gap-1 items-center opacity-100">
-                            {/* دکمه مشاهده */}
-                            <Link to={`${product.id}`} className="btn btn-sm btn-ghost btn-square text-slate-500 hover:bg-slate-100 tooltip tooltip-top" data-tip="مشاهده جزئیات">
+                            {/* دکمه مشاهده در سایت (لینک به فرانت‌اند مشتری) */}
+                            <a href={`/admin/products/${product.id}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-ghost btn-square text-slate-500 hover:bg-slate-100 tooltip tooltip-top" data-tip="مشاهده در سایت">
                                 <Eye size={18}/>
-                            </Link>
-                            {/* دکمه ویرایش */}
+                            </a>
                             <Link to={`edit/${product.id}`} className="btn btn-sm btn-ghost btn-square text-blue-600 hover:bg-blue-50 tooltip tooltip-top" data-tip="ویرایش محصول">
                                 <Edit size={18}/>
                             </Link>
-                            {/* دکمه حذف */}
                             <button onClick={() => handleDeleteOne(product.id)} className="btn btn-sm btn-ghost btn-square text-red-500 hover:bg-red-50 tooltip tooltip-top" data-tip="حذف محصول">
                                 <Trash2 size={18}/>
                             </button>
                         </div>
                       </td>
                     </motion.tr>
-                  ))
+                  );
+                })
               )}
             </tbody>
           </table>

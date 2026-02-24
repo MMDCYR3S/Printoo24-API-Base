@@ -1,459 +1,373 @@
-// src/app/features/admin/products/ProductDetailPage.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
-  ArrowRight, Edit, Trash2, Box, Layers, Ruler, 
-  DollarSign, CheckCircle2, XCircle, Info, Image as ImageIcon,
-  Settings, FileText, List, Type, CheckSquare, Calendar,
-  Download, ExternalLink, Paperclip
+  ArrowRight, Edit, Package, Layers, DollarSign, Image as ImageIcon, 
+  CheckCircle2, XCircle, Calculator, AlertCircle, Paperclip, CheckSquare, 
+  List, Link2, Download, ShieldAlert, Check
 } from 'lucide-react';
-import { adminProductService } from '../../services/adminProductService';
-import { adminCategoryService } from '../../services/adminCategoryService';
 import clsx from 'clsx';
+import { adminProductService } from '../../services/adminProductService';
 
-// تابع کمکی برای فرمت قیمت
 const formatPrice = (price) => {
-  if (!price) return '0';
-  const num = parseFloat(price);
-  return new Intl.NumberFormat('fa-IQ').format(num);
-};
-
-// تابع کمکی برای لینک فایل
-const getFileUrl = (url) => {
-    if (!url) return '#';
-    if (url.startsWith('http') || url.startsWith('blob:')) return url;
-    return `http://localhost:9010${url}`;
+    if (!price || isNaN(price)) return "0";
+    return new Intl.NumberFormat('fa-IR').format(Number(price));
 };
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [activeImage, setActiveImage] = useState(0);
 
-  // 1. دریافت اطلاعات کامل محصول
-  const { data: product, isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['admin-product', id],
     queryFn: () => adminProductService.getById(id),
-    retry: 1
+    staleTime: 0,
   });
 
-  // 2. دریافت اطلاعات دسته‌بندی فعلی (برای پیدا کردن والد)
-  const categoryId = product?.shell?.category_info?.id;
-  const { data: currentCategory } = useQuery({
-    queryKey: ['category-details', categoryId],
-    queryFn: () => adminCategoryService.getById(categoryId),
-    enabled: !!categoryId,
-    staleTime: 1000 * 60 * 5 // کش کردن برای جلوگیری از درخواست تکراری
-  });
-
-  // 3. دریافت اطلاعات دسته‌بندی والد (اگر وجود داشته باشد)
-  const parentId = currentCategory?.parent;
-  const { data: parentCategory } = useQuery({
-    queryKey: ['category-details', parentId],
-    queryFn: () => adminCategoryService.getById(parentId),
-    enabled: !!parentId,
-    staleTime: 1000 * 60 * 5
-  });
-
-  if (isLoading) return (
-    <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
-       <span className="loading loading-spinner loading-lg text-primary"></span>
-       <p className="text-slate-400 font-medium animate-pulse">در حال دریافت جزئیات محصول...</p>
-    </div>
-  );
-
-  if (isError || !product) return (
-    <div className="h-[50vh] flex flex-col items-center justify-center text-slate-400 gap-4">
-        <Box size={48} strokeWidth={1.5} />
-        <p>محصول مورد نظر یافت نشد یا مشکلی در ارتباط وجود دارد.</p>
-        <button onClick={() => navigate(-1)} className="btn btn-outline btn-sm">بازگشت</button>
-    </div>
-  );
-
-  const { shell, pricing_config, quantities, sizes, images, options, attachments } = product;
-
-  // --- نرمال‌سازی دیتا ---
-  const safeQuantities = Array.isArray(quantities) ? quantities : [];
-  
-  let safeSizes = [];
-  if (Array.isArray(sizes)) {
-      safeSizes = sizes;
-  } else if (sizes && typeof sizes === 'object' && Array.isArray(sizes.sizes)) {
-      safeSizes = sizes.sizes;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 relative overflow-hidden">
+        <div className="absolute w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] animate-pulse"></div>
+        <div className="relative z-10 flex flex-col items-center gap-6 bg-white/50 backdrop-blur-xl p-10 rounded-[3rem] shadow-2xl shadow-slate-200/50 border border-white">
+          <span className="loading loading-spinner loading-lg text-primary mb-2"></span>
+          <div className="flex flex-col items-center gap-1">
+            <span className="font-black text-xl text-slate-800">در حال دریافت اطلاعات محصول</span>
+            <span className="text-slate-500 text-sm font-medium">لطفاً چند لحظه صبر کنید...</span>
+          </div>
+        </div>
+      </div>
+    );
   }
-  
-  const safeAttachments = Array.isArray(attachments) ? attachments : [];
-  const basePrice = parseFloat(shell.price || 0);
+
+  if (isError || !data || !data.shell) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 relative overflow-hidden">
+        <div className="relative z-10 flex flex-col items-center gap-6 bg-white/70 backdrop-blur-xl p-10 rounded-[3rem] shadow-2xl shadow-red-500/10 border border-red-50 text-center max-w-sm">
+          <ShieldAlert size={48} className="text-red-500"/>
+          <h2 className="text-2xl font-black text-slate-800">محصول یافت نشد!</h2>
+          <button onClick={() => navigate('/admin/products')} className="btn btn-error text-white rounded-full w-full shadow-lg shadow-red-500/30">
+            بازگشت به لیست محصولات
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // === استخراج داده‌ها با بالاترین سطح امنیت ===
+  const shell = data?.shell || {};
+  const fields = Array.isArray(data?.fields) ? data.fields : [];
+  const formulas = Array.isArray(data?.formulas) ? data.formulas : [];
+  const images = Array.isArray(data?.images) ? data.images : [];
+  const attachments = Array.isArray(data?.attachments) ? data.attachments : [];
+
+  // تنظیم نام دسته‌بندی
+  let categoryDisplay = 'بدون دسته‌بندی';
+  if (shell?.category_info && typeof shell?.category_info === 'object') {
+     const pName = shell?.category_info?.parent_name;
+     const cName = shell?.category_info?.name;
+     if (pName && cName) categoryDisplay = `${pName} > ${cName}`;
+     else if (cName) categoryDisplay = cName;
+     else if (pName) categoryDisplay = pName;
+  } else if (typeof shell?.category_info === 'string') {
+     categoryDisplay = shell?.category_info;
+  } else if (typeof shell?.category === 'string') {
+     categoryDisplay = shell?.category;
+  }
+
+  // تابع شروط 
+  const getConditionText = (cond) => {
+      if (!cond) return "شرط نامعتبر";
+      const targetField = fields.find(f => f?.id === cond?.trigger_field_id);
+      const targetChoice = targetField?.choices?.find(c => c?.id === cond?.trigger_choice_id);
+      const actionText = { 'show': 'آشکار', 'hide': 'پنهان', 'enable': 'فعال', 'disable': 'غیرفعال' }[cond?.action] || cond?.action || 'نامشخص';
+      const opText = { 'equals': 'برابر با', 'not_equals': 'مخالف', 'is_empty': 'خالی', 'is_not_empty': 'پر' }[cond?.operator] || cond?.operator || 'باشد';
+      
+      if (!targetField) return "فیلد وابسته حذف شده است";
+      return `${actionText} می‌شود اگر [${targetField?.title || 'بدون نام'}] ${opText} ${targetChoice ? `[${targetChoice?.title || 'گزینه'}]` : ''}`;
+  };
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-6 pb-32 animate-fade-in-up">
+    <div className="min-h-screen bg-[#f8fafc] pb-32 font-sans selection:bg-blue-500/20">
       
-      {/* --- HEADER --- */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4 border-b border-base-200 pb-6 bg-white/80 backdrop-blur-md sticky top-0 z-50 p-4 rounded-b-2xl -mx-4 -mt-4 shadow-sm transition-all">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/admin/products')} className="btn btn-circle btn-ghost btn-sm text-slate-500 hover:bg-slate-100">
-             <ArrowRight size={22}/>
+      {/* Header */}
+      <div className="sticky top-0 z-40 bg-white/70 backdrop-blur-2xl border-b border-white shadow-[0_4px_30px_rgba(0,0,0,0.03)] px-6 py-4 flex justify-between items-center transition-all">
+        <div className="flex items-center gap-5">
+          <button onClick={() => navigate('/admin/products')} className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 text-slate-600 rounded-full shadow-sm hover:bg-slate-50 hover:text-blue-600 transition-all active:scale-95">
+            <ArrowRight size={20} />
           </button>
-          
-          <div className="flex gap-4 items-center">
-              {/* Thumbnail */}
-              <div className="avatar">
-                  <div className="w-16 h-16 rounded-xl ring-1 ring-slate-200 shadow-sm bg-white p-1">
-                      {images && images.length > 0 ? (
-                          <img src={images[0].image} alt={shell.name} className="object-cover rounded-lg"/>
-                      ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50 rounded-lg">
-                             <Box size={24}/>
-                          </div>
-                      )}
-                  </div>
-              </div>
-              
-              <div>
-                  <h1 className="text-2xl font-black text-slate-800 flex items-center gap-2">
-                    {shell.name}
-                    {shell.is_active ? (
-                        <div className="badge badge-success badge-sm gap-1 text-white text-xs">فعال</div>
-                    ) : (
-                        <div className="badge badge-error badge-sm gap-1 text-white text-xs">غیرفعال</div>
-                    )}
-                  </h1>
-                  <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500 font-mono">
-                      <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-bold tracking-wider">
-                         {shell.code || 'NO-CODE'}
-                      </span>
-                      <span className="flex items-center gap-1 dir-ltr opacity-70">
-                         /{shell.slug}
-                      </span>
-                  </div>
-              </div>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+               جزئیات محصول
+               {shell?.is_active ? (
+                  <span className="badge badge-success badge-sm text-white gap-1"><CheckCircle2 size={12}/> فعال</span>
+               ) : (
+                  <span className="badge badge-error badge-sm text-white gap-1"><XCircle size={12}/> غیرفعال</span>
+               )}
+            </h1>
+            <span className="text-[11px] text-slate-400 font-bold mt-0.5 font-mono">{shell?.code || '---'} | ID: {shell?.id || '---'}</span>
           </div>
         </div>
-
-        <div className="flex gap-2">
-           <Link to={`/admin/products/edit/${id}`} className="btn btn-primary btn-sm px-4 shadow-lg shadow-primary/20 gap-2 rounded-lg font-bold">
-              <Edit size={16}/> ویرایش
-           </Link>
-           <button className="btn btn-error btn-outline btn-sm btn-square rounded-lg" title="حذف محصول">
-              <Trash2 size={16}/>
-           </button>
-        </div>
+        
+        <Link to={`/admin/products/edit/${shell?.id || ''}`} className="btn btn-primary btn-sm h-10 px-6 rounded-full shadow-lg shadow-primary/30 gap-2 hover:scale-105 transition-transform">
+           <Edit size={16}/> ویرایش محصول
+        </Link>
       </div>
 
-      {/* --- MAIN GRID --- */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-          
-          {/* === LEFT COLUMN (DETAILS) === */}
-          <div className="xl:col-span-8 space-y-6">
+      <div className="max-w-7xl mx-auto mt-10 px-6 space-y-8">
+        
+        {/* ROW 1: Basic Info & Gallery */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+           
+           {/* Gallery */}
+           <div className="lg:col-span-4 space-y-4">
+              <div className="bg-white p-2 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-white aspect-square relative overflow-hidden">
+                 {images[activeImage]?.image ? (
+                    <img src={images[activeImage]?.image} alt={shell?.name || 'تصویر'} className="w-full h-full object-cover rounded-[1.5rem]" />
+                 ) : (
+                    <div className="w-full h-full bg-slate-50 rounded-[1.5rem] flex flex-col items-center justify-center text-slate-300 gap-3">
+                       <ImageIcon size={48} strokeWidth={1} />
+                       <span className="text-sm font-bold">بدون تصویر</span>
+                    </div>
+                 )}
+              </div>
               
-              {/* 1. Basic Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
-                  {/* Info Card */}
-                  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                      <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                         <Info size={18} className="text-primary"/> توضیحات و مشخصات
-                      </h3>
-                      <p className="text-sm text-slate-600 leading-7 text-justify bg-slate-50 p-4 rounded-xl border border-slate-100 min-h-[120px]">
-                          {shell.description || 'توضیحاتی ثبت نشده است.'}
-                      </p>
-                      
-                      {/* ✅ بخش نمایش دسته‌بندی (اصلاح شده) */}
-                      <div className="mt-4 flex flex-wrap gap-2">
-                         {shell.category_info && (
-                             <div className="badge badge-ghost gap-2 pl-4 pr-3 py-4 h-auto">
-                                <Layers size={16} className="text-slate-500"/> 
-                                <div className="flex flex-col items-start leading-none gap-1">
-                                    {/* نام والد */}
-                                    {parentCategory && (
-                                        <span className="text-[10px] text-slate-400 font-medium">
-                                            {parentCategory.name}
-                                        </span>
-                                    )}
-                                    {/* نام زیردسته */}
-                                    <span className="font-bold text-slate-700">
-                                        {currentCategory?.name || (typeof shell.category_info === 'object' ? shell.category_info.name : shell.category_info)}
-                                    </span>
-                                </div>
+              {images.length > 1 && (
+                 <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                    {images.map((img, idx) => (
+                       <button 
+                          key={img?.id || idx} 
+                          onClick={() => setActiveImage(idx)}
+                          className={clsx(
+                             "w-20 h-20 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all",
+                             activeImage === idx ? "border-primary shadow-md scale-105" : "border-transparent opacity-70 hover:opacity-100"
+                          )}
+                       >
+                          {img?.image && <img src={img?.image} alt="" className="w-full h-full object-cover" />}
+                       </button>
+                    ))}
+                 </div>
+              )}
+           </div>
+
+           {/* Info Cards */}
+           <div className="lg:col-span-8 flex flex-col gap-6">
+              <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 border border-white p-8 rounded-[2rem] flex-1">
+                 <div className="flex items-start gap-4 mb-6">
+                    <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                       <Package size={28} />
+                    </div>
+                    <div>
+                       <h2 className="text-2xl font-black text-slate-800">{shell?.name || 'بدون نام'}</h2>
+                       <div className="flex items-center gap-2 mt-2 text-sm font-bold text-slate-500">
+                          <Layers size={16}/> 
+                          {categoryDisplay}
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 text-sm text-slate-600 leading-relaxed font-medium mb-6">
+                    {shell?.description || <span className="italic opacity-50">توضیحاتی ثبت نشده است.</span>}
+                 </div>
+
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Price Card */}
+                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-5 rounded-2xl border border-emerald-100">
+                       <div className="flex items-center gap-2 text-emerald-700 font-black mb-3">
+                          <DollarSign size={18}/> اطلاعات مالی
+                       </div>
+                       {shell?.has_price ? (
+                          <div className="space-y-3">
+                             <div className="flex justify-between items-center text-sm">
+                                <span className="text-emerald-800/70 font-bold">قیمت نمایشی:</span>
+                                <span className="font-black text-emerald-700 dir-ltr flex items-center gap-1">
+                                   {formatPrice(shell?.show_price)} <span className="text-[10px] opacity-70">IQD</span>
+                                </span>
                              </div>
-                         )}
-                         
-                         <span className="badge badge-ghost gap-1 pl-3 py-4 h-auto">
-                            <Calendar size={16} className="text-slate-500"/> 
-                            <span className="font-bold text-slate-700 dir-ltr">
-                                {new Date(shell.created_at).toLocaleDateString('fa-IR')}
-                            </span>
-                         </span>
-                      </div>
-                  </div>
-
-                  {/* Pricing Config */}
-                  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
-                      <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-50 rounded-full blur-xl"></div>
-                      <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2 relative z-10">
-                         <DollarSign size={18} className="text-emerald-600"/> قوانین قیمت‌گذاری
-                      </h3>
-                      
-                      <div className="space-y-3 relative z-10">
-                          <ConfigItem 
-                             label="قیمت پایه محصول" 
-                             value={`${formatPrice(shell.price)} IQD`} 
-                             isPrice 
-                          />
-                          <ConfigItem 
-                             label="هزینه ثابت (Setup Price)" 
-                             value={`${formatPrice(pricing_config.base_setup_price)} IQD`} 
-                             isPrice 
-                          />
-                          <ConfigItem 
-                             label="هزینه طراحی" 
-                             value={pricing_config.design_service_available ? `${formatPrice(pricing_config.design_fee)} IQD` : 'ندارد'} 
-                          />
-                          <div className="divider my-1"></div>
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                             <BooleanTag label="ابعاد دلخواه" value={pricing_config.accepts_custom_dimensions} />
-                             <BooleanTag label="تعداد دلخواه" value={pricing_config.allow_custom_quantity} />
-                             <BooleanTag label="خدمات طراحی" value={pricing_config.design_service_available} />
+                             <div className="flex justify-between items-center text-sm border-t border-emerald-200/50 pt-3">
+                                <span className="text-emerald-800/70 font-bold">قیمت پایه سیستم:</span>
+                                <span className="font-black text-emerald-700 dir-ltr flex items-center gap-1">
+                                   {formatPrice(shell?.price_per_unit)} <span className="text-[10px] opacity-70">IQD</span>
+                                </span>
+                             </div>
                           </div>
-                      </div>
-                  </div>
+                       ) : (
+                          <div className="text-sm font-bold text-amber-600 bg-amber-50 p-2 rounded-xl text-center border border-amber-200/50">
+                             محصول استعلامی (بدون قیمت)
+                          </div>
+                       )}
+                    </div>
+
+                    {/* Guide Card */}
+                    <div className={clsx("p-5 rounded-2xl border flex flex-col", 
+                       shell?.guide_type === 'warning' ? "bg-amber-50 border-amber-100 text-amber-800" :
+                       shell?.guide_type === 'tip' ? "bg-purple-50 border-purple-100 text-purple-800" :
+                       "bg-blue-50 border-blue-100 text-blue-800"
+                    )}>
+                       <div className="flex items-center gap-2 font-black mb-3">
+                          <AlertCircle size={18}/> پیام راهنما
+                       </div>
+                       <p className="text-sm font-medium leading-relaxed opacity-90 flex-1">
+                          {shell?.guide_text || "پیامی ثبت نشده است."}
+                       </p>
+                       <div className="mt-3 text-xs font-bold opacity-60 flex items-center gap-1">
+                          <CheckSquare size={14}/>
+                          {shell?.has_quantity ? "مشتری می‌تواند تعداد دلخواه وارد کند" : "انتخاب تعداد از روی گزینه‌های فرم"}
+                       </div>
+                    </div>
+                 </div>
               </div>
+           </div>
+        </div>
 
-              {/* 2. OPTIONS */}
-              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                     <div>
-                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                            <List size={20} className="text-purple-600"/> 
-                            ویژگی‌های محصول (آپشن‌ها)
-                        </h3>
-                     </div>
-                     <span className="badge badge-neutral text-xs">{options?.length || 0} فیلد</span>
-                  </div>
-
-                  <div className="p-5 grid grid-cols-1 gap-4">
-                      {options && options.length > 0 ? (
-                          options.map((opt) => (
-                              <div key={opt.id} className="border border-slate-200 rounded-xl p-4 bg-white">
-                                  <div className="flex justify-between items-start mb-3">
-                                      <div className="flex items-center gap-3">
-                                          <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
-                                              {getIconForInputType(opt.input_type)}
-                                          </div>
-                                          <div>
-                                              <h4 className="font-bold text-slate-700 text-sm">{opt.label}</h4>
-                                              <span className="text-[10px] text-slate-400 font-mono bg-slate-100 px-1.5 rounded ml-2">{opt.name}</span>
-                                          </div>
-                                      </div>
-                                      <div className="flex gap-2">
-                                          {opt.is_required && <span className="badge badge-error badge-xs badge-outline font-bold">اجباری</span>}
-                                          <span className="badge badge-ghost badge-xs">{translateInputType(opt.input_type)}</span>
-                                      </div>
-                                  </div>
-
-                                  {opt.choices && opt.choices.length > 0 ? (
-                                      <div className="mt-3 flex flex-wrap gap-2">
-                                          {opt.choices.map((choice) => (
-                                              <div key={choice.id} className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5 text-xs">
-                                                  <span className="font-medium text-slate-700">{choice.label}</span>
-                                                  {parseFloat(choice.price_impact) !== 0 && (
-                                                      <span className={clsx(
-                                                          "font-mono dir-ltr font-bold",
-                                                          parseFloat(choice.price_impact) > 0 ? "text-emerald-600" : "text-red-500"
-                                                      )}>
-                                                          {parseFloat(choice.price_impact) > 0 ? '+' : ''}
-                                                          {formatPrice(choice.price_impact)}
-                                                      </span>
-                                                  )}
-                                                  {choice.is_default && <CheckCircle2 size={12} className="text-primary ml-1" title="پیش‌فرض"/>}
-                                              </div>
-                                          ))}
-                                      </div>
-                                  ) : (
-                                    <div className="text-xs text-slate-400 italic bg-slate-50 p-2 rounded">بدون گزینه (ورودی کاربر)</div>
-                                  )}
-                              </div>
-                          ))
-                      ) : (
-                          <div className="text-center py-10 text-slate-400 border-2 border-dashed border-slate-100 rounded-xl">
-                              ویژگی تعریف نشده است.
-                          </div>
-                      )}
-                  </div>
+        {/* ROW 2: Form Builder Fields */}
+        <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 border border-white p-8 rounded-[2rem]">
+           <div className="flex items-center gap-4 mb-8 pb-4 border-b border-slate-100">
+              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                 <List size={24} />
               </div>
-
-          </div>
-
-          {/* === RIGHT COLUMN === */}
-          <div className="xl:col-span-4 space-y-6">
-              
-              {/* Gallery */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                  <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                      <ImageIcon size={18} className="text-blue-500"/> گالری تصاویر
-                  </h3>
-                  <div className="grid grid-cols-3 gap-2">
-                      {images?.map((img) => (
-                          <div key={img.id} className="relative aspect-square group cursor-pointer overflow-hidden rounded-lg border border-slate-100">
-                              <img src={img.image} alt="Product" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"/>
-                              <span className="absolute bottom-1 right-1 bg-black/50 text-white text-[8px] px-1.5 rounded backdrop-blur-sm">
-                                  #{img.order}
-                              </span>
-                          </div>
-                      ))}
-                      {(!images || images.length === 0) && (
-                          <div className="col-span-3 py-8 text-center bg-slate-50 rounded-lg text-xs text-slate-400">
-                              تصویری موجود نیست
-                          </div>
-                      )}
-                  </div>
+              <div>
+                 <h3 className="text-xl font-black text-slate-800">ساختار فرم (ویژگی‌ها)</h3>
+                 <p className="text-sm text-slate-500 font-medium mt-1">فیلدهایی که در صفحه محصول به مشتری نمایش داده می‌شود</p>
               </div>
+           </div>
 
-              {/* Quantities */}
-              {shell.has_quantity && (
-                  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                      <div className="p-4 bg-slate-50/50 border-b border-slate-100">
-                          <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
-                              <Layers size={18} className="text-orange-500"/> لیست قیمت تیراژ
-                          </h3>
-                      </div>
-                      <div className="max-h-64 overflow-y-auto custom-scrollbar p-0">
-                         {safeQuantities.length > 0 ? (
-                             <table className="table table-sm w-full">
-                                 <thead className="bg-slate-50 text-slate-500 text-xs">
-                                    <tr>
-                                        <th className="text-right pr-6">تعداد (عدد)</th>
-                                        <th className="text-left pl-6">قیمت کل (تخمینی)</th>
-                                    </tr>
-                                 </thead>
-                                 <tbody className="text-sm">
-                                     {safeQuantities.map((q, idx) => {
-                                         const qtyValue = Number(q.value || q);
-                                         const calculatedPrice = q.price ? q.price : (qtyValue * basePrice);
-                                         return (
-                                             <tr key={idx} className="hover:bg-slate-50 border-b border-slate-50 last:border-0">
-                                                 <td className="font-bold text-slate-700 pr-6">
-                                                     {qtyValue.toLocaleString()}
-                                                 </td>
-                                                 <td className="text-left pl-6">
-                                                     <div className="font-mono dir-ltr font-bold text-emerald-600">
-                                                         {formatPrice(calculatedPrice)}
-                                                     </div>
-                                                     <div className="text-[10px] text-slate-400 font-mono">IQD</div>
-                                                 </td>
-                                             </tr>
-                                         );
-                                     })}
-                                 </tbody>
-                             </table>
-                         ) : (
-                             <div className="p-6 text-center text-xs text-slate-400">لیست تیراژ خالی است</div>
-                         )}
-                      </div>
-                  </div>
-              )}
-
-              {/* Standard Sizes */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                  <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                      <Ruler size={18} className="text-slate-500"/> سایزهای استاندارد
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                      {safeSizes.length > 0 ? safeSizes.map((s, idx) => (
-                          <div key={idx} className="badge badge-lg h-auto py-2 px-3 bg-slate-50 border border-slate-200 text-slate-700 flex flex-col gap-0.5 items-center">
-                             <span className="font-bold text-xs">{s.name || 'سایز'}</span>
-                             {(s.width && s.height) && (
-                                 <span className="text-[10px] text-slate-400 font-mono dir-ltr">
-                                     {s.width} × {s.height} cm
-                                 </span>
-                             )}
-                          </div>
-                      )) : (
-                          <span className="text-xs text-slate-400 bg-slate-50 p-2 rounded w-full text-center border border-dashed border-slate-200">
-                              سایز محدود تعریف نشده است.
-                          </span>
-                      )}
-                  </div>
+           {fields.length === 0 ? (
+              <div className="text-center py-10 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-slate-400 font-bold">
+                 هیچ فیلدی برای این محصول تعریف نشده است.
               </div>
+           ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                 {fields.map((field, idx) => (
+                    <div key={field?.id || idx} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                       <div className="absolute top-0 right-0 w-1 h-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                       
+                       <div className="flex justify-between items-start mb-4">
+                          <div>
+                             <h4 className="font-black text-slate-800 text-lg flex items-center gap-2">
+                                {field?.title || 'بدون عنوان'}
+                                {field?.is_required && <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-md">اجباری</span>}
+                             </h4>
+                             <span className="text-xs text-slate-400 font-mono mt-1 block">ID: field_{field?.id || '---'} | Type: {field?.field_type || '---'}</span>
+                          </div>
+                       </div>
 
-              {/* ✅ فایل‌های پیوست */}
-              {safeAttachments.length > 0 && (
-                  <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                      <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                          <Paperclip size={18} className="text-indigo-500"/> فایل‌های پیوست
-                      </h3>
-                      <div className="space-y-2">
-                          {safeAttachments.map((att) => (
-                              <a
-                                  key={att.id}
-                                  href={getFileUrl(att.file)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 hover:border-indigo-200 transition-all group"
-                              >
-                                  <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-white rounded-lg text-slate-500 group-hover:text-indigo-500 transition-colors shadow-sm">
-                                          {att.type === 'video' ? <Film size={16}/> : <FileText size={16}/>}
-                                      </div>
-                                      <span className="text-xs font-bold text-slate-700 group-hover:text-indigo-700 transition-colors max-w-[150px] truncate">
-                                          {att.name || 'فایل ضمیمه'}
+                       {field?.conditions && field?.conditions?.length > 0 && (
+                          <div className="mb-4 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 text-xs font-medium text-indigo-800/80 space-y-2">
+                             <div className="flex items-center gap-1 font-bold text-indigo-600"><Link2 size={12}/> شروط وابستگی:</div>
+                             {field?.conditions?.map((cond, cIdx) => (
+                                <div key={cond?.id || cIdx} className="flex items-start gap-1">
+                                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0"></div>
+                                   <span>{getConditionText(cond)}</span>
+                                </div>
+                             ))}
+                          </div>
+                       )}
+
+                       {field?.choices && field?.choices?.length > 0 && (
+                          <div className="space-y-2 mt-4 border-t border-slate-100 pt-4">
+                             <div className="text-xs font-bold text-slate-500 mb-2">گزینه‌های قابل انتخاب:</div>
+                             {field?.choices?.map((choice, chIdx) => (
+                                <div key={choice?.id || chIdx} className="flex justify-between items-center text-sm p-2 bg-slate-50 rounded-lg">
+                                   <span className="font-bold text-slate-700 flex items-center gap-2">
+                                      <Check size={14} className="text-indigo-400"/> {choice?.title || 'بدون نام'}
+                                   </span>
+                                   {parseFloat(choice?.numeric_value || 0) > 0 && (
+                                      <span className="font-mono text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 dir-ltr text-xs">
+                                         +{formatPrice(choice?.numeric_value)} <span className="text-[9px]">IQD</span>
                                       </span>
-                                  </div>
-                                  <ExternalLink size={14} className="text-slate-400 group-hover:text-indigo-500"/>
-                              </a>
-                          ))}
-                      </div>
-                  </div>
-              )}
+                                   )}
+                                </div>
+                             ))}
+                          </div>
+                       )}
+                    </div>
+                 ))}
+              </div>
+           )}
+        </div>
 
-          </div>
+        {/* ROW 3: Formulas & Attachments */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+           
+           {/* Formulas */}
+           <div dir='ltr' className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 border border-white p-8 rounded-[2rem]">
+              <div className="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+                 <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <Calculator size={24} />
+                 </div>
+                 <div>
+                    <h3 className="text-xl font-black text-slate-800">فرمول‌های محاسباتی</h3>
+                    <p className="text-sm text-slate-500 font-medium mt-1">فرمول‌های تعیین قیمت نهایی</p>
+                 </div>
+              </div>
+
+              {formulas.length === 0 ? (
+                 <div className="text-center py-8 text-slate-400 font-bold text-sm bg-slate-50 rounded-2xl">فرمولی ثبت نشده است.</div>
+              ) : (
+                 <div className="space-y-4">
+                    {formulas.map((f, fIdx) => (
+                       <div key={f?.id || fIdx} className="border border-purple-100 bg-purple-50/30 p-5 rounded-2xl">
+                          <h4 className="font-black text-purple-800 text-sm mb-3">{f?.title || `فرمول #${f?.id || ''}`}</h4>
+                          <div className="space-y-3">
+                             {f?.condition_expression && (
+                                <div className="bg-white/60 p-3 rounded-xl border border-purple-100/50">
+                                   <span className="text-xs font-bold text-purple-600/70 block mb-1">شرط اجرا:</span>
+                                   <code className="text-sm font-bold text-purple-800 dir-ltr block text-left">{f?.condition_expression}</code>
+                                </div>
+                             )}
+                             <div className="bg-white p-3 rounded-xl border border-purple-200 shadow-sm">
+                                <span className="text-xs font-bold text-emerald-600 block mb-1">فرمول محاسبه:</span>
+                                <code className="text-sm font-black text-emerald-700 dir-ltr block text-left">{f?.calculation_expression || '---'}</code>
+                             </div>
+                          </div>
+                       </div>
+                    ))}
+                 </div>
+              )}
+           </div>
+
+           {/* Attachments */}
+           <div className="bg-white/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 border border-white p-8 rounded-[2rem]">
+              <div className="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
+                 <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                    <Paperclip size={24} />
+                 </div>
+                 <div>
+                    <h3 className="text-xl font-black text-slate-800">فایل‌های پیوست</h3>
+                    <p className="text-sm text-slate-500 font-medium mt-1">اسناد، قالب‌ها و ویدیوهای مرتبط</p>
+                 </div>
+              </div>
+
+              {attachments.length === 0 ? (
+                 <div className="text-center py-8 text-slate-400 font-bold text-sm bg-slate-50 rounded-2xl">فایل پیوستی وجود ندارد.</div>
+              ) : (
+                 <div className="space-y-3">
+                    {attachments.map((att, aIdx) => (
+                       <a 
+                          key={att?.id || aIdx} 
+                          href={att?.file || '#'} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="flex items-center gap-4 p-4 bg-white border border-slate-100 rounded-2xl hover:border-rose-200 hover:shadow-md transition-all group"
+                       >
+                          <div className="w-10 h-10 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-rose-50 group-hover:text-rose-500 transition-colors">
+                             <Download size={18}/>
+                          </div>
+                          <div className="flex-1 overflow-hidden">
+                             <h5 className="font-bold text-slate-700 text-sm truncate dir-ltr text-right">{att?.name || 'فایل ضمیمه'}</h5>
+                             <span className="text-xs text-slate-400 font-medium">{att?.created_at ? new Date(att?.created_at).toLocaleDateString('fa-IR') : '---'}</span>
+                          </div>
+                       </a>
+                    ))}
+                 </div>
+              )}
+           </div>
+
+        </div>
       </div>
     </div>
   );
-};
-
-// --- Sub-Components ---
-const ConfigItem = ({ label, value, isPrice }) => (
-    <div className="flex justify-between items-center text-sm py-2 border-b border-slate-50 last:border-0">
-        <span className="text-slate-500">{label}</span>
-        <span className={clsx("font-bold", isPrice ? "text-emerald-600 dir-ltr font-mono" : "text-slate-800")}>
-            {value}
-        </span>
-    </div>
-);
-
-const BooleanTag = ({ label, value }) => (
-    <div className={clsx(
-        "flex items-center gap-1.5 px-3 py-2 rounded-lg border transition-colors",
-        value ? "bg-emerald-50 border-emerald-100 text-emerald-700" : "bg-slate-50 border-slate-100 text-slate-400"
-    )}>
-        {value ? <CheckCircle2 size={14}/> : <XCircle size={14}/>}
-        <span>{label}</span>
-    </div>
-);
-
-const getIconForInputType = (type) => {
-    switch (type) {
-        case 'text': return <Type size={18}/>;
-        case 'textarea': return <FileText size={18}/>;
-        case 'select': case 'radio': return <List size={18}/>;
-        case 'checkbox': return <CheckSquare size={18}/>;
-        case 'file': return <ImageIcon size={18}/>;
-        default: return <Settings size={18}/>;
-    }
-};
-
-const translateInputType = (type) => {
-    const map = {
-        'text': 'متنی کوتاه',
-        'textarea': 'متنی بلند',
-        'number': 'عددی',
-        'select': 'لیست کشویی',
-        'radio': 'تک انتخابی',
-        'checkbox': 'چند انتخابی',
-        'file': 'آپلود فایل',
-    };
-    return map[type] || type;
 };
 
 export default ProductDetailPage;

@@ -1,17 +1,16 @@
-// src/app/features/admin/products/hooks/useAdminProducts.js
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Fuse from 'fuse.js';
 import toast from 'react-hot-toast';
 import { adminProductService } from '../../../services/adminProductService';
-import { adminCategoryService } from '../../../services/adminCategoryService'; // مسیر سرویس کتگوری را چک کن
+import { adminCategoryService } from '../../../services/adminCategoryService';
 
 // تابع نرمال‌سازی برای مقایسه دقیق متون فارسی
 const normalize = (text) => {
   if (!text) return '';
   return text.toString().trim()
     .replace(/ي/g, 'ی').replace(/ك/g, 'ک')
-    .replace(/\s+/g, '') // حذف تمام فاصله‌ها برای مقایسه سخت‌گیرانه
+    .replace(/\s+/g, '') 
     .toLowerCase();
 };
 
@@ -20,24 +19,24 @@ export const useAdminProducts = () => {
   
   // --- States ---
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilterId, setCategoryFilterId] = useState('all'); // ID دسته‌بندی
+  const [categoryFilterId, setCategoryFilterId] = useState('all'); 
   const [statusFilter, setStatusFilter] = useState('all');
+  // سورتینگ فقط بر اساس زمان
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   // --- Queries ---
-  // 1. دریافت محصولات
   const { data: products = [], isLoading: pLoading, refetch } = useQuery({
     queryKey: ['admin-products'],
     queryFn: adminProductService.getAll,
     staleTime: 1000 * 60 * 2,
   });
 
-  // 2. دریافت دسته‌بندی‌ها (حیاتی برای فیلتر)
+  // دریافت دسته‌بندی‌ها (فقط ریشه‌ها که داخلشون children دارن)
   const { data: categories = [], isLoading: cLoading } = useQuery({
-    queryKey: ['admin-categories'],
-    queryFn: adminCategoryService.getAll,
+    queryKey: ['admin-categories-dropdown'],
+    queryFn: adminCategoryService.getRoots,
   });
 
   // --- Processing Logic ---
@@ -46,17 +45,21 @@ export const useAdminProducts = () => {
 
     let result = [...products];
 
-    // 1. فیلتر دسته‌بندی (Mapping ID -> Name)
+    // 1. فیلتر دسته‌بندی هوشمند (پدر + تمام فرزندان)
     if (categoryFilterId !== 'all') {
-      // پیدا کردن نام دسته‌بندی از روی ID انتخاب شده
-      const selectedCat = categories.find(c => String(c.id) === String(categoryFilterId));
-      
-      if (selectedCat) {
-        const targetName = normalize(selectedCat.name);
+      const selectedRoot = categories.find(c => String(c.id) === String(categoryFilterId));
+      if (selectedRoot) {
+        // جمع‌آوری نام دسته اصلی و تمام زیردسته‌های آن
+        const validCategoryNames = [selectedRoot.name];
+        if (selectedRoot.children && selectedRoot.children.length > 0) {
+           selectedRoot.children.forEach(child => validCategoryNames.push(child.name));
+        }
+        
+        const normalizedValidNames = validCategoryNames.map(normalize);
+        
         result = result.filter(p => {
           if (!p.category) return false;
-          // مقایسه نام نرمال شده محصول با نام نرمال شده دسته‌بندی
-          return normalize(p.category).includes(targetName);
+          return normalizedValidNames.includes(normalize(p.category));
         });
       }
     }
@@ -76,23 +79,10 @@ export const useAdminProducts = () => {
       result = fuse.search(searchQuery).map(r => r.item);
     }
 
-    // 4. مرتب‌سازی
+    // 4. مرتب‌سازی (فقط زمان)
     result.sort((a, b) => {
-      let aVal = a[sortConfig.key];
-      let bVal = b[sortConfig.key];
-
-      if (sortConfig.key === 'price') {
-        aVal = parseFloat(aVal) || 0;
-        bVal = parseFloat(bVal) || 0;
-      }
-      
-      if (sortConfig.key === 'created_at') {
-        aVal = new Date(aVal || 0).getTime();
-        bVal = new Date(bVal || 0).getTime();
-      }
-
-      aVal = aVal ?? '';
-      bVal = bVal ?? '';
+      let aVal = new Date(a.created_at || 0).getTime();
+      let bVal = new Date(b.created_at || 0).getTime();
 
       if (aVal === bVal) return 0;
       const comparison = aVal > bVal ? 1 : -1;
@@ -151,7 +141,7 @@ export const useAdminProducts = () => {
     currentPage, setCurrentPage,
     searchQuery, setSearchQuery,
     
-    categoryFilterId, setCategoryFilterId, // دقت کن: اینجا ID ست میشه
+    categoryFilterId, setCategoryFilterId,
     statusFilter, setStatusFilter,
     categories,
 
