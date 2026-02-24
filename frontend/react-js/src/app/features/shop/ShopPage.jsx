@@ -75,11 +75,16 @@ const ShopPage = () => {
   });
 
   /* ── فیلترینگ ── */
+/* ── فیلترینگ پیشرفته (ایمن شده در برابر Null) ── */
   const filteredProducts = useMemo(() => {
-    let result = allProducts;
+    // اطمینان از اینکه allProducts همیشه یک آرایه است
+    let result = Array.isArray(allProducts) ? allProducts : [];
 
+    // ۱. فیلتر دسته‌بندی
     if (selectedSlugs.length > 0 && categoriesTree.length > 0) {
       const selectedNames = [];
+      
+      // استخراج نام دسته‌بندی‌های انتخاب شده از روی اسلاگ آن‌ها
       const findNames = (list) => {
         list.forEach((cat) => {
           if (selectedSlugs.includes(cat.slug)) selectedNames.push(cat.name);
@@ -89,15 +94,21 @@ const ShopPage = () => {
       findNames(categoriesTree);
 
       result = result.filter((product) => {
+        // گارد: اگر محصول کلاً آبجکت category نداشت یا null بود، فیلترش کن
         if (!product.category) return false;
+        
         const parentName = product.category.parent_category;
         const childName = product.category.children_category;
+        
+        // چک کردن وجود نام در لیست انتخاب‌شده‌ها
         return selectedNames.some((name) => name === parentName || name === childName);
       });
     }
 
+    // ۲. فیلتر جستجو
     if (searchQuery) {
-      result = result.filter((p) => p.name.includes(searchQuery));
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter((p) => p.name?.toLowerCase().includes(query));
     }
 
     return result;
