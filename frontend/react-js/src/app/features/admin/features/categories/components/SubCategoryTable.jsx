@@ -195,9 +195,7 @@ const SubCategoryTable = () => {
                                                             </div>
                                                             <div className="flex justify-between items-center mt-1">
                                                                 <span className="text-[10px] font-mono bg-slate-100 px-1 rounded text-slate-500">/{product.slug}</span>
-                                                                <span className="text-[11px] font-medium text-emerald-600">
-                                                                    {product.price_display} <span className="text-[9px]">تومان</span>
-                                                                </span>
+
                                                             </div>
                                                         </div>
                                                         {/* Link to Product */}
@@ -206,6 +204,12 @@ const SubCategoryTable = () => {
                                                             className="btn btn-xs btn-ghost btn-square text-slate-300 hover:text-blue-600"
                                                         >
                                                             <Edit size={12}/>
+                                                        </Link>
+                                                        <Link 
+                                                            to={`/admin/products/${product.id}`} 
+                                                            className="btn btn-xs btn-ghost btn-square text-slate-300 hover:text-blue-600"
+                                                        >
+                                                            <Eye size={12}/>
                                                         </Link>
                                                     </div>
                                                 ))}
