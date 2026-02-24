@@ -32,22 +32,34 @@ const LoginPage = () => {
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       
-      // ✅ 2. ذخیره اطلاعات کاربر در LocalStorage (همون چیزی که خواستی)
+      // 2. ذخیره اطلاعات کاربر و ریدایرکت هوشمند
+      let defaultPath = '/';
+
       if (data.user) {
         localStorage.setItem('userData', JSON.stringify(data.user));
         localStorage.setItem('userId', data.user.id);
-        
-        // آپدیت کردن کش ریکت کوئری همزمان
         queryClient.setQueryData(['profile-info'], data.user);
+
+        const isStaff = data.user.is_staff === true || data.user.is_staff === "true";
+        const isSuperuser = data.user.is_superuser === true || data.user.is_superuser === "true";
+        
+        if (isStaff || isSuperuser) {
+          defaultPath = '/admin';
+        }
       }
 
-      toast.success('ورود موفقیت‌آمیز');
+      // 🛑 راهکار قطعی رفع مشکل محو نشدن Toast
+      const toastId = toast.success('ورود موفقیت‌آمیز');
+      
+      setTimeout(() => {
+        toast.dismiss(toastId); // بستن اجباری و هدفمند همین پیام
+      }, 2000);
 
-      const from = location.state?.from?.pathname || '/admin';
+      const from = location.state?.from?.pathname || defaultPath;
       navigate(from, { replace: true });
     },
     onError: (error) => {
-      const message = error.response?.data?.detail || 'نام کاربری یا رمز عبور اشتباه است';
+      const message = error.response?.data?.detail || 'شماره تلفن یا رمز عبور اشتباه است';
       toast.error(message);
     }
   });
@@ -61,14 +73,15 @@ const LoginPage = () => {
       <h2 className="text-xl font-semibold text-center mb-4">ورود به حساب کاربری</h2>
       
       <div className="form-control">
-        <label className="label"><span className="label-text">نام کاربری</span></label>
+        <label className="label"><span className="label-text">شماره تلفن</span></label>
         <input 
           type="text" 
           dir="ltr"
-          className={`input input-bordered w-full text-left ${errors.username ? 'input-error' : ''}`}
-          {...register('username')}
+          placeholder="09123456789"
+          className={`input input-bordered w-full text-left ${errors.phone_number ? 'input-error' : ''}`}
+          {...register('phone_number')}
         />
-        {errors.username && <span className="text-error text-xs mt-1">{errors.username.message}</span>}
+        {errors.phone_number && <span className="text-error text-xs mt-1">{errors.phone_number.message}</span>}
       </div>
 
       <div className="form-control">
