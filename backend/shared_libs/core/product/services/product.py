@@ -175,16 +175,22 @@ class ProductService:
             raise ProductNotFoundException("محصول یافت نشد.")
 
         # --- پاک کردن فیلدهای حذف شده ---
-        incoming_field_ids = [f['id'] for f in fields_data if f.get('id')]
+        clean_fields_data = [
+            f for f in fields_data 
+            if str(f.get('id')) != 'base_price' and str(f.get('temp_id')) != 'base_price'
+        ]
+
+        # --- پاک کردن فیلدهای حذف شده (دقت کن از clean_fields_data استفاده می‌کنیم) ---
+        incoming_field_ids = [f['id'] for f in clean_fields_data if f.get('id')]
         ProductField.objects.filter(product=product).exclude(id__in=incoming_field_ids).delete()
 
         pending_conditions = []
         
-        # 🌟 تغییر کلیدی: دیکشنری‌های سراسری برای تمام فیلدها و گزینه‌های این محصول
+        # ===== فیلدهای گلوبال ===== #
         global_field_map = {}
         global_choice_map = {}
 
-        # ======= مرحله اول (Pass 1): ساخت فیلدها و گزینه‌ها =======
+        # ======= مرحله اول (Pass 1): ساخت فیلدها و گزینه‌ها ======= #
         for field_data in fields_data:
             field_id = field_data.get('id')
             temp_id = field_data.get('temp_id')
@@ -226,6 +232,7 @@ class ProductService:
                     'title': choice_data['title'],
                     'numeric_value': choice_data.get('numeric_value', 0.0),
                     'order': choice_data.get('order', 0),
+                    'is_default': choice_data.get('is_default', False)
                 }
                 
                 if choice_id:

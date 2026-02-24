@@ -20,7 +20,10 @@ from .views import (
     InvoiceViewSet,
     QuotationViewSet,
     StaffViewSet,
-    SiteMediaDashboardViewSet
+    SiteMediaDashboardViewSet,
+    TutorialViewSet,
+    ArticleViewSet,
+    ArticleCategoryViewSet,
 )
 
 router = DefaultRouter()
@@ -40,6 +43,9 @@ router.register(r'site-media', SiteMediaDashboardViewSet, basename='site-media')
 router.register(r'provinces', ProvinceDashboardViewSet, basename='provinces')
 router.register(r'cities', CityDashboardViewSet, basename='cities')
 router.register(r'staffs', StaffViewSet, basename='staff')
+router.register(r'blog-categories', ArticleCategoryViewSet, basename='dashboard-blog-category')
+router.register(r'articles', ArticleViewSet, basename='dashboard-article')
+router.register(r'tutorials', TutorialViewSet, basename='dashboard-tutorial')
 
 app_name = "dashboard"
 

@@ -220,8 +220,8 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                             "is_required": True,
                             "order": 1,
                             "choices": [
-                                {"temp_id": "choice_new_1", "title": "گلاسه ۱۳۵", "numeric_value": "0.00", "order": 1},
-                                {"temp_id": "choice_new_2", "title": "گلاسه ۱۷۰", "numeric_value": "5000.00", "order": 2}
+                                {"temp_id": "choice_new_1", "title": "گلاسه ۱۳۵", "numeric_value": "0.00", "order": 1, "is_default": True}, # 👈 اضافه شدن is_default
+                                {"temp_id": "choice_new_2", "title": "گلاسه ۱۷۰", "numeric_value": "5000.00", "order": 2, "is_default": False} # 👈 اضافه شدن is_default
                             ],
                             "conditions": []
                         },
@@ -232,7 +232,7 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                             "is_required": True,
                             "order": 2,
                             "choices": [
-                                {"temp_id": "choice_new_3", "title": "۴ رنگ", "numeric_value": "0.00", "order": 1}
+                                {"temp_id": "choice_new_3", "title": "۴ رنگ", "numeric_value": "0.00", "order": 1, "is_default": True}
                             ],
                             "conditions": [
                                 {
@@ -252,39 +252,34 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 summary='سناریو ویرایش و حذف: استفاده از ID دیتابیس',
                 description='''
                 در این مثال فرض می‌کنیم فیلدها قبلاً ساخته شده‌اند و ID دارند.
-                اتفاقاتی که می‌افتد:
-                ۱. فیلد ۱ (نوع کاغذ) عنوانش تغییر می‌کند.
-                ۲. در فیلد ۱، گزینه (گلاسه ۱۳۵ با id: 100) آپدیت می‌شود.
-                ۳. در فیلد ۱، گزینه (گلاسه ۱۷۰) ارسال نشده، پس حذف می‌شود!
-                ۴. در فیلد ۱، یک گزینه جدید (کتان با temp_id) اضافه می‌شود.
-                ۵. فیلد ۲ (تعداد رنگ) کلاً در این آرایه فرستاده نشده، بنابراین کاملاً از دیتابیس حذف خواهد شد!
+                ... (توضیحات قبلی) ...
                 ''',
                 value={
                     "fields": [
                         {
-                            "id": 50,  # 👈 شناسه واقعی در دیتابیس (پس این فیلد ویرایش می‌شود)
+                            "id": 50, 
                             "title": "نوع کاغذ (ویرایش شده)",
                             "field_type": "dropdown",
-                            "is_required": False,  # تغییر پیدا کرد
+                            "is_required": False, 
                             "order": 1,
                             "choices": [
                                 {
-                                    "id": 100,  # 👈 این گزینه ویرایش می‌شود (مثلاً افزایش قیمت)
+                                    "id": 100, 
                                     "title": "گلاسه ۱۳۵", 
                                     "numeric_value": "2000.00", 
-                                    "order": 1
+                                    "order": 1,
+                                    "is_default": False # 👈 تغییر پیش‌فرض از سمت فرانت‌اند
                                 },
                                 {
-                                    "temp_id": "choice_new_99",  # 👈 این گزینه به فیلد قدیمی اضافه می‌شود
+                                    "temp_id": "choice_new_99", 
                                     "title": "کتان ۲۵۰", 
                                     "numeric_value": "15000.00", 
-                                    "order": 3
+                                    "order": 3,
+                                    "is_default": True # 👈 گزینه جدید حالا پیش‌فرض است
                                 }
-                                # گزینه "گلاسه ۱۷۰" با آیدی 101 چون اینجا فرستاده نشده، به صورت خودکار حذف میشه!
                             ],
                             "conditions": []
                         }
-                        # فیلد "تعداد رنگ" که آیدی 51 داشت، اینجا فرستاده نشده، پس همراه شروطش حذف میشه!
                     ]
                 },
                 request_only=True,

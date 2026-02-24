@@ -63,6 +63,7 @@ class ProductFieldChoiceSerializer(serializers.Serializer):
     title = serializers.CharField()
     numeric_value = serializers.DecimalField(max_digits=14, decimal_places=2, default=0.0)
     order = serializers.IntegerField(default=0)
+    is_default = serializers.BooleanField(default=False)
 
 
 class ProductFieldConditionSerializer(serializers.Serializer):
@@ -169,6 +170,7 @@ class ProductFieldChoiceReadSerializer(serializers.Serializer):
     title = serializers.CharField()
     numeric_value = serializers.DecimalField(max_digits=14, decimal_places=2)
     order = serializers.IntegerField()
+    is_default = serializers.BooleanField()
 
 
 class ProductFieldConditionReadSerializer(serializers.Serializer):

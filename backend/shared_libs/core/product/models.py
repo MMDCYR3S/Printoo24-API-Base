@@ -374,11 +374,26 @@ class ProductFieldChoice(models.Model):
         decimal_places=2, 
         default=0.0
     )
+
+    is_default = models.BooleanField(
+        _("گزینه پیش‌فرض"), 
+        default=False,
+        help_text=_("آیا این گزینه در فرانت‌اند به صورت پیش‌فرض انتخاب شده باشد؟")
+    )
     
     order = models.PositiveIntegerField(_("ترتیب"), default=0)
 
     class Meta:
         ordering = ['order']
+
+    def save(self, *args, **kwargs):
+        """
+        تضمین یکپارچگی داده‌ها (Data Integrity):
+        اگر این رکورد به عنوان پیش‌فرض ست شود، بقیه رکوردهای هم‌خانواده باید False شوند.
+        """
+        if self.is_default:
+            ProductFieldChoice.objects.filter(field=self.field).exclude(pk=self.pk).update(is_default=False)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.field.title} -> {self.title} (Value: {self.numeric_value})"
