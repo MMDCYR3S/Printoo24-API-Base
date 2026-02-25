@@ -3,9 +3,10 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import status
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from rest_framework import status, serializers
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse, inline_serializer, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
+from django.core.exceptions import ValidationError
 
 from .serializers import (
     ProductListSerializer,
@@ -13,6 +14,7 @@ from .serializers import (
     ProductFeedbackStatsSerializer,
     SubmitReviewSerializer,
     CategoryLandingPageSerializer,
+    LivePriceCalculationSerializer,
 )
 from apps.shop.services import (
     ShopProductListService,
@@ -20,6 +22,8 @@ from apps.shop.services import (
     ShopCategoryService,
     FeedbackService,
 )
+from core.product.services import ProductPricingDomainService
+from core.product.exceptions import InvalidProductDataException
 
 # ======= Product List View ======= #
 @extend_schema(
@@ -234,3 +238,134 @@ class ProductSearchView(ListAPIView):
         )
         
         return queryset
+    
+class ProductLivePriceCalculatorView(APIView):
+    """
+    سرویس محاسبه زنده و لحظه‌ای قیمت محصول.
+    """
+
+    @extend_schema(
+        tags=["Product"],
+        summary="محاسبه لحظه‌ای قیمت (Live Price)",
+        description="""
+            **راهنمای استفاده برای توسعه‌دهنده فرانت‌اند:**
+            لطفاً این API را با استفاده از مکانیزم `Debounce` (مثلاً ۳۰۰ الی ۵۰۰ میلی‌ثانیه) صدا بزنید تا در زمان تایپ کاربر، سرور با ریکوئست‌های رگباری درگیر نشود.
+            هربار که کاربر یک Dropdown را تغییر داد یا روی Checkbox کلیک کرد، کل state فعلی فرم را در قالب آبجکت `selections` برای این مسیر POST کنید.
+        """,
+        request=LivePriceCalculationSerializer,
+        
+        # ===== مثال‌های بدنه درخواست (Request) ===== #
+        examples=[
+            OpenApiExample(
+                name="نمونه ارسال انتخاب‌های کاربر",
+                description="ارسال ترکیبی از دراپ‌داون، چک‌باکس و فیلد متنی",
+                value={
+                    "selections": {
+                        "10": "45",
+                        "12": ["50", "51"],
+                        "15": "1000",
+                        "18": "توضیحات دلخواه"
+                    }
+                },
+                request_only=True,
+            )
+        ],
+        
+        # ===== ساختار و مثال‌های رسپانس‌ها (Responses) ===== #
+        responses={
+            200: OpenApiResponse(
+                description="محاسبه موفقیت‌آمیز بود",
+                response=inline_serializer(
+                    name='LivePriceSuccessResponse',
+                    fields={
+                        'success': serializers.BooleanField(default=True),
+                        'data': inline_serializer(
+                            name='LivePriceData',
+                            fields={
+                                'final_price': serializers.FloatField(),
+                                'formatted_price': serializers.CharField(),
+                                'summary': inline_serializer(
+                                    name='LivePriceSummary',
+                                    many=True,
+                                    fields={
+                                        'field_id': serializers.IntegerField(),
+                                        'field_title': serializers.CharField(),
+                                        'value': serializers.CharField(),
+                                        'choice_id': serializers.IntegerField(allow_null=True, required=False),
+                                    }
+                                )
+                            }
+                        )
+                    }
+                ),
+                examples=[
+                    OpenApiExample(
+                        name="پاسخ موفق",
+                        value={
+                            "success": True,
+                            "data": {
+                                "final_price": 25500.0,
+                                "formatted_price": "25,500",
+                                "summary": [
+                                    {
+                                        "field_id": 10,
+                                        "field_title": "جنس کاغذ",
+                                        "value": "گلاسه ۱۳۵ گرم",
+                                        "choice_id": 45
+                                    }
+                                ]
+                            }
+                        },
+                        response_only=True,
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                description="خطای ولیدیشن (مثلاً مقادیر نامعتبر یا اجباری)",
+                response=inline_serializer(
+                    name='LivePriceErrorResponse',
+                    fields={
+                        'success': serializers.BooleanField(default=False),
+                        'error': serializers.CharField()
+                    }
+                ),
+                examples=[
+                    OpenApiExample(
+                        name="خطای فیلد اجباری",
+                        value={"success": False, "error": "پر کردن فیلد 'تیراژ' الزامی است."},
+                        response_only=True
+                    )
+                ]
+            )
+        }
+    )
+    def post(self, request, product_id):
+        serializer = LivePriceCalculationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        selections = serializer.validated_data.get('selections', {})
+        
+        try:
+            final_price, configuration_summary = ProductPricingDomainService.calculate_final_price(
+                product_id=product_id,
+                user_selections=selections
+            )
+            
+            return Response({
+                "success": True,
+                "data": {
+                    "final_price": final_price,
+                    "formatted_price": f"{final_price:,.0f}", 
+                    "summary": configuration_summary
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except InvalidProductDataException as e:
+            return Response({"success": False, "error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+        except ValidationError as e:
+            error_msg = str(e.message) if hasattr(e, 'message') else str(e)
+            return Response({"success": False, "error": error_msg}, status=status.HTTP_404_NOT_FOUND)
+            
+        except Exception as e:
+            return Response({"success": False, "error": "خطای سیستمی در محاسبه قیمت رخ داده است."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -237,3 +237,22 @@ class CategoryLandingPageSerializer(serializers.Serializer):
     category_info = CategoryInfoSerializer()
     sub_categories = SubCategoryTinySerializer(many=True)
     products = ProductSummarySerializer(many=True)
+
+# ========== Live Price Calculation ========== #
+class LivePriceCalculationSerializer(serializers.Serializer):
+    """
+    سریالایزر برای دریافت داینامیک انتخاب‌های کاربر از فرانت‌اند.
+    نمونه ورودی:
+    {
+        "selections": {
+            "12": "45",       # فیلد آیدی 12 -> گزینه 45
+            "15": "1000",     # فیلد آیدی 15 -> عدد 1000
+            "20": ["1", "2"]  # فیلد چند انتخابی
+        }
+    }
+    """
+    selections = serializers.DictField(
+        child=serializers.JSONField(), 
+        required=True,
+        help_text="دیکشنری شامل آیدی فیلدها به عنوان کلید و مقادیر انتخابی کاربر"
+    )
