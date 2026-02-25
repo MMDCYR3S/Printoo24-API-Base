@@ -26,6 +26,10 @@ class DashboardBlogService:
 
     def bulk_delete(self, article_ids: list):
         return self._domain_service.bulk_delete(article_ids)
+    
+    def publish_article(self, article_id: int):
+        """ سرویس داشبورد برای انتشار مقاله """
+        return self._domain_service.publish_article(article_id)
 
 # ========== TUTORIAL SERVICE ========== #
 class DashboardTutorialService:

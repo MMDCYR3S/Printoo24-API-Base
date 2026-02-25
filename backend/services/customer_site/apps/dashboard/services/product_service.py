@@ -7,9 +7,11 @@ from django.db import transaction
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.core.files import File
+from django.db.models import Prefetch
 
 # فرض بر این است که متدهای مربوط به EAV را در Domain Service نوشته‌اید
 from core.product.services import ProductService, ProductMediaService
+from core.models import Product, ProductImage
 
 try:
     from apps.dashboard.tasks import upload_product_image_task, upload_attachment_library_task
@@ -184,3 +186,16 @@ class ProductDashboardService:
         """
         return self._domain_service.bulk_delete_products(product_ids)
 
+    def get_minimal_active_products(self):
+        """
+        دریافت ۴ فیلد اصلی + اولین عکس برای محصولات فعال
+        """
+        return Product.objects.filter(is_active=True).only(
+            'id', 'name', 'slug', 'code'
+        ).prefetch_related(
+            Prefetch(
+                'product_image', 
+                queryset=ProductImage.objects.order_by('order'),
+                to_attr='prefetched_images' # ذخیره در یک کش موقت در رم برای سرعت بیشتر
+            )
+        ).order_by('-id')
