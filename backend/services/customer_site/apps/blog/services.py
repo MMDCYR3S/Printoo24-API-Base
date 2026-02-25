@@ -43,6 +43,19 @@ class BlogDomainService:
     def bulk_delete(self, article_ids: List[int]) -> int:
         deleted, _ = Article.objects.filter(id__in=article_ids).delete()
         return deleted
+    
+    @transaction.atomic
+    def publish_article(self, article_id: int) -> Article:
+        """ تغییر وضعیت یک مقاله به حالت منتشر شده """
+        from apps.blog.models import ArticleStatus
+        
+        article = Article.objects.get_detail_by_id(article_id)
+        
+        if article.status != ArticleStatus.PUBLISHED:
+            article.status = ArticleStatus.PUBLISHED
+            article.save()
+            
+        return article
 
 # ========== TUTORIAL SERVICE ========== #
 class TutorialDomainService:

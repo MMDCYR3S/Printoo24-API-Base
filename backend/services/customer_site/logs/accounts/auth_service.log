@@ -1295,3 +1295,12 @@ INFO 2026-02-24 09:13:58,790 auth_service 9 127131786917568 User logged in: 21
 DEBUG 2026-02-24 09:17:56,960 auth_service 9 127131099068096 AuthService initialized with UserIdentityService
 INFO 2026-02-24 09:17:56,962 auth_service 9 127131099068096 Login attempt for: 09137555555
 INFO 2026-02-24 09:17:57,607 auth_service 9 127131099068096 User logged in: 21
+DEBUG 2026-02-25 06:44:51,847 auth_service 15 126228840482496 AuthService initialized with UserIdentityService
+INFO 2026-02-25 06:44:51,851 auth_service 15 126228840482496 Login attempt for: 09137514625
+INFO 2026-02-25 06:44:52,319 auth_service 15 126228840482496 User logged in: 11
+DEBUG 2026-02-25 06:49:50,119 auth_service 23 138005208626880 AuthService initialized with UserIdentityService
+INFO 2026-02-25 06:49:50,286 auth_service 23 138005208626880 Login attempt for: 09137514625
+INFO 2026-02-25 06:49:50,870 auth_service 23 138005208626880 User logged in: 11
+DEBUG 2026-02-25 07:20:21,882 auth_service 62 138651364394688 AuthService initialized with UserIdentityService
+INFO 2026-02-25 07:20:21,884 auth_service 62 138651364394688 Login attempt for: 09137514625
+INFO 2026-02-25 07:20:22,265 auth_service 62 138651364394688 User logged in: 11

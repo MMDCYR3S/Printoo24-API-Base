@@ -24,6 +24,7 @@ from .views import (
     TutorialViewSet,
     ArticleViewSet,
     ArticleCategoryViewSet,
+    ProductSelectorViewSet,
 )
 
 router = DefaultRouter()
@@ -46,6 +47,7 @@ router.register(r'staffs', StaffViewSet, basename='staff')
 router.register(r'blog-categories', ArticleCategoryViewSet, basename='dashboard-blog-category')
 router.register(r'articles', ArticleViewSet, basename='dashboard-article')
 router.register(r'tutorials', TutorialViewSet, basename='dashboard-tutorial')
+router.register(r'products-minimal', ProductSelectorViewSet, basename='dashboard-product-minimal')
 
 app_name = "dashboard"
 

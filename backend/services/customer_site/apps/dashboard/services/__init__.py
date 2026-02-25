@@ -7,3 +7,4 @@ from .order_service import OrderDashboardService
 from .dashboard_service import *
 from .location_service import *
 from .staff_service import *
+from .content_service import DashboardArticleCategoryService, DashboardBlogService, DashboardTutorialService

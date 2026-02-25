@@ -50,7 +50,7 @@ class Article(models.Model):
     
     summary = models.TextField(_("خلاصه مقاله"), help_text=_("برای نمایش در لیست مقالات"))
     content = models.TextField(_("متن کامل"))
-    image = models.ImageField(_("تصویر کاور"), upload_to='blog/covers/')
+    image = models.ImageField(_("تصویر کاور"), upload_to='blog/covers/', null=True, blank=True)
     
     # ===== سئو و متا دیتا =====
     meta_title = models.CharField(_("عنوان سئو (Meta Title)"), max_length=150, blank=True, null=True)

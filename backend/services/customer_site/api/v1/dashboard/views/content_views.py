@@ -3,17 +3,41 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 
-from apps.dashboard.services.content_service import (
+from apps.dashboard.services import (
     DashboardArticleCategoryService, 
     DashboardBlogService, 
     DashboardTutorialService
 )
+from apps.dashboard.services import ProductDashboardService
 from ..serializers import (
     ArticleCategoryReadSerializer, ArticleCategoryWriteSerializer,
     ArticleReadSerializer, ArticleWriteSerializer,
     TutorialReadSerializer, TutorialWriteSerializer,
-    BulkActionSerializer, BulkStatusSerializer
+    BulkActionSerializer, BulkStatusSerializer,
+    ProductMinimalSerializer, ArticleListSerializer,
+    TutorialListSerializer
 )
+
+# ========== PRODUCT SELECTOR VIEW ========== #
+@extend_schema(tags=['Dashboard-Article'])
+class ProductSelectorViewSet(viewsets.ViewSet):
+    """
+    این ویو فقط برای واکشی دیتای خلاصه محصولات جهت استفاده در فرم‌ها 
+    (مانند ساخت مقاله یا آموزش) استفاده می‌شود.
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.app_service = ProductDashboardService()
+
+    @extend_schema(
+        summary="لیست خلاصه محصولات (مخصوص دراپ‌داون)",
+        description="این API یک لیست بسیار سبک از محصولات فعال شامل (id, name, slug, code) برمی‌گرداند تا در فرم‌های ساخت مقاله یا آموزش استفاده شود.",
+        responses=ProductMinimalSerializer(many=True)
+    )
+    def list(self, request):
+        products = self.app_service.get_minimal_active_products()
+        serializer = ProductMinimalSerializer(products, many=True)
+        return Response(serializer.data)
 
 # ========== BLOG CATEGORY VIEW ========== #
 @extend_schema(tags=['Dashboard-Blog-Category'])
@@ -86,11 +110,14 @@ class ArticleViewSet(viewsets.ViewSet):
         self.app_service = DashboardBlogService()
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return ArticleReadSerializer
+        # 🌟 تفکیک هوشمند سریالایزرها بر اساس نوع درخواست فرانت‌اند
+        if self.action == 'list':
+            return ArticleListSerializer       # <--- دیتای سبک برای جدول
+        if self.action == 'retrieve':
+            return ArticleReadSerializer       # <--- دیتای کامل با محصولات مرتبط و متن
         return ArticleWriteSerializer
 
-    @extend_schema(summary="لیست تمام مقالات")
+    @extend_schema(summary="لیست تمام مقالات (خلاصه)")
     def list(self, request):
         articles = self.app_service.get_all_articles()
         serializer = self.get_serializer_class()(articles, many=True, context={'request': request})
@@ -103,6 +130,8 @@ class ArticleViewSet(viewsets.ViewSet):
         - `draft` : پیش‌نویس
         - `published` : منتشر شده
         - `archived` : بایگانی شده
+        
+        *نکته: فیلد related_products باید آرایه‌ای از شناسه‌های (ID) محصولات باشد.*
         """
     )
     def create(self, request):
@@ -114,15 +143,14 @@ class ArticleViewSet(viewsets.ViewSet):
     @extend_schema(summary="دریافت جزئیات مقاله")
     def retrieve(self, request, pk=None):
         article = self.app_service.get_article_detail(pk)
-        return Response(self.get_serializer_class()(article).data, context={'request': request})
+        serializer = self.get_serializer_class()(article, context={'request': request})
+        return Response(serializer.data)
 
     @extend_schema(
         summary="ویرایش مقاله",
         description="""
-        **وضعیت‌های مجاز برای مقاله (Article Status):**
-        - `draft` : پیش‌نویس
-        - `published` : منتشر شده
-        - `archived` : بایگانی شده
+        فیلدهایی که نیاز به تغییر دارند را ارسال کنید (Partial Update).
+        **وضعیت‌های مجاز (status):** `draft` | `published` | `archived`
         """
     )
     def update(self, request, pk=None):
@@ -163,6 +191,23 @@ class ArticleViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         deleted_count = self.app_service.bulk_delete(serializer.validated_data['ids'])
         return Response({'message': f'{deleted_count} مقاله با موفقیت حذف شد.'})
+    
+    @extend_schema(
+        summary="انتشار سریع مقاله",
+        description="""
+        با فراخوانی این API، وضعیت مقاله فوراً به `published` تغییر کرده و تاریخ انتشار سیستم برای آن ثبت می‌شود.
+        نیازی به ارسال بدنه (Body) در ریکوئست نیست.
+        """,
+        request=None, # چون فقط یک فرمان اجرایی است، بادی نمی‌خواهد
+        responses={200: ArticleReadSerializer}
+    )
+    @action(detail=True, methods=['patch'], url_path='publish')
+    def publish(self, request, pk=None):
+        article = self.app_service.publish_article(pk)
+        
+        # برگرداندن دیتای جدید مقاله با سریالایزر Read
+        serializer = ArticleReadSerializer(article, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # ========== TUTORIAL VIEW ========== #
@@ -173,27 +218,32 @@ class TutorialViewSet(viewsets.ViewSet):
         self.app_service = DashboardTutorialService()
 
     def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action == 'list':
+            return TutorialListSerializer
+        if self.action == 'retrieve':
             return TutorialReadSerializer
         return TutorialWriteSerializer
 
-    @extend_schema(summary="لیست تمام آموزش‌ها")
+    @extend_schema(summary="لیست تمام آموزش‌ها (خلاصه)")
     def list(self, request):
         tutorials = self.app_service.get_all_tutorials()
         serializer = self.get_serializer_class()(tutorials, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @extend_schema(summary="ایجاد آموزش جدید")
+    @extend_schema(
+        summary="ایجاد آموزش جدید",
+        description="ارسال اطلاعات ویدیو. فیلد `related_products` یک آرایه از ID محصولات مرتبط است."
+    )
     def create(self, request):
         serializer = self.get_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
         tutorial = self.app_service.create_tutorial(serializer.validated_data)
         return Response(TutorialReadSerializer(tutorial).data, status=status.HTTP_201_CREATED)
-
     @extend_schema(summary="دریافت جزئیات آموزش")
     def retrieve(self, request, pk=None):
         tutorial = self.app_service.get_tutorial_detail(pk)
-        return Response(self.get_serializer_class()(tutorial).data, context={'request': request})
+        serializer = self.get_serializer_class()(tutorial, context={'request': request})
+        return Response(serializer.data)
 
     @extend_schema(summary="ویرایش آموزش")
     def update(self, request, pk=None):
