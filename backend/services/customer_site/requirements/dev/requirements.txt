@@ -26,6 +26,7 @@ django-fsm
 
 # API Documentation
 drf-spectacular
+drf_yasg
 
 # Production Server
 gunicorn
