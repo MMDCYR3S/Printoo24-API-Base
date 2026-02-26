@@ -13,9 +13,6 @@ class OrderQuerySet(models.QuerySet):
 
     # ===== Access Control ===== #
     def filter_by_access(self, user):
-        """
-        فیلتر سفارشات براساس نقش کاربر.
-        """
         if user.is_superuser:
             return self
 
@@ -34,27 +31,32 @@ class OrderQuerySet(models.QuerySet):
 
     def get_order_by_id(self, order_id: int):
         """
-        دریافت یک سفارش با شناسه.
+        دریافت یک سفارش با تمام جزئیات (آیتم‌ها، فایل‌ها، وضعیت).
         """
-        return self.filter(id=order_id).first()
+        return self.filter(id=order_id)\
+            .select_related('current_status', 'address', 'user__customer_profile')\
+            .prefetch_related(
+                'order_item_order__product',
+                'order_item_order__files',
+            )\
+            .first()
 
     def get_order_with_items(self, user_id: int, order_id: int):
         """
         دریافت جزئیات کامل سفارش برای کاربر نهایی.
         """
-        # ===== دریافت ایمپورت ها===== #
         from ..models import OrderItem, OrderItemFile
-        
+
         files_prefetch = Prefetch(
             'files',
             queryset=OrderItemFile.objects.filter(is_latest=True)
         )
-        
+
         items_prefetch = Prefetch(
             'order_item_order',
             queryset=OrderItem.objects.select_related('product').prefetch_related(files_prefetch)
         )
-        
+
         return self.filter(id=order_id, user_id=user_id)\
             .select_related('current_status', 'address')\
             .prefetch_related(items_prefetch)\
@@ -97,7 +99,7 @@ class OrderQuerySet(models.QuerySet):
         return list(chart_data)
 
     def get_top_customers_by_revenue(self, limit: int = 5):
-        return self.values('user__username', 'user__customer_profile__last_name') \
+        return self.values('user__phone_number', 'user__customer_profile__last_name') \
             .annotate(total_spent=Sum('total_price')) \
             .order_by('-total_spent')[:limit]
 
@@ -105,7 +107,7 @@ class OrderQuerySet(models.QuerySet):
 class OrderManager(models.Manager):
     def get_queryset(self):
         return OrderQuerySet(self.model, using=self._db)
-    
+
     def get_order_by_id(self, order_id):
         return self.get_queryset().get_order_by_id(order_id)
 
@@ -120,7 +122,7 @@ class OrderManager(models.Manager):
         return self.get_queryset().get_order_with_items(user_id, order_id)
 
     def get_full_order_detail_for_admin(self, order_id):
-        return self.get_queryset().get_full_order_detail_for_admin(order_id)
+        return self.get_queryset().get_order_by_id(order_id)
 
     def get_all_orders_summary(self):
         return self.get_queryset().get_all_orders_summary()
@@ -153,7 +155,7 @@ class OrderManager(models.Manager):
     def get_top_customers_by_revenue(self, limit=5):
         return self.get_queryset().get_top_customers_by_revenue(limit)
 
-    # ===== Create Logic (from Repo) ===== #
+    # ===== Create Logic ===== #
     def create_order(self, user, current_status, address, total_price, order_type, order_code, base_price):
         return self.create(
             user=user,
