@@ -109,3 +109,24 @@ class AuthService:
         except Exception as e:
             logger.error(f"Login error for {phone_number}: {e}", exc_info=True)
             raise ValidationError(msg_provider.get("auth.E1003"))
+
+    # ========== UNIFIED AUTH ========== #
+    def authenticate_or_register(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        دریافت اطلاعات و تصمیم‌گیری برای لاگین یا ثبت‌نام
+        """
+        phone_number = data.get('phone_number')
+        
+        from core.models import User
+        user_exists = User.objects.filter(phone_number=phone_number).exists()
+
+        if user_exists:
+            logger.info(f"User found. Routing to login flow: {phone_number}")
+            result = self.login_customer(data)
+            result['action'] = 'login'
+            return result
+        else:
+            logger.info(f"User not found. Routing to registration flow: {phone_number}")
+            result = self.register_customer(data)
+            result['action'] = 'register'
+            return result

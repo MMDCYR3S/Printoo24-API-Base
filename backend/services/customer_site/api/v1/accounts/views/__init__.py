@@ -1,5 +1,5 @@
 from .email_verify_view import VerifyEmailApiView
-from .login_register_view import LoginAPIView, RegisterAPIView
+from .login_register_view import *
 from .password_reset_view import (
     PasswordResetConfirmAPIView, 
     PasswordResetRequestAPIView

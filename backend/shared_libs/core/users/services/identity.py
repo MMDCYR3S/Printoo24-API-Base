@@ -68,7 +68,7 @@ class UserIdentityService:
             )
 
         # ===== ویرایش اطلاعات ===== #
-        allowed_fields = ['phone_number', 'first_name', 'last_name'] # مثال
+        allowed_fields = ['phone_number', 'first_name', 'last_name']
         for field in allowed_fields:
             if field in data:
                 setattr(user, field, data[field])

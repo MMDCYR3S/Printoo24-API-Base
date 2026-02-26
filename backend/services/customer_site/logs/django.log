@@ -1,0 +1,273 @@
+INFO 2026-02-26 09:57:12,099 autoreload 7 139995004291968 Watching for file changes with StatReloader
+INFO 2026-02-26 09:57:49,012 autoreload 7 139995004291968 /app/src/api/v1/accounts/serializers/login_register_serializer.py changed, reloading.
+INFO 2026-02-26 09:57:53,919 autoreload 9 130625603763072 Watching for file changes with StatReloader
+INFO 2026-02-26 09:58:02,659 autoreload 9 130625603763072 /app/src/api/v1/accounts/serializers/login_register_serializer.py changed, reloading.
+INFO 2026-02-26 09:58:07,473 autoreload 11 130385925823360 Watching for file changes with StatReloader
+INFO 2026-02-26 09:59:50,185 autoreload 11 130385925823360 /app/src/api/v1/accounts/serializers/__init__.py changed, reloading.
+INFO 2026-02-26 09:59:54,377 autoreload 13 133784468388736 Watching for file changes with StatReloader
+INFO 2026-02-26 10:01:44,021 autoreload 13 133784468388736 /app/src/apps/accounts/services/auth_service.py changed, reloading.
+INFO 2026-02-26 10:01:48,574 autoreload 15 129457277696896 Watching for file changes with StatReloader
+INFO 2026-02-26 10:02:20,580 autoreload 15 129457277696896 /app/shared_libs/core/users/services/identity.py changed, reloading.
+INFO 2026-02-26 10:02:24,580 autoreload 17 127070247078784 Watching for file changes with StatReloader
+INFO 2026-02-26 10:02:33,302 basehttp 17 127070129616576 "GET /api/docs/ HTTP/1.1" 200 4640
+INFO 2026-02-26 10:02:34,565 user_feedback_service 17 127070129616576 Fetching comment history for User ID: None
+INFO 2026-02-26 10:02:34,581 user_feedback_service 17 127070129616576 Retrieved 0 comments for User ID: None
+INFO 2026-02-26 10:02:34,582 user_feedback_service 17 127070129616576 Fetching comment history for User ID: None
+INFO 2026-02-26 10:02:34,585 user_feedback_service 17 127070129616576 Retrieved 0 comments for User ID: None
+INFO 2026-02-26 10:02:34,671 product_list_service 17 127070129616576 Fetching base queryset for product list
+INFO 2026-02-26 10:02:34,684 product_list_service 17 127070129616576 Base queryset retrieved successfully - Total active products: 36
+INFO 2026-02-26 10:02:34,685 product_list_service 17 127070129616576 Fetching base queryset for product list
+INFO 2026-02-26 10:02:34,687 product_list_service 17 127070129616576 Base queryset retrieved successfully - Total active products: 36
+INFO 2026-02-26 10:02:34,812 basehttp 17 127070129616576 "GET /api/schema/ HTTP/1.1" 200 599558
+ERROR 2026-02-26 10:02:50,471 log 17 127070129616576 Internal Server Error: /api/v1/accounts/auth/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'accounts_auth'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 422, in initial
+    self.check_throttles(request)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 365, in check_throttles
+    if not throttle.allow_request(request, self):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 229, in allow_request
+    self.rate = self.get_rate()
+                ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'accounts_auth' scope
+ERROR 2026-02-26 10:02:50,485 basehttp 17 127070129616576 "POST /api/v1/accounts/auth/ HTTP/1.1" 500 145
+ERROR 2026-02-26 10:04:11,579 log 17 127070129616576 Internal Server Error: /api/v1/accounts/auth/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'accounts_auth'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 422, in initial
+    self.check_throttles(request)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 365, in check_throttles
+    if not throttle.allow_request(request, self):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 229, in allow_request
+    self.rate = self.get_rate()
+                ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'accounts_auth' scope
+ERROR 2026-02-26 10:04:11,584 basehttp 17 127070129616576 "POST /api/v1/accounts/auth/ HTTP/1.1" 500 145
+INFO 2026-02-26 10:04:46,109 autoreload 17 127070247078784 /app/src/api/v1/accounts/views/login_register_view.py changed, reloading.
+INFO 2026-02-26 10:04:49,414 autoreload 21 132026001714048 Watching for file changes with StatReloader
+ERROR 2026-02-26 10:07:08,233 log 21 132025816184512 Internal Server Error: /api/v1/accounts/auth/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'accounts_auth'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 422, in initial
+    self.check_throttles(request)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 365, in check_throttles
+    if not throttle.allow_request(request, self):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 229, in allow_request
+    self.rate = self.get_rate()
+                ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'accounts_auth' scope
+ERROR 2026-02-26 10:07:08,245 basehttp 21 132025816184512 "POST /api/v1/accounts/auth/ HTTP/1.1" 500 145
+WARNING 2026-02-26 10:07:18,255 log 21 132025816184512 Unauthorized: /api/v1/accounts/logout/
+WARNING 2026-02-26 10:07:18,258 basehttp 21 132025816184512 "POST /api/v1/accounts/logout/ HTTP/1.1" 401 54
+ERROR 2026-02-26 10:07:26,458 log 21 132025816184512 Internal Server Error: /api/v1/accounts/auth/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'accounts_auth'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 422, in initial
+    self.check_throttles(request)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 365, in check_throttles
+    if not throttle.allow_request(request, self):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 229, in allow_request
+    self.rate = self.get_rate()
+                ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'accounts_auth' scope
+ERROR 2026-02-26 10:07:26,459 basehttp 21 132025816184512 "POST /api/v1/accounts/auth/ HTTP/1.1" 500 145
+INFO 2026-02-26 10:08:10,946 autoreload 21 132026001714048 /app/src/api/v1/accounts/serializers/login_register_serializer.py changed, reloading.
+INFO 2026-02-26 10:08:15,054 autoreload 24 133180281600896 Watching for file changes with StatReloader
+INFO 2026-02-26 10:08:23,631 basehttp 24 133180082349760 "GET /api/docs/ HTTP/1.1" 200 4640
+INFO 2026-02-26 10:08:24,663 user_feedback_service 24 133180082349760 Fetching comment history for User ID: None
+INFO 2026-02-26 10:08:24,676 user_feedback_service 24 133180082349760 Retrieved 0 comments for User ID: None
+INFO 2026-02-26 10:08:24,678 user_feedback_service 24 133180082349760 Fetching comment history for User ID: None
+INFO 2026-02-26 10:08:24,680 user_feedback_service 24 133180082349760 Retrieved 0 comments for User ID: None
+INFO 2026-02-26 10:08:24,805 product_list_service 24 133180082349760 Fetching base queryset for product list
+INFO 2026-02-26 10:08:24,810 product_list_service 24 133180082349760 Base queryset retrieved successfully - Total active products: 36
+INFO 2026-02-26 10:08:24,812 product_list_service 24 133180082349760 Fetching base queryset for product list
+INFO 2026-02-26 10:08:24,815 product_list_service 24 133180082349760 Base queryset retrieved successfully - Total active products: 36
+INFO 2026-02-26 10:08:24,943 basehttp 24 133180082349760 "GET /api/schema/ HTTP/1.1" 200 599841
+ERROR 2026-02-26 10:08:28,023 log 24 133180082349760 Internal Server Error: /api/v1/accounts/auth/
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 92, in get_rate
+    return self.THROTTLE_RATES[self.scope]
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'accounts_auth'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/views/generic/base.py", line 105, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 503, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 422, in initial
+    self.check_throttles(request)
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/views.py", line 365, in check_throttles
+    if not throttle.allow_request(request, self):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 229, in allow_request
+    self.rate = self.get_rate()
+                ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/rest_framework/throttling.py", line 95, in get_rate
+    raise ImproperlyConfigured(msg)
+django.core.exceptions.ImproperlyConfigured: No default throttle rate set for 'accounts_auth' scope
+ERROR 2026-02-26 10:08:28,026 basehttp 24 133180082349760 "POST /api/v1/accounts/auth/ HTTP/1.1" 500 145
+INFO 2026-02-26 10:08:49,772 autoreload 24 133180281600896 /app/src/customer_site/settings/base.py changed, reloading.
+INFO 2026-02-26 10:08:52,707 autoreload 28 126939447335808 Watching for file changes with StatReloader
+INFO 2026-02-26 10:09:07,712 autoreload 28 126939447335808 /app/src/api/v1/accounts/views/login_register_view.py changed, reloading.
+INFO 2026-02-26 10:09:09,831 autoreload 30 140312730700672 Watching for file changes with StatReloader
+INFO 2026-02-26 10:09:24,046 autoreload 30 140312730700672 /app/src/api/v1/accounts/serializers/login_register_serializer.py changed, reloading.
+INFO 2026-02-26 10:09:26,914 autoreload 32 127632954448768 Watching for file changes with StatReloader
+INFO 2026-02-26 10:09:32,118 basehttp 32 127632827999936 "GET /api/docs/ HTTP/1.1" 200 4640
+INFO 2026-02-26 10:09:33,035 user_feedback_service 32 127632827999936 Fetching comment history for User ID: None
+INFO 2026-02-26 10:09:33,050 user_feedback_service 32 127632827999936 Retrieved 0 comments for User ID: None
+INFO 2026-02-26 10:09:33,051 user_feedback_service 32 127632827999936 Fetching comment history for User ID: None
+INFO 2026-02-26 10:09:33,052 user_feedback_service 32 127632827999936 Retrieved 0 comments for User ID: None
+INFO 2026-02-26 10:09:33,104 product_list_service 32 127632827999936 Fetching base queryset for product list
+INFO 2026-02-26 10:09:33,107 product_list_service 32 127632827999936 Base queryset retrieved successfully - Total active products: 36
+INFO 2026-02-26 10:09:33,108 product_list_service 32 127632827999936 Fetching base queryset for product list
+INFO 2026-02-26 10:09:33,110 product_list_service 32 127632827999936 Base queryset retrieved successfully - Total active products: 36
+INFO 2026-02-26 10:09:33,192 basehttp 32 127632827999936 "GET /api/schema/ HTTP/1.1" 200 599558
+INFO 2026-02-26 10:09:46,701 auth_service 32 127632827999936 User not found. Routing to registration flow: 09137125254
+INFO 2026-02-26 10:09:46,702 auth_service 32 127632827999936 Starting registration process for: None
+INFO 2026-02-26 10:09:46,858 signals 32 127632827999936 نقش 'مشتری' با موفقیت به کاربر 09137125254 اختصاص یافت.
+INFO 2026-02-26 10:09:46,877 auth_service 32 127632827999936 User created in DB - ID: 15
+INFO 2026-02-26 10:09:46,898 basehttp 32 127632827999936 "POST /api/v1/accounts/auth/ HTTP/1.1" 201 695

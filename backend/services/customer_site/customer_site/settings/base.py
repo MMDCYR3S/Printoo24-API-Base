@@ -18,7 +18,7 @@ environ.Env.read_env(env_file)
 
 SECRET_KEY = env('SECRET_KEY')
 
-DEBUG = env("DEBUG")
+DEBUG = env("DEBUG", default=True)
 
 ALLOWED_HOSTS = ["*"]
 
