@@ -10,9 +10,7 @@ class UnifiedAuthSerializer(serializers.Serializer):
     سریالایزر یکپارچه برای ورود و ثبت‌نام
     """
     phone_number = serializers.CharField(max_length=15)
-    password = serializers.CharField(write_only=True, min_length=6, error_messages={
-        'min_length': 'رمز عبور باید حداقل ۶ کاراکتر باشد.'
-    })
+    password = serializers.CharField(write_only=True)
 
 # ========== User Detail Serializer ========== #
 class UserDetailSerializer(serializers.ModelSerializer):

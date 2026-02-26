@@ -81,7 +81,7 @@ class CategoryLinkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductCategory
-        fields = ['id', 'name', 'banner_box', 'detail_url', 'products']
+        fields = ['id', 'name', 'banner_box', 'detail_url', 'products', 'order']
 
 # ========== PARENT CATEGORY LIST SERIALIZER ========== #
 class ParentCategoryListSerializer(serializers.ModelSerializer):
@@ -100,7 +100,7 @@ class ParentCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = [
-            'id', 'name', 'slug', 'detail_url', 'is_active',
+            'id', 'name', 'slug', 'detail_url', 'is_active', 'order',
             'banner_wide', 'banner_box', 'banner_wide_url', 'children',
             'children_count', 'products_preview', 'created_at'
         ]
@@ -133,6 +133,7 @@ class SubcategoryWithParentSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(read_only=True)
     slug = serializers.SlugField(read_only=True)
+    order = serializers.IntegerField(read_only=True)
     description = serializers.CharField(read_only=True, allow_null=True) # توضیحات هم بود که اضافه کردم
     is_active = serializers.BooleanField(read_only=True)
     
@@ -157,7 +158,7 @@ class ProductCategoryDetailWithLinksSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'slug', 'parent', 'parent_name', 'description',
             'banner_wide', 'banner_box', 'banner_wide_url',
-            'is_active', 'children', 'products', 'created_at', 'updated_at'
+            'is_active', 'order', 'children', 'products', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'slug', 'created_at', 'updated_at', 'banner_wide_url']
 
@@ -171,7 +172,7 @@ class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'name', 'slug', 'parent', 'parent_name', 'description',
             'banner_wide', 'banner_box', 'banner_wide_url',
-            'is_active', 'children', 'created_at', 'updated_at'
+            'is_active', 'order', 'children', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'slug', 'created_at', 'updated_at', 'banner_wide_url']
         
@@ -209,7 +210,7 @@ class CategoryBulkUpsertSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'slug', 'description', 
             'banner_wide', 'banner_box', 
-            'is_active', 'parent_slug'
+            'is_active', 'order', 'parent_slug'
         ]
         extra_kwargs = {
             'slug': {'required': False},

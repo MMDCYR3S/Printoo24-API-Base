@@ -18,22 +18,18 @@ class ProductCategoryQuerySet(TreeQuerySet):
         return self.filter(is_active=True).order_by('tree_id', 'lft')
     
     def get_subcategories_with_parent(self):
-        """
-        دریافت تمام زیردسته‌ها (دسته‌هایی که والد دارند) به همراه اطلاعات والد.
-        استفاده از select_related برای جلوگیری از مشکل N+1.
-        """
         return self.filter(
             parent__isnull=False,
             is_active=True
         ).select_related(
             'parent'
-        ).order_by('parent__id', 'name')
+        ).order_by('parent__id', 'order', 'name')
 
     def get_root_categories(self):
         """
         دریافت فقط دسته‌بندی‌های والد (ریشه) که فعال هستند.
         """
-        return self.filter(parent__isnull=True, is_active=True).order_by('tree_id')
+        return self.filter(parent__isnull=True, is_active=True).order_by('order', 'tree_id')
 
     def get_by_slug(self, slug: str):
         """دریافت دسته‌بندی با اسلاگ (رایز کردن اکسپشن در سرویس یا اینجا)"""
