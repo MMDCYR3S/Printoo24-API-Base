@@ -23,15 +23,18 @@ class OrderService:
         return Order.objects.get_order_by_id(order_id)
 
     def get_order_details(self, user_id: int, order_id: int) -> Order:
+        """
+        دریافت جزئیات سفارش برای کاربر.
+        """
         order = Order.objects.get_order_with_items(user_id, order_id)
         if not order:
-            raise OrderNotFoundException("سفارش یافت نشد")
+            raise OrderNotFoundException("سفارش یافت نشد") 
         return order
 
     def get_user_orders_summary(self, user_id: int) -> List[Order]:
-        user = User.objects.get(id=user_id)
+        user = User.objects.get(id=user_id) 
         return Order.objects.get_user_orders_summary(user)
-
+    
     # ===== CUSTOM ORDER CREATION ===== #
     @transaction.atomic
     def create_order_direct(self,
@@ -47,89 +50,87 @@ class OrderService:
                             ) -> Order:
         """
         ایجاد مستقیم سفارش (توسط ادمین) بدون استفاده از سبد خرید.
-        برای آیتم‌های با محصول، از CartProcessor استفاده می‌شود
-        تا قیمت و items دقیقاً مثل سبد خرید محاسبه شوند.
         """
         # ===== دریافت مشتری ===== #
         if user_id:
             user = User.objects.get(pk=user_id)
         else:
             user = None
-
-        # ===== اعتبارسنجی آدرس ===== #
+        
+        # ===== اعتبارسنجی ===== #
         if address_id:
             address = Address.objects.get(pk=address_id)
-        else:
+        else: 
             address = None
-
-        # ===== دریافت وضعیت اولیه ===== #
+            
+        # ===== دریافت و اعتبارسنجی وضعیت اولیه ===== #
         initial_status = OrderStatus.objects.filter(status_type='initial').first()
         if not initial_status:
             initial_status = OrderStatus.objects.first() or OrderStatus.objects.create(
-                name="ثبت اولیه",
+                name="ثبت اولیه", 
                 internal_code="INITIAL_DRAFT",
                 status_type='initial'
             )
-
+            
+        # ===== محاسبه قیمت کل ===== #
         calculated_total = Decimal(0)
         prepared_items = []
-
+        # ===== استخراج و ایجاد آیتم ها ===== #
         for item_data in items_data:
             product_slug = item_data.get('product_slug')
-            selections = item_data.get('selections') or {}
+            selections = item_data.get('selections', {}) 
             quantity = int(selections.get('quantity', 1))
-
+            
+            # ===== دریافت نام آیتم ===== #
             product = None
-            item_name = item_data.get('name') or selections.get('name')
-            item_description = item_data.get('description') or selections.get('description')
-
+            item_name = selections.get('name', item_data.get('name'))
+            item_description = selections.get('description', item_data.get('description'))
+            # ===== دریافت محصول ===== #
             if product_slug:
                 try:
                     product = Product.objects.get(slug=product_slug)
                 except ObjectDoesNotExist:
-                    raise ValidationError(f"محصولی با شناسه '{product_slug}' یافت نشد.")
-
+                    raise ValidationError(f"محصولی با شناسه {product_slug} یافت نشد.")
+                
                 if not item_name:
-                    item_name = product.name
+                        item_name = product.name
+                unit_price = product.price
             else:
                 if not item_name:
-                    raise ValidationError("برای آیتم‌های بدون محصول، وارد کردن 'name' الزامی است.")
-
-            # ===== محاسبه قیمت و items ===== #
+                    raise ValidationError("برای آیتم‌های بدون محصول، وارد کردن `name` الزامی است")
+                pass
+            # ===== آماده سازی اطلاعات سفارش ===== #
+            specs_json = {}
+            
             if product:
-                # ===== آیتم با محصول: از CartProcessor استفاده می‌کنیم ===== #
-                # دقیقاً مثل AddToCartService
-                processor = CartProcessor(product, selections).process()
-                specs_json = processor.result_item_data
-
-                if not item_name:
-                    item_name = processor.result_name or product.name
-                if not item_description:
-                    item_description = processor.result_description
-
-                # ===== قیمت دستی ادمین override می‌کند، وگرنه از processor ===== #
-                if 'item_price' in item_data and item_data['item_price'] is not None:
-                    line_price = Decimal(str(item_data['item_price']))
-                elif 'price' in item_data and item_data['price'] is not None:
-                    line_price = Decimal(str(item_data['price']))
-                else:
-                    line_price = processor.result_price * quantity
-
-            else:
-                # ===== آیتم دستی بدون محصول ===== #
-                if 'item_price' in item_data and item_data['item_price'] is not None:
-                    line_price = Decimal(str(item_data['item_price']))
-                elif 'price' in item_data and item_data['price'] is not None:
-                    line_price = Decimal(str(item_data['price']))
-                else:
-                    raise ValidationError(f"برای آیتم '{item_name}' قیمت مشخص نشده است.")
-
-                safe_selections = {k: v for k, v in selections.items()
-                                   if k not in ('quantity', 'name', 'description', 'item_price')}
+                 specs_json = self._prepare_item_specs_json(product, selections)
+            elif isinstance(selections, dict):
+                safe_selections = selections.copy() if isinstance(selections, dict) else {}
+                # ===== فیلدهای ثابت ===== #
+                safe_selections.pop('quantity', None)
+                safe_selections.pop('name', None)
+                safe_selections.pop('description', None)
+                safe_selections.pop('item_price', None)
+                
                 specs_json = safe_selections
 
-            calculated_total += line_price
+            line_price = None
 
+            # ===== محاسبه قیمت آیتم ===== #
+            if 'item_price' in item_data and item_data['item_price'] is not None:
+                line_price = Decimal(str(item_data['item_price']))
+            elif 'price' in item_data and item_data['price'] is not None:
+                # ===== قیمت دستی آیتم ===== #
+                line_price = Decimal(str(item_data['price']))
+            elif product:
+                # ===== در صورت بودن محصول و قیمت ===== #
+                line_price = product.price * quantity
+            else:
+                # ===== نبود محصول و قیمت ===== #
+                raise ValidationError(f"برای آیتم '{item_name}' قیمت مشخص نشده است.")
+            
+            calculated_total += line_price
+            # ===== ایجاد آیتم در یک لیست ===== #
             prepared_items.append({
                 'product': product,
                 'quantity': quantity,
@@ -138,9 +139,9 @@ class OrderService:
                 'name': item_name,
                 'description': item_description
             })
-
+        # ===== به دست آوردن مبلغ کل ===== #
         final_total = Decimal(str(total_price_override)) if total_price_override is not None else calculated_total
-
+        # ===== ایجاد سفارش ===== #
         order = Order.objects.create(
             user=user,
             address_id=address_id,
@@ -154,7 +155,7 @@ class OrderService:
             type=type,
             order_code=self._generate_order_code()
         )
-
+        # ===== ایجاد آیتم ===== #
         OrderItem.objects.bulk_create([
             OrderItem(
                 order=order,
@@ -171,11 +172,11 @@ class OrderService:
 
         order._created_by_admin = True
         order.save()
-
+                
         return order
-
+    
     ###################################
-
+        
     @transaction.atomic
     def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, int]:
         """
@@ -184,7 +185,8 @@ class OrderService:
         قانون 2: سفارشاتی که فاکتور نهایی شده یا پرداخت کامل دارند، حذف نمی‌شوند.
         """
         deletable_types = ['initial', 'cancel', 'pending']
-
+        
+        # فیلتر اولیه بر اساس وضعیت
         orders_to_delete = Order.objects.filter(
             id__in=order_ids,
             current_status__status_type__in=deletable_types
@@ -198,12 +200,12 @@ class OrderService:
 
         count_to_delete = orders_to_delete.count()
         deleted_ids = list(orders_to_delete.values_list('id', flat=True))
-
+        
         if 'Invoice' in globals() or 'Invoice' in locals():
-            Invoice.objects.filter(order__in=orders_to_delete).delete()
+             Invoice.objects.filter(order__in=orders_to_delete).delete()
 
         orders_to_delete.delete()
-
+        
         return {
             "requested_count": len(order_ids),
             "deleted_count": count_to_delete,
