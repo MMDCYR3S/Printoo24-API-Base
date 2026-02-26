@@ -1,22 +1,17 @@
 from django.urls import path, include
 from .views import (
-    RegisterAPIView, 
-    # VerifyEmailApiView,
-    LoginAPIView,
     PasswordResetConfirmAPIView,
     PasswordResetRequestAPIView,
     RefreshTokenView,
-    BlackListTokenView
+    BlackListTokenView,
+    UnifiedAuthAPIView
 )
 
 app_name = "accounts"
 
 urlpatterns = [
-    # ===== Register URLs ===== # 
-    path('register/', RegisterAPIView.as_view(), name='register'),
-    # path("verify/", VerifyEmailApiView.as_view(), name="verify-email"),
-    # ===== Login URLs ===== #
-    path('login/', LoginAPIView.as_view(), name='login'),
+    # ===== Register & Login URLs ===== #
+    path('auth/', UnifiedAuthAPIView.as_view(), name='auth'),
     # ===== Token URLs ===== #
     path('token/refresh/', RefreshTokenView.as_view(), name='token_refresh'),
     path('logout/', BlackListTokenView.as_view(), name='token_blacklist'),
