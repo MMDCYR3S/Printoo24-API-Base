@@ -1,12 +1,13 @@
 # مرحله اول: ساخت
 FROM node:22-bookworm AS build-stage
 WORKDIR /app
-# RUN npm config set registry https://mirror-npm.runflare.com/
-# RUN npm config set registry https://registry.fob.ir/
-# RUN npm config set registry https://registry.yarnpkg.com/
+
 RUN npm config set registry https://registry.npmmirror.com/
-COPY package.json package-lock.json ./
-RUN npm install
+
+# فقط package.json رو کپی کن (بذار package-lock نادیده گرفته بشه)
+COPY package.json ./
+
+RUN npm install --verbose
 
 COPY . .
 
