@@ -38,7 +38,7 @@ class UnifiedAuthAPIView(GenericAPIView):
             user_data = UserDetailSerializer(user_instance).data
             
             # ===== تنظیم پیام ===== # 
-            message = "ورود با موفقیت انجام شد." if action == 'login' else "ثبت نام و ورود با موفقیت انجام شد."
+            message = "چوونەژوورەوە بە سەرکەوتوویی ئەنجامدرا." if action == 'login' else "خۆتۆمارکردن و چوونەژوورەوە بە سەرکەوتوویی ئەنجامدرا."
             status_code = status.HTTP_200_OK if action == 'login' else status.HTTP_201_CREATED
             
             return Response({

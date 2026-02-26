@@ -229,6 +229,7 @@ class CategoryInfoSerializer(serializers.Serializer):
     name = serializers.CharField()
     slug = serializers.CharField()
     description = serializers.CharField(allow_null=True)
+    order = serializers.CharField()
     banners = serializers.DictField()
     breadcrumbs = serializers.ListField(child=serializers.DictField(), required=False)
 

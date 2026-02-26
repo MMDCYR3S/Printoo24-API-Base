@@ -1,4 +1,5 @@
 import re
+import json
 
 from rest_framework import status, serializers
 from rest_framework.viewsets import ModelViewSet
@@ -130,12 +131,14 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
                         "description": "تجهیزات دیجیتال و الکترونیکی",
                         "banner_wide": "(Binary File)",
                         "banner_box": "(Binary File)",
+                        "order": 2,
                         "is_active": True
                     },
                     {
                         "name": "گوشی موبایل",
                         "parent_slug": "electronics",
                         "banner_box": "(Binary File)",
+                        "order": 1,
                         "is_active": True
                     }
                 ]
@@ -150,6 +153,7 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
                         "name": "لپ تاپ (ویرایش شده)",
                         "parent_slug": "electronics", 
                         "banner_wide": "(Binary File - New Banner)",
+                        "order": 3,
                         "is_active": True
                     },
                     {
@@ -157,6 +161,7 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
                         "parent_slug": "electronics",
                         "description": "کیف، موس و خنک کننده",
                         "banner_box": "(Binary File)",
+                        "order": 1,
                         "is_active": True
                     }
                 ]
@@ -242,6 +247,12 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
         تغییر: جدا کردن پردازش POST و FILES برای تضمین دریافت عکس‌ها.
         """
         items_dict = {}
+        # ===== اضافه کردن پشتیبانی از JSON خام درون فرم‌دیتا ===== #
+        if 'data' in request.POST:
+            try:
+                return json.loads(request.POST['data'])
+            except json.JSONDecodeError:
+                pass
 
         def parse_key_value(key, value):
             match = re.search(r'\[(\d+)\]\.?(\w+)', key)
@@ -253,7 +264,7 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
                     items_dict[index] = {}
                 
                 items_dict[index][field_name] = value
-            elif key in ['id', 'name', 'slug', 'parent_slug', 'description', 'is_active', 'banner_wide', 'banner_box']:
+            elif key in ['id', 'name', 'slug', 'parent_slug', 'description', 'is_active', 'banner_wide', 'order', 'banner_box']:
                 if 0 not in items_dict: items_dict[0] = {}
                 items_dict[0][key] = value
 

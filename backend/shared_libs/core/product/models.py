@@ -136,12 +136,24 @@ class ProductCategory(MPTTModel):
         null=True,
         help_text=_("تصویر برای نمایش در لیست دسته‌بندی‌ها (مثلاً 400x400)")
     )
+    order = models.PositiveIntegerField(
+        _("ترتیب نمایش"), 
+        default=0, 
+        help_text=_("عدد کوچکتر = نمایش در رتبه بالاتر (مثال: 1 بالاتر از 2 است)")
+    )
     is_active = models.BooleanField(_("فعال"), default=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(_('تاریخ به روزرسانی'), auto_now=True)
     
     objects = ProductCategoryManager()
     
+    class MPTTMeta:
+        """
+        این کلاس به MPTT می‌گوید که در حین درج و ساخت درخت، 
+        گره‌های هم‌سطح را بر چه اساسی مرتب کند.
+        """
+        order_insertion_by = ['order', 'name']
+
     def save(self, *args, **kwargs):
         """ ذخیره اسلاگ به صورت خودکار """
         if not self.slug:

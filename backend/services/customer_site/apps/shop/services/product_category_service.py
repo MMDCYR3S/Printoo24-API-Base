@@ -38,6 +38,7 @@ class ShopCategoryService:
             "id": node.id,
             "name": node.name,
             "slug": node.slug,
+            "order": node.order,
             "has_children": len(children) > 0,
             "thumbnail": self._get_image_url(node.banner_box),
             "links": {
@@ -91,17 +92,19 @@ class ShopCategoryService:
                     "banners": {
                         "wide": self._get_image_url(category.banner_wide),
                         "box": self._get_image_url(category.banner_box),
-                    }
+                    },
+                    "order": category.order
                 },
                 "sub_categories": [
                     {
                         "id": child.id,
-                        "name": child.name, 
-                        "slug": child.slug, 
+                        "name": child.name,
+                        "slug": child.slug,
                         "thumbnail": self._get_image_url(child.banner_box),
-                        "link": self._generate_product_filter_url(child.slug)
+                        "link": self._generate_product_filter_url(child.slug),
+                        "order": child.order
                     } 
-                    for child in category.get_children() if child.is_active
+                    for child in category.get_children().order_by('order') if child.is_active
                 ],
                 "products": ProductMinimalSerializer(
                     products_queryset, 
@@ -136,7 +139,8 @@ class ShopCategoryService:
                     "banners": {
                         "wide": self._get_image_url(category.banner_wide),
                         "box": self._get_image_url(category.banner_box),
-                    }
+                    },
+                    "order": category.order
                 },
                 "sub_categories": [
                     {
@@ -144,9 +148,10 @@ class ShopCategoryService:
                         "name": child.name, 
                         "slug": child.slug,
                         "thumbnail": self._get_image_url(child.banner_box),
-                        "link": self._generate_product_filter_url(child.slug)
+                        "link": self._generate_product_filter_url(child.slug),
+                        "order": child.order
                     } 
-                    for child in category.get_children() if child.is_active
+                    for child in category.get_children().order_by('order') if child.is_active
                 ],
                 "products": products_queryset 
             }
@@ -187,6 +192,7 @@ class ShopCategoryService:
                     "wide": self._get_image_url(cat.banner_wide),
                     "box": self._get_image_url(cat.banner_box),
                 },
+                "order": cat.order,
                 "parent": parent_data,
                 "products": products_qs
             })
