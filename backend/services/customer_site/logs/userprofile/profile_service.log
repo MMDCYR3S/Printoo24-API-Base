@@ -1300,3 +1300,7 @@ INFO 2026-02-26 06:55:56,751 user_detail_service 7 132892571190976 Fetching prof
 INFO 2026-02-26 07:24:32,585 user_detail_service 7 132892596369088 Fetching profile details for User ID: 21
 INFO 2026-02-26 08:02:47,302 user_detail_service 7 132892972058304 Fetching profile details for User ID: 21
 INFO 2026-02-26 09:39:03,691 user_detail_service 7 132892579583680 Fetching profile details for User ID: 21
+INFO 2026-02-26 13:57:13,612 user_detail_service 305 123604709668544 Fetching profile details for User ID: 21
+INFO 2026-02-26 13:59:34,696 user_detail_service 305 123604689737408 Fetching profile details for User ID: 21
+INFO 2026-02-26 13:59:38,367 user_detail_service 305 123604326938304 Fetching profile details for User ID: 21
+INFO 2026-02-26 13:59:48,979 user_detail_service 305 123604689737408 Fetching profile details for User ID: 21

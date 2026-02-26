@@ -587,3 +587,17 @@ INFO 2026-02-26 11:29:31,516 cart_item_service 7 132892955272896 Fetching cart l
 INFO 2026-02-26 11:29:54,368 cart_item_service 7 132892571190976 Fetching cart list for User:21
 INFO 2026-02-26 11:30:23,841 cart_item_service 7 132892946880192 Fetching cart list for User:21
 INFO 2026-02-26 11:30:23,944 cart_item_service 7 132892946880192 Fetching cart list for User:21
+INFO 2026-02-26 11:46:14,159 cart_item_service 267 130864739780288 Fetching cart list for User:21
+INFO 2026-02-26 11:46:15,063 cart_item_service 267 130864739780288 Fetching cart list for User:21
+INFO 2026-02-26 11:57:25,312 cart_item_service 267 130864711456448 Fetching cart list for User:21
+INFO 2026-02-26 11:57:25,376 cart_item_service 267 130864711456448 Fetching cart list for User:21
+INFO 2026-02-26 12:10:18,903 cart_item_service 267 130864365172416 Fetching cart list for User:21
+INFO 2026-02-26 12:13:12,607 cart_item_service 267 130864711456448 Fetching cart list for User:21
+INFO 2026-02-26 12:14:18,290 cart_item_service 267 130864711456448 Fetching cart list for User:21
+INFO 2026-02-26 12:25:30,211 cart_item_service 267 130864711456448 Fetching cart list for User:21
+INFO 2026-02-26 13:57:21,021 cart_item_service 305 123604672952000 Fetching cart list for User:21
+INFO 2026-02-26 13:57:52,464 cart_item_service 305 123604672952000 Fetching cart list for User:21
+INFO 2026-02-26 13:57:58,131 cart_item_service 305 123604681344704 Fetching cart list for User:21
+INFO 2026-02-26 13:57:59,356 cart_item_service 305 123604681344704 Fetching cart list for User:21
+INFO 2026-02-26 13:59:04,158 cart_item_service 305 123604700227264 Fetching cart list for User:21
+INFO 2026-02-26 13:59:30,504 cart_item_service 305 123604672952000 Fetching cart list for User:21
