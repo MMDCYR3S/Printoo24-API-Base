@@ -6,7 +6,7 @@ import ArticleCard from '../components/ArticleCard';
 import Pagination from '../components/Pagination';
 import { useBlog } from '../hooks/useBlog';
 import { Search } from 'lucide-react'
-// import Top from '/public/top.webp'
+import Top from '../../../../assets/top.svg'
 
 const ArticleSkeleton = () => (
   <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col h-full animate-pulse">
@@ -43,17 +43,22 @@ const BlogListPage = () => {
       />
 
       {/* ── هدر صفحه ── */}
-      <div className="mb-8 bg-[url('top.svg')] bg-contain h-60 -mt-8 w-screen flex flex-row items-center">
-  <div className='w-full max-w-[90vw] mx-auto'>
+
+
+      <div style={{ backgroundImage: `url(${Top})` , backgroundSize: "cover" , backgroundPosition: "center" }}  className="mb-8   bg-contain h-50 bg-no-repeat md:h-80 -mt-8 w-screen flex flex-row items-center">
+  <div className='w-full max-w-[90vw]  mx-auto'>
     
 
-    <div className='bg-white/15 backdrop-blur-xs  inline-block p-8 rounded-lg'>
-        <div className='text-primary text-6xl font-extrabold relative'>
+    <div className='bg-radial from-secondary/40 to-primary/30 backdrop-blur-xs inset-shadow-xs inline-block p-4 rounded-2xl'>
+        <div className='text-primary text-5xl md:text-6xl flex flex-col font-extrabold '>
+            <span className='z-10 text-shadow-lg '>
             بلاگ‌ها
+            </span>
 
-            <div className='text-slate-800/30 text-stroke border-slate-500 top-9  -left-2 font-extrabold text-5xl absolute'>
-            Blogs
-        </div>
+
+            <span className='text-white text-stroke border-slate-500  font-extrabold text-4xl -mt-7 -ml-1 md:text-5xl text-left '>
+                 Blogs
+            </span>
 
         </div>
 
