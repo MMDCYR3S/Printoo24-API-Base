@@ -5,7 +5,7 @@ export const authService = {
   // 🔐 ورود کاربر
   login: async (credentials) => {
     // POST /api/v1/accounts/login/
-    const response = await apiClient.post('/accounts/login/', credentials);
+    const response = await apiClient.post('/accounts/auth/', credentials);
     return response.data; // این دیتا شامل { user: {...}, tokens: {...} } هست
   },
 

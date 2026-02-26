@@ -1313,3 +1313,11 @@ INFO 2026-02-25 11:30:46,835 auth_service 7 132892971357888 User logged in: 21
 DEBUG 2026-02-25 16:30:39,590 auth_service 7 132892946179776 AuthService initialized with UserIdentityService
 INFO 2026-02-25 16:30:39,595 auth_service 7 132892946179776 Login attempt for: 09137555555
 INFO 2026-02-25 16:30:40,312 auth_service 7 132892946179776 User logged in: 21
+DEBUG 2026-02-26 12:55:21,754 auth_service 300 137592389498560 AuthService initialized with UserIdentityService
+INFO 2026-02-26 12:55:21,809 auth_service 300 137592389498560 User found. Routing to login flow: 09137555555
+INFO 2026-02-26 12:55:21,811 auth_service 300 137592389498560 Login attempt for: 09137555555
+INFO 2026-02-26 12:55:22,543 auth_service 300 137592389498560 User logged in: 21
+DEBUG 2026-02-26 13:57:11,602 auth_service 305 123604700227264 AuthService initialized with UserIdentityService
+INFO 2026-02-26 13:57:11,680 auth_service 305 123604700227264 User found. Routing to login flow: 09137555555
+INFO 2026-02-26 13:57:11,683 auth_service 305 123604700227264 Login attempt for: 09137555555
+INFO 2026-02-26 13:57:12,963 auth_service 305 123604700227264 User logged in: 21

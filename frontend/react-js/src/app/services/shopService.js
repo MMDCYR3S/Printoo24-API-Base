@@ -2,30 +2,29 @@
 import { apiClient } from './apiClient';
 
 export const shopService = {
-  // دریافت لیست محصولات بر اساس فیلترهای URL
+  // دریافت لیست محصولات
   getProducts: async (filters = {}) => {
     const params = new URLSearchParams();
-
-    // فیلتر دسته‌بندی‌ها (ارسال چندباره کلید در صورت نیاز بک‌اند)
-    if (filters.categories && Array.isArray(filters.categories)) {
-      filters.categories.forEach(cat => {
-        if (cat) params.append('category', cat);
-      });
+    if (filters.categories) {
+      filters.categories.forEach(cat => params.append('category', cat));
     }
-
-    // فیلتر جستجوی متنی
-    if (filters.search) {
-      params.append('name', filters.search);
-    }
-
-    // آدرس دقیق بر اساس داکیومنت شما
+    if (filters.search) params.append('name', filters.search);
     const response = await apiClient.get('/shop/grid/', { params });
     return response.data;
   },
 
-  // دریافت جزئیات یک محصول با اسلاگ
+  // دریافت جزئیات محصول
   getProductDetail: async (slug) => {
     const response = await apiClient.get(`/shop/detail/${slug}/`);
     return response.data;
+  },
+
+
+  calculateLivePrice: async (productId, selections) => {
+    const response = await apiClient.post(`/shop/products/${productId}/calculate-price/`, {
+      selections: selections
+    });
+    return response.data;
   }
+
 };

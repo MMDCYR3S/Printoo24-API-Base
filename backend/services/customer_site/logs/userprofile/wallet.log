@@ -564,3 +564,559 @@ INFO 2026-02-21 05:50:40,145 user_transaction_service 7 135300646950592 Fetching
 DEBUG 2026-02-21 05:50:40,176 user_transaction_service 7 135300646950592 Wallet balance: -8986588.00
 INFO 2026-02-21 05:54:24,741 user_transaction_service 7 135300623873728 Fetching wallet balance for User ID: 1
 DEBUG 2026-02-21 05:54:24,779 user_transaction_service 7 135300623873728 Wallet balance: -8986588.00
+INFO 2026-02-21 06:13:36,964 user_transaction_service 7 135300612331200 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 06:13:37,117 user_transaction_service 7 135300612331200 Wallet balance: -8986588.00
+INFO 2026-02-21 06:31:56,953 user_transaction_service 7 135300636460736 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 06:31:57,086 user_transaction_service 7 135300636460736 Wallet balance: -8986588.00
+INFO 2026-02-21 06:59:31,538 user_transaction_service 7 135300623873728 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 06:59:31,604 user_transaction_service 7 135300623873728 Wallet balance: -8986588.00
+INFO 2026-02-21 10:19:31,045 user_transaction_service 382 126666769692352 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 10:19:31,073 user_transaction_service 382 126666769692352 Wallet balance: -8986588.00
+INFO 2026-02-21 10:30:39,089 user_transaction_service 382 126666751858368 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 10:30:39,155 user_transaction_service 382 126666751858368 Wallet balance: -8986588.00
+INFO 2026-02-21 10:38:36,571 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 10:38:36,586 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 11:12:10,643 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 11:12:10,652 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 11:43:36,866 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 11:43:36,943 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 12:04:24,756 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:04:24,872 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 12:21:16,832 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:21:16,938 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 12:24:23,113 user_transaction_service 382 126666370184896 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:24:23,130 user_transaction_service 382 126666370184896 Wallet balance: -8986588.00
+INFO 2026-02-21 12:24:32,492 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:24:32,520 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 12:29:50,684 user_transaction_service 382 126666715141824 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:29:50,751 user_transaction_service 382 126666715141824 Wallet balance: -8986588.00
+INFO 2026-02-21 12:29:58,327 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:29:58,354 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 12:30:03,436 user_transaction_service 382 126666715141824 Fetching transaction history for User ID: 1
+INFO 2026-02-21 12:30:03,446 user_transaction_service 382 126666715141824 Retrieved 6 transactions for User ID: 1
+INFO 2026-02-21 12:31:10,808 user_transaction_service 382 126666715141824 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:31:10,833 user_transaction_service 382 126666715141824 Wallet balance: -8986588.00
+INFO 2026-02-21 12:36:27,231 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:36:27,248 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 12:37:26,781 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:37:26,803 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 12:38:55,255 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:38:55,286 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:02,583 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:02,598 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:05,298 user_transaction_service 382 126666715141824 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:05,322 user_transaction_service 382 126666715141824 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:10,725 user_transaction_service 382 126666715141824 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:10,746 user_transaction_service 382 126666715141824 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:12,853 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:12,874 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:16,887 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:16,911 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:21,482 user_transaction_service 382 126666370184896 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:21,501 user_transaction_service 382 126666370184896 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:25,210 user_transaction_service 382 126666715141824 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:25,234 user_transaction_service 382 126666715141824 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:38,768 user_transaction_service 382 126666370184896 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:38,780 user_transaction_service 382 126666370184896 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:47,307 user_transaction_service 382 126666715141824 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:47,319 user_transaction_service 382 126666715141824 Wallet balance: -8986588.00
+INFO 2026-02-21 12:39:51,864 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:39:51,868 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 12:40:00,217 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 12:40:00,235 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 13:08:54,170 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:08:54,457 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 13:12:45,983 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:12:45,990 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:12:57,895 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:12:57,900 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:13:01,570 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:13:01,576 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:21:53,798 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:21:53,852 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 13:21:59,268 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:21:59,283 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 13:28:26,376 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:28:26,416 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 13:31:47,814 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:31:47,835 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 13:33:05,339 user_transaction_service 382 126666361792192 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:33:05,357 user_transaction_service 382 126666361792192 Wallet balance: -8986588.00
+INFO 2026-02-21 13:34:06,202 user_transaction_service 382 126666361792192 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:34:06,207 user_transaction_service 382 126666361792192 Wallet balance: -8986588.00
+INFO 2026-02-21 13:36:31,570 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:36:31,574 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:44:46,764 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:44:46,842 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 13:44:50,712 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:44:50,720 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:45:01,398 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:45:01,406 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:45:07,292 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:45:07,297 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 13:45:10,251 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:45:10,262 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 13:48:01,518 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:48:01,534 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:49:13,778 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:49:13,789 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:49:24,564 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:49:24,572 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 13:51:20,494 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:51:20,498 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:51:23,454 user_transaction_service 382 126666361792192 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:51:23,460 user_transaction_service 382 126666361792192 Wallet balance: -8986588.00
+INFO 2026-02-21 13:51:26,054 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:51:26,058 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 13:51:26,915 user_transaction_service 382 126666715141824 Fetching transaction history for User ID: 1
+INFO 2026-02-21 13:51:26,924 user_transaction_service 382 126666715141824 Retrieved 6 transactions for User ID: 1
+INFO 2026-02-21 13:51:38,086 user_transaction_service 382 126666724583104 Fetching transaction history for User ID: 1
+INFO 2026-02-21 13:51:38,090 user_transaction_service 382 126666724583104 Retrieved 6 transactions for User ID: 1
+INFO 2026-02-21 13:51:40,988 user_transaction_service 382 126666724583104 Fetching transaction history for User ID: 1
+INFO 2026-02-21 13:51:40,993 user_transaction_service 382 126666724583104 Retrieved 6 transactions for User ID: 1
+INFO 2026-02-21 13:51:43,935 user_transaction_service 382 126666724583104 Fetching transaction history for User ID: 1
+INFO 2026-02-21 13:51:43,939 user_transaction_service 382 126666724583104 Retrieved 6 transactions for User ID: 1
+INFO 2026-02-21 13:51:44,926 user_transaction_service 382 126666724583104 Fetching transaction history for User ID: 1
+INFO 2026-02-21 13:51:44,932 user_transaction_service 382 126666724583104 Retrieved 6 transactions for User ID: 1
+INFO 2026-02-21 13:51:47,930 user_transaction_service 382 126666724583104 Fetching transaction history for User ID: 1
+INFO 2026-02-21 13:51:47,933 user_transaction_service 382 126666724583104 Retrieved 6 transactions for User ID: 1
+INFO 2026-02-21 13:51:48,945 user_transaction_service 382 126666724583104 Fetching transaction history for User ID: 1
+INFO 2026-02-21 13:51:48,952 user_transaction_service 382 126666724583104 Retrieved 6 transactions for User ID: 1
+INFO 2026-02-21 13:51:51,154 user_transaction_service 382 126666724583104 Fetching transaction history for User ID: 1
+INFO 2026-02-21 13:51:51,159 user_transaction_service 382 126666724583104 Retrieved 6 transactions for User ID: 1
+INFO 2026-02-21 13:51:57,760 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 13:51:57,766 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 15:35:12,405 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 15:35:12,680 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 15:36:50,389 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 15:36:50,418 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 15:37:15,107 user_transaction_service 382 126666732975808 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 15:37:15,135 user_transaction_service 382 126666732975808 Wallet balance: -8986588.00
+INFO 2026-02-21 15:38:12,486 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 15:38:12,550 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 15:52:13,588 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 15:52:13,599 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 16:14:07,964 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:14:08,211 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 16:16:10,763 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:16:10,786 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 16:20:01,044 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:20:01,068 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 16:20:58,224 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:20:58,248 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 16:22:27,979 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:22:28,077 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 16:22:52,285 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:22:52,418 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 16:23:12,244 user_transaction_service 382 126666715141824 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:23:12,272 user_transaction_service 382 126666715141824 Wallet balance: -8986588.00
+INFO 2026-02-21 16:24:03,063 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:24:03,080 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 16:24:05,649 user_transaction_service 382 126666757105344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:24:05,663 user_transaction_service 382 126666757105344 Wallet balance: -8986588.00
+INFO 2026-02-21 16:24:08,746 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:24:08,765 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 16:25:35,210 user_transaction_service 382 126666715141824 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:25:35,247 user_transaction_service 382 126666715141824 Wallet balance: -8986588.00
+INFO 2026-02-21 16:35:53,813 user_transaction_service 382 126666715141824 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:35:53,868 user_transaction_service 382 126666715141824 Wallet balance: -8986588.00
+INFO 2026-02-21 16:54:44,496 user_transaction_service 382 126666748712640 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 16:54:44,634 user_transaction_service 382 126666748712640 Wallet balance: -8986588.00
+INFO 2026-02-21 17:02:49,682 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 17:02:49,807 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 17:13:17,630 user_transaction_service 382 126666724583104 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 17:13:17,680 user_transaction_service 382 126666724583104 Wallet balance: -8986588.00
+INFO 2026-02-21 18:27:33,273 user_transaction_service 889 138103582873280 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 18:27:33,289 user_transaction_service 889 138103582873280 Wallet balance: -8986588.00
+INFO 2026-02-21 18:28:25,478 user_transaction_service 889 138103677425344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 18:28:25,490 user_transaction_service 889 138103677425344 Wallet balance: -8986588.00
+INFO 2026-02-21 18:29:01,704 user_transaction_service 889 138103677425344 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 18:29:01,709 user_transaction_service 889 138103677425344 Wallet balance: -8986588.00
+INFO 2026-02-21 18:45:17,130 user_transaction_service 889 138103591265984 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 18:45:17,182 user_transaction_service 889 138103591265984 Wallet balance: -8986588.00
+INFO 2026-02-21 19:02:46,533 user_transaction_service 889 138103582873280 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 19:02:46,620 user_transaction_service 889 138103582873280 Wallet balance: -8986588.00
+INFO 2026-02-21 19:03:03,086 user_transaction_service 889 138103582873280 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 19:03:03,135 user_transaction_service 889 138103582873280 Wallet balance: -8986588.00
+INFO 2026-02-21 22:06:53,879 user_transaction_service 889 138103571334848 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:06:53,909 user_transaction_service 889 138103571334848 Wallet balance: -8986588.00
+INFO 2026-02-21 22:19:34,981 user_transaction_service 889 138103582873280 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:19:35,224 user_transaction_service 889 138103582873280 Wallet balance: -8986588.00
+INFO 2026-02-21 22:22:21,096 user_transaction_service 889 138103599658688 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:22:21,159 user_transaction_service 889 138103599658688 Wallet balance: -8986588.00
+INFO 2026-02-21 22:22:30,204 user_transaction_service 889 138103560844992 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:22:30,223 user_transaction_service 889 138103560844992 Wallet balance: -8986588.00
+INFO 2026-02-21 22:24:25,237 user_transaction_service 889 138103571334848 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:24:25,256 user_transaction_service 889 138103571334848 Wallet balance: -8986588.00
+INFO 2026-02-21 22:24:45,751 user_transaction_service 889 138103560844992 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:24:45,770 user_transaction_service 889 138103560844992 Wallet balance: -8986588.00
+INFO 2026-02-21 22:26:01,733 user_transaction_service 889 138103571334848 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:26:01,786 user_transaction_service 889 138103571334848 Wallet balance: -8986588.00
+INFO 2026-02-21 22:27:00,832 user_transaction_service 889 138103591265984 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:27:00,845 user_transaction_service 889 138103591265984 Wallet balance: -8986588.00
+INFO 2026-02-21 22:28:10,217 user_transaction_service 889 138103571334848 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:28:10,266 user_transaction_service 889 138103571334848 Wallet balance: -8986588.00
+INFO 2026-02-21 22:28:21,738 user_transaction_service 889 138103571334848 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:28:21,778 user_transaction_service 889 138103571334848 Wallet balance: -8986588.00
+INFO 2026-02-21 22:29:46,170 user_transaction_service 889 138103560844992 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:29:46,197 user_transaction_service 889 138103560844992 Wallet balance: -8986588.00
+INFO 2026-02-21 22:33:16,922 user_transaction_service 889 138103571334848 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:33:16,967 user_transaction_service 889 138103571334848 Wallet balance: -8986588.00
+INFO 2026-02-21 22:40:57,113 user_transaction_service 889 138103582873280 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 22:40:57,223 user_transaction_service 889 138103582873280 Wallet balance: -8986588.00
+INFO 2026-02-21 23:03:48,118 user_transaction_service 889 138103571334848 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 23:03:48,467 user_transaction_service 889 138103571334848 Wallet balance: -8986588.00
+INFO 2026-02-21 23:20:52,882 user_transaction_service 1117 137138565801664 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 23:20:52,952 user_transaction_service 1117 137138565801664 Wallet balance: -8986588.00
+INFO 2026-02-21 23:29:02,702 user_transaction_service 1130 138276868011712 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 23:29:02,734 user_transaction_service 1130 138276868011712 Wallet balance: -8986588.00
+INFO 2026-02-21 23:30:08,057 user_transaction_service 1130 138276857521856 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 23:30:08,070 user_transaction_service 1130 138276857521856 Wallet balance: -8986588.00
+INFO 2026-02-21 23:30:59,043 user_transaction_service 1130 138276857521856 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 23:30:59,054 user_transaction_service 1130 138276857521856 Wallet balance: -8986588.00
+INFO 2026-02-21 23:37:34,711 user_transaction_service 1130 138276823951040 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 23:37:34,830 user_transaction_service 1130 138276823951040 Wallet balance: -8986588.00
+INFO 2026-02-21 23:50:05,135 user_transaction_service 1130 138276857521856 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 23:50:05,416 user_transaction_service 1130 138276857521856 Wallet balance: -8986588.00
+INFO 2026-02-21 23:57:05,679 user_transaction_service 1130 138276823951040 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 23:57:05,765 user_transaction_service 1130 138276823951040 Wallet balance: -8986588.00
+INFO 2026-02-21 23:57:39,350 user_transaction_service 1130 138276857521856 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-21 23:57:39,422 user_transaction_service 1130 138276857521856 Wallet balance: -8986588.00
+INFO 2026-02-22 00:00:36,068 user_transaction_service 1130 138276455306944 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-22 00:00:36,117 user_transaction_service 1130 138276455306944 Wallet balance: -8986588.00
+INFO 2026-02-22 00:38:12,892 user_transaction_service 1130 138276472092352 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-22 00:38:12,990 user_transaction_service 1130 138276472092352 Wallet balance: -8986588.00
+INFO 2026-02-22 02:23:32,721 user_transaction_service 7 131222172849856 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-22 02:23:32,807 user_transaction_service 7 131222172849856 Wallet balance: -8986588.00
+INFO 2026-02-22 10:05:35,104 user_transaction_service 7 127477638756032 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-22 10:05:35,158 user_transaction_service 7 127477638756032 Wallet balance: -8986588.00
+INFO 2026-02-23 02:14:23,402 user_transaction_service 21 128653351618240 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:14:23,497 user_transaction_service 21 128653351618240 Wallet balance: -8986588.00
+INFO 2026-02-23 02:23:14,331 user_transaction_service 21 128653102925504 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:23:14,347 user_transaction_service 21 128653102925504 Wallet balance: -8986588.00
+INFO 2026-02-23 02:40:50,728 user_transaction_service 21 128653128103616 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:40:50,751 user_transaction_service 21 128653128103616 Wallet balance: -8986588.00
+INFO 2026-02-23 02:41:42,673 user_transaction_service 21 128653351618240 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:41:42,681 user_transaction_service 21 128653351618240 Wallet balance: -8986588.00
+INFO 2026-02-23 02:41:48,835 user_transaction_service 21 128653128103616 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:41:48,844 user_transaction_service 21 128653128103616 Wallet balance: -8986588.00
+INFO 2026-02-23 02:45:39,480 user_transaction_service 21 128653351618240 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:45:39,504 user_transaction_service 21 128653351618240 Wallet balance: -8986588.00
+INFO 2026-02-23 02:46:46,543 user_transaction_service 21 128653128103616 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:46:46,554 user_transaction_service 21 128653128103616 Wallet balance: -8986588.00
+INFO 2026-02-23 02:47:22,582 user_transaction_service 21 128653351618240 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:47:22,629 user_transaction_service 21 128653351618240 Wallet balance: -8986588.00
+INFO 2026-02-23 02:48:34,557 user_transaction_service 21 128653111318208 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:48:34,568 user_transaction_service 21 128653111318208 Wallet balance: -8986588.00
+INFO 2026-02-23 02:48:38,620 user_transaction_service 21 128653111318208 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:48:38,647 user_transaction_service 21 128653111318208 Wallet balance: -8986588.00
+INFO 2026-02-23 02:49:34,924 user_transaction_service 21 128653102925504 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:49:34,942 user_transaction_service 21 128653102925504 Wallet balance: -8986588.00
+INFO 2026-02-23 02:50:49,751 user_transaction_service 21 128653111318208 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:50:49,759 user_transaction_service 21 128653111318208 Wallet balance: -8986588.00
+INFO 2026-02-23 02:53:57,864 user_transaction_service 21 128653102925504 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 02:53:57,882 user_transaction_service 21 128653102925504 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:08,915 user_transaction_service 153 135163071686336 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:08,958 user_transaction_service 153 135163071686336 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:10,261 user_transaction_service 153 135163080079040 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:10,274 user_transaction_service 153 135163080079040 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:16,415 user_transaction_service 153 135163063293632 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:16,427 user_transaction_service 153 135163063293632 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:18,265 user_transaction_service 153 135163063293632 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:18,276 user_transaction_service 153 135163063293632 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:22,898 user_transaction_service 153 135163080079040 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:22,903 user_transaction_service 153 135163080079040 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:24,733 user_transaction_service 153 135163063293632 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:24,754 user_transaction_service 153 135163063293632 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:36,326 user_transaction_service 153 135163063293632 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:36,330 user_transaction_service 153 135163063293632 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:38,166 user_transaction_service 153 135163071686336 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:38,170 user_transaction_service 153 135163071686336 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:47,290 user_transaction_service 153 135163063293632 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:47,295 user_transaction_service 153 135163063293632 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:52,811 user_transaction_service 153 135163080079040 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:52,818 user_transaction_service 153 135163080079040 Wallet balance: -8986588.00
+INFO 2026-02-23 03:17:54,286 user_transaction_service 153 135163080079040 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:17:54,297 user_transaction_service 153 135163080079040 Wallet balance: -8986588.00
+INFO 2026-02-23 03:18:33,311 user_transaction_service 153 135163080079040 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 03:18:33,318 user_transaction_service 153 135163080079040 Wallet balance: -8986588.00
+INFO 2026-02-23 07:38:20,257 user_transaction_service 153 135163052803776 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 07:38:20,295 user_transaction_service 153 135163052803776 Wallet balance: -8986588.00
+INFO 2026-02-23 07:39:47,396 user_transaction_service 153 135163080079040 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 07:39:47,399 user_transaction_service 153 135163080079040 Wallet balance: -8986588.00
+INFO 2026-02-23 18:55:25,860 user_transaction_service 277 130100305868480 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 18:55:25,937 user_transaction_service 277 130100305868480 Wallet balance: -8986588.00
+INFO 2026-02-23 18:55:30,650 user_transaction_service 277 130100289083072 Fetching wallet balance for User ID: 1
+DEBUG 2026-02-23 18:55:30,658 user_transaction_service 277 130100289083072 Wallet balance: -8986588.00
+INFO 2026-02-24 09:07:44,776 user_transaction_service 9 127131780622016 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:07:44,816 user_transaction_service 9 127131780622016 No wallet found for User ID: 21
+INFO 2026-02-24 09:09:14,021 user_transaction_service 9 127131409434304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:09:14,031 user_transaction_service 9 127131409434304 No wallet found for User ID: 21
+INFO 2026-02-24 09:10:54,158 user_transaction_service 9 127131799504576 Fetching wallet balance for User ID: 22
+WARNING 2026-02-24 09:10:54,189 user_transaction_service 9 127131799504576 No wallet found for User ID: 22
+INFO 2026-02-24 09:13:28,527 user_transaction_service 9 127131799504576 Fetching wallet balance for User ID: 22
+WARNING 2026-02-24 09:13:28,556 user_transaction_service 9 127131799504576 No wallet found for User ID: 22
+INFO 2026-02-24 09:16:25,877 user_transaction_service 9 127131799504576 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:16:25,909 user_transaction_service 9 127131799504576 No wallet found for User ID: 21
+INFO 2026-02-24 09:17:08,515 user_transaction_service 9 127131799504576 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:17:08,527 user_transaction_service 9 127131799504576 No wallet found for User ID: 21
+INFO 2026-02-24 09:23:58,683 user_transaction_service 9 127131434612416 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:23:58,695 user_transaction_service 9 127131434612416 No wallet found for User ID: 21
+INFO 2026-02-24 09:52:13,168 user_transaction_service 9 127131392648896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:52:13,189 user_transaction_service 9 127131392648896 No wallet found for User ID: 21
+INFO 2026-02-24 09:53:13,656 user_transaction_service 9 127131384256192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:53:13,661 user_transaction_service 9 127131384256192 No wallet found for User ID: 21
+INFO 2026-02-24 09:56:11,959 user_transaction_service 9 127131384256192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:56:11,966 user_transaction_service 9 127131384256192 No wallet found for User ID: 21
+INFO 2026-02-24 09:56:14,936 user_transaction_service 9 127131786917568 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:56:14,959 user_transaction_service 9 127131786917568 No wallet found for User ID: 21
+INFO 2026-02-24 09:58:47,285 user_transaction_service 9 127131786917568 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 09:58:47,292 user_transaction_service 9 127131786917568 No wallet found for User ID: 21
+INFO 2026-02-24 10:00:08,283 user_transaction_service 9 127131786917568 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:00:08,288 user_transaction_service 9 127131786917568 No wallet found for User ID: 21
+INFO 2026-02-24 10:00:30,127 user_transaction_service 9 127131786917568 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:00:30,152 user_transaction_service 9 127131786917568 No wallet found for User ID: 21
+INFO 2026-02-24 10:01:32,340 user_transaction_service 9 127131392648896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:01:32,368 user_transaction_service 9 127131392648896 No wallet found for User ID: 21
+INFO 2026-02-24 10:02:01,780 user_transaction_service 9 127131392648896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:02:01,786 user_transaction_service 9 127131392648896 No wallet found for User ID: 21
+INFO 2026-02-24 10:02:04,671 user_transaction_service 9 127131392648896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:02:04,678 user_transaction_service 9 127131392648896 No wallet found for User ID: 21
+INFO 2026-02-24 10:02:06,514 user_transaction_service 9 127131384256192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:02:06,518 user_transaction_service 9 127131384256192 No wallet found for User ID: 21
+INFO 2026-02-24 10:02:11,447 user_transaction_service 9 127131786917568 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:02:11,454 user_transaction_service 9 127131786917568 No wallet found for User ID: 21
+INFO 2026-02-24 10:02:28,495 user_transaction_service 9 127131786917568 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:02:28,502 user_transaction_service 9 127131786917568 No wallet found for User ID: 21
+INFO 2026-02-24 10:04:04,135 user_transaction_service 9 127131392648896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:04:04,138 user_transaction_service 9 127131392648896 No wallet found for User ID: 21
+INFO 2026-02-24 10:11:35,866 user_transaction_service 9 127131417827008 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:11:35,893 user_transaction_service 9 127131417827008 No wallet found for User ID: 21
+INFO 2026-02-24 10:16:46,882 user_transaction_service 9 127131384256192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:16:46,888 user_transaction_service 9 127131384256192 No wallet found for User ID: 21
+INFO 2026-02-24 10:20:10,824 user_transaction_service 9 127131392648896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:20:10,830 user_transaction_service 9 127131392648896 No wallet found for User ID: 21
+INFO 2026-02-24 10:20:48,649 user_transaction_service 9 127131392648896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:20:48,673 user_transaction_service 9 127131392648896 No wallet found for User ID: 21
+INFO 2026-02-24 10:39:16,015 user_transaction_service 9 127131434612416 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:39:16,039 user_transaction_service 9 127131434612416 No wallet found for User ID: 21
+INFO 2026-02-24 10:42:08,822 user_transaction_service 9 127131434612416 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:42:08,829 user_transaction_service 9 127131434612416 No wallet found for User ID: 21
+INFO 2026-02-24 10:42:36,051 user_transaction_service 9 127131384256192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:42:36,081 user_transaction_service 9 127131384256192 No wallet found for User ID: 21
+INFO 2026-02-24 10:51:55,036 user_transaction_service 9 127131384256192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:51:55,062 user_transaction_service 9 127131384256192 No wallet found for User ID: 21
+INFO 2026-02-24 10:51:58,196 user_transaction_service 9 127131786917568 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:51:58,233 user_transaction_service 9 127131786917568 No wallet found for User ID: 21
+INFO 2026-02-24 10:53:30,245 user_transaction_service 9 127131434612416 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:53:30,261 user_transaction_service 9 127131434612416 No wallet found for User ID: 21
+INFO 2026-02-24 10:54:10,097 user_transaction_service 9 127131786917568 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 10:54:10,113 user_transaction_service 9 127131786917568 No wallet found for User ID: 21
+INFO 2026-02-24 11:01:26,843 user_transaction_service 9 127131434612416 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 11:01:26,903 user_transaction_service 9 127131434612416 No wallet found for User ID: 21
+INFO 2026-02-24 12:02:34,656 user_transaction_service 9 127131384256192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-24 12:02:34,721 user_transaction_service 9 127131384256192 No wallet found for User ID: 21
+INFO 2026-02-26 02:56:52,671 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 02:56:52,837 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 02:59:22,862 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 02:59:22,879 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 02:59:55,678 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 02:59:55,690 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 03:29:32,847 user_transaction_service 7 132892946179776 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:29:32,914 user_transaction_service 7 132892946179776 No wallet found for User ID: 21
+INFO 2026-02-26 03:32:44,481 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:32:44,519 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 03:55:23,553 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:55:23,653 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 03:55:31,246 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:55:31,326 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 03:56:29,448 user_transaction_service 7 132892946179776 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:56:29,557 user_transaction_service 7 132892946179776 No wallet found for User ID: 21
+INFO 2026-02-26 03:57:20,172 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:57:20,177 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 03:58:15,987 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:58:15,999 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 03:59:04,360 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:59:04,419 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 03:59:24,953 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:59:24,969 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 03:59:26,173 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:59:26,184 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 03:59:30,862 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:59:30,909 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 03:59:34,272 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:59:34,298 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 03:59:35,188 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:59:35,200 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 03:59:56,715 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 03:59:56,749 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 04:00:03,936 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:00:03,955 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 04:00:07,546 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:00:07,562 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 04:00:08,816 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:00:08,836 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 04:00:21,782 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:00:21,796 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 04:07:45,117 user_transaction_service 7 132892562798272 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:07:45,149 user_transaction_service 7 132892562798272 No wallet found for User ID: 21
+INFO 2026-02-26 04:13:43,959 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:13:44,020 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 04:13:48,889 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:13:48,893 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 04:15:22,589 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:15:22,600 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 04:16:20,161 user_transaction_service 7 132892571190976 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:16:20,171 user_transaction_service 7 132892571190976 No wallet found for User ID: 21
+INFO 2026-02-26 04:25:09,897 user_transaction_service 7 132892955272896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:25:09,945 user_transaction_service 7 132892955272896 No wallet found for User ID: 21
+INFO 2026-02-26 04:33:24,570 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:33:24,591 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 04:46:21,444 user_transaction_service 7 132892571190976 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 04:46:21,451 user_transaction_service 7 132892571190976 No wallet found for User ID: 21
+INFO 2026-02-26 05:06:23,289 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:06:23,299 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 05:09:35,274 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:09:35,326 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 05:11:09,778 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:11:09,795 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 05:11:30,622 user_transaction_service 7 132892955272896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:11:30,637 user_transaction_service 7 132892955272896 No wallet found for User ID: 21
+INFO 2026-02-26 05:11:38,242 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:11:38,265 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 05:13:10,094 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:13:10,103 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 05:14:24,320 user_transaction_service 7 132892955272896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:14:24,326 user_transaction_service 7 132892955272896 No wallet found for User ID: 21
+INFO 2026-02-26 05:27:33,079 user_transaction_service 7 132892946880192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:27:33,724 user_transaction_service 7 132892946880192 No wallet found for User ID: 21
+INFO 2026-02-26 05:27:43,288 user_transaction_service 7 132892946880192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:27:43,293 user_transaction_service 7 132892946880192 No wallet found for User ID: 21
+INFO 2026-02-26 05:28:26,738 user_transaction_service 7 132892955272896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:28:26,749 user_transaction_service 7 132892955272896 No wallet found for User ID: 21
+INFO 2026-02-26 05:58:37,380 user_transaction_service 7 132892571190976 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 05:58:37,426 user_transaction_service 7 132892571190976 No wallet found for User ID: 21
+INFO 2026-02-26 06:01:42,134 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:01:42,144 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 06:27:34,776 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:27:34,802 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 06:29:49,199 user_transaction_service 7 132892955272896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:29:49,275 user_transaction_service 7 132892955272896 No wallet found for User ID: 21
+INFO 2026-02-26 06:31:44,248 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:31:44,274 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 06:34:29,425 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:34:29,448 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 06:34:36,330 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:34:36,343 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 06:42:34,300 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:42:34,824 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 06:54:31,739 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:54:31,807 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 06:57:02,152 user_transaction_service 7 132892571190976 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:57:02,166 user_transaction_service 7 132892571190976 No wallet found for User ID: 21
+INFO 2026-02-26 06:57:27,973 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 06:57:27,986 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 07:15:03,738 user_transaction_service 7 132892946880192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:15:03,780 user_transaction_service 7 132892946880192 No wallet found for User ID: 21
+INFO 2026-02-26 07:15:11,172 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:15:11,185 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 07:24:32,558 user_transaction_service 7 132892946880192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:24:32,708 user_transaction_service 7 132892946880192 No wallet found for User ID: 21
+INFO 2026-02-26 07:24:35,591 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:24:35,601 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 07:24:46,041 user_transaction_service 7 132892596369088 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:24:46,077 user_transaction_service 7 132892596369088 No wallet found for User ID: 21
+INFO 2026-02-26 07:25:32,769 user_transaction_service 7 132892596369088 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:25:32,793 user_transaction_service 7 132892596369088 No wallet found for User ID: 21
+INFO 2026-02-26 07:25:55,063 user_transaction_service 7 132892587976384 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:25:55,140 user_transaction_service 7 132892587976384 No wallet found for User ID: 21
+INFO 2026-02-26 07:29:58,961 user_transaction_service 7 132892596369088 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:29:59,048 user_transaction_service 7 132892596369088 No wallet found for User ID: 21
+INFO 2026-02-26 07:39:58,247 user_transaction_service 7 132892596369088 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:39:58,312 user_transaction_service 7 132892596369088 No wallet found for User ID: 21
+INFO 2026-02-26 07:44:40,078 user_transaction_service 7 132892579583680 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:44:40,184 user_transaction_service 7 132892579583680 No wallet found for User ID: 21
+INFO 2026-02-26 07:46:17,471 user_transaction_service 7 132892579583680 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 07:46:17,509 user_transaction_service 7 132892579583680 No wallet found for User ID: 21
+INFO 2026-02-26 08:02:46,635 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 08:02:46,659 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 09:39:02,869 user_transaction_service 7 132892955272896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 09:39:02,883 user_transaction_service 7 132892955272896 No wallet found for User ID: 21
+INFO 2026-02-26 10:00:21,666 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 10:00:21,764 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 10:10:50,551 user_transaction_service 7 132892955272896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 10:10:51,425 user_transaction_service 7 132892955272896 No wallet found for User ID: 21
+INFO 2026-02-26 10:31:38,864 user_transaction_service 7 132892596369088 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 10:31:38,967 user_transaction_service 7 132892596369088 No wallet found for User ID: 21
+INFO 2026-02-26 10:38:26,101 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 10:38:26,127 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 10:44:06,034 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 10:44:06,058 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 10:44:47,588 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 10:44:47,600 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 10:45:10,941 user_transaction_service 7 132892946880192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 10:45:10,950 user_transaction_service 7 132892946880192 No wallet found for User ID: 21
+INFO 2026-02-26 10:46:28,616 user_transaction_service 7 132892972058304 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 10:46:28,627 user_transaction_service 7 132892972058304 No wallet found for User ID: 21
+INFO 2026-02-26 11:11:25,885 user_transaction_service 7 132892946880192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:11:25,965 user_transaction_service 7 132892946880192 No wallet found for User ID: 21
+INFO 2026-02-26 11:11:47,886 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:11:47,894 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 11:13:06,999 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:13:07,011 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 11:13:11,914 user_transaction_service 7 132892955272896 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:13:11,948 user_transaction_service 7 132892955272896 No wallet found for User ID: 21
+INFO 2026-02-26 11:14:17,745 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:14:17,773 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 11:15:46,733 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:15:46,761 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 11:18:07,174 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:18:07,223 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 11:19:15,001 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:19:15,140 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 11:19:51,756 user_transaction_service 7 132892963665600 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:19:51,771 user_transaction_service 7 132892963665600 No wallet found for User ID: 21
+INFO 2026-02-26 11:20:20,265 user_transaction_service 7 132892946880192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:20:20,281 user_transaction_service 7 132892946880192 No wallet found for User ID: 21
+INFO 2026-02-26 11:25:12,676 user_transaction_service 7 132892946880192 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:25:12,740 user_transaction_service 7 132892946880192 No wallet found for User ID: 21
+INFO 2026-02-26 11:25:57,926 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:25:57,965 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 11:27:32,078 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:27:32,124 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 11:29:31,215 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:29:31,374 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 11:29:54,177 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:29:54,197 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 11:30:23,817 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:30:23,829 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 11:30:23,877 user_transaction_service 7 132892990822080 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:30:23,901 user_transaction_service 7 132892990822080 No wallet found for User ID: 21
+INFO 2026-02-26 11:46:13,939 user_transaction_service 267 130864729290432 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:46:14,024 user_transaction_service 267 130864729290432 No wallet found for User ID: 21
+INFO 2026-02-26 11:46:14,944 user_transaction_service 267 130864720897728 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:46:14,955 user_transaction_service 267 130864720897728 No wallet found for User ID: 21
+INFO 2026-02-26 11:57:25,180 user_transaction_service 267 130864365172416 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:57:25,184 user_transaction_service 267 130864365172416 No wallet found for User ID: 21
+INFO 2026-02-26 11:57:25,262 user_transaction_service 267 130864365172416 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 11:57:25,266 user_transaction_service 267 130864365172416 No wallet found for User ID: 21
+INFO 2026-02-26 12:10:18,776 user_transaction_service 267 130864711456448 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 12:10:18,850 user_transaction_service 267 130864711456448 No wallet found for User ID: 21
+INFO 2026-02-26 12:13:12,320 user_transaction_service 267 130864365172416 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 12:13:12,456 user_transaction_service 267 130864365172416 No wallet found for User ID: 21
+INFO 2026-02-26 12:14:18,196 user_transaction_service 267 130864711456448 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 12:14:18,202 user_transaction_service 267 130864711456448 No wallet found for User ID: 21
+INFO 2026-02-26 12:25:30,116 user_transaction_service 267 130864365172416 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 12:25:30,161 user_transaction_service 267 130864365172416 No wallet found for User ID: 21
+INFO 2026-02-26 13:57:20,926 user_transaction_service 305 123604700227264 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 13:57:20,931 user_transaction_service 305 123604700227264 No wallet found for User ID: 21
+INFO 2026-02-26 13:57:52,426 user_transaction_service 305 123604681344704 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 13:57:52,441 user_transaction_service 305 123604681344704 No wallet found for User ID: 21
+INFO 2026-02-26 13:57:57,897 user_transaction_service 305 123604689737408 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 13:57:57,939 user_transaction_service 305 123604689737408 No wallet found for User ID: 21
+INFO 2026-02-26 13:57:59,376 user_transaction_service 305 123604672952000 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 13:57:59,388 user_transaction_service 305 123604672952000 No wallet found for User ID: 21
+INFO 2026-02-26 13:59:04,083 user_transaction_service 305 123604672952000 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 13:59:04,100 user_transaction_service 305 123604672952000 No wallet found for User ID: 21
+INFO 2026-02-26 13:59:30,449 user_transaction_service 305 123604700227264 Fetching wallet balance for User ID: 21
+WARNING 2026-02-26 13:59:30,468 user_transaction_service 305 123604700227264 No wallet found for User ID: 21

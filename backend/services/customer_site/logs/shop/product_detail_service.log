@@ -796,3 +796,52 @@ DEBUG 2026-02-24 10:11:35,789 product_detail_service 9 127131384256192 ShopProdu
 DEBUG 2026-02-24 10:16:46,808 product_detail_service 9 127131392648896 ShopProductDetailService initialized
 DEBUG 2026-02-24 10:44:18,356 product_detail_service 9 127131392648896 ShopProductDetailService initialized
 DEBUG 2026-02-24 10:53:25,976 product_detail_service 9 127131417827008 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:10:18,771 product_detail_service 267 130864739780288 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:13:12,408 product_detail_service 267 130864739780288 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:14:18,115 product_detail_service 267 130864739780288 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:20:44,023 product_detail_service 267 130864720897728 ShopProductDetailService initialized
+ERROR 2026-02-26 12:20:44,171 product_detail_service 267 130864720897728 Error fetching product: محصول با اسلاگ '49' یافت نشد.
+DEBUG 2026-02-26 12:21:16,337 product_detail_service 267 130864720897728 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:25:30,122 product_detail_service 267 130864739780288 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:26:51,184 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:27:02,999 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:49:15,068 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:49:16,750 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:49:21,674 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:51:56,085 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:51:56,848 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:51:57,907 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:51:58,039 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:54:31,108 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:54:31,244 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:54:32,336 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:54:32,361 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:55:50,892 product_detail_service 305 123604700227264 ShopProductDetailService initialized
+ERROR 2026-02-26 13:55:50,995 product_detail_service 305 123604700227264 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:55:53,821 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:55:53,964 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:56:14,302 product_detail_service 305 123604700227264 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:56:31,459 product_detail_service 305 123604700227264 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:57:46,691 product_detail_service 305 123604689737408 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:57:52,389 product_detail_service 305 123604689737408 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:57:57,869 product_detail_service 305 123604672952000 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:57:59,124 product_detail_service 305 123604681344704 ShopProductDetailService initialized
+DEBUG 2026-02-26 14:02:52,081 product_detail_service 305 123604681344704 ShopProductDetailService initialized
