@@ -778,3 +778,21 @@ ERROR 2026-02-23 02:47:32,726 product_detail_service 21 128653111318208 Error fe
 LINE 1: ...ield"."title", "core_productfield"."description", "core_prod...
                                                              ^
 
+DEBUG 2026-02-24 09:52:13,070 product_detail_service 9 127131786917568 ShopProductDetailService initialized
+DEBUG 2026-02-24 09:53:13,480 product_detail_service 9 127131786917568 ShopProductDetailService initialized
+DEBUG 2026-02-24 09:56:11,864 product_detail_service 9 127131786917568 ShopProductDetailService initialized
+DEBUG 2026-02-24 09:56:14,850 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 09:58:47,198 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:00:08,191 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:00:29,925 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:01:32,091 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:01,680 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:04,477 product_detail_service 9 127131392648896 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:06,437 product_detail_service 9 127131392648896 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:11,365 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:28,403 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:04:04,063 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:11:35,789 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:16:46,808 product_detail_service 9 127131392648896 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:44:18,356 product_detail_service 9 127131392648896 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:53:25,976 product_detail_service 9 127131417827008 ShopProductDetailService initialized

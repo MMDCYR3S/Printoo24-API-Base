@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+import { HelmetProvider } from 'react-helmet-async' 
 
 // موقت
 import DesignUploadPage from './app/features/shop/components/DesignUploadPage';
@@ -34,6 +35,13 @@ import WalletPage from './app/features/profile/WalletPage';
 import AddressPage from './app/features/profile/AddressPage';
 import QuotationPage from './app/features/profile/QuotationPage';
 import InvoicePage from './app/features/profile/InvoicePage'
+
+//  --- Blog pages ---
+import BlogListPage from './app/features/blog/pages/BlogListPage';
+import ArticleDetailPage from './app/features/blog/pages/ArticleDetailPage';
+import TutorialListPagePublic from './app/features/blog/pages/TutorialListPage';
+
+
 
 // --- Admin Pages ---
 import AdminDashboard from './app/features/admin/features/dashboard/AdminDashboard';
@@ -68,6 +76,17 @@ import SliderSettingsPage from './app/features/admin/features/settings/SliderSet
 import ModalSettingsPage from './app/features/admin/features/settings/ModalSettingsPage';
 import SiteMediaPage from './app/features/admin/features/settings/SiteMediaPage';
 
+// Admin > Blog 
+import BlogCategoriesPage from './app/features/admin/features/blog/BlogCategoriesPage';
+import ArticleListPage from './app/features/admin/features/blog/ArticleListPage';
+import ArticleEditorPage from './app/features/admin/features/blog/ArticleEditorPage';
+
+// Admin > Turorails
+import TutorialListPage from './app/features/admin/features/tutorials/TutorialListPage';
+import TutorialEditorPage from './app/features/admin/features/tutorials/TutorialEditorPage';
+
+
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -76,106 +95,126 @@ const queryClient = new QueryClient({
     },
   },
 });
-
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Toaster position="top-center" reverseOrder={false} />
-        
-        <Routes >
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Toaster position="top-center" reverseOrder={false} />
           
-          {/* =========================================
-              ADMIN ROUTES (Protected)
-             ========================================= */}
-          <Route path="/admin" element={<AdminGuard />}>
-            <Route element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              
-              {/* === Products (اصلاح شده و نهایی) === */}
-              <Route path="products" element={<ProductListPage />} />
-              
-              {/* 1. اولویت اول: ساخت محصول جدید */}
-              <Route path="products/create" element={<ProductEditorPage />} /> 
-              <Route path="products/new" element={<Navigate to="create" replace />} />
-              
-              {/* 2. اولویت دوم: ویرایش محصول (اصلاح آدرس برای هماهنگی با دکمه‌ها) */}
-              {/* قبلاً :id/edit بود که با دکمه‌های شما فرق داشت */}
-              <Route path="products/edit/:id" element={<ProductEditorPage />} />
-              
-              <Route path="products/quantities" element={<ProductQuantitiesPage />} />
-              <Route path="products/sizes" element={<ProductSizesPage />} />
-              
-              {/* 3. اولویت آخر: جزئیات محصول (مسیر متغیر) */}
-              <Route path="products/:id" element={<AdminProductDetailPage />} />
+          <Routes>
+            
+            {/* =========================================
+                ADMIN ROUTES (Protected)
+               ========================================= */}
+            <Route path="/admin" element={<AdminGuard />}>
+              <Route element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                
+                {/* === Products (اصلاح شده و نهایی) === */}
+                <Route path="products" element={<ProductListPage />} />
+                
+                {/* 1. اولویت اول: ساخت محصول جدید */}
+                <Route path="products/create" element={<ProductEditorPage />} /> 
+                <Route path="products/new" element={<Navigate to="create" replace />} />
+                
+                {/* 2. اولویت دوم: ویرایش محصول (اصلاح آدرس برای هماهنگی با دکمه‌ها) */}
+                {/* قبلاً :id/edit بود که با دکمه‌های شما فرق داشت */}
+                <Route path="products/edit/:id" element={<ProductEditorPage />} />
+                
+                <Route path="products/quantities" element={<ProductQuantitiesPage />} />
+                <Route path="products/sizes" element={<ProductSizesPage />} />
+                
+                {/* 3. اولویت آخر: جزئیات محصول (مسیر متغیر) */}
+                <Route path="products/:id" element={<AdminProductDetailPage />} />
 
-              {/* Categories */}
-              <Route path="categories" element={<CategoryListPage />} />
-              <Route path="categories/new" element={<CategoryUpsertPage />} />
-              <Route path="categories/edit/:id/" element={<CategoryUpsertPage />} />
-              <Route path="categories/:id/subs" element={<SubCategoryPage />} />
-              <Route path="categories/:id/" element={<CategoryDetailPage />} />
-              <Route path="edit/:id" element={<CategoryUpsertPage />} />
+                {/* Categories */}
+                <Route path="categories" element={<CategoryListPage />} />
+                <Route path="categories/new" element={<CategoryUpsertPage />} />
+                <Route path="categories/edit/:id/" element={<CategoryUpsertPage />} />
+                <Route path="categories/:id/subs" element={<SubCategoryPage />} />
+                <Route path="categories/:id/" element={<CategoryDetailPage />} />
+                <Route path="edit/:id" element={<CategoryUpsertPage />} />
 
-              {/* Orders */}
-              <Route path="orders">
-                <Route index element={<AdminOrderListPage />} />
-                <Route path="create" element={<OrderCreatePage />} />
-                <Route path=":id" element={<AdminOrderDetailsPage />} />
+                <Route path="products"> 
+                </Route>  
+
+                {/* Orders */}
+                <Route path="orders">
+                  <Route index element={<AdminOrderListPage />} />
+                  <Route path="create" element={<OrderCreatePage />} />
+                  <Route path=":id" element={<AdminOrderDetailsPage />} />
+                </Route>
+
+                {/* Users & Locations */}
+                <Route path="users" element={<UserListPage />} />
+                <Route path="users/:id" element={<CustomerDetailPage />} />
+                <Route path="provinces" element={<ProvincesPage />} />
+                <Route path="cities" element={<CitiesPage />} />
+                
+                {/* Messages & Settings */}
+                <Route path="messages" element={<MessageListPage />} />
+                <Route path="settings/sliders" element={<SliderSettingsPage />} />
+                <Route path="settings/modals" element={<ModalSettingsPage />} />
+                <Route path="settings/media" element={<SiteMediaPage />} />
+
+                {/* Admin Blog */}
+                <Route path="blog-categories" element={<BlogCategoriesPage />} />
+                <Route path="articles" element={<ArticleListPage />} />
+                <Route path="articles/new" element={<ArticleEditorPage />} />
+                <Route path="articles/edit/:id" element={<ArticleEditorPage />} />
+
+                {/* Admin Tutorials */}
+                <Route path="tutorials" element={<TutorialListPage />} />
+                <Route path="tutorials/new" element={<TutorialEditorPage />} />
+                <Route path="tutorials/edit/:id" element={<TutorialEditorPage />} />
+
+              </Route>
+            </Route>
+
+            {/* AUTH ROUTES */}
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/verify" element={<VerifyPage />} />
+            </Route>
+
+            {/* PUBLIC ROUTES */}
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/product/:slug" element={<PublicProductDetailPage />} />
+              
+              <Route path="profile">
+                <Route index element={<ProfileDashboard />} />
+                <Route path="orders" element={<MyOrdersPage />} />
+                <Route path="orders/:id" element={<OrderDetailPage />} />
+                <Route path="wallet" element={<WalletPage />} />
+                <Route path="addresses" element={<AddressPage />} />
+                <Route path="orders/:id/quotation" element={<QuotationPage />} />
+                <Route path="orders/:id/invoice" element={<InvoicePage />} />
               </Route>
 
-              {/* Users & Locations */}
-              <Route path="users" element={<UserListPage />} />
-              <Route path="users/:id" element={<CustomerDetailPage />} />
-              <Route path="provinces" element={<ProvincesPage />} />
-              <Route path="cities" element={<CitiesPage />} />
-              
-              {/* Messages & Settings */}
-              <Route path="messages" element={<MessageListPage />} />
-              <Route path="settings/sliders" element={<SliderSettingsPage />} />
-              <Route path="settings/modals" element={<ModalSettingsPage />} />
-              <Route path="settings/media" element={<SiteMediaPage />} />
-            </Route>
-          </Route>
+              {/* Blog */}
+              <Route path='blog' element={<BlogListPage />} />
+              <Route path='blog/:id' element={<ArticleDetailPage />} />
+              <Route path="tutorials" element={<TutorialListPagePublic />} />
 
-          {/* AUTH ROUTES */}
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/verify" element={<VerifyPage />} />
-          </Route>
 
-          {/* PUBLIC ROUTES */}
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/shop" element={<ShopPage />} />
-            <Route path="/product/:slug" element={<PublicProductDetailPage />} />
-            
-            <Route path="profile">
-              <Route index element={<ProfileDashboard />} />
-              <Route path="orders" element={<MyOrdersPage />} />
-              <Route path="orders/:id" element={<OrderDetailPage />} />
-              <Route path="wallet" element={<WalletPage />} />
-              <Route path="addresses" element={<AddressPage />} />
-              <Route path="orders/:id/quotation" element={<QuotationPage />} />
-              <Route path="orders/:id/invoice" element={<InvoicePage />} />
+
+
+              <Route path="/cart/upload/:itemId" element={<DesignUploadPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+
             </Route>
 
+            <Route path="*" element={<Navigate to="/" replace />} />
 
-
-
-<Route path="/cart/upload/:itemId" element={<DesignUploadPage />} />
-<Route path="/cart" element={<CartPage />} />
-<Route path="/checkout" element={<CheckoutPage />} />
-
-
-          </Route>
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-
-        </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
+          </Routes>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 

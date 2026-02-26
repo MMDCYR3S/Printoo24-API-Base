@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <Link 
-      to={`/shop/detail/${product.slug}`} // آپدیت شده بر اساس فرمت استاندارد
+      to={`/product/${product.slug}`} // آپدیت شده بر اساس فرمت استاندارد
       className="group border border-slate-200 rounded-[24px] bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col block overflow-hidden"
     >
       {/* بخش تصویر */}

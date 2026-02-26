@@ -18,6 +18,8 @@ import {
   Phone,
   Headphones,
   Store,
+  Book ,
+  Video
 } from 'lucide-react';
 import MegaMenu from '../components/layout/MegaMenu';
 import pageText from '../lang/pages.json';
@@ -386,6 +388,8 @@ const navigate = useNavigate();
             <nav className="flex items-center gap-0.5 mr-1">
               {[
                 { label: pageText.layout.Header.allProducts, to: '/shop', icon: Store },
+                { label: 'blogs' , to: 'blog', icon: Book },
+                { label: 'tutorials' , to: 'tutorials', icon: Video },
                 { label: pageText.layout.Header.lastOrders, to: '/profile/orders', icon: Package },
                 { label: pageText.layout.Header.myAddresses, to: '/profile/addresses', icon: MapPin },
                 { label: pageText.layout.Header.trackingOrder, to: 'https://wa.me/9647762278666', icon: Headphones },
@@ -412,7 +416,7 @@ const navigate = useNavigate();
               <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg">
                 <Phone size={13} strokeWidth={2} className="text-slate-400" />
                 <span className="font-bold text-slate-500 dir-ltr text-xs tracking-wide">
-                  0770-6227-8666
+                  07762278666
                 </span>
               </div>
               <span className="text-[11px] text-slate-400 hidden xl:inline">
