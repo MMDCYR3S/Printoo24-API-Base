@@ -125,7 +125,12 @@ class ProductPricingDomainService:
         return active_field_ids
 
     @classmethod
-    def calculate_final_price(cls, product_id: int, user_selections: Dict[str, Any]) -> Tuple[Decimal, Dict[str, Any]]:
+    def calculate_final_price(
+        cls, 
+        product_id: int, 
+        user_selections: Dict[str, Any],
+        strict_validation: bool = True
+    ) -> Tuple[Decimal, Dict[str, Any]]:
         """
         دریافت ورودی‌های کاربر، تجمیع مقادیر فیلدها و اجرای فرمول.
         """
@@ -228,7 +233,7 @@ class ProductPricingDomainService:
                         "choice_id": None
                     })
             
-            elif field.is_required:
+            elif field.is_required and strict_validation:
                 raise InvalidProductDataException(f"تکمیل فیلد '{field.title}' الزامی است.")
             
             formula_variables[var_name] = numeric_val

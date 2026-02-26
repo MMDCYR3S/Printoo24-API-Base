@@ -85,8 +85,8 @@ class OrderDashboardService:
         if not final_recipient_name and user.customer_profile:
              final_recipient_name = user.customer_profile.fullname() or user.username
              
-        if not final_recipient_phone and user.customer_profile:
-             final_recipient_phone = user.customer_profile.phone_number
+        if not final_recipient_phone and user:
+             final_recipient_phone = user.phone_number
 
         final_full_address = full_address
         

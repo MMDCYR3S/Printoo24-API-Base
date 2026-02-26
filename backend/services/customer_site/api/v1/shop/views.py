@@ -348,7 +348,8 @@ class ProductLivePriceCalculatorView(APIView):
         try:
             final_price, configuration_summary = ProductPricingDomainService.calculate_final_price(
                 product_id=product_id,
-                user_selections=selections
+                user_selections=selections,
+                strict_validation=False  # <-- برای live price اجباری بودن چک نمیشه
             )
             
             return Response({
