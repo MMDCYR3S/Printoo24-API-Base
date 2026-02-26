@@ -1,228 +1,55 @@
-import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { toast } from 'react-hot-toast';
-import { ShoppingCart, ShieldCheck, Truck, ChevronRight } from 'lucide-react';
+// src/app/features/shop/components/OrderWizard.jsx
+import React from 'react';
 
-import { shopService } from '../../services/shopService';
-import { cartService } from '../../services/cartService';
-import { useProductCalculator } from './hooks/useProductCalculator';
+const OrderWizard = ({ productData, state, setters }) => {
+  const { selectedOptions, visibleFields } = state;
+  const { handleOptionSelect } = setters;
 
-// ایمپورت کامپوننت‌های داخلی
-import ProductGallery from './components/ProductGallery';
-import OrderWizard from './components/OrderWizard';
-
-// فایل ترجمه
-import pageText from '../../lang/pages.json'
-import globalText from '../../lang/global.json'
-
-const ProductDetailPage = () => {
-  const { slug } = useParams();
-  const navigate = useNavigate();
-
-  // دریافت اطلاعات محصول
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['product-detail', slug],
-    queryFn: () => shopService.getProductDetail(slug),
-    retry: 1,
-  });
-
-  // محاسبات
-  const { state, setters, pricing } = useProductCalculator(data);
-
-  // افزودن به سبد
-  const addToCartMutation = useMutation({
-    mutationFn: cartService.addToCart,
-    onSuccess: (response) => {
-      toast.success(pageText.shop.productDetail.addToCartSuccess);
-      // لاجیک هدایت به صفحه آپلود
-      // اگر در پاسخ item_id یا id آمد، هدایت کن
-      const itemId = response?.id || response?.item_id;
-      if (itemId) {
-        navigate(`/cart/upload/${itemId}`);
-      } else {
-        navigate('/cart');
-      }
-    },
-    onError: (err) => {
-        console.error("Cart Error:", err.response?.data);
-        const msg = err.response?.data?.selections ? pageText.shop.productDetail.infoNotComplete : pageText.shop.productDetail.addToCartError;
-        toast.error(msg);
-    }
-  });
-
-  const handleAddToCart = () => {
-    if (!data) return;
-    
-    const minQty = data.pricing_config?.min_quantity || 1;
-    const qty = parseInt(state.customQuantity) || 1;
-
-    if (data.pricing_config?.allow_custom_quantity && qty < minQty) {
-      toast.error(pageText.shop.productDetail.minOrderError01 + {minQty} + pageText.shop.productDetail.minOrderError02);
-      return;
-    }
-
-    if (state.sizeType === 'custom' && (!state.customDimensions.width || !state.customDimensions.height)) {
-       toast.error(pageText.shop.productDetail.sizeError);
-       return;
-    }
-
-    // --- FIX: ساختار Payload دقیقا طبق انتظار سرور (داخل selections) ---
-    const payload = {
-      product_id: data.product_info.id,
-      selections: {
-        name: data.product_info.name, // نام محصول
-        has_design: true, // فلگ طراحی
-        options: state.selectedOptions, // آپشن‌ها
-        
-        // لاجیک تیراژ
-        ...(state.quantityType === 'fixed' 
-            ? { quantity_id: state.selectedQuantityId } 
-            : { quantity: qty }),
-        
-        // لاجیک سایز
-        ...(state.sizeType === 'fixed'
-            ? { size_id: state.selectedSizeId }
-            : { 
-                width: parseFloat(state.customDimensions.width), 
-                height: parseFloat(state.customDimensions.height) 
-              }),
-      }
-    };
-
-    addToCartMutation.mutate(payload);
-  };
-
-  if (isLoading) return <DetailSkeleton />;
-  if (error || !data) return <div className="text-center py-20">{pageText.shop.productNotFound}</div>;
-
-  const { product_info } = data;
+  if (!productData?.fields || productData.fields.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pb-20">
-      <div className="w-full h-48 bg-gradient-to-b from-primary/5 to-transparent absolute top-0 left-0 -z-10"></div>
-
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
-           <a href="/shop" className="hover:text-primary flex items-center gap-1">
-             <ChevronRight size={16} /> {pageText.shop.productCard.products}
-           </a>
-           <span className="opacity-30">/</span>
-           <span className="text-slate-800 font-bold">{product_info.name}</span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          <div className="lg:col-span-4">
-             <div className="sticky top-24">
-<ProductGallery 
-         images={data.images} 
-         attachments={data.attachments} 
-      />
-             </div>
-          </div>
-
-          <div className="lg:col-span-5 flex flex-col gap-8">
-             <div>
-               <h1 className="text-3xl font-black text-slate-800 leading-snug mb-3">
-                 {product_info.name}
-               </h1>
-               <div className="flex items-center gap-3">
-                 <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono text-slate-500">
-                   CODE: {product_info.code}
-                 </span>
-               </div>
-             </div>
-
-             {product_info.description && (
-               <div className="prose prose-sm max-w-none text-slate-600 bg-white p-5 rounded-2xl border border-slate-100">
-                 {product_info.description}
-               </div>
-             )}
-
-             <OrderWizard 
-               productData={data} 
-               state={state} 
-               setters={setters} 
-             />
-          </div>
-
-          <div className="lg:col-span-3 h-full"> 
-            <div className="sticky top-24 space-y-4  ">
-              <div className="bg-white rounded-[24px] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden transition-all duration-300">
-                <div className="p-6 bg-slate-900 text-white relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
-                  <h3 className="text-lg font-bold">{pageText.shop.productDetail.orderFactor}</h3>
-                  <div className="mt-4 flex flex-col gap-1">
-                    <span className="text-xs opacity-70">
-                     {pageText.shop.productDetail.finalPriceForQty01} {pricing.finalQuantity.toLocaleString()} {pageText.shop.productDetail.finalPriceForQty02}
-                    </span>
-                    <div className="flex items-baseline gap-2">
-                       <span className="text-3xl font-black tracking-tight">{pricing.totalPrice.toLocaleString()}</span>
-                       <span className="text-sm font-bold text-primary">{globalText.currency}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6 space-y-4">
-                  <div className="space-y-2 text-sm text-slate-600">
-                    <div className="flex justify-between">
-                      <span>{pageText.shop.productDetail.basePrice}</span>
-                      <span className="font-medium">{pricing.baseUnitPrice.toLocaleString()}</span>
-                    </div>
-                    {pricing.extraCosts > 0 && (
-                      <div className="flex justify-between text-emerald-600">
-                        <span>{pageText.shop.productDetail.optionsAndSize}</span>
-                        <span className="font-medium">+{pricing.extraCosts.toLocaleString()}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="divider my-2"></div>
-
-                  <button 
-                    onClick={handleAddToCart}
-                    disabled={addToCartMutation.isLoading}
-                    className="btn btn-primary w-full h-12 rounded-xl text-lg shadow-lg shadow-primary/25"
-                  >
-                    {addToCartMutation.isLoading ? (
-                      <span className="loading loading-dots"></span>
-                    ) : (
-                      <>
-                        <ShoppingCart size={20} />
-                        {pageText.shop.productDetail.addToCart}
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-5 border border-slate-100 text-xs text-slate-500 space-y-3 shadow-sm">
-                <div className="flex items-center gap-3">
-                  <ShieldCheck className="text-emerald-500" size={18} />
-                  <span>{pageText.shop.productDetail.physicalHealthProduct}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Truck className="text-blue-500" size={18} />
-                  <span>{pageText.shop.productDetail.sendWithSafety}</span>
-                </div>
-              </div>
+    <div className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
+      <h3 className="text-base font-extrabold text-slate-800 mb-2 border-b border-slate-100 pb-3">
+        مشخصات سفارش
+      </h3>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {productData.fields
+          .filter(field => visibleFields.includes(field.id)) // فقط فیلدهای مجاز طبق شروط
+          .sort((a, b) => a.order - b.order) // مرتب‌سازی بر اساس فیلد order
+          .map(field => (
+            <div key={field.id} className="form-control w-full">
+              <label className="label py-1.5 flex items-center gap-1">
+                <span className="text-sm font-bold text-slate-700">
+                  {field.title}
+                </span>
+                {field.is_required && <span className="text-red-500 text-lg leading-none">*</span>}
+              </label>
+              
+              <select
+                className="select select-bordered w-full bg-slate-50/50 border-slate-200 focus:border-primary focus:bg-white transition-colors"
+                value={selectedOptions[field.id] || ''}
+                onChange={(e) => handleOptionSelect(field.id, parseInt(e.target.value))}
+              >
+                {!field.is_required && (
+                  <option value="">انتخاب کنید...</option>
+                )}
+                
+                {field.choices
+                  .sort((a, b) => a.order - b.order)
+                  .map(choice => (
+                    <option key={choice.id} value={choice.id}>
+                      {choice.title}
+                    </option>
+                  ))}
+              </select>
             </div>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
 };
 
-const DetailSkeleton = () => (
-  <div className="container mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
-     <div className="lg:col-span-4 h-96 bg-gray-200 rounded-3xl animate-pulse"></div>
-     <div className="lg:col-span-5 space-y-6">
-       <div className="h-10 w-3/4 bg-gray-200 rounded-xl animate-pulse"></div>
-     </div>
-     <div className="lg:col-span-3 h-80 bg-gray-200 rounded-3xl animate-pulse"></div>
-  </div>
-);
-
-export default ProductDetailPage;
+export default OrderWizard;

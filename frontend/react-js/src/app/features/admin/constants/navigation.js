@@ -1,7 +1,8 @@
 // src/app/features/admin/constants/navigation.js
 import { 
   LayoutDashboard, ShoppingCart, Box, Users, 
-  MessageSquare, Settings, Layers, Hash, FilePlus, List , Map , MapPin
+  MessageSquare, Settings, Layers, Hash, FilePlus, List , Map , MapPin,
+  BookOpen , Book , Video
 } from 'lucide-react';
 
 export const ADMIN_NAVIGATION = [
@@ -16,7 +17,7 @@ export const ADMIN_NAVIGATION = [
     children: [
       { title: 'لیست محصولات', path: '/admin/products', icon: List },
       { title: 'ایجاد محصول جدید', path: '/admin/products/create', icon: FilePlus },
-      { title: 'مدیریت سایزها', path: '/admin/products/sizes', icon: Hash }, // ویژگی‌ها
+      { title: 'مدیریت سایزها', path: '/admin/products/sizes', icon: Hash }, 
       { title: 'مدیریت تیراژها', path: '/admin/products/quantities', icon: Hash },
     ]
   },
@@ -25,17 +26,17 @@ export const ADMIN_NAVIGATION = [
     icon: Layers,
     children: [
       { title: 'مدیریت دسته‌ها', path: '/admin/categories', icon: List },
-      { title: 'زیر‌دسته‌ها', path: '/admin/categories/sub', icon: Layers }, // اگه جداست
+      { title: 'زیر‌دسته‌ها', path: '/admin/categories/sub', icon: Layers },
     ]
   },
   {
-  title: 'مناطق جغرافیایی',
-  icon: Map, // Import Map from lucide-react
-  children: [
-    { title: 'مدیریت استان‌ها', path: '/admin/provinces', icon: Layers },
-    { title: 'مدیریت شهرها', path: '/admin/cities', icon: MapPin },
-  ]
-},
+    title: 'مناطق جغرافیایی',
+    icon: Map, 
+    children: [
+      { title: 'مدیریت استان‌ها', path: '/admin/provinces', icon: Layers },
+      { title: 'مدیریت شهرها', path: '/admin/cities', icon: MapPin },
+    ]
+  },
   {
     title: 'سفارشات',
     icon: ShoppingCart,
@@ -44,12 +45,28 @@ export const ADMIN_NAVIGATION = [
       { title: 'ثبت سفارش دستی', path: '/admin/orders/create', icon: FilePlus },
     ]
   },
+    {
+    title: 'بلاگ',
+    icon: BookOpen, // آیکون بلاگ
+    children: [
+      { title: 'دسته‌بندی‌های بلاگ', path: '/admin/blog-categories', icon: Layers },
+      { title: 'مقالات', path: '/admin/articles', icon: Book },
+      { title: 'نوشتن مقاله جدید', path: '/admin/articles/new', icon: Book },
+    ]
+  },
+    {
+    title: 'آموزش ها',
+    icon: Video , 
+    children: [
+      { title: 'آموزش ها', path: '/admin/Tutorials', icon: Book },
+      { title: 'ایجاد آموزش جدید', path: '/admin/Tutorials/new', icon: Book },
+    ]
+  },
   {
     title: 'مشتریان',
     icon: Users,
     children: [
       { title: 'لیست کاربران', path: '/admin/users', icon: List },
-      // دیتیل معمولاً روت دینامیک هست و توی منو نمیاد (admin/users/:id)
     ]
   },
   {
@@ -65,7 +82,7 @@ export const ADMIN_NAVIGATION = [
     children: [
       { title: 'اسلایدر صفحه اصلی', path: '/admin/settings/sliders', icon: Layers },
       { title: 'مودال‌های اطلاع‌رسانی', path: '/admin/settings/modals', icon: MessageSquare },
-      {  title: 'نوار هدر', path: '/admin/settings/media', icon: Settings }
+      { title: 'نوار هدر', path: '/admin/settings/media', icon: Settings }
     ]
   },
 ];
