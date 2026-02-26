@@ -15,7 +15,6 @@ env = environ.Env(
 env_file = os.path.join(BASE_DIR, 'env/.env.prod')
 environ.Env.read_env(env_file)
 
-
 SECRET_KEY = env('SECRET_KEY')
 
 DEBUG = env("DEBUG", default=True)
@@ -182,3 +181,7 @@ SIMPLE_JWT = {
 
 # ======= Message Json File ======= #
 MESSAGES_JSON_FILE = os.path.join(BASE_DIR, 'locale/messages.json')
+
+# ===== MAX UPLOAD FILE ===== #
+FILE_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
