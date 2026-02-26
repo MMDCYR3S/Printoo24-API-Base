@@ -13,7 +13,8 @@ from ..serializers import (
     AdminOrderCreateSerializer,
     AdminOrderUpdateSerializer,
     OrderStatusChangeSerializer,
-    OrderStatusListSerializer
+    OrderStatusListSerializer,
+    CartItemAddSimpleSerializer
 )
 
 # ===== Order Dashboard ViewSet ===== #
@@ -55,28 +56,65 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         except Exception:
             return Response({'detail': 'سفارش یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
 
+    # ===== ADD ITEM TO EXISTING ORDER ===== #
+    @extend_schema(
+        summary="افزودن آیتم دستی به سفارش موجود",
+        description="افزودن محصول یا ردیف خدماتی جدید به سفارش از قبل ثبت شده.",
+        request=CartItemAddSimpleSerializer,
+        examples=[
+            OpenApiExample(
+                'Manual Item Add',
+                summary='افزودن آیتم دستی با قیمت دلخواه',
+                value={
+                    "product_slug": None,
+                    "name": "هزینه بسته‌بندی ویژه صادراتی",
+                    "price": 450000,
+                    "selections": {"quantity": 1}
+                },
+                request_only=True
+            )
+        ]
+    )
+    @action(detail=True, methods=['post'], url_path='items')
+    def add_item(self, request, pk=None):
+        serializer = CartItemAddSimpleSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            item = self.service.add_item_to_order(pk, serializer.validated_data)
+            return Response(
+                {'id': item.id, 'message': 'آیتم به سفارش اضافه شد.'}, 
+                status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     # ===== CREATE ===== #
     @extend_schema(
-        summary="ایجاد سفارش دستی",
-        description="ثبت سفارش برای کاربر یا مهمان. امکان تعیین قیمت کل به صورت دستی (total_price) و اطلاعات کامل مشتری.",
+        summary="ایجاد سفارش دستی (ادمین)",
+        description=(
+            "ثبت سفارش جدید توسط اپراتور. "
+            "امکان ثبت محصول با قیمت دلخواه یا ثبت ردیف‌های خدماتی بدون محصول (مثل هزینه طراحی) وجود دارد."
+        ),
         request=AdminOrderCreateSerializer,
         responses={201: inline_serializer(name='OrderCreateResp', fields={'id': serializers.IntegerField(), 'message': serializers.CharField()})},
         examples=[
             OpenApiExample(
-                '1. Standard Size (With Price Override)',
-                summary='سفارش با سایز استاندارد + قیمت کل دستی',
-                description='تعیین دستی مبلغ کل سفارش با نادیده گرفتن قیمت پایه محصول.',
+                '1. Existing Product with Manual Price',
+                summary='محصول موجود با قیمت دستی',
+                description='در این حالت محصول انتخاب شده اما قیمت واحد توسط ادمین تعیین می‌شود.',
                 value={
-                    "user_id": 101,
+                    "user_id": 10,
                     "address_id": 5,
-                    "total_price": 5000000, # <--- قیمت کل دستی
+                    "total_price": 5500000, # قیمت کل نهایی فاکتور
                     "items": [
                         {
-                            "product_slug": "business-card-gl",
-                            "quantity": 1000,
+                            "product_slug": "catalog-print",
+                            "price": 5500000, # قیمت دستی برای این ردیف
                             "selections": {
+                                "quantity": 100,
                                 "size_id": 12,
-                                "option_value_ids": [55]
+                                "options": {"paper": "glossy-200g"}
                             }
                         }
                     ]
@@ -84,23 +122,22 @@ class OrderDashboardViewSet(viewsets.ViewSet):
                 request_only=True
             ),
             OpenApiExample(
-                '2. Custom Size (Guest User)',
-                summary='سفارش با سایز دلخواه + کاربر مهمان',
-                description='ثبت اطلاعات کامل آدرس و گیرنده به صورت متنی.',
+                '2. Fully Manual Service Item',
+                summary='ردیف خدماتی کاملاً دستی',
+                description='زمانی که محصولی در سایت نداریم و ادمین مستقیماً نام و قیمت وارد می‌کند.',
                 value={
-                    "user_id": None,
-                    "recipient_name": "علی رضایی",
-                    "recipient_phone": "09120000000",
-                    "full_address": "شیراز، خیابان زند، پلاک ۱",
-                    "total_price": 850000,
+                    "user_id": None, # سفارش برای مهمان
+                    "recipient_name": "شرکت نرم‌افزاری الف",
+                    "recipient_phone": "09121234567",
+                    "full_address": "تهران، میدان ونک، برج نگار",
                     "items": [
                         {
-                            "product_slug": "banner-flex",
+                            "product_slug": None, # فیلد اسلاگ خالی است
+                            "name": "هزینه فوریت در چاپ و ارسال اکسپرس",
+                            "price": 850000,
+                            "description": "ارسال با پیک اختصاصی تا قبل از ساعت ۱۸",
                             "selections": {
-                                "quantity": 1,
-                                "custom_width": 350.5,
-                                "custom_height": 120,
-                                "name": "بنر سردر مغازه"
+                                "quantity": 1
                             }
                         }
                     ]
@@ -116,17 +153,18 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         valid_data = serializer.validated_data
         
         try:
+            # فراخوانی سرویس دامین با پارامترهای جدید
             order = self.service.create_admin_order(
-                user_id=valid_data['user_id'],
+                user_id=valid_data.get('user_id'),
                 items_data=valid_data['items'],
-                total_price_override=valid_data.get('total_price'), # <--- باگ اصلاح شد (به جای price)
+                total_price_override=valid_data.get('total_price'),
                 address_id=valid_data.get('address_id'),
                 full_address=valid_data.get('full_address'),
                 recipient_name=valid_data.get('recipient_name'),
                 recipient_phone=valid_data.get('recipient_phone'),
                 company_name=valid_data.get('company_name')
             )
-            return Response({'id': order.id, 'message': 'سفارش ثبت شد.'}, status=status.HTTP_201_CREATED)
+            return Response({'id': order.id, 'message': 'سفارش با موفقیت ثبت شد.'}, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

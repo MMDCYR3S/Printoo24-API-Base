@@ -6,3 +6,5 @@ from core.models import (
 )
 
 admin.site.register(ProductFormula)
+admin.site.register(ProductFieldCondition)
+admin.site.register(ProductFieldChoice)

@@ -37,25 +37,55 @@ class UserCartDetailSerializer(serializers.ModelSerializer):
 # ===== Cart Item Add Serializer ===== #
 class CartItemSelectionSerializer(serializers.Serializer):
     """
-    ساختار انتخاب‌های محصول (ساده‌سازی شده).
+    ساختار انتخاب‌های محصول.
     """
     quantity = serializers.IntegerField(min_value=1, required=False, allow_null=True)
     quantity_id = serializers.IntegerField(required=False, allow_null=True)
     size_id = serializers.IntegerField(required=False, allow_null=True)
     
-    custom_width = serializers.FloatField(required=False)
-    custom_height = serializers.FloatField(required=False)
+    custom_width = serializers.FloatField(required=False, allow_null=True)
+    custom_height = serializers.FloatField(required=False, allow_null=True)
     
     options = serializers.DictField(required=False, default={})
     has_design = serializers.BooleanField(default=True)
+    
+    # افزوده شد: برای مواردی که نام و توضیحات داخل selection فرستاده می‌شود
+    name = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    description = serializers.CharField(required=False, allow_null=True, allow_blank=True)
 
 # ===== Cart Item Add Simple Serializer ===== #
 class CartItemAddSimpleSerializer(serializers.Serializer):
     """
-    سریالایزر اصلی برای افزودن آیتم به سبد خرید ادمین.
+    سریالایزر اصلی برای افزودن آیتم به سبد خرید یا ثبت سفارش توسط ادمین.
     """
-    product_slug = serializers.CharField() 
-    selections = CartItemSelectionSerializer()
+    # تغییر کرد: الزامی بودن آن برداشته شد تا ادمین بتواند آیتم کاملاً دستی ثبت کند
+    product_slug = serializers.CharField(required=False, allow_null=True, allow_blank=True) 
+    
+    # افزوده شد: فیلدهای مربوط به قیمت‌گذاری دستی توسط ادمین
+    price = serializers.DecimalField(max_digits=14, decimal_places=0, required=False, allow_null=True)
+    item_price = serializers.DecimalField(max_digits=14, decimal_places=0, required=False, allow_null=True)
+    
+    # افزوده شد: نام و توضیحات در سطح آیتم (همانطور که سرویس شما انتظار دارد)
+    name = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    description = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+
+    selections = CartItemSelectionSerializer(required=False)
+
+    def validate(self, attrs):
+        """
+        اعتبارسنجی سطح شیء (Object-level Validation)
+        اگر محصول مشخص نشده است، حداقل نام باید ارسال شود.
+        """
+        product_slug = attrs.get('product_slug')
+        name = attrs.get('name')
+        selections = attrs.get('selections') or {}
+        selection_name = selections.get('name')
+
+        if not product_slug and not name and not selection_name:
+            raise serializers.ValidationError(
+                "وقتی محصولی انتخاب نمی‌کنید (product_slug خالی است)، وارد کردن 'name' برای آیتم الزامی است."
+            )
+        return attrs
 
 # ===== Cart Item Update Serializer ===== #
 class CartItemUpdateSerializer(serializers.Serializer):
