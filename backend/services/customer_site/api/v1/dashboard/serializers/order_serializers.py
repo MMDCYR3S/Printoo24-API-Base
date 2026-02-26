@@ -119,7 +119,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'total_price', 'base_products_price',
             'type', 'created_at', 'items'
         ]
-
+    
     def get_user_info(self, obj):
         if not obj.user:
             return None

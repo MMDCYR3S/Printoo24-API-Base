@@ -132,7 +132,7 @@ class ProductPricingDomainService:
         strict_validation: bool = True
     ) -> Tuple[Decimal, Dict[str, Any]]:
         """
-        دریافت ورودی‌های کاربر، تجمیع مقادیر فیلدها و اجرای فرمول.
+        دریافت ورودی‌های کاربر، تجمیع مقادیر فیلدها و اجرای ماشین‌حساب ریاضی.
         """
         try:
             product = Product.objects.prefetch_related(
@@ -146,25 +146,27 @@ class ProductPricingDomainService:
 
         fields_map = {f.id: f for f in product.fields.all()}
         
-        # ===== انتخاب فیلدهای انتخاب شده ===== #
+        # ===== پیدا کردن فیلدهای فعال براساس Rule Engine ===== #
         active_field_ids = cls._evaluate_field_conditions(fields_map, user_selections)
 
         formula_variables = {}
         configuration_summary = []
+        
+        # متغیر پیش‌فرض برای تیراژ
+        quantity_val = Decimal('1.0') 
 
-        # ===== انتخاب فیلدهای فعال ===== #
+        # ===== استخراج مقادیر فیلدها ===== #
         for f_id in active_field_ids:
             field = fields_map[f_id]
             str_f_id = str(f_id)
             var_name = f"field_{f_id}"
             
-            # ===== مقدار پایه هر فیلد ===== #
             numeric_val = field.numeric_value 
             
             if str_f_id in user_selections and user_selections[str_f_id] not in [None, '', [], 'null']:
                 user_val = user_selections[str_f_id]
 
-                # ===== حالت اول: فیلدهای تک انتخابی ===== #
+                # -------- حالت اول: فیلدهای تک انتخابی -------- #
                 if field.field_type in ['dropdown', 'single_select', 'radio']:
                     choice = next((c for c in field.choices.all() if str(c.id) == str(user_val)), None)
                     if not choice:
@@ -178,7 +180,7 @@ class ProductPricingDomainService:
                         "choice_id": choice.id
                     })
 
-                # ===== حالت دوم: فیلدهای چند انتخابی (پیاده‌سازی عملگر داخلی) ===== #
+                # -------- حالت دوم: فیلدهای چند انتخابی -------- #
                 elif field.field_type in ['multi_select', 'checkbox']:
                     if not isinstance(user_val, list):
                         user_val = [user_val]
@@ -187,7 +189,6 @@ class ProductPricingDomainService:
                     if not selected_choices:
                         raise InvalidProductDataException(f"مقادیر ارسالی برای فیلد '{field.title}' معتبر نیست.")
                     
-                    # ===== انتخاب فیلدهایی که ادمین در نظر گرفته ===== #
                     internal_result = selected_choices[0].numeric_value
                     operator_choice = getattr(field, 'multi_select_operator', 'add')
 
@@ -211,7 +212,7 @@ class ProductPricingDomainService:
                         "choice_ids": [c.id for c in selected_choices]
                     })
 
-                # ===== حالت سوم: فیلدهای عددی و تیراژ ===== #
+                # -------- حالت سوم: فیلدهای عددی و تیراژ -------- #
                 elif field.field_type == 'number':
                     try:
                         numeric_val += Decimal(str(user_val))
@@ -224,7 +225,7 @@ class ProductPricingDomainService:
                     except Exception:
                         raise InvalidProductDataException(f"مقدار وارد شده در فیلد '{field.title}' باید عدد باشد.")
                 
-                # ===== حالت چهارم: فیلدهای متنی ===== #
+                # -------- حالت چهارم: فیلدهای متنی -------- #
                 else:
                     configuration_summary.append({
                         "field_id": field.id,
@@ -236,20 +237,34 @@ class ProductPricingDomainService:
             elif field.is_required and strict_validation:
                 raise InvalidProductDataException(f"تکمیل فیلد '{field.title}' الزامی است.")
             
+            # ذخیره ارزش عددی فیلد
             formula_variables[var_name] = numeric_val
+            
+            # 🌟 شناسایی خودکار فیلد تیراژ (چک کردن flag مدل)
+            if field.is_quantity_field:
+                quantity_val = numeric_val
 
-        # ===== در نظر نگرفتن فیلدهای مخفی ===== # 
+        # ===== مقداردهی فیلدهای مخفی شده با صفر (برای جلوگیری از کرش فرمول) ===== # 
         for f_id in fields_map.keys():
             var_name = f"field_{f_id}"
             if var_name not in formula_variables:
                 formula_variables[var_name] = Decimal('0.0')
 
-        formula_variables["price_per_unit"] = Decimal(str(product.price_per_unit))
+        # 🌟 ===== تزریق متغیرهای سیستمی حیاتی به مفسر فرمول ===== 🌟
+        formula_variables["price_per_unit"] = Decimal(str(product.price_per_unit)) if product.price_per_unit else Decimal('1.0')
+        formula_variables["base_price"] = Decimal(str(product.price))
+        formula_variables["quantity"] = quantity_val
 
         # ===== پیدا کردن فرمول مناسب ===== #
         formulas = list(product.formulas.all())
+        
+        # 🌟 ===== اگر محصول فرمولی نداشت (رفتار دیفالت استاندارد صنعت چاپ) ===== 🌟
         if not formulas:
-            return sum(formula_variables.values()), configuration_summary
+            # فقط مقادیر فیلدها با هم جمع می‌شوند (بدون جمع شدن با متغیرهای سیستمی)
+            fields_sum = sum(v for k, v in formula_variables.items() if k.startswith('field_'))
+            # منطق استاندارد: (قیمت پایه + جمع ارزش آپشن‌ها) * (تیراژ انتخاب شده / واحد مبنا)
+            fallback_price = (formula_variables["base_price"] + fields_sum) * (quantity_val / formula_variables["price_per_unit"])
+            return fallback_price.quantize(Decimal('0.00')), configuration_summary
 
         active_formula = None
         default_formula = None
@@ -269,10 +284,6 @@ class ProductPricingDomainService:
                     break
             except Exception:
                 pass
-
-            if SafeMathEvaluator.evaluate(formula.condition_expression, formula_variables):
-                active_formula = formula
-                break
         
         if not active_formula:
             active_formula = default_formula
@@ -280,7 +291,7 @@ class ProductPricingDomainService:
         if not active_formula:
             active_formula = formulas[-1]
 
-        # ===== انتخاب و اجرای فرمول انتخاب شده ===== #
+        # ===== انتخاب و اجرای فرمول نهایی ===== #
         final_price = SafeMathEvaluator.evaluate(
             expression=active_formula.calculation_expression,
             variables=formula_variables
