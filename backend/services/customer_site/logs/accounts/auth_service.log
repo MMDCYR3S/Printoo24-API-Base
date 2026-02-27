@@ -1321,3 +1321,15 @@ DEBUG 2026-02-26 13:57:11,602 auth_service 305 123604700227264 AuthService initi
 INFO 2026-02-26 13:57:11,680 auth_service 305 123604700227264 User found. Routing to login flow: 09137555555
 INFO 2026-02-26 13:57:11,683 auth_service 305 123604700227264 Login attempt for: 09137555555
 INFO 2026-02-26 13:57:12,963 auth_service 305 123604700227264 User logged in: 21
+DEBUG 2026-02-27 07:49:33,712 auth_service 11 131148060554944 AuthService initialized with UserIdentityService
+INFO 2026-02-27 07:49:33,781 auth_service 11 131148060554944 User found. Routing to login flow: 09137514625
+INFO 2026-02-27 07:49:33,783 auth_service 11 131148060554944 Login attempt for: 09137514625
+INFO 2026-02-27 07:49:34,123 auth_service 11 131148060554944 User logged in: 11
+DEBUG 2026-02-27 08:06:17,791 auth_service 28 129570405611200 AuthService initialized with UserIdentityService
+INFO 2026-02-27 08:06:17,799 auth_service 28 129570405611200 User found. Routing to login flow: 09137514625
+INFO 2026-02-27 08:06:17,801 auth_service 28 129570405611200 Login attempt for: 09137514625
+INFO 2026-02-27 08:06:18,014 auth_service 28 129570405611200 User logged in: 11
+DEBUG 2026-02-27 08:34:02,968 auth_service 65 123931800368832 AuthService initialized with UserIdentityService
+INFO 2026-02-27 08:34:02,993 auth_service 65 123931800368832 User found. Routing to login flow: 09137514625
+INFO 2026-02-27 08:34:02,995 auth_service 65 123931800368832 Login attempt for: 09137514625
+INFO 2026-02-27 08:34:03,160 auth_service 65 123931800368832 User logged in: 11
