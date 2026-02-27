@@ -12,7 +12,7 @@ from ..exceptions import (
 from ..models import (
     Product, ProductCategory,
     ProductFormula, ProductFieldChoice, ProductField,
-    ProductFieldCondition
+    ProductFieldCondition, ProductCategoryRelation
 )
 
 class ProductService:
@@ -63,9 +63,11 @@ class ProductService:
         data['user'] = user
         product = Product.objects.create(**data)
 
-        valid_ids = [id for id in (category_id, subcategory_id) if id]
-        if valid_ids:
-            product.categories.set(valid_ids)
+        self._sync_categories(
+            product=product,
+            primary_category_id=category_id,
+            subcategory_id=subcategory_id
+        )
         
         return product
 
@@ -85,15 +87,16 @@ class ProductService:
         
         # اگر آپدیت دسته‌بندی داشتیم، لیست جدید را set کن
         if has_category_update:
-            valid_ids = [id for id in (category_id, subcategory_id) if id]
-            product.categories.set(valid_ids)
+            self._sync_categories(
+                product=product,
+                primary_category_id=category_id,
+                subcategory_id=subcategory_id
+            )
         
         return product
     
     def _sync_categories(self, product, primary_category_id, subcategory_id):
         """ مدیریت صریح یک دسته اصلی و یک زیردسته """
-        from core.models import ProductCategoryRelation 
-
         valid_ids = []
         if primary_category_id:
             valid_ids.append(primary_category_id)
@@ -108,23 +111,16 @@ class ProductService:
 
         # ===== ایجاد دسته‌بندی اصلی ===== #
         if primary_category_id:
-            rel, _ = ProductCategoryRelation.objects.get_or_create(
+            rel, created = ProductCategoryRelation.objects.get_or_create(
                 product=product, category_id=primary_category_id,
-                defaults={'is_primary': True}
             )
-            if not rel.is_primary:
-                rel.is_primary = True
-                rel.save(update_fields=['is_primary'])
 
-        # ===== ایجاد رابطه با محصول ===== #
+        # ===== ایجاد رابطه با زیردسته ===== #
         if subcategory_id and subcategory_id != primary_category_id:
-            rel, _ = ProductCategoryRelation.objects.get_or_create(
+            rel, created = ProductCategoryRelation.objects.get_or_create(
                 product=product, category_id=subcategory_id,
-                defaults={'is_primary': False}
             )
-            if rel.is_primary:
-                rel.is_primary = False
-                rel.save(update_fields=['is_primary'])
+            rel.save()
 
     # ===== ساخت بخش مربوط به محصولات ===== #
     def delete_product(self, product_id: int):

@@ -183,7 +183,7 @@ class ProductCategory(MPTTModel):
 class ProductCategoryRelation(models.Model):
     """
     جدول واسط صریح برای مدیریت رابطه محصول و دسته‌بندی.
-    این جدول به ما اجازه می‌دهد فراداده‌هایی مثل 'is_primary' داشته باشیم.
+    این جدول به ما اجازه می‌دهد فراداده‌هایی مثل داشته باشیم.
     """
     product = models.ForeignKey(
         'Product', 
