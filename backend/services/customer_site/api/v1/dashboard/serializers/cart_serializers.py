@@ -91,19 +91,15 @@ class CartItemAddSimpleSerializer(serializers.Serializer):
     name = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     description = serializers.CharField(required=False, allow_null=True, allow_blank=True)
 
-    selections = CartItemSelectionSerializer(required=False)
-
-    def validate(self, attrs):
-        product_slug = attrs.get('product_slug')
-        name = attrs.get('name')
-        selections = attrs.get('selections') or {}
-        selection_name = selections.get('name')
-
-        if not product_slug and not name and not selection_name:
-            raise serializers.ValidationError(
-                "وقتی محصولی انتخاب نمی‌کنید (product_slug خالی است)، وارد کردن 'name' الزامی است."
-            )
-        return attrs
+    selections = serializers.DictField(
+        child=serializers.JSONField(), # به کلاینت اجازه می‌دهد عدد، رشته یا لیست (برای چک‌باکس‌ها) بفرستد
+        help_text="""
+        دیکشنری انتخاب‌های کاربر.
+        - کلیدها: آیدی فیلدهای داینامیک (مثلاً "10")
+        - مقادیر: مقدار تایپ شده یا آیدیِ گزینه انتخاب شده.
+        - فیلدهای رزرو شده (اختیاری): "name" (نام پروژه) و "description" (توضیحات مشتری).
+        """
+    )
 
 # ===== ویرایش آیتم سبد ===== #
 class CartItemUpdateSerializer(serializers.Serializer):
@@ -150,7 +146,7 @@ class CartListSerializer(serializers.ModelSerializer):
                     return name
             except Exception:
                 pass
-            return getattr(obj.user, 'phone_number', obj.user.username)
+            return getattr(obj.user, 'phone_number', obj.user.phone_number)
         return f"مهمان ({obj.session_key[:8]}...)" if obj.session_key else "ناشناس"
 
 # ===== آپلود فایل ===== #
