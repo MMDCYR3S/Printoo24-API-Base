@@ -75,27 +75,17 @@ class CartDashboardViewSet(viewsets.ViewSet):
                 'Scenario 1: Product with Field Selections',
                 summary='محصول با انتخاب فیلدها (ProductField)',
                 value={
-                    "product_slug": "catalog-print",
+                    "product_slug": "khrt-wyzyt",
+                    "name": "کارت ویزیت توکافولاد",
                     "selections": {
-                        "field_12": 3,
-                        "field_15": 500,
-                        "quantity": 100,
-                        "has_design": True
-                    }
+                        "13": 24,
+                        "14": 28,
+                        "15": 31
+                    },
+                    "descrpition" : "سلام. خدافظ"
                 },
                 request_only=True,
-            ),
-            OpenApiExample(
-                'Scenario 2: Manual Item (No Product)',
-                summary='آیتم دستی بدون محصول',
-                value={
-                    "product_slug": None,
-                    "name": "هزینه طراحی لوگو",
-                    "price": 850000,
-                    "selections": {"quantity": 1}
-                },
-                request_only=True,
-            ),
+            )
         ]
     )
     @action(detail=True, methods=['post'], url_path='items')
@@ -122,10 +112,9 @@ class CartDashboardViewSet(viewsets.ViewSet):
             OpenApiExample(
                 'Update with field selections',
                 value={
-                    "field_12": 3,
-                    "field_15": 200,
-                    "quantity": 50,
-                    "has_design": True
+                    "12": 23,
+                    "14": 27,
+                    "15": 32
                 }
             ),
         ]

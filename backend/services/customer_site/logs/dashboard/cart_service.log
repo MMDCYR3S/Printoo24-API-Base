@@ -32,3 +32,11 @@ INFO 2025-12-22 10:31:44,312 cart_service 394 140057175389888 START: Get cart of
 INFO 2025-12-22 10:31:44,342 cart_service 394 140057175389888 SUCCESS: Item 14 added to cart for User 1. Price: 324556.0
 INFO 2025-12-22 10:31:44,346 cart_service 394 140057175389888 START: Get Cart Details for User ID 1
 INFO 2025-12-22 10:31:44,354 cart_service 394 140057175389888 SUCCESS: Cart details retrieved for User 1. Cart ID: 1
+INFO 2026-03-01 12:32:03,440 cart_service 11 124386602383040 START: Get Cart Details for User ID 6
+INFO 2026-03-01 12:33:05,880 cart_service 11 124386602383040 Admin adding item for Cart ID 1
+INFO 2026-03-01 12:33:27,535 cart_service 11 124386602383040 Admin adding item for Cart ID 6
+INFO 2026-03-01 12:34:16,955 cart_service 14 135361464366784 Admin adding item for Cart ID 6
+ERROR 2026-03-01 12:34:17,068 cart_service 14 135361464366784 Failed to add item via Admin: ["تکمیل فیلد 'گرماژ' الزامی است."]
+INFO 2026-03-01 12:34:57,463 cart_service 14 135361464366784 Admin adding item for Cart ID 6
+INFO 2026-03-01 12:34:57,528 cart_service 14 135361464366784 Item 30 added via Admin to Cart 6.
+INFO 2026-03-01 12:34:57,536 cart_service 14 135361464366784 START: Get Cart Details for User ID 6
