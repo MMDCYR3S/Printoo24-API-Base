@@ -339,82 +339,131 @@ class MultiSelectOperator(models.TextChoices):
     MULTIPLY = 'mul', _('ضرب (*)')
     DIVIDE = 'div', _('تقسیم (/)')
 
-# ======== 1. فرم‌ساز (مدل فیلدها) ======== #
-class ProductField(models.Model):
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='fields', verbose_name=_("محصول"))
-    title = models.CharField(_("عنوان فیلد"), max_length=150)
-    description = models.TextField(_("توضیحات"), blank=True, null=True)
-    multi_select_operator = models.CharField(
-        _("عملگر داخلی چندانتخابی"),
-        max_length=10,
-        choices=MultiSelectOperator.choices,
-        default=MultiSelectOperator.ADD,
-        help_text=_("اگر فیلد چندانتخابی است، مقادیرِ تیک‌خورده با چه عملگری با هم محاسبه شوند؟")
-    )
-    field_type = models.CharField(_("نوع فیلد"), max_length=20, choices=FieldType.choices, default=FieldType.DROPDOWN)
-    
-    # اضافه شدن مقدار عددی به خود فیلد (طبق دستور شما)
-    numeric_value = models.DecimalField(
-        _("مقدار عددی پایه (برای فرمول)"), 
-        max_digits=14, 
-        decimal_places=2, 
-        default=0.0,
-        help_text=_("اگر خود فیلد به تنهایی دارای ارزش عددی/قیمتی در فرمول است (مستقل از زیرمجموعه‌ها)")
-    )
-    
-    is_required = models.BooleanField(_("اجباری بودن"), default=False)
-    is_active = models.BooleanField(_("فعال بودن"), default=True)
-    is_quantity_field = models.BooleanField(_("آیا این فیلد همان تیراژ است؟"), default=False)
-    
-    order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
 
-    class Meta:
-        ordering = ['order']
+# ====================================== #
+# ======== PRODUCT FIELD MODELS ======== #
+# ====================================== #
+
+class FieldDictionary(models.Model):
+    """
+    مخزن مرکزی فیلدها (مثلاً: رنگ، سایز، جنس)
+    این جدول در طول زمان به صورت خودکار توسط ورودی‌های کاربر پر می‌شود.
+    """
+    title = models.CharField(_("عنوان فیلد"), max_length=150, unique=True)
+    description = models.TextField(_("توضیحات پیش‌فرض"), blank=True, null=True)
+    
+    # تنظیمات ذاتی فیلد که مستقل از محصول هستند
+    field_type = models.CharField(
+        _("نوع فیلد"), max_length=20, choices=FieldType.choices, default=FieldType.DROPDOWN
+    )
+    multi_select_operator = models.CharField(
+        _("عملگر داخلی چندانتخابی"), max_length=10, 
+        choices=MultiSelectOperator.choices, default=MultiSelectOperator.ADD
+    )
+    is_quantity_field = models.BooleanField(_("آیا این فیلد همان تیراژ است؟"), default=False)
+    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("تاریخ بروزرسانی"), auto_now=True)
 
     def __str__(self):
-        return f"{self.product.name} - {self.title} (ID: {self.id})"
+        return self.title
 
 
-# ======== 2. مقادیر زیرمجموعه ======== #
-class ProductFieldChoice(models.Model):
-    field = models.ForeignKey(ProductField, on_delete=models.CASCADE, related_name='choices')
+class FieldChoiceDictionary(models.Model):
+    """
+    مخزن مرکزی مقادیر زیرمجموعه (مثلاً: قرمز، آبی / لارج، ایکس‌لارج)
+    """
+    field = models.ForeignKey(
+        FieldDictionary, on_delete=models.CASCADE, related_name='choices', verbose_name=_("فیلد پدر")
+    )
     title = models.CharField(_("عنوان مقدار"), max_length=150)
+    created_at = models.DateTimeField(_("تاریخ ایجاد"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("تاریخ بروزرسانی"), auto_now=True)
+
+    class Meta:
+        unique_together = ('field', 'title') 
+
+    def __str__(self):
+        return f"{self.field.title} -> {self.title}"
+
+
+# ======== PRODUCT Fields ======== #
+class ProductField(models.Model):
+    """
+    اختصاص یک فیلد به یک محصول خاص
+    """
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='fields', verbose_name=_("محصول"))
+    field_dict = models.ForeignKey(FieldDictionary, on_delete=models.RESTRICT, verbose_name=_("فیلد مرجع"))
     
+    # تنظیمات اختصاصی این فیلد برای این محصول خاص
     numeric_value = models.DecimalField(
-        _("مقدار عددی (برای فرمول)"), 
+        _("مقدار عددی پایه (برای فرمول این محصول)"), 
         max_digits=14, 
         decimal_places=2, 
         default=0.0
     )
+    is_required = models.BooleanField(_("اجباری بودن برای این محصول"), default=False)
+    is_active = models.BooleanField(_("فعال بودن در این محصول"), default=True)
+    order = models.PositiveIntegerField(_("ترتیب نمایش"), default=0)
 
-    is_default = models.BooleanField(
-        _("گزینه پیش‌فرض"), 
-        default=False,
-        help_text=_("آیا این گزینه در فرانت‌اند به صورت پیش‌فرض انتخاب شده باشد؟")
-    )
+    class Meta:
+        ordering = ['order']
+        # یک فیلد نباید دوبار به یک محصول اضافه شود
+        unique_together = ('product', 'field_dict')
+
+    def __str__(self):
+        return f"{self.product.name} - {self.field_dict.title}"
+
+
+class ProductFieldChoice(models.Model):
+    """
+    اختصاص یک زیرویژگی (مقدار) به فیلدِ همان محصول
+    """
+    product_field = models.ForeignKey(ProductField, on_delete=models.CASCADE, related_name='choices')
+    choice_dict = models.ForeignKey(FieldChoiceDictionary, on_delete=models.RESTRICT, verbose_name=_("مقدار مرجع"))
     
+    # تنظیمات اختصاصی این گزینه برای این محصول خاص
+    numeric_value = models.DecimalField(
+        _("مقدار عددی (ارزش این گزینه در این محصول)"), 
+        max_digits=14, 
+        decimal_places=2, 
+        default=0.0
+    )
+    is_default = models.BooleanField(_("گزینه پیش‌فرض"), default=False)
     order = models.PositiveIntegerField(_("ترتیب"), default=0)
 
     class Meta:
         ordering = ['order']
+        # جلوگیری از افزودن تکراری یک گزینه به یک فیلد محصول
+        unique_together = ('product_field', 'choice_dict')
+
+    def clean(self):
+        """
+        تضمین یکپارچگی داده‌ها (Data Integrity Check):
+        باید مطمئن شویم زیرویژگی انتخابی، واقعاً متعلق به همان فیلد والد است.
+        """
+        super().clean()
+        if self.choice_dict.field_id != self.product_field.field_dict_id:
+            raise ValidationError({
+                'choice_dict': _("این مقدار متعلق به فیلد دیگری است و نمی‌تواند به این فیلد اختصاص یابد.")
+            })
 
     def save(self, *args, **kwargs):
-        """
-        تضمین یکپارچگی داده‌ها (Data Integrity):
-        اگر این رکورد به عنوان پیش‌فرض ست شود، بقیه رکوردهای هم‌خانواده باید False شوند.
-        """
+        self.clean() # اجرای اعتبارسنجی قبل از ذخیره
+        
+        # مدیریت گزینه پیش‌فرض برای این محصول خاص
         if self.is_default:
-            ProductFieldChoice.objects.filter(field=self.field).exclude(pk=self.pk).update(is_default=False)
+            ProductFieldChoice.objects.filter(
+                product_field=self.product_field
+            ).exclude(pk=self.pk).update(is_default=False)
+            
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.field.title} -> {self.title} (Value: {self.numeric_value})"
-
+        return f"{self.product_field} -> {self.choice_dict.title} (Value: {self.numeric_value})"
 
 # ======== 3. شرط‌ساز ======== #
 class ProductFieldCondition(models.Model):
     target_field = models.ForeignKey(ProductField, on_delete=models.CASCADE, related_name='applied_conditions', verbose_name=_("فیلد هدف"))
-    
     trigger_field = models.ForeignKey(ProductField, on_delete=models.CASCADE, related_name='triggering_conditions', verbose_name=_("فیلد شرط"))
     operator = models.CharField(_("عملگر"), max_length=20, choices=ConditionOperator.choices)
     
@@ -424,11 +473,25 @@ class ProductFieldCondition(models.Model):
     action = models.CharField(_("عملیات"), max_length=20, choices=ConditionAction.choices)
 
     def clean(self):
+        # ۱. جلوگیری از وابستگی به خود
         if self.target_field == self.trigger_field:
             raise ValidationError(_("یک فیلد نمی‌تواند به خودش وابسته باشد."))
+            
+        # ۲. تضمین اینکه هر دو فیلد متعلق به یک محصول هستند (بسیار مهم)
+        if self.target_field.product_id != self.trigger_field.product_id:
+            raise ValidationError(_("فیلد هدف و فیلد شرط باید متعلق به یک محصول باشند."))
+            
+        # ۳. اگر مقداری (choice) انتخاب شده، باید حتماً زیرمجموعه همان فیلد شرط باشد
+        if self.trigger_choice and self.trigger_choice.product_field_id != self.trigger_field.id:
+            raise ValidationError({'trigger_choice': _("این مقدار متعلق به فیلد شرط انتخاب شده نیست.")})
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"If {self.trigger_field.title} {self.operator} -> {self.action} {self.target_field.title}"
+        # اصلاح مسیر دسترسی به عنوانِ فیلد (از طریق دیکشنری)
+        return f"If {self.trigger_field.field_dict.title} {self.operator} -> {self.action} {self.target_field.field_dict.title}"
 
 
 # ======== 4. فرمول‌ساز نهایی ======== #
