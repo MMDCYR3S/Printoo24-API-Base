@@ -167,7 +167,7 @@ class ProductCoreCreateSerializer(serializers.Serializer):
 # ===== Read-Only Field/Choice/Condition Serializers (برای خروجی Detail) ===== #
 class ProductFieldChoiceReadSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    title = serializers.CharField()
+    title = serializers.CharField(source='choice_dict.title')
     numeric_value = serializers.DecimalField(max_digits=14, decimal_places=2)
     order = serializers.IntegerField()
     is_default = serializers.BooleanField()
@@ -184,15 +184,20 @@ class ProductFieldConditionReadSerializer(serializers.Serializer):
 
 class ProductFieldReadSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    title = serializers.CharField()
-    description = serializers.CharField(allow_null=True)
-    field_type = serializers.CharField()
-    numeric_value = serializers.DecimalField(max_digits=14, decimal_places=2)
+    # دیتا از جدول FieldDictionary خوانده می‌شود
+    title = serializers.CharField(source='field_dict.title')
+    description = serializers.CharField(source='field_dict.description', allow_null=True)
+    field_type = serializers.CharField(source='field_dict.field_type')
+    multi_select_operator = serializers.CharField(source='field_dict.multi_select_operator', allow_null=True, required=False)
+    
+    is_quantity_field = serializers.BooleanField(source='field_dict.is_quantity_field')
+    
+    # مقادیر زیر در خود جدول واسط (ProductField) قرار دارند
+    numeric_value = serializers.DecimalField(max_digits=14, decimal_places=2, allow_null=True, required=False)
     is_required = serializers.BooleanField()
     is_active = serializers.BooleanField()
-    is_quantity_field = serializers.BooleanField()
     order = serializers.IntegerField()
-    multi_select_operator = serializers.CharField()
+    
     choices = ProductFieldChoiceReadSerializer(many=True)
     conditions = ProductFieldConditionReadSerializer(source='applied_conditions', many=True)
 

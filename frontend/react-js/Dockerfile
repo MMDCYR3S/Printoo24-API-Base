@@ -6,11 +6,12 @@ WORKDIR /app
 
 # کپی فایل‌های شناسنامه پروژه برای نصب پکیج‌ها
 # این کار باعث می‌شود اگر کدها تغییر کرد اما پکیج جدیدی اضافه نشد، این لایه دوباره بیلد نشود (سرعت بالا)
+RUN npm config set registry https://mirror-npm.runflare.com/
 COPY package.json package-lock.json ./
 
 
 # نصب پکیج‌ها
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # کپی بقیه فایل‌ها (برای محیط توسعه که Volume داریم، این لایه در اجرا اورراید می‌شود)
 COPY . .

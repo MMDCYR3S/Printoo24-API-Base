@@ -52,6 +52,14 @@ class AttachmentSerializer(serializers.ModelSerializer):
 # ==========================================
 
 class ProductFieldChoiceOutputSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='choice_dict.title', read_only=True)
+    numeric_value = serializers.DecimalField(
+        source='choice_dict.numeric_value', 
+        max_digits=14, 
+        decimal_places=2, 
+        read_only=True
+    )
+
     class Meta:
         model = ProductFieldChoice
         fields = ['id', 'title', 'numeric_value', 'order']
@@ -69,6 +77,12 @@ class ProductFieldConditionOutputSerializer(serializers.ModelSerializer):
 
 
 class ProductFieldOutputSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source='field_dict.title', read_only=True)
+    description = serializers.CharField(source='field_dict.description', read_only=True, allow_null=True)
+    field_type = serializers.CharField(source='field_dict.field_type', read_only=True)
+    
+    is_quantity_field = serializers.BooleanField(source='field_dict.is_quantity_field', read_only=True)
+
     choices = ProductFieldChoiceOutputSerializer(many=True, read_only=True)
     conditions = ProductFieldConditionOutputSerializer(
         source='applied_conditions', many=True, read_only=True

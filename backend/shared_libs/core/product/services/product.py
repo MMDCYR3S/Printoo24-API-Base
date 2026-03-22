@@ -1,4 +1,5 @@
 import ast
+import re
 from typing import List, Optional, Dict, Any, Set
 
 from django.db.models import Max, ProtectedError
@@ -11,8 +12,8 @@ from ..exceptions import (
 )
 from ..models import (
     Product, ProductCategory,
-    ProductFormula, ProductFieldChoice, ProductField,
-    ProductFieldCondition, ProductCategoryRelation
+    ProductFormula, ProductFieldChoice, ProductField, FieldChoiceDictionary,
+    ProductFieldCondition, ProductCategoryRelation, FieldDictionary
 )
 
 class ProductService:
@@ -160,6 +161,14 @@ class ProductService:
             "total_processed": len(product_ids)
         }
 
+    def normalize_text(self, text: str) -> str:
+        if not text:
+            return ""
+        text = text.strip()
+        text = text.replace('ي', 'ی').replace('ك', 'ک')
+        text = re.sub(r'\s+', ' ', text)
+        return text
+
     # ========================================== #
     # 1. موتور همگام‌ساز فیلدها (Form Builder Sync)
     # ========================================== #
@@ -176,105 +185,116 @@ class ProductService:
             if str(f.get('id')) != 'base_price' and str(f.get('temp_id')) != 'base_price'
         ]
 
-        # --- پاک کردن فیلدهای حذف شده (دقت کن از clean_fields_data استفاده می‌کنیم) ---
         incoming_field_ids = [f['id'] for f in clean_fields_data if f.get('id')]
+        # حذف از جدول واسط (دیکشنری‌ها دست‌نخورده باقی می‌مانند)
         ProductField.objects.filter(product=product).exclude(id__in=incoming_field_ids).delete()
 
         pending_conditions = []
-        
-        # ===== فیلدهای گلوبال ===== #
         global_field_map = {}
         global_choice_map = {}
 
         # ======= مرحله اول (Pass 1): ساخت فیلدها و گزینه‌ها ======= #
-        for field_data in fields_data:
+        for field_data in clean_fields_data:
             field_id = field_data.get('id')
             temp_id = field_data.get('temp_id')
 
-            field_defaults = {
-                'title': field_data['title'],
-                'description': field_data.get('description', ''),
-                'field_type': field_data['field_type'],
+            # ۱. پردازش لایه دیکشنری فیلد
+            clean_field_title = self.normalize_text(field_data.get('title', ''))
+            field_dict, _ = FieldDictionary.objects.get_or_create(
+                title=clean_field_title,
+                defaults={
+                    'description': field_data.get('description', ''),
+                    'field_type': field_data.get('field_type', 'dropdown'),
+                    'multi_select_operator': field_data.get('multi_select_operator', 'add'),
+                    'is_quantity_field': field_data.get('is_quantity_field', False),
+                }
+            )
+
+            # ۲. پردازش لایه واسط فیلد (اتصال به محصول)
+            product_field_defaults = {
+                'field_dict': field_dict, # اگر کاربر اسم را تغییر دهد، فقط لینک به دیکشنری جدید عوض می‌شود
                 'numeric_value': field_data.get('numeric_value', 0.0),
                 'is_required': field_data.get('is_required', False),
                 'is_active': field_data.get('is_active', True),
-                'is_quantity_field': field_data.get('is_quantity_field', False),
                 'order': field_data.get('order', 0),
-                'multi_select_operator': field_data.get('multi_select_operator', 'add'),
             }
 
             if field_id:
-                field, _ = ProductField.objects.update_or_create(
-                    id=field_id, product=product, defaults=field_defaults
+                product_field, _ = ProductField.objects.update_or_create(
+                    id=field_id, product=product, defaults=product_field_defaults
                 )
             else:
-                field = ProductField.objects.create(product=product, **field_defaults)
+                product_field = ProductField.objects.create(product=product, **product_field_defaults)
 
-            # ثبت فیلد در ریجستری سراسری
-            global_field_map[str(field.id)] = field
+            # ثبت فیلد در ریجستری سراسری (برای فرمول‌ها و شرط‌ها از آیدی همین جدول واسط استفاده می‌کنیم)
+            global_field_map[str(product_field.id)] = product_field
             if temp_id:
-                global_field_map[str(temp_id)] = field
+                global_field_map[str(temp_id)] = product_field
 
-            # ذخیره گزینه‌ها (Choices)
+            # ۳. پردازش گزینه‌ها (Choices)
             choices_data = field_data.get('choices', [])
             incoming_choice_ids = [c['id'] for c in choices_data if c.get('id')]
-            ProductFieldChoice.objects.filter(field=field).exclude(id__in=incoming_choice_ids).delete()
+            ProductFieldChoice.objects.filter(product_field=product_field).exclude(id__in=incoming_choice_ids).delete()
 
             for choice_data in choices_data:
                 choice_id = choice_data.get('id')
                 temp_choice_id = choice_data.get('temp_id')
                 
-                choice_defaults = {
-                    'title': choice_data['title'],
+                # پردازش لایه دیکشنری مقدار
+                clean_choice_title = self.normalize_text(choice_data.get('title', ''))
+                choice_dict, _ = FieldChoiceDictionary.objects.get_or_create(
+                    field=field_dict, # زیرمجموعه همان دیکشنری اصلی
+                    title=clean_choice_title
+                )
+
+                # پردازش لایه واسط مقدار (اتصال به فیلد محصول)
+                product_choice_defaults = {
+                    'choice_dict': choice_dict,
                     'numeric_value': choice_data.get('numeric_value', 0.0),
                     'order': choice_data.get('order', 0),
                     'is_default': choice_data.get('is_default', False)
                 }
                 
                 if choice_id:
-                    choice, _ = ProductFieldChoice.objects.update_or_create(
-                        id=choice_id, field=field, defaults=choice_defaults
+                    product_choice, _ = ProductFieldChoice.objects.update_or_create(
+                        id=choice_id, product_field=product_field, defaults=product_choice_defaults
                     )
                 else:
-                    choice = ProductFieldChoice.objects.create(field=field, **choice_defaults)
+                    product_choice = ProductFieldChoice.objects.create(product_field=product_field, **product_choice_defaults)
 
-                # 🌟 ثبت گزینه در ریجستری سراسری (حل باگ اصلی)
-                global_choice_map[str(choice.id)] = choice
+                # ثبت گزینه در ریجستری سراسری
+                global_choice_map[str(product_choice.id)] = product_choice
                 if temp_choice_id:
-                    global_choice_map[str(temp_choice_id)] = choice
+                    global_choice_map[str(temp_choice_id)] = product_choice
 
-            # جمع‌آوری شرایط برای مرحله دوم (بدون نیاز به پاس دادن مپ‌ها)
+            # جمع‌آوری شرایط برای مرحله دوم
             if field_data.get('conditions'):
                 pending_conditions.append({
-                    'target_field': field,
+                    'target_field': product_field,
                     'conditions': field_data['conditions']
                 })
 
         # ======= مرحله دوم (Pass 2): ساخت شرط‌ها با resolve کردن ID های موقت =======
         ProductFieldCondition.objects.filter(target_field__product=product).delete()
-
         new_conditions = []
         errors = []
 
         for pc in pending_conditions:
             target_field = pc['target_field']
-
             for cond_data in pc['conditions']:
                 raw_trigger_field_id = str(cond_data['trigger_field_id'])
                 raw_trigger_choice_id = str(cond_data.get('trigger_choice_id')) if cond_data.get('trigger_choice_id') else None
 
-                # 1. Resolve کردن فیلد شرط از ریجستری سراسری
                 trigger_field_obj = global_field_map.get(raw_trigger_field_id)
                 if not trigger_field_obj:
-                    errors.append(f"شرط فیلد '{target_field.title}': فیلد شرط با شناسه {raw_trigger_field_id} یافت نشد.")
+                    errors.append(f"شرط فیلد '{target_field.field_dict.title}': فیلد شرط یافت نشد.")
                     continue
 
-                # 2. Resolve کردن گزینه شرط از ریجستری سراسری
                 resolved_choice_id = None
                 if raw_trigger_choice_id and raw_trigger_choice_id != 'None':
                     choice_obj = global_choice_map.get(raw_trigger_choice_id)
                     if not choice_obj:
-                        errors.append(f"شرط فیلد '{target_field.title}': گزینه شرط با شناسه {raw_trigger_choice_id} یافت نشد.")
+                        errors.append(f"شرط فیلد '{target_field.field_dict.title}': گزینه شرط یافت نشد.")
                         continue
                     resolved_choice_id = choice_obj.id
 

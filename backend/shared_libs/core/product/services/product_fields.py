@@ -111,7 +111,7 @@ class ProductPricingDomainService:
         return active_field_ids
 
     @classmethod
-    def calculate_final_price(cls, product_id: int, user_selections: Dict[str, Any]) -> Tuple[Decimal, Dict[str, Any]]:
+    def calculate_final_price(cls, product_id: int, user_selections: Dict[str, Any], strict_validation: bool = True) -> Tuple[Decimal, Dict[str, Any]]:
         """
         متد اصلی محاسبه قیمت.
         user_selections: {'12': '45', '15': '1000'} -> {field_id: choice_id_or_typed_value}
@@ -119,9 +119,9 @@ class ProductPricingDomainService:
         # --- 1. واکشی سنگین اما بهینه (بدون N+1) ---
         try:
             product = Product.objects.prefetch_related(
-                Prefetch('fields', queryset=ProductField.objects.filter(is_active=True).prefetch_related(
-                    'choices',
-                    'applied_conditions' # شروطی که تارگت‌شان این فیلد است
+                Prefetch('fields', queryset=ProductField.objects.filter(is_active=True).select_related('field_dict').prefetch_related(
+                    'applied_conditions',
+                    Prefetch('choices', queryset=ProductFieldChoice.objects.select_related('choice_dict'))
                 )),
                 'formulas'
             ).get(id=product_id)
@@ -149,34 +149,30 @@ class ProductPricingDomainService:
                 user_val = user_selections[str_f_id]
 
                 # حالت الف: فیلدهای انتخابی (یافتن آبجکت زیرمجموعه)
-                if field.field_type in ['dropdown', 'single_select', 'multi_select']:
+                if field.field_dict.field_type in ['dropdown', 'single_select', 'multi_select']:
                     choice = next((c for c in field.choices.all() if str(c.id) == str(user_val)), None)
                     if not choice:
-                        raise InvalidProductDataException(f"مقدار انتخابی برای '{field.title}' نامعتبر است.")
+                        raise InvalidProductDataException(f"مقدار انتخابی برای '{field.field_dict.title}' نامعتبر است.")
                     
                     numeric_val += choice.numeric_value
-                    configuration_summary[field.title] = choice.title
+                    configuration_summary[field.field_dict.title] = choice.choice_dict.title
 
                 # حالت ب: فیلدهای متنی یا عددی
-                elif field.field_type == 'number':
+                elif field.field_dict.field_type == 'number':
                     try:
                         numeric_val += Decimal(str(user_val))
-                        configuration_summary[field.title] = str(user_val)
+                        configuration_summary[field.field_dict.title] = str(user_val)
                     except Exception:
-                        raise InvalidProductDataException(f"مقدار فیلد '{field.title}' باید عدد باشد.")
+                        raise InvalidProductDataException(f"مقدار فیلد '{field.field_dict.title}' باید عدد باشد.")
                 else:
                     # فیلد متنی در محاسبات اثری ندارد اما در خلاصه سفارش ثبت می‌شود
-                    configuration_summary[field.title] = str(user_val)
+                    configuration_summary[field.field_dict.title] = str(user_val)
             
-            # اعتبارسنجی فیلدهای اجباری (فقط برای فیلدهای فعال چک می‌شود)
-            elif field.is_required:
-                raise InvalidProductDataException(f"پر کردن فیلد '{field.title}' الزامی است.")
-            
-            # مقدار نهایی فیلد برای ارسال به ماشین‌حساب آماده است
+            elif field.is_required and strict_validation:
+                raise InvalidProductDataException(f"پر کردن فیلد '{field.field_dict.title}' الزامی است.")
+
             formula_variables[var_name] = numeric_val
 
-        # اگر فیلدی در دیتابیس هست اما فعال نیست (مخفی شده)، مقدارش در فرمول 0 در نظر گرفته میشود
-        # تا فرمول با خطای "متغیر یافت نشد" مواجه نشود.
         for f_id in fields_map.keys():
             var_name = f"field_{f_id}"
             if var_name not in formula_variables:

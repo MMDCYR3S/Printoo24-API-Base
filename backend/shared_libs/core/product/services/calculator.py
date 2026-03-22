@@ -86,7 +86,6 @@ class ProductPricingDomainService:
     def _evaluate_field_conditions(fields_map: Dict[int, ProductField], user_selections: Dict[str, Any]) -> Set[int]:
         """
         موتور ارزیابی شروط (Rule Engine).
-        بررسی می‌کند کاربر چه مقادیری فرستاده، تا فیلدهایی که باید مخفی شوند را از چرخه محاسبه حذف کند.
         """
         active_field_ids = set(fields_map.keys())
 
@@ -102,7 +101,6 @@ class ProductPricingDomainService:
                 elif condition.operator == ConditionOperator.IS_NOT_EMPTY:
                     is_condition_met = bool(user_value)
                 elif user_value is not None:
-                    # پشتیبانی از حالت چندانتخابی در trigger
                     user_values_list = user_value if isinstance(user_value, list) else [user_value]
                     user_values_str = [str(v) for v in user_values_list]
 
@@ -135,9 +133,11 @@ class ProductPricingDomainService:
         دریافت ورودی‌های کاربر، تجمیع مقادیر فیلدها و اجرای ماشین‌حساب ریاضی.
         """
         try:
+            # ===== اصلاح کوئری برای واکشی جداول دیکشنری ===== #
             product = Product.objects.prefetch_related(
-                Prefetch('fields', queryset=ProductField.objects.filter(is_active=True).prefetch_related(
-                    'choices', 'applied_conditions'
+                Prefetch('fields', queryset=ProductField.objects.filter(is_active=True).select_related('field_dict').prefetch_related(
+                    'applied_conditions',
+                    Prefetch('choices', queryset=ProductFieldChoice.objects.select_related('choice_dict'))
                 )),
                 'formulas'
             ).get(id=product_id)
@@ -158,90 +158,94 @@ class ProductPricingDomainService:
         # ===== استخراج مقادیر فیلدها ===== #
         for f_id in active_field_ids:
             field = fields_map[f_id]
+            field_dict = field.field_dict  # دسترسی سریع به دیکشنری
             str_f_id = str(f_id)
             var_name = f"field_{f_id}"
             
-            numeric_val = field.numeric_value 
+            # خواندن مقدار عددی پیش‌فرض از دیکشنری در صورت وجود (وگرنه 0)
+            numeric_val = getattr(field_dict, 'numeric_value', Decimal('0.0'))
             
             if str_f_id in user_selections and user_selections[str_f_id] not in [None, '', [], 'null']:
                 user_val = user_selections[str_f_id]
 
                 # -------- حالت اول: فیلدهای تک انتخابی -------- #
-                if field.field_type in ['dropdown', 'single_select', 'radio']:
+                if field_dict.field_type in ['dropdown', 'single_select', 'radio']:
                     choice = next((c for c in field.choices.all() if str(c.id) == str(user_val)), None)
                     if not choice:
-                        raise InvalidProductDataException(f"مقدار انتخابی برای '{field.title}' نامعتبر است.")
+                        raise InvalidProductDataException(f"مقدار انتخابی برای '{field_dict.title}' نامعتبر است.")
                     
-                    numeric_val += choice.numeric_value
+                    numeric_val += getattr(choice.choice_dict, 'numeric_value', Decimal('0.0'))
                     configuration_summary.append({
                         "field_id": field.id,
-                        "field_title": field.title,
-                        "value": choice.title,
+                        "field_title": field_dict.title,
+                        "value": choice.choice_dict.title,
                         "choice_id": choice.id
                     })
 
                 # -------- حالت دوم: فیلدهای چند انتخابی -------- #
-                elif field.field_type in ['multi_select', 'checkbox']:
+                elif field_dict.field_type in ['multi_select', 'checkbox']:
                     if not isinstance(user_val, list):
                         user_val = [user_val]
                     
                     selected_choices = [c for c in field.choices.all() if str(c.id) in map(str, user_val)]
                     if not selected_choices:
-                        raise InvalidProductDataException(f"مقادیر ارسالی برای فیلد '{field.title}' معتبر نیست.")
+                        raise InvalidProductDataException(f"مقادیر ارسالی برای فیلد '{field_dict.title}' معتبر نیست.")
                     
-                    internal_result = selected_choices[0].numeric_value
-                    operator_choice = getattr(field, 'multi_select_operator', 'add')
+                    internal_result = getattr(selected_choices[0].choice_dict, 'numeric_value', Decimal('0.0'))
+                    operator_choice = getattr(field_dict, 'multi_select_operator', 'add')
 
                     for c in selected_choices[1:]:
+                        c_val = getattr(c.choice_dict, 'numeric_value', Decimal('0.0'))
                         if operator_choice == 'add':
-                            internal_result += c.numeric_value
+                            internal_result += c_val
                         elif operator_choice == 'sub':
-                            internal_result -= c.numeric_value
+                            internal_result -= c_val
                         elif operator_choice == 'mul':
-                            internal_result *= c.numeric_value
+                            internal_result *= c_val
                         elif operator_choice == 'div':
-                            if c.numeric_value == 0:
-                                raise InvalidProductDataException(f"خطا: تقسیم بر صفر در گزینه‌های '{field.title}'.")
-                            internal_result /= c.numeric_value
+                            if c_val == 0:
+                                raise InvalidProductDataException(f"خطا: تقسیم بر صفر در گزینه‌های '{field_dict.title}'.")
+                            internal_result /= c_val
 
                     numeric_val += internal_result
                     configuration_summary.append({
                         "field_id": field.id,
-                        "field_title": field.title,
-                        "value": " ، ".join([c.title for c in selected_choices]),
+                        "field_title": field_dict.title,
+                        "value": " ، ".join([c.choice_dict.title for c in selected_choices]),
                         "choice_ids": [c.id for c in selected_choices]
                     })
 
                 # -------- حالت سوم: فیلدهای عددی و تیراژ -------- #
-                elif field.field_type == 'number':
+                elif field_dict.field_type == 'number':
                     try:
                         numeric_val += Decimal(str(user_val))
                         configuration_summary.append({
                             "field_id": field.id,
-                            "field_title": field.title,
+                            "field_title": field_dict.title,
                             "value": str(user_val),
                             "choice_id": None
                         })
                     except Exception:
-                        raise InvalidProductDataException(f"مقدار وارد شده در فیلد '{field.title}' باید عدد باشد.")
+                        raise InvalidProductDataException(f"مقدار وارد شده در فیلد '{field_dict.title}' باید عدد باشد.")
                 
                 # -------- حالت چهارم: فیلدهای متنی -------- #
                 else:
                     configuration_summary.append({
                         "field_id": field.id,
-                        "field_title": field.title,
+                        "field_title": field_dict.title,
                         "value": str(user_val),
                         "choice_id": None
                     })
             
-            elif field.is_required and strict_validation:
-                raise InvalidProductDataException(f"تکمیل فیلد '{field.title}' الزامی است.")
+            # ویژگی is_required معمولاً در خود جدول واسط (ProductField) نگه‌داری می‌شود تا بتواند برای هر محصول متفاوت باشد
+            elif getattr(field, 'is_required', False) and strict_validation:
+                raise InvalidProductDataException(f"تکمیل فیلد '{field_dict.title}' الزامی است.")
             
             # ذخیره ارزش عددی فیلد
             formula_variables[var_name] = numeric_val
             
-            # 🌟 شناسایی خودکار فیلد تیراژ (چک کردن flag مدل)
-            if field.is_quantity_field:
+            # 🌟 شناسایی خودکار فیلد تیراژ با خواندن از دیکشنری
+            if getattr(field_dict, 'is_quantity_field', False):
                 quantity_val = numeric_val
 
         # ===== مقداردهی فیلدهای مخفی شده با صفر (برای جلوگیری از کرش فرمول) ===== # 
@@ -260,9 +264,7 @@ class ProductPricingDomainService:
         
         # 🌟 ===== اگر محصول فرمولی نداشت (رفتار دیفالت استاندارد صنعت چاپ) ===== 🌟
         if not formulas:
-            # فقط مقادیر فیلدها با هم جمع می‌شوند (بدون جمع شدن با متغیرهای سیستمی)
             fields_sum = sum(v for k, v in formula_variables.items() if k.startswith('field_'))
-            # منطق استاندارد: (قیمت پایه + جمع ارزش آپشن‌ها) * (تیراژ انتخاب شده / واحد مبنا)
             fallback_price = (formula_variables["base_price"] + fields_sum) * (quantity_val / formula_variables["price_per_unit"])
             return fallback_price.quantize(Decimal('0.00')), configuration_summary
 

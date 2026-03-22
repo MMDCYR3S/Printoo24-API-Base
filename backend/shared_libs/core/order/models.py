@@ -323,7 +323,7 @@ class OrderItemFile(models.Model):
         ordering = ['-version']
 
     def __str__(self):
-        return f"File v{self.version} - {self.get_status_display()}"
+        return f"File v{self.version}"
 
     # ===== Properties ===== #
     @property
