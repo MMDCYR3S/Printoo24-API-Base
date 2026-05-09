@@ -7,8 +7,7 @@ from django.db.models import Prefetch
 from django.core.exceptions import ValidationError
 
 from core.product.models import (
-    Product, ProductField, ProductFieldChoice, 
-    ProductFieldCondition, ProductFormula, 
+    Product, ProductField, ProductFieldChoice,
     ConditionOperator, ConditionAction
 )
 from core.product.exceptions import InvalidProductDataException
@@ -25,57 +24,120 @@ class SafeMathEvaluator:
         ast.Sub: operator.sub,
         ast.Mult: operator.mul,
         ast.Div: operator.truediv,
+        ast.Pow: operator.pow,
+        ast.Mod: operator.mod,
+        ast.FloorDiv: operator.floordiv,
         ast.USub: operator.neg,
+        ast.UAdd: operator.pos,
         ast.Gt: operator.gt,
         ast.Lt: operator.lt,
         ast.GtE: operator.ge,
         ast.LtE: operator.le,
         ast.Eq: operator.eq,
         ast.NotEq: operator.ne,
+        ast.And: lambda a, b: a and b,
+        ast.Or: lambda a, b: a or b,
     }
 
     @classmethod
     def evaluate(cls, expression: str, variables: Dict[str, Decimal]):
-        if not expression:
+        """
+        ارزیابی فرمول با جایگزینی امن متغیرها
+        """
+        if not expression or not expression.strip():
             return Decimal('0.0')
+        
         try:
-            parsed_expr = expression
-            for var_name, var_value in sorted(variables.items(), key=lambda x: len(x[0]), reverse=True):
-                parsed_expr = parsed_expr.replace(var_name, str(var_value))
+            # پارس کردن بدون جایگزینی
+            tree = ast.parse(expression.strip(), mode='eval').body
+            result = cls._eval_node(tree, variables)
             
-            tree = ast.parse(parsed_expr, mode='eval').body
-            result = cls._eval_node(tree)
-            
+            # اگر نتیجه boolean بود، همان را برگردان
             if isinstance(result, bool):
                 return result
-                
+            
+            # تبدیل به Decimal
             return Decimal(str(result)).quantize(Decimal('0.00'))
             
         except ZeroDivisionError:
-            raise InvalidProductDataException("خطای محاسباتی: تقسیم بر صفر در فرمول رخ داده است.")
+            raise ValueError("خطای محاسباتی: تقسیم بر صفر در فرمول رخ داده است.")
+        except KeyError as e:
+            raise ValueError(f"متغیر '{e.args[0]}' در فرمول تعریف نشده است.")
         except Exception as e:
-            raise InvalidProductDataException(f"خطا در تجزیه و محاسبه فرمول: {str(e)}")
+            raise ValueError(f"خطا در تجزیه و محاسبه فرمول: {str(e)}")
 
     @classmethod
-    def _eval_node(cls, node):
+    def _eval_node(cls, node, variables: Dict[str, Decimal]):
+        """
+        ارزیابی بازگشتی نودهای AST با پشتیبانی از متغیرها
+        """
+        # اعداد ثابت (Python < 3.8)
         if isinstance(node, ast.Num):
             return node.n
+        
+        # اعداد ثابت (Python >= 3.8)
         elif isinstance(node, ast.Constant):
             return node.value
+        
+        # متغیرها (مثل field_10, quantity و...)
+        elif isinstance(node, ast.Name):
+            var_name = node.id
+            if var_name not in variables:
+                raise KeyError(var_name)
+            return variables[var_name]
+        
+        # عملگرهای دوتایی (+, -, *, /)
         elif isinstance(node, ast.BinOp):
-            left = cls._eval_node(node.left)
-            right = cls._eval_node(node.right)
-            return cls.allowed_operators[type(node.op)](left, right)
+            left = cls._eval_node(node.left, variables)
+            right = cls._eval_node(node.right, variables)
+            op_func = cls.allowed_operators.get(type(node.op))
+            if not op_func:
+                raise TypeError(f"عملگر '{type(node.op).__name__}' پشتیبانی نمی‌شود")
+            return op_func(left, right)
+        
+        # عملگرهای یکتایی (-, +)
         elif isinstance(node, ast.UnaryOp):
-            operand = cls._eval_node(node.operand)
-            return cls.allowed_operators[type(node.op)](operand)
+            operand = cls._eval_node(node.operand, variables)
+            op_func = cls.allowed_operators.get(type(node.op))
+            if not op_func:
+                raise TypeError(f"عملگر '{type(node.op).__name__}' پشتیبانی نمی‌شود")
+            return op_func(operand)
+        
+        # مقایسه‌ها (>, <, ==, !=, >=, <=)
         elif isinstance(node, ast.Compare):
-            left = cls._eval_node(node.left)
-            op = node.ops[0]
-            right = cls._eval_node(node.comparators[0])
-            return cls.allowed_operators[type(op)](left, right)
+            left = cls._eval_node(node.left, variables)
+            
+            # پشتیبانی از زنجیره مقایسه (a < b < c)
+            for op, comparator in zip(node.ops, node.comparators):
+                right = cls._eval_node(comparator, variables)
+                op_func = cls.allowed_operators.get(type(op))
+                if not op_func:
+                    raise TypeError(f"عملگر مقایسه '{type(op).__name__}' پشتیبانی نمی‌شود")
+                
+                if not op_func(left, right):
+                    return False
+                left = right
+            
+            return True
+        
+        # عملگرهای منطقی (and, or)
+        elif isinstance(node, ast.BoolOp):
+            op_func = cls.allowed_operators.get(type(node.op))
+            if not op_func:
+                raise TypeError(f"عملگر منطقی '{type(node.op).__name__}' پشتیبانی نمی‌شود")
+            
+            values = [cls._eval_node(val, variables) for val in node.values]
+            result = values[0]
+            for val in values[1:]:
+                result = op_func(result, val)
+            return result
+        
+        # عملگر not
+        elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+            return not cls._eval_node(node.operand, variables)
+        
         else:
-            raise TypeError(f"ساختار نامعتبر در فرمول: {type(node)}")
+            raise TypeError(f"ساختار نامعتبر در فرمول: {type(node).__name__}")
 
 # ======================================================= #
 # 2. موتور هوشمند قیمت‌گذاری و تجمیع ویژگی‌ها
@@ -158,12 +220,11 @@ class ProductPricingDomainService:
         # ===== استخراج مقادیر فیلدها ===== #
         for f_id in active_field_ids:
             field = fields_map[f_id]
-            field_dict = field.field_dict  # دسترسی سریع به دیکشنری
+            field_dict = field.field_dict
             str_f_id = str(f_id)
             var_name = f"field_{f_id}"
             
-            # خواندن مقدار عددی پیش‌فرض از دیکشنری در صورت وجود (وگرنه 0)
-            numeric_val = getattr(field_dict, 'numeric_value', Decimal('0.0'))
+            numeric_val = field.numeric_value
             
             if str_f_id in user_selections and user_selections[str_f_id] not in [None, '', [], 'null']:
                 user_val = user_selections[str_f_id]
@@ -173,8 +234,8 @@ class ProductPricingDomainService:
                     choice = next((c for c in field.choices.all() if str(c.id) == str(user_val)), None)
                     if not choice:
                         raise InvalidProductDataException(f"مقدار انتخابی برای '{field_dict.title}' نامعتبر است.")
-                    
-                    numeric_val += getattr(choice.choice_dict, 'numeric_value', Decimal('0.0'))
+            
+                    numeric_val += choice.numeric_value
                     configuration_summary.append({
                         "field_id": field.id,
                         "field_title": field_dict.title,
@@ -191,11 +252,12 @@ class ProductPricingDomainService:
                     if not selected_choices:
                         raise InvalidProductDataException(f"مقادیر ارسالی برای فیلد '{field_dict.title}' معتبر نیست.")
                     
-                    internal_result = getattr(selected_choices[0].choice_dict, 'numeric_value', Decimal('0.0'))
+                    internal_result = selected_choices[0].numeric_value
                     operator_choice = getattr(field_dict, 'multi_select_operator', 'add')
 
+
                     for c in selected_choices[1:]:
-                        c_val = getattr(c.choice_dict, 'numeric_value', Decimal('0.0'))
+                        c_val = c.numeric_value
                         if operator_choice == 'add':
                             internal_result += c_val
                         elif operator_choice == 'sub':
