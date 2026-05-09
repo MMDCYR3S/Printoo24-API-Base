@@ -9,8 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 WORKDIR /app
 
 # ===== نصب پیش نیاز اصلی داکر ===== #
-RUN sed -i 's/deb.debian.org/mirror.arvancloud.ir/g' /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     libjpeg-dev \
@@ -22,7 +21,8 @@ COPY ./backend/shared_libs /app/shared_libs
 
 # ===== نصب و کپی اپلیکیشن مشتری سایت ===== #
 COPY ./backend/services/customer_site/requirements/dev/requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r /app/requirements.txt
 
 # ===== کپی سورس کد اپلیکیشن مشتری سایت ===== #
 COPY ./backend/services/customer_site /app/src

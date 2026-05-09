@@ -256,3 +256,9 @@ INFO 2026-02-26 13:13:41,605 add_to_cart_service 305 123604700227264 Start addin
 INFO 2026-03-01 12:34:16,977 add_to_cart_service 14 135361464366784 Start adding product 42 to cart
 INFO 2026-03-01 12:34:57,479 add_to_cart_service 14 135361464366784 Start adding product 42 to cart
 INFO 2026-03-01 12:34:57,513 add_to_cart_service 14 135361464366784 Creating new cart item
+INFO 2026-03-22 11:58:35,045 add_to_cart_service 95 137188033427136 Start adding product 47 to cart
+INFO 2026-03-22 11:58:41,983 add_to_cart_service 95 137188033427136 Start adding product 47 to cart
+INFO 2026-03-22 11:58:48,677 add_to_cart_service 95 137188033427136 Start adding product 47 to cart
+INFO 2026-03-22 11:59:12,183 add_to_cart_service 95 137188016641728 Start adding product 47 to cart
+INFO 2026-03-22 11:59:23,010 add_to_cart_service 95 137188016641728 Start adding product 47 to cart
+INFO 2026-03-22 11:59:23,033 add_to_cart_service 95 137188016641728 Creating new cart item
