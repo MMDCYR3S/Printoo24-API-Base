@@ -76,7 +76,7 @@ class Command(BaseCommand):
         
         # 1. اطمینان از وجود ادمین برای فیلد user
         if not User.objects.filter(is_superuser=True).exists():
-             User.objects.create_superuser('admin', 'admin@printoo.ir', 'admin')
+             User.objects.create_superuser(password='admin', phone_number='09137555555')
              self.stdout.write(" + ادمین پیش‌فرض ساخته شد.")
         
         admin_user = User.objects.filter(is_superuser=True).first()
