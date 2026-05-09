@@ -5,177 +5,410 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from django.core.files import File 
+from django.core.files import File
+from django.utils import timezone
+
 from core.models import (
-    ProductCategory, Product, ProductPricingConfig,
-    Size, ProductSize,
-    Quantity, ProductQuantity,
-    Option, ProductOption, ProductOptionValue,
-    ProductCategoryRelation, ProductImage  # اضافه شدن ProductImage
+    ProductCategory,
+    Product,
+    ProductCategoryRelation,
+    ProductImage,
+    FieldDictionary,
+    FieldChoiceDictionary,
+    ProductField,
+    ProductFieldChoice,
+    ProductFieldCondition,
+    ProductFormula,
 )
 
 User = get_user_model()
 
+
+# ============================================================ #
+#  DATA MAP: تعریف فیلدهای مرجع (FieldDictionary) و مقادیرشان
+# ============================================================ #
+
+FIELD_DEFINITIONS = {
+    'paper-type': {
+        'title': 'نوع کاغذ',
+        'field_type': 'dropdown',
+        'is_quantity_field': False,
+        'choices': [
+            ('تحریر ۸۰ گرم', 0),
+            ('گلاسه ۱۳۵ گرم', 15000),
+            ('کرافت', 20000),
+        ]
+    },
+    'corner-type': {
+        'title': 'نوع گوشه',
+        'field_type': 'single_select',
+        'is_quantity_field': False,
+        'choices': [
+            ('تیز', 0),
+            ('گرد معمولی', 5000),
+            ('گرد شعاع ۵', 8000),
+        ]
+    },
+    'coating': {
+        'title': 'روکش',
+        'field_type': 'single_select',
+        'is_quantity_field': False,
+        'choices': [
+            ('بدون روکش', 0),
+            ('سلفون مات', 10000),
+            ('سلفون براق', 10000),
+            ('UV موضعی', 25000),
+        ]
+    },
+    'print-side': {
+        'title': 'طرف چاپ',
+        'field_type': 'single_select',
+        'is_quantity_field': False,
+        'choices': [
+            ('یک رو', 0),
+            ('دو رو', 20000),
+        ]
+    },
+    'circulation': {
+        'title': 'تیراژ',
+        'field_type': 'dropdown',
+        'is_quantity_field': True,
+        'choices': [
+            ('۱۰۰۰ عدد', 0),
+            ('۲۰۰۰ عدد', 80000),
+            ('۵۰۰۰ عدد', 180000),
+        ]
+    },
+    'banner-material': {
+        'title': 'جنس بنر',
+        'field_type': 'single_select',
+        'is_quantity_field': False,
+        'choices': [
+            ('ایرانی ۱۳ انس', 0),
+            ('چینی', 15000),
+            ('فلکس', 30000),
+        ]
+    },
+    'delivery': {
+        'title': 'زمان تحویل',
+        'field_type': 'single_select',
+        'is_quantity_field': False,
+        'choices': [
+            ('عادی ۷ روز', 0),
+            ('فوری ۳ روز', 50000),
+            ('اکسپرس ۲۴ ساعته', 120000),
+        ]
+    },
+}
+
+
+# ============================================================ #
+#  تعریف الگوهای محصول و اینکه هر الگو چه فیلدهایی دارد
+# ============================================================ #
+
+PRODUCT_TEMPLATES = [
+    {
+        'name': 'کارت ویزیت گلاسه',
+        'slug_base': 'glossy-business-card',
+        'category_slugs': ['business-card'],
+        'price': Decimal('150000'),
+        'price_per_unit': 1000,
+        'fields': ['paper-type', 'corner-type', 'coating', 'print-side', 'circulation', 'delivery'],
+        'formula': '(base_price + paper_type_value + corner_type_value + coating_value + print_side_value + circulation_value) * 1',
+        'is_large_format': False,
+    },
+    {
+        'name': 'تراکت تحریر',
+        'slug_base': 'paper-flyer',
+        'category_slugs': ['flyer-80g', 'advertising-flyer'],
+        'price': Decimal('80000'),
+        'price_per_unit': 1000,
+        'fields': ['paper-type', 'print-side', 'circulation', 'delivery'],
+        'formula': '(base_price + paper_type_value + print_side_value + circulation_value)',
+        'is_large_format': False,
+    },
+    {
+        'name': 'تراکت گلاسه',
+        'slug_base': 'glossy-flyer',
+        'category_slugs': ['flyer-glossy-135', 'advertising-flyer'],
+        'price': Decimal('120000'),
+        'price_per_unit': 1000,
+        'fields': ['coating', 'print-side', 'circulation', 'delivery'],
+        'formula': '(base_price + coating_value + print_side_value + circulation_value)',
+        'is_large_format': False,
+    },
+    {
+        'name': 'بنر ایرانی',
+        'slug_base': 'iranian-banner',
+        'category_slugs': ['banner-13oz', 'banner-large-format'],
+        'price': Decimal('45000'),
+        'price_per_unit': 1,
+        'fields': ['banner-material', 'delivery'],
+        'formula': '(base_price + banner_material_value) * width * height',
+        'is_large_format': True,
+    },
+    {
+        'name': 'استیکر شیشه‌ای',
+        'slug_base': 'glass-sticker',
+        'category_slugs': ['sticker-glass', 'sticker-mesh'],
+        'price': Decimal('60000'),
+        'price_per_unit': 1,
+        'fields': ['print-side', 'delivery'],
+        'formula': '(base_price + print_side_value) * width * height',
+        'is_large_format': True,
+    },
+    {
+        'name': 'پاکت نامه ملخی',
+        'slug_base': 'envelope-dl',
+        'category_slugs': ['envelope-dl', 'office-set'],
+        'price': Decimal('200000'),
+        'price_per_unit': 1000,
+        'fields': ['paper-type', 'print-side', 'circulation', 'delivery'],
+        'formula': '(base_price + paper_type_value + print_side_value + circulation_value)',
+        'is_large_format': False,
+    },
+    {
+        'name': 'سربرگ A4',
+        'slug_base': 'letterhead-a4',
+        'category_slugs': ['letterhead-a4', 'office-set'],
+        'price': Decimal('180000'),
+        'price_per_unit': 1000,
+        'fields': ['paper-type', 'coating', 'circulation', 'delivery'],
+        'formula': '(base_price + paper_type_value + coating_value + circulation_value)',
+        'is_large_format': False,
+    },
+    {
+        'name': 'بروشور دو لت',
+        'slug_base': 'brochure-2fold',
+        'category_slugs': ['brochure-2-fold', 'brochure-catalog'],
+        'price': Decimal('250000'),
+        'price_per_unit': 1000,
+        'fields': ['paper-type', 'coating', 'print-side', 'circulation', 'delivery'],
+        'formula': '(base_price + paper_type_value + coating_value + circulation_value)',
+        'is_large_format': False,
+    },
+    {
+        'name': 'ساک دستی',
+        'slug_base': 'shopping-bag',
+        'category_slugs': ['shopping-bag', 'packaging'],
+        'price': Decimal('500000'),
+        'price_per_unit': 1000,
+        'fields': ['paper-type', 'corner-type', 'circulation', 'delivery'],
+        'formula': '(base_price + paper_type_value + corner_type_value + circulation_value)',
+        'is_large_format': False,
+    },
+    {
+        'name': 'مش چسب‌دار',
+        'slug_base': 'mesh-adhesive',
+        'category_slugs': ['mesh-adhesive', 'sticker-mesh'],
+        'price': Decimal('55000'),
+        'price_per_unit': 1,
+        'fields': ['banner-material', 'delivery'],
+        'formula': '(base_price + banner_material_value) * width * height',
+        'is_large_format': True,
+    },
+]
+
+
 class Command(BaseCommand):
-    help = 'Generates products with 3-5 random images from media/pro/'
+    help = 'Seeds products based on actual model structure with FieldDictionary, ProductField, ProductFieldChoice, and ProductFormula'
 
     def handle(self, *args, **kwargs):
-        self.stdout.write(self.style.WARNING('>>> Start seeding products...'))
-        
-        # ===== آماده‌سازی لیست تصاویر ===== #
+        self.stdout.write(self.style.WARNING('>>> شروع seed محصولات...'))
+
+        # ===== آماده‌سازی تصاویر ===== #
         source_dir = os.path.join(settings.MEDIA_ROOT, 'pro')
         available_images = []
         if os.path.exists(source_dir):
-            # بررسی می‌کنیم که فایل‌ها واقعاً وجود داشته باشند
-            available_images = [f"{i}.jpg" for i in range(1, 9) if os.path.exists(os.path.join(source_dir, f"{i}.jpg"))]
+            available_images = [
+                f"{i}.jpg" for i in range(1, 9)
+                if os.path.exists(os.path.join(source_dir, f"{i}.jpg"))
+            ]
 
         if not available_images:
-            self.stdout.write(self.style.ERROR(f"❌ خطای حیاتی: هیچ عکسی در مسیر {source_dir} پیدا نشد."))
-            return
+            self.stdout.write(self.style.WARNING(f"⚠️ هیچ تصویری در {source_dir} یافت نشد. محصولات بدون تصویر ساخته می‌شوند."))
 
         with transaction.atomic():
+
+            # ===== ۱. بررسی ادمین ===== #
             admin_user = User.objects.filter(is_superuser=True).first()
             if not admin_user:
-                self.stdout.write(self.style.ERROR("ادمین یافت نشد. ابتدا seed_categories را اجرا کنید."))
+                self.stdout.write(self.style.ERROR("❌ ادمین یافت نشد. ابتدا seed_categories را اجرا کنید."))
                 return
 
-            categories = ProductCategory.objects.exclude(parent=None)
-            if not categories.exists():
-                self.stdout.write(self.style.ERROR("دسته‌بندی یافت نشد."))
+            # ===== ۲. بررسی دسته‌بندی‌ها ===== #
+            if not ProductCategory.objects.exists():
+                self.stdout.write(self.style.ERROR("❌ دسته‌بندی یافت نشد. ابتدا seed_categories را اجرا کنید."))
                 return
 
-            sizes = self.create_master_sizes(admin_user)
-            options_dict = self.create_master_options(admin_user)
-            quantities = self.create_master_quantities(admin_user)
-            
-            # پاس دادن لیست تصاویر به متد ساخت محصول
-            self.create_products(admin_user, categories, sizes, options_dict, quantities, source_dir, available_images)
+            # ===== ۳. ساخت FieldDictionary و FieldChoiceDictionary ===== #
+            self.stdout.write(">>> ساخت فیلدهای مرجع...")
+            field_dict_map = self._create_field_dictionaries()
 
-        self.stdout.write(self.style.SUCCESS('✅ Products seeded successfully.'))
+            # ===== ۴. ساخت محصولات ===== #
+            self.stdout.write(">>> ساخت محصولات...")
+            count = 0
+            for template in PRODUCT_TEMPLATES:
+                # هر template را ۳ بار با ID تصادفی بساز
+                for _ in range(3):
+                    unique_id = random.randint(1000, 9999)
+                    self._create_product(
+                        admin_user,
+                        template,
+                        field_dict_map,
+                        unique_id,
+                        source_dir,
+                        available_images,
+                    )
+                    count += 1
 
-    def create_master_sizes(self, user):
-        data = [('Standard Card', 8.5, 4.8), ('Square Card', 5.5, 5.5), ('A4', 21.0, 29.7), ('A5', 14.8, 21.0)]
-        return [Size.objects.get_or_create(name=n, defaults={'user': user, 'width': w, 'height': h})[0] for n, w, h in data]
+        self.stdout.write(self.style.SUCCESS(f"✅ {count} محصول با موفقیت ساخته شد."))
 
-    def create_master_options(self, user):
-        source = {
-            'corner-type': {'label': 'نوع گوشه', 'type': 'select', 'values': ['تیز', 'گرد معمولی', 'گرد شعاع ۵']},
-            'coating': {'label': 'روکش', 'type': 'radio', 'values': ['سلفون مات', 'سلفون براق', 'بدون روکش']},
-            'delivery': {'label': 'زمان تحویل', 'type': 'radio', 'values': ['عادی (۷ روز)', 'فوری (۲ روز)']},
-        }
+    # ============================================================ #
+    def _create_field_dictionaries(self):
+        """
+        ساخت یا دریافت FieldDictionary و FieldChoiceDictionary از دیتابیس.
+        Returns: dict به شکل { 'paper-type': { 'obj': <FieldDictionary>, 'choices': { 'تحریر ۸۰ گرم': <FieldChoiceDictionary>, ... } } }
+        """
         result = {}
-        for key, data in source.items():
-            opt, _ = Option.objects.get_or_create(
-                name=key,
-                defaults={'label': data['label'], 'input_type': data['type']}
+
+        for key, data in FIELD_DEFINITIONS.items():
+            field_obj, created = FieldDictionary.objects.get_or_create(
+                title=data['title'],
+                defaults={
+                    'field_type': data['field_type'],
+                    'is_quantity_field': data['is_quantity_field'],
+                }
             )
-            result[key] = {'obj': opt, 'values': data['values']}
+            if created:
+                self.stdout.write(f"  + FieldDictionary ساخته شد: {data['title']}")
+
+            choices_map = {}
+            for choice_title, numeric_val in data['choices']:
+                choice_obj, _ = FieldChoiceDictionary.objects.get_or_create(
+                    field=field_obj,
+                    title=choice_title,
+                )
+                choices_map[choice_title] = {'obj': choice_obj, 'numeric_value': numeric_val}
+
+            result[key] = {
+                'obj': field_obj,
+                'choices': choices_map,
+            }
+
         return result
 
-    def create_master_quantities(self, user):
-        return [Quantity.objects.get_or_create(value=v, defaults={'user': user})[0] for v in [1000, 2000, 5000]]
+    # ============================================================ #
+    def _create_product(self, user, template, field_dict_map, unique_id, source_dir, available_images):
+        """ساخت یک محصول کامل با تمام روابط"""
 
-    def create_products(self, user, categories, sizes, options_map, quantities, source_dir, available_images):
-        product_templates = [
-            ('کارت ویزیت گلاسه', 'glossy-business-card', False),
-            ('تراکت تحریر', 'paper-flyer', False),
-            ('بنر تسلیت', 'banner-condolence', True),
-            ('استیکر شیشه‌ای', 'glass-sticker', True),
-            ('پاکت نامه ملخی', 'envelope-dl', False)
-        ]
+        prod_name = f"{template['name']} - {unique_id}"
+        prod_slug = f"{template['slug_base']}-{unique_id}"
 
-        # برای ۳۰ محصول تست
-        for i in range(1, 31):
-            name_fa, slug_base, is_large = random.choice(product_templates)
-            cat = random.choice(categories)
-            unique_id = random.randint(1000, 9999)
-            prod_name = f"{name_fa} - نمونه {unique_id}"
-            prod_slug = f"{slug_base}-{unique_id}"
+        # ===== ۱. ساخت محصول پایه ===== #
+        product = Product.objects.create(
+            user=user,
+            name=prod_name,
+            slug=prod_slug,
+            has_price=True,
+            price=template['price'],
+            price_per_unit=template['price_per_unit'],
+            is_active=True,
+            has_quantity=not template['is_large_format'],
+            description=f"محصول {template['name']} با کیفیت تضمینی و تحویل سریع.",
+        )
 
-            # 1. ساخت محصول پایه
-            product = Product.objects.create(
-                user=user,
-                name=prod_name,
-                slug=prod_slug,
-                has_price=True,
-                price=Decimal(random.choice([50000, 100000])),
-                price_per_unit=1 if is_large else 1000,
-                is_active=True,
-                has_quantity=not is_large,
-            )
-
-            # 2. اتصال دسته‌بندی
-            product.categories.add(cat)
-
-            # 3. کانفیگ قیمت
-            ProductPricingConfig.objects.create(
-                product=product,
-                allow_custom_quantity=is_large,
-                min_quantity=1 if is_large else 1000,
-                max_quantity=50000,
-                accepts_custom_dimensions=is_large,
-                min_width=10.0 if is_large else 0,
-                max_width=500.0 if is_large else 0,
-                base_setup_price=Decimal(50000)
-            )
-
-            # 4. اتصال سایز و تیراژ
-            if not is_large:
-                for s in random.sample(sizes, k=min(2, len(sizes))):
-                    ProductSize.objects.create(user=user, product=product, size=s, price_impact=0)
-                
-                for q in quantities:
-                    ProductQuantity.objects.create(
-                        user=user, 
-                        product=product, 
-                        quantity=q
-                    )
-
-            # 5. اتصال آپشن‌ها
-            selected_keys = random.sample(list(options_map.keys()), k=random.randint(1, 2))
-            for idx, key in enumerate(selected_keys):
-                opt_data = options_map[key]
-                prod_opt = ProductOption.objects.create(
+        # ===== ۲. اتصال دسته‌بندی‌ها از طریق جدول واسط ===== #
+        for cat_slug in template['category_slugs']:
+            try:
+                cat = ProductCategory.objects.get(slug=cat_slug)
+                ProductCategoryRelation.objects.get_or_create(
                     product=product,
-                    option=opt_data['obj'],
-                    is_required=True,
-                    order=idx
+                    category=cat,
                 )
-                
-                for v_idx, v_label in enumerate(opt_data['values']):
-                    ProductOptionValue.objects.create(
-                        product_option=prod_opt,
-                        label=v_label,
-                        value=v_label,
-                        price_impact=Decimal(random.randint(0, 20000)),
-                        is_default=(v_idx==0),
-                        order=v_idx
-                    )
-            
-            # 6. اتصال تصاویر (بخش جدید)
-            # ===== انتخاب ۳ تا ۵ عکس تصادفی ===== #
-            num_images = random.randint(3, 5)
-            # استفاده از sample برای جلوگیری از انتخاب عکس تکراری برای یک محصول
-            selected_imgs = random.sample(available_images, k=min(num_images, len(available_images)))
-            
+            except ProductCategory.DoesNotExist:
+                self.stdout.write(self.style.WARNING(f"  ⚠️ دسته‌بندی '{cat_slug}' یافت نشد، رد شد."))
+
+        # ===== ۳. ساخت ProductField و ProductFieldChoice ===== #
+        # نگه داشتن مپ از key فیلد به ProductField برای استفاده در فرمول و شرط
+        product_field_map = {}
+
+        for order_idx, field_key in enumerate(template['fields']):
+            if field_key not in field_dict_map:
+                continue
+
+            field_data = field_dict_map[field_key]
+            field_dict_obj = field_data['obj']
+
+            # ساخت ProductField
+            prod_field = ProductField.objects.create(
+                product=product,
+                field_dict=field_dict_obj,
+                is_required=True,
+                is_active=True,
+                order=order_idx,
+                numeric_value=Decimal('0.00'),
+            )
+            product_field_map[field_key] = prod_field
+
+            # ساخت ProductFieldChoice برای هر گزینه
+            for choice_idx, (choice_title, choice_data) in enumerate(field_data['choices'].items()):
+                ProductFieldChoice.objects.create(
+                    product_field=prod_field,
+                    choice_dict=choice_data['obj'],
+                    numeric_value=Decimal(str(choice_data['numeric_value'])),
+                    is_default=(choice_idx == 0),
+                    order=choice_idx,
+                )
+
+        # ===== ۴. ساخت شرط نمونه (ProductFieldCondition) ===== #
+        # مثال: اگر روکش انتخاب شد و نوع کاغذ هم وجود داشت، شرط بساز
+        if 'coating' in product_field_map and 'paper-type' in product_field_map:
+            coating_field = product_field_map['coating']
+            paper_field = product_field_map['paper-type']
+
+            # گزینه پیش‌فرض coating (بدون روکش)
+            default_coating_choice = ProductFieldChoice.objects.filter(
+                product_field=coating_field,
+                is_default=True
+            ).first()
+
+            if default_coating_choice:
+                # اگر روکش = بدون روکش بود، فیلد کاغذ فعال بماند (نمونه شرط)
+                ProductFieldCondition.objects.create(
+                    target_field=paper_field,
+                    trigger_field=coating_field,
+                    operator='not_equals',
+                    trigger_choice=default_coating_choice,
+                    action='show',
+                )
+
+        # ===== ۵. ساخت فرمول قیمت‌گذاری (ProductFormula) ===== #
+        ProductFormula.objects.create(
+            product=product,
+            title=f"فرمول اصلی - {product.name}",
+            calculation_expression=template['formula'],
+            condition_expression=None,
+        )
+
+        # ===== ۶. اتصال تصاویر ===== #
+        if available_images:
+            num_images = random.randint(3, min(5, len(available_images)))
+            selected_imgs = random.sample(available_images, k=num_images)
+
             for img_order, img_name in enumerate(selected_imgs):
                 try:
                     img_path = os.path.join(source_dir, img_name)
                     with open(img_path, 'rb') as f:
                         django_file = File(f)
-                        
-                        # ایجاد نمونه ProductImage
                         prod_img = ProductImage(
                             user=user,
                             product=product,
-                            order=img_order
+                            order=img_order,
                         )
-                        
-                        # نام فایل یونیک برای ذخیره
-                        new_filename = f"prod_{product.id}_{img_name}"
+                        new_filename = f"prod_{product.id}_{unique_id}_{img_name}"
                         prod_img.image.save(new_filename, django_file, save=True)
-                        
                 except Exception as e:
-                    self.stdout.write(self.style.ERROR(f"Error adding image {img_name} to product {product.slug}: {e}"))
+                    self.stdout.write(self.style.ERROR(f"  ❌ خطا در تصویر {img_name}: {e}"))
 
-            self.stdout.write(f" + Product Created: {prod_slug} with {len(selected_imgs)} images.")
+        self.stdout.write(f"  + محصول ساخته شد: {prod_slug}")
