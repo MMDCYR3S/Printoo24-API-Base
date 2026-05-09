@@ -134,7 +134,7 @@ class ProductPricingDomainService:
         active_field_ids = cls._evaluate_conditions(fields_map, user_selections)
 
         formula_variables = {}
-        configuration_summary = {}
+        configuration_summary = []
 
         # --- 3. استخراج مقادیر عددی برای فیلدهای فعال ---
         for f_id in active_field_ids:
