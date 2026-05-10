@@ -1,14 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
 from django.core.exceptions import ValidationError
 
 from apps.dashboard.services.order_service import OrderDashboardService
 from ..serializers.order_serializers import (
     OrderDetailSerializer, OrderCreateSerializer, OrderUpdateSerializer,
     ChangeStatusSerializer, BulkActionIdsSerializer, BulkChangeStatusSerializer,
-    OrderStatusSerializer
+    OrderStatusSerializer, UserAddressSerializer
 )
 
 @extend_schema(tags=["Admin - Order Management"])
@@ -42,12 +42,11 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         responses={201: OrderDetailSerializer},
         examples=[
             OpenApiExample(
-                "نمونه ثبت سفارش یکپارچه",
+                "کاربر ثبت‌نام‌شده (با آدرس ذخیره‌شده)",
                 value={
                     "user_id": 10,
-                    "recipient_name": "علی حسینی",
-                    "recipient_phone": "09137555555",
-                    "full_address": "اصفهان - خیابان بزرگمهر",
+                    "address_id": 5,
+                    "company_name": "چاپخانه نمونه",
                     "type": "1",
                     "product_id": 49,
                     "has_design": True,
@@ -57,7 +56,23 @@ class OrderDashboardViewSet(viewsets.ViewSet):
                     ]
                 },
                 request_only=True
-            )
+            ),
+            OpenApiExample(
+                "مهمان (بدون حساب کاربری)",
+                value={
+                    "recipient_name": "علی حسینی",
+                    "recipient_phone": "09137555555",
+                    "full_address": "اصفهان - خیابان بزرگمهر - پلاک ۱۲",
+                    "company_name": "شرکت نمونه",
+                    "type": "1",
+                    "product_id": 49,
+                    "has_design": False,
+                    "selected_options": [
+                        {"field_id": 13, "choice_id": 24}
+                    ]
+                },
+                request_only=True
+            ),
         ]
     )
     def create(self, request):
@@ -77,16 +92,27 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         responses={200: OrderDetailSerializer},
         examples=[
             OpenApiExample(
-                "تغییر آپشن‌های محصول در ویرایش",
+                "ویرایش آدرس کاربر سیستمی",
                 value={
-                    "recipient_name": "علی حسینی (ادیت شده)",
-                    "product_id": 49,
+                    "address_id": 7,
+                    "company_name": "شرکت جدید"
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                "ویرایش اطلاعات مهمان + تغییر محصول",
+                value={
+                    "recipient_name": "رضا احمدی",
+                    "recipient_phone": "09120000000",
+                    "full_address": "تهران - خیابان ولیعصر",
+                    "product_id": 50,
+                    "quantity": 2,
                     "selected_options": [
                         {"field_id": 13, "choice_id": 25}
                     ]
                 },
                 request_only=True
-            )
+            ),
         ]
     )
     def partial_update(self, request, pk=None):
@@ -104,7 +130,7 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         try:
             self.service.delete_order(pk)
             return Response({"detail": "با موفقیت حذف شد."}, status=status.HTTP_204_NO_CONTENT)
-        except ValidationError as e:
+        except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # ===== CHANGE STATUS (SINGLE) ===== #
@@ -179,3 +205,16 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         statuses = self.service.get_order_statuses()
         serializer = OrderStatusSerializer(statuses, many=True)
         return Response(serializer.data)
+
+    @extend_schema(
+        summary="لیست آدرس‌های یک کاربر",
+        responses=UserAddressSerializer(many=True),
+        parameters=[OpenApiParameter('user_id', int, OpenApiParameter.QUERY, required=True)]
+    )
+    @action(detail=False, methods=['get'], url_path='user-addresses')
+    def user_addresses(self, request):
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({'detail': 'user_id الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
+        addresses = self.service.get_user_addresses(user_id)
+        return Response(UserAddressSerializer(addresses, many=True).data)

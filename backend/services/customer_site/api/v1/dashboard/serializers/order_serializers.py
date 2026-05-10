@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Order, OrderItem, OrderStatus
+from core.models import Order, OrderItem, OrderStatus, Address
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True, default=None)
@@ -15,18 +15,19 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderDetailSerializer(serializers.ModelSerializer):
     user_info = serializers.SerializerMethodField()
-    address_detail = serializers.CharField(source='address.full_address', read_only=True, default=None)
+    province = serializers.SerializerMethodField()
+    city = serializers.SerializerMethodField()
+    address_detail = serializers.SerializerMethodField()
     current_status = serializers.CharField(source='current_status.name', read_only=True)
     current_status_code = serializers.CharField(source='current_status.internal_code', read_only=True)
-    # خروجی همچنان لیست میمونه چون فیلد Relation از نوع OneToMany هست، اما همیشه 1 دونه عضو داره
     items = OrderItemSerializer(source='order_item_order', many=True, read_only=True)
 
     class Meta:
         model = Order
         fields = [
-            'id', 'order_code', 'user_info', 'recipient_name', 'recipient_phone', 
-            'company_name', 'full_address', 'address_detail', 'current_status', 
-            'current_status_code', 'total_price', 'base_products_price', 
+            'id', 'order_code', 'user_info', 'recipient_name', 'recipient_phone',
+            'company_name', 'city', 'province', 'full_address', 'address_detail',
+            'current_status', 'current_status_code', 'total_price', 'base_products_price',
             'type', 'created_at', 'items'
         ]
 
@@ -36,8 +37,23 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         return {
             "id": obj.user.id,
             "phone_number": obj.user.phone_number,
-            "full_name": f"{obj.user.first_name} {obj.user.last_name}".strip() if hasattr(obj.user, 'first_name') else obj.user.phone_number
+            "full_name": obj.user.customer_profile.fullname() or obj.user.phone_number
         }
+
+    def get_province(self, obj):
+        if obj.address:
+            return obj.address.province.name
+        return None
+
+    def get_city(self, obj):
+        if obj.address:
+            return obj.address.city.name
+        return None
+
+    def get_address_detail(self, obj):
+        if obj.address:
+            return obj.address.address
+        return obj.full_address
 
 # ===== Input Serializers ===== #
 class SelectedOptionInputSerializer(serializers.Serializer):
@@ -67,12 +83,12 @@ class OrderCreateSerializer(serializers.Serializer):
 
 class OrderUpdateSerializer(serializers.Serializer):
     """ سریالایزر ویرایش سفارش (تکی) """
-    recipient_name = serializers.CharField(max_length=255, required=False)
-    recipient_phone = serializers.CharField(max_length=11, required=False)
-    full_address = serializers.CharField(required=False)
+    recipient_name = serializers.CharField(max_length=255, required=False, allow_null=True)
+    recipient_phone = serializers.CharField(max_length=11, required=False, allow_null=True)
+    company_name = serializers.CharField(max_length=150, required=False, allow_null=True)
+    full_address = serializers.CharField(required=False, allow_null=True)
+    address_id = serializers.IntegerField(required=False, allow_null=True)
     total_price_override = serializers.DecimalField(max_digits=18, decimal_places=0, required=False, allow_null=True)
-    
-    # ادمین در صورت نیاز می‌تونه محصول و آپشن‌ها رو هم ویرایش کنه
     product_id = serializers.IntegerField(required=False)
     quantity = serializers.IntegerField(required=False, default=1)
     has_design = serializers.BooleanField(required=False, default=True)
@@ -95,3 +111,11 @@ class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderStatus
         fields = ['id', 'name', 'internal_code', 'status_type', 'group_name', 'sort_order']
+
+
+class UserAddressSerializer(serializers.ModelSerializer):
+    province_name = serializers.CharField(source="province.name", read_only=True, default=None)
+    city_name = serializers.CharField(source="city.name", read_only=True, default=None)
+    class Meta:
+        model = Address
+        fields = ['id', 'address', 'province', 'province_name', 'city', 'city_name', 'postal_code'] 
