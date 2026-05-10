@@ -1,5 +1,3 @@
-# apps/order/services/order_service.py
-
 import uuid
 from decimal import Decimal
 from typing import List, Dict, Any, Tuple
@@ -13,6 +11,7 @@ from core.models import (
     User, Invoice, Order, OrderStatus, Product, OrderItem, 
     OrderStateLog, ProductFieldChoice, ProductField
 )
+from core.product.services import ProductPricingDomainService
 from ..exceptions import OrderNotFoundException
 
 class OrderService:
@@ -87,6 +86,15 @@ class OrderService:
         selected_options = selected_options or []
         user = User.objects.get(pk=user_id) if user_id else None
         
+        if address_id:
+            from core.models import Address
+            try:
+                address = Address.objects.get(pk=address_id)
+                if user and address.user_id != user.id:
+                    raise ValidationError("این آدرس متعلق به کاربر مشخص‌شده نیست.")
+            except Address.DoesNotExist:
+                raise ValidationError(f"آدرسی با شناسه {address_id} یافت نشد.")
+
         # دریافت وضعیت اولیه
         initial_status = OrderStatus.objects.filter(
             status_type='initial'
@@ -99,20 +107,29 @@ class OrderService:
         try:
             product = Product.objects.prefetch_related(
                 'fields__field_dict',
-                'fields__choices'
+                'fields__choices__choice_dict'
             ).get(id=product_id)
         except ObjectDoesNotExist:
             raise ValidationError(f"محصولی با شناسه {product_id} یافت نشد.")
 
-        # ساخت configuration و محاسبه قیمت
-        configuration, calculated_price = self._build_item_configuration(
-            product=product,
-            quantity=quantity,
-            selected_options=selected_options
+        user_selections = {}
+        for opt in selected_options:
+            fid = str(opt['field_id'])
+            if 'choice_id' in opt and opt['choice_id'] is not None:
+                user_selections[fid] = opt['choice_id']
+            elif 'choice_ids' in opt and opt['choice_ids']:
+                user_selections[fid] = opt['choice_ids']
+            elif 'value' in opt and opt['value'] is not None:
+                user_selections[fid] = opt['value']
+
+        calculated_price, configuration = ProductPricingDomainService.calculate_final_price(
+            product_id=product_id,
+            user_selections=user_selections,
+            strict_validation=False
         )
 
         # قیمت نهایی
-        final_total = total_price_override if total_price_override is not None else calculated_price
+        final_total = calculated_price
 
         # ایجاد سفارش
         order = Order.objects.create(
@@ -135,7 +152,7 @@ class OrderService:
             product=product,
             quantity=quantity,
             price=calculated_price,
-            items=configuration,  # لیست configuration_summary
+            items=configuration,
             name=product.name,
             description=product.description,
             status='approved'
@@ -150,12 +167,15 @@ class OrderService:
         ویرایش سفارش موجود.
         """
         order = self.get_order_by_id(order_id)
-        
+
         # ویرایش اطلاعات پایه
         basic_fields = ['recipient_name', 'recipient_phone', 'full_address', 'company_name']
         for field in basic_fields:
             if field in update_data:
                 setattr(order, field, update_data[field])
+
+        if 'address_id' in update_data:
+            order.address_id = update_data['address_id']
 
         # ویرایش محصول و مشخصات
         if 'product_id' in update_data:
@@ -170,12 +190,27 @@ class OrderService:
                 ).get(id=product_id)
             except ObjectDoesNotExist:
                 raise ValidationError(f"محصولی با شناسه {product_id} یافت نشد.")
+    
+            user_selections = {}
+            for opt in selected_options:
+                fid = str(opt['field_id'])
+                if 'choice_id' in opt and opt['choice_id'] is not None:
+                    user_selections[fid] = opt['choice_id']
+                elif 'choice_ids' in opt and opt['choice_ids']:
+                    user_selections[fid] = opt['choice_ids']
+                elif 'value' in opt and opt['value'] is not None:
+                    user_selections[fid] = opt['value']
+                print(opt)
 
-            configuration, calculated_price = self._build_item_configuration(
-                product=product,
-                quantity=quantity,
-                selected_options=selected_options
+            print(selected_options)
+
+            calculated_price, configuration = ProductPricingDomainService.calculate_final_price(
+                product_id=product_id,
+                user_selections=user_selections,
+                strict_validation=False
             )
+            print(configuration)
+            print(calculated_price)
 
             # آپدیت آیتم موجود
             order_item = order.order_item_order.first()
@@ -201,14 +236,7 @@ class OrderService:
 
             order.base_products_price = calculated_price
             
-            # قیمت نهایی
-            total_override = update_data.get('total_price_override')
-            order.total_price = Decimal(str(total_override)) if total_override is not None else calculated_price
-        else:
-            # فقط قیمت کل تغییر کرده
-            total_override = update_data.get('total_price_override')
-            if total_override is not None:
-                order.total_price = Decimal(str(total_override))
+            order.total_price = calculated_price
 
         order.save()
         return order
@@ -282,128 +310,20 @@ class OrderService:
 
     @transaction.atomic
     def bulk_delete_orders(self, order_ids: List[int]) -> Dict[str, Any]:
-        """
-        حذف گروهی سفارشات
-        """
-        deletable_types = ['initial', 'cancel', 'pending']
-        
-        orders_to_delete = Order.objects.filter(
-            id__in=order_ids,
-            current_status__status_type__in=deletable_types
-        ).exclude(
-            Q(invoice__status='finalize') |
-            Q(invoice__status='paid_full') |
-            Q(invoice__status='paid_partial')
-        )
+        existing_ids = set(Order.objects.filter(id__in=order_ids).values_list('id', flat=True))
+        not_found_ids = [oid for oid in order_ids if oid not in existing_ids]
 
+        orders_to_delete = Order.objects.filter(id__in=existing_ids)
         count_to_delete = orders_to_delete.count()
         deleted_ids = list(orders_to_delete.values_list('id', flat=True))
-        
+
         orders_to_delete.delete()
-        
+
         return {
             "requested_count": len(order_ids),
             "deleted_count": count_to_delete,
-            "skipped_count": len(order_ids) - count_to_delete,
+            "skipped_count": len(not_found_ids),
             "deleted_ids": deleted_ids,
+            "not_found_ids": not_found_ids,
             "message": f"{count_to_delete} سفارش با موفقیت حذف شدند."
         }
-
-    # ========== HELPER METHOD ========== #
-    def _build_item_configuration(
-        self, 
-        product: Product, 
-        quantity: int, 
-        selected_options: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], Decimal]:
-        """
-        ساخت configuration_summary و محاسبه قیمت.
-        
-        Returns:
-            (configuration_list, total_price)
-        """
-        configuration = []
-        calculated_price = product.price or Decimal('0.00')
-
-        # ایجاد دیکشنری فیلدها برای دسترسی سریع
-        fields_map = {
-            field.id: field 
-            for field in product.fields.select_related('field_dict').prefetch_related('choices')
-        }
-
-        for opt in selected_options:
-            field_id = opt.get('field_id')
-            
-            if field_id not in fields_map:
-                raise ValidationError(f"فیلد {field_id} برای این محصول معتبر نیست.")
-            
-            field = fields_map[field_id]
-            field_dict = field.field_dict
-            
-            config_item = {
-                "field_id": field.id,
-                "field_title": field_dict.title,
-                "field_type": field_dict.field_type,
-            }
-
-            # پردازش بر اساس نوع فیلد
-            if field_dict.field_type in ['dropdown', 'single_select']:
-                choice_id = opt.get('choice_id')
-                if not choice_id:
-                    raise ValidationError(
-                        f"برای فیلد '{field_dict.title}' انتخاب گزینه الزامی است."
-                    )
-                
-                try:
-                    choice = field.choices.get(id=choice_id)
-                except ObjectDoesNotExist:
-                    raise ValidationError(f"گزینه {choice_id} نامعتبر است.")
-                
-                config_item["value"] = choice.choice_dict.title
-                config_item["choice_id"] = choice.id
-                
-                # اضافه کردن قیمت گزینه
-                if choice.numeric_value:
-                    calculated_price += choice.numeric_value
-
-            elif field_dict.field_type == 'multi_select':
-                choice_ids = opt.get('choice_ids', [])
-                if not choice_ids:
-                    raise ValidationError(
-                        f"برای فیلد '{field_dict.title}' حداقل یک گزینه باید انتخاب شود."
-                    )
-                
-                choices = field.choices.filter(id__in=choice_ids)
-                if choices.count() != len(choice_ids):
-                    raise ValidationError(f"برخی از گزینه‌های انتخابی نامعتبر هستند.")
-                
-                config_item["value"] = "، ".join([c.title for c in choices])
-                config_item["choices"] = [
-                    {"id": c.id, "title": c.title} 
-                    for c in choices
-                ]
-                
-                # اضافه کردن قیمت گزینه‌ها
-                for c in choices:
-                    if c.numeric_value:
-                        calculated_price += c.numeric_value
-
-            else:  # text, number, textarea
-                text_value = opt.get('value')
-                if not text_value:
-                    raise ValidationError(
-                        f"برای فیلد '{field_dict.title}' مقدار الزامی است."
-                    )
-                
-                config_item["value"] = str(text_value)
-                
-                # اضافه کردن قیمت فیلد (اگر داشته باشد)
-                if field.numeric_value:
-                    calculated_price += field.numeric_value
-            
-            configuration.append(config_item)
-
-        # محاسبه قیمت نهایی با تعداد
-        total_price = calculated_price * quantity
-        
-        return configuration, total_price

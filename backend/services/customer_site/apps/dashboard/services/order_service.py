@@ -1,7 +1,7 @@
 # در فایل apps/dashboard/services/order_service.py
 
 from django.core.exceptions import ValidationError
-from core.models import Order, OrderStatus
+from core.models import Order, OrderStatus, Address
 from core.order.services import OrderService
 class OrderDashboardService:
     def __init__(self):
@@ -27,13 +27,19 @@ class OrderDashboardService:
         return self.domain.change_order_status(order_id, internal_code, actor, description)
 
     def delete_order(self, order_id):
+        # اول بررسی وجود سفارش
+        if not Order.objects.filter(id=order_id).exists():
+            raise Exception(f"سفارش با شناسه {order_id} یافت نشد.")
+
         result = self.domain.bulk_delete_orders([order_id])
-        if result['deleted_count'] == 0:
-            raise ValidationError("سفارش قابل حذف نیست (ممکن است فاکتور شده باشد).")
-        return True
+        return result
+
 
     def bulk_delete(self, order_ids):
         return self.domain.bulk_delete_orders(order_ids)
 
     def bulk_change_status(self, order_ids, internal_code, actor):
         return self.domain.bulk_change_status(order_ids, internal_code, actor)
+    
+    def get_user_addresses(self, user_id):
+        return Address.objects.filter(user_id=user_id)
