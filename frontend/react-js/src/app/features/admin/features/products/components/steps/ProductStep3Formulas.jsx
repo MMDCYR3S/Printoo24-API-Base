@@ -58,6 +58,7 @@ const ProductStep3Formulas = ({ initialData, onSave, isSaving }) => {
         // اینجا می‌تونی یک توست (Toast) کوچیک نشون بدی: "متغیر کپی شد"
     };
 
+    const Price_Per_Unit = "Price_Per_Unit"
     return (
         <FormProvider {...methods}>
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 xl:grid-cols-12 gap-8 pb-32 relative">
@@ -163,6 +164,16 @@ const ProductStep3Formulas = ({ initialData, onSave, isSaving }) => {
                             </p>
 
                             <div className="space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
+                                    <div 
+                                        key="price_per_Unit" 
+                                        onClick={() => copyToClipboard("price_per_unit")}
+                                        className="flex items-center justify-between p-3 bg-slate-50 hover:bg-purple-50 border border-slate-100 hover:border-purple-200 rounded-xl cursor-pointer transition-colors group"
+                                    >
+                                        <span className="text-xs font-bold text-slate-700 group-hover:text-purple-700">قیمت پایه</span>
+                                        <span className="text-[11px] font-mono bg-white border border-slate-200 group-hover:border-purple-300 px-2 py-1 rounded-md text-slate-500 group-hover:text-purple-600">
+                                            price_per_unit
+                                        </span>
+                                    </div>
                                 {availableVariables.map((v) => (
                                     <div 
                                         key={v.id} 

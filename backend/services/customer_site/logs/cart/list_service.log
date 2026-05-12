@@ -601,3 +601,4 @@ INFO 2026-02-26 13:57:58,131 cart_item_service 305 123604681344704 Fetching cart
 INFO 2026-02-26 13:57:59,356 cart_item_service 305 123604681344704 Fetching cart list for User:21
 INFO 2026-02-26 13:59:04,158 cart_item_service 305 123604700227264 Fetching cart list for User:21
 INFO 2026-02-26 13:59:30,504 cart_item_service 305 123604672952000 Fetching cart list for User:21
+INFO 2026-05-09 09:12:11,795 cart_item_service 14 137371207055040 Fetching cart list for User:1

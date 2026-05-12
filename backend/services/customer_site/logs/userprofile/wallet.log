@@ -1120,3 +1120,5 @@ INFO 2026-02-26 13:59:04,083 user_transaction_service 305 123604672952000 Fetchi
 WARNING 2026-02-26 13:59:04,100 user_transaction_service 305 123604672952000 No wallet found for User ID: 21
 INFO 2026-02-26 13:59:30,449 user_transaction_service 305 123604700227264 Fetching wallet balance for User ID: 21
 WARNING 2026-02-26 13:59:30,468 user_transaction_service 305 123604700227264 No wallet found for User ID: 21
+INFO 2026-05-09 09:12:11,636 user_transaction_service 14 137371232233152 Fetching wallet balance for User ID: 1
+WARNING 2026-05-09 09:12:11,660 user_transaction_service 14 137371232233152 No wallet found for User ID: 1
