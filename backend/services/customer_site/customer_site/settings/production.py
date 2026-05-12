@@ -7,14 +7,14 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
 
 # CSRF & CORS
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
-    'http://185.213.165.186:9010',
-    'http://185.213.165.186:5173',
-    'http://185.213.165.186:3000'
+    'http://187.124.27.96:9010',
+    'http://187.124.27.96:5173',
+    'http://187.124.27.96:3000'
 ])
 
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
-    'http://185.213.165.186:5173',
-    'http://185.213.165.186:3000'
+    'http://187.124.27.96:5173',
+    'http://187.124.27.96:3000'
 ])
 
 
