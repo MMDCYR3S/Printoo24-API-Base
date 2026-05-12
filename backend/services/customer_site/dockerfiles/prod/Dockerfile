@@ -6,9 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 WORKDIR /app
 
-# نصب پیش‌نیازها با استفاده از آینه ایران (برای سرعت بیشتر در سرور داخلی) [cite: 7]
-RUN sed -i 's/deb.debian.org/mirror.arvancloud.ir/g' /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && apt-get install -y --no-install-recommends \
+# نصب پیش‌نیازها از مخازن اصلی دیبیان
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
