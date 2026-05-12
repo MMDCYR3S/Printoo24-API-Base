@@ -22,47 +22,47 @@ services:
 # --- شروع بخش‌های غیرفعال شده ---
 
   # # ====== Admin Backend (غیرفعال شد) ====== #
-  admin_site:
-    build:
-      context: .
-      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
-    container_name: printoo_admin_site
-    command: python manage.py runserver 0.0.0.0:8010
-    volumes:
-      - ./backend/services/admin_site:/app/src
-      - ./backend/shared_libs:/app/shared_libs
-    ports:
-      - "8010:8010"
-    environment:
-      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
-    env_file:
-      - ./env/.env.dev
-    depends_on:
-      - db
-      - redis
-    networks:
-      - admin_site_network
-      - data_network
+  # admin_site:
+  #   build:
+  #     context: .
+  #     dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
+  #   container_name: printoo_admin_site
+  #   command: python manage.py runserver 0.0.0.0:8010
+  #   volumes:
+  #     - ./backend/services/admin_site:/app/src
+  #     - ./backend/shared_libs:/app/shared_libs
+  #   ports:
+  #     - "8010:8010"
+  #   environment:
+  #     - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+  #   env_file:
+  #     - ./env/.env.dev
+  #   depends_on:
+  #     - db
+  #     - redis
+  #   networks:
+  #     - admin_site_network
+  #     - data_network
 
-  # # ====== Celery Workers(Admin Site) (غیرفعال شد) ====== #
-  celery_worker_admin:
-    build:
-      context: .
-      dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
-    container_name: printoo_celery_admin
-    command: celery -A admin_site.celery worker -l info
-    volumes:
-      - ./backend/services/admin_site:/app/src
-      - ./backend/shared_libs:/app/shared_libs
-    environment:
-      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
-    env_file:
-      - ./env/.env.dev
-    depends_on:
-      - redis
-      - db
-    networks:
-      - data_network
+  # # # ====== Celery Workers(Admin Site) (غیرفعال شد) ====== #
+  # celery_worker_admin:
+  #   build:
+  #     context: .
+  #     dockerfile: backend/services/admin_site/dockerfiles/dev/Dockerfile
+  #   container_name: printoo_celery_admin
+  #   command: celery -A admin_site.celery worker -l info
+  #   volumes:
+  #     - ./backend/services/admin_site:/app/src
+  #     - ./backend/shared_libs:/app/shared_libs
+  #   environment:
+  #     - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+  #   env_file:
+  #     - ./env/.env.dev
+  #   depends_on:
+  #     - redis
+  #     - db
+  #   networks:
+  #     - data_network
 
 # --- پایان بخش‌های غیرفعال شده ---
 
@@ -149,8 +149,6 @@ services:
 
 # ====== Networks' Settings ====== #
 networks:
-  admin_site_network:
-    driver: bridge
   customer_site_network:
     driver: bridge
   data_network:
