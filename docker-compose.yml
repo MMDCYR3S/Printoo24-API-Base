@@ -46,7 +46,7 @@ services:
       redis:
         condition: service_started
     networks:
-      - customer_site_network
+      - app_network
       - data_network
 
   # ====== Celery Worker ====== #
@@ -71,16 +71,6 @@ services:
     networks:
       - data_network
 
-  # ====== React Frontend ====== #
-  frontend:
-    build:
-      context: ./frontend/react-js
-      dockerfile: Dockerfile.prod
-    container_name: printoo_frontend
-    restart: always
-    networks:
-      - customer_site_network
-
   # ====== Nginx ====== #
   nginx:
     image: nginx:alpine
@@ -95,14 +85,14 @@ services:
       - /var/www/certbot:/var/www/certbot:ro
       - staticfiles_data:/app/src/staticfiles:ro
       - ./backend/services/customer_site/media:/app/src/media:ro
+      - ./frontend/react-js/dist:/var/www/react-dist:ro
     depends_on:
       - customer_site
-      - frontend
     networks:
-      - customer_site_network
+      - app_network
 
 networks:
-  customer_site_network:
+  app_network:
     driver: bridge
   data_network:
     driver: bridge
