@@ -6,7 +6,6 @@ WORKDIR /app
 
 # کپی فایل‌های شناسنامه پروژه برای نصب پکیج‌ها
 # این کار باعث می‌شود اگر کدها تغییر کرد اما پکیج جدیدی اضافه نشد، این لایه دوباره بیلد نشود (سرعت بالا)
-RUN npm config set registry https://mirror-npm.runflare.com/
 COPY package.json package-lock.json ./
 
 
