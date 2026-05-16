@@ -16,6 +16,8 @@ import {
   FileCheck,
   AlertCircle,
   FolderOpen,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { profileService } from '../../services/profileService';
 import { formatCurrency } from '../../utils/formatters';
@@ -56,6 +58,8 @@ const SPEC_LABELS = {
   color_mode: pageText.profile.orderDetailPage.specLabels.color_mode,
   print_side: pageText.profile.orderDetailPage.specLabels.print_side,
   category: pageText.profile.orderDetailPage.specLabels.category,
+  quantity_label: "تعداد کل",
+  has_design: "دارای طراحی اختصاصی",
 };
 
 /* ─────────────────────────────────────────────
@@ -265,136 +269,94 @@ const OrderDetailPage = () => {
 /* ═════════════════════════════════════════════
    کارت آیتم سفارش
    ═════════════════════════════════════════════ */
-const OrderItemCard = ({ item }) => (
-  <div className="
-    bg-white rounded-2xl ring-1 ring-black/[0.05]
-    overflow-hidden
-    hover:shadow-lg hover:shadow-black/[0.04]
-    transition-all duration-300
-  ">
-    {/* هدر آیتم */}
-    <div className="
-      flex flex-wrap items-center justify-between gap-3
-      px-5 py-4
-      bg-slate-50/50 border-b border-slate-100/80
-    ">
-      <div className="flex items-center gap-3">
-        <div className="
-          w-10 h-10 rounded-xl bg-white
-          ring-1 ring-black/[0.05]
-          flex items-center justify-center text-primary
-        ">
-          <Package size={19} />
-        </div>
-        <div>
-          <h3 className="text-sm font-bold text-slate-800">
-            {pageText.profile.orderDetailPage.specialProduct} #{item.id}
-          </h3>
-          <p className="text-[11px] text-slate-400 mt-0.5 font-medium">
-            {pageText.profile.orderDetailPage.count} {item.quantity.toLocaleString()} {pageText.profile.orderDetailPage.number}
-          </p>
-        </div>
-      </div>
-      <div className="
-        px-4 py-2 rounded-xl
-        bg-primary text-white
-        text-sm font-extrabold tabular-nums
-        shadow-sm shadow-primary/15
-      ">
-        {formatCurrency(item.item_price)} {globalText.currency}
-      </div>
-    </div>
-
-    {/* محتوای آیتم */}
-    <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* مشخصات فنی */}
-      <div>
-        <SectionLabel color="primary">
-          {pageText.profile.orderDetailPage.productionTechnicalInfo}
-        </SectionLabel>
-        <div className="flex flex-wrap gap-2 mt-3">
-          {item.specs?.specifications &&
-            Object.entries(item.specs.specifications).map(([key, value]) => (
-              <SpecBadge key={key} label={key} value={value} />
-            ))}
-        </div>
-
-        {/* یادداشت‌های سیستم */}
-        {item.specs?.admin_logs?.length > 0 && (
-          <div className="
-            mt-5 p-4 rounded-xl
-            bg-amber-50/80 ring-1 ring-amber-200/40
-          ">
-            <span className="text-[10px] font-bold text-amber-500 block mb-2">
-              {pageText.profile.orderDetailPage.systemNotes}
-            </span>
-            {item.specs.admin_logs.map((log, idx) => (
-              <p key={idx} className="text-xs text-amber-700 leading-relaxed">
-                • {log}
-              </p>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* فایل‌های طراحی */}
-      <div>
-        <SectionLabel color="blue">
-          {pageText.profile.orderDetailPage.sendingDesignFiles}
-        </SectionLabel>
-        <div className="space-y-2 mt-3">
-          {item.design_files?.length > 0 ? (
-            item.design_files.map((file) => (
-              <a
-                key={file.id}
-                href={file.file_url}
-                target="_blank"
-                rel="noreferrer"
-                className="
-                  group/file flex items-center justify-between
-                  p-3.5 rounded-xl
-                  bg-slate-50/80 ring-1 ring-black/[0.04]
-                  hover:ring-primary/20 hover:bg-white hover:shadow-sm
-                  transition-all duration-200
-                "
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="
-                    w-9 h-9 rounded-lg bg-white
-                    ring-1 ring-black/[0.04]
-                    flex items-center justify-center
-                    text-slate-400 group-hover/file:text-primary
-                    transition-colors
-                  ">
-                    <FileText size={17} />
-                  </div>
-                  <span className="text-xs font-bold text-slate-700 truncate">
-                    {pageText.profile.orderDetailPage.lookDesignFiles} #{file.id}
-                  </span>
-                </div>
-                <Download
-                  size={16}
-                  className="text-slate-300 group-hover/file:text-primary shrink-0 transition-colors"
-                />
-              </a>
-            ))
-          ) : (
-            <div className="
-              flex flex-col items-center justify-center
-              py-8 rounded-xl
-              bg-slate-50/50 ring-1 ring-dashed ring-black/[0.06]
-            ">
-              <FolderOpen size={24} strokeWidth={1.3} className="text-slate-300 mb-2" />
-              <p className="text-xs text-slate-400 font-medium">
-                {pageText.profile.orderDetailPage.fileDidNotFound}
+/* ═════════════════════════════════════════════
+   کارت آیتم سفارش (اصلاح شده)
+   ═════════════════════════════════════════════ */
+   const getSpecLabel = (key) => {
+    const labels = {
+      quantity_label: "تیراژ/تعداد",
+      has_design: "نیاز به طراحی اختصاصی",
+    };
+    return labels[key] || key;
+  };
+  
+  const OrderItemCard = ({ item }) => {
+    return (
+      <div className="bg-white rounded-2xl ring-1 ring-black/[0.05] overflow-hidden hover:shadow-lg transition-all duration-300 mb-4">
+        
+        {/* هدر کارت: نام محصول و قیمت کل */}
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 bg-slate-50/50 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            {item.product?.image ? (
+              <img 
+                src={item.product.image} 
+                alt={item.product?.name} 
+                className="w-12 h-12 rounded-xl object-cover ring-1 ring-black/[0.05]"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-xl bg-white ring-1 ring-black/[0.05] flex items-center justify-center text-blue-600">
+                <Package size={22} />
+              </div>
+            )}
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">
+                {item.product?.name || item.name}
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-0.5 font-medium">
+                کد محصول: {item.product?.code || '---'}
               </p>
             </div>
-          )}
+          </div>
+  
+          <div className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-extrabold tabular-nums shadow-sm">
+            {Number(item.price).toLocaleString()} تومان
+          </div>
+        </div>
+  
+        {/* محتوای اصلی: انتخاب‌های کاربر */}
+        <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+
+  
+          {/* بخش دوم: فایل‌های طراحی آپلود شده توسط کاربر */}
+          <div>
+            <span className="text-xs font-bold text-indigo-600 border-r-2 border-indigo-600 pr-2 block mb-3">
+              فایل‌های طراحی ارسالی
+            </span>
+  
+            <div className="space-y-2">
+              {item.design_files && item.design_files.length > 0 ? (
+                item.design_files.map((file, index) => (
+                  <a
+                    key={file.id}
+                    href={file.file_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-center justify-between p-3 rounded-xl bg-slate-50 ring-1 ring-black/[0.02] hover:ring-indigo-200 hover:bg-indigo-50/30 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-lg bg-white ring-1 ring-black/[0.04] flex items-center justify-center text-slate-400 group-hover:text-indigo-600 transition-colors">
+                        <FileText size={18} />
+                      </div>
+                      <span className="text-xs font-bold text-slate-700 truncate dir-ltr text-right">
+                        فایل طراحی شماره {index + 1}
+                      </span>
+                    </div>
+                    <Download size={16} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                  </a>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 rounded-xl bg-slate-50/50 border border-dashed border-slate-200">
+                  <p className="text-xs text-slate-400 font-medium">فایلی توسط کاربر آپلود نشده است.</p>
+                </div>
+              )}
+            </div>
+          </div>
+  
         </div>
       </div>
-    </div>
-  </div>
-);
+    );
+  };
 
 /* ─────────────────────────────────────────────
    کامپوننت‌های کمکی
