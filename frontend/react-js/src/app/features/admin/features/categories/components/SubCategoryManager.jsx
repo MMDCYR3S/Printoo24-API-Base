@@ -10,7 +10,7 @@ const SubCategoryManager = ({ parentCategory }) => {
   const queryClient = useQueryClient();
   const parentSlug = parentCategory?.slug; 
   
-  // رفرنس برای ذخیره URL های پیش‌نمایش جهت پاکسازی از مموری مرورگر (Best Practice)
+  // رفرنس برای ذخیره URL های پیش‌نمایش جهت پاکسازی از مموری مرورگر
   const previewUrls = useRef([]);
 
   const { control, register, handleSubmit, reset, setValue, watch, formState: { isDirty } } = useForm({
@@ -22,51 +22,51 @@ const SubCategoryManager = ({ parentCategory }) => {
     name: "subs"
   });
 
-  // دریافت مقادیر لحظه‌ای برای نمایش پیش‌نمایش عکس‌ها
-  const subsWatch = watch("subs");
+  // دریافت مقادیر لحظه‌ای فیلدها برای مانیتور کردن آدرس تصاویر پیش‌نمایش
+  const subsWatch = watch("subs") || [];
 
   useEffect(() => {
     if (parentCategory?.children) {
-      const formattedData = parentCategory.children.map(child => ({
-        id: child.id,
-        name: child.name,
-        is_active: child.is_active ?? true,
-        // گرفتن عکس قبلی از سرور (در صورت وجود)
-        preview_url: child.banners?.box || null, 
-        banner_box_file: null // فایل جدید باینری
-      }));
+      const formattedData = parentCategory.children.map(child => {
+        // استخراج دقیق آدرس عکس از ساختار دیتای سرور
+        const serverImg = child.banners?.box || child.banner_box || null;
+        
+        return {
+          id: child.id,
+          name: child.name,
+          is_active: child.is_active ?? true,
+          preview_url: serverImg, // تنظیم آدرس عکس سرور به عنوان پیش‌نمایش اولیه
+          banner_box_file: null   // فایل باینری جدید در ابتدا خالی است
+        };
+      });
       reset({ subs: formattedData });
     }
 
-    // Cleanup function: جلوگیری از Memory Leak برای عکس‌های آپلود شده
+    // Cleanup function برای جلوگیری از Memory Leak
     return () => {
       previewUrls.current.forEach(url => URL.revokeObjectURL(url));
     };
   }, [parentCategory, reset]);
 
-  // هندل کردن انتخاب فایل
+  // هندل کردن انتخاب فایل جدید برای هر سطر
   const handleFileChange = (e, index) => {
     const file = e.target.files[0];
     if (file) {
-      // 1. ذخیره فایل باینری در State فرم
+      // ۱. ذخیره فایل باینری در فیلد مربوط به خودش
       setValue(`subs.${index}.banner_box_file`, file, { shouldDirty: true });
       
-      // 2. ساخت URL پیش‌نمایش لوکال
+      // ۲. ساخت URL پیش‌نمایش لوکال و بروزرسانی فیلد preview_url
       const objectUrl = URL.createObjectURL(file);
       previewUrls.current.push(objectUrl);
-      setValue(`subs.${index}.preview_url`, objectUrl);
+      setValue(`subs.${index}.preview_url`, objectUrl, { shouldDirty: true });
     }
   };
 
   const bulkMutation = useMutation({
     mutationFn: (data) => {
-      // ✅ ساخت FormData بجای JSON خالص
       const formData = new FormData();
 
       data.subs.forEach((item, index) => {
-        // ⚠️ مهم: نحوه نام‌گذاری کلیدها در آرایه FormData به بک‌اند شما بستگی دارد.
-        // متداول‌ترین حالت برای دریافت آرایه در بک‌اند فرمت زیر است: `[0]name` یا `0[name]`
-        // اگر بک‌اند شما ارور داد، این بخش (الگوی استرینگ) را طبق نیاز بک‌اند تغییر دهید.
         const prefix = `[${index}]`;
 
         formData.append(`${prefix}name`, item.name);
@@ -77,7 +77,7 @@ const SubCategoryManager = ({ parentCategory }) => {
           formData.append(`${prefix}id`, item.id);
         }
 
-        // اگر فایل جدیدی انتخاب شده، آن را ضمیمه کن
+        // فقط در صورتی که فایل جدید انتخاب شده باشد فرستاده می‌شود
         if (item.banner_box_file) {
           formData.append(`${prefix}banner_box`, item.banner_box_file);
         }
@@ -86,6 +86,7 @@ const SubCategoryManager = ({ parentCategory }) => {
       return adminCategoryService.bulkUpsert(formData);
     },
     onSuccess: () => {
+      // اینولید کردن کش کامپوننت والد برای لود مجدد دیتای تازه از سرور
       queryClient.invalidateQueries(['category', String(parentCategory.id)]);
       toast.success('زیرمجموعه‌ها با موفقیت ذخیره شدند');
     },
@@ -115,7 +116,7 @@ const SubCategoryManager = ({ parentCategory }) => {
             <CornerDownRight className="text-primary"/> مدیریت سریع زیرمجموعه‌ها
           </h3>
           <p className="text-xs text-slate-500 mt-1">
-             والد: <strong className="dir-ltr font-mono bg-slate-100 px-1 rounded">{parentSlug}</strong>
+              والد: <strong className="dir-ltr font-mono bg-slate-100 px-1 rounded">{parentSlug}</strong>
           </p>
         </div>
         <button 
@@ -138,7 +139,7 @@ const SubCategoryManager = ({ parentCategory }) => {
               <thead>
                 <tr>
                   <th className="w-10">#</th>
-                  <th className="w-16">تصویر</th>
+                  <th className="w-20">تصویر</th>
                   <th>نام زیردسته</th>
                   <th className="text-center w-24">وضعیت</th>
                   <th className="w-16"></th>
@@ -146,27 +147,34 @@ const SubCategoryManager = ({ parentCategory }) => {
               </thead>
               <tbody>
                 {fields.map((field, index) => {
+                  // گارد کلاوز برای دسترسی امن به واچ ایندکس فعلی سطر
                   const currentPreview = subsWatch[index]?.preview_url;
 
                   return (
                   <tr key={field.id} className="hover:bg-slate-50 transition-colors">
                     <td className="text-slate-400 font-mono text-xs">{index + 1}</td>
                     
-                    {/* --- بخش آپلود عکس UI --- */}
+                    {/* --- بخش آپلود عکس سطر با ساپورت نمایش آدرس سرور و فایل لوکال --- */}
                     <td>
-                      <label className="relative flex w-10 h-10 rounded-lg cursor-pointer group bg-slate-100 border border-slate-200 overflow-hidden hover:border-primary transition-all">
+                      <label className="relative flex w-12 h-12 rounded-xl cursor-pointer group bg-slate-100 border border-slate-200 overflow-hidden hover:border-primary transition-all shadow-sm">
                         {currentPreview ? (
-                          <img src={currentPreview} alt="preview" className="w-full h-full object-cover" />
+                          <img 
+                            src={currentPreview} 
+                            alt={`preview-${index}`} 
+                            className="w-full h-full object-cover" 
+                          />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-400">
-                            <ImageIcon size={18} />
+                          <div className="w-full h-full flex items-center justify-center text-slate-400 bg-slate-50">
+                            <ImageIcon size={20} />
                           </div>
                         )}
-                        {/* Overlay زمان Hover */}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
-                           <Upload size={14} />
+                        
+                        {/* اورلی شیک هنگام هاور موس */}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
+                           <Upload size={16} />
                         </div>
-                        {/* اینپوت مخفی */}
+                        
+                        {/* اینپوت فایل مخفی با آدرس‌دهی داینامیک ایندکس فیلد ارایه */}
                         <input 
                           type="file" 
                           accept="image/*" 

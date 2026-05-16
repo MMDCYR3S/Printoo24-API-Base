@@ -104,7 +104,7 @@ const QuotationPage = () => {
           <div className="absolute -right-8 top-1/2 -translate-y-1/2 w-40 h-40 bg-primary rotate-45 border-4 border-white flex items-center justify-center shadow-lg print:shadow-none">
             <span className="text-primary-content -rotate-45 font-black text-3xl tracking-tighter">P24</span>
           </div>
-          <div className="flex-1 text-center mr-36 text-primary">
+          <div className="flex-1 text-center mr-36 text-white">
             <h1 className="text-4xl font-black mb-4 tracking-tight">{pageText.order.quotationPage.brandName}</h1>
             <div className="flex justify-center items-center gap-8 font-bold text-sm">
               <span className="flex items-center gap-1 dir-ltr"><Phone size={18} className="mr-1"/> 021 - 1234 5678</span>
@@ -220,7 +220,7 @@ const QuotationPage = () => {
           </div>
 
           {/* فوتر زرد پایین */}
-          <div className="bg-neutral text-primary font-black p-4 mx-6 print:mx-6 mb-4 rounded-[1.5rem] text-center flex justify-center items-center gap-2 text-lg">
+          <div className="bg-neutral text-white font-black p-4 mx-6 print:mx-6 mb-4 rounded-[1.5rem] text-center flex justify-center items-center gap-2 text-lg">
             <Instagram size={22} /> <span className="mt-1 tracking-widest uppercase">printoo24_official</span>
           </div>
 

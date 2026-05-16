@@ -111,16 +111,6 @@ const CategoryDetailPage = () => {
                   </div>
               </div>
               
-              <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
-                  <h3 className="text-xs font-bold text-slate-400 mb-2 uppercase">بنر عریض (Wide)</h3>
-                  <div className="aspect-[3/1] bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 flex items-center justify-center">
-                      {category.banner_wide ? (
-                          <img src={category.banner_wide} alt="Wide" className="w-full h-full object-cover"/>
-                      ) : (
-                          <div className="text-slate-300 flex flex-col items-center gap-2"><ImageIcon size={30}/><span className="text-xs">ندارد</span></div>
-                      )}
-                  </div>
-              </div>
           </div>
       </div>
 
