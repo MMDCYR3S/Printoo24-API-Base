@@ -57,6 +57,20 @@ export const profileService = {
   deleteAddress: async (id) => {
     await apiClient.delete(`/profile/addresses/${id}/`);
   },
+
+  getProvinces: async () => {
+    const response = await apiClient.get('/profile/locations/provinces/');
+    return response.data;
+  },
+
+  getCities: async (provinceId) => {
+    const response = await apiClient.get('/profile/locations/cities/', {
+      params: { province_id: provinceId } // ارسال شناسه استان به صورت Query String
+    });
+    return response.data;
+  },
+
+  
   // دریافت پیش‌فاکتور بر اساس آیدی سفارش
   getQuotationByOrder: async (orderId) => {
     // فرض بر این است که apiClient در فایل شما ایمپورت شده است
