@@ -33,23 +33,25 @@ const AddressPage = () => {
   });
   const addresses = Array.isArray(rawAddresses?.[0]) ? rawAddresses[0] : (rawAddresses || []);
 
-  // 2. لیست استان‌ها (فقط یکبار لود شود)
+  // 2. لیست استان‌ها
   const { data: provinces, isLoading: isProvincesLoading } = useQuery({
     queryKey: ['provinces'],
     queryFn: profileService.getProvinces,
-    staleTime: Infinity, // استان‌ها به ندرت تغییر می‌کنند
+    staleTime: Infinity,
   });
 
   // 3. لیست شهرها (وابسته به استان انتخاب شده)
   const { data: cities, isLoading: isCitiesLoading } = useQuery({
     queryKey: ['cities', selectedProvinceId],
     queryFn: () => profileService.getCities(selectedProvinceId),
-    enabled: !!selectedProvinceId, // تا استانی انتخاب نشود، درخواست نزن
+    enabled: !!selectedProvinceId, // تا استانی انتخاب نشود، درخواست سابمیت نمی‌شود
   });
 
   // وقتی استان عوض شد، شهر قبلی را پاک کن
   useEffect(() => {
-    setValue('city_id', '');
+    if (selectedProvinceId) {
+      setValue('city_id', '');
+    }
   }, [selectedProvinceId, setValue]);
 
 
@@ -59,8 +61,8 @@ const AddressPage = () => {
     mutationFn: profileService.addAddress,
     onSuccess: () => {
       toast.success(pageText.profile.addressPage.registeredAddressSuccess);
-      queryClient.invalidateQueries(['addresses']);
-      queryClient.invalidateQueries(['profile-addresses']);
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
+      queryClient.invalidateQueries({ queryKey: ['profile-addresses'] });
       setIsModalOpen(false);
       reset();
     },
@@ -74,8 +76,8 @@ const AddressPage = () => {
     mutationFn: profileService.deleteAddress,
     onSuccess: () => {
       toast.success('آدرس حذف شد');
-      queryClient.invalidateQueries(['addresses']);
-      queryClient.invalidateQueries(['profile-addresses']);
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
+      queryClient.invalidateQueries({ queryKey: ['profile-addresses'] });
     },
     onError: () => toast.error(pageText.profile.addressPage.deleteAddressError)
   });
@@ -85,6 +87,7 @@ const AddressPage = () => {
       ...data,
       province_id: Number(data.province_id),
       city_id: Number(data.city_id),
+      postal_code: String(data.postal_code), // اطمینان از ارسال فیلد الزامی کد پستی
     };
     addMutation.mutate(payload);
   };
@@ -205,8 +208,8 @@ const AddressPage = () => {
                 </div>
               </div>
 
-              {/* کد پستی */}
-              {/* <div className="form-control">
+              {/* کد پستی (از کامنت خارج شد چون الزامی است) */}
+              <div className="form-control">
                 <label className="label text-xs font-bold text-slate-600">
                   کد پستی
                   <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{pageText.profile.addressPage.onlyTen}</span>
@@ -223,7 +226,7 @@ const AddressPage = () => {
                   })} 
                 />
                 {errors.postal_code && <span className="text-error text-[10px] mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.postal_code.message}</span>}
-              </div> */}
+              </div>
 
               {/* آدرس دقیق */}
               <div className="form-control">
