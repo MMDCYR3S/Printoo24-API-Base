@@ -313,10 +313,37 @@ const OrderDetailPage = () => {
           </div>
         </div>
   
-        {/* محتوای اصلی: انتخاب‌های کاربر */}
-        <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+{/* محتوای اصلی: انتخاب‌های کاربر */}
+<div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
           
-
+          {/* بخش اول: مشخصات و آپشن‌های انتخابی محصول */}
+          <div>
+            <span className="text-xs font-bold text-blue-600 border-r-2 border-blue-600 pr-2 block mb-3">
+              مشخصات فنی سفارش
+            </span>
+            
+            <div className="flex flex-wrap gap-2">
+              {item.specs?.options_detail && item.specs.options_detail.length > 0 ? (
+                item.specs.options_detail.map((opt, idx) => (
+                  <div 
+                    key={idx} 
+                    className="flex items-center gap-2 bg-slate-50/80 ring-1 ring-black/[0.04] px-3 py-1.5 rounded-lg"
+                  >
+                    <span className="text-[10px] text-slate-400 font-bold">
+                      {opt.option_group}:
+                    </span>
+                    <span className="text-xs text-slate-700 font-semibold">
+                      {opt.selections?.[0]?.label || '---'}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="w-full flex items-center gap-2 bg-slate-50/50 border border-dashed border-slate-200 p-3 rounded-xl">
+                  <p className="text-xs text-slate-400 font-medium">مشخصاتی برای این آیتم ثبت نشده است.</p>
+                </div>
+              )}
+            </div>
+          </div>
   
           {/* بخش دوم: فایل‌های طراحی آپلود شده توسط کاربر */}
           <div>

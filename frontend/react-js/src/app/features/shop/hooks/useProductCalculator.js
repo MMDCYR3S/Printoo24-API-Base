@@ -46,7 +46,7 @@ export const useProductCalculator = (productData) => {
     }).map(f => f.id);
   }, [productData, selectedOptions]);
 
-  // ۳. ریکوئست به بک‌اند با Debounce (بدون تغییر در ساختار لایو متناسب با قبل)
+  // ۳. ریکوئست به بک‌اند با Debounce (اصلاح‌شده متناسب با فرمت Selections سواگر)
   const fetchPriceFromServer = useCallback(
     debounce(async (productId, currentSelections, visible) => {
       if (!productId) return;
@@ -54,13 +54,21 @@ export const useProductCalculator = (productData) => {
       const activeSelections = {};
       Object.entries(currentSelections).forEach(([fieldId, choiceId]) => {
         if (visible.includes(Number(fieldId))) {
-          activeSelections[String(fieldId)] = String(choiceId);
+          const stringValue = String(choiceId);
+          
+          // اگر مقدار شامل کاما بود، آن را تبدیل به آرایه‌ای از رشته‌ها کن
+          if (stringValue.includes(',')) {
+            activeSelections[String(fieldId)] = stringValue.split(',');
+          } else {
+            activeSelections[String(fieldId)] = stringValue;
+          }
         }
       });
 
       try {
         setIsCalculating(true);
         setPriceError(null);
+        // ارسال دیتای اصلاح شده با آرایه‌های واقعی به جای استرینگ کامادار
         const result = await shopService.calculateLivePrice(productId, activeSelections);
         
         if (result?.success && result?.data) {
@@ -90,13 +98,20 @@ export const useProductCalculator = (productData) => {
     setSelectedOptions(prev => ({ ...prev, [fieldId]: String(choiceId) }));
   }, []);
 
-  // آماده کردن دیتای نهایی برای افزودن به سبد خرید (اصلاح اصلی اینجاست: تبدیل مقادیر خروجی به Number)
+  // آماده کردن دیتای نهایی برای افزودن به سبد خرید (اصلاح‌شده برای پشتیبانی از چندانتخابی‌ها)
   const getSubmitPayload = useCallback(() => {
     const activeSelections = {};
     Object.entries(selectedOptions).forEach(([fieldId, choiceId]) => {
       if (visibleFields.includes(Number(fieldId))) {
-        // کلید و مقدار هر دو به صورت Number به خروجی پاس داده می‌شوند
-        activeSelections[Number(fieldId)] = Number(choiceId);
+        const stringValue = String(choiceId);
+
+        // اگر فیلد چند انتخابی با کاما بود، آن را به آرایه‌ای از اعداد تبدیل کن
+        if (stringValue.includes(',')) {
+          activeSelections[Number(fieldId)] = stringValue.split(',').map(Number);
+        } else {
+          // اگر فیلد تک انتخابی بود، به عدد تبدیل شود
+          activeSelections[Number(fieldId)] = Number(choiceId);
+        }
       }
     });
     return {

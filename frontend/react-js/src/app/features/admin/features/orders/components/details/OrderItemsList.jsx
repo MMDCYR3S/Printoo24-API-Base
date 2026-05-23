@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Trash2, Upload, Ruler, PenTool, Layers, FileText, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Box, Trash2, Upload, Layers, FileText, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { useAdminOrderDetails } from '../../../../hooks/useAdminOrderDetails';
 import { formatPrice } from '../../../../utils/formatPrice';
 import { apiClient } from '../../../../../../services/apiClient';
@@ -21,7 +21,6 @@ const isImageFile = (url) => {
   if (!url) return false;
   return /\.(jpeg|jpg|gif|png|webp|svg|bmp)$/i.test(url);
 };
-
 
 const OrderItemsList = ({ order }) => {
   const { deleteItemMutation, uploadFileMutation } = useAdminOrderDetails();
@@ -47,38 +46,26 @@ const OrderItemsList = ({ order }) => {
     );
   };
 
+  // اصلاح اساسی متد رندر مشخصات بر اساس ریسپانس واقعی سرور
   const renderSpecificationsList = (specs) => {
-    if (!specs) return <span className="text-slate-400 text-sm">مشخصاتی ثبت نشده است</span>;
+    if (!specs || !Array.isArray(specs) || specs.length === 0) {
+      return <span className="text-slate-400 text-sm font-medium">مشخصاتی ثبت نشده است</span>;
+    }
 
     return (
       <div className="space-y-3">
-        {(specs.width || specs.height) && (
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 last:border-0 last:pb-0">
+        {specs.map((spec, idx) => (
+          <div 
+            key={spec.field_id || idx} 
+            className="flex items-center justify-between pb-3 border-b border-slate-200/60 last:border-0 last:pb-0"
+          >
             <div className="flex items-center gap-2 text-slate-500">
-               <Ruler size={16} />
-               <span className="text-sm font-medium">ابعاد (طول × عرض)</span>
+               <Layers size={16} className="text-slate-400" />
+               <span className="text-sm font-medium text-slate-600">{spec.field_title}</span>
             </div>
-            <span className="text-sm font-bold text-slate-800 dir-ltr">{specs.width || '?'} × {specs.height || '?'} cm</span>
-          </div>
-        )}
-
-        {specs.has_design && (
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 last:border-0 last:pb-0">
-            <div className="flex items-center gap-2 text-primary">
-               <PenTool size={16} />
-               <span className="text-sm font-bold">وضعیت طراحی</span>
-            </div>
-            <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-md">نیاز به طراحی</span>
-          </div>
-        )}
-
-        {specs.options && Array.isArray(specs.options) && specs.options.map((opt, idx) => (
-          <div key={idx} className="flex items-center justify-between pb-2 border-b border-slate-200/60 last:border-0 last:pb-0">
-            <div className="flex items-center gap-2 text-slate-500">
-               <Layers size={16} />
-               <span className="text-sm font-medium">{opt.name}</span>
-            </div>
-            <span className="text-sm font-bold text-slate-800">{opt.value}</span>
+            <span className="text-sm font-bold text-slate-800 bg-slate-100/80 px-2.5 py-1 rounded-lg">
+              {spec.value}
+            </span>
           </div>
         ))}
       </div>
@@ -96,13 +83,13 @@ const OrderItemsList = ({ order }) => {
           اقلام سفارش
         </h2>
         <div className="bg-slate-100 text-slate-600 font-bold px-3 py-1 rounded-md text-sm">
-          {order.items?.length || 0} ردیف
+          {order?.items?.length || 0} ردیف
         </div>
       </div>
 
       {/* --- لیست محصولات --- */}
       <div className="grid grid-cols-1 gap-6">
-        {order.items?.map((item, index) => (
+        {order?.items?.map((item, index) => (
           <div key={item.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all">
             
             {/* نوار عنوان محصول */}
@@ -112,7 +99,7 @@ const OrderItemsList = ({ order }) => {
                     {index + 1}
                   </span>
                   <div>
-                    <h3 className="font-bold text-slate-800 text-lg">{item.product_name}</h3>
+                    <h3 className="font-bold text-slate-800 text-lg">{item.product_name || item.name}</h3>
                     <p className="text-slate-400 font-mono text-xs mt-0.5">SLUG: {item.product_slug}</p>
                   </div>
                </div>
@@ -125,7 +112,7 @@ const OrderItemsList = ({ order }) => {
             <div className="p-6">
               <div className="flex flex-col lg:flex-row gap-8">
                 
-                {/* بخش راست: مشخصات فنی (بخش وسیع‌تر) */}
+                {/* بخش راست: مشخصات فنی */}
                 <div className="flex-1 space-y-3">
                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">مشخصات فنی</h4>
                    <div className="bg-slate-50/50 rounded-xl p-5 border border-slate-100">
@@ -133,7 +120,7 @@ const OrderItemsList = ({ order }) => {
                    </div>
                 </div>
 
-                {/* بخش چپ: قیمت و عملیات (بخش جمع‌وجورتر) */}
+                {/* بخش چپ: قیمت و عملیات */}
                 <div className="w-full lg:w-72 flex flex-col gap-5">
                    
                    {/* باکس قیمت */}
@@ -143,7 +130,7 @@ const OrderItemsList = ({ order }) => {
                        <span className="text-emerald-700 font-black text-xl dir-ltr tracking-tight">
                          {formatPrice(item.price)}
                        </span>
-                       <span className="text-emerald-600/70 font-bold text-xs">IQD</span>
+                       <span className="text-emerald-600/70 font-bold text-xs">تومان</span>
                      </div>
                    </div>
 
@@ -223,7 +210,7 @@ const OrderItemsList = ({ order }) => {
         ))}
 
         {/* حالت بدون آیتم */}
-        {(!order.items || order.items.length === 0) && (
+        {(!order?.items || order.items.length === 0) && (
           <div className="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
             <Box size={40} className="mx-auto text-slate-300 mb-3" />
             <p className="text-slate-500 font-bold text-lg">این سفارش فاقد آیتم است.</p>

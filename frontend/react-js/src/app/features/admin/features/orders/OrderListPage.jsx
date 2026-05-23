@@ -46,6 +46,7 @@ const OrderListPage = () => {
     }
   };
 
+  /* اصلاح باگ: نام تابع ست‌استیت درست شد */
   const openStatusModal = (order, targetStatusCode) => {
     setSelectedOrderForStatus(order);
     setNewStatusCode(targetStatusCode);
@@ -95,26 +96,25 @@ const OrderListPage = () => {
 
       {/* Advanced Filter Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-4">
-        {/* Quick Status Tabs */}
-{/* این تیکه رو تو OrderListPage.jsx جایگزین کن */}
-        <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-2 border-b border-slate-100">
-          <button 
-            onClick={() => { setStatusIdFilter('all'); setCurrentPage(1); }}
-            className={`btn btn-sm rounded-lg px-6 transition-all ${statusIdFilter === 'all' ? 'bg-slate-800 text-white hover:bg-slate-700' : 'btn-ghost text-slate-500 hover:bg-slate-100'}`}
-          >
-            همه سفارشات
-          </button>
-          {statuses?.map(status => (
-            <button 
-              key={status.id}
-              // اینجا String اضافه شد تا با URL همخوانی داشته باشه و فیلتر کار کنه
-              onClick={() => { setStatusIdFilter(String(status.id)); setCurrentPage(1); }}
-              className={`btn btn-sm rounded-lg px-6 whitespace-nowrap transition-all ${statusIdFilter === String(status.id) ? 'bg-primary text-white shadow-md shadow-primary/20' : 'btn-ghost text-slate-500 hover:bg-slate-100'}`}
-            >
-              {status.name}
-            </button>
-          ))}
-        </div>
+{/* Quick Status Tabs */}
+<div className="flex overflow-x-auto hide-scrollbar gap-2 pb-2 border-b border-slate-100">
+  <button 
+    onClick={() => { setStatusIdFilter('all'); setCurrentPage(1); }}
+    className={`btn btn-sm rounded-lg px-6 transition-all ${statusIdFilter === 'all' ? 'bg-slate-800 text-white hover:bg-slate-700' : 'btn-ghost text-slate-500 hover:bg-slate-100'}`}
+  >
+    همه سفارشات
+  </button>
+  {statuses?.map(status => (
+    <button 
+      key={status.id}
+      /* تغییر مهم: به جای status.id از internal_code یا نام انگلیسی که بک‌اند می‌شناسه استفاده کن */
+      onClick={() => { setStatusIdFilter(String(status.internal_code)); setCurrentPage(1); }}
+      className={`btn btn-sm rounded-lg px-6 whitespace-nowrap transition-all ${statusIdFilter === String(status.internal_code) ? 'bg-primary text-white shadow-md shadow-primary/20' : 'btn-ghost text-slate-500 hover:bg-slate-100'}`}
+    >
+      {status.name}
+    </button>
+  ))}
+</div>
 
         {/* Inputs (Search & Date) */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -149,17 +149,17 @@ const OrderListPage = () => {
         </div>
       </div>
 
-      {/* The Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+      {/* The Table Container */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm min-h-[400px] relative">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-80 gap-4">
             <span className="loading loading-spinner loading-lg text-primary"></span>
             <span className="text-slate-400 font-medium animate-pulse">در حال بارگذاری اطلاعات...</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="table table-pin-rows w-full">
-              <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+          <div className="overflow-x-visible">
+            <table className="table table-pin-rows w-full" style={{ borderCollapse: 'separate' }}>
+              <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider relative z-10">
                 <tr className="text-right">
                   <th className="w-12 bg-slate-50">
                     <input type="checkbox" className="checkbox checkbox-sm checkbox-primary rounded"
@@ -183,10 +183,14 @@ const OrderListPage = () => {
                   </tr>
                 ) : (
                   orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group relative hover:z-20">
                       <th>
-                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary rounded"
-                          checked={selectedIds.includes(order.id)} onChange={() => handleToggleOne(order.id)} />
+                        <input 
+                          type="checkbox" 
+                          className="checkbox checkbox-sm checkbox-primary rounded"
+                          checked={selectedIds.includes(order.id)} 
+                          onChange={() => handleToggleOne(order.id)} 
+                        />
                       </th>
                       <td>
                         <div className="font-mono text-sm font-bold text-slate-700 bg-slate-100 inline-block px-2 py-1 rounded">
@@ -195,27 +199,30 @@ const OrderListPage = () => {
                       </td>
                       <td>
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-800">{order.username || order.recipient_name}</span>
+                          <span className="font-bold text-slate-800">
+                            {order.user_info?.full_name || order.recipient_name}
+                          </span>
                           <span className="text-xs text-slate-400 mt-0.5">{order.recipient_phone}</span>
                         </div>
                       </td>
                       
                       {/* Interactive Status Cell */}
                       <td className="text-center">
-                        <div className="dropdown dropdown-bottom dropdown-end">
-                          <div tabIndex={0} role="button" className="transition-transform active:scale-95 group-hover:ring-2 ring-primary/20 rounded-lg p-1">
-                            <OrderStatusBadge status={order.status_name} />
+                        <div className="dropdown dropdown-bottom dropdown-end static sm:relative">
+                          <div tabIndex={0} role="button" className="transition-transform active:scale-95 group-hover:ring-2 ring-primary/20 rounded-lg p-1 inline-block">
+                            <OrderStatusBadge status={order.current_status} />
                           </div>
-                          <ul tabIndex={0} className="dropdown-content z-[50] menu p-2 shadow-xl shadow-slate-200/50 bg-base-100 rounded-xl w-52 border border-slate-100">
+                          <ul tabIndex={0} className="dropdown-content menu p-2 shadow-2xl bg-base-100 rounded-xl w-52 border border-slate-100 absolute z-[9999] mt-1">
                             <li className="menu-title text-[10px] text-slate-400">تغییر وضعیت به:</li>
                             {statuses?.map(s => (
                               <li key={s.id}>
-                                <a 
+                                <button 
+                                  type="button"
                                   onClick={() => openStatusModal(order, s.internal_code)}
-                                  className={order.status_name === s.name ? 'active bg-primary/10 text-primary font-bold' : ''}
+                                  className={`w-full text-right px-4 py-2 text-sm rounded-lg block ${order.current_status === s.name ? 'active bg-primary/10 text-primary font-bold' : 'hover:bg-slate-50'}`}
                                 >
                                   {s.name}
-                                </a>
+                                </button>
                               </li>
                             ))}
                           </ul>
@@ -228,7 +235,9 @@ const OrderListPage = () => {
                         </div>
                       </td>
                       <td className="text-center">
-                        <div className="badge badge-ghost badge-sm border-slate-200">{order.items_count} مورد</div>
+                        <div className="badge badge-ghost badge-sm border-slate-200">
+                          {order.items?.length || 0} مورد
+                        </div>
                       </td>
                       <td className="text-xs text-slate-500">
                         <div className="flex flex-col">
@@ -256,7 +265,7 @@ const OrderListPage = () => {
 
         {/* Pagination Footer */}
         {!isLoading && orders.length > 0 && (
-          <div className="p-4 border-t border-slate-100 bg-slate-50 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="p-4 border-t border-slate-100 bg-slate-50 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
             <span className="text-sm text-slate-500 font-medium">
               نمایش صفحه <span className="font-bold text-slate-800">{currentPage}</span> از <span className="font-bold text-slate-800">{totalPages}</span>
             </span>
@@ -277,7 +286,7 @@ const OrderListPage = () => {
 
       {/* --- Status Change Modal --- */}
       {statusModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="p-6">
               <h3 className="text-lg font-black text-slate-800 mb-2">تایید تغییر وضعیت</h3>
@@ -291,7 +300,7 @@ const OrderListPage = () => {
                   <span className="label-text-alt text-slate-400">برای ثبت در لاگ</span>
                 </label>
                 <textarea 
-                  className="textarea textarea-bordered h-24 focus:border-primary bg-slate-50 focus:bg-white" 
+                  className="textarea textarea-bordered h-24 focus:border-primary bg-slate-50 focus:bg-white w-full text-right" 
                   placeholder="مثال: با مشتری تماس گرفته شد و..."
                   value={newStatusDesc}
                   onChange={(e) => setNewStatusDesc(e.target.value)}
@@ -300,6 +309,7 @@ const OrderListPage = () => {
 
               <div className="flex gap-3 justify-end">
                 <button 
+                  type="button"
                   onClick={() => setStatusModalOpen(false)} 
                   className="btn btn-ghost"
                   disabled={changeStatusMutation.isPending}
@@ -307,6 +317,7 @@ const OrderListPage = () => {
                   انصراف
                 </button>
                 <button 
+                  type="button"
                   onClick={submitStatusChange} 
                   className="btn btn-primary px-8"
                   disabled={changeStatusMutation.isPending}

@@ -1,18 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, AlertTriangle } from 'lucide-react';
+import { ArrowRight, AlertTriangle, Clock } from 'lucide-react'; // این کلاک رو برای آیکون وضعیت آوردم
 import { useAdminOrderDetails } from '../../hooks/useAdminOrderDetails';
 import OrderHeader from './components/details/OrderHeader';
 import OrderFinancials from './components/details/OrderFinancials';
 import OrderItemsList from './components/details/OrderItemsList';
 import OrderCustomerCard from './components/details/OrderCustomerCard';
 import OrderInvoiceModule from './components/details/OrderInvoiceModule';
-
-// این کامپوننت‌ها رو تو قدم‌های بعدی یکی یکی با هم می‌سازیم
-// import OrderHeader from './components/details/OrderHeader';
-// import OrderItemsList from './components/details/OrderItemsList';
-// import OrderCustomerCard from './components/details/OrderCustomerCard';
-// import OrderFinancials from './components/details/OrderFinancials';
 
 const OrderDetailsPage = () => {
   const navigate = useNavigate();
@@ -34,44 +28,50 @@ const OrderDetailsPage = () => {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 pb-24 animate-fade-in">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 pb-24 animate-fade-in" dir="rtl">
       
-      {/* دکمه بازگشت */}
-      <button 
-        onClick={() => navigate(-1)} 
-        className="btn btn-sm btn-ghost gap-2 text-slate-500 hover:text-slate-800 mb-2"
-      >
-        <ArrowRight size={16} /> بازگشت به لیست سفارشات
-      </button>
+      {/* بخش بالای صفحه: شامل دکمه بازگشت و وضعیت فعلی */}
+      <div className="flex justify-between items-center mb-2">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="btn btn-sm btn-ghost gap-2 text-slate-500 hover:text-slate-800"
+        >
+          <ArrowRight size={16} /> بازگشت به لیست سفارشات
+        </button>
 
-<div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        {/* بج نمایش وضعیت فعلی سفارش */}
+        <div className="flex items-center gap-2 bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+          <Clock size={14} className="text-slate-500" />
+          <span>وضعیت سفارش:</span>
+          <span className="text-primary font-black">{order.current_status || "نامشخص"}</span>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
          <OrderHeader order={order} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* ستون راست: لیست اقلام */}
-<div className="lg:col-span-2">
-  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-4">
-    <OrderItemsList order={order} />
-  </div>
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-4">
+            <OrderItemsList order={order} />
+          </div>
 
-  <OrderInvoiceModule order={order}  />
-</div>
+          <OrderInvoiceModule order={order}  />
+        </div>
 
         {/* ستون چپ: اطلاعات مشتری و مالی */}
         <div className="space-y-6">
           
           {/* کارت اطلاعات مشتری */}
-<div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-   <OrderCustomerCard order={order} />
-</div>
-
-
-
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+             <OrderCustomerCard order={order} />
+          </div>
 
           {/* کارت مالی و تغییر قیمت */}
-<div className=" rounded-2xl shadow-xl">
+          <div className="rounded-2xl shadow-xl">
              <OrderFinancials order={order} />
           </div>
 
