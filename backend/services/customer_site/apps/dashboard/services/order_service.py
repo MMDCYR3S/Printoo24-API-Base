@@ -23,8 +23,8 @@ class OrderDashboardService:
     def update_order(self, order_id, data):
         return self.domain.update_order_details(order_id, data)
 
-    def change_status(self, order_id, internal_code, actor, description=""):
-        return self.domain.change_order_status(order_id, internal_code, actor, description)
+    def change_status(self, order_id, status_code, actor, description=""):
+        return self.domain.change_order_status(order_id, status_code, actor, description)
 
     def delete_order(self, order_id):
         # اول بررسی وجود سفارش

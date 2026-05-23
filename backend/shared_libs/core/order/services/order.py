@@ -246,19 +246,19 @@ class OrderService:
     def change_order_status(
         self, 
         order_id: int, 
-        internal_code: str, 
+        status_code: str, 
         actor: User, 
         description: str = ""
     ) -> Order:
         """
-        تغییر وضعیت تکی با استفاده از internal_code
+        تغییر وضعیت تکی با استفاده از status_code
         """
         order = self.get_order_by_id(order_id)
         
         try:
-            new_status = OrderStatus.objects.get(internal_code=internal_code)
+            new_status = OrderStatus.objects.get(internal_code=status_code)
         except ObjectDoesNotExist:
-            raise ValidationError(f"وضعیتی با کد سیستمی {internal_code} یافت نشد.")
+            raise ValidationError(f"وضعیتی با کد سیستمی {status_code} یافت نشد.")
             
         old_status = order.current_status
 
@@ -282,16 +282,16 @@ class OrderService:
     def bulk_change_status(
         self, 
         order_ids: List[int], 
-        internal_code: str, 
+        status_code: str, 
         actor: User
     ) -> int:
         """
         تغییر وضعیت گروهی
         """
         try:
-            new_status = OrderStatus.objects.get(internal_code=internal_code)
+            new_status = OrderStatus.objects.get(internal_code=status_code)
         except ObjectDoesNotExist:
-            raise ValidationError(f"وضعیتی با کد سیستمی {internal_code} یافت نشد.")
+            raise ValidationError(f"وضعیتی با کد سیستمی {status_code} یافت نشد.")
         
         orders = Order.objects.filter(id__in=order_ids)
         updated_count = 0
@@ -300,7 +300,7 @@ class OrderService:
             if order.current_status != new_status:
                 self.change_order_status(
                     order.id, 
-                    internal_code, 
+                    status_code, 
                     actor, 
                     description="تغییر وضعیت گروهی ادمین"
                 )

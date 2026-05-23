@@ -95,14 +95,14 @@ class OrderUpdateSerializer(serializers.Serializer):
     selected_options = SelectedOptionInputSerializer(many=True, required=False, default=list)
 
 class ChangeStatusSerializer(serializers.Serializer):
-    internal_code = serializers.CharField(required=True, help_text="کد سیستمی وضعیت (مثال: PENDING_INITIAL_ADMIN)")
+    status_code = serializers.CharField(required=True, help_text="کد سیستمی وضعیت (مثال: PENDING_INITIAL_ADMIN)")
     description = serializers.CharField(required=False, allow_blank=True)
 
 class BulkActionIdsSerializer(serializers.Serializer):
     order_ids = serializers.ListField(child=serializers.IntegerField(), required=True, allow_empty=False)
 
 class BulkChangeStatusSerializer(BulkActionIdsSerializer):
-    internal_code = serializers.CharField(required=True)
+    status_code = serializers.CharField(required=True)
 
 # ===== سریالایزر جدید برای لیست وضعیت‌ها ===== #
 class OrderStatusSerializer(serializers.ModelSerializer):

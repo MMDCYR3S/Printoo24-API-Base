@@ -154,7 +154,7 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         try:
             data = serializer.validated_data
-            order = self.service.change_status(pk, data['internal_code'], request.user, data.get('description', ''))
+            order = self.service.change_status(pk, data['status_code'], request.user, data.get('description', ''))
             return Response(OrderDetailSerializer(order).data)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
