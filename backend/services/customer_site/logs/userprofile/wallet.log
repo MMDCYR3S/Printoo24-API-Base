@@ -1122,3 +1122,39 @@ INFO 2026-02-26 13:59:30,449 user_transaction_service 305 123604700227264 Fetchi
 WARNING 2026-02-26 13:59:30,468 user_transaction_service 305 123604700227264 No wallet found for User ID: 21
 INFO 2026-05-09 09:12:11,636 user_transaction_service 14 137371232233152 Fetching wallet balance for User ID: 1
 WARNING 2026-05-09 09:12:11,660 user_transaction_service 14 137371232233152 No wallet found for User ID: 1
+INFO 2026-05-20 14:12:24,124 user_transaction_service 7 139745874319040 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 14:12:24,395 user_transaction_service 7 139745874319040 Wallet balance: -8398.00
+INFO 2026-05-20 14:16:39,560 user_transaction_service 7 139745485125312 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 14:16:39,612 user_transaction_service 7 139745485125312 Wallet balance: -8398.00
+INFO 2026-05-20 14:29:22,524 user_transaction_service 7 139745865926336 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 14:29:23,168 user_transaction_service 7 139745865926336 Wallet balance: -8398.00
+INFO 2026-05-20 14:30:35,047 user_transaction_service 7 139745485125312 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 14:30:35,140 user_transaction_service 7 139745485125312 Wallet balance: -8398.00
+INFO 2026-05-20 14:31:10,974 user_transaction_service 7 139745840748224 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 14:31:11,000 user_transaction_service 7 139745840748224 Wallet balance: -8398.00
+INFO 2026-05-20 14:31:41,092 user_transaction_service 7 139745865926336 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 14:31:41,670 user_transaction_service 7 139745865926336 Wallet balance: -8398.00
+INFO 2026-05-20 14:33:49,013 user_transaction_service 7 139745485125312 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 14:33:49,146 user_transaction_service 7 139745485125312 Wallet balance: -8398.00
+INFO 2026-05-20 14:34:00,361 user_transaction_service 7 139745874319040 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 14:34:00,490 user_transaction_service 7 139745874319040 Wallet balance: -8398.00
+INFO 2026-05-20 15:23:09,687 user_transaction_service 7 139745849140928 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 15:23:10,065 user_transaction_service 7 139745849140928 Wallet balance: -8398.00
+INFO 2026-05-20 15:30:16,273 user_transaction_service 7 139745874319040 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-20 15:30:16,341 user_transaction_service 7 139745874319040 Wallet balance: -8398.00
+INFO 2026-05-23 05:53:56,438 user_transaction_service 7 137846314915520 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-23 05:53:56,466 user_transaction_service 7 137846314915520 Wallet balance: -8398.00
+INFO 2026-05-23 06:09:56,239 user_transaction_service 7 137846323308224 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-23 06:09:56,248 user_transaction_service 7 137846323308224 Wallet balance: -8398.00
+INFO 2026-05-23 06:10:26,576 user_transaction_service 7 137846314915520 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-23 06:10:26,582 user_transaction_service 7 137846314915520 Wallet balance: -8398.00
+INFO 2026-05-23 06:28:58,820 user_transaction_service 7 137846323308224 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-23 06:28:58,854 user_transaction_service 7 137846323308224 Wallet balance: -8398.00
+INFO 2026-05-23 06:32:46,319 user_transaction_service 7 137846314915520 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-23 06:32:46,343 user_transaction_service 7 137846314915520 Wallet balance: -8406.00
+INFO 2026-05-23 06:49:59,633 user_transaction_service 7 137846314915520 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-23 06:49:59,707 user_transaction_service 7 137846314915520 Wallet balance: -8406.00
+INFO 2026-05-23 07:35:45,930 user_transaction_service 7 137846314915520 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-23 07:35:45,947 user_transaction_service 7 137846314915520 Wallet balance: -8414.00
+INFO 2026-05-23 07:41:59,704 user_transaction_service 7 137845913278144 Fetching wallet balance for User ID: 1
+DEBUG 2026-05-23 07:41:59,798 user_transaction_service 7 137845913278144 Wallet balance: -8414.00

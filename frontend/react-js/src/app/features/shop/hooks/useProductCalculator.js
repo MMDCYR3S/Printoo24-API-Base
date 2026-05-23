@@ -1,3 +1,4 @@
+// src/app/features/shop/hooks/useProductCalculator.js
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import { shopService } from '../../../services/shopService';
@@ -8,7 +9,7 @@ export const useProductCalculator = (productData) => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [priceError, setPriceError] = useState(null);
 
-  // ۱. مقداردهی اولیه دیفالت‌ها
+  // ۱. مقداردهی اولیه دیفالت‌ها (استیت داخلی برای سازگاری با UI همچنان استرینگ می‌ماند)
   useEffect(() => {
     if (!productData || !Array.isArray(productData.fields)) return;
 
@@ -19,7 +20,7 @@ export const useProductCalculator = (productData) => {
         if (newState[field.id] === undefined && Array.isArray(field.choices) && field.choices.length > 0) {
           const defaultChoice = field.choices.find(c => c.is_default) || field.choices[0];
           if (defaultChoice) {
-            newState[field.id] = String(defaultChoice.id); // حتما استرینگ باشه طبق داکیومنت
+            newState[field.id] = String(defaultChoice.id); 
             hasChanges = true;
           }
         }
@@ -31,7 +32,7 @@ export const useProductCalculator = (productData) => {
     setLivePrice(parseFloat(productData?.show_price || 0));
   }, [productData]);
 
-  // ۲. منطق نمایش فیلدها (همچنان سمت فرانت نیازه تا فیلدای نامربوط مخفی بشن)
+  // ۲. منطق نمایش فیلدها (با تبدیل دو طرف به String برای جلوگیری از باگ تفاوت Type)
   const visibleFields = useMemo(() => {
     if (!productData || !Array.isArray(productData.fields)) return [];
     return productData.fields.filter(field => {
@@ -45,12 +46,11 @@ export const useProductCalculator = (productData) => {
     }).map(f => f.id);
   }, [productData, selectedOptions]);
 
-  // ۳. ریکوئست به بک‌اند با Debounce (جلوگیری از اسپم ریکوئست)
+  // ۳. ریکوئست به بک‌اند با Debounce (بدون تغییر در ساختار لایو متناسب با قبل)
   const fetchPriceFromServer = useCallback(
     debounce(async (productId, currentSelections, visible) => {
       if (!productId) return;
 
-      // فقط آپشن‌هایی که واقعاً تو صفحه دارن نمایش داده میشن رو بفرستیم به سرور (پاک کردن دیتای کثیف)
       const activeSelections = {};
       Object.entries(currentSelections).forEach(([fieldId, choiceId]) => {
         if (visible.includes(Number(fieldId))) {
@@ -74,28 +74,29 @@ export const useProductCalculator = (productData) => {
       } finally {
         setIsCalculating(false);
       }
-    }, 400), // 400 میلی‌ثانیه دی‌باونس
+    }, 400),
     []
   );
 
-  // ۴. هربار که کاربر روی مستطیل‌ها کلیک کرد، قیمت رو لایو بگیر
+  // ۴. افکت استعلام قیمت لایو
   useEffect(() => {
     if (productData?.id && Object.keys(selectedOptions).length > 0) {
       fetchPriceFromServer(productData.id, selectedOptions, visibleFields);
     }
   }, [selectedOptions, productData?.id, visibleFields, fetchPriceFromServer]);
 
-  // آپدیت کردن استیت با کلیک کاربر روی فرم
+  // آپدیت کردن استیت با کلیک کاربر روی فرم (همچنان استرینگ نگه می‌داریم تا رندر فرم‌ها خراب نشود)
   const handleOptionSelect = useCallback((fieldId, choiceId) => {
     setSelectedOptions(prev => ({ ...prev, [fieldId]: String(choiceId) }));
   }, []);
 
-  // آماده کردن دیتای نهایی برای افزودن به سبد خرید
+  // آماده کردن دیتای نهایی برای افزودن به سبد خرید (اصلاح اصلی اینجاست: تبدیل مقادیر خروجی به Number)
   const getSubmitPayload = useCallback(() => {
     const activeSelections = {};
     Object.entries(selectedOptions).forEach(([fieldId, choiceId]) => {
       if (visibleFields.includes(Number(fieldId))) {
-        activeSelections[String(fieldId)] = String(choiceId);
+        // کلید و مقدار هر دو به صورت Number به خروجی پاس داده می‌شوند
+        activeSelections[Number(fieldId)] = Number(choiceId);
       }
     });
     return {

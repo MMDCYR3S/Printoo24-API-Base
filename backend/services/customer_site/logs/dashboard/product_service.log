@@ -170,3 +170,6 @@ INFO 2026-02-23 09:04:50,717 product_service 153 135163080079040 Attempting asyn
 INFO 2026-02-23 19:00:44,687 product_service 277 130100314261184 Attempting async upload for product 49
 INFO 2026-02-24 09:48:07,958 product_service 9 127131384256192 Attempting async attachment upload: df337e77-1978-462b-9e0a-083990da7837.mp4
 INFO 2026-02-24 09:48:13,003 product_service 9 127131384256192 Attempting async attachment upload: خاطرات کینیاز دالگورکی.pdf
+INFO 2026-05-20 14:29:07,570 product_service 7 139745874319040 Attempting async upload for product 33
+INFO 2026-05-20 15:22:42,425 product_service 7 139745485125312 Attempting async upload for product 36
+INFO 2026-05-23 06:09:02,909 product_service 7 137846323308224 Attempting async upload for product 37
