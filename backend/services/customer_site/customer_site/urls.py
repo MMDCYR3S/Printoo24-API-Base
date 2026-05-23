@@ -39,7 +39,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("it's-a-secret:)/", admin.site.urls),
     path("api/", include("api.urls")),
     
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),

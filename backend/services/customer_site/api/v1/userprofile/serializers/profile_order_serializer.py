@@ -4,7 +4,6 @@ from core.models import Order, OrderItem, OrderItemFile, Product, Address, Quota
 # ===== Quotation ===== #
 class QuotationSerializer(serializers.ModelSerializer):
     product_image_url = serializers.SerializerMethodField()
-    # snapshot_details = serializers.SerializerMethodField()
     
     class Meta:
         model = Quotation
@@ -26,21 +25,6 @@ class QuotationSerializer(serializers.ModelSerializer):
         if obj.product_image:
             return request.build_absolute_uri(obj.product_image.url) if request else obj.product_image.url
         return None
-
-    # def get_snapshot_details(self, obj):
-    #     """
-    #     تبدیل JSON ذخیره شده به فرمت قابل نمایش
-    #     """
-    #     raw_data = obj.product_snapshot or {}
-    #     details = raw_data.get('details', {})
-        
-    #     return {
-    #         "dimensions": f"{details.get('width', 0)} x {details.get('height', 0)}",
-    #         "material": details.get('material_name', 'نامشخص'),
-    #         "features": [
-    #             f"{opt['name']}: {opt['value']}" for opt in details.get('options', [])
-    #         ]
-    #     }
 
 # ===== Product Summary ===== #
 class ProductSummarySerializer(serializers.ModelSerializer):
@@ -138,15 +122,21 @@ class OrderWithDetailsSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source='current_status.name', read_only=True)
     type_display = serializers.CharField(source='get_type_display', read_only=True)
+    full_address = serializers.CharField(source='address', read_only=True)
     
-    # آدرس (هم دریافت ID برای ثبت، هم نمایش متن برای خواندن)
+    # ===== نمایش آدرس‌ کاربر ===== #
     address_id = serializers.PrimaryKeyRelatedField(
         queryset=Address.objects.all(),
         source="address",
         write_only=True,
         required=True
     )
-    address = serializers.StringRelatedField(read_only=True)
+    address = serializers.SerializerMethodField(read_only=True)
+
+    def get_address(self, obj):
+        if obj.address:
+            return f"{obj.address.province} - {obj.address.city} - {obj.address.postal_code} - {obj.address.address}" 
+        return self.full_address
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -159,7 +149,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', "recipient_name", "recipient_phone",
             'status', 'type_display', 'total_price',
-            'order_code', 'created_at', "address_id", "address"
+            'order_code', 'created_at', "address_id", "address", "full_address"
         ]
 
 # ===== User Invoice Serializer ===== #
