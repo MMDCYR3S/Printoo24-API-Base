@@ -9,12 +9,16 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['*'])
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
     'http://187.124.27.96:9010',
     'http://187.124.27.96:5173',
-    'http://187.124.27.96:3000'
+    'http://187.124.27.96:3000',
+    'https://printoo24.com',
+    'https://www.printoo24.com',
 ])
 
 CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
     'http://187.124.27.96:5173',
-    'http://187.124.27.96:3000'
+    'http://187.124.27.96:3000',
+    'https://printoo24.com',
+    'https://www.printoo24.com',
 ])
 
 

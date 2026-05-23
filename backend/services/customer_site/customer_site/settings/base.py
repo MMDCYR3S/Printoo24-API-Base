@@ -10,15 +10,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # ==== Environment Variables ==== #
 env = environ.Env(
 
-    DEBUG=(bool, True)
+    DEBUG=(bool, False)
 )
-env_file = os.path.join(BASE_DIR, 'env/.env.dev')
+env_file = os.path.join(BASE_DIR, 'env/.env.prod')
 environ.Env.read_env(env_file)
 
 
 SECRET_KEY = env('SECRET_KEY')
 
-DEBUG = env("DEBUG", default=True)
+DEBUG = env("DEBUG", default=False)
 
 ALLOWED_HOSTS = ["*"]
 
