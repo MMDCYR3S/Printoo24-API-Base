@@ -56,11 +56,11 @@ const ProductDetailPage = () => {
       }
     }
 
+    // ساختار جدید و منطبق بر سند سواگر (حذف فیلدهای هاردکد و واسط)
     const payload = {
       product_id: payloadInfo.product_id,
       selections: {
-        has_design: true,
-        options: payloadInfo.options 
+        ...payloadInfo.options 
       }
     };
 
