@@ -37,8 +37,7 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     uploads = CartItemUploadSerializer(many=True, read_only=True)
     
-    # 🌟 تغییر کلیدی: items مستقیماً خروجی داده می‌شود (چون ما آن را به صورت Dict ذخیره کردیم)
-    configuration = serializers.JSONField(source='items', help_text="مشخصات فنی و انتخاب‌های کاربر")
+    selections = serializers.JSONField(source='items', help_text="مشخصات فنی و انتخاب‌های کاربر")
 
     class Meta:
         model = CartItem
@@ -47,9 +46,9 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
             'product',
             'name',
             'description',
-            'quantity',  # تعداد این پکیج خاص در سبد (مثلاً 2 تا از این بنر)
-            'price',     # قیمت نهایی محاسبه شده با فرمول
-            'configuration', # جایگزین items قبلی برای خوانایی بهتر
+            'quantity',
+            'price',
+            'selections',
             'uploads',
             'created_at'
         ]
