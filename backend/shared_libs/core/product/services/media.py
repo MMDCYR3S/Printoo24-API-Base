@@ -3,6 +3,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from ..models import Product, ProductImage, Attachment
+from ..exceptions import ProductImageNotFoundException, AttachmentNotFoundException
 from core.models import User
 
 # ========== MEDIA SERVICE ========== #
@@ -22,7 +23,12 @@ class ProductMediaService:
 
     @transaction.atomic
     def delete_product_image(self, product_id: int, image_id: int):
-        ProductImage.objects.delete_image(image_id)
+        """ حذف فیزیکی تصویر محصول با شرط تطابق محصول """
+        try:
+            image = ProductImage.objects.get(id=image_id, product_id=product_id)
+            image.delete()
+        except ProductImage.DoesNotExist:
+            raise ProductImageNotFoundException(f"تصویری با شناسه {image_id} برای این محصول یافت نشد.")
 
     @transaction.atomic
     def reorder_images(self, product_id: int, image_ids: List[int]):
@@ -57,3 +63,12 @@ class ProductMediaService:
             product=product, 
             name=name
         )
+    
+    @transaction.atomic
+    def delete_product_attachment(self, product_id: int, attachment_id: int):
+        """ حذف فایل پیوست با شرط تطابق محصول """
+        try:
+            attachment = Attachment.objects.get(id=attachment_id, product_id=product_id)
+            attachment.delete()
+        except Attachment.DoesNotExist:
+            raise AttachmentNotFoundException(f"فایل پیوستی با شناسه {attachment_id} برای این محصول یافت نشد.")

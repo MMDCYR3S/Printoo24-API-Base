@@ -45,7 +45,7 @@ class ProductCategoryManager(TreeManager):
     مدیر مدل دسته‌بندی (ارث‌بری از TreeManager برای پشتیبانی MPTT)
     """
     def get_queryset(self):
-        return ProductCategoryQuerySet(self.model, using=self._db)
+        return ProductCategoryQuerySet(self.model, using=self._db).order_by('tree_id', 'lft')
 
     def get_all_active_categories(self):
         return self.get_queryset().get_all_active_categories()
