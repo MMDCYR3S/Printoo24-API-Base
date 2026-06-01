@@ -17,8 +17,8 @@ export const ADMIN_NAVIGATION = [
     children: [
       { title: 'لیست محصولات', path: '/admin/products', icon: List },
       { title: 'ایجاد محصول جدید', path: '/admin/products/create', icon: FilePlus },
-      { title: 'مدیریت سایزها', path: '/admin/products/sizes', icon: Hash }, 
-      { title: 'مدیریت تیراژها', path: '/admin/products/quantities', icon: Hash },
+      // { title: 'مدیریت سایزها', path: '/admin/products/sizes', icon: Hash }, 
+      // { title: 'مدیریت تیراژها', path: '/admin/products/quantities', icon: Hash },
     ]
   },
   {

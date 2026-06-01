@@ -195,7 +195,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-[1920px] mx-auto space-y-8 pb-32 animate-fade-in-up">
+    <div className="p-6 md:p-8 max-w-[1920px] mx-auto space-y-8 pb-32 animate-fade-in-up overflow-hidden">
       
       {/* --- Header --- */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -351,7 +351,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Product Config Stats */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+          {/* <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
                <h4 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                    <Layers size={18} className="text-primary"/> پیکربندی محصولات
                </h4>
@@ -371,7 +371,7 @@ const AdminDashboard = () => {
                    <span>محصولات غیرفعال:</span>
                    <span className="font-bold text-error">{products?.status_breakdown?.inactive} مورد</span>
                </div>
-          </div>
+          </div> */}
 
       </div>
 
