@@ -1,5 +1,5 @@
 import random
-from slugify import slugify as unicode_slugify
+from slugify import slugify
 from decimal import Decimal
 
 from django.db import models
@@ -115,10 +115,9 @@ class ProductCategory(MPTTModel):
     """
     مدل دسته بندی محصولات
     """
-
     user = models.ForeignKey("core.User", related_name='product_category', on_delete=models.PROTECT)
     name = models.CharField(_("نام"), max_length=150)
-    slug = models.SlugField(_("اسلاگ"), unique=True, blank=True, null=True)
+    slug = models.SlugField(_("اسلاگ"), unique=True, blank=True, null=True, allow_unicode=True)
     parent = TreeForeignKey("self", related_name="children", on_delete=models.PROTECT, blank=True, null=True)
     # ===== فیلدهای جدید برای بنر و توضیحات ===== #
     description = models.TextField(_("توضیحات"), blank=True, null=True, help_text=_("توضیحات برای نمایش در بالای صفحه دسته بندی و سئو"))
@@ -155,9 +154,8 @@ class ProductCategory(MPTTModel):
         order_insertion_by = ['order', 'name']
 
     def save(self, *args, **kwargs):
-        """ ذخیره اسلاگ به صورت خودکار """
         if not self.slug:
-            self.slug = unicode_slugify(self.name)
+            self.slug = slugify(self.name, allow_unicode=True)
         super().save(*args, **kwargs)
     
     def __str__(self):
@@ -235,7 +233,7 @@ class Product(HasGuide, models.Model):
         verbose_name=_('دسته‌بندی‌ها'),
         blank=True
     )
-    slug = models.SlugField(_('اسلاگ'), unique=True, blank=True, null=True)
+    slug = models.SlugField(_('اسلاگ'), unique=True, blank=True, null=True, allow_unicode=True)
     has_price = models.BooleanField(_('دارای قیمت'), default=True)
     show_price = models.DecimalField(
         _("قیمت نمایشی"),
@@ -286,7 +284,7 @@ class Product(HasGuide, models.Model):
     def save(self, *args, **kwargs):
         """ ذخیره اسلاگ محصول به صورت خودکار """
         if not self.slug:
-            self.slug = unicode_slugify(self.name)
+            self.slug = slugify(self.name, allow_unicode=True)
         if self.slug in Product.objects.filter(slug=self.slug).exclude(pk=self.pk):
             raise ValidationError('محصول با این نام قبلا ساخته شده است.')
             
@@ -297,17 +295,6 @@ class Product(HasGuide, models.Model):
             self.code = product_code_generator(category_slug, self.slug, year)
             
         super().save(*args, **kwargs)
-    
-    # def get_primary_category(self):
-    #     """
-    #     یک متد کمکی برای دریافت دسته‌بندی اصلی جهت استفاده در لاجیک‌ها.
-    #     """
-    #     rel = self.category_relations.filter(is_primary=True).select_related('category').first()
-    #     if rel:
-    #         return rel.category
-
-    #     rel = self.category_relations.select_related('category').first()
-    #     return rel.category if rel else None
 
     def __str__(self):
         return f"{self.name} - {self.code}"

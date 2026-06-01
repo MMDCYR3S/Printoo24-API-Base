@@ -3,7 +3,8 @@ from django.db import transaction
 from django.db.models import QuerySet
 
 from ..models import ProductCategory, Product
-from ..exceptions import ProductCategoryNotFoundException
+from ..exceptions import ProductCategoryNotFoundException, ProductCategoryHasDependencyException
+from django.db.models import ProtectedError
 
 # ========== CATEGORY SERVICE ========== #
 class ProductCategoryService:
@@ -81,10 +82,11 @@ class ProductCategoryService:
         return instance
 
     def delete_category(self, instance: ProductCategory) -> None:
-        """
-        حذف یک دسته‌بندی.
-        """
-        instance.delete()
+        try:
+            instance.delete()
+        except ProtectedError:
+            raise ProductCategoryHasDependencyException("دسته‌بندی قابل حذف نیست، چون وابستگی‌هایی دارد.")
+
 
     # ===== Bulk Operations ===== #
     @transaction.atomic
@@ -93,8 +95,11 @@ class ProductCategoryService:
 
     @transaction.atomic
     def bulk_delete(self, ids: List[int]) -> tuple:
-        return ProductCategory.objects.bulk_delete_categories(ids)
-
+        try:
+            return ProductCategory.objects.bulk_delete_categories(ids)
+        except ProtectedError:
+            raise ProductCategoryHasDependencyException("برخی دسته‌بندی‌ها قابل حذف نیستند چون وابستگی دارند.")\
+                
     def get_products_by_category_ids(self, category_ids: List[int]) -> QuerySet[Product]:
         """
         دریافت محصولات بر اساس لیستی از شناسه‌های دسته‌بندی.
@@ -115,84 +120,85 @@ class ProductCategoryService:
         عملیات ترکیبی ایجاد و ویرایش گروهی دسته‌بندی‌ها.
         پشتیبانی از تمامی فیلدها (عکس، توضیحات و ...).
         """
-        results = []
-        
-        updates_data = [item for item in validated_data_list if item.get('id')]
-        creates_data = [item for item in validated_data_list if not item.get('id')]
+        with ProductCategory.objects.delay_mptt_updates():
+            results = []
+            
+            updates_data = [item for item in validated_data_list if item.get('id')]
+            creates_data = [item for item in validated_data_list if not item.get('id')]
 
-        # ===== UPDATE OPERATION ===== #
-        if updates_data:
-            update_ids = [item['id'] for item in updates_data]
-            # ===== واکشی داده‌های مربوط به والد ===== #
-            existing_categories = ProductCategory.objects.filter(id__in=update_ids)
-            existing_map = {cat.id: cat for cat in existing_categories}
+            # ===== UPDATE OPERATION ===== #
+            if updates_data:
+                update_ids = [item['id'] for item in updates_data]
+                # ===== واکشی داده‌های مربوط به والد ===== #
+                existing_categories = ProductCategory.objects.filter(id__in=update_ids)
+                existing_map = {cat.id: cat for cat in existing_categories}
 
-            for item in updates_data:
-                pk = item.pop('id')
-                instance = existing_map.get(pk)
-                if not instance:
-                    continue
-                
-                # ===== مدیریت تغییر والد در آپدیت ===== #
-                if 'parent_slug' in item:
-                    p_slug = item.pop('parent_slug')
-                    if p_slug:
-                        parent = ProductCategory.objects.filter(slug=p_slug).first()
-                        instance.parent = parent
-                    else:
-                        instance.parent = None # قطع رابطه والد
-
-                # ===== آپدیت ===== #
-                for field, value in item.items():
-                    # ===== ست کردن فیلد‌هایی که در مدل هستند ===== #
-                    if hasattr(instance, field):
-                        setattr(instance, field, value)
-                
-                instance.full_clean()
-                instance.save()
-                results.append({"status": "updated", "id": instance.id, "name": instance.name})
-
-        # ===== INSERT OPERATIONS ===== #
-        created_slug_map = {} 
-
-        # ===== ایجاد والد قبل از فرزند ===== #
-        pending_creates = creates_data
-        attempts = 0
-        max_attempts = 10
-
-        while pending_creates and attempts < max_attempts:
-            next_pending = []
-            for item in pending_creates:
-                parent_slug = item.pop('parent_slug', None)
-                
-                parent = None
-                can_create = True
-
-                if parent_slug:
-                    if parent_slug in created_slug_map:
-                        parent = created_slug_map[parent_slug]
-                    else:
-                        parent = ProductCategory.objects.filter(slug=parent_slug).first()
-                        if not parent:
-                            item['parent_slug'] = parent_slug
-                            next_pending.append(item)
-                            can_create = False
-                
-                if can_create:
-                    item['parent'] = parent
-                    item['user'] = user
+                for item in updates_data:
+                    pk = item.pop('id')
+                    instance = existing_map.get(pk)
+                    if not instance:
+                        continue
                     
-                    instance = ProductCategory(**item)
+                    # ===== مدیریت تغییر والد در آپدیت ===== #
+                    if 'parent_slug' in item:
+                        p_slug = item.pop('parent_slug')
+                        if p_slug:
+                            parent = ProductCategory.objects.filter(slug=p_slug).first()
+                            instance.parent = parent
+                        else:
+                            instance.parent = None # قطع رابطه والد
+
+                    # ===== آپدیت ===== #
+                    for field, value in item.items():
+                        # ===== ست کردن فیلد‌هایی که در مدل هستند ===== #
+                        if hasattr(instance, field):
+                            setattr(instance, field, value)
+                    
                     instance.full_clean()
                     instance.save()
+                    results.append({"status": "updated", "id": instance.id, "name": instance.name})
+
+            # ===== INSERT OPERATIONS ===== #
+            created_slug_map = {} 
+
+            # ===== ایجاد والد قبل از فرزند ===== #
+            pending_creates = creates_data
+            attempts = 0
+            max_attempts = 10
+
+            while pending_creates and attempts < max_attempts:
+                next_pending = []
+                for item in pending_creates:
+                    parent_slug = item.pop('parent_slug', None)
                     
-                    created_slug_map[instance.slug] = instance
-                    results.append({"status": "created", "id": instance.id, "name": instance.name})
-            
-            if len(pending_creates) == len(next_pending) and pending_creates:
-                pass 
-            
-            pending_creates = next_pending
-            attempts += 1
+                    parent = None
+                    can_create = True
+
+                    if parent_slug:
+                        if parent_slug in created_slug_map:
+                            parent = created_slug_map[parent_slug]
+                        else:
+                            parent = ProductCategory.objects.filter(slug=parent_slug).first()
+                            if not parent:
+                                item['parent_slug'] = parent_slug
+                                next_pending.append(item)
+                                can_create = False
+                    
+                    if can_create:
+                        item['parent'] = parent
+                        item['user'] = user
+                        
+                        instance = ProductCategory(**item)
+                        instance.full_clean()
+                        instance.save()
+                        
+                        created_slug_map[instance.slug] = instance
+                        results.append({"status": "created", "id": instance.id, "name": instance.name})
+                
+                if len(pending_creates) == len(next_pending) and pending_creates:
+                    pass 
+                
+                pending_creates = next_pending
+                attempts += 1
 
         return results
