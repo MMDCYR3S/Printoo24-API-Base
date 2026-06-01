@@ -171,7 +171,22 @@ class ProductDashboardService:
     # ===== DELETE PRODUCT ===== #
     def delete_product(self, product_id: int):
         self._domain_service.delete_product(product_id)
-        
+    
+    # ===== DELETE IMAGE ===== #
+    def delete_product_image_from_app(self, product_id: int, image_id: int):
+        """
+        واسط حذف تصویر محصول از طریق لایه اپلیکیشن
+        """
+        # در صورت نیاز به بررسی سطوح دسترسی بیزینسی خاص، اینجا پیاده‌سازی می‌شود
+        return self.media_service.delete_product_image(product_id=product_id, image_id=image_id)
+
+    # ===== DELTE ATTACHMENT ===== #
+    def delete_product_attachment_from_app(self, product_id: int, attachment_id: int):
+        """
+        واسط حذف فایل پیوست محصول از طریق لایه اپلیکیشن
+        """
+        return self.media_service.delete_product_attachment(product_id=product_id, attachment_id=attachment_id)
+
     # ========== BULK ACTIONS ========== #
     def bulk_update_product_status(self, product_ids: List[int], is_active: bool) -> int:
         """
@@ -196,6 +211,6 @@ class ProductDashboardService:
             Prefetch(
                 'product_image', 
                 queryset=ProductImage.objects.order_by('order'),
-                to_attr='prefetched_images' # ذخیره در یک کش موقت در رم برای سرعت بیشتر
+                to_attr='prefetched_images'
             )
         ).order_by('-id')

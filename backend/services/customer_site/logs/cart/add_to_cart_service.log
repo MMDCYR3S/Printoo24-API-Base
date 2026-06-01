@@ -276,3 +276,5 @@ INFO 2026-05-23 08:12:10,895 add_to_cart_service 54 139513825326784 Start adding
 INFO 2026-05-23 08:12:11,026 add_to_cart_service 54 139513825326784 Creating new cart item
 INFO 2026-05-23 10:04:38,369 add_to_cart_service 54 139513825326784 Start adding product 37 to cart
 INFO 2026-05-23 10:04:38,477 add_to_cart_service 54 139513825326784 Creating new cart item
+INFO 2026-06-01 11:07:35,644 add_to_cart_service 261 126858226034368 Start adding product 3 to cart
+INFO 2026-06-01 11:07:35,680 add_to_cart_service 261 126858226034368 Creating new cart item

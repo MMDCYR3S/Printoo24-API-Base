@@ -299,3 +299,4 @@ INFO 2026-05-23 10:17:32,203 user_order_service 54 139513825326784 Fetching deta
 INFO 2026-05-23 10:17:44,481 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
 INFO 2026-05-23 10:18:31,123 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
 INFO 2026-05-23 10:18:32,716 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+INFO 2026-06-01 11:13:02,336 user_order_service 261 126858317436608 Fetching order history for User ID: 1

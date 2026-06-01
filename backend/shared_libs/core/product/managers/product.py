@@ -97,8 +97,8 @@ class ProductQuerySet(BaseQuerySet):
             Q(name__icontains=query) |
             Q(description__icontains=query) |
             Q(code__icontains=query) |
-            Q(fields__title__icontains=query) |           # جستجو در نام فیلدهای داینامیک
-            Q(fields__choices__title__icontains=query)    # جستجو در گزینه‌های فیلدهای انتخابی
+            Q(fields__title__icontains=query) |
+            Q(fields__choices__title__icontains=query)
         ).filter(is_active=True).distinct()
 
 

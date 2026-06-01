@@ -3,8 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_spectacular.utils import (
-    extend_schema, OpenApiExample, OpenApiTypes,
-    inline_serializer, OpenApiResponse
+    extend_schema, OpenApiExample, OpenApiTypes, 
+    inline_serializer, OpenApiResponse, OpenApiParameter
 )
 from rest_framework import serializers
 
@@ -41,7 +41,6 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # ========== CREATE ========== #
     # ========== CREATE ========== #
     @extend_schema(
         summary="مرحله ۱: ایجاد هسته محصول",
@@ -432,6 +431,26 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         http_status = status.HTTP_202_ACCEPTED if result['status'] == 'processing' else status.HTTP_201_CREATED
         return Response(result, status=http_status)
 
+    # ========== DELETE PRODUCT IMAGE ========== #
+    @extend_schema(
+        summary="حذف یک تصویر خاص از محصول",
+        description="این اکشن تصویر مشخصی را با شناسه image_id از محصول مشخص شده با id حذف فیزیکی می‌کند.",
+        parameters=[
+            OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="شناسه محصول"),
+            OpenApiParameter(name="image_id", type=int, location=OpenApiParameter.PATH, description="شناسه تصویر")
+        ]
+    )
+    @action(detail=True, methods=['delete'], url_path='delete-image/(?P<image_id>[0-9]+)')
+    def delete_image(self, request, id=None, image_id=None):
+        """
+        حذف فیزیکی یک تصویر مشخص متصل به محصول از طریق App Service
+        """
+        try:
+            self.app_service.delete_product_image_from_app(product_id=id, image_id=image_id)
+            return Response({'message': 'تصویر محصول با موفقیت حذف شد.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     # ========== UPLOAD ATTACHMENT ========== #
     @extend_schema(
         summary="آپلود فایل پیوست",
@@ -473,6 +492,26 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         )
         http_status = status.HTTP_202_ACCEPTED if result['status'] == 'processing' else status.HTTP_201_CREATED
         return Response(result, status=http_status)
+
+    # ========== DELETE PRODUCT ATTACHMENT ========== #
+    @extend_schema(
+        summary="حذف یک فایل پیوست خاص از محصول",
+        description="این اکشن فایل پیوست مشخصی را با شناسه attachment_id از محصول مشخص شده با id حذف فیزیکی می‌کند.",
+        parameters=[
+            OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH, description="شناسه محصول"),
+            OpenApiParameter(name="attachment_id", type=int, location=OpenApiParameter.PATH, description="شناسه فایل پیوست")
+        ]
+    )
+    @action(detail=True, methods=['delete'], url_path='delete-attachment/(?P<attachment_id>[0-9]+)')
+    def delete_attachment(self, request, id=None, attachment_id=None):
+        """
+        حذف فیزیکی یک فایل پیوست مشخص متصل به محصول از طریق App Service
+        """
+        try:
+            self.app_service.delete_product_attachment_from_app(product_id=id, attachment_id=attachment_id)
+            return Response({'message': 'فایل پیوست با موفقیت حذف شد.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     # ========== BULK STATUS ========== #
     @extend_schema(

@@ -167,8 +167,8 @@ REST_FRAMEWORK = {
     },
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "EXCEPTION_HANDLER": "core.product.exception_handler.product_exception_handler",
 }
-
 # ======= Simple JWT ======= #
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=300),

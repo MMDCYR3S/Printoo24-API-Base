@@ -8,7 +8,8 @@ from django.utils import timezone
 
 from ..exceptions import (
     ProductNotFoundException,
-    InvalidProductDataException
+    InvalidProductDataException,
+    ProductHasDependencyException
 )
 from ..models import (
     Product, ProductCategory,
@@ -82,6 +83,9 @@ class ProductService:
         category_id = data.pop('category_id', None)
         subcategory_id = data.pop('subcategory_id', None)
         
+        if 'name' in data and 'slug' not in data:
+            product.slug = None
+
         for key, value in data.items():
             setattr(product, key, value)
         product.save()
@@ -130,6 +134,8 @@ class ProductService:
             raise ProductNotFoundException("محصول یافت نشد.")
         try:
             product.delete()
+        except ProtectedError:
+            raise ProductHasDependencyException("این محصول در بخش‌های دیگر (مانند سفارشات) وابستگی دارد و قابل حذف نیست.")
         except Exception:
             product.is_active = False
             product.save()
@@ -198,9 +204,12 @@ class ProductService:
             field_id = field_data.get('id')
             temp_id = field_data.get('temp_id')
 
-            # ۱. پردازش لایه دیکشنری فیلد
+            # ===== پردازش لایه دیکشنری فیلد ===== #
             clean_field_title = self.normalize_text(field_data.get('title', ''))
-            field_dict, _ = FieldDictionary.objects.get_or_create(
+
+            # ===== مشخصاتی که فرانت‌اندن فرستاده است ===== #
+
+            field_dict, _ = FieldDictionary.objects.update_or_create(
                 title=clean_field_title,
                 defaults={
                     'description': field_data.get('description', ''),
@@ -210,9 +219,9 @@ class ProductService:
                 }
             )
 
-            # ۲. پردازش لایه واسط فیلد (اتصال به محصول)
+            # ===== پردازش لایه واسط فیلد - اتصال به محصول ===== #
             product_field_defaults = {
-                'field_dict': field_dict, # اگر کاربر اسم را تغییر دهد، فقط لینک به دیکشنری جدید عوض می‌شود
+                'field_dict': field_dict,
                 'numeric_value': field_data.get('numeric_value', 0.0),
                 'is_required': field_data.get('is_required', False),
                 'is_active': field_data.get('is_active', True),
@@ -226,12 +235,12 @@ class ProductService:
             else:
                 product_field = ProductField.objects.create(product=product, **product_field_defaults)
 
-            # ثبت فیلد در ریجستری سراسری (برای فرمول‌ها و شرط‌ها از آیدی همین جدول واسط استفاده می‌کنیم)
+            # ===== ثبت فیلد در یک مخزن سراسری که تعبیه شده است ===== #
             global_field_map[str(product_field.id)] = product_field
             if temp_id:
                 global_field_map[str(temp_id)] = product_field
 
-            # ۳. پردازش گزینه‌ها (Choices)
+            # ===== پردازش انتخاب‌ها ===== #
             choices_data = field_data.get('choices', [])
             incoming_choice_ids = [c['id'] for c in choices_data if c.get('id')]
             ProductFieldChoice.objects.filter(product_field=product_field).exclude(id__in=incoming_choice_ids).delete()
@@ -240,14 +249,14 @@ class ProductService:
                 choice_id = choice_data.get('id')
                 temp_choice_id = choice_data.get('temp_id')
                 
-                # پردازش لایه دیکشنری مقدار
+                # ===== پردازش دیکشنری انتخاب‌ها ===== #
                 clean_choice_title = self.normalize_text(choice_data.get('title', ''))
                 choice_dict, _ = FieldChoiceDictionary.objects.get_or_create(
-                    field=field_dict, # زیرمجموعه همان دیکشنری اصلی
+                    field=field_dict,
                     title=clean_choice_title
                 )
 
-                # پردازش لایه واسط مقدار (اتصال به فیلد محصول)
+                # ===== اتصال انتخاب‌ها به فیلد محصول ===== #
                 product_choice_defaults = {
                     'choice_dict': choice_dict,
                     'numeric_value': choice_data.get('numeric_value', 0.0),

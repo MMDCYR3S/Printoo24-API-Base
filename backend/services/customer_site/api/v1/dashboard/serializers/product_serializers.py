@@ -54,52 +54,184 @@ class ProductSerializer(serializers.ModelSerializer):
         cat = obj.categories.first()
         return cat.name if cat else "Uncategorized"
 
-
 # ===== Field Builder Serializers ===== #
+
 class ProductFieldChoiceSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=False, allow_null=True)
-    temp_id = serializers.CharField(required=False, allow_null=True,
-        help_text="ID موقت برای فیلدهای جدید (از فرانت‌اند)")
-    title = serializers.CharField()
-    numeric_value = serializers.DecimalField(max_digits=14, decimal_places=2, default=0.0)
-    order = serializers.IntegerField(default=0)
-    is_default = serializers.BooleanField(default=False)
+    temp_id = serializers.CharField(
+        required=False, 
+        allow_null=True,
+        error_messages={
+            'blank': 'شناسه موقت گزینه نمی‌تواند خالی باشد.'
+        }
+    )
+    title = serializers.CharField(
+        error_messages={
+            'blank': 'عنوان گزینه نمی‌تواند خالی باشد.',
+            'required': 'ارسال عنوان گزینه الزامی است.'
+        }
+    )
+    numeric_value = serializers.DecimalField(
+        max_digits=14, 
+        decimal_places=2, 
+        default=0.0,
+        error_messages={
+            'invalid': 'مقدار عددی گزینه معتبر نیست.',
+            'required': 'ارسال مقدار عددی گزینه الزامی است.'
+        }
+    )
+    order = serializers.IntegerField(
+        default=0,
+        error_messages={'invalid': 'ترتیب نمایش باید یک عدد صحیح باشد.'}
+    )
+    is_default = serializers.BooleanField(
+        default=False,
+        error_messages={'invalid': 'مقدار گزینه پیش‌فرض باید Boolean باشد.'}
+    )
+
+    def validate(self, attrs):
+        if not attrs.get('id') and not attrs.get('temp_id'):
+            raise serializers.ValidationError({"temp_id": "برای گزینه‌ها، ارسال id یا temp_id الزامی است."})
+        return attrs
 
 
 class ProductFieldConditionSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=False, allow_null=True)
-    trigger_field_id = serializers.CharField(  # CharField چون ممکنه temp_id باشه
-        help_text="ID یا temp_id فیلد trigger"
+    trigger_field_id = serializers.CharField(
+        error_messages={
+            'blank': 'شناسه فیلد شرط نمی‌تواند خالی باشد.',
+            'required': 'ارسال شناسه فیلد شرط الزامی است.'
+        }
     )
-    operator = serializers.ChoiceField(choices=ConditionOperator.choices)
-    trigger_choice_id = serializers.CharField(required=False, allow_null=True,
-        help_text="ID یا temp_id گزینه trigger")
-    trigger_value_text = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    action = serializers.ChoiceField(choices=ConditionAction.choices)
+    operator = serializers.ChoiceField(
+        choices=ConditionOperator.choices,
+        error_messages={
+            'invalid_choice': 'عملگر انتخابی معتبر نیست.',
+            'required': 'انتخاب عملگر شرط الزامی است.'
+        }
+    )
+    trigger_choice_id = serializers.CharField(
+        required=False, 
+        allow_null=True,
+        error_messages={'blank': 'شناسه گزینه شرط نمی‌تواند خالی باشد.'}
+    )
+    trigger_value_text = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        allow_null=True,
+        error_messages={'blank': 'متن شرط نمی‌تواند خالی باشد.'}
+    )
+    action = serializers.ChoiceField(
+        choices=ConditionAction.choices,
+        error_messages={
+            'invalid_choice': 'عملیات انتخابی معتبر نیست.',
+            'required': 'انتخاب عملیات شرط الزامی است.'
+        }
+    )
 
 class ProductFieldSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=False, allow_null=True)
-    temp_id = serializers.CharField(required=False, allow_null=True,
-        help_text="ID موقت برای فیلدهای جدید")
-    title = serializers.CharField()
-    description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    field_type = serializers.ChoiceField(choices=FieldType.choices)
+    temp_id = serializers.CharField(
+        required=False, 
+        allow_null=True,
+        error_messages={'blank': 'شناسه موقت فیلد نمی‌تواند خالی باشد.'}
+    )
+    title = serializers.CharField(
+        error_messages={
+            'blank': 'عنوان فیلد نمی‌تواند خالی باشد.',
+            'required': 'ارسال عنوان فیلد الزامی است.'
+        }
+    )
+    description = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        allow_null=True
+    )
+    field_type = serializers.ChoiceField(
+        choices=FieldType.choices,
+        error_messages={
+            'invalid_choice': 'نوع فیلد انتخابی معتبر نیست.',
+            'required': 'انتخاب نوع فیلد الزامی است.'
+        }
+    )
     multi_select_operator = serializers.ChoiceField(
         choices=MultiSelectOperator.choices, 
-        default='add'
+        default='add',
+        error_messages={'invalid_choice': 'عملگر چندانتخابی معتبر نیست.'}
     )
-    numeric_value = serializers.DecimalField(max_digits=14, decimal_places=2, default=0.0)
+    numeric_value = serializers.DecimalField(
+        max_digits=14, 
+        decimal_places=2, 
+        default=0.0,
+        error_messages={'invalid': 'مقدار عددی فیلد نامعتبر است.'}
+    )
     is_required = serializers.BooleanField(default=False)
     is_active = serializers.BooleanField(default=True)
     is_quantity_field = serializers.BooleanField(default=False)
     order = serializers.IntegerField(default=0)
+    
     choices = ProductFieldChoiceSerializer(many=True, required=False, allow_empty=True)
     conditions = ProductFieldConditionSerializer(many=True, required=False, allow_empty=True)
 
+    def validate(self, attrs):
+        if not attrs.get('id') and not attrs.get('temp_id'):
+            raise serializers.ValidationError({"error": "داشتن id یا temp_id برای هر فیلد الزامی است."})
+        return attrs
+
 
 class ProductFieldsBulkSyncSerializer(serializers.Serializer):
-    fields = serializers.ListField(child=ProductFieldSerializer(), allow_empty=True)
+    fields = serializers.ListField(
+        child=ProductFieldSerializer(), 
+        allow_empty=True,
+        error_messages={'required': 'لیست فیلدها ارسال نشده است.'}
+    )
+    def validate(self, attrs):
+        fields_data = attrs.get('fields', [])
+        condition_errors = []
+        
+        # ===== درست کردن فیلد ===== #
+        valid_field_keys = set()
+        valid_choice_keys = set()
+        
+        for field in fields_data:
+            # ===== کلید فیلدهای یکتا ===== #
+            f_key = str(field.get('id') or field.get('temp_id'))
+            valid_field_keys.add(f_key)
+            
+            for choice in field.get('choices', []):
+                c_key = str(choice.get('id') or choice.get('temp_id'))
+                valid_choice_keys.add(c_key)
 
+        # ===== فیلد قسمت مربوط به اعتبارسنجی فیلدها ===== #
+        for field in fields_data:
+            f_key = str(field.get('id') or field.get('temp_id'))
+            
+            for cond in field.get('conditions', []):
+                trigger_field_id = str(cond.get('trigger_field_id'))
+                trigger_choice_id = str(cond.get('trigger_choice_id')) if cond.get('trigger_choice_id') else None
+
+                # ===== وجود فیلدهای پیش‌شرط ===== #
+                if trigger_field_id not in valid_field_keys:
+                    condition_errors.append({
+                        "target_field_id": f_key,
+                        "trigger_field_id": trigger_field_id,
+                        "error": f"فیلد پیش‌شرط با شناسه '{trigger_field_id}' در لیست فیلدها یافت نشد."
+                    })
+                
+                if trigger_choice_id and trigger_choice_id != 'None':
+                    if trigger_choice_id not in valid_choice_keys:
+                        condition_errors.append({
+                            "target_field_id": f_key,
+                            "trigger_choice_id": trigger_choice_id,
+                            "error": f"گزینه پیش‌شرط با شناسه '{trigger_choice_id}' یافت نشد."
+                        })
+
+        if condition_errors:
+            raise serializers.ValidationError({
+                "error": condition_errors
+            })
+
+        return attrs
 
 # ===== Formula Builder Serializers ===== #
 class ProductFormulaSerializer(serializers.Serializer):
