@@ -75,6 +75,13 @@ INFO 2026-02-23 02:41:48,846 user_address_service 21 128653360010944 Fetching ad
 INFO 2026-02-23 02:48:38,630 user_address_service 21 128653128103616 Fetching addresses for User ID: 1
 INFO 2026-02-24 10:20:48,656 user_address_service 9 127131434612416 Fetching addresses for User ID: 21
 INFO 2026-05-23 06:49:59,561 user_address_service 7 137845941454528 Fetching addresses for User ID: 1
+<<<<<<< HEAD
 INFO 2026-05-24 18:25:59,343 user_address_service 8 124190705309376 Fetching addresses for User ID: 1
 INFO 2026-06-01 18:26:18,928 user_address_service 7 139665183622848 Fetching addresses for User ID: 1
 INFO 2026-06-01 18:26:31,099 user_address_service 7 139665222923968 Fetching addresses for User ID: 1
+=======
+INFO 2026-06-01 11:08:26,579 user_address_service 261 126858234427072 Fetching addresses for User ID: 1
+INFO 2026-06-01 11:12:36,843 user_address_service 261 126858317436608 Adding new address for User ID: 1
+INFO 2026-06-01 11:12:36,867 user_address_service 261 126858317436608 Address created successfully with ID: 2
+INFO 2026-06-01 11:12:36,894 user_address_service 261 126858317436608 Fetching addresses for User ID: 1
+>>>>>>> debf3403d6a239088024e2bb9f6b32ee2bac7f5a

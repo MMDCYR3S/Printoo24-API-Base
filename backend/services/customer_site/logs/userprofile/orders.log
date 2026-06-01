@@ -299,6 +299,7 @@ INFO 2026-05-23 10:17:32,203 user_order_service 54 139513825326784 Fetching deta
 INFO 2026-05-23 10:17:44,481 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
 INFO 2026-05-23 10:18:31,123 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
 INFO 2026-05-23 10:18:32,716 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+<<<<<<< HEAD
 INFO 2026-05-24 18:25:57,970 user_order_service 8 124191094511296 Fetching order history for User ID: 1
 INFO 2026-06-01 12:20:42,629 user_order_service 7 124105042687680 Fetching order history for User ID: 1
 INFO 2026-06-01 12:22:19,242 user_order_service 7 124105042687680 Fetching order history for User ID: 1
@@ -310,3 +311,6 @@ INFO 2026-06-01 12:23:03,244 user_order_service 7 124104782882496 Fetching order
 INFO 2026-06-01 12:35:37,245 user_order_service 7 124104824846016 Fetching order history for User ID: 1
 INFO 2026-06-01 18:26:17,790 user_order_service 7 139665569556160 Fetching order history for User ID: 1
 INFO 2026-06-01 18:26:31,100 user_order_service 7 139665208800960 Fetching order history for User ID: 1
+=======
+INFO 2026-06-01 11:13:02,336 user_order_service 261 126858317436608 Fetching order history for User ID: 1
+>>>>>>> debf3403d6a239088024e2bb9f6b32ee2bac7f5a

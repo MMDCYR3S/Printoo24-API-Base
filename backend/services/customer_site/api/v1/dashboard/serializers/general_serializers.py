@@ -134,7 +134,7 @@ class SubcategoryWithParentSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
     slug = serializers.SlugField(read_only=True)
     order = serializers.IntegerField(read_only=True)
-    description = serializers.CharField(read_only=True, allow_null=True) # توضیحات هم بود که اضافه کردم
+    description = serializers.CharField(read_only=True, allow_null=True)
     is_active = serializers.BooleanField(read_only=True)
     
     # ===== اضافه کردن فیلد تصاویر ===== #
@@ -179,10 +179,10 @@ class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.ListField(child=serializers.DictField()))
     def get_children(self, obj):
         """
-        بازگرداندن فرزندان به صورت بازگشتی.
-        اگر فرزندی وجود داشته باشد، همین سریالایزر را برای آن‌ها صدا می‌زنیم.
+        بازگرداندن فرزندان فعال به صورت بازگشتی با استفاده از Relation Manager
         """
-        children = obj.get_children()
+        children = obj.children.filter(is_active=True).order_by('order', 'name')
+        
         if children.exists():
             return ProductCategoryDashboardSerializer(children, many=True, context=self.context).data
         return []
@@ -202,7 +202,8 @@ class CategoryBulkUpsertSerializer(serializers.ModelSerializer):
         required=False, 
         allow_null=True, 
         allow_blank=True, 
-        write_only=True
+        write_only=True,
+        allow_unicode=True
     )
 
     class Meta:
