@@ -376,7 +376,7 @@ const ArticleDetailPage = () => {
 
               <div className="flex items-center gap-1.5 text-primary">
                 <Calendar size={16} />
-                <span>{formatToJalali(article.published_at)}</span>
+                <span>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(article.published_at))}</span>
               </div>
 
               <div className="flex items-center gap-1.5 text-primary">

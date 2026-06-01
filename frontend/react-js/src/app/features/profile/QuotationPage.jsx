@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Printer, ChevronRight, AlertCircle, Phone, MapPin, Instagram } from 'lucide-react';
 import { profileService } from '../../services/profileService';
 
-// وارد کردن فایل‌های ترجمه
 import pageText from '../../lang/pages.json';
 import globalText from '../../lang/global.json';
 
@@ -49,179 +48,242 @@ const QuotationPage = () => {
   }
 
   return (
-    <div className="min-h-screen pb-10 print:pb-0 print:bg-white animate-in fade-in duration-500 bg-slate-50 flex flex-col items-center" dir="rtl">
-      
-      {/* استایل‌های جادویی پرینت سایز A4 */}
-      <style type="text/css" media="print">
-        {`
-          @page { 
-            size: A4 portrait; 
-            margin: 0; 
-          }
-          body { 
-            -webkit-print-color-adjust: exact !important; 
-            print-color-adjust: exact !important; 
-            background-color: white !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          body * { visibility: hidden !important; }
-          #printable-invoice, #printable-invoice * { visibility: visible !important; }
-          
-          #printable-invoice {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 210mm !important; 
-            min-height: 297mm !important; 
-            margin: 0 auto !important;
-            padding: 10mm 0 !important; 
-            box-shadow: none !important;
-            border: none !important;
-            background: white !important;
-          }
-        `}
-      </style>
+    <div className="min-h-screen pb-10 print:pb-0 print:bg-white animate-in fade-in duration-500 bg-base-200 flex flex-col items-center" dir="rtl">
 
-      {/* اکشن بار (مخفی در چاپ) */}
-      <div className="w-full max-w-[210mm] pt-6 mb-6 flex justify-between items-center print:hidden px-4">
-        <Link to={`/profile/orders/${id}`} className="btn btn-ghost text-slate-500 hover:bg-slate-200 rounded-xl gap-2">
-          <ChevronRight size={18} /> {pageText.order.quotationPage.backBtn}
+      <style type="text/css" media="print">{`
+        @page { size: A4 portrait; margin: 0; }
+        body {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          background: white !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        body * { visibility: hidden !important; }
+        #printable-invoice, #printable-invoice * { visibility: visible !important; }
+        #printable-invoice {
+          position: absolute !important;
+          left: 0 !important; top: 0 !important;
+          width: 210mm !important;
+          min-height: 297mm !important;
+          margin: 0 !important; padding: 0 !important;
+          box-shadow: none !important;
+          border: none !important;
+          background: white !important;
+        }
+      `}</style>
+
+      {/* ── Action bar (hidden in print) ── */}
+      <div className="w-full max-w-[210mm] pt-7 mb-5 flex justify-between items-center print:hidden px-2">
+        <Link
+          to={`/profile/orders/${id}`}
+          className="btn btn-ghost text-base-content/60 hover:bg-base-300 rounded-xl gap-1"
+        >
+          <ChevronRight size={17} />
+          {pageText.order.quotationPage.backBtn}
         </Link>
-        <button onClick={handlePrint} className="btn bg-primary text-primary-content hover:bg-primary/90 rounded-xl px-8 shadow-lg shadow-primary/20 gap-2 border-none">
-          <Printer size={18} /> {pageText.order.quotationPage.printBtn}
+        <button
+          onClick={handlePrint}
+          className="btn btn-neutral rounded-xl px-7 gap-2 shadow-md"
+        >
+          <Printer size={16} />
+          {pageText.order.quotationPage.printBtn}
         </button>
       </div>
 
-      {/* بدنه اصلی پیش‌فاکتور */}
-      <div 
-        id="printable-invoice" 
-        className="w-full max-w-[210mm] min-h-[297mm] mx-auto bg-white shadow-2xl shadow-slate-200/50 relative border border-slate-100 print:border-none flex flex-col"
+      {/* ═══════════════════════════════════════
+          QUOTATION BODY
+      ═══════════════════════════════════════ */}
+      <div
+        id="printable-invoice"
+        className="w-full max-w-[210mm] min-h-[297mm] mx-auto bg-white shadow-2xl shadow-slate-300/30 border border-slate-200 print:border-none flex flex-col overflow-hidden"
       >
-        
-        {/* هدر زرد رنگ بالای فاکتور */}
-        <div className="bg-neutral m-4 print:mx-6 rounded-[2rem] p-6 relative flex flex-row items-center justify-between overflow-hidden min-h-[140px] shrink-0">
-          <div className="absolute -right-8 top-1/2 -translate-y-1/2 w-40 h-40 bg-primary rotate-45 border-4 border-white flex items-center justify-center shadow-lg print:shadow-none">
-            <span className="text-primary-content -rotate-45 font-black text-3xl tracking-tighter">P24</span>
-          </div>
-          <div className="flex-1 text-center mr-36 text-white">
-            <h1 className="text-4xl font-black mb-4 tracking-tight">{pageText.order.quotationPage.brandName}</h1>
-            <div className="flex justify-center items-center gap-8 font-bold text-sm">
-              <span className="flex items-center gap-1 dir-ltr"><Phone size={18} className="mr-1"/> 021 - 1234 5678</span>
-              <span className="flex items-center gap-1"><MapPin size={18} className="ml-1"/> {pageText.order.quotationPage.brandSub}</span>
+
+        {/* ── HEADER ── */}
+        <div className="bg-neutral shrink-0">
+          {/* top strip: logo left / contact right */}
+          <div className="flex items-center justify-between px-8 pt-5 pb-4">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-md shadow-black/20">
+                <span className="text-primary-content font-black text-base tracking-tight leading-none">P24</span>
+              </div>
+              <div>
+                <p className="text-neutral-content font-black text-xl tracking-tight leading-none">
+                  {pageText.order.quotationPage.brandName}
+                </p>
+                <p className="text-neutral-content/50 text-xs mt-0.5 font-medium">
+                  {pageText.order.quotationPage.brandSub}
+                </p>
+              </div>
             </div>
+
+            {/* Contact */}
+            <div className="text-right space-y-1.5">
+              <div className="flex items-center justify-end gap-2 text-neutral-content/80 text-sm font-semibold dir-ltr">
+                <Phone size={14} className="text-primary shrink-0" />
+                <span>021 - 1234 5678</span>
+              </div>
+              <div className="flex items-center justify-end gap-2 text-neutral-content/80 text-sm font-semibold">
+                <MapPin size={14} className="text-primary shrink-0" />
+                <span>{pageText.order.quotationPage.brandSub}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* tagline banner */}
+          <div className="bg-black/10 px-8 py-2 flex items-center justify-center">
+            <p className="text-neutral-content/70 text-xs font-medium tracking-wide">
+              {pageText.order.quotationPage.brandName}
+            </p>
           </div>
         </div>
 
-        {/* اطلاعات خریدار و پیش‌فاکتور */}
-        <div className="px-12 py-6 flex justify-between items-start shrink-0">
-          <div className="text-right">
-            <h2 className="text-5xl text-blue-500 font-normal tracking-wide mb-2">Quotation</h2>
-            <p className="text-slate-700 font-bold text-lg">{pageText.order.quotationPage.pageTitle} رسمی</p>
+        {/* ── QUOTATION TITLE + META ── */}
+        <div className="px-8 py-6 flex items-start justify-between border-b border-slate-100 shrink-0">
+          {/* Title block */}
+          <div>
+            <h1 className="text-blue-500 font-light tracking-widest text-4xl leading-none" style={{ fontFamily: 'Georgia, serif' }}>
+              Quotation
+            </h1>
+            <p className="text-slate-400 text-xs mt-1.5 font-medium tracking-wide uppercase">
+              {pageText.order.quotationPage.pageTitle}
+            </p>
+            <p className="text-slate-300 text-xs mt-0.5">Page 1 of 1</p>
           </div>
-          <div className="text-base space-y-3 text-right border-l-4 border-neutral pl-6">
-            <div className="flex gap-3 justify-end items-center">
-              <span className="font-bold text-slate-800">{pageText.order.quotationPage.customerInfoTitle}:</span> 
-              <span className="font-semibold text-slate-600">{quotation.customer_name}</span>
+
+          {/* Meta card */}
+          <div className="bg-slate-50 rounded-2xl border border-slate-100 px-5 py-4 space-y-2.5 min-w-[200px] text-sm">
+            <div className="flex gap-4 justify-between items-center">
+              <span className="text-slate-400 font-medium shrink-0">{pageText.order.quotationPage.customerInfoTitle}:</span>
+              <span className="font-bold text-slate-700 text-right">{quotation.customer_name}</span>
             </div>
-            <div className="flex gap-3 justify-end items-center">
-              <span className="font-bold text-slate-800">{pageText.order.quotationPage.pageTitle} {pageText.order.quotationPage.numberLabel}</span> 
-              <span className="font-black text-blue-500 dir-ltr text-lg">{quotation.quotation_number}</span>
+            <div className="h-px bg-slate-200" />
+            <div className="flex gap-4 justify-between items-center">
+              <span className="text-slate-400 font-medium shrink-0">
+                {pageText.order.quotationPage.pageTitle} {pageText.order.quotationPage.numberLabel}
+              </span>
+              <span className="font-black text-blue-500 dir-ltr text-base">{quotation.quotation_number}</span>
             </div>
-            <div className="flex gap-3 justify-end items-center">
-              <span className="font-bold text-slate-800">{pageText.order.quotationPage.dateLabel}</span> 
-              <span className="font-semibold text-slate-600 dir-ltr">
+            <div className="flex gap-4 justify-between items-center">
+              <span className="text-slate-400 font-medium shrink-0">{pageText.order.quotationPage.dateLabel}</span>
+              <span className="font-semibold text-blue-400 dir-ltr">
                 {new Date(quotation.created_at).toLocaleDateString('fa-IR')}
               </span>
             </div>
           </div>
         </div>
 
-        {/* جدول اقلام */}
-        <div className="px-12 mt-2 flex-grow">
-          <table className="w-full text-base text-right border-collapse">
+        {/* ── TABLE ── */}
+        <div className="px-8 pt-6 flex-grow">
+          <table className="w-full text-sm text-right border-collapse">
             <thead>
-              <tr className="border-y-4 border-neutral text-slate-700 bg-slate-50/50">
-                <th className="py-3 px-3 font-black w-12">{pageText.order.quotationPage.tableRow}</th>
-                <th className="py-3 px-3 font-black">{pageText.order.quotationPage.tableDescription}</th>
-                <th className="py-3 px-3 font-black w-20">{pageText.order.quotationPage.tableQuantity}</th>
-                <th className="py-3 px-3 font-black w-36 text-left">{pageText.order.quotationPage.tableUnitPrice}</th>
-                <th className="py-3 px-3 font-black w-40 text-left">{pageText.order.quotationPage.tableTotalPrice}</th>
+              <tr>
+                <th className="pb-3 pr-3 text-slate-400 font-semibold text-xs tracking-widest uppercase w-10 border-b-2 border-neutral">
+                  {pageText.order.quotationPage.tableRow}
+                </th>
+                <th className="pb-3 px-3 text-slate-400 font-semibold text-xs tracking-widest uppercase border-b-2 border-neutral text-right">
+                  {pageText.order.quotationPage.tableDescription}
+                </th>
+                <th className="pb-3 px-3 text-slate-400 font-semibold text-xs tracking-widest uppercase border-b-2 border-neutral text-center w-20">
+                  {pageText.order.quotationPage.tableQuantity}
+                </th>
+                <th className="pb-3 px-3 text-slate-400 font-semibold text-xs tracking-widest uppercase border-b-2 border-neutral text-center w-32">
+                  {pageText.order.quotationPage.tableUnitPrice}
+                </th>
+                <th className="pb-3 pl-3 text-slate-400 font-semibold text-xs tracking-widest uppercase border-b-2 border-neutral text-left w-36">
+                  {pageText.order.quotationPage.tableTotalPrice}
+                </th>
               </tr>
             </thead>
-            <tbody className="text-slate-800">
-              <tr className="border-b border-slate-200">
-                <td className="py-4 px-3 font-bold align-top">۱</td>
-                <td className="py-4 px-3 font-semibold align-top text-right">
-                  <span className="font-bold block mb-1 text-lg">{quotation.product_name}</span>
+            <tbody>
+              {/* Main product row */}
+              <tr className="border-b border-slate-100">
+                <td className="py-4 pr-3 text-slate-300 font-medium">1</td>
+                <td className="py-4 px-3 font-semibold text-slate-700 text-right">
+                  <span className="font-bold block mb-1">{quotation.product_name}</span>
                   {quotation.product_snapshot?.meta?.size_info && (
-                    <span className="text-xs font-medium text-slate-500 ml-2 block mt-2">
-                      <span className="font-bold text-slate-700">{pageText.order.quotationPage.dimensions}</span> {quotation.product_snapshot.meta.size_info.size_name}
+                    <span className="text-xs font-medium text-slate-500 block mt-1">
+                      <span className="font-bold text-slate-700">{pageText.order.quotationPage.dimensions}:</span>{' '}
+                      {quotation.product_snapshot.meta.size_info.size_name}
                     </span>
                   )}
                   {quotation.product_snapshot?.options?.map((opt, idx) => (
-                    <span key={idx} className="text-xs font-medium text-slate-500 ml-2 block mt-1">
+                    <span key={idx} className="text-xs font-medium text-slate-500 block mt-1">
                       <span className="font-bold text-slate-700">{opt.option_label}:</span> {opt.value.label}
                     </span>
                   ))}
                 </td>
-                <td className="py-4 px-3 font-medium align-top">{quotation.quantity}</td>
-                <td className="py-4 px-3 dir-ltr text-left font-medium align-top">
-                  {formatCurrency(quotation.total_price / quotation.quantity)}
+                <td className="py-4 px-3 text-center text-slate-700 font-medium">
+                  {quotation.quantity}
                 </td>
-                <td className="py-4 px-3 dir-ltr text-left font-bold align-top">
+                <td className="py-4 px-3 text-center font-medium text-slate-700 dir-ltr">
+                  {formatCurrency(quotation.total_price / quotation.quantity)}
+                  <span className="text-slate-400 text-xs font-normal ml-1">{globalText.currency}</span>
+                </td>
+                <td className="py-4 pl-3 dir-ltr text-left font-bold text-slate-800">
                   {formatCurrency(quotation.total_price)}
+                  <span className="text-slate-400 text-xs font-normal ml-1">{globalText.currency}</span>
                 </td>
               </tr>
-              <tr className="border-b-4 border-neutral bg-slate-50/30">
-                <td colSpan="4" className="py-4 px-3 text-left font-black text-slate-800 text-lg">{pageText.order.quotationPage.totalPayable}</td>
-                <td className="py-4 px-3 font-black dir-ltr text-left text-slate-800 text-lg">
-                  {formatCurrency(quotation.total_price)} <span className="text-sm font-medium text-slate-500">{globalText.currency}</span>
-                </td>
+
+              {/* spacer */}
+              <tr>
+                <td colSpan={5} className="py-6"></td>
               </tr>
             </tbody>
           </table>
-          
-          {/* بخش توضیحات */}
-          <div className="mt-6 text-sm bg-slate-50/50 py-3 px-4 rounded-xl border border-slate-100 print:border-none print:bg-transparent">
-            <p className="text-slate-800 font-medium leading-relaxed">
-              <span className="font-black text-primary">{pageText.order.quotationPage.notesTitle}</span> <br/>
-              {pageText.order.quotationPage.note1} <br/>
+        </div>
+
+        {/* ── NOTES ── */}
+        <div className="px-8 pb-6 shrink-0">
+          <div className="border-r-4 border-primary bg-slate-50 rounded-xl px-4 py-3 print:bg-transparent">
+            <p className="text-slate-500 text-xs leading-relaxed">
+              <span className="font-bold text-slate-700">{pageText.order.quotationPage.notesTitle}</span>{' '}
+              {pageText.order.quotationPage.note1}
+              <br />
               {pageText.order.quotationPage.note2}
             </p>
           </div>
         </div>
 
-        {/* محافظت از شکسته شدن صفحه */}
-        <div className="print:break-inside-avoid mt-auto pt-16 shrink-0 relative">
-          
-          {/* بخش پایینی: مهر و امضا + مبالغ نهایی */}
-          <div className="px-12 relative flex justify-between items-end mb-6">
-            {/* خط زرد جداکننده */}
-            <div className="absolute bottom-16 left-12 right-12 h-[3px] bg-neutral print:bg-neutral z-0"></div>
+        {/* ── TOTAL + STAMP ── */}
+        <div className="mt-auto print:break-inside-avoid shrink-0">
 
-            {/* مهر و امضا */}
-            <div className="z-10 bg-white print:bg-white px-8 text-center pb-2">
-              <div className="w-24 h-24 bg-secondary text-secondary-content rotate-45 mx-auto mb-6 flex items-center justify-center border-4 border-white shadow-sm print:border-2">
-                <span className="-rotate-45 text-xs font-black text-center leading-relaxed">{pageText.order.quotationPage.sellerStamp}<br/>Printoo24</span>
+          <div className="px-8 pt-5 pb-6 border-t-2 border-slate-100">
+            <div className="flex justify-between items-end gap-8">
+
+              {/* Stamp */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-20 h-20 rounded-full border-2 border-dashed border-neutral flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-neutral font-black text-xs leading-tight">P24</p>
+                    <p className="text-neutral/60 text-[9px] leading-tight mt-0.5 font-semibold">STAMP</p>
+                  </div>
+                </div>
+                <p className="text-slate-400 text-xs font-medium">{pageText.order.quotationPage.sellerStamp}</p>
               </div>
-              <p className="font-black text-slate-800 text-sm">Stamp & Signature</p>
-            </div>
 
-            {/* خلاصه مبالغ (چون پیش فاکتوره فقط جمع کل رو نشون دادم) */}
-            <div className="z-10 bg-white print:bg-white px-6 text-base w-80 space-y-3 pb-2">
-              <div className="flex justify-between items-center bg-slate-50 p-3 rounded-lg">
-                <span className="font-black text-blue-600 text-lg">مبلغ کل برآورد:</span>
-                <span className="font-black text-blue-600 text-xl dir-ltr">
-                  {formatCurrency(quotation.total_price)} <span className="text-sm">{globalText.currency}</span>
-                </span>
+              {/* Total amount */}
+              <div className="flex-1 max-w-xs space-y-2">
+                <div className="bg-neutral/5 rounded-xl px-4 py-3 flex justify-between items-center border border-neutral/10">
+                  <span className="font-black text-slate-800 text-sm">{pageText.order.quotationPage.totalPayable}</span>
+                  <span className="font-black text-blue-500 text-lg dir-ltr">
+                    {formatCurrency(quotation.total_price)}
+                    <span className="text-xs font-medium text-slate-400 ml-1">{globalText.currency}</span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* فوتر زرد پایین */}
-          <div className="bg-neutral text-white font-black p-4 mx-6 print:mx-6 mb-4 rounded-[1.5rem] text-center flex justify-center items-center gap-2 text-lg">
-            <Instagram size={22} /> <span className="mt-1 tracking-widest uppercase">printoo24_official</span>
+          {/* ── FOOTER BAR ── */}
+          <div className="bg-neutral px-8 py-4 flex items-center justify-center gap-3">
+            <Instagram size={18} className="text-neutral-content/60" />
+            <span className="text-neutral-content font-black tracking-[0.2em] text-sm uppercase mx-2">
+              printoo24_official
+            </span>
+            <Instagram size={18} className="text-neutral-content/60 opacity-0" />
           </div>
 
         </div>

@@ -167,7 +167,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle, index }) => {
                         <div className="p-1.5 bg-blue-50 text-blue-500 rounded-lg">
                           <LayoutGrid size={15} strokeWidth={2.2} />
                         </div>
-                        <h3 className="text-[13px] font-bold text-slate-600">زیر دسته بندی ها</h3>
+                        <h3 className="text-[13px] font-bold text-slate-600">ژێر پۆل</h3>
                       </div>
 
                       <motion.div
