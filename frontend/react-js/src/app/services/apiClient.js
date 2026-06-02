@@ -61,8 +61,11 @@ apiClient.interceptors.response.use(
         }
       } catch (refreshError) {
         // اگه رفرش هم نشد، یعنی واقعا باید بره بیرون
-        localStorage.clear();
-        window.location.href = '/login';
+        // localStorage.clear();
+        // window.location.href = '/login';
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+
         return Promise.reject(refreshError);
       }
     }

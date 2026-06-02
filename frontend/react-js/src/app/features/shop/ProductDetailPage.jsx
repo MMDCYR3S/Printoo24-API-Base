@@ -45,6 +45,12 @@ const ProductDetailPage = () => {
   });
 
   const handleAddToCart = () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+  
     const payloadInfo = getSubmitPayload();
     
     const requiredFields = (data?.fields || []).filter(f => f.is_required && state.visibleFields.includes(f.id));
@@ -54,12 +60,12 @@ const ProductDetailPage = () => {
         return;
       }
     }
-
+  
     const payload = {
       product_id: payloadInfo.product_id,
       selections: { ...payloadInfo.options }
     };
-
+  
     addToCartMutation.mutate(payload);
   };
 

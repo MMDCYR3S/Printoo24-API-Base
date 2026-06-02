@@ -83,40 +83,24 @@ const CartItem = ({ item, onDelete, isDeleting }) => {
           </div>
 
           {/* مشخصات */}
-          <div className="
-            bg-slate-50/80 rounded-xl p-3.5
-            grid grid-cols-1 md:grid-cols-2
-            gap-2.5 text-[13px]
-            mb-3
-          ">
-            {/* سایز */}
-            <SpecRow label={pageText.cart.cartItem.sizeLabel} value={specs.size_label} />
+{/* مشخصات */}
+<div className="
+  bg-slate-50/80 rounded-xl p-3.5
+  flex flex-col gap-2 text-[13px]
+  mb-3
+">
+  {(item.selections || []).map((sel, idx) => (
+    <div key={idx} className="flex items-center justify-between py-0.5">
+      <span className="text-slate-500">{sel.field_title}</span>
+      <span className="font-semibold text-slate-700">{sel.value}</span>
+    </div>
+  ))}
 
-            {/* تعداد */}
-            <SpecRow
-              label={pageText.cart.cartItem.quantityLabel}
-              value={`${item.quantity.toLocaleString()} ${pageText.cart.cartItem.unit}`}
-            />
-
-            {/* ابعاد دقیق */}
-            {specs.dimensions && specs.dimensions !== '0.0x0.0' && (
-              <SpecRow
-                label={pageText.cart.cartItem.exactDimensionsLabel}
-                value={specs.dimensions}
-                highlight
-                mono
-              />
-            )}
-
-            {/* آپشن‌های سفارشی */}
-            {specs.options?.map((opt, idx) => (
-              <SpecRow
-                key={idx}
-                label={`${opt.option_label}:`}
-                value={opt.value?.label}
-              />
-            ))}
-          </div>
+  <div className="flex items-center justify-between py-0.5 border-t border-slate-100 mt-1 pt-2">
+    <span className="text-slate-500">تعداد</span>
+    <span className="font-semibold text-slate-700">{item.quantity.toLocaleString()}</span>
+  </div>
+</div>
 
           {/* وضعیت فایل */}
           <div className="flex flex-wrap items-center gap-2 mt-auto">

@@ -16,6 +16,7 @@ import MainLayout from './app/layouts/MainLayout';
 import AuthLayout from './app/features/auth/AuthLayout';
 import AdminLayout from './app/features/admin/layout/AdminLayout';
 import AdminGuard from './app/features/auth/AdminGuard';
+import UserGuard from './app/features/auth/UserGuard';
 
 // --- Public Pages ---
 import HomePage from './app/pages/Home';
@@ -185,14 +186,16 @@ function App() {
               <Route path="/shop" element={<ShopPage />} />
               <Route path="/product/:slug" element={<PublicProductDetailPage />} />
               
-              <Route path="profile">
-                <Route index element={<ProfileDashboard />} />
-                <Route path="orders" element={<MyOrdersPage />} />
-                <Route path="orders/:id" element={<OrderDetailPage />} />
-                <Route path="wallet" element={<WalletPage />} />
-                <Route path="addresses" element={<AddressPage />} />
-                <Route path="orders/:id/quotation" element={<QuotationPage />} />
-                <Route path="orders/:id/invoice" element={<InvoicePage />} />
+              <Route element={<UserGuard />}>
+                <Route path="profile">
+                  <Route index element={<ProfileDashboard />} />
+                  <Route path="orders" element={<MyOrdersPage />} />
+                  <Route path="orders/:id" element={<OrderDetailPage />} />
+                  <Route path="wallet" element={<WalletPage />} />
+                  <Route path="addresses" element={<AddressPage />} />
+                  <Route path="orders/:id/quotation" element={<QuotationPage />} />
+                  <Route path="orders/:id/invoice" element={<InvoicePage />} />
+                </Route>
               </Route>
 
               {/* Blog */}
