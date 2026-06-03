@@ -7,14 +7,24 @@ import {
 import { useAdminOrders } from '../../hooks/useAdminOrders';
 import { useOrderStatuses } from '../../hooks/useOrderStatuses';
 import { formatPrice } from '../../utils/formatPrice';
-import OrderStatusBadge from './components/OrderStatusBadge';
 import BulkActionsBar from '../users/components/BulkActionsBar';
+
+const STATUS_STYLES = {
+  PENDING_REVIEW: { badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/60',          dot: 'bg-blue-500'    },
+  DESIGNING:      { badge: 'bg-purple-50 text-purple-700 ring-1 ring-purple-200/60',    dot: 'bg-purple-500'  },
+  PRINTING:       { badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60',       dot: 'bg-amber-500'   },
+  SHIPPED:        { badge: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200/60',             dot: 'bg-sky-500'     },
+  DELIVERED:      { badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60', dot: 'bg-emerald-500' },
+  CANCELED:       { badge: 'bg-red-50 text-red-600 ring-1 ring-red-200/60',             dot: 'bg-red-500'     },
+};
+
+const getStatusStyle = (code) =>
+  STATUS_STYLES[code] ?? { badge: 'bg-slate-100 text-slate-500', dot: 'bg-slate-400' };
 
 const OrderListPage = () => {
   const navigate = useNavigate();
   const [selectedIds, setSelectedIds] = useState([]);
   
-  // States برای مودال تغییر وضعیت سریع
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [selectedOrderForStatus, setSelectedOrderForStatus] = useState(null);
   const [newStatusDesc, setNewStatusDesc] = useState('');
@@ -28,7 +38,6 @@ const OrderListPage = () => {
     deleteMutation, bulkDeleteMutation, changeStatusMutation
   } = useAdminOrders();
 
-  // --- Actions ---
   const handleToggleAll = () => {
     if (selectedIds.length === orders.length && orders.length > 0) setSelectedIds([]);
     else setSelectedIds(orders.map(o => o.id));
@@ -46,7 +55,6 @@ const OrderListPage = () => {
     }
   };
 
-  /* اصلاح باگ: نام تابع ست‌استیت درست شد */
   const openStatusModal = (order, targetStatusCode) => {
     setSelectedOrderForStatus(order);
     setNewStatusCode(targetStatusCode);
@@ -72,7 +80,6 @@ const OrderListPage = () => {
   return (
     <div className="p-6 space-y-6 pb-24 animate-fade-in relative">
       
-      {/* Header & Main Stats */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-800 flex items-center gap-3">
@@ -94,29 +101,25 @@ const OrderListPage = () => {
         </button>
       </div>
 
-      {/* Advanced Filter Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-4">
-{/* Quick Status Tabs */}
-<div className="flex overflow-x-auto hide-scrollbar gap-2 pb-2 border-b border-slate-100">
-  <button 
-    onClick={() => { setStatusIdFilter('all'); setCurrentPage(1); }}
-    className={`btn btn-sm rounded-lg px-6 transition-all ${statusIdFilter === 'all' ? 'bg-slate-800 text-white hover:bg-slate-700' : 'btn-ghost text-slate-500 hover:bg-slate-100'}`}
-  >
-    همه سفارشات
-  </button>
-  {statuses?.map(status => (
-    <button 
-      key={status.id}
-      /* تغییر مهم: به جای status.id از internal_code یا نام انگلیسی که بک‌اند می‌شناسه استفاده کن */
-      onClick={() => { setStatusIdFilter(String(status.internal_code)); setCurrentPage(1); }}
-      className={`btn btn-sm rounded-lg px-6 whitespace-nowrap transition-all ${statusIdFilter === String(status.internal_code) ? 'bg-primary text-white shadow-md shadow-primary/20' : 'btn-ghost text-slate-500 hover:bg-slate-100'}`}
-    >
-      {status.name}
-    </button>
-  ))}
-</div>
+        <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-2 border-b border-slate-100">
+          <button 
+            onClick={() => { setStatusIdFilter('all'); setCurrentPage(1); }}
+            className={`btn btn-sm rounded-lg px-6 transition-all ${statusIdFilter === 'all' ? 'bg-slate-800 text-white hover:bg-slate-700' : 'btn-ghost text-slate-500 hover:bg-slate-100'}`}
+          >
+            همه سفارشات
+          </button>
+          {statuses?.map(status => (
+            <button 
+              key={status.id}
+              onClick={() => { setStatusIdFilter(String(status.internal_code)); setCurrentPage(1); }}
+              className={`btn btn-sm rounded-lg px-6 whitespace-nowrap transition-all ${statusIdFilter === String(status.internal_code) ? 'bg-primary text-white shadow-md shadow-primary/20' : 'btn-ghost text-slate-500 hover:bg-slate-100'}`}
+            >
+              {status.name}
+            </button>
+          ))}
+        </div>
 
-        {/* Inputs (Search & Date) */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="relative w-full md:w-1/2 lg:w-96">
             <input 
@@ -149,7 +152,6 @@ const OrderListPage = () => {
         </div>
       </div>
 
-      {/* The Table Container */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm min-h-[400px] relative">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-80 gap-4">
@@ -182,88 +184,92 @@ const OrderListPage = () => {
                     </td>
                   </tr>
                 ) : (
-                  orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group relative hover:z-20">
-                      <th>
-                        <input 
-                          type="checkbox" 
-                          className="checkbox checkbox-sm checkbox-primary rounded"
-                          checked={selectedIds.includes(order.id)} 
-                          onChange={() => handleToggleOne(order.id)} 
-                        />
-                      </th>
-                      <td>
-                        <div className="font-mono text-sm font-bold text-slate-700 bg-slate-100 inline-block px-2 py-1 rounded">
-                          #{order.id}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-slate-800">
-                            {order.user_info?.full_name || order.recipient_name}
-                          </span>
-                          <span className="text-xs text-slate-400 mt-0.5">{order.recipient_phone}</span>
-                        </div>
-                      </td>
-                      
-                      {/* Interactive Status Cell */}
-                      <td className="text-center">
-                        <div className="dropdown dropdown-bottom dropdown-end static sm:relative">
-                          <div tabIndex={0} role="button" className="transition-transform active:scale-95 group-hover:ring-2 ring-primary/20 rounded-lg p-1 inline-block">
-                            <OrderStatusBadge status={order.current_status} />
+                  orders.map((order) => {
+                    const style = getStatusStyle(order.current_status_code);
+                    return (
+                      <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group relative hover:z-20">
+                        <th>
+                          <input 
+                            type="checkbox" 
+                            className="checkbox checkbox-sm checkbox-primary rounded"
+                            checked={selectedIds.includes(order.id)} 
+                            onChange={() => handleToggleOne(order.id)} 
+                          />
+                        </th>
+                        <td>
+                          <div className="font-mono text-sm font-bold text-slate-700 bg-slate-100 inline-block px-2 py-1 rounded">
+                            #{order.id}
                           </div>
-                          <ul tabIndex={0} className="dropdown-content menu p-2 shadow-2xl bg-base-100 rounded-xl w-52 border border-slate-100 absolute z-[9999] mt-1">
-                            <li className="menu-title text-[10px] text-slate-400">تغییر وضعیت به:</li>
-                            {statuses?.map(s => (
-                              <li key={s.id}>
-                                <button 
-                                  type="button"
-                                  onClick={() => openStatusModal(order, s.internal_code)}
-                                  className={`w-full text-right px-4 py-2 text-sm rounded-lg block ${order.current_status === s.name ? 'active bg-primary/10 text-primary font-bold' : 'hover:bg-slate-50'}`}
-                                >
-                                  {s.name}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </td>
+                        </td>
+                        <td>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-800">
+                              {order.user_info?.full_name || order.recipient_name}
+                            </span>
+                            <span className="text-xs text-slate-400 mt-0.5">{order.recipient_phone}</span>
+                          </div>
+                        </td>
+                        
+                        <td className="text-center">
+                          <div className="dropdown dropdown-bottom dropdown-end static sm:relative">
+                            <div tabIndex={0} role="button" className="transition-transform active:scale-95 group-hover:ring-2 ring-primary/20 rounded-lg p-1 inline-block">
+                              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold ${style.badge}`}>
+                                <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${style.dot}`} />
+                                {order.current_status}
+                              </div>
+                            </div>
+                            <ul tabIndex={0} className="dropdown-content menu p-2 shadow-2xl bg-base-100 rounded-xl w-52 border border-slate-100 absolute z-[9999] mt-1">
+                              <li className="menu-title text-[10px] text-slate-400">تغییر وضعیت به:</li>
+                              {statuses?.map(s => (
+                                <li key={s.id}>
+                                  <button 
+                                    type="button"
+                                    onClick={() => openStatusModal(order, s.internal_code)}
+                                    className={`w-full text-right px-4 py-2 text-sm rounded-lg block ${order.current_status_code === s.internal_code ? 'active bg-primary/10 text-primary font-bold' : 'hover:bg-slate-50'}`}
+                                  >
+                                    {s.name}
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </td>
 
-                      <td>
-                        <div className="font-black text-emerald-600 dir-ltr text-right text-base">
-                          {formatPrice(order.total_price)}
-                        </div>
-                      </td>
-                      <td className="text-center">
-                        <div className="badge badge-ghost badge-sm border-slate-200">
-                          {order.items?.length || 0} مورد
-                        </div>
-                      </td>
-                      <td className="text-xs text-slate-500">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-slate-700">{new Date(order.created_at).toLocaleDateString('fa-IR')}</span>
-                          <span className="text-slate-400 dir-ltr text-right">{new Date(order.created_at).toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'})}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="flex items-center justify-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-                           <button onClick={() => navigate(`/admin/orders/${order.id}`)} className="btn btn-square btn-ghost btn-sm text-primary hover:bg-primary/10" title="مشاهده جزئیات کامل">
-                             <Eye size={18} />
-                           </button>
-                           <button onClick={() => {if(confirm('آیا از حذف مطمئن هستید؟')) deleteMutation.mutate(order.id)}} className="btn btn-square btn-ghost btn-sm text-error hover:bg-error/10" title="حذف سفارش">
-                             <Trash2 size={18} />
-                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        <td>
+                          <div className="font-black text-emerald-600 dir-ltr text-right text-base">
+                            {formatPrice(order.total_price)}
+                          </div>
+                        </td>
+                        <td className="text-center">
+                          <div className="badge badge-ghost badge-sm border-slate-200">
+                            {order.items?.length || 0} مورد
+                          </div>
+                        </td>
+                        <td className="text-xs text-slate-500">
+                          <div className="flex flex-col">
+                            <span className="font-medium text-slate-700">{new Date(order.created_at).toLocaleDateString('fa-IR')}</span>
+                            <span className="text-slate-400 dir-ltr text-right">{new Date(order.created_at).toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'})}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex items-center justify-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                             <button onClick={() => navigate(`/admin/orders/${order.id}`)} className="btn btn-square btn-ghost btn-sm text-primary hover:bg-primary/10" title="مشاهده جزئیات کامل">
+                               <Eye size={18} />
+                             </button>
+                             <button onClick={() => {if(confirm('آیا از حذف مطمئن هستید؟')) deleteMutation.mutate(order.id)}} className="btn btn-square btn-ghost btn-sm text-error hover:bg-error/10" title="حذف سفارش">
+                               <Trash2 size={18} />
+                             </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
         )}
 
-        {/* Pagination Footer */}
         {!isLoading && orders.length > 0 && (
           <div className="p-4 border-t border-slate-100 bg-slate-50 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
             <span className="text-sm text-slate-500 font-medium">
@@ -284,7 +290,6 @@ const OrderListPage = () => {
         onDelete={handleBulkDelete}
       />
 
-      {/* --- Status Change Modal --- */}
       {statusModalOpen && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
@@ -293,19 +298,6 @@ const OrderListPage = () => {
               <p className="text-sm text-slate-500 mb-6">
                 شما در حال تغییر وضعیت سفارش <span className="font-mono font-bold text-slate-800">#{selectedOrderForStatus?.id}</span> هستید.
               </p>
-              
-              <div className="form-control mb-6">
-                <label className="label">
-                  <span className="label-text font-bold text-slate-700">توضیحات (اختیاری)</span>
-                  <span className="label-text-alt text-slate-400">برای ثبت در لاگ</span>
-                </label>
-                <textarea 
-                  className="textarea textarea-bordered h-24 focus:border-primary bg-slate-50 focus:bg-white w-full text-right" 
-                  placeholder="مثال: با مشتری تماس گرفته شد و..."
-                  value={newStatusDesc}
-                  onChange={(e) => setNewStatusDesc(e.target.value)}
-                ></textarea>
-              </div>
 
               <div className="flex gap-3 justify-end">
                 <button 

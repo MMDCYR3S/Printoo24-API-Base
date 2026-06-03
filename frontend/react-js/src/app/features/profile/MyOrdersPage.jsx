@@ -1,18 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Package, Calendar, MapPin, ChevronLeft, AlertCircle, Printer, FileCheck, ShoppingBag } from 'lucide-react';
+import { Package, Calendar, MapPin, ChevronLeft, Printer, FileCheck, ShoppingBag } from 'lucide-react';
 import { profileService } from '../../services/profileService';
 
-import pageText from '../../lang/pages.json'
-import globalText from '../../lang/global.json'
+import pageText from '../../lang/pages.json';
+import globalText from '../../lang/global.json';
 
-const getStatusStyle = (status) => {
-  if (!status) return { badge: 'bg-slate-100 text-slate-500', dot: 'bg-slate-400' };
-  if (status.includes('تحویل') || status.includes('تکمیل')) return { badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60', dot: 'bg-emerald-500' };
-  if (status.includes('چاپ') || status.includes('آماده')) return { badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60', dot: 'bg-amber-500' };
-  if (status.includes('لغو') || status.includes('رد')) return { badge: 'bg-red-50 text-red-600 ring-1 ring-red-200/60', dot: 'bg-red-500' };
-  return { badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/60', dot: 'bg-blue-500' };
+const STATUS_STYLES = {
+  PENDING_REVIEW: { badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/60',        dot: 'bg-blue-500',    card: 'bg-white' },
+  DESIGNING:      { badge: 'bg-purple-50 text-purple-700 ring-1 ring-purple-200/60',  dot: 'bg-purple-500',  card: 'bg-white' },
+  PRINTING:       { badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60',     dot: 'bg-amber-500',   card: 'bg-white' },
+  SHIPPED:        { badge: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200/60',           dot: 'bg-sky-500',     card: 'bg-white' },
+  DELIVERED:      { badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60', dot: 'bg-emerald-500', card: 'bg-emerald-500/20' },
+  CANCELED:       { badge: 'bg-red-50 text-red-600 ring-1 ring-red-200/60',           dot: 'bg-red-500',     card: 'bg-white' },
 };
+
+const getStatusStyle = (code) =>
+  STATUS_STYLES[code] ?? { badge: 'bg-slate-100 text-slate-500', dot: 'bg-slate-400', card: 'bg-white' };
 
 const MyOrdersPage = () => {
   const { data: rawData, isLoading } = useQuery({
@@ -20,11 +24,10 @@ const MyOrdersPage = () => {
     queryFn: profileService.getOrders,
   });
 
-  // هندل کردن آرایه تو در تو [[{...}]]
   const orders = Array.isArray(rawData?.[0]) ? rawData[0] : (rawData || []);
 
   if (isLoading) return (
-    <div className="space-y-6 ">
+    <div className="space-y-6">
       <div className="flex items-center justify-between pb-5 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-slate-100 animate-pulse" />
@@ -47,7 +50,7 @@ const MyOrdersPage = () => {
   );
 
   return (
-    <div className="space-y-6 max-w-[90vw] items-center mx-auto ">
+    <div className="space-y-6 max-w-[90vw] items-center mx-auto">
       {/* هدر */}
       <div className="flex justify-between items-center border-b border-slate-100 pb-5">
         <div className="flex items-center gap-3">
@@ -62,9 +65,10 @@ const MyOrdersPage = () => {
           {orders.length} {pageText.profile.myOrdersPage.order}
         </span>
       </div>
-          <p className='text-slate-600'>
-          داواکارییەکەت لە ژێر پشکنینە. ئەگەر پەسەند بکرێت، لە ڕێگەی ژمارەی مۆبایلەکەتەوە ئاگادارت دەکەینەوە
-          </p>
+
+      <p className="text-slate-600">
+        داواکارییەکەت لە ژێر پشکنینە. ئەگەر پەسەند بکرێت، لە ڕێگەی ژمارەی مۆبایلەکەتەوە ئاگادارت دەکەینەوە
+      </p>
 
       <div className="space-y-3">
         {orders.length === 0 ? (
@@ -79,10 +83,12 @@ const MyOrdersPage = () => {
           </div>
         ) : (
           orders.map((order) => {
-            const style = getStatusStyle(order.status);
+            const style = getStatusStyle(order.status_code);
             return (
-              <div key={order.id} className="bg-white rounded-2xl ring-1 ring-black/[0.05] hover:ring-black/[0.08] hover:shadow-lg hover:shadow-black/[0.04] transition-all duration-300 overflow-hidden">
-                
+              <div
+                key={order.id}
+                className={`${style.card} rounded-2xl ring-1 ring-black/[0.05] hover:ring-black/[0.08] hover:shadow-lg hover:shadow-black/[0.04] transition-all duration-300 overflow-hidden`}
+              >
                 {/* ردیف بالا */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 pb-4">
                   <div className="flex items-center gap-3.5">
@@ -95,7 +101,7 @@ const MyOrdersPage = () => {
                       </h3>
                       <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium mt-0.5">
                         <Calendar size={11} />
-                        {new Date(order.created_at).toLocaleDateString('fa-IR')}
+                        {new Date(order.created_at).toLocaleDateString('en-GB')}
                       </div>
                     </div>
                   </div>
