@@ -10,16 +10,12 @@ class Command(BaseCommand):
 
         try:
             with transaction.atomic():
-                # پاکسازی کامل جدول
                 self._force_clean_table()
 
-                # تعمیر sequence
                 self._fix_sequence_pointers()
 
-                # ایجاد داده‌های جدید
                 self._create_statuses()
                 
-                # تنظیم نهایی sequence
                 self._fix_sequence_pointers()
 
                 self.stdout.write(self.style.SUCCESS("Successfully seeded Order Statuses!"))
@@ -50,7 +46,6 @@ class Command(BaseCommand):
                 """)
 
     def _create_statuses(self):
-        # تعریف گروه‌ها
         groups_data = [
             {"name": "ادمین", "code": "admin", "description": "مدیریت کل سیستم"},
             {"name": "طراح", "code": "designer", "description": "واحد طراحی و لیتوگرافی"},
@@ -65,57 +60,56 @@ class Command(BaseCommand):
                 code=g_data['code'],
                 name=g_data['name'],
                 description=g_data['description'],
-                is_system=False  # حذف کردم is_system رو
+                is_system=False
             )
             groups_map[g_data['code']] = group
 
-        # تعریف وضعیت‌ها
         statuses_data = [
             {
-                "name": "در انتظار بررسی",
+                "name": "لە چاوەڕوانی پشکنین‌دایە",
                 "internal_code": "PENDING_REVIEW",
                 "status_type": "initial",
-                "group": "admin",  # فقط ادمین
+                "group": "admin",
                 "description": "سفارش ثبت شده و در انتظار بررسی اولیه",
                 "visible_to_customer": True
             },
             {
-                "name": "در حال طراحی",
+                "name": "لە قۆناغی دیزاین‌دایە",
                 "internal_code": "DESIGNING",
                 "status_type": "progress",
-                "group": "designer",  # فقط طراح
+                "group": "designer",
                 "description": "در حال طراحی و آماده‌سازی فایل چاپ",
                 "visible_to_customer": True
             },
             {
-                "name": "در حال چاپ",
+                "name": "لە قۆناغی چاپ‌دایە",
                 "internal_code": "PRINTING",
                 "status_type": "progress",
-                "group": "printing",  # فقط واحد چاپ
+                "group": "printing",
                 "description": "در حال پروسه چاپ",
                 "visible_to_customer": True
             },
             {
-                "name": "ارسال‌شده",
+                "name": "نێردراوە",
                 "internal_code": "SHIPPED",
                 "status_type": "progress",
-                "group": "warehouse",  # فقط انبار
+                "group": "warehouse",
                 "description": "سفارش ارسال شده است",
                 "visible_to_customer": True
             },
             {
-                "name": "تحویل‌شده",
+                "name": "تەسلیم کراوە",
                 "internal_code": "DELIVERED",
                 "status_type": "approve",
-                "group": "admin",  # فقط ادمین
+                "group": "admin",
                 "description": "سفارش به دست مشتری رسیده",
                 "visible_to_customer": True
             },
             {
-                "name": "لغو شده",
+                "name": "هەڵوەشاوەتەوە",
                 "internal_code": "CANCELED",
                 "status_type": "cancel",
-                "group": "admin",  # فقط ادمین می‌تونه تغییر بده
+                "group": "admin",
                 "description": "سفارش لغو شده",
                 "visible_to_customer": True
             },
@@ -129,7 +123,7 @@ class Command(BaseCommand):
                 status_type=s_data['status_type'],
                 group=groups_map[s_data['group']],
                 description=s_data['description'],
-                is_system=False,  # حذف کردم is_system رو
+                is_system=False,
                 sort_order=index + 1
             ))
         OrderStatus.objects.bulk_create(status_objects)

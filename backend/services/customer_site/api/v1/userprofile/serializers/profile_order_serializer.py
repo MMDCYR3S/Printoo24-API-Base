@@ -121,6 +121,7 @@ class OrderWithDetailsSerializer(serializers.ModelSerializer):
 # ===== Order Detail (Main) ===== #
 class OrderSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source='current_status.name', read_only=True)
+    status_code = serializers.CharField(source='current_status.internal_code', read_only=True)
     type_display = serializers.CharField(source='get_type_display', read_only=True)
     full_address = serializers.CharField(source='address', read_only=True)
     
@@ -148,7 +149,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             'id', 'user', "recipient_name", "recipient_phone",
-            'status', 'type_display', 'total_price',
+            'status', 'status_code', 'type_display', 'total_price',
             'order_code', 'created_at', "address_id", "address", "full_address"
         ]
 

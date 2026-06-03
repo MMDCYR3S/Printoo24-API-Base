@@ -250,8 +250,7 @@ class Product(HasGuide, models.Model):
     # ===== قیمت گذاری براساس مقدار ==== #
     price_per_unit = models.PositiveIntegerField(
         _("گام شمارش (تعداد مبنا)"),
-        default=1,
-        validators=[MinValueValidator(1)],
+        default=0,
         help_text=_("قیمت بالا به ازای چه تعدادی است؟ (مثلا: ۱۰۰۰ تومان به ازای هر ۱۰ عدد).")
     )
     description = models.TextField(_('توضیحات'), blank=True, null=True)
