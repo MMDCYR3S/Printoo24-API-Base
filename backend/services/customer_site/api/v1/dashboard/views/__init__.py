@@ -12,3 +12,4 @@ from .financial_view import *
 from .staff_view import *
 from .site_media_views import *
 from .content_views import *
+from .expense_views import *

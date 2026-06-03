@@ -6,11 +6,13 @@ from drf_spectacular.utils import extend_schema
 
 from apps.dashboard.services import (
     ProductDashboardStateService, OrderDashboardStateService,
-    UserDashboardStateService, FinancialDashboardStateService
+    UserDashboardStateService, FinancialDashboardStateService,
+    CombinedDashboardStateService
 )
 from ..serializers import (
     ProductDashboardStatsSerializer, OrderDashboardStatsSerializer,
-    UserDashboardStatsSerializer, FinancialDashboardStatsSerializer
+    UserDashboardStatsSerializer, FinancialDashboardStatsSerializer,
+    CombinedDashboardStatsSerializer
 )
 
 # ========== PRODUCT VIEW ========== #
@@ -93,3 +95,16 @@ class FinancialDashboardStatsView(APIView):
         stats_data = service.get_financial_statistics()
         serializer = FinancialDashboardStatsSerializer(instance=stats_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+# ========== EXPENSE VIEW ========== #
+class CombinedDashboardStatsView(APIView):
+    permission_classes = [IsAdminUser]
+
+    @extend_schema(
+        tags=['Dashboard - States'],
+        summary="دریافت تمام آمار داشبورد در یک API",
+        responses={200: CombinedDashboardStatsSerializer}
+    )
+    def get(self, request):
+        stats = CombinedDashboardStateService().get_combined_statistics()
+        return Response(CombinedDashboardStatsSerializer(instance=stats).data)

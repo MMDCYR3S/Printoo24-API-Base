@@ -1,18 +1,29 @@
 from rest_framework import serializers
-from core.models import Order, OrderItem, OrderStatus, Address
+from core.models import Order, OrderItem, OrderStatus, Address, OrderItemFile
+
+
+# ===== Upload & Delete Item File of Order ===== #
+class OrderItemFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItemFile
+        fields = ['id', 'file']
+
+class OrderItemUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True, default=None)
     product_slug = serializers.CharField(source='product.slug', read_only=True, default=None)
     specifications = serializers.JSONField(source='items', read_only=True)
+    files = OrderItemFileSerializer(many=True, read_only=True)
 
     class Meta:
         model = OrderItem
         fields = [
-            'id', 'product_name', 'product_slug', 'name', 
-            'description', 'quantity', 'price', 'status', 'specifications'
+            'id', 'product_name', 'product_slug', 'name',
+            'description', 'quantity', 'price', 'status', 'specifications', 'files'
         ]
-
 class OrderDetailSerializer(serializers.ModelSerializer):
     user_info = serializers.SerializerMethodField()
     province = serializers.SerializerMethodField()
