@@ -8,7 +8,6 @@ const AuthLayout = () => {
           {/* لوگوی پروژه یا تیتر مشترک */}
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-primary">Printoo24</h1>
-            <p className="text-sm text-base-content/70 mt-2">سامانه مدیریت سفارشات چاپ</p>
           </div>
           
           {/* محتوای متغیر صفحات (Login/Register) اینجا قرار می‌گیرد */}
