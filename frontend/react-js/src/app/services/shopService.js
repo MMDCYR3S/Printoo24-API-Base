@@ -25,6 +25,17 @@ export const shopService = {
       selections: selections
     });
     return response.data;
-  }
+  },
+  // دریافت نتایج جستجو
+searchProducts: async (query, page = 1) => {
+  const params = new URLSearchParams();
+  params.append('name', query);
+  params.append('page', page);
+  const response = await apiClient.get('/shop/grid/', { params });
+  
+  // بررسی ساختار response — کدوم حالت داری؟
+  // اگه API مستقیم آرایه برمیگردونه:
+  return Array.isArray(response.data) ? response.data : response.data.results ?? [];
+},
 
 };

@@ -104,7 +104,7 @@ const OrderHeader = ({ order }) => {
                 </div>
               </div>
 
-              <div className="form-control">
+              {/* <div className="form-control">
                 <label className="label mb-1">
                   <span className="label-text font-bold text-slate-700">توضیحات داخلی (لاگ سیستم)</span>
                 </label>
@@ -114,7 +114,7 @@ const OrderHeader = ({ order }) => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
-              </div>
+              </div> */}
 
               <div className="flex gap-4 pt-4">
                 <button 
