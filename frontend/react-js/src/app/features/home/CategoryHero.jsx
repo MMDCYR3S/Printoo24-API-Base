@@ -229,7 +229,7 @@ const CategoryItem = memo(({ category, isOpen, onToggle, index }) => {
                           "
                           style={{ transition: 'gap 0.3s ease, color 0.2s ease' }}
                         >
-                          مشاهده همه <ArrowLeft size={13} />
+                          بینینی هەمووی <ArrowLeft size={13} />
                         </Link>
                       </div>
 

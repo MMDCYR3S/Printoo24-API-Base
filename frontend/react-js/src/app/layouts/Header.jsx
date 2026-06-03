@@ -396,8 +396,8 @@ const navigate = useNavigate();
             <nav className="flex items-center gap-0.5 mr-1">
               {[
                 { label: pageText.layout.Header.allProducts, to: '/shop', icon: Store },
-                { label: 'blogs' , to: 'blog', icon: Book },
-                { label: 'tutorials' , to: 'tutorials', icon: Video },
+                { label: pageText.layout.Header.blog , to: 'blog', icon: Book },
+                { label: pageText.layout.Header.tutorials , to: 'tutorials', icon: Video },
                 { label: pageText.layout.Header.lastOrders, to: '/profile/orders', icon: Package },
                 { label: pageText.layout.Header.myAddresses, to: '/profile/addresses', icon: MapPin },
                 { label: pageText.layout.Header.trackingOrder, to: 'https://wa.me/9647762278666', icon: Headphones },
