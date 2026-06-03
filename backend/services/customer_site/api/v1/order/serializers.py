@@ -116,7 +116,6 @@ class OrderSerializer(serializers.ModelSerializer):
     province_id = serializers.IntegerField(write_only=True, required=False, label="شناسه استان")
     city_id = serializers.IntegerField(write_only=True, required=False, label="شناسه شهر")
     address_text = serializers.CharField(write_only=True, required=False, label="نشانی دقیق")
-    postal_code = serializers.CharField(write_only=True, required=False, label="کد پستی")
 
     type = serializers.ChoiceField(
         choices=Order.ORDER_TYPE, default='1', write_only=True
@@ -133,7 +132,7 @@ class OrderSerializer(serializers.ModelSerializer):
             # Inputs
             'type', 'address_id', 
             'first_name', 'last_name', 'phone_number', 'company_name',
-            'province_id', 'city_id', 'address_text', 'postal_code'
+            'province_id', 'city_id', 'address_text'
         ]
 
     def get_item_detail(self, obj):
@@ -211,8 +210,7 @@ class AddressListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 
             'province', 
-            'city', 
-            'postal_code', 
+            'city',
             'address', 
             'created_at'
         ]
