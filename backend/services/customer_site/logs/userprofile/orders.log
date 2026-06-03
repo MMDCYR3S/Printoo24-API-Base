@@ -314,3 +314,7 @@ INFO 2026-06-01 18:26:31,100 user_order_service 7 139665208800960 Fetching order
 =======
 INFO 2026-06-01 11:13:02,336 user_order_service 261 126858317436608 Fetching order history for User ID: 1
 >>>>>>> debf3403d6a239088024e2bb9f6b32ee2bac7f5a
+INFO 2026-06-03 08:47:39,632 user_order_service 7 135518281144000 Fetching order history for User ID: 1
+INFO 2026-06-03 08:49:30,917 user_order_service 7 135518654461632 Fetching order history for User ID: 1
+INFO 2026-06-03 08:51:05,597 user_order_service 7 135518654461632 Fetching order history for User ID: 1
+INFO 2026-06-03 08:51:11,617 user_order_service 7 135518255965888 Fetching order history for User ID: 1
