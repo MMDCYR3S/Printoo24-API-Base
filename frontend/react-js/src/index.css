@@ -105,3 +105,74 @@ html, body {
 .drawer-toggle:checked ~ .drawer-side > .menu {
   transform: translateX(0); /* ورود نرم */
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* کانتینر اصلی برای مدیریت هر دو اسلایدر */
+.marquee-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* فاصله بین دو ردیف اسلایدر */
+  background-color: #ffffff; /* پس‌زمینه سفید کل مجموعه */
+  padding: 20px 0;
+}
+
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  background-color: #ffffff; /* پس‌زمینه سفید هر ردیف */
+}
+
+.marquee-track {
+  display: inline-flex;
+  gap: 40px;
+  animation: slideLinear 60s linear forwards; 
+}
+
+/* اسلایدر اول به صورت عادی حرکت می‌کند */
+.marquee-track.forward {
+  animation-direction: normal;
+}
+
+/* اسلایدر دوم دقیقاً معکوس حرکت می‌کند (از انتها به ابتدا) */
+.marquee-track.reverse {
+  animation-direction: reverse;
+}
+
+/* هاور روی هر ردیف، فقط همان ردیف را متوقف می‌کند */
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.marquee-logo {
+  width: 120px; 
+  height: 60px;
+  object-fit: contain; 
+  filter: grayscale(100%);
+  transition: filter 0.3s ease;
+}
+
+.marquee-logo:hover {
+  filter: grayscale(0%);
+}
+
+@keyframes slideLinear {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% + 100vw)); 
+  }
+}

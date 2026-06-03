@@ -23,6 +23,8 @@ import img501 from '../../assets/images/home/501.webp';
 import img503 from '../../assets/images/home/503.webp';
 
 
+import LogoMarquee from '../components/LogoMarquee'
+
 /* ─────────────────────────────────────────────
    انیمیشن‌های مشترک
    ───────────────────────────────────────────── */
@@ -104,6 +106,9 @@ const HomePage = () => {
 
         {/* 5. سؤالات متداول */}
         <FAQSection />
+
+        {/* Customer logos */}
+        <LogoMarquee />
 
         {/* 6. تماس */}
         {/* <ContactSection /> */}
@@ -435,5 +440,7 @@ const FAQSection = () => {
     </section>
   );
 };
+
+
 
 export default HomePage;
