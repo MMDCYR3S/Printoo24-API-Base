@@ -108,7 +108,7 @@ class CustomerProfile(models.Model):
     user = models.OneToOneField("core.User", related_name='customer_profile', on_delete=models.CASCADE)
     first_name = models.CharField(_('نام'), max_length=150)
     last_name = models.CharField(_('نام خانوادگی'), max_length=150)
-    # phone_number = models.CharField(_('شماره تماس'), max_length=150)
+    
     company = models.CharField(_('نام شرکت'), max_length=150, blank=True, null=True)
     bio = models.TextField(_('بیوگرافی'), blank=True, null=True)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
@@ -180,12 +180,6 @@ class Address(models.Model):
     user = models.ForeignKey("core.User", related_name='addresses', on_delete=models.CASCADE)
     province = models.ForeignKey(Province, verbose_name=_("استان"), on_delete=models.CASCADE)
     city = models.ForeignKey(City, verbose_name=_("شهر"), on_delete=models.CASCADE)
-    postal_code = models.CharField(
-        _('کد پستی'), 
-        max_length=10, 
-        null=True, 
-        blank=True
-    )
     address = models.TextField(_('آدرس'))
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
