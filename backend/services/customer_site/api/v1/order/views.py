@@ -63,8 +63,7 @@ class CreateOrderView(GenericAPIView):
                     "company_name": "شرکت چاپ نمونه",
                     "province_id": 8,
                     "city_id": 124,
-                    "address_text": "خیابان آزادی، کوچه مهر، پلاک ۱۰، واحد ۴",
-                    "postal_code": "1234567890"
+                    "address_text": "خیابان آزادی، کوچه مهر، پلاک ۱۰، واحد ۴"
                 },
                 request_only=True
             ),
@@ -89,8 +88,7 @@ class CreateOrderView(GenericAPIView):
                     "phone_number": "09129998877",
                     "province_id": 5,
                     "city_id": 40,
-                    "address_text": "اصفهان، میدان نقش جهان...",
-                    "postal_code": "8181818181"
+                    "address_text": "اصفهان، میدان نقش جهان..."
                 },
                 request_only=True
             ),
@@ -153,7 +151,6 @@ class CreateOrderView(GenericAPIView):
             'city_id': data.get('city_id'),
             'city_name': data.get('city_name'),
             'address_text': data.get('address_text'),
-            'postal_code': data.get('postal_code'),
         }
 
         order_type = data.get('type', '1')
@@ -207,7 +204,6 @@ class BulkCreateOrderView(GenericAPIView):
                     "province_id": 1,
                     "city_id": 2,
                     "address_text": "خیابان ولیعصر...",
-                    "postal_code": "1111111111"
                 },
                 request_only=True
             ),
@@ -253,7 +249,6 @@ class BulkCreateOrderView(GenericAPIView):
             'city_id': data.get('city_id'),
             'city_name': data.get('city_name'),
             'address_text': data.get('address_text'),
-            'postal_code': data.get('postal_code'),
         }
 
         order_type = data.get('type', '1')
