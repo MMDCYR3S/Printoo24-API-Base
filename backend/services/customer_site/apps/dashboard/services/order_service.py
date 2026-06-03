@@ -43,3 +43,42 @@ class OrderDashboardService:
     
     def get_user_addresses(self, user_id):
         return Address.objects.filter(user_id=user_id)
+
+    def get_order_item(self, order_item_id: int) -> 'OrderItem':
+        from core.models import OrderItem
+        try:
+            return OrderItem.objects.get(id=order_item_id)
+        except OrderItem.DoesNotExist:
+            raise Exception(f"آیتم سفارش با شناسه {order_item_id} یافت نشد.")
+
+    def upload_order_item_file(self, order_item_id: int, uploaded_file) -> None:
+        from apps.dashboard.tasks import upload_order_item_file_task
+        import tempfile, os
+
+        self.get_order_item(order_item_id)  # بررسی وجود آیتم
+
+        original_filename = uploaded_file.name
+        suffix = os.path.splitext(original_filename)[1]
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            for chunk in uploaded_file.chunks():
+                tmp.write(chunk)
+            temp_path = tmp.name
+
+        upload_order_item_file_task.delay(
+            order_item_id=order_item_id,
+            temp_file_path=temp_path,
+            original_filename=original_filename
+        )
+
+    def delete_order_item_file(self, order_item_id: int) -> None:
+        from core.models import OrderItemFile
+        self.get_order_item(order_item_id)
+
+        files = OrderItemFile.objects.filter(order_item_id=order_item_id)
+        for f in files:
+            if f.file:
+                f.file.delete(save=False)
+        f.delete()
+
+

@@ -93,3 +93,23 @@ class FinancialDashboardStatsSerializer(serializers.Serializer):
     summary = FinancialSummarySerializer()
     chart_data = FinancialChartItemSerializer(many=True, help_text="داده‌های ۳۰ روز گذشته برای نمودار")
     
+
+# ========== EXPENSE SERIALIZERS ========== #
+class ExpenseSummarySerializer(serializers.Serializer):
+    total_expenses = serializers.IntegerField()
+    daily_expenses = serializers.IntegerField()
+    monthly_expenses = serializers.IntegerField()
+    yearly_expenses = serializers.IntegerField()
+
+class ProfitSummarySerializer(serializers.Serializer):
+    daily_profit = serializers.IntegerField()
+    monthly_profit = serializers.IntegerField()
+    yearly_profit = serializers.IntegerField()
+
+class CombinedDashboardStatsSerializer(serializers.Serializer):
+    products = ProductDashboardStatsSerializer()
+    orders = OrderDashboardStatsSerializer()
+    users = UserDashboardStatsSerializer()
+    financial = FinancialDashboardStatsSerializer()
+    expenses = ExpenseSummarySerializer()
+    profit = ProfitSummarySerializer()

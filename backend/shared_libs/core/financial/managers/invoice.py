@@ -1,9 +1,12 @@
-from typing import Optional
+from datetime import datetime, time
+
+
 from django.db import models
-from .base import BaseQuerySet
 from django.db import models
 from django.db.models import Sum, Count, Avg
+from django.utils import timezone
 
+from .base import BaseQuerySet
 # ========== INVOICE QUERYSET ========== #
 class InvoiceQuerySet(BaseQuerySet):
     """کوئری‌های مربوط به فاکتور"""
@@ -76,6 +79,37 @@ class InvoiceQuerySet(BaseQuerySet):
             count=Count('id'),
             total=Sum('final_amount')
         ).order_by('-count')
+    
+    def get_profit_by_date_range(self, start_date, end_date) -> int:
+        """
+        سود = مجموع final_amount فاکتورها - مجموع هزینه‌ها
+        در یک بازه زمانی مشخص
+        """
+        from core.financial.models import Expense
+
+        revenue = self.get_revenue_by_date_range(start_date, end_date)
+        expenses = int(
+            Expense.objects.filter(
+                created_at__range=(start_date, end_date)
+            ).aggregate(total=Sum('amount'))['total'] or 0
+        )
+        return revenue - expenses
+    
+    def get_daily_profit(self) -> int:
+        today = timezone.now().date()
+        start = timezone.make_aware(datetime.combine(today, time.min))
+        end = timezone.make_aware(datetime.combine(today, time.max))
+        return self.get_profit_by_date_range(start, end)
+
+    def get_monthly_profit(self) -> int:
+        now = timezone.now()
+        start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        return self.get_profit_by_date_range(start, now)
+
+    def get_yearly_profit(self) -> int:
+        now = timezone.now()
+        start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        return self.get_profit_by_date_range(start, now)
 
 # ========== INVOICE MANAGER ========== #
 class InvoiceManager(models.Manager):
@@ -120,3 +154,15 @@ class InvoiceManager(models.Manager):
 
     def get_status_breakdown(self):
         return self.get_queryset().get_status_breakdown()
+    
+    def get_profit_by_date_range(self, start_date, end_date) -> int:
+        return self.get_queryset().get_profit_by_date_range(start_date, end_date)
+    
+    def get_daily_profit(self):
+        return self.get_queryset().get_daily_profit()
+
+    def get_monthly_profit(self):
+        return self.get_queryset().get_monthly_profit()
+
+    def get_yearly_profit(self):
+        return self.get_queryset().get_yearly_profit()

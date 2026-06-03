@@ -11,3 +11,4 @@ from .quotation_serializers import *
 from .staff_serialziers import *
 from .site_media_serializers import *
 from .content_serializers import *
+from .expense_serializers import *

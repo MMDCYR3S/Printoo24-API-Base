@@ -8,8 +8,10 @@ from apps.dashboard.services.order_service import OrderDashboardService
 from ..serializers.order_serializers import (
     OrderDetailSerializer, OrderCreateSerializer, OrderUpdateSerializer,
     ChangeStatusSerializer, BulkActionIdsSerializer, BulkChangeStatusSerializer,
-    OrderStatusSerializer, UserAddressSerializer
+    OrderStatusSerializer, UserAddressSerializer, OrderItemUploadSerializer
 )
+from apps.dashboard.tasks import upload_order_item_file_task
+from rest_framework import parsers
 
 @extend_schema(tags=["Admin - Order Management"])
 class OrderDashboardViewSet(viewsets.ViewSet):
@@ -251,3 +253,30 @@ class OrderDashboardViewSet(viewsets.ViewSet):
             return Response({'detail': 'user_id الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
         addresses = self.service.get_user_addresses(user_id)
         return Response(UserAddressSerializer(addresses, many=True).data)
+
+    # ===== ORDER ITEM FILE UPLOAD ===== #
+    @extend_schema(
+        summary="آپلود فایل طراحی برای یک آیتم سفارش",
+        request=OrderItemUploadSerializer,
+        responses={202: {"description": "آپلود در صف قرار گرفت"}},
+    )
+    @action(detail=False, methods=['post'], url_path=r'items/(?P<item_id>\d+)/upload-file',
+            parser_classes=[parsers.MultiPartParser])
+    def upload_item_file(self, request, item_id=None):
+        serializer = OrderItemUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            self.service.upload_order_item_file(int(item_id), serializer.validated_data['file'])
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'فایل در صف آپلود قرار گرفت.'}, status=status.HTTP_202_ACCEPTED)
+
+    @extend_schema(summary="حذف فایل‌های طراحی یک آیتم سفارش")
+    @action(detail=False, methods=['delete'], url_path=r'items/(?P<item_id>\d+)/delete-file')
+    def delete_item_file(self, request, item_id=None):
+        try:
+            self.service.delete_order_item_file(int(item_id))
+            return Response({'detail': 'فایل با موفقیت حذف شد.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+
