@@ -166,28 +166,14 @@ const ProductDetailPage = () => {
                       ) : (
                         <>
                           <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
-                          {data?.has_price ? "افزودن به سبد خرید" : "استعلام قیمت"}
+                          {data?.has_price ? "زیاد کردن به سەبەتەی کڕین" : "استعلام قیمت"}
                         </>
                       )}
                     </button>
                   </div>
                 </div>
 
-                {/* آیکون‌های اعتماد */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-100 text-xs font-bold text-slate-500 space-y-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-50 rounded-lg text-emerald-500">
-                      <ShieldCheck size={20} />
-                    </div>
-                    <span>تضمین سلامت فیزیکی محصول</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 rounded-lg text-blue-500">
-                      <Truck size={20} />
-                    </div>
-                    <span>ارسال سریع و مطمئن</span>
-                  </div>
-                </div>
+
 
               </div>
             </div>
@@ -225,7 +211,7 @@ const ProductDetailPage = () => {
                 <span className="text-2xl font-black tracking-tight text-emerald-400 leading-none">
                   {Number(pricing?.totalPrice || 0).toLocaleString()}
                 </span>
-                <span className="text-xs text-slate-400 font-bold">{globalText.currency || 'تومان'}</span>
+                <span className="text-xs text-slate-400 font-bold">{globalText.currency || 'IQD'}</span>
               </div>
             )}
           </div>
@@ -241,7 +227,7 @@ const ProductDetailPage = () => {
             ) : (
               <>
                 <ShoppingCart size={18} />
-                <span>{data?.has_price ? "افزودن به سبد" : "استعلام قیمت"}</span>
+                <span>{data?.has_price ? "زیاد کردن به سەبەتەی کڕین" : "استعلام قیمت"}</span>
               </>
             )}
           </button>
