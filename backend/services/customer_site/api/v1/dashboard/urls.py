@@ -25,6 +25,8 @@ from .views import (
     ArticleViewSet,
     ArticleCategoryViewSet,
     ProductSelectorViewSet,
+    ExpenseViewSet,
+    CombinedDashboardStatsView,
 )
 
 router = DefaultRouter()
@@ -48,6 +50,7 @@ router.register(r'blog-categories', ArticleCategoryViewSet, basename='dashboard-
 router.register(r'articles', ArticleViewSet, basename='dashboard-article')
 router.register(r'tutorials', TutorialViewSet, basename='dashboard-tutorial')
 router.register(r'products-minimal', ProductSelectorViewSet, basename='dashboard-product-minimal')
+router.register(r'expenses', ExpenseViewSet, basename='expense')
 
 app_name = "dashboard"
 
@@ -56,5 +59,6 @@ urlpatterns = [
     path("user-stats/", UserDashboardStatsView.as_view(), name="user-stats"),
     path("order-stats/", OrderDashboardStatsView.as_view(), name="order-stats"),
     path('stats/financial/', FinancialDashboardStatsView.as_view(), name='dashboard-financial-stats'),
+    path('stats/', CombinedDashboardStatsView.as_view(), name='dashboard-combined-stats'),
     path("", include(router.urls)),
 ]

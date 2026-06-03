@@ -2,7 +2,7 @@ from typing import Dict, Any
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
-from core.models import Product, Order, User, Invoice
+from core.models import Product, Order, User, Invoice, Expense, Invoice
 
 # ========== PRODUCT DASHBOARD SERVICE ========== #
 class ProductDashboardStateService:
@@ -227,4 +227,25 @@ class UserDashboardStateService:
                 "inactive": dashboard_stats['inactive']
             },
             "role_breakdown": formatted_role_breakdown
+        }
+
+# ========== EXPENSE SERVICE ========== #
+class CombinedDashboardStateService:
+    def get_combined_statistics(self) -> Dict[str, Any]:
+        return {
+            "products":  ProductDashboardStateService().get_product_statistics(),
+            "orders":    OrderDashboardStateService().get_order_statistics(),
+            "users":     UserDashboardStateService().get_user_statistics(),
+            "financial": FinancialDashboardStateService().get_financial_statistics(),
+            "expenses": {
+                "total_expenses":   Expense.objects.get_total_expenses(),
+                "daily_expenses":   Expense.objects.get_daily_expenses(),
+                "monthly_expenses": Expense.objects.get_monthly_expenses(),
+                "yearly_expenses":  Expense.objects.get_yearly_expenses(),
+            },
+            "profit": {
+                "daily_profit":   Invoice.objects.get_daily_profit(),
+                "monthly_profit": Invoice.objects.get_monthly_profit(),
+                "yearly_profit":  Invoice.objects.get_yearly_profit(),
+            }
         }

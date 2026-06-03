@@ -4,7 +4,8 @@ from django.conf import settings
 
 from .managers import (
     InvoiceManager,
-    QuotationManager
+    QuotationManager,
+    ExpenseManager
 )
 
 # ===== Invoice Model ===== #
@@ -137,3 +138,35 @@ class Quotation(models.Model):
         if self.valid_until and self.valid_until < timezone.now().date():
             return True
         return False
+
+# ===== Expense Model ===== #
+class Expense(models.Model):
+    """
+    مدل ثبت هزینه‌های سازمان.
+    می‌تواند به یک سفارش مرتبط باشد یا مستقل (هزینه‌های عمومی).
+    """
+    
+    order = models.ForeignKey(
+        'core.Order',
+        related_name='expenses',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name=_("سفارش مرتبط"),
+        help_text=_("در صورت خالی بودن، هزینه عمومی محسوب می‌شود")
+    )
+    name = models.CharField(_("عنوان هزینه"), max_length=255)
+    amount = models.DecimalField(_("مبلغ"), max_digits=18, decimal_places=0, default=0)
+    
+    created_at = models.DateTimeField(_("تاریخ ثبت"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("تاریخ به‌روزرسانی"), auto_now=True)
+    
+    objects = ExpenseManager()
+    
+    class Meta:
+        db_table = 'core_expenses'
+        verbose_name = _('هزینه')
+        verbose_name_plural = _('هزینه‌ها')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.amount:,} تومان"
