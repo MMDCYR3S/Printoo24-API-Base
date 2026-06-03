@@ -1440,3 +1440,5 @@ INFO 2026-06-03 08:20:15,240 user_detail_service 7 135518646068928 Fetching prof
 INFO 2026-06-03 08:51:11,606 user_detail_service 7 135518654461632 Fetching profile details for User ID: 1
 INFO 2026-06-03 09:03:14,560 user_detail_service 7 135518281144000 Fetching profile details for User ID: 1
 INFO 2026-06-03 14:27:27,411 user_detail_service 7 135518281144000 Fetching profile details for User ID: 1
+INFO 2026-06-03 19:07:24,975 user_detail_service 101 138022955759296 Fetching profile details for User ID: 1
+INFO 2026-06-03 19:15:51,902 user_detail_service 101 138022990378688 Fetching profile details for User ID: 1

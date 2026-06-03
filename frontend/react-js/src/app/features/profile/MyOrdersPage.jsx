@@ -62,6 +62,9 @@ const MyOrdersPage = () => {
           {orders.length} {pageText.profile.myOrdersPage.order}
         </span>
       </div>
+          <p className='text-slate-600'>
+          داواکارییەکەت لە ژێر پشکنینە. ئەگەر پەسەند بکرێت، لە ڕێگەی ژمارەی مۆبایلەکەتەوە ئاگادارت دەکەینەوە
+          </p>
 
       <div className="space-y-3">
         {orders.length === 0 ? (
