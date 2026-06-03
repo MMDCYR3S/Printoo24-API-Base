@@ -38,7 +38,7 @@ const QuotationPage = () => {
         </div>
         <h2 className="text-xl font-black text-slate-700">{pageText.order.quotationPage.notFound}</h2>
         <p className="text-slate-500 text-sm leading-relaxed">
-          {error?.response?.data?.detail || "ممکن است پیش‌فاکتور حذف شده باشد یا مشکلی در دریافت اطلاعات وجود داشته باشد."}
+          {error?.response?.data?.detail || "لەوانەیە پێشفاکتەرەکە سڕدرابێتەوە، یان کێشەیەک لە وەرگرتنی زانیارییەکاندا هەبێت."}
         </p>
         <Link to={`/profile/orders/${id}`} className="btn btn-primary rounded-xl px-8 shadow-lg shadow-primary/20 mt-4">
           {pageText.order.quotationPage.backToOrder}
