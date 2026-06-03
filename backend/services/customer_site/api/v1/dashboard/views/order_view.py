@@ -87,29 +87,60 @@ class OrderDashboardViewSet(viewsets.ViewSet):
     # ===== UPDATE DETAILS ===== #
     @extend_schema(
         summary="ویرایش مشخصات یا محصول سفارش",
-        description="""شما می‌تونید فقط آدرس رو ادیت کنید، یا اگه نیاز بود کل محصول و آپشن‌هاش رو عوض کنید.""",
+        description="""
+        تمام فیلدها اختیاری هستند و فقط آنچه ارسال شود آپدیت می‌شود.
+
+        **منطق قیمت:**
+        - `total_price_override` ارسال شد → قیمت دستی، محاسبه انجام نمی‌شود
+        - `total_price_override` نبود ولی `product_id` یا `selected_options` بود → محاسبه خودکار
+        """,
         request=OrderUpdateSerializer,
         responses={200: OrderDetailSerializer},
         examples=[
             OpenApiExample(
-                "ویرایش آدرس کاربر سیستمی",
+                "فقط ویرایش اطلاعات گیرنده",
                 value={
-                    "address_id": 7,
-                    "company_name": "شرکت جدید"
+                    "recipient_name": "رضا احمدی",
+                    "recipient_phone": "09120000000",
+                    "company_name": "شرکت نمونه"
                 },
                 request_only=True
             ),
             OpenApiExample(
-                "ویرایش اطلاعات مهمان + تغییر محصول",
+                "ویرایش آدرس سیستمی",
                 value={
-                    "recipient_name": "رضا احمدی",
-                    "recipient_phone": "09120000000",
-                    "full_address": "تهران - خیابان ولیعصر",
+                    "address_id": 7
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                "تغییر محصول و آپشن‌ها — قیمت خودکار",
+                value={
                     "product_id": 50,
                     "quantity": 2,
                     "selected_options": [
-                        {"field_id": 13, "choice_id": 25}
+                        {"field_id": 13, "choice_id": 25},
+                        {"field_id": 14, "choice_ids": [3, 5]},
+                        {"field_id": 15, "value": "A4"}
                     ]
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                "ست کردن قیمت دستی — بدون محاسبه مجدد",
+                value={
+                    "total_price_override": 850000
+                },
+                request_only=True
+            ),
+            OpenApiExample(
+                "تغییر آپشن‌ها + قیمت دستی — قیمت دستی اولویت دارد",
+                value={
+                    "product_id": 50,
+                    "selected_options": [
+                        {"field_id": 13, "choice_id": 26}
+                    ],
+                    "total_price_override": 950000
                 },
                 request_only=True
             ),
@@ -121,6 +152,8 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         try:
             order = self.service.update_order(pk, serializer.validated_data)
             return Response(OrderDetailSerializer(order).data)
+        except ValidationError as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -75,17 +75,20 @@ class UserDashboardStatsSerializer(serializers.Serializer):
 # ========= FINANCIAL SERIALIZERS ========== #
 class FinancialSummarySerializer(serializers.Serializer):
     total_revenue = serializers.IntegerField()
+    total_paid = serializers.IntegerField()
+    outstanding = serializers.IntegerField()
     revenue_this_month = serializers.IntegerField()
     revenue_last_month = serializers.IntegerField()
+    paid_this_month = serializers.IntegerField()
     revenue_growth = serializers.FloatField()
     revenue_status = serializers.CharField()
-    average_order_value = serializers.IntegerField()
+    average_invoice_value = serializers.IntegerField()
 
 class FinancialChartItemSerializer(serializers.Serializer):
     date = serializers.CharField(help_text="Format: YYYY-MM-DD")
     amount = serializers.IntegerField()
+    paid = serializers.IntegerField()
     order_count = serializers.IntegerField()
-
 class FinancialDashboardStatsSerializer(serializers.Serializer):
     summary = FinancialSummarySerializer()
     chart_data = FinancialChartItemSerializer(many=True, help_text="داده‌های ۳۰ روز گذشته برای نمودار")

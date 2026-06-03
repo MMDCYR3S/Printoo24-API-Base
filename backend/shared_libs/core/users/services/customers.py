@@ -78,30 +78,28 @@ class CustomerService:
 
     @transaction.atomic
     def update_customer(self, user_id: int, data: Dict[str, Any]) -> User:
-        """
-        ویرایش اطلاعات مشتری (شامل یوزر و پروفایل).
-        """
         user = self.get_customer_by_id_admin(user_id)
         profile = getattr(user, 'customer_profile', None)
-        
+
+        # ===== فیلدهای مورد نیاز جهت دریافت از api ===== #
+        if 'phone_number' in data:
+            user.phone_number = data['phone_number']
         if 'is_active' in data:
             user.is_active = data['is_active']
-            
-        if 'password' in data and data['password']:
+        if 'is_verified' in data:
+            user.is_verified = data['is_verified']
+        if data.get('password'):
             user.set_password(data['password'])
-            
         user.save()
 
-        # 2. آپدیت اطلاعات پروفایل
         if profile:
-            if 'first_name' in data: profile.first_name = data['first_name']
-            if 'last_name' in data: profile.last_name = data['last_name']
-            if 'phone_number' in data: profile.phone_number = data['phone_number']
-            if 'company' in data: profile.company = data['company']
-            if 'bio' in data: profile.bio = data['bio']
+            for field in ('first_name', 'last_name', 'company', 'bio'):
+                if field in data:
+                    setattr(profile, field, data[field])
             profile.save()
-        
+
         return user
+
 
     @transaction.atomic
     def delete_customer(self, user_id: int):

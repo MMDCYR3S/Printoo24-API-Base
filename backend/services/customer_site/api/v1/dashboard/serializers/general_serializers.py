@@ -291,7 +291,7 @@ class AddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Address
-        fields = ['id', 'province', 'province_name', 'city', 'city_name', 'postal_code', 'address']
+        fields = ['id', 'province', 'province_name', 'city', 'city_name', 'address']
         extra_kwargs = {
             'province': {'required': True},
             'city': {'required': True},
@@ -305,23 +305,14 @@ class AddressReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Address
-        fields = ['id', 'province', 'province_name', 'city', 'city_name', 'postal_code', 'address']
+        fields = ['id', 'province', 'province_name', 'city', 'city_name', 'address']
 
 class AddressWriteSerializer(serializers.Serializer):
     """ دریافت ورودی آدرس """
     id = serializers.IntegerField(required=False) # برای ویرایش
     province = serializers.PrimaryKeyRelatedField(queryset=Province.objects.all())
     city = serializers.PrimaryKeyRelatedField(queryset=City.objects.all())
-    
-    # اصلاح: اختیاری کردن کد پستی
-    postal_code = serializers.CharField(required=False, allow_blank=True, allow_null=True, max_length=10)
     address = serializers.CharField()
-
-    def validate_postal_code(self, value):
-        """ تبدیل رشته خالی به None """
-        if not value:
-            return None
-        return value
 
 # ===== CUSTOMER READ SERIALIZER ===== #
 class CustomerReadSerializer(serializers.ModelSerializer):
@@ -349,26 +340,33 @@ class CustomerReadSerializer(serializers.ModelSerializer):
 
 # ===== CUSTOMER WRITE SERIALIZER ===== # 
 class CustomerWriteSerializer(serializers.ModelSerializer):
-    """
-    مخصوص ایجاد و ویرایش.
-    """
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
     company = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     bio = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-
     addresses = AddressWriteSerializer(many=True, required=False)
 
     class Meta:
         model = User
         fields = [
-            'id', 'password', 'is_active', 
-            'first_name', 'last_name', 'phone_number', 'company', 'bio', 
+            'id', 'password', 'is_active',
+            'first_name', 'last_name', 'phone_number', 'company', 'bio',
             'addresses'
         ]
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
+            'phone_number': {'required': False},
         }
+
+    def validate_phone_number(self, value):
+        # در حالت update، instance وجود دارد
+        qs = User.objects.filter(phone_number=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("این شماره تماس قبلاً ثبت شده است.")
+        return value
+
 
 # ===== سریالایزر نمایش تراکنش‌ها ===== #
 class WalletTransactionSerializer(serializers.ModelSerializer):
