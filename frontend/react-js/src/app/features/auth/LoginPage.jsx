@@ -24,7 +24,7 @@ const LoginPage = () => {
       const refreshToken = data.tokens?.refresh;
 
       if (!accessToken) {
-        toast.error("خطا: توکن دریافت نشد!");
+        toast.error("خطا : داده ای از سمت سرور دریافت نشد");
         return;
       }
 
@@ -59,7 +59,7 @@ const LoginPage = () => {
       navigate(from, { replace: true });
     },
     onError: (error) => {
-      const message = error.response?.data?.detail || 'شماره تلفن یا رمز عبور اشتباه است';
+      const message = error.response?.data?.detail ;
       toast.error(message);
     }
   });
@@ -70,10 +70,12 @@ const LoginPage = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <h2 className="text-xl font-semibold text-center mb-4">ورود به حساب کاربری</h2>
+      <h2 className="text-xl font-semibold text-center mb-4"> ورود یا ثبت نام </h2>
+      <p className="text-sm text-base-content/70 mt-2"> از صحت شماره تلفن خود اطمینان حاصل کنید زیرا سفارشات شما از طریق شماره تلفن پیگیری خواهد شد </p>
+
       
       <div className="form-control">
-        <label className="label"><span className="label-text">شماره تلفن</span></label>
+        {/* <label className="label"><span className="label-text"> شماره تلفن </span></label> */}
         <input 
           type="text" 
           dir="ltr"
@@ -84,7 +86,7 @@ const LoginPage = () => {
         {errors.phone_number && <span className="text-error text-xs mt-1">{errors.phone_number.message}</span>}
       </div>
 
-      <div className="form-control">
+      {/* <div className="form-control">
         <label className="label"><span className="label-text">رمز عبور</span></label>
         <PasswordInput register={register} name="password" error={errors.password} />
         <label className="label">
@@ -92,7 +94,7 @@ const LoginPage = () => {
              رمز عبور را فراموش کردید؟
            </Link>
         </label>
-      </div>
+      </div> */}
 
       <button 
         type="submit" 
@@ -102,9 +104,6 @@ const LoginPage = () => {
         {loginMutation.isPending ? <span className="loading loading-spinner"></span> : 'ورود'}
       </button>
 
-      <div className="text-center mt-4 text-sm">
-        حساب کاربری ندارید؟ <Link to="/register" className="text-secondary font-bold hover:underline">ثبت نام کنید</Link>
-      </div>
     </form>
   );
 };

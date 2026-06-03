@@ -174,9 +174,9 @@
       "itemCountLabel": "ژمارەی بڕگەکان",
       "subtotalLabel": "کۆی گشتی",
       "totalPayableLabel": "بڕی پارەی پێویست بۆ دانەوه",
-      "currency": "تمەن",
+      "currency": "IQD",
       "noFileWarning": "تۆ بۆ {{count}} بەرهەم هیچ فایلێکت بار نەکردووە. دەتوانیت بەبێ فایل بەردەوام بیت و دواتر بینێریت.",
-      "checkoutBtn": "تەواوکردنی کڕین و پارەدان"
+      "checkoutBtn": "پشتڕاستکردنەوە"
     },
     "cartItem": {
       "productCode": "کۆد:",
@@ -188,7 +188,7 @@
       "manageFiles": "بەڕێوەبردن / زیادکردنی فایل",
       "uploadDesignOptional": "بارکردنی فایلی دیزاین (ئارەزوومەندانە)",
       "itemTotalPriceLabel": "نرخی گشتی بڕگە",
-      "currency": "تمەن",
+      "currency": "IQD",
       "deleteItemBtn": "سڕینەوەی بڕگە"
     }
   },
@@ -222,7 +222,7 @@
     "shippingCost": "تێچووی ناردن",
     "postPaid": "کرێ لە کاتی وەرگرتن",
     "payableAmount": "بڕی پارەی پێویست بۆ دانەوه",
-    "currency": "تمەن",
+    "currency": "IQD",
     "submitting": "لە تۆمارکردندایە...",
     "confirmAndPay": "پشتڕاستکردنەوە و پارەدان"
   },

@@ -209,7 +209,7 @@ const AddressPage = () => {
               </div>
 
               {/* کد پستی (از کامنت خارج شد چون الزامی است) */}
-              <div className="form-control">
+              {/* <div className="form-control">
                 <label className="label text-xs font-bold text-slate-600">
                   کد پستی
                   <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{pageText.profile.addressPage.onlyTen}</span>
@@ -226,7 +226,7 @@ const AddressPage = () => {
                   })} 
                 />
                 {errors.postal_code && <span className="text-error text-[10px] mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.postal_code.message}</span>}
-              </div>
+              </div> */}
 
               {/* آدرس دقیق */}
               <div className="form-control">

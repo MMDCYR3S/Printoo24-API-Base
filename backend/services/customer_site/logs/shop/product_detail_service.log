@@ -895,3 +895,12 @@ DEBUG 2026-06-01 11:31:27,599 product_detail_service 272 125068554442432 ShopPro
 DEBUG 2026-06-01 11:32:12,036 product_detail_service 272 125068527314624 ShopProductDetailService initialized
 DEBUG 2026-06-01 11:33:21,783 product_detail_service 272 125068527314624 ShopProductDetailService initialized
 >>>>>>> debf3403d6a239088024e2bb9f6b32ee2bac7f5a
+DEBUG 2026-06-02 20:40:09,800 product_detail_service 7 129908600731328 ShopProductDetailService initialized
+DEBUG 2026-06-02 20:40:36,520 product_detail_service 7 129908592338624 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:48:35,739 product_detail_service 7 135518654461632 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:48:41,970 product_detail_service 7 135518654461632 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:49:38,578 product_detail_service 7 135518281144000 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:50:49,004 product_detail_service 7 135518247573184 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:56:10,082 product_detail_service 7 135518255965888 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:56:17,111 product_detail_service 7 135518255965888 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:56:26,234 product_detail_service 7 135518255965888 ShopProductDetailService initialized
