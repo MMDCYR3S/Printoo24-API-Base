@@ -135,10 +135,10 @@ const OrderItemsList = ({ order }) => {
                    </div>
 
                    {/* باکس عملیات */}
-                   <div className="space-y-3">
+
+                   {/* <div className="space-y-3">
                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">عملیات</h4>
                      <div className="flex flex-col gap-2">
-                       {/* دکمه آپلود */}
                        <label className={`btn w-full rounded-xl h-11 min-h-[2.75rem] text-sm font-bold shadow-sm ${uploadingItemId === item.id ? 'btn-disabled bg-slate-100' : 'bg-primary hover:bg-primary-focus text-white border-0'}`}>
                          <input type="file" className="hidden" onChange={(e) => handleFileUpload(item.id, e)} disabled={uploadingItemId === item.id} />
                          {uploadingItemId === item.id ? (
@@ -147,16 +147,8 @@ const OrderItemsList = ({ order }) => {
                            <><Upload size={18} /> آپلود فایل طراحی</>
                          )}
                        </label>
-
-                       {/* دکمه حذف */}
-                       <button 
-                         onClick={() => handleDeleteItem(item.id)}
-                         className="btn w-full rounded-xl h-11 min-h-[2.75rem] bg-white border border-slate-200 text-error hover:bg-error hover:text-white hover:border-error transition-colors shadow-sm text-sm font-bold" 
-                       >
-                         <Trash2 size={18} /> حذف این ردیف
-                       </button>
                      </div>
-                   </div>
+                   </div> */}
 
                 </div>
               </div>
