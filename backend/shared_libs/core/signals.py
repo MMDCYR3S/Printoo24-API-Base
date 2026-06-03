@@ -8,7 +8,8 @@ from django.db import transaction
 from .models import(
     ProductCategoryRelation, Product,
     product_code_generator, OrderStateLog,
-    OrderStatusGroup, Role, Order, UserRole, User
+    OrderStatusGroup, Role, Order, UserRole,
+    User, Quotation
 )
 
 logger = logging.getLogger(__name__)
@@ -119,35 +120,6 @@ def log_order_state_change(sender, instance, created, **kwargs):
         else:
             pass
 
-# ========== CREATE QUOTAION FOR EVERY ORDER ========== #
-# @receiver(post_save, sender=Order, dispatch_uid="unique_quotation_for_order_creation")
-# def create_quotation_for_new_order(sender, instance, created, **kwargs):
-#     if created:
-#         with transaction.atomic():
-            
-#             if Quotation.objects.filter(converted_order=instance).exists():
-#                 return
-            
-#             # ===== ایجاد کد پیش‌فاکتور ===== #
-#             if instance.order_code:
-#                 q_number = f"QTE-{instance.order_code}"
-#             else:
-#                 q_number = f"QTE-{uuid.uuid4().hex[:8].upper()}"
-            
-#             # ===== استخراج نام کاربر ===== #
-#             customer_name = instance.recipient_name
-#             if not customer_name and getattr(instance, 'user', None):
-#                 customer_name = instance.user.get_full_name() or instance.user.phone_number
-            
-#             # ===== ایجاد پیش‌فاکتور ===== #
-#             Quotation.objects.create(
-#                 quotation_number=q_number,
-#                 created_by=instance.user if hasattr(instance, 'user') else None,
-#                 converted_order=instance,
-#                 customer_name=customer_name,
-#                 total_price=instance.total_price,
-#             )
-
 # ===== سیگنال تخصیص نقش پیش‌فرض (مشتری) به کاربر جدید ===== #
 @receiver(post_save, sender=User, dispatch_uid="assign_customer_role_on_new_user")
 def assign_default_role_to_new_user(sender, instance, created, **kwargs):
@@ -186,3 +158,53 @@ def assign_default_role_to_new_user(sender, instance, created, **kwargs):
             except Exception as e:
                 # ===== لاگ کردن خطا در صورت بروز مشکل سیستمی ===== #
                 logger.error(f"خطا در تخصیص نقش مشتری به کاربر {instance.phone_number}: {str(e)}")
+
+# ===== SYNC ORDER TOTAL PRICE TO QUOTATION (PRE-SAVE) ===== #
+@receiver(pre_save, sender=Order)
+def capture_old_total_price(sender, instance, **kwargs):
+    """
+    قبل از ذخیره، مبلغ کل فعلی دیتابیس را نگه می‌داریم
+    تا در post_save بتوانیم تغییر را تشخیص دهیم.
+    """
+    if instance.pk:
+        try:
+            old_obj = Order.objects.get(pk=instance.pk)
+            instance._old_total_price = old_obj.total_price
+        except Order.DoesNotExist:
+            instance._old_total_price = None
+    else:
+        instance._old_total_price = None
+
+
+# ===== SYNC ORDER TOTAL PRICE TO QUOTATION (POST-SAVE) ===== #
+@receiver(post_save, sender=Order, dispatch_uid="sync_order_price_to_quotation")
+def sync_total_price_to_quotation(sender, instance, created, **kwargs):
+    """
+    اگر ادمین مبلغ کل سفارش را تغییر داد، پیش‌فاکتور مرتبط هم آپدیت می‌شود.
+    فقط روی سفارش‌هایی که قبلاً ساخته شده‌اند اجرا می‌شود (not created).
+    """
+    if created:
+        return
+
+    old_price = getattr(instance, '_old_total_price', None)
+
+    # اگر قیمت تغییر نکرده، کاری نکن
+    if old_price is None or old_price == instance.total_price:
+        return
+
+    try:
+        quotation = instance.origin_quotation  # related_name روی Quotation
+        if quotation:
+            Quotation.objects.filter(pk=quotation.pk).update(
+                total_price=instance.total_price
+            )
+            logger.info(
+                f"Quotation #{quotation.quotation_number} total_price synced "
+                f"from {old_price} to {instance.total_price} "
+                f"(Order: {instance.order_code})"
+            )
+    except Quotation.DoesNotExist:
+        # سفارش پیش‌فاکتور ندارد، نرمال است
+        pass
+    except Exception as e:
+        logger.error(f"Error syncing price to quotation for Order {instance.pk}: {e}")

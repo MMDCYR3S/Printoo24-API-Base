@@ -193,8 +193,6 @@ class Order(models.Model):
     
     class Meta:
         ordering = ['-created_at']
-        # verbose_name = _('سفارش')
-        # verbose_name_plural = _('سفارشات')
 
     def save(self, *args, **kwargs):
         if not self.current_status:

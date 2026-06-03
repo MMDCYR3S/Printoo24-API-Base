@@ -124,13 +124,20 @@ class ProductListSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug', 'price', 'show_price', 'has_price', 'category', 'thumbnail', 'detail_url']
 
     def get_category(self, obj):
-        assigned_cat = obj.categories.first()
-        if not assigned_cat:
-            return {"parent_category": None, "children_category": None}
+        assigned_cats = obj.categories.select_related("parent").all()
 
+        subcategory = next((c for c in assigned_cats if c.parent is not None), None)
+        
+        if subcategory:
+            return {
+                "parent_category": subcategory.parent.name,
+                "children_category": subcategory.name
+            }
+
+        root_cat = next((c for c in assigned_cats if c.parent is None), None)
         return {
-            "parent_category": assigned_cat.parent.name if assigned_cat.parent else assigned_cat.name,
-            "children_category": assigned_cat.name
+            "parent_category": root_cat.name if root_cat else None,
+            "children_category": None
         }
 
     def get_thumbnail(self, obj):
@@ -217,13 +224,13 @@ class ProductFeedbackStatsSerializer(serializers.Serializer):
 # ==========================================
 
 class ProductSummarySerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug', 'price', 'image']
+        fields = ['id', 'name', 'slug', 'price', 'thumbnail']
 
-    def get_image(self, obj):
+    def get_thumbnail(self, obj):
         first_image = obj.product_image.first()
         if first_image and first_image.image:
             request = self.context.get('request')

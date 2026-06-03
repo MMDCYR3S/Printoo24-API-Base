@@ -165,78 +165,98 @@ class OrderService:
     def update_order_details(self, order_id: int, update_data: Dict[str, Any]) -> Order:
         """
         ویرایش سفارش موجود.
+
+        منطق قیمت:
+        - total_price ارسال شد → قیمت دستی، calculate اجرا نمی‌شه
+        - total_price نبود ولی product_id یا selected_options بود → calculate_price
         """
         order = self.get_order_by_id(order_id)
 
-        # ویرایش اطلاعات پایه
-        basic_fields = ['recipient_name', 'recipient_phone', 'full_address', 'company_name']
-        for field in basic_fields:
+        # ===== ۱. فیلدهای پایه‌ی Order ===== #
+        order_basic_fields = ['recipient_name', 'recipient_phone', 'full_address', 'company_name']
+        for field in order_basic_fields:
             if field in update_data:
                 setattr(order, field, update_data[field])
 
         if 'address_id' in update_data:
             order.address_id = update_data['address_id']
 
-        # ویرایش محصول و مشخصات
-        if 'product_id' in update_data:
-            product_id = update_data['product_id']
-            quantity = update_data.get('quantity', 1)
-            selected_options = update_data.get('selected_options', [])
+        # ===== ۲. تشخیص نوع آپدیت ===== #
+        has_product          = 'product_id' in update_data
+        has_options          = 'selected_options' in update_data
+        has_price_override   = (
+            'total_price' in update_data
+            and update_data['total_price'] is not None
+        )
 
-            try:
-                product = Product.objects.prefetch_related(
-                    'fields__field_dict',
-                    'fields__choices'
-                ).get(id=product_id)
-            except ObjectDoesNotExist:
-                raise ValidationError(f"محصولی با شناسه {product_id} یافت نشد.")
-    
-            user_selections = {}
-            for opt in selected_options:
-                fid = str(opt['field_id'])
-                if 'choice_id' in opt and opt['choice_id'] is not None:
-                    user_selections[fid] = opt['choice_id']
-                elif 'choice_ids' in opt and opt['choice_ids']:
-                    user_selections[fid] = opt['choice_ids']
-                elif 'value' in opt and opt['value'] is not None:
-                    user_selections[fid] = opt['value']
-                print(opt)
+        if has_product or has_options or has_price_override:
 
-            print(selected_options)
-
-            calculated_price, configuration = ProductPricingDomainService.calculate_final_price(
-                product_id=product_id,
-                user_selections=user_selections,
-                strict_validation=False
-            )
-            print(configuration)
-            print(calculated_price)
-
-            # آپدیت آیتم موجود
             order_item = order.order_item_order.first()
-            if order_item:
-                order_item.product = product
-                order_item.quantity = quantity
-                order_item.price = calculated_price
-                order_item.items = configuration
-                order_item.name = product.name
-                order_item.description = product.description
-                order_item.save()
+
+            # ===== ۳. محصول ===== #
+            if has_product:
+                product_id = update_data['product_id']
+                try:
+                    product = Product.objects.prefetch_related(
+                        'fields__field_dict',
+                        'fields__choices'
+                    ).get(id=product_id)
+                except ObjectDoesNotExist:
+                    raise ValidationError(f"محصولی با شناسه {product_id} یافت نشد.")
             else:
-                OrderItem.objects.create(
-                    order=order,
-                    product=product,
-                    quantity=quantity,
-                    price=calculated_price,
-                    items=configuration,
-                    name=product.name,
-                    description=product.description,
-                    status='approved'
+                product = order_item.product if order_item else None
+
+            # ===== ۴. تعیین قیمت نهایی ===== #
+            if has_price_override:
+                # قیمت دستی → اولویت مطلق، حتی اگه آپشن‌ها هم عوض شدن
+                final_price   = update_data['total_price']
+                configuration = order_item.items if order_item else None
+            else:
+                # قیمت خودکار از calculate
+                selected_options = update_data.get('selected_options', [])
+                user_selections  = {}
+                for opt in selected_options:
+                    fid = str(opt['field_id'])
+                    if opt.get('choice_id') is not None:
+                        user_selections[fid] = opt['choice_id']
+                    elif opt.get('choice_ids'):
+                        user_selections[fid] = opt['choice_ids']
+                    elif opt.get('value') is not None:
+                        user_selections[fid] = opt['value']
+
+                final_price, configuration = ProductPricingDomainService.calculate_final_price(
+                    product_id=product.id,
+                    user_selections=user_selections,
+                    strict_validation=False
                 )
 
-            order.base_products_price = calculated_price
-            
-            order.total_price = calculated_price
+            quantity = update_data.get('quantity', order_item.quantity if order_item else 1)
+
+            # ===== ۵. ذخیره‌ی OrderItem ===== #
+            if order_item:
+                order_item.quantity = quantity
+                order_item.price    = final_price
+                order_item.items    = configuration
+                if has_product and product:
+                    order_item.product = product
+                    order_item.name    = product.name
+                order_item.save()
+            else:
+                if not product:
+                    raise ValidationError("برای ایجاد آیتم جدید، product_id الزامی است.")
+                OrderItem.objects.create(
+                    order    = order,
+                    product  = product,
+                    quantity = quantity,
+                    price    = final_price,
+                    items    = configuration,
+                    name     = product.name,
+                    status   = 'approved',
+                )
+
+            # ===== ۶. آپدیت قیمت‌های Order ===== #
+            order.base_products_price = final_price
+            order.total_price         = final_price
 
         order.save()
         return order

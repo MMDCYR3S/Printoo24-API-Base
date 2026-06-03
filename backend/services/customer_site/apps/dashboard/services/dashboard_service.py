@@ -2,7 +2,7 @@ from typing import Dict, Any
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
-from core.models import Product, Order, User
+from core.models import Product, Order, User, Invoice
 
 # ========== PRODUCT DASHBOARD SERVICE ========== #
 class ProductDashboardStateService:
@@ -118,10 +118,6 @@ class OrderDashboardStateService:
 
 # ========== FINANCIAL DASHBOARD SERVICE ========== #
 class FinancialDashboardStateService:
-    """
-    سرویس داشبورد مالی.
-    مستقیماً از OrderManager استفاده می‌کند (چون آمار مالی در OrderManager است).
-    """
 
     def _calculate_percentage_change(self, current: int, previous: int) -> float:
         if previous == 0:
@@ -131,27 +127,29 @@ class FinancialDashboardStateService:
 
     def get_financial_statistics(self) -> Dict[str, Any]:
         now = timezone.now()
-        
+
         start_of_current_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         start_of_last_month = start_of_current_month - relativedelta(months=1)
         end_of_last_month = start_of_current_month - relativedelta(seconds=1)
 
-        # ===== دریافت اطلاعات از OrderManager ===== #
-        total_revenue = Order.objects.get_total_revenue()
-        avg_order_value = Order.objects.get_average_order_value()
-        
-        revenue_this_month = Order.objects.get_revenue_by_date_range(start_of_current_month, now)
-        revenue_last_month = Order.objects.get_revenue_by_date_range(start_of_last_month, end_of_last_month)
+        # ===== همه داده‌های مالی از Invoice میان، نه Order ===== #
+        total_revenue       = Invoice.objects.get_total_revenue()
+        total_paid          = Invoice.objects.get_total_paid()
+        avg_invoice_value   = Invoice.objects.get_average_invoice_value()
+
+        revenue_this_month  = Invoice.objects.get_revenue_by_date_range(start_of_current_month, now)
+        revenue_last_month  = Invoice.objects.get_revenue_by_date_range(start_of_last_month, end_of_last_month)
+        paid_this_month     = Invoice.objects.get_paid_by_date_range(start_of_current_month, now)
 
         revenue_growth = self._calculate_percentage_change(revenue_this_month, revenue_last_month)
 
-        # دریافت نمودار
-        raw_chart_data = Order.objects.get_daily_revenue_chart_data(days=30)
-        
+        # ===== نمودار روزانه ===== #
+        raw_chart_data = Invoice.objects.get_daily_revenue_chart_data(days=30)
         formatted_chart_data = [
             {
-                "date": item['date'].strftime('%Y-%m-%d'),
-                "amount": item['total'],
+                "date":        item['date'].strftime('%Y-%m-%d'),
+                "amount":      item['total'],
+                "paid":        item['paid'],
                 "order_count": item['count']
             }
             for item in raw_chart_data
@@ -159,12 +157,15 @@ class FinancialDashboardStateService:
 
         return {
             "summary": {
-                "total_revenue": total_revenue,
-                "revenue_this_month": revenue_this_month,
-                "revenue_last_month": revenue_last_month,
-                "revenue_growth": revenue_growth,
-                "revenue_status": "positive" if revenue_growth >= 0 else "negative",
-                "average_order_value": avg_order_value
+                "total_revenue":       total_revenue,
+                "total_paid":          total_paid,
+                "outstanding":         total_revenue - total_paid,
+                "revenue_this_month":  revenue_this_month,
+                "revenue_last_month":  revenue_last_month,
+                "paid_this_month":     paid_this_month,
+                "revenue_growth":      revenue_growth,
+                "revenue_status":      "positive" if revenue_growth >= 0 else "negative",
+                "average_invoice_value": avg_invoice_value
             },
             "chart_data": formatted_chart_data
         }

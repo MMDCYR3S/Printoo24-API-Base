@@ -88,10 +88,9 @@ class OrderUpdateSerializer(serializers.Serializer):
     company_name = serializers.CharField(max_length=150, required=False, allow_null=True)
     full_address = serializers.CharField(required=False, allow_null=True)
     address_id = serializers.IntegerField(required=False, allow_null=True)
-    total_price_override = serializers.DecimalField(max_digits=18, decimal_places=0, required=False, allow_null=True)
+    total_price = serializers.DecimalField(max_digits=18, decimal_places=0, required=False, allow_null=True)
     product_id = serializers.IntegerField(required=False)
     quantity = serializers.IntegerField(required=False, default=1)
-    has_design = serializers.BooleanField(required=False, default=True)
     selected_options = SelectedOptionInputSerializer(many=True, required=False, default=list)
 
 class ChangeStatusSerializer(serializers.Serializer):
@@ -118,4 +117,4 @@ class UserAddressSerializer(serializers.ModelSerializer):
     city_name = serializers.CharField(source="city.name", read_only=True, default=None)
     class Meta:
         model = Address
-        fields = ['id', 'address', 'province', 'province_name', 'city', 'city_name', 'postal_code'] 
+        fields = ['id', 'address', 'province', 'province_name', 'city', 'city_name'] 

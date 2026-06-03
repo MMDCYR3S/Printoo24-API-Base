@@ -135,8 +135,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_address(self, obj):
         if obj.address:
-            return f"{obj.address.province} - {obj.address.city} - {obj.address.postal_code} - {obj.address.address}" 
-        return self.full_address
+            return f"{obj.address.province} - {obj.address.city} - {obj.address.address}" 
+        return obj.full_address
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

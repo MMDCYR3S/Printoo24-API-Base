@@ -51,7 +51,7 @@ class ProductListView(ListAPIView):
         queryset = queryset.prefetch_related(
             'categories',
             'product_image'
-        )
+        ).order_by("-created_at")
 
         return queryset
 

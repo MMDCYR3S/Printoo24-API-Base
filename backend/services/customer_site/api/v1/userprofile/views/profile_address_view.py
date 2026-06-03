@@ -36,7 +36,6 @@ class UserAddressListCreateAPIView(GenericAPIView):
                         "province_detail": {"id": 8, "name": "تهران", "slug": "tehran"},
                         "city_detail": {"id": 120, "name": "تهران", "slug": "tehran"},
                         "address": "خیابان آزادی، کوچه مهر، پلاک ۱۰",
-                        "postal_code": "1345678901",
                         "created_at": "2023-12-01T10:00:00Z"
                     }
                 ]
@@ -54,7 +53,6 @@ class UserAddressListCreateAPIView(GenericAPIView):
         description="""
         **نکات مهم:**
         * `province_id` و `city_id` باید شناسه معتبر از دیتابیس باشند.
-        * `postal_code` باید دقیقا ۱۰ رقم باشد.
         """,
         request=AddressSerializer,
         responses={201: AddressSerializer},
@@ -66,7 +64,6 @@ class UserAddressListCreateAPIView(GenericAPIView):
                 value={
                     "province_id": 1,
                     "city_id": 12,
-                    "postal_code": "1999999999",
                     "address": "تهران، میدان ونک، خیابان ملاصدرا، پلاک ۱"
                 },
                 request_only=True,
@@ -85,7 +82,6 @@ class UserAddressListCreateAPIView(GenericAPIView):
                 'province_id': validated_data['province'].id,
                 'city_id': validated_data['city'].id,
                 'address': validated_data['address'],
-                'postal_code': validated_data['postal_code']
             }
             new_address = self.service.add_address(request.user.id, service_data)
             return Response(AddressSerializer(new_address).data, status=status.HTTP_201_CREATED)
@@ -123,8 +119,6 @@ class UserAddressDetailAPIView(GenericAPIView):
         if 'province' in data: service_payload['province_id'] = data['province'].id
         if 'city' in data: service_payload['city_id'] = data['city'].id
         if 'address' in data: service_payload['address'] = data['address']
-        if 'postal_code' in data: service_payload['postal_code'] = data['postal_code']
-
         try:
             updated_address = self.service.edit_address(request.user.id, address_id, service_payload)
             return Response(AddressSerializer(updated_address).data)

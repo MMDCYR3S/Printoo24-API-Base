@@ -27,19 +27,17 @@ class CreateOrderFromCartService:
             province = address_obj.province.name
             city = address_obj.city.name
             addr_text = address_obj.address
-            postal = address_obj.postal_code
         else:
             # ===== اگر اطلاعات به صورت دستی بود ===== #
             province = data.get('province_name')
             city = data.get('city_name')
             addr_text = data.get('address_text')
-            postal = data.get('postal_code', '---')
         
         # ===== اعتبارسنجی وجود اطلاعات ===== #
         if not (province and city and addr_text):
             raise ValidationError(msg_provider.get("order.E7001"))
 
-        return f"{province} - {city} - {addr_text} - کدپستی: {postal}"
+        return f"{province} - {city} - {addr_text}"
     
     def _handle_address_logic(self, user: User, data: dict) -> Address:
         """
@@ -59,7 +57,6 @@ class CreateOrderFromCartService:
         # ===== دریافت اطلاعات کاربر ===== #
         province_id = data.get('province_id')
         city_id = data.get('city_id')
-        postal_code = data.get('postal_code', '')
         address_text = data.get('address_text')
 
         if not (province_id and city_id and address_text):
@@ -71,7 +68,6 @@ class CreateOrderFromCartService:
             province_id=province_id,
             city_id=city_id,
             address=address_text,
-            postal_code=postal_code
         ).first()
 
         if existing_address:
@@ -83,7 +79,6 @@ class CreateOrderFromCartService:
             province_id=province_id,
             city_id=city_id,
             address=address_text,
-            postal_code=postal_code
         )
         return new_address
 
