@@ -32,6 +32,7 @@ import { useSearch } from '../hooks/useSearch';
 import SearchOverlay from './SearchOverlay';
 
 import { useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 /* ─────────────────────────────────────────────
    Header — نوار بالای صفحه
    ───────────────────────────────────────────── */
@@ -45,6 +46,11 @@ const Header = ({ onOpenDrawer }) => {
   const searchInputRef = useRef(null);
 
   const { results, loading, hasMore, loadMore } = useSearch(searchQuery);
+
+  console.log(logo); // ببین تو کنسول چی نشون میده
+  
+  // اگه undefined بود، مسیر اشتباهه
+  // اگه یه رشته بود، ببین مسیرش چیه
 
 
 const navigate = useNavigate();
@@ -138,12 +144,14 @@ const navigate = useNavigate();
             </button>
 
             <Link to="/" className="flex items-center group gap-0.5">
-              <span className="text-[26px] md:text-3xl font-black text-slate-800 tracking-tighter transition-colors group-hover:text-slate-900">
-                
-              </span>
-              <span className="text-[26px] md:text-3xl font-black bg-radial from-primary drop-shadow-primary/50 drop-shadow-lg to-secondary bg-clip-text text-transparent">
-                Printoo24
-              </span>
+
+              <img
+                src={ logo } alt
+                className="
+                  w-40
+                "
+              />
+
             </Link>
           </div>
 

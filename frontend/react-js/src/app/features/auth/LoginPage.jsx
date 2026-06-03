@@ -24,7 +24,7 @@ const LoginPage = () => {
       const refreshToken = data.tokens?.refresh;
 
       if (!accessToken) {
-        toast.error("خطا : داده ای از سمت سرور دریافت نشد");
+        toast.error(" هەڵەیەک ڕوویدا، تکایە دووبارە هەوڵ بدەرەوە ");
         return;
       }
 
@@ -49,7 +49,7 @@ const LoginPage = () => {
       }
 
       // 🛑 راهکار قطعی رفع مشکل محو نشدن Toast
-      const toastId = toast.success('ورود موفقیت‌آمیز');
+      const toastId = toast.success(' بە سەرکەوتوویی چوویتە ژوورەوە ');
       
       setTimeout(() => {
         toast.dismiss(toastId); // بستن اجباری و هدفمند همین پیام
@@ -70,8 +70,8 @@ const LoginPage = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <h2 className="text-xl font-semibold text-center mb-4"> ورود یا ثبت نام </h2>
-      <p className="text-sm text-base-content/70 mt-2"> از صحت شماره تلفن خود اطمینان حاصل کنید زیرا سفارشات شما از طریق شماره تلفن پیگیری خواهد شد </p>
+      <h2 className="text-xl font-semibold text-center mb-4"> چوونەژوورەوە / تۆمارکردن </h2>
+      <p className="text-sm text-base-content/70 mt-2"> دڵنیابە لە دروستی ژمارەی مۆبایلەکەت، چونکە هەموو زانیارییەکانی داواکاریەکانت لە ڕێگەی ئەم ژمارەیە دەگەیەنرێت </p>
 
       
       <div className="form-control">
@@ -86,22 +86,21 @@ const LoginPage = () => {
         {errors.phone_number && <span className="text-error text-xs mt-1">{errors.phone_number.message}</span>}
       </div>
 
-      {/* <div className="form-control">
-        <label className="label"><span className="label-text">رمز عبور</span></label>
+      <div className="form-control">
+        <label className="label"><span className="label-text"> وشەی نهێنی </span></label>
         <PasswordInput register={register} name="password" error={errors.password} />
         <label className="label">
            <Link to="/forgot-password" className="label-text-alt link link-hover text-primary">
-             رمز عبور را فراموش کردید؟
            </Link>
         </label>
-      </div> */}
+      </div>
 
       <button 
         type="submit" 
         className="btn btn-primary w-full mt-4"
         disabled={loginMutation.isPending}
       >
-        {loginMutation.isPending ? <span className="loading loading-spinner"></span> : 'ورود'}
+        {loginMutation.isPending ? <span className="loading loading-spinner"></span> : 'چوونەژوورەوە'}
       </button>
 
     </form>

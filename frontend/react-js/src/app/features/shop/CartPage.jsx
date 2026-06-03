@@ -353,7 +353,7 @@ const EmptyCart = () => (
         {pageText.cart.cartPage.emptyCartTitle}
       </h1>
       <p className="text-sm text-slate-400 font-medium mb-6 max-w-xs">
-        هنوز محصولی به سبد خریدتون اضافه نکردید
+      هێشتا هیچ بەرهەمێکت بۆ سەبەتەکە زیاد نەکردووە
       </p>
       <Link
         to="/shop"
