@@ -18,13 +18,16 @@ const baseLogos = [
   logo7, logo8, logo9, logo10, logo11, logo12
 ];
 
-// همان لیست ۱۲۰ تایی هاردکد شده
-const allLogos = Array(10).fill(baseLogos).flat();
+const allLogos = Array(30).fill(baseLogos).flat();
 
 const LogoMarquee = () => {
+
+
   return (
     <div className="marquee-wrapper">
-      {/* اسلایدر اول: حرکت به سمت چپ (عادی) */}
+  <h2 className="text-2xl mx-auto mb-8 mt-8 font-extrabold text-slate-600">
+  کڕیار و کۆمپانیاکان کە متمانەیان پێ کردووین
+</h2>
       <div className="marquee-container" dir="ltr">
         <div className="marquee-track forward">
           {allLogos.map((logo, index) => (
@@ -38,7 +41,6 @@ const LogoMarquee = () => {
         </div>
       </div>
 
-      {/* اسلایدر دوم: حرکت به سمت راست (معکوس) */}
       <div className="marquee-container" dir="ltr">
         <div className="marquee-track reverse">
           {allLogos.map((logo, index) => (

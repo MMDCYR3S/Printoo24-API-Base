@@ -410,10 +410,7 @@ const FAQSection = () => {
     <section className="container mx-auto px-4 py-12">
       {/* هدر */}
       <AnimatedSection className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-primary/8 text-primary px-4 py-1.5 rounded-full text-xs font-bold mb-4">
-          <MessageCircleQuestion size={14} />
-          پرسیارە باوەکان 
-        </div>
+
         <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">
           {pageText.home.faqTitle}
         </h2>

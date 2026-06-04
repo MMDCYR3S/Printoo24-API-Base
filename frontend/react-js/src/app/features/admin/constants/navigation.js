@@ -43,6 +43,7 @@ export const ADMIN_NAVIGATION = [
     children: [
       { title: 'لیست سفارشات', path: '/admin/orders', icon: List },
       { title: 'ثبت سفارش دستی', path: '/admin/orders/create', icon: FilePlus },
+      { title: 'هزینه ها', path: '/admin/expense', icon: FilePlus },
     ]
   },
     {

@@ -6,7 +6,7 @@ import globalText from '../../lang/global.json';
 
 const ProductCard = ({ product }) => {
   // استفاده از show_price و فرمت کردن آن
-  const formattedPrice = new Intl.NumberFormat('fa-IR').format(parseFloat(product.show_price) || 0);
+  const formattedPrice = new Intl.NumberFormat('en').format(parseFloat(product.show_price) || 0);
 
   // استخراج نام دسته‌ها با هندل کردن حالت‌های null به صورت ایمن
   const parentCategory = product.category?.parent_category || 'بدون دسته‌بندی';
@@ -74,7 +74,7 @@ const ProductCard = ({ product }) => {
           {product.has_price ? (
             <div className="flex items-center text-emerald-600 gap-1">
               <span className="text-lg font-black tracking-tight">{formattedPrice}</span>
-              <span className="text-[10px] font-bold opacity-80 pt-1">{globalText.currency || 'تومان'}</span>
+              <span className="text-[10px] font-bold opacity-80 pt-1">{globalText.currency || 'IQD'}</span>
             </div>
           ) : (
             <div className="w-full flex items-center justify-center gap-1.5 bg-amber-50 text-amber-600 rounded-xl py-2 px-3 border border-amber-100">
