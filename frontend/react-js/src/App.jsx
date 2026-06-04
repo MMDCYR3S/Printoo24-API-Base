@@ -64,6 +64,7 @@ import CategoryDetailPage from './app/features/admin/features/categories/Categor
 import OrderCreatePage from './app/features/admin/features/orders/OrderCreatePage';
 import AdminOrderListPage from './app/features/admin/features/orders/OrderListPage';
 import AdminOrderDetailsPage from './app/features/admin/features/orders/OrderDetailsPage';
+import Expense from './app/features/admin/features/expense/expense';
 
 // Admin > Users & Locations
 import UserListPage from './app/features/admin/features/users/UsersListPage';
@@ -146,6 +147,7 @@ function App() {
                   <Route path="create" element={<OrderCreatePage />} />
                   <Route path=":id" element={<AdminOrderDetailsPage />} />
                 </Route>
+                <Route path="expense/" element={<Expense />} />
 
                 {/* Users & Locations */}
                 <Route path="users" element={<UserListPage />} />
