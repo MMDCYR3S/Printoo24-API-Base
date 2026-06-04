@@ -780,3 +780,5 @@ INFO 2026-06-03 20:00:24,853 cart_item_service 101 138022990378688 Fetching cart
 INFO 2026-06-03 20:03:47,685 cart_item_service 101 138022598211264 Fetching cart list for User:1
 INFO 2026-06-03 20:07:52,442 cart_item_service 101 138022990378688 Fetching cart list for User:1
 INFO 2026-06-03 20:09:52,282 cart_item_service 101 138022598211264 Fetching cart list for User:1
+INFO 2026-06-04 12:49:07,799 cart_item_service 7 139458301302464 Fetching cart list for User:1
+INFO 2026-06-04 12:50:31,504 cart_item_service 7 139457922594496 Fetching cart list for User:1
