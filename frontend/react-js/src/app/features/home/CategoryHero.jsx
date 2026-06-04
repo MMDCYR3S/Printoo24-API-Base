@@ -1,367 +1,374 @@
-// src/app/features/home/CategoryHero.jsx
-import { useState, useEffect, memo, useCallback } from 'react';
+// src/app/components/layout/MegaMenu.jsx
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { FreeMode } from 'swiper/modules';
-import { ChevronDown, Sparkles, LayoutGrid, Tag, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import 'swiper/css';
-import 'swiper/css/free-mode';
-
+import { ChevronLeft, ArrowLeft, Image as ImageIcon, Layers } from 'lucide-react';
 import { categoryService } from '../../services/categoryService';
-import ProductCard from '../../components/product/ProductCard';
+import pageText from '../../lang/pages.json';
 
 /* ─────────────────────────────────────────────
-   Staggered fade-in variants for child items
+   انیمیشن‌های stagger برای آیتم‌های گرید
    ───────────────────────────────────────────── */
-const staggerContainer = {
+const gridContainer = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.06, delayChildren: 0.1 },
+    transition: { staggerChildren: 0.025, delayChildren: 0.05 },
   },
 };
 
-const staggerItem = {
-  hidden: { opacity: 0, y: 14, scale: 0.95 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 260, damping: 24 } },
+const gridItem = {
+  hidden: { opacity: 0, y: 10, scale: 0.96 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 300, damping: 26 },
+  },
+};
+
+const sidebarItem = {
+  hidden: { opacity: 0, x: 12 },
+  show: { opacity: 1, x: 0 },
+};
+
+const sidebarContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.03, delayChildren: 0.08 },
+  },
 };
 
 /* ─────────────────────────────────────────────
-   CategoryItem — single accordion card
+   LazyImage — با shimmer، fade-in، و cache-hit
+   (همان پترن CategoryHero)
    ───────────────────────────────────────────── */
-const CategoryItem = memo(({ category, isOpen, onToggle, index }) => {
-  const { category_info, sub_categories, products } = category;
-  const [showContent, setShowContent] = useState(false);
+const LazyImage = memo(({ src, alt, className, priority = false, onError }) => {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const imgRef = useRef(null);
 
+  // تصویر از cache — load event fire نمی‌شه
   useEffect(() => {
-    let timer;
-    if (isOpen && !showContent) {
-      timer = setTimeout(() => setShowContent(true), 320);
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+      setLoaded(true);
     }
-    if (!isOpen) setShowContent(false);
-    return () => clearTimeout(timer);
-  }, [isOpen, showContent]);
+  }, []);
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.07, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className={`
-        relative rounded-[20px] overflow-hidden transition-all duration-500
-        ${isOpen
-          ? 'shadow-[0_8px_40px_-8px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.04]'
-          : 'shadow-sm ring-1 ring-black/[0.06] hover:shadow-md hover:ring-black/[0.08]'
-        }
-      `}
-    >
-      {/* ── Header / Toggle ── */}
-      <button
-        onClick={() => onToggle(category_info.id)}
-        aria-expanded={isOpen}
-        className={`
-          relative w-full cursor-pointer flex items-center gap-4 px-4 md:px-6
-          h-[68px] md:h-[76px] select-none overflow-hidden
-          transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
-          ${isOpen ? 'rounded-t-[20px]' : 'rounded-[20px]'}
-        `}
-      >
-        {/* Background layer */}
-        <div className="absolute inset-0 z-0">
-          <div className={`absolute inset-0 transition-colors duration-500 ${isOpen ? 'bg-primary' : 'bg-base'}`} />
-          <img
-            src={category_info.banners?.wide}
-            alt=""
-            loading="lazy"
-            className={`
-              absolute inset-0 w-full h-full object-cover
-              transition-all duration-700 ease-out
-              ${isOpen ? 'opacity-30 scale-105 blur-[1px]' : 'opacity-0'}
-            `}
-          />
-          <div className={`absolute inset-0 transition-all duration-500 ${isOpen ? 'bg-primary' : ''}`} />
-        </div>
+    <div className="relative w-full h-full bg-slate-100 overflow-hidden">
+      {!loaded && !error && (
+        <div className="absolute inset-0 bg-slate-100 animate-pulse" />
+      )}
 
-        {/* Content */}
-        <div className="relative z-10 flex items-center justify-between w-full">
-          <div className="flex items-center gap-3 md:gap-4 min-w-0">
-            {/* Thumbnail */}
-            <div className={`
-              shrink-0 w-11 h-11 md:w-[50px] md:h-[50px] rounded-2xl overflow-hidden
-              flex items-center justify-center
-              transition-all duration-500
-              ${isOpen
-                ? 'bg-white/15 backdrop-blur-md ring-1 ring-white/20 shadow-lg shadow-black/10'
-                : 'bg-slate-50 ring-1 ring-slate-200/60'
-              }
-            `}>
-              <img
-                src={category_info.banners?.box}
-                className="w-full h-full object-cover"
-                alt=""
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
-            </div>
-
-            {/* Text */}
-            <div className="flex flex-col min-w-0">
-              <h2 className={`
-                text-[15px] md:text-lg font-extrabold tracking-tight truncate
-                transition-colors duration-400
-                ${isOpen ? 'text-white' : 'text-slate-800'}
-              `}>
-                {category_info.name}
-              </h2>
-              <motion.p
-                initial={false}
-                animate={{
-                  opacity: isOpen ? 1 : 0,
-                  y: isOpen ? 0 : -4,
-                  height: isOpen ? 'auto' : 0,
-                }}
-                transition={{ duration: 0.35 }}
-                className="text-[11px] md:text-xs font-medium text-white/70 leading-relaxed hidden md:block overflow-hidden"
-              >
-                {category_info.description}
-              </motion.p>
-            </div>
-          </div>
-
-          {/* Chevron */}
-          <div className={`
-            shrink-0 w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center
-            transition-all duration-500 ease-out
-            ${isOpen
-              ? 'bg-white text-primary rotate-180 shadow-md shadow-black/10'
-              : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
-            }
-          `}>
-            <ChevronDown size={18} strokeWidth={2.5} />
-          </div>
-        </div>
-      </button>
-
-      {/* ── Expandable Content ── */}
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="p-4 md:p-6 bg-base border-t border-slate-100 min-h-[180px]">
-              {!showContent ? (
-                <ContentSkeleton />
-              ) : (
-                <div className="flex flex-col gap-7">
-
-                  {/* ── Sub-categories Grid ── */}
-                  {sub_categories?.length > 0 && (
-                    <section>
-                      <div className="flex items-center gap-2.5 mb-4 px-0.5">
-                        <div className="p-1.5 bg-blue-50 text-blue-500 rounded-lg">
-                          <LayoutGrid size={15} strokeWidth={2.2} />
-                        </div>
-                        <h3 className="text-[13px] font-bold text-slate-600">ژێر پۆل</h3>
-                      </div>
-
-                      <motion.div
-                        variants={staggerContainer}
-                        initial="hidden"
-                        animate="show"
-                        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-6 gap-3 md:gap-4"
-                      >
-                        {sub_categories.map((sub, idx) => (
-                          <motion.div key={idx} variants={staggerItem}>
-                            <Link
-                              to={`/shop?category=${sub.slug}`}
-                              className="group flex flex-col items-center gap-2"
-                            >
-                              <div className="
-                                relative w-full aspect-square rounded-2xl bg-white overflow-hidden
-                                ring-1 ring-black/[0.05]
-                                transition-all duration-300
-                                group-hover:shadow-lg group-hover:shadow-black/8 group-hover:ring-primary/20
-                                group-hover:-translate-y-0.5
-                              ">
-                                <img
-                                  src={sub.thumbnail}
-                                  alt={sub.name}
-                                  loading="lazy"
-                                  className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]"
-                                />
-                              </div>
-                              <span className="
-                                text-[11px] md:text-xs font-semibold text-center
-                                text-slate-500 group-hover:text-slate-800
-                                transition-colors duration-200 leading-tight
-                              ">
-                                {sub.name}
-                              </span>
-                            </Link>
-                          </motion.div>
-                        ))}
-                      </motion.div>
-                    </section>
-                  )}
-
-                  {/* ── Featured Products Carousel ── */}
-                  {products?.length > 0 && (
-                    <section>
-                      <div className="flex items-center justify-between mb-4 px-0.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-1.5 bg-emerald-50 text-emerald-500 rounded-lg">
-                            <Tag size={15} strokeWidth={2.2} />
-                          </div>
-                          <h3 className="text-[13px] font-bold text-slate-600">محصولات برگزیده</h3>
-                        </div>
-                        <Link
-                          to={`/shop?category=${category_info.slug}`}
-                          className="
-                            text-xs font-bold text-primary/80 hover:text-primary
-                            flex items-center gap-1 transition-colors duration-200
-                            hover:gap-2
-                          "
-                          style={{ transition: 'gap 0.3s ease, color 0.2s ease' }}
-                        >
-                          بینینی هەمووی <ArrowLeft size={13} />
-                        </Link>
-                      </div>
-
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.5, delay: 0.15 }}
-                        className="-mr-4 md:mr-0 pr-4 md:pr-0"
-                      >
-                        <Swiper
-                          modules={[FreeMode]}
-                          spaceBetween={14}
-                          slidesPerView={1.35}
-                          freeMode={{ enabled: true, momentum: true, momentumRatio: 0.6 }}
-                          breakpoints={{
-                            500: { slidesPerView: 2.2, spaceBetween: 14 },
-                            768: { slidesPerView: 3.2, spaceBetween: 16 },
-                            1024: { slidesPerView: 4.2, spaceBetween: 16 },
-                            1280: { slidesPerView: 5.2, spaceBetween: 18 },
-                          }}
-                          className="!pb-4 !pt-1 px-0.5"
-                        >
-                          {products.map((product) => (
-                            <SwiperSlide key={product.id} className="h-auto">
-                              <ProductCard product={product} />
-                            </SwiperSlide>
-                          ))}
-                        </Swiper>
-                      </motion.div>
-                    </section>
-                  )}
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {!error && src && (
+        <img
+          ref={imgRef}
+          src={src}
+          alt={alt}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchPriority={priority ? 'high' : 'low'}
+          className={`${className} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setLoaded(true)}
+          onError={(e) => {
+            setError(true);
+            onError?.(e);
+          }}
+        />
+      )}
+    </div>
   );
 });
+LazyImage.displayName = 'LazyImage';
 
 /* ─────────────────────────────────────────────
-   CategoryHero — parent controller
+   MegaMenu — کامپوننت اصلی
    ───────────────────────────────────────────── */
-const CategoryHero = () => {
-  const [expandedId, setExpandedId] = useState(null);
+const MegaMenu = ({ isOpen, onClose }) => {
+  const [activeId, setActiveId] = useState(null);
+  const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
+  const navigate = useNavigate();
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen && !hasOpenedOnce) setHasOpenedOnce(true);
+  }, [isOpen, hasOpenedOnce]);
 
   const { data: categories, isLoading } = useQuery({
-    queryKey: ['categories-landing'],
-    queryFn: categoryService.getCategoriesLanding,
+    queryKey: ['categories-tree'],
+    queryFn: categoryService.getCategoriesTree,
+    staleTime: 1000 * 60 * 60,
+    enabled: hasOpenedOnce,
   });
 
   useEffect(() => {
-    if (expandedId === null && categories?.length > 0) {
-      setExpandedId(categories[0].category_info.id);
+    if (categories?.length > 0 && !activeId) setActiveId(categories[0].id);
+  }, [categories, activeId]);
+
+  // اسکرول به بالا هنگام تغییر دسته‌بندی
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [categories, expandedId]);
+  }, [activeId]);
 
-  const handleToggle = useCallback((id) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  }, []);
+  const handleParentClick = useCallback(
+    (slug) => {
+      navigate(`/shop?category=${slug}`);
+      if (onClose) onClose();
+    },
+    [navigate, onClose]
+  );
 
-  if (isLoading) return <HeroSkeleton />;
+  if (!hasOpenedOnce && !categories) return null;
+
+  const activeCategory =
+    categories?.find((c) => c.id === activeId) || categories?.[0];
 
   return (
-    <section className="container mx-auto px-4 my-8">
-      <div className="flex flex-col gap-3 md:gap-4">
-        {categories?.map((catData, index) => (
-          <CategoryItem
-            key={catData.category_info.id}
-            category={catData}
-            isOpen={expandedId === catData.category_info.id}
-            onToggle={handleToggle}
-            index={index}
-          />
-        ))}
-      </div>
-    </section>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          className="
+            absolute top-full right-0 left-0 z-50
+            bg-white/[0.98] backdrop-blur-xl
+            shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)]
+            rounded-b-2xl
+            border-t border-slate-200/60
+            overflow-hidden flex h-[70vh]
+          "
+        >
+          {isLoading ? (
+            <MegaMenuSkeleton />
+          ) : (
+            <>
+              {/* ── سایدبار ── */}
+              <div className="w-[230px] flex-shrink-0 bg-radial from-white to-slate-200 border-l border-slate-200/40 overflow-y-auto custom-scrollbar">
+                <div className="py-3 px-2.5">
+                  {/* عنوان سایدبار */}
+                  <div className="flex items-center gap-2 px-3 py-2 mb-1">
+                    <Layers size={14} className="text-primary" />
+                    <span className="text-[11px] font-bold text-primary tracking-wide">
+                      {pageText.profile.orderDetailPage.specLabels.category}
+                    </span>
+                  </div>
+
+                  <motion.ul
+                    variants={sidebarContainer}
+                    initial="hidden"
+                    animate="show"
+                    className="space-y-0.5"
+                  >
+                    {categories?.map((cat) => {
+                      const isActive = activeId === cat.id;
+                      return (
+                        <motion.li key={cat.id} variants={sidebarItem}>
+                          <button
+                            onMouseEnter={() => setActiveId(cat.id)}
+                            onClick={() => handleParentClick(cat.slug)}
+                            className={`
+                              group w-full flex items-center justify-between
+                              px-3 py-2.5 rounded-xl text-[13px]
+                              transition-all duration-200 ease-out
+                              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30
+                              ${isActive
+                                ? 'bg-primary text-white font-bold shadow-md shadow-primary/20'
+                                : 'text-slate-600 hover:bg-white hover:shadow-sm font-medium'
+                              }
+                            `}
+                          >
+                            <span className="truncate">{cat.name}</span>
+                            <ChevronLeft
+                              size={13}
+                              className={`
+                                transition-all duration-200
+                                ${isActive
+                                  ? 'text-white/80 opacity-100'
+                                  : 'text-slate-300 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0'
+                                }
+                              `}
+                            />
+                          </button>
+                        </motion.li>
+                      );
+                    })}
+                  </motion.ul>
+                </div>
+              </div>
+
+              {/* ── بدنه اصلی ── */}
+              <div
+                ref={contentRef}
+                className="flex-1 overflow-y-auto custom-scrollbar"
+              >
+                <AnimatePresence mode="wait">
+                  {activeCategory && (
+                    <motion.div
+                      key={activeCategory.id}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 12 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className="p-6"
+                    >
+                      {/* هدر */}
+                      <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                        <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2.5">
+                          <span className="w-1 h-5 bg-gradient-to-b from-primary to-primary/50 rounded-full" />
+                          {activeCategory.name}
+                          {activeCategory.children?.length > 0 && (
+                            <span className="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                              {activeCategory.children.length} {pageText.home.categoryHero.subC}
+                            </span>
+                          )}
+                        </h3>
+                        <Link
+                          to={`/shop?category=${activeCategory.slug}`}
+                          onClick={onClose}
+                          className="
+                            text-xs font-bold text-primary/70 hover:text-primary
+                            flex items-center gap-1.5
+                            px-3 py-1.5 rounded-lg
+                            hover:bg-primary/5
+                            transition-all duration-200
+                          "
+                        >
+                          مشاهده همه
+                          <ArrowLeft size={13} />
+                        </Link>
+                      </div>
+
+                      {/* گرید زیردسته‌ها */}
+                      {activeCategory.children?.length > 0 ? (
+                        <motion.div
+                          variants={gridContainer}
+                          initial="hidden"
+                          animate="show"
+                          className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3"
+                        >
+                          {activeCategory.children.map((sub, idx) => (
+                            <motion.div key={sub.id} variants={gridItem}>
+                              <Link
+                                to={`/shop?category=${sub.slug}`}
+                                onClick={onClose}
+                                className="
+                                  group flex flex-col items-center gap-2.5
+                                  p-2.5 rounded-2xl
+                                  transition-all duration-300 ease-out
+                                  hover:bg-slate-50
+                                  border border-transparent hover:border-slate-200/80
+                                  hover:shadow-sm
+                                "
+                              >
+                                {/* تصویر — LazyImage با shimmer و fade-in */}
+                                <div className="
+                                  relative w-full aspect-square overflow-hidden rounded-xl
+                                  ring-1 ring-black/[0.04]
+                                  group-hover:ring-primary/20
+                                  group-hover:shadow-md group-hover:shadow-primary/5
+                                  transition-all duration-300
+                                ">
+                                  {sub.thumbnail ? (
+                                    <LazyImage
+                                      src={sub.thumbnail}
+                                      alt={sub.name}
+                                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]"
+                                      priority={idx < 7}
+                                    />
+                                  ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+                                      <ImageIcon
+                                        size={20}
+                                        className="text-slate-300 group-hover:text-slate-400 transition-colors"
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* اسم */}
+                                <span className="
+                                  text-[11px] font-semibold text-center leading-[1.4]
+                                  text-slate-500 group-hover:text-slate-800
+                                  transition-colors duration-200
+                                  line-clamp-2 h-8 flex items-center justify-center
+                                ">
+                                  {sub.name}
+                                </span>
+                              </Link>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="flex flex-col items-center justify-center h-48 gap-3"
+                        >
+                          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+                            <Layers size={24} className="text-slate-300" />
+                          </div>
+                          <p className="text-sm text-slate-400 font-medium">
+                            {pageText.home.categoryHero.subC} 0
+                          </p>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
 /* ─────────────────────────────────────────────
-   Skeletons
+   Skeleton — با افکت shimmer
    ───────────────────────────────────────────── */
-const shimmer = 'relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.8s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/40 before:to-transparent';
+const shimmer =
+  'relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.8s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent';
 
-const ContentSkeleton = () => (
-  <div className="flex flex-col gap-7">
-    <div className="space-y-4">
-      <div className={`h-5 w-28 bg-slate-100 rounded-lg ${shimmer}`} />
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex flex-col items-center gap-2">
-            <div className={`w-full aspect-square bg-slate-100 rounded-2xl ${shimmer}`} />
-            <div className={`h-3 w-12 bg-slate-100 rounded ${shimmer}`} />
-          </div>
-        ))}
-      </div>
+const MegaMenuSkeleton = () => (
+  <div className="flex w-full h-full bg-white/[0.98]">
+    {/* سایدبار */}
+    <div className="w-[230px] bg-slate-50/80 border-l border-slate-200/40 p-3 space-y-1.5">
+      <div className={`h-4 w-20 bg-slate-100 rounded-lg mb-3 ${shimmer}`} />
+      {[...Array(10)].map((_, i) => (
+        <div
+          key={i}
+          className={`h-9 bg-slate-100/80 rounded-xl ${shimmer}`}
+          style={{ animationDelay: `${i * 80}ms`, width: `${70 + Math.random() * 30}%` }}
+        />
+      ))}
     </div>
-    <div className="space-y-4">
-      <div className="flex justify-between">
-        <div className={`h-5 w-32 bg-slate-100 rounded-lg ${shimmer}`} />
-        <div className={`h-4 w-16 bg-slate-100 rounded ${shimmer}`} />
+    {/* بدنه */}
+    <div className="flex-1 p-6 space-y-5">
+      <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+        <div className={`h-5 w-36 bg-slate-100 rounded-lg ${shimmer}`} />
+        <div className={`h-4 w-20 bg-slate-50 rounded-lg ${shimmer}`} />
       </div>
-      <div className="flex gap-3.5 overflow-hidden">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className={`w-56 h-44 shrink-0 bg-slate-100 rounded-2xl ${shimmer}`} />
+      <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
+        {[...Array(14)].map((_, i) => (
+          <div key={i} className="flex flex-col items-center gap-2.5 p-2.5">
+            <div
+              className={`w-full aspect-square bg-slate-100/80 rounded-xl ${shimmer}`}
+              style={{ animationDelay: `${i * 50}ms` }}
+            />
+            <div className={`h-3 w-14 bg-slate-100/60 rounded ${shimmer}`} />
+          </div>
         ))}
       </div>
     </div>
   </div>
 );
 
-const HeroSkeleton = () => (
-  <section className="container mx-auto px-4 my-8 space-y-3 md:space-y-4">
-    {[1, 2, 3].map((i) => (
-      <div
-        key={i}
-        className="rounded-[20px] bg-base ring-1 ring-black/[0.06] overflow-hidden"
-        style={{ animationDelay: `${i * 120}ms` }}
-      >
-        <div className="h-[68px] md:h-[76px] flex items-center px-4 md:px-6 gap-3 md:gap-4">
-          <div className={`w-11 h-11 md:w-[50px] md:h-[50px] bg-slate-100 rounded-2xl ${shimmer}`} />
-          <div className="flex-1 space-y-2.5">
-            <div className={`h-4 w-36 bg-slate-100 rounded-lg ${shimmer}`} />
-            <div className={`h-3 w-56 bg-slate-50 rounded hidden md:block ${shimmer}`} />
-          </div>
-          <div className={`w-8 h-8 md:w-9 md:h-9 bg-slate-100 rounded-full ${shimmer}`} />
-        </div>
-      </div>
-    ))}
-  </section>
-);
-
-export default CategoryHero;
+export default MegaMenu;

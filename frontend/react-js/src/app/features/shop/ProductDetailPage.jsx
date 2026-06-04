@@ -142,7 +142,7 @@ const ProductDetailPage = () => {
                           <span className="text-3xl md:text-4xl font-black tracking-tight text-emerald-400">
                             {Number(pricing?.totalPrice || 0).toLocaleString()}
                           </span>
-                          <span className="text-sm font-bold opacity-80">{globalText.currency || 'تومان'}</span>
+                          <span className="text-sm font-bold opacity-80">{globalText.currency || 'IQD'}</span>
                         </div>
                       )}
                     </div>

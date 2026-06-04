@@ -46,11 +46,20 @@ export const adminProductService = {
   },
 
   uploadAttachment: async (formData) => {
-    // طبق سواگر برای اتچمنت آیدی محصول در بدنه ارسال می‌شود نه در URL
     const { data } = await apiClient.post(`${BASE_URL}upload-attachment/`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return data;
+  },
+
+  // --- حذف تصویر از سرور ---
+  deleteImage: async (productId, imageId) => {
+    await apiClient.delete(`${BASE_URL}${productId}/delete-image/${imageId}/`);
+  },
+
+  // --- حذف پیوست از سرور ---
+  deleteAttachment: async (productId, attachmentId) => {
+    await apiClient.delete(`${BASE_URL}${productId}/delete-attachment/${attachmentId}/`);
   },
 
   // --- Bulk Actions (عملیات گروهی) ---
@@ -62,5 +71,5 @@ export const adminProductService = {
   bulkStatus: async ({ product_ids, is_active }) => {
     const { data } = await apiClient.patch(`${BASE_URL}bulk-status/`, { product_ids, is_active });
     return data;
-  }
+  },
 };
