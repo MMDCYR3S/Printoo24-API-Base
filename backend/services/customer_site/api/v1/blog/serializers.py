@@ -1,6 +1,36 @@
 from rest_framework import serializers
 from apps.blog.models import ArticleCategory, Article, Tutorial
-from api.v1.dashboard.serializers import ProductMinimalSerializer 
+from core.models import Product
+
+# ========== PRODUCT MINIMAL SERIALIZER ========== #
+class ProductMinimalSerializer(serializers.ModelSerializer):
+    thumbnail = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'slug', 'price','show_price', 'has_price', 'thumbnail', 'category']
+
+    def get_thumbnail(self, obj):
+        first_image = obj.product_image.first()
+        if first_image and first_image.image:
+            request = self.context.get('request')
+            return request.build_absolute_uri(first_image.image.url) if request else first_image.image.url
+        return None
+
+    def get_category(self, obj):
+        assigned_cats = obj.categories.select_related("parent").all()
+        subcategory = next((c for c in assigned_cats if c.parent is not None), None)
+        if subcategory:
+            return {
+                "parent_category": subcategory.parent.name,
+                "children_category": subcategory.name
+            }
+        root_cat = next((c for c in assigned_cats if c.parent is None), None)
+        return {
+            "parent_category": root_cat.name if root_cat else None,
+            "children_category": None
+        }
 
 # ========== PUBLIC BLOG CATEGORY SERIALIZER ========== #
 class PublicArticleCategorySerializer(serializers.ModelSerializer):
