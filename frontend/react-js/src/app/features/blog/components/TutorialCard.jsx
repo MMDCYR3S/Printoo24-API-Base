@@ -41,7 +41,7 @@ const TutorialCard = ({ tutorial, onClick }) => {
         
         <div className="mt-auto flex items-center gap-2 text-xs font-medium text-slate-500 pt-4 border-t border-slate-100">
           <Calendar size={14} className="text-slate-400" />
-          <span>{formatToJalali(tutorial.created_at)}</span>
+          <span>{new Intl.DateTimeFormat('en-US').format(new Date(tutorial.created_at))}</span>
         </div>
       </div>
     </div>

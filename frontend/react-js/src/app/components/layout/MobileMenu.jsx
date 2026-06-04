@@ -70,7 +70,6 @@ const MobileMenu = ({ onClose }) => {
                 `}
                 onClick={() => (hasChildren ? toggleExpand(category.id) : null)}
               >
-                {/* اگر زیردسته نداشت، لینک مستقیم باشه */}
                 {hasChildren ? (
                   <>
                     <span className="font-semibold text-[15px]">
@@ -84,8 +83,9 @@ const MobileMenu = ({ onClose }) => {
                     />
                   </>
                 ) : (
+                  // دسته بدون زیردسته — مستقیم به shop با فیلتر
                   <Link
-                    to={`/category/${category.slug}`}
+                    to={`/shop?category=${category.slug}`}
                     onClick={onClose}
                     className="flex items-center justify-between w-full"
                   >
@@ -110,10 +110,10 @@ const MobileMenu = ({ onClose }) => {
                   `}
                 >
                   <ul className="py-2 pr-4 space-y-0.5">
-                    {/* لینک همه محصولات */}
+                    {/* لینک همه محصولات دسته اصلی */}
                     <li>
                       <Link
-                        to={`/category/${category.slug}`}
+                        to={`/shop?category=${category.slug}`}
                         onClick={onClose}
                         className="
                           flex items-center gap-3 px-4 py-2.5 rounded-lg
@@ -127,21 +127,20 @@ const MobileMenu = ({ onClose }) => {
                       </Link>
                     </li>
 
-                    {/* زیردسته‌ها */}
+                    {/* زیردسته‌ها — همان الگوی MegaMenu */}
                     {category.children.map((subCategory) => (
                       <li key={subCategory.id}>
                         <Link
-                          to={`/category/${category.slug}/${subCategory.slug}`}
+                          to={`/shop?category=${subCategory.slug}`}
                           onClick={onClose}
                           className="
-        flex items-center gap-3 px-4 py-2.5 rounded-lg
-        text-base-content/70 text-sm
-        hover:bg-base-200 hover:text-base-content
-        transition-colors duration-200
-      "
+                            flex items-center gap-3 px-4 py-2.5 rounded-lg
+                            text-base-content/70 text-sm
+                            hover:bg-base-200 hover:text-base-content
+                            transition-colors duration-200
+                          "
                         >
                           <span className="w-1 h-1 rounded-full bg-base-content/30"></span>
-                          {/* 🟢 اصلاح شده: نقطه اضافه شد */}
                           {subCategory.name}
                         </Link>
                       </li>
