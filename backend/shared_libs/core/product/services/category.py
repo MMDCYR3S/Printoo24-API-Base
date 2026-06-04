@@ -5,6 +5,13 @@ from django.db.models import QuerySet
 from ..models import ProductCategory, Product
 from ..exceptions import ProductCategoryNotFoundException, ProductCategoryHasDependencyException
 from django.db.models import ProtectedError
+from celery import current_app
+
+try:
+    from apps.shop.tasks import compress_category_images_task
+except ImportError:
+    compress_category_images_task = None
+
 
 # ========== CATEGORY SERVICE ========== #
 class ProductCategoryService:
@@ -62,23 +69,39 @@ class ProductCategoryService:
     # ===== Write Operations ===== #
     @transaction.atomic
     def create_category(self, data: Dict[str, Any]) -> ProductCategory:
-        """
-        ایجاد یک دسته‌بندی جدید.
-        """
         category = ProductCategory(**data)
         category.full_clean()
         category.save()
+
+        if category.banner_wide or category.banner_box:
+            category_id = category.id
+            def _queue_compress():
+                current_app.send_task(
+                    'compress_category_images_task',  # ← همون name= داخل task
+                    args=[category_id]
+                )
+            transaction.on_commit(_queue_compress)
+
         return category
 
     @transaction.atomic
     def update_category(self, instance: ProductCategory, data: Dict[str, Any]) -> ProductCategory:
-        """
-        ویرایش دسته‌بندی.
-        """
+        image_fields_changed = 'banner_wide' in data or 'banner_box' in data
+
         for field, value in data.items():
             setattr(instance, field, value)
         instance.full_clean()
         instance.save()
+
+        if image_fields_changed and (instance.banner_wide or instance.banner_box):
+            category_id = instance.id
+            def _queue_compress():
+                current_app.send_task(
+                    'compress_category_images_task',
+                    args=[category_id]
+                )
+            transaction.on_commit(_queue_compress)
+
         return instance
 
     def delete_category(self, instance: ProductCategory) -> None:
@@ -113,7 +136,6 @@ class ProductCategoryService:
         ).distinct()
 
     # ===== UPSERT METHOD ===== #
-    # ===== UPSERT METHOD (OPTIMIZED) ===== #
     @transaction.atomic
     def bulk_upsert_categories(self, validated_data_list: List[Dict[str, Any]], user) -> List[Dict]:
         """
@@ -122,6 +144,7 @@ class ProductCategoryService:
         """
         with ProductCategory.objects.delay_mptt_updates():
             results = []
+            ids_to_compress = []
             
             updates_data = [item for item in validated_data_list if item.get('id')]
             creates_data = [item for item in validated_data_list if not item.get('id')]
@@ -139,6 +162,9 @@ class ProductCategoryService:
                     if not instance:
                         continue
                     
+                    # ===== بررسی تغییر فیلدهای عکس ===== #
+                    image_fields_changed = 'banner_wide' in item or 'banner_box' in item
+                    
                     # ===== مدیریت تغییر والد در آپدیت ===== #
                     if 'parent_slug' in item:
                         p_slug = item.pop('parent_slug')
@@ -146,7 +172,7 @@ class ProductCategoryService:
                             parent = ProductCategory.objects.filter(slug=p_slug).first()
                             instance.parent = parent
                         else:
-                            instance.parent = None # قطع رابطه والد
+                            instance.parent = None  # قطع رابطه والد
 
                     # ===== آپدیت ===== #
                     for field, value in item.items():
@@ -158,8 +184,12 @@ class ProductCategoryService:
                     instance.save()
                     results.append({"status": "updated", "id": instance.id, "name": instance.name})
 
+                    # ===== اضافه کردن به لیست فشرده‌سازی در صورت تغییر عکس ===== #
+                    if image_fields_changed and (instance.banner_wide or instance.banner_box):
+                        ids_to_compress.append(instance.id)
+
             # ===== INSERT OPERATIONS ===== #
-            created_slug_map = {} 
+            created_slug_map = {}
 
             # ===== ایجاد والد قبل از فرزند ===== #
             pending_creates = creates_data
@@ -194,11 +224,26 @@ class ProductCategoryService:
                         
                         created_slug_map[instance.slug] = instance
                         results.append({"status": "created", "id": instance.id, "name": instance.name})
+
+                        # ===== اضافه کردن به لیست فشرده‌سازی در صورت وجود عکس ===== #
+                        if instance.banner_wide or instance.banner_box:
+                            ids_to_compress.append(instance.id)
                 
                 if len(pending_creates) == len(next_pending) and pending_creates:
-                    pass 
+                    pass
                 
                 pending_creates = next_pending
                 attempts += 1
+
+            # ===== queue فشرده‌سازی بعد از commit کامل transaction ===== #
+            if ids_to_compress:
+                ids_snapshot = list(ids_to_compress)
+                def _queue_compress():
+                    for cat_id in ids_snapshot:
+                        current_app.send_task(
+                            'compress_category_images_task',
+                            args=[cat_id]
+                        )
+                transaction.on_commit(_queue_compress)
 
         return results

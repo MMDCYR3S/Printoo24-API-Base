@@ -9,7 +9,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files import File
 from django.db.models import Prefetch
 
-# فرض بر این است که متدهای مربوط به EAV را در Domain Service نوشته‌اید
+from apps.shop.tasks import compress_new_product_image_task
 from core.product.services import ProductService, ProductMediaService
 from core.models import Product, ProductImage
 
@@ -88,16 +88,11 @@ class ProductDashboardService:
 
     # ===== آپلود تصویر (با Fallback) ===== #
     def upload_product_image_async(self, product_id, user, file_obj, order=0):
-        """
-        آپلود تصویر محصول با مکانیزم Async + Sync Fallback.
-        """
         temp_path = self._save_temp_file(file_obj)
         original_name = file_obj.name
 
         try:
             logger.info(f"Attempting async upload for product {product_id}")
-
-            # ===== اجرای همگام (Async) ===== #
             upload_product_image_task.delay(
                 product_id=product_id,
                 user_id=user.id,
@@ -110,15 +105,22 @@ class ProductDashboardService:
         except (OperationalError, Exception) as e:
             logger.error(f"Celery connection failed: {str(e)}. Switching to Sync mode.")
 
-            # ===== FALLBACK: اجرای همگام (Sync) ===== #
             try:
-                with open(temp_path, 'rb') as f:
-                    django_file = File(f, name=original_name)
-                    instance = self.media_service.upload_product_image(product_id, user, django_file, order=order)
-                
-                # ===== حذف فایل موقت ===== #
+                from apps.shop.tasks import _compress_image_bytes
+                from django.core.files.base import ContentFile
+
+                # ===== فشرده‌سازی + آپلود sync ===== #
+                compressed_bytes, ext = _compress_image_bytes(temp_path)
+                stem = os.path.splitext(original_name)[0]
+                compressed_filename = f"{stem}{ext}"
+
+                django_file = File(ContentFile(compressed_bytes), name=compressed_filename)
+                instance = self.media_service.upload_product_image(product_id, user, django_file, order=order)
+
                 os.remove(temp_path)
+                logger.info(f"[Sync Fallback] Image {instance.id} uploaded & compressed.")
                 return {"status": "completed", "id": instance.id}
+
             except Exception as sync_error:
                 logger.error(f"Sync upload also failed: {str(sync_error)}")
                 raise sync_error

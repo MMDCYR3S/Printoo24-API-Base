@@ -50,26 +50,33 @@ def send_contact_us_reply_task(user_email: str, user_name: str, reply_message: s
 # ===== Task: Upload Product Image ===== #
 @shared_task(name='upload_product_image_task', bind=True, max_retries=3)
 def upload_product_image_task(self, product_id, user_id, temp_file_path, original_filename, order=0):
-    """ تسک آپلود تصویر محصول """
+    """ تسک آپلود و فشرده‌سازی همزمان تصویر محصول """
     logger.info(f"[Image Task] Starting for Product {product_id}. File: {temp_file_path}")
     media_service = ProductMediaService()
-    
+
     try:
         user = User.objects.get(id=user_id)
 
-        if os.path.exists(temp_file_path):
-            with open(temp_file_path, 'rb') as f:
-                django_file = File(f, name=original_filename)
-                instance = media_service.upload_product_image(product_id, user, django_file, order)
-            
-            # ===== حذف فایل موقت ===== #
-            os.remove(temp_file_path)
-            logger.info(f"[Image Task] Success: Image {instance.id} created.")
-            return f"Image uploaded: {instance.id}"
-        else:
-            error_msg = f"[Image Task] File NOT FOUND at {temp_file_path}. Check Docker Volumes!"
-            logger.error(error_msg)
+        if not os.path.exists(temp_file_path):
+            logger.error(f"[Image Task] File NOT FOUND at {temp_file_path}. Check Docker Volumes!")
             return "Temp file missing"
+
+        # ===== فشرده‌سازی قبل از آپلود ===== #
+        from apps.shop.tasks import _compress_image_bytes
+        compressed_bytes, ext = _compress_image_bytes(temp_file_path)
+        stem = os.path.splitext(original_filename)[0]
+        compressed_filename = f"{stem}{ext}"
+
+        # ===== آپلود فایل فشرده ===== #
+        with open(temp_file_path, 'rb') as _:
+            from django.core.files.base import ContentFile
+            django_file = File(ContentFile(compressed_bytes), name=compressed_filename)
+            instance = media_service.upload_product_image(product_id, user, django_file, order)
+
+        # ===== حذف فایل موقت ===== #
+        os.remove(temp_file_path)
+        logger.info(f"[Image Task] Success: Image {instance.id} uploaded & compressed.")
+        return f"Image uploaded & compressed: {instance.id}"
 
     except Exception as e:
         logger.error(f"[Image Task] Error: {str(e)}")
