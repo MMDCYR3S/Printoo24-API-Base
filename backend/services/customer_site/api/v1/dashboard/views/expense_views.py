@@ -4,13 +4,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from core.financial.models import Expense, Invoice
+from core.models import Expense, Invoice
 from core.financial.services import ExpenseService
 from api.v1.dashboard.serializers import (
     ExpenseSerializer,
     ExpenseCreateSerializer,
     ExpenseUpdateSerializer,
-    ExpenseStatsSerializer
+    ExpenseStatsSerializer,
+    UnlockedInvoiceOrderSerializer
 )
 
 # ========== EXPENSE VIEWSET ========== #
@@ -159,3 +160,19 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         expenses = Expense.objects.get_order_expenses(order_id)
         serializer = ExpenseSerializer(expenses, many=True)
         return Response(serializer.data)
+
+    @extend_schema(
+        tags=['Dashboard - Expenses'],
+        summary="لیست سفارشات دارای فاکتور قفل‌نشده",
+        description="دریافت تمامی سفارشاتی که فاکتور برای آن‌ها صادر شده اما هنوز نهایی/قفل نشده‌اند.",
+        responses={200: UnlockedInvoiceOrderSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'], url_path='unlocked-invoices')
+    def list_unlocked_invoice_orders(self, request):
+        """
+        بازگرداندن لیست کامل سفارشات با فاکتورهای باز (قفل‌نشده)
+        """
+        orders = ExpenseService.get_orders_with_unlocked_invoices()
+
+        serializer = UnlockedInvoiceOrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

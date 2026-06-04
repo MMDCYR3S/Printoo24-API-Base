@@ -1,4 +1,4 @@
-from core.financial.models import Expense
+from core.models import Order, Expense, Invoice
 from django.db import models
 
 class ExpenseService:
@@ -88,3 +88,15 @@ class ExpenseService:
         """
         expenses = Expense.objects.get_order_expenses(order_id)
         return expenses.aggregate(total=models.Sum('amount'))['total'] or 0
+
+
+    @staticmethod
+    def get_orders_with_unlocked_invoices() -> models.QuerySet:
+        """
+        دریافت تمامی سفارشاتی که فاکتور دارند و فاکتور آن‌ها قفل (نهایی) نشده است.
+        """
+        return Order.objects.filter(
+            invoice__isnull=False
+        ).exclude(
+            invoice__status=Invoice.Status.FINALIZE
+        ).select_related('invoice', 'current_status', 'user')
