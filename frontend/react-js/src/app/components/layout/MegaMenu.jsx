@@ -1,5 +1,5 @@
 // src/app/components/layout/MegaMenu.jsx
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,6 +40,49 @@ const sidebarContainer = {
     transition: { staggerChildren: 0.03, delayChildren: 0.08 },
   },
 };
+
+/* ─────────────────────────────────────────────
+   LazyImage — با shimmer، fade-in، و cache-hit
+   (همان پترن CategoryHero)
+   ───────────────────────────────────────────── */
+const LazyImage = memo(({ src, alt, className, priority = false, onError }) => {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const imgRef = useRef(null);
+
+  // تصویر از cache — load event fire نمی‌شه
+  useEffect(() => {
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, []);
+
+  return (
+    <div className="relative w-full h-full bg-slate-100 overflow-hidden">
+      {!loaded && !error && (
+        <div className="absolute inset-0 bg-slate-100 animate-pulse" />
+      )}
+
+      {!error && src && (
+        <img
+          ref={imgRef}
+          src={src}
+          alt={alt}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchPriority={priority ? 'high' : 'low'}
+          className={`${className} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          onLoad={() => setLoaded(true)}
+          onError={(e) => {
+            setError(true);
+            onError?.(e);
+          }}
+        />
+      )}
+    </div>
+  );
+});
+LazyImage.displayName = 'LazyImage';
 
 /* ─────────────────────────────────────────────
    MegaMenu — کامپوننت اصلی
@@ -210,7 +253,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
                           animate="show"
                           className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3"
                         >
-                          {activeCategory.children.map((sub) => (
+                          {activeCategory.children.map((sub, idx) => (
                             <motion.div key={sub.id} variants={gridItem}>
                               <Link
                                 to={`/shop?category=${sub.slug}`}
@@ -224,28 +267,23 @@ const MegaMenu = ({ isOpen, onClose }) => {
                                   hover:shadow-sm
                                 "
                               >
-                                {/* تصویر */}
+                                {/* تصویر — LazyImage با shimmer و fade-in */}
                                 <div className="
                                   relative w-full aspect-square overflow-hidden rounded-xl
-                                  bg-gradient-to-br from-slate-50 to-slate-100
                                   ring-1 ring-black/[0.04]
                                   group-hover:ring-primary/20
                                   group-hover:shadow-md group-hover:shadow-primary/5
                                   transition-all duration-300
                                 ">
                                   {sub.thumbnail ? (
-                                    <img
+                                    <LazyImage
                                       src={sub.thumbnail}
                                       alt={sub.name}
-                                      loading="lazy"
-                                      className="
-                                        w-full h-full object-cover
-                                        transition-transform duration-500 ease-out
-                                        group-hover:scale-[1.06]
-                                      "
+                                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]"
+                                      priority={idx < 7}
                                     />
                                   ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
                                       <ImageIcon
                                         size={20}
                                         className="text-slate-300 group-hover:text-slate-400 transition-colors"
