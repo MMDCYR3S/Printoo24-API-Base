@@ -153,12 +153,38 @@ class OrderSerializer(serializers.ModelSerializer):
             'order_code', 'created_at', "address_id", "address", "full_address"
         ]
 
-# ===== User Invoice Serializer ===== #
-class UserInvoiceSerializer(serializers.ModelSerializer):
-    """
-    سریالایزر نمایش فاکتور نهایی به مشتری
-    """
+
+# ===== Order Detail Serializer ===== #
+class InvoiceOrderSummarySerializer(serializers.ModelSerializer):
+    """ سریالایزر سفارش که فقط تک آیتم مربوطه را برمی‌گرداند """
+    status_display = serializers.CharField(source='current_status.name', read_only=True)
+    full_address = serializers.SerializerMethodField(read_only=True)
+    single_item = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'order_code', 'status_display', 'total_price', 
+            'full_address', 'recipient_name', 'recipient_phone',
+            'created_at', 'single_item'
+        ]
+
+    def get_full_address(self, obj):
+        if obj.address:
+            return f"{obj.address.province} - {obj.address.city} - {obj.address.address}" 
+        return obj.full_address
+
+    def get_single_item(self, obj):
+        item = obj.order_item_order.first()
+        if item:
+            return OrderItemDetailSerializer(item, context=self.context).data
+        return None
+
+# ===== Full Invoice Detail Serializer ===== #
+class FullInvoiceDetailSerializer(serializers.ModelSerializer):
+    """ سریالایزر جامع فاکتور به همراه جزئیات کامل سفارش و آیتم """
     status_display = serializers.CharField(source='get_status_display', read_only=True)
+    order_details = InvoiceOrderSummarySerializer(source='order', read_only=True)
     
     class Meta:
         model = Invoice
@@ -177,4 +203,5 @@ class UserInvoiceSerializer(serializers.ModelSerializer):
             'status_display',
             'issued_at',
             'finalized_at',
+            'order_details'
         ]

@@ -11,6 +11,8 @@ class QuotationQuerySet(BaseQuerySet):
             'converted_order', 
             'converted_order__user'
         ).filter(converted_order_id=order_id).first()
+    
+    
 
 # ========== QUOTATION MANAGER ========== #
 class QuotationManager(models.Manager):

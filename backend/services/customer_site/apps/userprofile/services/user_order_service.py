@@ -70,7 +70,7 @@ class UserOrderListService:
         """
         from core.financial.models import Invoice 
         
-        invoice = Invoice.objects.get_invoice_by_order(order_id)
+        invoice = Invoice.objects.get_invoice_with_full_details_by_order(order_id)
 
         if not invoice:
             logger.warning(f"Invoice not found for order {order_id}")
@@ -85,3 +85,4 @@ class UserOrderListService:
             raise NotFound(msg_provider.get("profile.E8009"))
 
         return invoice
+

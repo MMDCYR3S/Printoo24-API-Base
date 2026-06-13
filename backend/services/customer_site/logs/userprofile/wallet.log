@@ -1335,3 +1335,23 @@ INFO 2026-06-04 12:49:07,780 user_transaction_service 7 139458292909760 Fetching
 DEBUG 2026-06-04 12:49:07,799 user_transaction_service 7 139458292909760 Wallet balance: -519426.00
 INFO 2026-06-04 12:50:31,337 user_transaction_service 7 139458276124352 Fetching wallet balance for User ID: 1
 DEBUG 2026-06-04 12:50:31,409 user_transaction_service 7 139458276124352 Wallet balance: -519426.00
+INFO 2026-06-13 17:29:31,838 user_transaction_service 7 134606086993600 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-13 17:29:31,840 user_transaction_service 7 134606086993600 Wallet balance: -1407933.00
+INFO 2026-06-13 18:22:19,063 user_transaction_service 82 131289898284736 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-13 18:22:19,070 user_transaction_service 82 131289898284736 Wallet balance: -1567933.00
+INFO 2026-06-13 18:22:58,204 user_transaction_service 82 131289898284736 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-13 18:22:58,211 user_transaction_service 82 131289898284736 Wallet balance: -1567933.00
+INFO 2026-06-13 18:58:48,848 user_transaction_service 91 129286635779776 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-13 18:58:48,884 user_transaction_service 91 129286635779776 Wallet balance: -1567933.00
+INFO 2026-06-13 18:59:39,842 user_transaction_service 91 129286635779776 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-13 18:59:39,857 user_transaction_service 91 129286635779776 Wallet balance: -1570933.00
+INFO 2026-06-13 18:59:48,281 user_transaction_service 91 129286626338496 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-13 18:59:48,295 user_transaction_service 91 129286626338496 Wallet balance: -1570933.00
+INFO 2026-06-13 19:00:02,417 user_transaction_service 91 129286635779776 Fetching wallet balance for User ID: 2
+WARNING 2026-06-13 19:00:02,424 user_transaction_service 91 129286635779776 No wallet found for User ID: 2
+INFO 2026-06-13 19:00:31,813 user_transaction_service 91 129286854051520 Fetching wallet balance for User ID: 2
+DEBUG 2026-06-13 19:00:31,840 user_transaction_service 91 129286854051520 Wallet balance: -131000.00
+INFO 2026-06-13 19:00:42,678 user_transaction_service 91 129286854051520 Fetching wallet balance for User ID: 3
+WARNING 2026-06-13 19:00:42,682 user_transaction_service 91 129286854051520 No wallet found for User ID: 3
+INFO 2026-06-13 19:01:21,200 user_transaction_service 91 129286862444224 Fetching wallet balance for User ID: 6
+WARNING 2026-06-13 19:01:21,208 user_transaction_service 91 129286862444224 No wallet found for User ID: 6

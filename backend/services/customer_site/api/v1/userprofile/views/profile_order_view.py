@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError, NotFound
 from drf_spectacular.utils import extend_schema, OpenApiExample
 
 from apps.userprofile.services import UserOrderListService
-from ..serializers import OrderWithDetailsSerializer, OrderSerializer, QuotationSerializer, UserInvoiceSerializer
+from ..serializers import OrderWithDetailsSerializer, OrderSerializer, QuotationSerializer, FullInvoiceDetailSerializer
 from core.infrastructure.messages import msg_provider
 
 # ===== User Order List APIView ===== #
@@ -111,7 +111,7 @@ class UserOrderDetailAPIView(APIView):
         try:
             order = self._service.get_order_detail(request.user.id, order_id)
             
-            # ===== اصلاح حیاتی: ارسال context ===== #
+            # ===== ارسال context ===== #
             serializer = OrderWithDetailsSerializer(
                 order, 
                 context={'request': request}
@@ -119,7 +119,6 @@ class UserOrderDetailAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except (ValidationError, NotFound) as e:
-            # مدیریت خطای تمیز
             return Response(
                 {'detail': str(e)}, 
                 status=status.HTTP_404_NOT_FOUND
@@ -188,7 +187,7 @@ class UserOrderQuotationAPIView(APIView):
 @extend_schema(tags=["Profile"])
 class UserOrderInvoiceAPIView(APIView):
     """
-    نمایش فاکتور یک سفارش خاص (فقط در صورت تسویه کامل).
+    نمایش فاکتور یک سفارش خاص (فقط در صورت تسویه کامل) به همراه جزئیات سفارش و آیتم.
     """
     permission_classes = [IsAuthenticated]
 
@@ -198,40 +197,19 @@ class UserOrderInvoiceAPIView(APIView):
 
     @extend_schema(
         summary="دریافت فاکتور سفارش",
-        description="این متد فاکتور سفارش را برمی‌گرداند. توجه: فاکتور تنها در صورتی نمایش داده می‌شود که وضعیت آن تسویه کامل (PAID_FULL) یا نهایی شده (FINALIZE) باشد.",
-        responses={200: UserInvoiceSerializer},
-        examples=[
-            OpenApiExample(
-                'Invoice Example',
-                value={
-                    "id": 50,
-                    "invoice_number": "INV-4582-PENDING-CARD-2023",
-                    "items_amount": 2500000,
-                    "services_amount": 0,
-                    "tax_amount": 225000,
-                    "discount_amount": 0,
-                    "final_amount": 2725000,
-                    "paid_amount": 2725000,
-                    "remaining_amount": 0,
-                    "description": "تسویه شده از طریق درگاه پرداخت",
-                    "status": "PAID_FULL",
-                    "status_display": "تسویه کامل",
-                    "issued_at": "2023-11-20T14:00:00Z",
-                    "finalized_at": "2023-11-21T10:00:00Z"
-                }
-            )
-        ]
+        description="این متد فاکتور سفارش را برمی‌گرداند. فاکتور تنها در صورتی نمایش داده می‌شود که وضعیت آن تسویه کامل (PAID_FULL) یا نهایی شده (FINALIZE) باشد.",
+        responses={200: FullInvoiceDetailSerializer},
     )
     def get(self, request, order_id):
         try:
-            # فراخوانی متد جدیدی که در سرویس نوشتیم
+            # ===== استفاده از سرویس واسط ===== #
             invoice = self._service.get_order_invoice(request.user.id, order_id)
             
-            serializer = UserInvoiceSerializer(invoice)
+            # ===== نمایش تمامی جزئیات با صحت عملکرد ===== #
+            serializer = FullInvoiceDetailSerializer(invoice, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except NotFound as e:
-            # خطای 404 برای زمانی که فاکتور نیست، مال کاربر نیست یا هنوز پرداخت نشده
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response(

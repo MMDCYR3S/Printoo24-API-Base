@@ -16,6 +16,57 @@ class CreateOrderFromCartService:
     def __init__(self):
         self._checkout_domain = CheckoutService() 
         self._wallet_service = WalletService()
+
+    def _sync_user_profile(self, user, checkout_data: dict) -> dict:
+        """
+        دریافت نام و شماره تماس گیرنده با اولویت:
+        ۱. دیتای ارسالی در ریکوئست
+        ۲. دیتای پروفایل کاربر
+        ۳. مقادیر پیش‌فرض (برای جلوگیری از خطای خالی بودن)
+        """
+        # ===== دریافت پروفایل در صورت وجود ===== #
+        profile = getattr(user, 'customer_profile', None)
+
+        # ===== مدیریت شماره تماس (اولویت با ریکوئست، سپس شماره خود کاربر) ===== #
+        final_phone = checkout_data.get('phone_number') or user.phone_number
+
+        # ===== مدیریت نام و نام خانوادگی ===== #
+        req_fname = checkout_data.get('first_name')
+        req_lname = checkout_data.get('last_name')
+
+        prof_fname = profile.first_name if profile else ""
+        prof_lname = profile.last_name if profile else ""
+
+        # ===== اعمال منطق جایگزین ===== #
+        final_fname = req_fname or prof_fname or "کاربر"
+        final_lname = req_lname or prof_lname or final_phone
+
+        final_recipient_name = f"{final_fname} {final_lname}".strip()
+
+        # ===== به‌روزرسانی یا ایجاد پروفایل در صورت ناقص بودن ===== #
+        if profile:
+            needs_update = False
+            if not profile.first_name and final_fname != "کاربر":
+                profile.first_name = final_fname
+                needs_update = True
+            if not profile.last_name and final_lname != final_phone:
+                profile.last_name = final_lname
+                needs_update = True
+            
+            if needs_update:
+                profile.save()
+        else:
+            from core.models import CustomerProfile
+            CustomerProfile.objects.create(
+                user=user,
+                first_name=final_fname if final_fname != "کاربر" else "",
+                last_name=final_lname if final_lname != final_phone else ""
+            )
+
+        return {
+            'recipient_name': final_recipient_name,
+            'recipient_phone': final_phone,
+        }
         
     def _construct_full_address(self, data: dict, address_obj: Address = None) -> str:
         """
@@ -81,49 +132,6 @@ class CreateOrderFromCartService:
             address=address_text,
         )
         return new_address
-
-    def _sync_user_profile(self, user: User, data: dict) -> dict:
-        """
-        1. اطلاعات را از ورودی می‌خواند.
-        2. اگر پروفایل کاربر ناقص بود، آن را پر می‌کند.
-        3. خروجی نهایی برای ثبت در سفارش را برمی‌گرداند.
-        """
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
-        company = data.get('company_name', '')
-
-        if not (first_name and last_name):
-             raise ValidationError(msg_provider.get("order.E7004"))
-        
-        # ===== دریافت اطلاعات کاربر ===== #
-        profile, created = CustomerProfile.objects.get_or_create(user=user, defaults={
-            'first_name': first_name,
-            'last_name': last_name,
-            'company': company
-        })
-
-        if not created:
-            # ===== آپدیت اطلاعات کاربر ===== #
-            updated = False
-            if not profile.first_name:
-                profile.first_name = first_name
-                updated = True
-            if not profile.last_name:
-                profile.last_name = last_name
-                updated = True
-            if not profile.company and company:
-                profile.company = company
-                updated = True
-            
-            if updated:
-                profile.save()
-
-        # ===== بازگردانی اطلاعات کاربر ===== #
-        return {
-            'recipient_name': f"{first_name} {last_name}",
-            'recipient_phone': user.phone_number,
-            'company_name': company
-        }
         
     @transaction.atomic
     @transaction.atomic
@@ -202,6 +210,8 @@ class CreateOrderFromCartService:
         address_obj = None
         if user and user.is_authenticated:
             address_obj = self._handle_address_logic(user, checkout_data)
+            
+
             profile_data = self._sync_user_profile(user, checkout_data)
             recipient_name = profile_data['recipient_name']
             recipient_phone = profile_data['recipient_phone']

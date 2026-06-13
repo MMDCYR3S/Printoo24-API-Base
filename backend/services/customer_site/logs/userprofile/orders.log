@@ -318,3 +318,17 @@ INFO 2026-06-03 08:47:39,632 user_order_service 7 135518281144000 Fetching order
 INFO 2026-06-03 08:49:30,917 user_order_service 7 135518654461632 Fetching order history for User ID: 1
 INFO 2026-06-03 08:51:05,597 user_order_service 7 135518654461632 Fetching order history for User ID: 1
 INFO 2026-06-03 08:51:11,617 user_order_service 7 135518255965888 Fetching order history for User ID: 1
+INFO 2026-06-13 17:28:51,294 user_order_service 7 134606461503168 Invoice for order 7 is not fully paid yet.
+INFO 2026-06-13 17:29:57,418 user_order_service 7 134606078600896 Fetching order history for User ID: 1
+INFO 2026-06-13 17:30:10,599 user_order_service 7 134606461503168 Invoice for order 8 is not fully paid yet.
+INFO 2026-06-13 17:49:03,116 user_order_service 54 123455366399680 Fetching detail Order 8 for User 1
+INFO 2026-06-13 17:49:54,713 user_order_service 54 123455366399680 Fetching detail Order 8 for User 1
+INFO 2026-06-13 17:50:01,491 user_order_service 54 123455366399680 Fetching detail Order 8 for User 1
+INFO 2026-06-13 18:21:11,953 user_order_service 82 131289898284736 Fetching detail Order 8 for User 1
+INFO 2026-06-13 18:59:13,813 user_order_service 91 129286626338496 Fetching order history for User ID: 1
+INFO 2026-06-13 18:59:17,282 user_order_service 91 129286626338496 Fetching detail Order 9 for User 1
+INFO 2026-06-13 18:59:39,841 user_order_service 91 129286845658816 Fetching order history for User ID: 1
+INFO 2026-06-13 18:59:48,272 user_order_service 91 129286845658816 Fetching order history for User ID: 1
+INFO 2026-06-13 19:00:26,178 user_order_service 91 129286854051520 Fetching order history for User ID: 2
+INFO 2026-06-13 19:00:28,092 user_order_service 91 129286854051520 Fetching detail Order 10 for User 2
+INFO 2026-06-13 19:01:37,962 user_order_service 91 129286854051520 Fetching order history for User ID: 6
