@@ -7,16 +7,13 @@ from ..exceptions import EmptyCartError, ItemNotFoundException
 from core.models import User, Address, Order, CustomerProfile
 from core.infrastructure.messages import msg_provider
 from apps.cart.models import Cart, CartItem
-from apps.accounts.services import WalletService
 from apps.order.domain_services import CheckoutService
 
 logger = logging.getLogger('shop.services.order_creation')
 
 class CreateOrderFromCartService:
     def __init__(self):
-        self._checkout_domain = CheckoutService() 
-        self._wallet_service = WalletService()
-
+        self._checkout_domain = CheckoutService()
     def _sync_user_profile(self, user, checkout_data: dict) -> dict:
         """
         دریافت نام و شماره تماس گیرنده با اولویت:
@@ -174,12 +171,6 @@ class CreateOrderFromCartService:
         except CartItem.DoesNotExist:
             raise ItemNotFoundException(msg_provider.get("order.E7006"))
 
-        if user and user.is_authenticated:
-            user_balance = self._wallet_service.get_user_balance(user)
-            if user_balance < cart_item.price:
-                 logger.info(f"User {user.phone_number} doesn't have enough balance but anyways... :)")
-            self._wallet_service.debit(user=user, amount=cart_item.price)
-
         # ===== ایجاد سفارش مربوطه ===== #
         try:
             order = self._checkout_domain.checkout_single_item(
@@ -236,13 +227,6 @@ class CreateOrderFromCartService:
 
         cart_items = list(cart.cart_items.select_related('product').prefetch_related('uploads').all())
         total_price = sum(item.price for item in cart_items)
-        
-        # ===== دریافت اطلاعات کلی کیف پول اگر کاربر لاگ شده باشد ===== #
-        if user and user.is_authenticated:
-            user_balance = self._wallet_service.get_user_balance(user)
-            if user_balance < total_price:
-                logger.info(f"User {user.phone_number} doesn't have enough balance but anyways... :)")
-            self._wallet_service.debit(user=user, amount=total_price)
             
         # ===== ایجاد سفارشات ===== #
         created_orders = []

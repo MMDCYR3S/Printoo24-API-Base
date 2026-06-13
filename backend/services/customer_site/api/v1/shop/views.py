@@ -153,7 +153,7 @@ class SubmitReviewView(APIView):
     ثبت نظر و امتیاز برای یک محصول.
     کاربر باید لاگین باشد و طبق قوانین دامین (خرید محصول) مجاز باشد.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = SubmitReviewSerializer
 
     def post(self, request, slug):
@@ -243,6 +243,7 @@ class ProductLivePriceCalculatorView(APIView):
     """
     سرویس محاسبه زنده و لحظه‌ای قیمت محصول.
     """
+    permission_classes = [AllowAny]
 
     @extend_schema(
         tags=["Product"],
