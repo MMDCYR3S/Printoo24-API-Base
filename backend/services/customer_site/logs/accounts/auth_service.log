@@ -1369,3 +1369,31 @@ DEBUG 2026-06-03 14:27:26,323 auth_service 7 135518281144000 AuthService initial
 INFO 2026-06-03 14:27:26,375 auth_service 7 135518281144000 User found. Routing to login flow: 09137555555
 INFO 2026-06-03 14:27:26,377 auth_service 7 135518281144000 Login attempt for: 09137555555
 INFO 2026-06-03 14:27:27,116 auth_service 7 135518281144000 User logged in: 1
+DEBUG 2026-06-13 17:24:49,080 auth_service 7 134606461503168 AuthService initialized with UserIdentityService
+INFO 2026-06-13 17:24:49,142 auth_service 7 134606461503168 User found. Routing to login flow: 09137555555
+INFO 2026-06-13 17:24:49,143 auth_service 7 134606461503168 Login attempt for: 09137555555
+INFO 2026-06-13 17:24:49,427 auth_service 7 134606461503168 User logged in: 1
+DEBUG 2026-06-13 17:28:03,007 auth_service 7 134606440904384 AuthService initialized with UserIdentityService
+INFO 2026-06-13 17:28:03,021 auth_service 7 134606440904384 User found. Routing to login flow: 09137555555
+INFO 2026-06-13 17:28:03,023 auth_service 7 134606440904384 Login attempt for: 09137555555
+INFO 2026-06-13 17:28:03,195 auth_service 7 134606440904384 User logged in: 1
+DEBUG 2026-06-13 19:00:02,071 auth_service 91 129286845658816 AuthService initialized with UserIdentityService
+INFO 2026-06-13 19:00:02,081 auth_service 91 129286845658816 User found. Routing to login flow: 09137514625
+INFO 2026-06-13 19:00:02,082 auth_service 91 129286845658816 Login attempt for: 09137514625
+INFO 2026-06-13 19:00:02,252 auth_service 91 129286845658816 User logged in: 2
+DEBUG 2026-06-13 19:00:42,367 auth_service 91 129286854051520 AuthService initialized with UserIdentityService
+INFO 2026-06-13 19:00:42,382 auth_service 91 129286854051520 User found. Routing to login flow: 091375555555
+INFO 2026-06-13 19:00:42,383 auth_service 91 129286854051520 Login attempt for: 091375555555
+INFO 2026-06-13 19:00:42,525 auth_service 91 129286854051520 User logged in: 3
+DEBUG 2026-06-13 19:00:50,701 auth_service 91 129286862444224 AuthService initialized with UserIdentityService
+INFO 2026-06-13 19:00:50,717 auth_service 91 129286862444224 User found. Routing to login flow: 09137555555
+INFO 2026-06-13 19:00:50,719 auth_service 91 129286862444224 Login attempt for: 09137555555
+INFO 2026-06-13 19:00:50,879 auth_service 91 129286862444224 User logged in: 1
+DEBUG 2026-06-13 19:01:20,868 auth_service 91 129286854051520 AuthService initialized with UserIdentityService
+INFO 2026-06-13 19:01:20,878 auth_service 91 129286854051520 User not found. Routing to registration flow: 09132525255
+INFO 2026-06-13 19:01:20,880 auth_service 91 129286854051520 Starting registration process for: None
+INFO 2026-06-13 19:01:21,038 auth_service 91 129286854051520 User created in DB - ID: 6
+DEBUG 2026-06-13 19:01:47,280 auth_service 91 129286854051520 AuthService initialized with UserIdentityService
+INFO 2026-06-13 19:01:47,290 auth_service 91 129286854051520 User found. Routing to login flow: 09137555555
+INFO 2026-06-13 19:01:47,291 auth_service 91 129286854051520 Login attempt for: 09137555555
+INFO 2026-06-13 19:01:47,433 auth_service 91 129286854051520 User logged in: 1

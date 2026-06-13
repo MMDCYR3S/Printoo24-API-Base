@@ -9,7 +9,7 @@ from .models import(
     ProductCategoryRelation, Product,
     product_code_generator, OrderStateLog,
     OrderStatusGroup, Role, Order, UserRole,
-    User, Quotation
+    User, Quotation, Invoice
 )
 
 logger = logging.getLogger(__name__)
@@ -36,17 +36,7 @@ def generate_code_on_relation_creation(sender, instance, created, **kwargs):
         
         # ===== ذخیره کد ===== #
         Product.objects.filter(pk=product.pk).update(code=new_code)
-        
-# =========== PREVENT SYSTEM DATA DELETION =========== #
-# @receiver(pre_delete, sender=OrderStatus)
-# @receiver(pre_delete, sender=OrderStatusGroup)
-# def prevent_system_data_deletion(sender, instance, **kwargs):
-#     """
-#     جلوگیری از حذف رکوردهای سیستمی حیاتی.
-#     """
-#     if instance.is_system:
-#         raise PermissionDenied(f"حذف رکورد سیستمی '{instance}' مجاز نیست.")
-    
+
 # ========== CREATE STATUS GROUP ========== #
 @receiver(post_save, sender=Role)
 def create_status_group_for_role(sender, created, instance, **kwargs):
@@ -188,12 +178,12 @@ def sync_total_price_to_quotation(sender, instance, created, **kwargs):
 
     old_price = getattr(instance, '_old_total_price', None)
 
-    # اگر قیمت تغییر نکرده، کاری نکن
+    # ===== اگر قیمت تغییر نکرده، کاری صورت نگیرد ===== #
     if old_price is None or old_price == instance.total_price:
         return
 
     try:
-        quotation = instance.origin_quotation  # related_name روی Quotation
+        quotation = instance.origin_quotation
         if quotation:
             Quotation.objects.filter(pk=quotation.pk).update(
                 total_price=instance.total_price
@@ -204,7 +194,125 @@ def sync_total_price_to_quotation(sender, instance, created, **kwargs):
                 f"(Order: {instance.order_code})"
             )
     except Quotation.DoesNotExist:
-        # سفارش پیش‌فاکتور ندارد، نرمال است
         pass
     except Exception as e:
         logger.error(f"Error syncing price to quotation for Order {instance.pk}: {e}")
+
+# ===== SYNC INVOICE TO ORDER (PRE-SAVE) ===== #
+@receiver(pre_save, sender=Invoice)
+def capture_old_invoice_amount(sender, instance, **kwargs):
+    """
+    نگه‌داشتن مبلغ نهایی قبلی فاکتور برای مقایسه
+    """
+    if instance.pk:
+        try:
+            old_obj = Invoice.objects.get(pk=instance.pk)
+            instance._old_final_amount = old_obj.final_amount
+        except Invoice.DoesNotExist:
+            instance._old_final_amount = None
+    else:
+        instance._old_final_amount = None
+
+
+# ===== SYNC INVOICE TO ORDER (POST-SAVE) ===== #
+@receiver(post_save, sender=Invoice, dispatch_uid="sync_invoice_amount_to_order")
+def sync_invoice_amount_to_order(sender, instance, created, **kwargs):
+    """
+    اگر قیمت نهایی فاکتور تغییر کرد، قیمت کل سفارش برابر با آن می‌شود.
+    """
+    # ===== بررسی تغییر قیمت ===== #
+    if not created:
+        old_amount = getattr(instance, '_old_final_amount', None)
+        if old_amount is None or old_amount == instance.final_amount:
+            return
+
+    if instance.order_id:
+        Order.objects.filter(pk=instance.order_id).update(
+            total_price=instance.final_amount
+        )
+        logger.info(f"Order #{instance.order_id} total_price synced to matches Invoice #{instance.invoice_number}.")
+
+# ===== SYNC ORDER TO INVOICE (POST-SAVE) ===== #
+@receiver(post_save, sender=Order, dispatch_uid="sync_order_price_to_invoice")
+def sync_total_price_to_invoice(sender, instance, created, **kwargs):
+    """
+    اگر قیمت کل سفارش تغییر کرد:
+    ۱. برای افزایش قیمت: مستقیما به مبلغ اقلام اضافه می‌شود.
+    ۲. برای کاهش قیمت (آبشاری): خدمات -> مالیات -> اقلام (تا حد پایه) -> تخفیف (در صورت نیاز).
+    """
+    if created:
+        return
+
+    old_price = getattr(instance, '_old_total_price', None)
+    if old_price is None or old_price == instance.total_price:
+        return
+
+    price_difference = instance.total_price - old_price
+
+    if hasattr(instance, 'invoice') and instance.invoice:
+        invoice = instance.invoice
+        
+        new_items = invoice.items_amount or 0
+        new_services = invoice.services_amount or 0
+        new_tax = invoice.tax_amount or 0
+        new_discount = invoice.discount_amount or 0
+        
+        if price_difference > 0:
+            # ===== در صورت افزایش قیمت، به مبلغ اقلام اضافه می‌شود ===== #
+            new_items += price_difference
+        else:
+            # ===== در صورت کاهش قیمت، منطق آبشاری اجرا می‌شود ===== #
+            reduction = abs(price_difference)
+            
+            # ===== کسر از خدمات ===== #
+            svc_deduct = min(new_services, reduction)
+            new_services -= svc_deduct
+            reduction -= svc_deduct
+            
+            # ===== کسر از مالیات ===== #
+            tax_deduct = min(new_tax, reduction)
+            new_tax -= tax_deduct
+            reduction -= tax_deduct
+            
+            # ===== کسر از اقلام (با شرط حفظ حداقل قیمت پایه محصولات) ===== #
+            min_items_allowed = instance.base_products_price or 0
+            if new_items > min_items_allowed and reduction > 0:
+                max_item_deductible = new_items - min_items_allowed
+                items_deduct = min(max_item_deductible, reduction)
+                new_items -= items_deduct
+                reduction -= items_deduct
+                
+            # ===== در صورتی که هنوز کاهش قیمت نیاز است (رسیدن به کف اقلام)، به تخفیف اضافه می‌شود ===== #
+            if reduction > 0:
+                new_discount += reduction
+
+        # ===== آپدیت دیتابیس (بدون تریگر کردن سیگنال‌های فاکتور برای جلوگیری از لوپ) ===== #
+        Invoice.objects.filter(pk=invoice.pk).update(
+            items_amount=new_items,
+            services_amount=new_services,
+            tax_amount=new_tax,
+            discount_amount=new_discount,
+            final_amount=instance.total_price
+        )
+        
+        logger.info(f"Invoice #{invoice.invoice_number} cascaded sync. New Final: {instance.total_price}")
+
+# ===== AUTO-BALANCE INVOICE AMOUNTS (PRE-SAVE) ===== #
+@receiver(pre_save, sender=Invoice, dispatch_uid="auto_balance_invoice_amounts")
+def auto_balance_invoice_amounts(sender, instance, **kwargs):
+    """
+    تراز کردن خودکار فاکتور:
+    هر زمان که یکی از اجزای فاکتور (اقلام، خدمات و...) تغییر کند،
+    مبلغ نهایی (final_amount) بر اساس جمع آن‌ها به صورت خودکار بازنویسی می‌شود.
+    """
+    items_amt = instance.items_amount or 0
+    services_amt = instance.services_amount or 0
+    tax_amt = instance.tax_amount or 0
+    discount_amt = instance.discount_amount or 0
+
+    # ===== محاسبه مبلغ نهایی قطعی ===== #
+    expected_final = (items_amt + services_amt + tax_amt) - discount_amt
+
+    if instance.final_amount != expected_final:
+        instance.final_amount = expected_final
+        logger.info(f"Invoice {instance.invoice_number} final_amount auto-calculated to: {expected_final}")

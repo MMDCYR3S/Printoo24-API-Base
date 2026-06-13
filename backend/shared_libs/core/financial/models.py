@@ -62,7 +62,7 @@ class Invoice(models.Model):
 
     @property
     def is_paid(self):
-        return self.status in [self.Status.PAID_FULL, self.Status.FINALIZE]
+        return self.status in [self.Status.PAID_FULL, self.Status.FINALIZE, self.Status.PAID_PARTIAL]
 
 # ===== Quotation (Independent) ===== #
 class Quotation(models.Model):
