@@ -77,7 +77,7 @@ class ProductCategoryService:
             category_id = category.id
             def _queue_compress():
                 current_app.send_task(
-                    'compress_category_images_task',  # ← همون name= داخل task
+                    'compress_category_images_task',
                     args=[category_id]
                 )
             transaction.on_commit(_queue_compress)

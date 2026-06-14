@@ -154,8 +154,10 @@ class ProductCategory(MPTTModel):
         order_insertion_by = ['order', 'name']
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
+        """ ذخیره اسلاگ دسته‌بندی به صورت خودکار """
+        if self.slug in ProductCategory.objects.filter(slug=self.slug).exclude(pk=self.pk):
+            raise ValidationError('‌دسته‌بندی با این نام قبلا ساخته شده است.')
+        self.slug = slugify(self.name, allow_unicode=True)
         super().save(*args, **kwargs)
     
     def __str__(self):
@@ -282,10 +284,9 @@ class Product(HasGuide, models.Model):
          
     def save(self, *args, **kwargs):
         """ ذخیره اسلاگ محصول به صورت خودکار """
-        if not self.slug:
-            self.slug = slugify(self.name, allow_unicode=True)
         if self.slug in Product.objects.filter(slug=self.slug).exclude(pk=self.pk):
             raise ValidationError('محصول با این نام قبلا ساخته شده است.')
+        self.slug = slugify(self.name, allow_unicode=True)
             
         if not self.code:
             year = timezone.now().year

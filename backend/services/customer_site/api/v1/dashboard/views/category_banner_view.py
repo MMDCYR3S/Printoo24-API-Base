@@ -69,10 +69,8 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # پاس دادن داده‌های معتبر به سرویس دامین
         instance = self.service.create_category(serializer.validated_data)
         
-        # سریالایز کردن مجدد برای پاسخ
         output_serializer = self.get_serializer(instance)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
