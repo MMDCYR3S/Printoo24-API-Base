@@ -7,7 +7,7 @@ import { profileService } from '../../services/profileService';
 import pageText from '../../lang/pages.json';
 import globalText from '../../lang/global.json';
 
-const formatCurrency = (val) => new Intl.NumberFormat('fa-IQ').format(val);
+const formatCurrency = (val) => new Intl.NumberFormat('EN').format(val);
 
 const QuotationPage = () => {
   const { id } = useParams();
@@ -122,7 +122,7 @@ const QuotationPage = () => {
             <div className="text-right space-y-1.5">
               <div className="flex items-center justify-end gap-2 text-neutral-content/80 text-sm font-semibold dir-ltr">
                 <Phone size={14} className="text-primary shrink-0" />
-                <span>021 - 1234 5678</span>
+                <span dir='ltr'>776 227 8666</span>
               </div>
               <div className="flex items-center justify-end gap-2 text-neutral-content/80 text-sm font-semibold">
                 <MapPin size={14} className="text-primary shrink-0" />
@@ -168,7 +168,7 @@ const QuotationPage = () => {
             <div className="flex gap-4 justify-between items-center">
               <span className="text-slate-400 font-medium shrink-0">{pageText.order.quotationPage.dateLabel}</span>
               <span className="font-semibold text-blue-400 dir-ltr">
-                {new Date(quotation.created_at).toLocaleDateString('fa-IR')}
+                {new Date(quotation.created_at).toLocaleDateString('EN')}
               </span>
             </div>
           </div>

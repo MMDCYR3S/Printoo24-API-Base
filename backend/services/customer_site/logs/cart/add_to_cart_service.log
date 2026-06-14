@@ -290,3 +290,13 @@ INFO 2026-06-13 19:00:18,598 add_to_cart_service 91 129286854051520 Start adding
 INFO 2026-06-13 19:00:18,625 add_to_cart_service 91 129286854051520 Creating new cart item
 INFO 2026-06-13 19:01:29,309 add_to_cart_service 91 129286854051520 Start adding product 3 to cart
 INFO 2026-06-13 19:01:29,328 add_to_cart_service 91 129286854051520 Creating new cart item
+INFO 2026-06-14 10:55:11,251 add_to_cart_service 7 125334125016768 Start adding product 38 to cart
+INFO 2026-06-14 10:55:11,293 add_to_cart_service 7 125334125016768 Creating new cart item
+INFO 2026-06-14 11:00:09,972 add_to_cart_service 7 125334475392704 Start adding product 38 to cart
+INFO 2026-06-14 11:00:09,997 add_to_cart_service 7 125334475392704 Creating new cart item
+INFO 2026-06-14 11:01:04,993 add_to_cart_service 7 125334518404800 Start adding product 38 to cart
+INFO 2026-06-14 11:01:05,036 add_to_cart_service 7 125334518404800 Creating new cart item
+INFO 2026-06-14 11:17:27,013 add_to_cart_service 7 125334518404800 Start adding product 37 to cart
+INFO 2026-06-14 11:17:27,053 add_to_cart_service 7 125334518404800 Creating new cart item
+INFO 2026-06-14 11:19:36,051 add_to_cart_service 7 125334475392704 Start adding product 37 to cart
+INFO 2026-06-14 11:19:36,081 add_to_cart_service 7 125334475392704 Creating new cart item

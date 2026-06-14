@@ -29,7 +29,7 @@ const parseTags = (tagsString) => {
 
 const formatToJalali = (dateString) => {
   if (!dateString) return '';
-  return new Intl.DateTimeFormat('fa-IR', {
+  return new Intl.DateTimeFormat('EN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

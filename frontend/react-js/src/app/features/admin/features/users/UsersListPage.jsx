@@ -42,11 +42,9 @@ const CustomersTab = () => {
       // Search Logic
       const term = searchTerm.toLowerCase();
       const matchesSearch = 
-        (user.username?.toLowerCase().includes(term)) ||
-        (user.email?.toLowerCase().includes(term)) ||
-        (user.phone_number?.includes(term)) ||
-        (user.first_name?.toLowerCase().includes(term)) ||
-        (user.last_name?.toLowerCase().includes(term));
+      (user.phone_number?.includes(term)) ||
+      (user.first_name?.toLowerCase().includes(term)) ||
+      (user.last_name?.toLowerCase().includes(term));
       
       // Status Logic
       const matchesStatus = statusFilter === 'all' 
@@ -212,7 +210,7 @@ const CustomersTab = () => {
                   </label>
                 </th>
                 
-                <th onClick={() => handleSort('username')} className="cursor-pointer hover:bg-slate-100 transition-colors">
+                <th onClick={() => handleSort('phone_number')} className="cursor-pointer hover:bg-slate-100 transition-colors">
                   <div className="flex items-center gap-2">کاربر <SortIcon columnKey="username"/></div>
                 </th>
                 
@@ -251,7 +249,8 @@ const CustomersTab = () => {
                 </tr>
               ) : (
                 paginatedData.map((user) => (
-                  <CustomerRow 
+                  
+                  <CustomerRow
                     key={user.id} 
                     user={user} 
                     isSelected={selectedIds.includes(user.id)}
@@ -259,6 +258,7 @@ const CustomersTab = () => {
                     onEdit={handleEdit}
                     onWalletAction={handleWalletAction} 
                   />
+                  
                 ))
               )}
             </tbody>

@@ -610,7 +610,7 @@ const DesignUploadPage = () => {
                 </span>
               </div>
             ) : (
-              <span className="text-[13px] text-slate-400 font-medium">
+              <span className="text-md text-slate-400 font-medium">
                 {t.noFilesUploadedYet}
               </span>
             )}
@@ -622,19 +622,19 @@ const DesignUploadPage = () => {
             disabled={isUploading || hasPending || deletingId !== null}
             className="
               flex items-center justify-center gap-2
-              px-6 py-2.5 rounded-xl
-              bg-primary text-white text-sm font-bold
+              px-8 py-4 rounded-xl
+              bg-primary text-white text-md font-bold
               shadow-md shadow-primary/20
               hover:shadow-lg hover:shadow-primary/30
               hover:-translate-y-[1px]
               active:translate-y-0
               disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-sm
               transition-all duration-200
-              flex-1 sm:flex-none
+              flex-1 sm:flex-none 
             "
           >
             {hasPending ? t.uploadPendingWarning : t.finalConfirmAndBack}
-            <ArrowLeft size={16} />
+            <ArrowLeft size={25} />
           </button>
         </div>
       </div>

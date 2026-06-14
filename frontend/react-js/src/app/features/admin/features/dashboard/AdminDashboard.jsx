@@ -222,7 +222,7 @@ const AdminDashboard = () => {
         </div>
         <div className="flex items-center gap-3 bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm">
           <span className="text-xs font-bold text-slate-400 px-3 flex items-center gap-2">
-            <Calendar size={14}/> {new Date().toLocaleDateString('fa-IR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            <Calendar size={14}/> {new Date().toLocaleDateString('EN', { weekday: 'long', day: 'numeric', month: 'long' })}
           </span>
           <button onClick={refetchAll} className="btn btn-circle btn-ghost btn-sm text-primary hover:bg-primary/10 tooltip tooltip-left" data-tip="بروزرسانی">
             <RefreshCw size={18}/>

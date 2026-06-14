@@ -1355,3 +1355,77 @@ INFO 2026-06-13 19:00:42,678 user_transaction_service 91 129286854051520 Fetchin
 WARNING 2026-06-13 19:00:42,682 user_transaction_service 91 129286854051520 No wallet found for User ID: 3
 INFO 2026-06-13 19:01:21,200 user_transaction_service 91 129286862444224 Fetching wallet balance for User ID: 6
 WARNING 2026-06-13 19:01:21,208 user_transaction_service 91 129286862444224 No wallet found for User ID: 6
+INFO 2026-06-14 10:30:18,666 user_transaction_service 7 125334108231360 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:30:18,672 user_transaction_service 7 125334108231360 Wallet balance: -519426.00
+INFO 2026-06-14 10:30:21,012 user_transaction_service 7 125334116624064 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:30:21,019 user_transaction_service 7 125334116624064 Wallet balance: -519426.00
+INFO 2026-06-14 10:40:14,215 user_transaction_service 7 125334116624064 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:40:14,246 user_transaction_service 7 125334116624064 Wallet balance: -519426.00
+INFO 2026-06-14 10:40:18,948 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:40:18,956 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:40:30,763 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:40:30,767 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:41:11,206 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:41:11,215 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:41:16,380 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:41:16,387 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:41:17,393 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:41:17,397 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:41:30,624 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:41:30,629 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:41:33,165 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:41:33,171 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:41:42,482 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:41:42,486 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:41:45,027 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:41:45,031 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:41:46,710 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:41:46,714 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:41:53,400 user_transaction_service 7 125334099838656 Fetching transaction history for User ID: 1
+INFO 2026-06-14 10:41:53,405 user_transaction_service 7 125334099838656 Retrieved 15 transactions for User ID: 1
+INFO 2026-06-14 10:44:29,401 user_transaction_service 7 125334099838656 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:44:29,416 user_transaction_service 7 125334099838656 Wallet balance: -519426.00
+INFO 2026-06-14 10:46:07,756 user_transaction_service 7 125334108231360 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:46:07,768 user_transaction_service 7 125334108231360 Wallet balance: -519426.00
+INFO 2026-06-14 10:47:31,520 user_transaction_service 7 125334108231360 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:47:31,526 user_transaction_service 7 125334108231360 Wallet balance: -519426.00
+INFO 2026-06-14 10:48:13,665 user_transaction_service 7 125334125016768 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:48:13,676 user_transaction_service 7 125334125016768 Wallet balance: -519426.00
+INFO 2026-06-14 10:48:52,242 user_transaction_service 7 125334116624064 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:48:52,253 user_transaction_service 7 125334116624064 Wallet balance: -519426.00
+INFO 2026-06-14 10:56:02,643 user_transaction_service 7 125334125016768 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:56:02,648 user_transaction_service 7 125334125016768 Wallet balance: -519426.00
+INFO 2026-06-14 10:56:19,815 user_transaction_service 7 125334125016768 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:56:19,827 user_transaction_service 7 125334125016768 Wallet balance: -519426.00
+INFO 2026-06-14 10:56:28,541 user_transaction_service 7 125334518404800 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:56:28,572 user_transaction_service 7 125334518404800 Wallet balance: -519426.00
+INFO 2026-06-14 10:58:06,534 user_transaction_service 7 125334125016768 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 10:58:06,553 user_transaction_service 7 125334125016768 Wallet balance: -519426.00
+INFO 2026-06-14 11:20:55,832 user_transaction_service 7 125334518404800 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 11:20:55,853 user_transaction_service 7 125334518404800 Wallet balance: -519426.00
+INFO 2026-06-14 11:44:28,536 user_transaction_service 7 125334108231360 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 11:44:28,547 user_transaction_service 7 125334108231360 Wallet balance: -519426.00
+INFO 2026-06-14 12:27:35,900 user_transaction_service 7 125334518404800 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-14 12:27:35,905 user_transaction_service 7 125334518404800 Wallet balance: -519426.00
+INFO 2026-06-14 12:47:39,080 user_transaction_service 7 125334504769216 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:47:39,091 user_transaction_service 7 125334504769216 No wallet found for User ID: 4
+INFO 2026-06-14 12:47:48,571 user_transaction_service 7 125334108231360 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:47:48,593 user_transaction_service 7 125334108231360 No wallet found for User ID: 4
+INFO 2026-06-14 12:47:52,409 user_transaction_service 7 125334108231360 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:47:52,417 user_transaction_service 7 125334108231360 No wallet found for User ID: 4
+INFO 2026-06-14 12:47:57,960 user_transaction_service 7 125334496376512 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:47:57,966 user_transaction_service 7 125334496376512 No wallet found for User ID: 4
+INFO 2026-06-14 12:48:18,226 user_transaction_service 7 125334108231360 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:48:18,234 user_transaction_service 7 125334108231360 No wallet found for User ID: 4
+INFO 2026-06-14 12:48:21,697 user_transaction_service 7 125334504769216 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:48:21,704 user_transaction_service 7 125334504769216 No wallet found for User ID: 4
+INFO 2026-06-14 12:48:39,430 user_transaction_service 7 125334475392704 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:48:39,437 user_transaction_service 7 125334475392704 No wallet found for User ID: 4
+INFO 2026-06-14 12:48:39,476 user_transaction_service 7 125334518404800 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:48:39,483 user_transaction_service 7 125334518404800 No wallet found for User ID: 4
+INFO 2026-06-14 12:48:51,075 user_transaction_service 7 125334504769216 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:48:51,087 user_transaction_service 7 125334504769216 No wallet found for User ID: 4
+INFO 2026-06-14 12:48:54,282 user_transaction_service 7 125334504769216 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:48:54,302 user_transaction_service 7 125334504769216 No wallet found for User ID: 4
+INFO 2026-06-14 12:48:54,359 user_transaction_service 7 125334108231360 Fetching wallet balance for User ID: 4
+WARNING 2026-06-14 12:48:54,370 user_transaction_service 7 125334108231360 No wallet found for User ID: 4

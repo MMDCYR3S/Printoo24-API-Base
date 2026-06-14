@@ -32,7 +32,7 @@ const ProfileDashboard = () => {
 
   // فرمت کردن عدد پول
   const formattedBalance = wallet?.decimal 
-    ? new Intl.NumberFormat('fa-IQ').format(Number(wallet.decimal)) 
+    ? new Intl.NumberFormat('EN').format(Number(wallet.decimal)) 
     : '0';
 
   // 3. تنظیمات فرم ادیت

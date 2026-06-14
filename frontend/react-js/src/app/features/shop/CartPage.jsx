@@ -102,7 +102,7 @@ const CartPage = () => {
   const formattedTotal = cartData.total_price?.toLocaleString();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/50 pb-28 lg:pb-8 pt-6 md:pt-8">
+    <div className="min-h-screen pb-28 lg:pb-8 pt-6 md:pt-8">
       <div className="container mx-auto px-4 max-w-7xl">
 
         {/* ── هدر ── */}
@@ -134,7 +134,7 @@ const CartPage = () => {
               transition-all duration-200
             "
           >
-            ادامه خرید
+            بەردەوامبوون لە کڕین
             <ArrowLeft size={14} />
           </Link>
         </motion.div>

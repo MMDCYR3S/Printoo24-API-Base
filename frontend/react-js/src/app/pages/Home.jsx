@@ -242,46 +242,33 @@ const TrustSection = () => {
               key={item.id}
               variants={fadeUp}
               className="
-                group relative rounded-2xl
+                 relative rounded-2xl
                 bg-white
                 ring-1 ring-black/[0.05]
-                p-5 md:p-6
+                p-5 md:px-6 py-4
                 transition-all duration-500 ease-out
                 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/[0.06]
-                overflow-hidden
+                overflow-hidden flex
               "
             >
-              {/* خط گرادیان بالا */}
-              <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
-              {/* دایره تزئینی پس‌زمینه */}
-              <div className={`
-                absolute -bottom-8 -left-8 w-32 h-32 rounded-full
-                bg-gradient-to-br ${item.gradient} opacity-[0.04]
-                group-hover:opacity-[0.08] group-hover:scale-125
-                transition-all duration-700
-              `} />
 
-              <div className="relative z-10 flex items-start gap-4">
+
+              <div className="relative z-10 flex items-start ">
+                <div className='absolute rounded-lg -top-[33.5px] -right-20 w-28 h-28 bg-primary rotate-45 outline -outline-offset-4 outline-white'></div>
                 {/* آیکون */}
                 <div className={`
-                  shrink-0 w-12 h-12 rounded-xl
-                  flex items-center justify-center
-                  ${item.lightBg} ${item.lightText}
-                  group-hover:bg-gradient-to-br group-hover:${item.gradient}
-                  group-hover:text-white group-hover:shadow-lg
+                  
+                  group-hover:shadow-lg
                   transition-all duration-500
-                  group-hover:scale-105 group-hover:rotate-2
+                  group-hover:scale-105 
                 `}>
-                  <Icon size={24} strokeWidth={1.8} />
+                  <Icon className='absolute -right-4 z-10 text-white' size={44} strokeWidth={1.8} />
                 </div>
 
                 {/* متن */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-extrabold text-slate-800 mb-1.5 leading-tight">
-                    {item.title}
-                  </h3>
-                  <p className="text-[13px] text-slate-500 leading-relaxed font-medium">
+                <div className="flex-1 min-w-0 pr-16 ">
+                  <p className="text-[13px] text-slate-900 leading-relaxed font-bold">
                     {item.desc}
                   </p>
                 </div>

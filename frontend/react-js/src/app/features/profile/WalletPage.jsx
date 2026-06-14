@@ -12,7 +12,7 @@ const WalletPage = () => {
   });
 
   // تابع کمکی برای فرمت قیمت
-  const formatPrice = (price) => new Intl.NumberFormat('fa-IQ').format(price);
+  const formatPrice = (price) => new Intl.NumberFormat('EN').format(price);
 
   if (isLoading) return <div className="p-10 text-center"><span className="loading loading-spinner"></span></div>;
 
@@ -30,9 +30,9 @@ const WalletPage = () => {
         {transactions.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="table w-full">
-              <thead className="bg-slate-50 text-slate-500">
+              <thead className="bg-slate-50 text-slate-500 text-right">
                 <tr>
-                  <th>{pageText.profile.walletPage.transactionType}</th>
+                  <th >{pageText.profile.walletPage.transactionType}</th>
                   <th>{pageText.profile.walletPage.price} ({globalText.currency})</th>
                   <th>{pageText.profile.walletPage.amountAfterTransaction}</th>
                   <th>{pageText.profile.walletPage.date}</th>
@@ -44,7 +44,7 @@ const WalletPage = () => {
                   return (
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                       <td>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center  gap-2">
                           <div className={`p-2 rounded-xl ${isDeposit ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
                             {isDeposit ? <ArrowDownLeft size={16} /> : <ArrowUpRight size={16} />}
                           </div>
@@ -60,7 +60,7 @@ const WalletPage = () => {
                       <td className="text-slate-400 text-sm">
                         <div className="flex items-center gap-1">
                           <Calendar size={14} />
-                          <span dir="ltr">{new Date(item.created_at).toLocaleDateString('fa-IR')}</span>
+                          <span dir="ltr">{new Date(item.created_at).toLocaleDateString('EN')}</span>
                         </div>
                       </td>
                     </tr>

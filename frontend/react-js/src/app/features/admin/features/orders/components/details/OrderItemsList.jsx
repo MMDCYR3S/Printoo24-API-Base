@@ -73,39 +73,24 @@ const OrderItemsList = ({ order }) => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* --- هدر اصلی بخش --- */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-3">
-          <div className="p-2 bg-slate-800 rounded-lg text-white shadow-sm">
-            <Box size={20} />
-          </div>
-          اقلام سفارش
-        </h2>
-        <div className="bg-slate-100 text-slate-600 font-bold px-3 py-1 rounded-md text-sm">
-          {order?.items?.length || 0} ردیف
-        </div>
-      </div>
+    <div className="">
+
 
       {/* --- لیست محصولات --- */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="">
         {order?.items?.map((item, index) => (
-          <div key={item.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all">
+          <div key={item.id} className="">
             
             {/* نوار عنوان محصول */}
             <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex flex-wrap justify-between items-center gap-4">
                <div className="flex items-center gap-3">
-                  <span className="flex items-center justify-center w-7 h-7 rounded-full bg-slate-200 text-slate-600 font-bold text-sm">
-                    {index + 1}
-                  </span>
+
                   <div>
                     <h3 className="font-bold text-slate-800 text-lg">{item.product_name || item.name}</h3>
                     <p className="text-slate-400 font-mono text-xs mt-0.5">SLUG: {item.product_slug}</p>
                   </div>
                </div>
-               <div className="bg-white border border-slate-200 text-slate-700 px-4 py-1.5 rounded-lg font-bold text-sm shadow-sm">
-                  تعداد: {item.quantity}
-               </div>
+
             </div>
 
             {/* بدنه اصلی کارت */}
@@ -162,8 +147,8 @@ const OrderItemsList = ({ order }) => {
                   
                   <div className="flex flex-wrap gap-3">
                     {item.files.map((file) => {
-                      const absoluteUrl = getAbsoluteUrl(file.file_url);
-                      const isImage = isImageFile(file.file_url);
+                      const absoluteUrl = getAbsoluteUrl(file.file);
+                      const isImage = isImageFile(file.file);
 
                       return (
                         <a 

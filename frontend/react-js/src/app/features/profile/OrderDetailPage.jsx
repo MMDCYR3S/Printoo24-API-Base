@@ -146,7 +146,7 @@ const OrderDetailPage = () => {
             <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5 mt-1">
               <Calendar size={12} />
               {pageText.profile.orderDetailPage.registeredAt}{' '}
-              {new Date(order.created_at).toLocaleDateString('fa-IR')}
+              {new Date(order.created_at).toLocaleDateString('EN')}
             </p>
           </div>
         </div>
@@ -215,7 +215,7 @@ const OrderDetailPage = () => {
           </span>
           <div className="text-2xl font-extrabold text-slate-800 tabular-nums">
             {formatCurrency(order.total_price)}
-            <span className="text-xs font-bold text-slate-400 mr-1">{globalText.currency}</span>
+            <span className="text-xs font-bold text-slate-400 mx-1">{globalText.currency}</span>
           </div>
         </motion.div>
 
@@ -308,9 +308,9 @@ const OrderDetailPage = () => {
             </div>
           </div>
   
-          <div className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-extrabold tabular-nums shadow-sm">
-            {Number(item.price).toLocaleString()} تومان
-          </div>
+          <div className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-extrabold tabular-nums shadow-sm " dir='ltr'>
+            {Number(item.price).toLocaleString()} IQD
+          </div> 
         </div>
   
 {/* محتوای اصلی: انتخاب‌های کاربر */}
@@ -318,9 +318,7 @@ const OrderDetailPage = () => {
           
           {/* بخش اول: مشخصات و آپشن‌های انتخابی محصول */}
           <div>
-            <span className="text-xs font-bold text-blue-600 border-r-2 border-blue-600 pr-2 block mb-3">
-              مشخصات فنی سفارش
-            </span>
+
             
             <div className="flex flex-wrap gap-2">
               {item.specs?.options_detail && item.specs.options_detail.length > 0 ? (
@@ -339,7 +337,6 @@ const OrderDetailPage = () => {
                 ))
               ) : (
                 <div className="w-full flex items-center gap-2 bg-slate-50/50 border border-dashed border-slate-200 p-3 rounded-xl">
-                  <p className="text-xs text-slate-400 font-medium">مشخصاتی برای این آیتم ثبت نشده است.</p>
                 </div>
               )}
             </div>
@@ -347,9 +344,7 @@ const OrderDetailPage = () => {
   
           {/* بخش دوم: فایل‌های طراحی آپلود شده توسط کاربر */}
           <div>
-            <span className="text-xs font-bold text-indigo-600 border-r-2 border-indigo-600 pr-2 block mb-3">
-              فایل‌های طراحی ارسالی
-            </span>
+
   
             <div className="space-y-2">
               {item.design_files && item.design_files.length > 0 ? (
@@ -366,7 +361,7 @@ const OrderDetailPage = () => {
                         <FileText size={18} />
                       </div>
                       <span className="text-xs font-bold text-slate-700 truncate dir-ltr text-right">
-                        فایل طراحی شماره {index + 1}
+                       {index + 1}
                       </span>
                     </div>
                     <Download size={16} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
@@ -374,7 +369,7 @@ const OrderDetailPage = () => {
                 ))
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 rounded-xl bg-slate-50/50 border border-dashed border-slate-200">
-                  <p className="text-xs text-slate-400 font-medium">فایلی توسط کاربر آپلود نشده است.</p>
+                  <p className="text-xs text-slate-400 font-medium">هیچ فایلێک بۆ ئەم داواکارییە تۆمار نەکراوە</p>
                 </div>
               )}
             </div>
