@@ -12,7 +12,7 @@ const STATUS_STYLES = {
   PRINTING:       { badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60',     dot: 'bg-amber-500',   card: 'bg-white' },
   SHIPPED:        { badge: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200/60',           dot: 'bg-sky-500',     card: 'bg-white' },
   DELIVERED:      { badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60', dot: 'bg-emerald-500', card: 'bg-emerald-500/20' },
-  CANCELED:       { badge: 'bg-red-50 text-red-600 ring-1 ring-red-200/60',           dot: 'bg-red-500',     card: 'bg-white' },
+  CANCELED:       { badge: 'bg-red-50 text-red-600 ring-1 ring-red-200/60',           dot: 'bg-red-500',     card: 'bg-red-500/20' },
 };
 
 const getStatusStyle = (code) =>
@@ -123,9 +123,9 @@ const MyOrdersPage = () => {
                   <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                     <div className="text-left">
                       <span className="block text-[9px] text-slate-400 font-medium">{pageText.profile.myOrdersPage.totalPrice}</span>
-                      <span className="text-base font-extrabold text-slate-700 tabular-nums dir-ltr">
-                        {new Intl.NumberFormat('fa-IQ').format(order.total_price)}
-                        <span className="text-[10px] font-bold text-slate-400 mr-1">{globalText.currency}</span>
+                      <span className="text-base font-extrabold text-slate-700 tabular-nums ">
+                        {new Intl.NumberFormat('EN').format(order.total_price)}
+                        <span className="text-[10px] font-bold text-slate-400 mx-1">{globalText.currency}</span>
                       </span>
                     </div>
 

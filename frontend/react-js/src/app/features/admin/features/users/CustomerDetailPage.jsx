@@ -73,11 +73,7 @@ const CustomerDetailPage = () => {
                 <div className={`absolute top-0 right-0 w-full h-2 ${user.is_active ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
                 
                 <div className="flex flex-col sm:flex-row gap-6">
-                    <div className="avatar placeholder">
-                        <div className="bg-slate-100 text-slate-400 rounded-3xl w-24 h-24 text-3xl font-black flex items-center justify-center ring-4 ring-white shadow-lg">
-                            {user.username.substring(0, 2).toUpperCase()}
-                        </div>
-                    </div>
+
                     
                     <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                         <div className="space-y-1">

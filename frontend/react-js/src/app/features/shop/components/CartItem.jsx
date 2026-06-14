@@ -96,10 +96,7 @@ const CartItem = ({ item, onDelete, isDeleting }) => {
     </div>
   ))}
 
-  <div className="flex items-center justify-between py-0.5 border-t border-slate-100 mt-1 pt-2">
-    <span className="text-slate-500">تعداد</span>
-    <span className="font-semibold text-slate-700">{item.quantity.toLocaleString()}</span>
-  </div>
+
 </div>
 
           {/* وضعیت فایل */}

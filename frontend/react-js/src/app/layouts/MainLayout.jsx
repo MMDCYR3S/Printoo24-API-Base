@@ -99,7 +99,7 @@ const MainLayout = () => {
 
               {/* ── فوتر سایدبار ── */}
               <div className="shrink-0 border-t border-slate-100 bg-slate-50/50 p-4 space-y-3">
-                <button className="
+                <a href="https://wa.me/9647762278666" target="_blank" rel="noreferrer" title="WhatsApp" className="
                   w-full flex items-center justify-center gap-2
                   py-2.5 rounded-xl
                   bg-gradient-to-l from-secondary to-secondary/90
@@ -111,13 +111,8 @@ const MainLayout = () => {
                 ">
                   <Headphones size={16} />
                   {pageText.layout.MainLaouy}
-                </button>
-                <div className="
-                  text-center text-[10px] text-slate-400/60
-                  font-mono tracking-wider
-                " dir="ltr">
-                  Printoo24 v1.0.0
-                </div>
+                </a>
+
               </div>
             </motion.div>
           </div>

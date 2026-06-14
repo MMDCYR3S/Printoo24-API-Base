@@ -320,27 +320,17 @@ const CheckoutPage = () => {
                         </div>
 
                         <div className="form-control mb-4">
-                            <label className="label"><span className="label-text">{pageText.checkout.addressDetails}</span></label>
+                            <label className="label"><span className="label-text">{pageText.checkout.addressDetails}</span></label> <br />
                             <textarea 
                                 name="address_text" 
                                 value={formData.address_text} 
                                 onChange={handleInputChange}
-                                className="textarea textarea-bordered rounded-xl bg-slate-50 h-24" 
+                                className="textarea textarea-bordered rounded-xl bg-slate-50 h-24 w-full" 
                                 placeholder={pageText.checkout.addressPlaceholder}
                             ></textarea>
                         </div>
 
-                        <div className="form-control sm:w-1/2">
-                            <label className="label"><span className="label-text">{pageText.checkout.postalCodeLabel}</span></label>
-                            <input 
-                                name="postal_code" 
-                                value={formData.postal_code} 
-                                onChange={handleInputChange} 
-                                type="text" 
-                                className="input input-bordered rounded-xl bg-slate-50 dir-ltr text-right" 
-                                placeholder={pageText.checkout.postalCodePlaceholder}
-                            />
-                        </div>
+
                     </div>
                 )}
             </div>

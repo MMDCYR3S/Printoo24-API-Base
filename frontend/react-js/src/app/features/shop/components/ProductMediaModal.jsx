@@ -122,7 +122,7 @@ const ProductMediaModal = ({
                       {file.name}
                     </h4>
                     <span className="text-xs text-slate-400 mt-1 block">
-                      {new Date(file.created_at).toLocaleDateString('fa-IR')}
+                      {new Date(file.created_at).toLocaleDateString('EN')}
                     </span>
                   </div>
                   <a 

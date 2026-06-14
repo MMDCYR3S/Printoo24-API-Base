@@ -32,12 +32,12 @@ const OrderDetailsPage = () => {
       
       {/* بخش بالای صفحه: شامل دکمه بازگشت و وضعیت فعلی */}
       <div className="flex justify-between items-center mb-2">
-        <button 
-          onClick={() => navigate(-1)} 
+        <a
+          href='/admin/orders'
           className="btn btn-sm btn-ghost gap-2 text-slate-500 hover:text-slate-800"
         >
           <ArrowRight size={16} /> بازگشت به لیست سفارشات
-        </button>
+        </a>
 
         {/* بج نمایش وضعیت فعلی سفارش */}
         <div className="flex items-center gap-2 bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
@@ -55,7 +55,7 @@ const OrderDetailsPage = () => {
         
         {/* ستون راست: لیست اقلام */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-4">
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm mb-4">
             <OrderItemsList order={order} />
           </div>
 

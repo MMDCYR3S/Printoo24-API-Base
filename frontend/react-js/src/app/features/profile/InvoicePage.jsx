@@ -115,13 +115,9 @@ const InvoicePage = () => {
 
             {/* Phones */}
             <div className="text-right space-y-1.5">
-              <div className="flex items-center justify-end gap-2 text-neutral-content/80 text-sm font-semibold dir-ltr">
+              <div className="flex items-center justify-end gap-2 text-neutral-content/80 text-sm font-semibold " dir='ltr'>
                 <Phone size={14} className="text-primary shrink-0" />
                 <span>0776 2278 666</span>
-              </div>
-              <div className="flex items-center justify-end gap-2 text-neutral-content/80 text-sm font-semibold dir-ltr">
-                <Phone size={14} className="text-primary shrink-0" />
-                <span>0770 080 5867</span>
               </div>
             </div>
           </div>

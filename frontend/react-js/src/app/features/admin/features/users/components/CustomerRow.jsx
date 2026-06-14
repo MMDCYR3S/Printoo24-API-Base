@@ -29,15 +29,19 @@ const CustomerRow = memo(({ user, isSelected, onToggle, onEdit, onWalletAction }
         <div onClick={handleRowClick} className="flex items-center gap-3">
           <div className="avatar placeholder">
             <div className="bg-neutral-focus text-neutral-content rounded-full w-10 ring-1 ring-slate-200">
-              <span className="text-xs font-bold uppercase">{user.username?.substring(0, 2)}</span>
+            <span className="text-xs font-bold uppercase">{user.phone_number?.substring(0, 2)}</span>
             </div>
           </div>
           <div>
-            <div className="font-bold text-slate-700 text-sm flex items-center gap-1">
-              {user.username}
-              {user.is_superuser && <ShieldAlert size={14} className="text-amber-500" />}
-            </div>
-            <div className="text-[11px] text-slate-400 font-mono">{user.email || '---'}</div>
+          <div className="font-bold text-slate-700 text-sm flex items-center gap-1">
+  {user.phone_number}
+  {user.is_superuser && <ShieldAlert size={14} className="text-amber-500" />}
+</div>
+<div className="text-[11px] text-slate-400 font-mono">
+  {user.first_name || user.last_name 
+    ? `${user.first_name} ${user.last_name}`.trim() 
+    : '---'}
+</div>
           </div>
         </div>
       </td>
