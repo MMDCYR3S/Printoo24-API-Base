@@ -3,14 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from drf_spectacular.utils import (
-    extend_schema, OpenApiExample, OpenApiTypes, 
-    inline_serializer, OpenApiResponse, OpenApiParameter
+    extend_schema, OpenApiExample,
+    inline_serializer, OpenApiParameter
 )
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 
 from apps.dashboard.services import ProductDashboardService
 from ..serializers import (
-    ProductSerializer, ProductShellSerializer,
+    ProductSerializer, ProductImageReorderSerializer,
     ProductCoreCreateSerializer, ProductDetailSerializer,
     ProductFieldsBulkSyncSerializer, ProductFormulasBulkSyncSerializer,
 )
@@ -572,3 +573,46 @@ class ProductDashboardViewSet(viewsets.ViewSet):
             return Response(result)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+    # ========== REORDER IMAGES ========== #
+    @extend_schema(
+        summary="تغییر ترتیب و چینش تصاویر محصول",
+        description="""
+        با ارسال لیستی از ID های تصاویر به ترتیب دلخواه، فیلد order آن‌ها در دیتابیس آپدیت می‌شود.
+        تصویری که ID آن در ابتدای آرایه باشد، به عنوان عکس اول (order=1) در نظر گرفته می‌شود.
+        """,
+        request=ProductImageReorderSerializer,
+        responses={200: inline_serializer('ReorderImagesResponse', fields={
+            'message': serializers.CharField(),
+        })},
+        examples=[
+            OpenApiExample(
+                name='مرتب‌سازی عکس‌ها',
+                summary='ارسال ID عکس‌ها به ترتیب دلخواه',
+                value={
+                    "image_ids": [15, 12, 18, 20] 
+                },
+                request_only=True,
+            )
+        ]
+    )
+    @action(detail=True, methods=['patch'], url_path='reorder-images')
+    def reorder_images(self, request, id=None):
+        serializer = ProductImageReorderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            self.app_service.reorder_product_images(
+                product_id=id,
+                image_ids=serializer.validated_data['image_ids']
+            )
+            return Response(
+                {'message': 'ترتیب تصاویر با موفقیت به‌روزرسانی شد.'},
+                status=status.HTTP_200_OK
+            )
+        except ValidationError as e:
+            return Response(
+                {'error': e.message if hasattr(e, 'message') else str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+

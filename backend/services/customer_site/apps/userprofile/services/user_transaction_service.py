@@ -27,13 +27,13 @@ class WalletAppService:
         logger.info(f"Fetching wallet balance for User ID: {user_id}")
         
         try:
-            wallet = self._wallet_repo.get_user_balance(user_id)
+            wallet = self._wallet_repo.get_user_balance(self.user) 
             
             if not wallet:
                 logger.warning(f"No wallet found for User ID: {self.user.id}")
                 return None
             
-            logger.debug(f"Wallet balance: {wallet}")
+            logger.debug(f"Wallet balance: {wallet.balance}")
             return wallet
         except Exception as e:
             logger.exception(f"Error fetching wallet for User ID: {user_id}")

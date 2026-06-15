@@ -216,3 +216,10 @@ class ProductDashboardService:
                 to_attr='prefetched_images'
             )
         ).order_by('-id')
+    
+    # ===== REORDER IMAGES ===== #
+    def reorder_product_images(self, product_id: int, image_ids: List[int]):
+        """
+        واسط تغییر ترتیب تصاویر محصول
+        """
+        self.media_service.reorder_images(product_id=product_id, image_ids=image_ids)
