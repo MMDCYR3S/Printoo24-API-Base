@@ -34,7 +34,6 @@ const MobileMenu = ({ onClose }) => {
     return (
       <div className="text-center py-12 text-base-content/50">
         <Squares2X2Icon className="w-12 h-12 mx-auto mb-3 opacity-30" />
-        <p>دسته‌بندی یافت نشد</p>
       </div>
     );
   }
@@ -45,7 +44,7 @@ const MobileMenu = ({ onClose }) => {
       <div className="px-4 py-4 mb-2 border-b border-base-200">
         <h2 className="text-lg font-bold text-base-content flex items-center gap-2">
           <Squares2X2Icon className="w-5 h-5 text-primary" />
-          دسته‌بندی محصولات
+          پۆلێنکردنی بەرهەمەکان
         </h2>
       </div>
 
@@ -123,7 +122,7 @@ const MobileMenu = ({ onClose }) => {
                         "
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                        مشاهده همه {category.name}
+                        بینینی هەموو {category.name}
                       </Link>
                     </li>
 
