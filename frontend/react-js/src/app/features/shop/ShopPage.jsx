@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import SEO from '../../components/common/SEO';
 import { shopService } from '../../services/shopService';
 import { categoryService } from '../../services/categoryService';
 import ProductCard from '../../components/product/ProductCard';
@@ -186,6 +187,12 @@ const ShopPage = () => {
 
   return (
     <div className="mx-auto px-4 md:px-6 py-6 md:py-8 max-w-[92vw]">
+            <SEO 
+        title="فێرکارییە ڤیدیۆییەکان" 
+        description="ویدیوهای آموزشی پرینتو۲۴ را تماشا کنید و مهارت‌های چاپ و طراحی خود را ارتقا دهید."
+        keywords="آموزش چاپ, ویدیو آموزشی, پرینتو۲۴, طراحی برای چاپ"
+      />
+
 
       {/* ════════════════ هدر موبایل ════════════════ */}
       <div className="flex lg:hidden justify-between items-center mb-5">
@@ -212,7 +219,7 @@ const ShopPage = () => {
           "
         >
           <Filter size={18} strokeWidth={2} />
-          فیلتر
+          فلتەرەکان
           {totalFilters > 0 && (
             <span className="
               absolute -top-1.5 -left-1.5
@@ -647,7 +654,7 @@ const MobileDrawer = ({ onClose, children }) => (
       <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-100">
         <h3 className="text-sm font-extrabold text-slate-700 flex items-center gap-2">
           <SlidersHorizontal size={16} className="text-primary" />
-          فیلتر محصولات
+          فلتەرکردنی بەرهەمەکان
         </h3>
         <button
           onClick={onClose}

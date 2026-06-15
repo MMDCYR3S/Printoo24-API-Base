@@ -40,6 +40,7 @@ const BlogListPage = () => {
       <SEO 
         title="Blog & Articles" 
         description="Stay updated with the latest printing technologies, design tips, and news from Printoo24."
+        keywords="آموزش چاپ, ویدیو آموزشی, پرینتو۲۴, طراحی برای چاپ"
       />
 
       {/* ── هدر صفحه ── */}
@@ -52,7 +53,7 @@ const BlogListPage = () => {
     <div className='bg-radial from-secondary/40 to-primary/30 backdrop-blur-xs inset-shadow-xs inline-block p-4 rounded-2xl'>
         <div className='text-primary text-5xl md:text-6xl flex flex-col font-extrabold '>
             <span className='z-10 text-shadow-lg '>
-            بلاگ‌ها
+            بڵاگەکان
             </span>
 
 

@@ -27,7 +27,7 @@ const DesignUploadPage = () => {
       }
     } catch (err) {
       console.error(err);
-      toast.error('خطا در دریافت اطلاعات فایل‌ها');
+      toast.error('هەڵە لە وەرگرتنی زانیاری فایلەکان');
     } finally {
       setLoadingItem(false);
     }
@@ -68,12 +68,12 @@ const DesignUploadPage = () => {
       } catch (err) {
         console.error(err);
         setPendingFiles(prev => prev.map(f => f.id === item.id ? { ...f, status: 'error' } : f));
-        toast.error(`خطا در آپلود ${item.file.name}`);
+        toast.error(` هەڵە لە بارکردنی ${item.file.name}`);
       }
     }
 
     if (successCount > 0) {
-      toast.success(`${successCount} فایل با موفقیت ذخیره شد`);
+      toast.success(`${successCount} فایل بە سەرکەوتوویی پاشەکەوت کرا `);
       fetchItemDetails();
     }
     
@@ -81,16 +81,16 @@ const DesignUploadPage = () => {
   };
 
   const handleDeleteServerFile = async (uploadId) => {
-    if (!window.confirm('آیا از حذف این فایل طراحی اطمینان دارید؟')) return;
+    if (!window.confirm('دڵنیایت لە سڕینەوەی فایلی دیزاین؟')) return;
     
     try {
       setDeletingId(uploadId);
       await cartService.deleteUpload(uploadId);
       setServerFiles(prev => prev.filter(f => f.id !== uploadId));
-      toast.success('فایل با موفقیت حذف شد');
+      toast.success('فایل بە سەرکەوتوویی سڕایەوە');
     } catch (err) {
-      console.error("خطا در حذف:", err);
-      toast.error('مشکلی در حذف فایل پیش آمد');
+      console.error( err);
+      toast.error(' کێشەیەک لە سڕینەوەی فایل ڕوویدا');
     } finally {
       setDeletingId(null);
     }
@@ -110,18 +110,18 @@ const DesignUploadPage = () => {
         
         <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
             <div>
-                <h1 className="text-xl font-bold text-slate-800">مدیریت فایل‌های سفارش</h1>
-                <p className="text-xs text-slate-500 mt-1">شناسه سفارش: {itemId}</p>
+                <h1 className="text-xl font-bold text-slate-800">بەڕێوەبردنی فایلەکانی داواکاری</h1>
+                <p className="text-xs text-slate-500 mt-1"> {itemId}</p>
             </div>
             <button onClick={() => fetchItemDetails()} className="btn btn-ghost btn-sm text-xs">
-                بروزرسانی لیست
+ 
             </button>
         </div>
 
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
             <h2 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <UploadCloud className="text-blue-600"/>
-                افزودن فایل جدید
+                زیادکردنی فایلێکی نوێ
             </h2>
             
             <div className="relative group">
@@ -137,8 +137,8 @@ const DesignUploadPage = () => {
                     <div className="w-14 h-14 bg-white text-blue-600 rounded-full shadow-md flex items-center justify-center mb-3">
                         <UploadCloud size={28} />
                     </div>
-                    <h3 className="font-bold text-slate-700">فایل‌ها را اینجا رها کنید</h3>
-                    <p className="text-xs text-slate-400 mt-2">پشتیبانی از JPG, PNG, PDF, ZIP (تعداد نامحدود)</p>
+                    <h3 className="font-bold text-slate-700"> فایلەکان لێرە دابنێ</h3>
+                    <p className="text-xs text-slate-400 mt-2">پشتگیری لە فۆرماتەکانی JPG, PNG, PDF, ZIP </p>
                 </div>
             </div>
         </div>
@@ -148,7 +148,7 @@ const DesignUploadPage = () => {
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-amber-800 flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
-                        فایل‌های آماده ارسال ({pendingFiles.length})
+                        فایلە ئامادەکانی ناردن ({pendingFiles.length})
                     </h3>
                     {isUploading && <span className="loading loading-spinner loading-sm text-amber-600"></span>}
                 </div>
@@ -169,7 +169,7 @@ const DesignUploadPage = () => {
                             </div>
                             
                             <div className="flex items-center gap-2">
-                                {item.status === 'error' && <span className="text-xs text-red-500 font-bold">خطا</span>}
+                                {item.status === 'error' && <span className="text-xs text-red-500 font-bold">هەڵە</span>}
                                 {item.status === 'uploading' ? (
                                     <span className="loading loading-spinner loading-xs"></span>
                                 ) : (
@@ -187,7 +187,7 @@ const DesignUploadPage = () => {
                     disabled={isUploading}
                     className="btn bg-amber-500 hover:bg-amber-600 text-white border-none w-full shadow-lg shadow-amber-500/20"
                 >
-                    {isUploading ? 'در حال آپلود...' : 'شروع آپلود فایل‌ها'}
+                    {isUploading ? ' لە بارکردندایە...' : 'دەستپێکردنی بارکردنی فایلەکان'}
                 </button>
             </div>
         )}
@@ -195,13 +195,13 @@ const DesignUploadPage = () => {
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm min-h-[200px]">
              <h2 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
                 <CheckCircle className="text-emerald-500"/>
-                فایل‌های ثبت شده ({serverFiles.length})
+               ({serverFiles.length})
             </h2>
 
             {serverFiles.length === 0 ? (
                 <div className="text-center py-10 text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                     <ImageIcon size={48} className="mx-auto mb-2 opacity-50"/>
-                    <p>هنوز فایلی برای این سفارش ثبت نشده است</p>
+                    <p>هێشتا هیچ فایلێک بۆ ئەم داواکارییە تۆمار نەکراوە</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -222,7 +222,7 @@ const DesignUploadPage = () => {
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteServerFile(file.id); }}
                                 disabled={deletingId === file.id}
                                 className="absolute top-2 left-2 z-50 flex items-center justify-center w-8 h-8 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-lg"
-                                title="حذف این فایل"
+                                title="سڕینەوەی ئەم فایلە"
                             >
                                 {deletingId === file.id ? (
                                     <span className="loading loading-spinner loading-xs"></span>
@@ -232,14 +232,14 @@ const DesignUploadPage = () => {
                             </button>
                             
                             <div className="absolute top-2 right-2 z-30 bg-emerald-500/90 text-white text-[10px] px-2 py-1 rounded-md shadow-sm pointer-events-none">
-                                ثبت شده
+                            تۆمارکرا
                             </div>
 
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm z-20 pointer-events-none group-hover:pointer-events-auto">
                                 <button 
                                     onClick={() => openImage(file.file_url)}
                                     className="p-3 bg-white text-slate-800 rounded-xl hover:scale-110 transition-transform shadow-lg pointer-events-auto"
-                                    title="مشاهده بزرگتر"
+                                    title="بینینی وێنە بە قەبارەی گەورەتر"
                                 >
                                     <Eye size={20} />
                                 </button>
@@ -257,8 +257,8 @@ const DesignUploadPage = () => {
         <div className="max-w-4xl mx-auto flex items-center gap-4">
             <div className="flex-1 text-sm text-slate-500 hidden sm:block">
                 {serverFiles.length > 0 
-                  ? `${serverFiles.length} فایل برای چاپ آماده است.` 
-                  : 'هنوز فایلی آپلود نکرده‌اید.'}
+                  ? `${serverFiles.length} فایل بۆ چاپ ئامادەیە ` 
+                  : ' هێشتا هیچ فایلێکت بار نەکردووە '}
             </div>
             
             <button
@@ -267,8 +267,8 @@ const DesignUploadPage = () => {
                 className="btn btn-primary px-8 rounded-xl flex-1 sm:flex-none shadow-lg shadow-primary/30"
             >
                 {pendingFiles.length > 0 
-                    ? 'لطفا ابتدا فایل‌های جدید را آپلود کنید' 
-                    : 'تایید نهایی و بازگشت به سبد خرید'}
+                    ? '  تکایە سەرەتا فایلە نوێیەکان باربکە ' 
+                    : '  پەسەندکردنی کۆتایی و گەڕانەوە بۆ سەبەتی کڕین '}
                 <ArrowLeft size={18} />
             </button>
         </div>

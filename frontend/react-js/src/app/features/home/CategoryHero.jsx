@@ -158,7 +158,7 @@ const AccordionContent = memo(({ category, isFirstAndOpen }) => {
               <div className="p-1.5 bg-emerald-50 text-emerald-500 rounded-lg">
                 <Tag size={15} strokeWidth={2.2} />
               </div>
-              <h3 className="text-[13px] font-bold text-slate-600">محصولات برگزیده</h3>
+              <h3 className="text-[13px] font-bold text-slate-600">بەرهەمە تایبەتەکان</h3>
             </div>
             <Link
               to={`/shop?category=${category_info.slug}`}

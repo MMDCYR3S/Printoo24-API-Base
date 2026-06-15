@@ -180,7 +180,6 @@ const CustomersTab = () => {
       </div>
 
       {/* Filters Section */}
-      <div className="bg-white p-1 rounded-3xl shadow-sm border border-slate-100">
         <CustomerFilters 
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
@@ -190,11 +189,10 @@ const CustomersTab = () => {
             onRoleChange={setRoleFilter}
             onRefresh={() => usersQuery.refetch()}
         />
-      </div>
 
       {/* Main Table */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden relative min-h-[400px]">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden relative  ">
+        <div className="">
           <table className="table w-full">
             {/* Table Head */}
             <thead className="bg-slate-50/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider border-b border-slate-100 backdrop-blur-sm sticky top-0 z-10">
@@ -331,7 +329,7 @@ const UsersListPage = () => {
     <div className="w-full relative">
       {/* هدر تب‌ها در بالاترین سطح صفحه قرار می‌گیرد */}
       <div className="pt-6 px-6 md:px-8 max-w-[1920px] mx-auto">
-        <div className="tabs tabs-boxed bg-slate-100 p-1 w-fit border border-slate-200 shadow-sm rounded-xl">
+        {/* <div className="tabs tabs-boxed bg-slate-100 p-1 w-fit border border-slate-200 shadow-sm rounded-xl">
           <button 
             onClick={() => setActiveTab('customers')}
             className={`tab tab-md md:tab-lg gap-2 transition-all rounded-lg ${activeTab === 'customers' ? 'tab-active !bg-white !text-primary shadow-sm font-bold' : 'text-slate-500 font-medium'}`}
@@ -346,7 +344,7 @@ const UsersListPage = () => {
             <ShieldCheck size={18} />
             کارمندان
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* محتوای تب انتخاب شده */}

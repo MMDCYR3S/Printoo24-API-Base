@@ -77,20 +77,10 @@ const AddressRow = ({ index, remove }) => {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        {/* کد پستی */}
-        <div className="form-control col-span-1">
-          <label className="label text-xs font-bold text-base-content/70">کد پستی</label>
-          <input 
-            {...register(`addresses.${index}.postal_code`)} 
-            type="text" 
-            className={`input input-bordered input-sm w-full rounded-lg dir-ltr ${fieldErrors.postal_code ? 'input-error' : ''}`}
-            placeholder="کد پستی"
-          />
-          {fieldErrors.postal_code && <span className="text-error text-[10px] mt-1">{fieldErrors.postal_code.message}</span>}
-        </div>
+
 
         {/* آدرس دقیق */}
-        <div className="form-control col-span-2">
+        <div className="form-control col-span-3">
           <label className="label text-xs font-bold text-base-content/70">آدرس دقیق</label>
           <input 
             {...register(`addresses.${index}.address`)} 
