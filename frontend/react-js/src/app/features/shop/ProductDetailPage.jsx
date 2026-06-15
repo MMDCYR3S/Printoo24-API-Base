@@ -2,7 +2,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
-import { ShoppingCart, ShieldCheck, Truck, ChevronRight, AlertCircle, Zap } from 'lucide-react';
+import { ShoppingCart, ShieldCheck, Truck, ChevronRight, AlertCircle, Zap, PhoneCall } from 'lucide-react';
 
 import { shopService } from '../../services/shopService';
 import { cartService } from '../../services/cartService';
@@ -84,7 +84,7 @@ const ProductDetailPage = () => {
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
             <a href="/shop" className="hover:text-primary flex items-center gap-1 transition-colors">
-              <ChevronRight size={16} /> فروشگاه
+              <ChevronRight size={16} /> فرۆشگاە
             </a>
             <span className="opacity-30">/</span>
             <span className="text-slate-800 font-bold truncate">{data?.name}</span>
@@ -107,7 +107,7 @@ const ProductDetailPage = () => {
                 </h1>
                 <div className="flex items-center gap-3">
                   <span className="px-3 py-1 bg-slate-100 rounded-lg text-xs font-mono text-slate-500 font-bold">
-                    کد: {data?.code}
+                     {data?.code}
                   </span>
                 </div>
                 {data?.description && (
@@ -128,7 +128,6 @@ const ProductDetailPage = () => {
 
                 <div className="bg-white rounded-[24px] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                   <div className="p-6 bg-slate-900 text-white relative">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
                     <h3 className="text-lg font-bold">پیش‌فاکتور سفارش</h3>
 
                     <div className="mt-6 flex flex-col gap-1 min-h-[60px] justify-center">
@@ -156,21 +155,35 @@ const ProductDetailPage = () => {
                   </div>
 
                   <div className="p-5 bg-white space-y-4">
-                    <button
-                      onClick={handleAddToCart}
-                      disabled={isAddToCartDisabled}
-                      className="btn btn-primary w-full h-14 rounded-xl text-base font-bold shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed group"
-                    >
-                      {addToCartMutation.isLoading ? (
-                        <span className="loading loading-dots"></span>
-                      ) : (
-                        <>
-                          <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
-                          {data?.has_price ? "زیاد کردن به سەبەتەی کڕین" : "استعلام قیمت"}
-                        </>
-                      )}
-                    </button>
-                  </div>
+  {data?.has_price ? (
+    // حالت اول: قیمت وجود دارد -> دکمه افزودن به سبد خرید
+    <button
+      onClick={handleAddToCart}
+      disabled={isAddToCartDisabled}
+      className="btn btn-primary w-full h-14 rounded-xl text-base font-bold shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed group"
+    >
+      {addToCartMutation.isLoading ? (
+        <span className="loading loading-dots"></span>
+      ) : (
+        <>
+          <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
+          زیاد کردن به سەبەتەی کڕین
+        </>
+      )}
+    </button>
+  ) : (
+    // حالت دوم: قیمت وجود ندارد -> لینک واتساپ
+    <a
+      href="https://wa.me/9647762278666"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-full flex items-center justify-center gap-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl py-3.5 border border-amber-100 font-bold transition-all h-14"
+    >
+      <PhoneCall size={20} />
+      استعلام قیمت
+    </a>
+  )}
+</div>
                 </div>
 
 

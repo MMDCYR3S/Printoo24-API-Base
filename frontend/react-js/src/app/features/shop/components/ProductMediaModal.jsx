@@ -31,7 +31,15 @@ const ProductMediaModal = ({
     if (isOpen) {
       setActiveTab(initialTab);
       setCurrentIndex(initialIndex);
+      // جلوگیری از اسکرول صفحه اصلی وقتی مودال باز است
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
     }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen, initialTab, initialIndex]);
 
   if (!isOpen) return null;
@@ -40,8 +48,16 @@ const ProductMediaModal = ({
   const handlePrev = () => setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
 
   return createPortal(
-    <div className="fixed inset-0  z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200">
-      <div className="bg-white w-full max-w-4xl rounded-[32px] overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
+    // پس‌زمینه (Backdrop) - کلیک روی اینجا باعث بسته شدن می‌شود
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200"
+      onClick={onClose} // <--- این خط اضافه شد
+    >
+      {/* کانتینر محتوای مودال - کلیک روی اینجا باعث بسته نشدن می‌شود */}
+      <div 
+        className="bg-white w-full max-w-4xl rounded-[32px] overflow-hidden flex flex-col max-h-[90vh] shadow-2xl"
+        onClick={(e) => e.stopPropagation()} // <--- این خط جلوی انتقال کلیک به بیرون را می‌گیرد
+      >
         
         {/* هدر مودال */}
         <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
@@ -72,6 +88,7 @@ const ProductMediaModal = ({
           {/* تب تصاویر */}
           {activeTab === 'images' && (
             <div className="flex flex-col items-center h-full space-y-6">
+              {/* پس‌زمینه عکس سفید شد (bg-white اضافه شد) */}
               <div className="relative w-full flex-1 min-h-[40vh] md:min-h-[50vh] flex items-center justify-center bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                 <img 
                   src={images[currentIndex]?.image_url} 

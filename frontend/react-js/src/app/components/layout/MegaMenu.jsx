@@ -229,20 +229,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
                             </span>
                           )}
                         </h3>
-                        <Link
-                          to={`/shop?category=${activeCategory.slug}`}
-                          onClick={onClose}
-                          className="
-                            text-xs font-bold text-primary/70 hover:text-primary
-                            flex items-center gap-1.5
-                            px-3 py-1.5 rounded-lg
-                            hover:bg-primary/5
-                            transition-all duration-200
-                          "
-                        >
-                          مشاهده همه
-                          <ArrowLeft size={13} />
-                        </Link>
+                        
                       </div>
 
                       {/* گرید زیردسته‌ها */}

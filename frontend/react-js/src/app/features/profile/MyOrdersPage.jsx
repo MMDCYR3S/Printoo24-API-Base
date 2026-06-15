@@ -8,9 +8,9 @@ import globalText from '../../lang/global.json';
 
 const STATUS_STYLES = {
   PENDING_REVIEW: { badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/60',        dot: 'bg-blue-500',    card: 'bg-white' },
-  DESIGNING:      { badge: 'bg-purple-50 text-purple-700 ring-1 ring-purple-200/60',  dot: 'bg-purple-500',  card: 'bg-white' },
-  PRINTING:       { badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60',     dot: 'bg-amber-500',   card: 'bg-white' },
-  SHIPPED:        { badge: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200/60',           dot: 'bg-sky-500',     card: 'bg-white' },
+  DESIGNING:      { badge: 'bg-purple-50 text-purple-700 ring-1 ring-purple-200/60',  dot: 'bg-purple-500',  card: 'bg-emerald-500/20' },
+  PRINTING:       { badge: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60',     dot: 'bg-amber-500',   card: 'bg-emerald-500/20' },
+  SHIPPED:        { badge: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200/60',           dot: 'bg-sky-500',     card: 'bg-emerald-500/20' },
   DELIVERED:      { badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60', dot: 'bg-emerald-500', card: 'bg-emerald-500/20' },
   CANCELED:       { badge: 'bg-red-50 text-red-600 ring-1 ring-red-200/60',           dot: 'bg-red-500',     card: 'bg-red-500/20' },
 };

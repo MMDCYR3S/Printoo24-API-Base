@@ -195,7 +195,7 @@ const ShopPage = () => {
           </h1>
           {filteredProducts.length > 0 && (
             <p className="text-xs text-slate-400 font-medium mt-0.5">
-              {filteredProducts.length} محصول
+              {filteredProducts.length} بەرهەم 
             </p>
           )}
         </div>
@@ -385,13 +385,13 @@ const ShopPage = () => {
           {!isLoading && filteredProducts.length > 0 && (
             <div className="hidden md:flex items-center justify-between px-1">
               <p className="text-[13px] text-slate-400 font-medium">
-                <span className="font-extrabold text-slate-600">{filteredProducts.length}</span> محصول
+                <span className="font-extrabold text-slate-600">{filteredProducts.length}</span> بەرهەم 
                 {totalPages > 1 && (
                   <span className="text-slate-300 mx-1.5">·</span>
                 )}
                 {totalPages > 1 && (
                   <span>
-                    صفحه <span className="font-bold text-slate-500">{currentPage}</span> از {totalPages}
+                    پەڕە<span className="font-bold text-slate-500">{currentPage}</span>  لە  {totalPages}
                   </span>
                 )}
               </p>
