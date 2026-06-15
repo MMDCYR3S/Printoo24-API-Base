@@ -356,3 +356,14 @@ class ProductMediaSyncSerializer(serializers.Serializer):
     attachment_ids_to_link = serializers.ListField(child=serializers.IntegerField(), required=False)
     attachment_ids_to_unlink = serializers.ListField(child=serializers.IntegerField(), required=False)
     image_orders = serializers.ListField(child=ProductImageOrderSerializer(), required=False, allow_null=True)
+
+class ProductImageReorderSerializer(serializers.Serializer):
+    image_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        allow_empty=False,
+        error_messages={
+            'empty': 'لیست شناسه‌های تصویر نمی‌تواند خالی باشد.'
+        },
+        help_text="لیست شناسه‌های تصاویر به ترتیبی که باید نمایش داده شوند."
+    )
+
