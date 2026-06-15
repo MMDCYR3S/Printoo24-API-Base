@@ -28,7 +28,7 @@ const SupportFloat = () => {
         >
           {/* label */}
           <span className="absolute left-14 bg-white text-slate-700 text-xs font-bold px-2.5 py-1 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-slate-100">
-            واتساپ
+            WhatsApp
           </span>
           <button className="w-12 h-12 rounded-full bg-[#25D366] hover:bg-[#20bd5a] border-none shadow-lg shadow-[#25D366]/40 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white" xmlns="http://www.w3.org/2000/svg">
@@ -46,7 +46,7 @@ const SupportFloat = () => {
           className="group relative flex items-center"
         >
           <span className="absolute left-14 bg-white text-slate-700 text-xs font-bold px-2.5 py-1 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-slate-100">
-            تلگرام
+            Telegram
           </span>
           <button className="w-12 h-12 rounded-full bg-[#229ED9] hover:bg-[#1e8dbf] border-none shadow-lg shadow-[#229ED9]/40 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-6 h-6 fill-white" xmlns="http://www.w3.org/2000/svg">

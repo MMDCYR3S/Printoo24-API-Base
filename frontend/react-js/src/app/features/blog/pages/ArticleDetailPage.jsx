@@ -202,16 +202,16 @@ const ArticleError = ({ error }) => (
       <div className="w-20 h-20 mx-auto mb-6 bg-red-50 rounded-full flex items-center justify-center">
         <AlertCircle size={36} className="text-red-400" />
       </div>
-      <h2 className="text-2xl font-extrabold text-slate-800 mb-3">مقاله یافت نشد!</h2>
+      <h2 className="text-2xl font-extrabold text-slate-800 mb-3">بابەت نەدۆزرایەوە</h2>
       <p className="text-slate-500 mb-8 leading-relaxed">
-        {error || 'ممکن است آدرس را اشتباه وارد کرده باشید یا مقاله حذف شده باشد.'}
+        {error || 'لەوانەیە ناونیشانەکەت هەڵە بێت یان بابەتەکە سڕدرابێتەوە'}
       </p>
       <Link
         to="/blog"
         className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-white rounded-2xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-0.5"
       >
         <ChevronRight size={18} />
-        بازگشت به بلاگ
+        بڵاگەکان
       </Link>
     </div>
   </div>
@@ -248,18 +248,18 @@ const ShareButton = ({ title, url }) => {
       <button
         onClick={handleNativeShare}
         className="flex items-center gap-2 px-4 py-2  text-secondary bg-primary/30 hover:bg-primary/50 rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5 hover:shadow-sm"
-        title="اشتراک‌گذاری"
+        title="هاوبەشکردن"
       >
         <Share2 size={16} />
-        <span className="hidden sm:inline">اشتراک‌گذاری</span>
+        <span className="hidden sm:inline">هاوبەشکردن</span>
       </button>
       <button
         onClick={handleCopy}
         className="flex items-center gap-2 px-4 py-2 text-secondary bg-primary/30 hover:bg-primary/50  rounded-xl text-sm font-medium transition-all hover:-translate-y-0.5 hover:shadow-sm"
-        title="کپی لینک"
+        title="کپی  کۆپیکردنی بەستەر"
       >
         {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
-        <span className="hidden sm:inline">{copied ? 'کپی شد!' : 'کپی لینک'}</span>
+        <span className="hidden sm:inline">{copied ? 'کۆپی کرا' : ' کۆپیکردنی بەستەر'}</span>
       </button>
     </div>
   );
@@ -334,7 +334,7 @@ const ArticleDetailPage = () => {
           className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-primary transition-colors font-medium group"
         >
           <ChevronRight size={16} className="transition-transform group-hover:translate-x-[-3px]" />
-          بازگشت به مقالات
+          بڵاگەکان
         </Link>
       </nav>
 
@@ -379,10 +379,7 @@ const ArticleDetailPage = () => {
                 <span>{new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(article.published_at))}</span>
               </div>
 
-              <div className="flex items-center gap-1.5 text-primary">
-                <BookOpen size={16} />
-                <span>{article.read_time} دقیقه مطالعه</span>
-              </div>
+
 
             </div>
           </div>
@@ -425,7 +422,7 @@ const ArticleDetailPage = () => {
           <div className="mb-12 anim-fade-in-up anim-delay-4">
             <h3 className="text-2xl font-extrabold text-slate-800 mb-8 flex items-center gap-3">
               <span className="w-1.5 h-8 bg-primary rounded-full" />
-              محصولات مرتبط با این مقاله
+              بەرهەمە پەیوەندیدارەکان بە ئەم بابەتە
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {article.related_products.map((rp) => (
@@ -434,7 +431,7 @@ const ArticleDetailPage = () => {
                   product={{
                     ...rp,
                     thumbnail: rp.image,
-                    category: { parent_category: 'محصول مرتبط' },
+                    category: { parent_category: ' بەرهەمە پەیوەندیدارەکان بە ئەم بابەتە' },
                     has_price: false,
                   }}
                 />
@@ -447,7 +444,7 @@ const ArticleDetailPage = () => {
       {/* ── دکمه بازگشت به بالا ── */}
       <button
         onClick={scrollToTop}
-        aria-label="بازگشت به بالا"
+        aria-label=" گەڕانەوە بۆ سەرەوە"
         className={`scroll-to-top fixed bottom-6 left-6 z-50 w-12 h-12 bg-white border border-slate-200 rounded-2xl shadow-lg flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary/30 hover:shadow-xl ${
           showScrollTop ? 'visible' : 'hidden'
         }`}

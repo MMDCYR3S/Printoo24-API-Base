@@ -16,7 +16,6 @@ import CustomerAddressList from './CustomerAddressList'; // اطمینان از 
 
 // --- اسکیما ---
 const customerSchema = z.object({
-  username: z.string().min(3, 'نام کاربری کوتاه است'),
   first_name: z.string().optional(),
   last_name: z.string().optional(),
   email: z.string().email('فرمت ایمیل اشتباه است').optional().or(z.literal('')),
@@ -194,22 +193,18 @@ const CustomerModal = ({ isOpen, onClose, initialData }) => {
                   </div>
                 </div>
 
-                <div className="form-control">
+                {/* <div className="form-control">
                   <label className="label text-xs font-bold text-base-content/70">نام کاربری *</label>
                   <input {...register('username')} className={`input input-bordered rounded-xl w-full dir-ltr ${errors.username ? 'input-error' : ''}`} />
                   {errors.username && <span className="text-error text-[10px] mt-1">{errors.username.message}</span>}
-                </div>
+                </div> */}
 
                 <div className="form-control">
                   <label className="label text-xs font-bold text-base-content/70">موبایل</label>
                   <input {...register('phone_number')} className="input input-bordered rounded-xl w-full dir-ltr" />
                 </div>
 
-                <div className="form-control">
-                  <label className="label text-xs font-bold text-base-content/70">ایمیل</label>
-                  <input {...register('email')} className={`input input-bordered rounded-xl w-full dir-ltr ${errors.email ? 'input-error' : ''}`} />
-                  {errors.email && <span className="text-error text-[10px] mt-1">{errors.email.message}</span>}
-                </div>
+
 
                 {isEdit && (
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex justify-between items-center">

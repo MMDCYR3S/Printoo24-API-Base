@@ -34,7 +34,7 @@ const TutorialListPagePublic = () => {
   return (
     <div className="container mx-auto px-4 py-12 max-w-7xl" dir="rtl">
       <SEO 
-        title="آموزش‌های ویدیویی" 
+        title="فێرکارییە ڤیدیۆییەکان" 
         description="ویدیوهای آموزشی پرینتو۲۴ را تماشا کنید و مهارت‌های چاپ و طراحی خود را ارتقا دهید."
         keywords="آموزش چاپ, ویدیو آموزشی, پرینتو۲۴, طراحی برای چاپ"
       />
@@ -46,10 +46,9 @@ const TutorialListPagePublic = () => {
         </div>
         <div>
           <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-3">
-            آموزش‌های ویدیویی
-          </h1>
+          فێرکارییە ڤیدیۆییەکان          </h1>
           <p className="text-slate-500 max-w-2xl text-sm md:text-base leading-relaxed">
-            در این بخش می‌توانید جدیدترین ویدیوهای آموزشی ما را تماشا کنید. از نکات طراحی تا راهنمای انتخاب محصولات، همه چیز اینجاست.
+          لەم بەشەدا دەتوانیت نوێترین ڤیدیۆ فێرکارییەکانمان ببینیت. لە ئامۆژگارییەکانی دیزاینەوە تا ڕێنمایی هەڵبژاردنی بەرهەم، هەموو شتێک لێرەیە.
           </p>
         </div>
       </div>
@@ -75,9 +74,9 @@ const TutorialListPagePublic = () => {
           ) : (
             <div className="col-span-full py-24 flex flex-col items-center justify-center text-center bg-slate-50 rounded-3xl border border-slate-200 border-dashed">
               <Film size={64} className="text-slate-300 mb-6" />
-              <h3 className="text-xl font-bold text-slate-700 mb-2">ویدیویی یافت نشد</h3>
+              <h3 className="text-xl font-bold text-slate-700 mb-2">هیچ ڤیدیۆیەک نەدۆزرایەوە</h3>
               <p className="text-slate-500 text-sm max-w-sm">
-                هنوز آموزش ویدیویی در این بخش منتشر نشده است. به زودی با ویدیوهای جدید برمی‌گردیم.
+              هێشتا هیچ ڤیدیۆیەکی فێرکاری لەم بەشەدا بڵاونەکراوەتەوە. بە زوویی بە ڤیدیۆی نوێ دەگەڕێینەوە.
               </p>
             </div>
           )}

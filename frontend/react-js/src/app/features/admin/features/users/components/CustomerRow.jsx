@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Edit, Shield, ShieldAlert, Wallet } from 'lucide-react';
+import { Edit, Shield, ShieldAlert, Wallet, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const CustomerRow = memo(({ user, isSelected, onToggle, onEdit, onWalletAction }) => {
@@ -10,7 +10,7 @@ const CustomerRow = memo(({ user, isSelected, onToggle, onEdit, onWalletAction }
     navigate(`${user.id}`);
   };
   return (
-    <tr className={`group transition-colors hover:bg-slate-50 ${isSelected ? 'bg-primary/5' : ''}`}>
+    <tr className={`group transition-colors hover:bg-slate-50 ${isSelected ? 'bg-primary/5' : ''} `}>
       
       {/* 1. Checkbox */}
       <th>
@@ -27,11 +27,7 @@ const CustomerRow = memo(({ user, isSelected, onToggle, onEdit, onWalletAction }
       {/* 2. User Info */}
       <td>
         <div onClick={handleRowClick} className="flex items-center gap-3">
-          <div className="avatar placeholder">
-            <div className="bg-neutral-focus text-neutral-content rounded-full w-10 ring-1 ring-slate-200">
-            <span className="text-xs font-bold uppercase">{user.phone_number?.substring(0, 2)}</span>
-            </div>
-          </div>
+
           <div>
           <div className="font-bold text-slate-700 text-sm flex items-center gap-1">
   {user.phone_number}
@@ -95,16 +91,16 @@ const CustomerRow = memo(({ user, isSelected, onToggle, onEdit, onWalletAction }
 
                     <a href= {'users/' + user.id}
             // onClick={handleRowClick} 
-            className="btn btn-sm btn-square btn-ghost text-red-600 hover:bg-emerald-50 hover:text-emerald-700 tooltip tooltip-top"
-            data-tip="مدیریت کیف پول"
+            className="btn btn-sm btn-square btn-ghost text-blue-600 hover:bg-emerald-50 hover:text-emerald-700 tooltip tooltip-top"
+            data-tip="جزئیات کاربر"
           >
-            <Wallet size={18} />
+            <Eye size={18} />
           </a>
 {/* onClick={handleRowClick} */}
           {/* دکمه ویرایش */}
           <button 
             onClick={(e) => { e.stopPropagation(); onEdit(user); }}
-            className="btn btn-sm btn-square btn-ghost text-blue-600 hover:bg-blue-50 hover:text-blue-700 tooltip tooltip-top"
+            className="btn btn-sm btn-square btn-ghost text-slate-600 hover:bg-blue-50 hover:text-blue-700 tooltip tooltip-top"
             data-tip="ویرایش کاربر"
           >
             <Edit size={18} />

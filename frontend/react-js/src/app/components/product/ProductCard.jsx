@@ -32,7 +32,7 @@ const ProductCard = ({ product }) => {
           />
         ) : (
           <div className="flex items-center justify-center h-full text-slate-300 text-xs font-medium">
-             بدون تصویر
+             بێ وێنە
           </div>
         )}
 
@@ -40,7 +40,7 @@ const ProductCard = ({ product }) => {
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[1px]">
            <button className="flex items-center gap-1 bg-primary text-white rounded-full px-5 py-2 font-bold shadow-lg text-xs hover:bg-primary-focus transition-colors">
             <Eye size={16} />
-            مشاهده
+            بینینی بەرهەم
            </button>
         </div>
       </div>
@@ -79,7 +79,7 @@ const ProductCard = ({ product }) => {
           ) : (
             <div className="w-full flex items-center justify-center gap-1.5 bg-amber-50 text-amber-600 rounded-xl py-2 px-3 border border-amber-100">
               <PhoneCall size={14} />
-              <span className="text-xs font-bold">استعلام قیمت</span>
+              <span className="text-xs font-bold">داوا کردنی نرخ</span>
             </div>
           )}
         </div>

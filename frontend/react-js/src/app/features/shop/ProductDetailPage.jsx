@@ -33,14 +33,14 @@ const ProductDetailPage = () => {
   const addToCartMutation = useMutation({
     mutationFn: cartService.addToCart,
     onSuccess: (response) => {
-      toast.success(pageText.shop.productDetail.addToCartSuccess || "با موفقیت به سبد خرید اضافه شد.");
+      toast.success(pageText.shop.productDetail.addToCartSuccess || "بە سەرکەوتوویی زیادکرا بۆ سەبەتی کڕین");
       const itemId = response?.id || response?.item_id;
       if (itemId) navigate(`/cart/upload/${itemId}`);
       else navigate('/cart');
     },
     onError: (err) => {
       console.error("Cart Error:", err.response?.data);
-      toast.error(err.response?.data?.error || "خطا در افزودن به سبد خرید");
+      toast.error(err.response?.data?.error || " هەڵە لە زیادکردن بۆ سەبەتی کڕین");
     }
   });
 
@@ -56,7 +56,7 @@ const ProductDetailPage = () => {
     const requiredFields = (data?.fields || []).filter(f => f.is_required && state.visibleFields.includes(f.id));
     for (let f of requiredFields) {
       if (!state.selectedOptions[f.id]) {
-        toast.error(`لطفاً فیلد "${f.title}" را انتخاب کنید.`);
+        toast.error(`تکایە"${f.title}"هەڵبژێرە`);
         return;
       }
     }
@@ -72,7 +72,7 @@ const ProductDetailPage = () => {
   const isAddToCartDisabled = addToCartMutation.isLoading || !data?.has_price || pricing?.isCalculating || !!pricing?.error;
 
   if (isLoading) return <DetailSkeleton />;
-  if (error || !data) return <div className="text-center py-20 font-bold text-slate-500">محصول یافت نشد</div>;
+  if (error || !data) return <div className="text-center py-20 font-bold text-slate-500">بەرهەم نەدۆزرایەوە</div>;
 
   return (
     <>
@@ -128,13 +128,13 @@ const ProductDetailPage = () => {
 
                 <div className="bg-white rounded-[24px] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                   <div className="p-6 bg-slate-900 text-white relative">
-                    <h3 className="text-lg font-bold">پیش‌فاکتور سفارش</h3>
+                    <h3 className="text-lg font-bold">پێش وەسڵی داواکاری</h3>
 
                     <div className="mt-6 flex flex-col gap-1 min-h-[60px] justify-center">
                       {pricing?.isCalculating ? (
                         <div className="flex items-center gap-3 text-emerald-400">
                           <span className="loading loading-dots loading-md"></span>
-                          <span className="text-sm font-medium opacity-80 animate-pulse">در حال استعلام...</span>
+                          <span className="text-sm font-medium opacity-80 animate-pulse"> لە چاوەڕوانی نرخدا... </span>
                         </div>
                       ) : (
                         <div className="flex items-baseline gap-2">
@@ -180,7 +180,7 @@ const ProductDetailPage = () => {
       className="w-full flex items-center justify-center gap-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl py-3.5 border border-amber-100 font-bold transition-all h-14"
     >
       <PhoneCall size={20} />
-      استعلام قیمت
+      داوا کردنی نرخ
     </a>
   )}
 </div>
@@ -207,7 +207,7 @@ const ProductDetailPage = () => {
 
           {/* بخش قیمت */}
           <div className="flex-1 min-w-0 bg-slate-900 rounded-2xl px-4 py-2.5 flex flex-col justify-center">
-            <p className="text-[10px] text-slate-400 font-bold mb-0.5 leading-none">پیش‌فاکتور سفارش</p>
+            <p className="text-[10px] text-slate-400 font-bold mb-0.5 leading-none">پێش وەسڵی داواکاری</p>
 
             {pricing?.isCalculating ? (
               <div className="flex items-center gap-2 text-emerald-400 mt-1">
@@ -240,7 +240,7 @@ const ProductDetailPage = () => {
             ) : (
               <>
                 <ShoppingCart size={18} />
-                <span>{data?.has_price ? "زیاد کردن به سەبەتەی کڕین" : "استعلام قیمت"}</span>
+                <span>{data?.has_price ? "زیاد کردن به سەبەتەی کڕین" : "داوا کردنی نرخ"}</span>
               </>
             )}
           </button>

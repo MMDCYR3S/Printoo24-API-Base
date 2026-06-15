@@ -50,12 +50,12 @@ const TutorialModal = ({ isOpen, onClose, tutorial, isLoading, error }) => {
           {isLoading ? (
             <div className="text-white flex flex-col items-center gap-3">
               <Loader2 size={40} className="animate-spin text-primary" />
-              <span className="text-sm font-light opacity-80">در حال بارگذاری پلیر...</span>
+              <span className="text-sm font-light opacity-80">پخشکەر بار دەکرێت</span>
             </div>
           ) : error ? (
             <div className="text-red-400 flex flex-col items-center gap-2">
               <AlertCircle size={40} />
-              <span>خطا در بارگذاری</span>
+              <span> هەڵە لە بارکردندا</span>
             </div>
           ) : tutorial?.youtube_embed_url ? (
             <iframe
@@ -68,7 +68,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial, isLoading, error }) => {
           ) : (
             <div className="flex flex-col items-center text-slate-500">
               <PlayCircle size={64} className="mb-2 opacity-50" />
-              <p>ویدیویی یافت نشد</p>
+              <p> ناونیشانی ڤیدیۆ</p>
             </div>
           )}
         </div>
@@ -79,7 +79,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial, isLoading, error }) => {
           {/* هدر سایدبار */}
           <div className="p-5 border-b border-slate-200 bg-white shrink-0">
             <h3 className="font-bold text-lg text-slate-800 line-clamp-2 leading-tight">
-              {tutorial?.title || <span className="animate-pulse bg-slate-200 rounded text-transparent">عنوان ویدیو</span>}
+              {tutorial?.title || <span className="animate-pulse bg-slate-200 rounded text-transparent"></span>}
             </h3>
           </div>
 
@@ -95,7 +95,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial, isLoading, error }) => {
                 }`}
               >
                 <Info size={16} />
-                توضیحات
+
               </button>
               <button
                 onClick={() => setActiveTab('products')}
@@ -106,7 +106,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial, isLoading, error }) => {
                 }`}
               >
                 <Package size={16} />
-                محصولات مرتبط
+                
                 {tutorial.related_products?.length > 0 && (
                   <span className="bg-primary/10 text-primary text-[10px] px-1.5 py-0.5 rounded-full">
                     {tutorial.related_products.length}
@@ -134,7 +134,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial, isLoading, error }) => {
                         {tutorial.description}
                       </p>
                     ) : (
-                      <p className="text-slate-400 text-sm text-center mt-10">توضیحاتی برای این ویدیو ثبت نشده است.</p>
+                      <p className="text-slate-400 text-sm text-center mt-10">هیچ ڕوونکردنەوەیەک بۆ ئەم ڤیدیۆیە تۆمار نەکراوە</p>
                     )}
                   </div>
                 )}
@@ -159,7 +159,7 @@ const TutorialModal = ({ isOpen, onClose, tutorial, isLoading, error }) => {
                     ) : (
                       <div className="flex flex-col items-center justify-center text-slate-400 mt-10 gap-2">
                         <Package size={32} className="opacity-50" />
-                        <span className="text-sm">محصول مرتبطی یافت نشد.</span>
+                        <span className="text-sm">هیچ بەرهەمێکی پەیوەندیدار نەدۆزرایەوە</span>
                       </div>
                     )}
                   </div>

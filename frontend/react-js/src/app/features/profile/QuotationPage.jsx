@@ -47,6 +47,9 @@ const QuotationPage = () => {
     );
   }
 
+  // product_snapshot is an array of selections: [{ field_title, value, ... }]
+  const selections = Array.isArray(quotation.product_snapshot) ? quotation.product_snapshot : [];
+
   return (
     <div className="min-h-screen pb-10 print:pb-0 print:bg-white animate-in fade-in duration-500 bg-base-200 flex flex-col items-center" dir="rtl">
 
@@ -91,9 +94,6 @@ const QuotationPage = () => {
         </button>
       </div>
 
-      {/* ═══════════════════════════════════════
-          QUOTATION BODY
-      ═══════════════════════════════════════ */}
       <div
         id="printable-invoice"
         className="w-full max-w-[210mm] min-h-[297mm] mx-auto bg-white shadow-2xl shadow-slate-300/30 border border-slate-200 print:border-none flex flex-col overflow-hidden"
@@ -101,9 +101,7 @@ const QuotationPage = () => {
 
         {/* ── HEADER ── */}
         <div className="bg-neutral shrink-0">
-          {/* top strip: logo left / contact right */}
           <div className="flex items-center justify-between px-8 pt-5 pb-4">
-            {/* Logo */}
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-md shadow-black/20">
                 <span className="text-primary-content font-black text-base tracking-tight leading-none">P24</span>
@@ -117,8 +115,6 @@ const QuotationPage = () => {
                 </p>
               </div>
             </div>
-
-            {/* Contact */}
             <div className="text-right space-y-1.5">
               <div className="flex items-center justify-end gap-2 text-neutral-content/80 text-sm font-semibold dir-ltr">
                 <Phone size={14} className="text-primary shrink-0" />
@@ -130,8 +126,6 @@ const QuotationPage = () => {
               </div>
             </div>
           </div>
-
-          {/* tagline banner */}
           <div className="bg-black/10 px-8 py-2 flex items-center justify-center">
             <p className="text-neutral-content/70 text-xs font-medium tracking-wide">
               {pageText.order.quotationPage.brandName}
@@ -141,7 +135,6 @@ const QuotationPage = () => {
 
         {/* ── QUOTATION TITLE + META ── */}
         <div className="px-8 py-6 flex items-start justify-between border-b border-slate-100 shrink-0">
-          {/* Title block */}
           <div>
             <h1 className="text-blue-500 font-light tracking-widest text-4xl leading-none" style={{ fontFamily: 'Georgia, serif' }}>
               Quotation
@@ -151,8 +144,6 @@ const QuotationPage = () => {
             </p>
             <p className="text-slate-300 text-xs mt-0.5">Page 1 of 1</p>
           </div>
-
-          {/* Meta card */}
           <div className="bg-slate-50 rounded-2xl border border-slate-100 px-5 py-4 space-y-2.5 min-w-[200px] text-sm">
             <div className="flex gap-4 justify-between items-center">
               <span className="text-slate-400 font-medium shrink-0">{pageText.order.quotationPage.customerInfoTitle}:</span>
@@ -197,22 +188,21 @@ const QuotationPage = () => {
               </tr>
             </thead>
             <tbody>
-              {/* Main product row */}
               <tr className="border-b border-slate-100">
                 <td className="py-4 pr-3 text-slate-300 font-medium">1</td>
                 <td className="py-4 px-3 font-semibold text-slate-700 text-right">
-                  <span className="font-bold block mb-1">{quotation.product_name}</span>
-                  {quotation.product_snapshot?.meta?.size_info && (
-                    <span className="text-xs font-medium text-slate-500 block mt-1">
-                      <span className="font-bold text-slate-700">{pageText.order.quotationPage.dimensions}:</span>{' '}
-                      {quotation.product_snapshot.meta.size_info.size_name}
-                    </span>
-                  )}
-                  {quotation.product_snapshot?.options?.map((opt, idx) => (
-                    <span key={idx} className="text-xs font-medium text-slate-500 block mt-1">
-                      <span className="font-bold text-slate-700">{opt.option_label}:</span> {opt.value.label}
+
+                  {/* نام محصول */}
+                  <span className="font-bold block mb-2">{quotation.product_name}</span>
+
+                  {/* گزینه‌های انتخابی کاربر از product_snapshot */}
+                  {selections.map((sel, idx) => (
+                    <span key={idx} className="text-xs font-medium text-slate-500 flex gap-1 mt-1">
+                      <span className="font-bold text-slate-700 shrink-0">{sel.field_title}:</span>
+                      <span>{Array.isArray(sel.value) ? sel.value.join('، ') : sel.value}</span>
                     </span>
                   ))}
+
                 </td>
                 <td className="py-4 px-3 text-center text-slate-700 font-medium">
                   {quotation.quantity}
@@ -227,7 +217,6 @@ const QuotationPage = () => {
                 </td>
               </tr>
 
-              {/* spacer */}
               <tr>
                 <td colSpan={5} className="py-6"></td>
               </tr>
@@ -249,11 +238,8 @@ const QuotationPage = () => {
 
         {/* ── TOTAL + STAMP ── */}
         <div className="mt-auto print:break-inside-avoid shrink-0">
-
           <div className="px-8 pt-5 pb-6 border-t-2 border-slate-100">
             <div className="flex justify-between items-end gap-8">
-
-              {/* Stamp */}
               <div className="flex flex-col items-center gap-2">
                 <div className="w-20 h-20 rounded-full border-2 border-dashed border-neutral flex items-center justify-center">
                   <div className="text-center">
@@ -263,8 +249,6 @@ const QuotationPage = () => {
                 </div>
                 <p className="text-slate-400 text-xs font-medium">{pageText.order.quotationPage.sellerStamp}</p>
               </div>
-
-              {/* Total amount */}
               <div className="flex-1 max-w-xs space-y-2">
                 <div className="bg-neutral/5 rounded-xl px-4 py-3 flex justify-between items-center border border-neutral/10">
                   <span className="font-black text-slate-800 text-sm">{pageText.order.quotationPage.totalPayable}</span>
@@ -279,13 +263,10 @@ const QuotationPage = () => {
 
           {/* ── FOOTER BAR ── */}
           <div className="bg-neutral px-8 py-4 flex items-center justify-center gap-3">
-            <Instagram size={18} className="text-neutral-content/60" />
             <span className="text-neutral-content font-black tracking-[0.2em] text-sm uppercase mx-2">
-              printoo24_official
+              printoo24.com
             </span>
-            <Instagram size={18} className="text-neutral-content/60 opacity-0" />
           </div>
-
         </div>
 
       </div>
