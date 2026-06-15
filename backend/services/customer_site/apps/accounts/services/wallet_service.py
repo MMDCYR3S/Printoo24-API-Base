@@ -13,13 +13,13 @@ class WalletService:
     سرویس کیف پول (جایگزین WalletDomainService)
     """
 
-    def get_user_balance(self, user: User) -> Decimal:
+    def get_user_balance(self, user: User):
         """ موجودی کیف پول کاربر را برمی‌گرداند. """
         try:
             wallet = Wallet.objects.get_by_user(user)
-            return wallet.balance
+            return wallet
         except WalletNotFoundException:
-            return Decimal(0)
+            return None
 
     @transaction.atomic
     def deposit(self, user: User, amount: Decimal):
