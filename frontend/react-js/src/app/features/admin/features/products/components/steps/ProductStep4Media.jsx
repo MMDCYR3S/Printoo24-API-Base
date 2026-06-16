@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect,  useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -38,6 +38,20 @@ const SectionTitle = ({ step, icon: Icon, title, desc }) => (
   </div>
 );
 
+
+const moveImage = (index, direction) => {
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= images.length) return;
+
+  setImages((prev) => {
+    const arr = [...prev];
+    [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
+    // بعد از آپدیت state، با سرور sync می‌کنیم
+    syncOrderWithServer(arr);
+    return arr;
+  });
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 const ProductStep4Media = ({
   initialData,
@@ -53,7 +67,8 @@ const ProductStep4Media = ({
   const [deletingImageId, setDeletingImageId] = useState(null);
   // پیوستی که در حال حذف است (uniqueId)
   const [deletingAttachmentId, setDeletingAttachmentId] = useState(null);
-
+// ─── reorder ref ──────────────────────────────────────────────────────────
+const reorderTimerRef = useRef(null);
   // ─── Init از سرور ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (initialData?.images && images.length === 0) {
@@ -150,19 +165,31 @@ const ProductStep4Media = ({
     }
   };
 
-  // ─── 3. جابجایی تصویر (چپ/راست) ──────────────────────────────────────────
-  const moveImage = (index, direction) => {
-    // direction: -1 = به راست (index کمتر = کاور)، +1 = به چپ
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= images.length) return;
+// ─── 3. جابجایی تصویر + sync با سرور ─────────────────────────────────────
+const syncOrderWithServer = useCallback((newImages) => {
+  const ids = newImages.filter((img) => img.id).map((img) => img.id);
+  if (!ids.length) return;
+  if (reorderTimerRef.current) clearTimeout(reorderTimerRef.current);
+  reorderTimerRef.current = setTimeout(async () => {
+    try {
+      await adminProductService.reorderImages(productId, ids);
+    } catch (error) {
+      console.error('خطا در ذخیره ترتیب تصاویر:', error);
+      toast.error('ترتیب تصاویر ذخیره نشد');
+    }
+  }, 600);
+}, [productId]);
 
-    setImages((prev) => {
-      const arr = [...prev];
-      [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
-      return arr;
-    });
-  };
-
+const moveImage = (index, direction) => {
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= images.length) return;
+  setImages((prev) => {
+    const arr = [...prev];
+    [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
+    syncOrderWithServer(arr);
+    return arr;
+  });
+};
   // ─── 4. آپلود پیوست ───────────────────────────────────────────────────────
   const handleAttachmentUpload = async (e, type) => {
     const files = e.target.files;
