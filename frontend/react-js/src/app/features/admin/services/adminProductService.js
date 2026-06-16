@@ -52,6 +52,13 @@ export const adminProductService = {
     return data;
   },
 
+  reorderImages: async (productId, imageIds) => {
+    const { data } = await apiClient.patch(`${BASE_URL}${productId}/reorder-images/`, {
+      image_ids: imageIds,
+    });
+    return data;
+  },
+  
   // --- حذف تصویر از سرور ---
   deleteImage: async (productId, imageId) => {
     await apiClient.delete(`${BASE_URL}${productId}/delete-image/${imageId}/`);
