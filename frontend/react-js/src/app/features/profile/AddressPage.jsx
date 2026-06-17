@@ -75,7 +75,7 @@ const AddressPage = () => {
   const deleteMutation = useMutation({
     mutationFn: profileService.deleteAddress,
     onSuccess: () => {
-      toast.success('آدرس حذف شد');
+      toast.success('آدرس با موفقیت حذف شد');
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
       queryClient.invalidateQueries({ queryKey: ['profile-addresses'] });
     },

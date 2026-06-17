@@ -247,8 +247,8 @@ const OrderListPage = () => {
                         </td>
                         <td className="text-xs text-slate-500">
                           <div className="flex flex-col">
-                            <span className="font-medium text-slate-700">{new Date(order.created_at).toLocaleDateString('fa-IR')}</span>
-                            <span className="text-slate-400 dir-ltr text-right">{new Date(order.created_at).toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'})}</span>
+                            <span className="font-medium text-slate-700">{new Date(order.created_at).toLocaleDateString('EN')}</span>
+                            <span className="text-slate-400 dir-ltr text-right">{new Date(order.created_at).toLocaleTimeString('EN', {hour: '2-digit', minute:'2-digit'})}</span>
                           </div>
                         </td>
                         <td>

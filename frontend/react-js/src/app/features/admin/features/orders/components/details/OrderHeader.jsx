@@ -45,10 +45,10 @@ const OrderHeader = ({ order }) => {
             <div className="flex items-center gap-4 text-slate-500 text-sm font-medium">
               <span className="flex items-center gap-1.5">
                 <Calendar size={16} />
-                {new Date(order.created_at).toLocaleDateString('fa-IR', { dateStyle: 'full' })}
+                {new Date(order.created_at).toLocaleDateString('EN', { dateStyle: 'full' })}
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-              <span>ساعت {new Date(order.created_at).toLocaleTimeString('fa-IR', { timeStyle: 'short' })}</span>
+              <span>ساعت {new Date(order.created_at).toLocaleTimeString('EN', { timeStyle: 'short' })}</span>
             </div>
           </div>
         </div>

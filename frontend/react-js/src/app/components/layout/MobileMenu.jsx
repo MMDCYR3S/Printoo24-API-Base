@@ -41,12 +41,12 @@ const MobileMenu = ({ onClose }) => {
   return (
     <nav className="pb-6">
       {/* هدر منو */}
-      <div className="px-4 py-4 mb-2 border-b border-base-200">
+      {/* <div className="px-4 py-4 mb-2 border-b border-base-200">
         <h2 className="text-lg font-bold text-base-content flex items-center gap-2">
           <Squares2X2Icon className="w-5 h-5 text-primary" />
           پۆلێنکردنی بەرهەمەکان
         </h2>
-      </div>
+      </div> */}
 
       {/* لیست دسته‌ها */}
       <ul className="space-y-1 px-2">

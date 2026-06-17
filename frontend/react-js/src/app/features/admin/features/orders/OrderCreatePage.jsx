@@ -253,7 +253,7 @@ const StepProductSelection = ({ cartItems, setCartItems }) => {
               >
                 <div className="text-sm font-bold text-slate-700">{p.name}</div>
                 <div className="text-xs text-slate-500 dir-ltr bg-slate-100 px-2 py-1 rounded">
-                  {new Intl.NumberFormat('fa-IQ').format(p.price)} IQD
+                  {new Intl.NumberFormat('EN').format(p.price)} IQD
                 </div>
               </div>
             ))

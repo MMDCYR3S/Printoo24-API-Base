@@ -189,7 +189,7 @@ const OrderInvoiceModule = ({ order }) => {
         <div className="mt-6 flex flex-wrap items-center gap-6 text-[10px] font-bold text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-100">
           <div className="flex items-center gap-1.5">
             <Calendar size={14} className="text-slate-400"/>
-            سررسید: <span className="text-slate-800">{invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('fa-IR') : 'ثبت نشده'}</span>
+            سررسید: <span className="text-slate-800">{invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('EN') : 'ثبت نشده'}</span>
           </div>
           {invoice.description && (
             <div className="flex items-start gap-1.5 flex-1 border-r border-slate-200 pr-6">
