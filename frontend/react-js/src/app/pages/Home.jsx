@@ -199,7 +199,7 @@ const TrustSection = () => {
     },
     {
       id: 2,
-      icon: Truck,
+      icon: ShieldCheck,
       title: pageText.home.cards.id2.title,
       desc: pageText.home.cards.id2.value,
       gradient: 'from-amber-500 to-orange-600',
@@ -208,7 +208,7 @@ const TrustSection = () => {
     },
     {
       id: 3,
-      icon: Headset,
+      icon:Truck ,
       title: pageText.home.cards.id3.title,
       desc: pageText.home.cards.id3.value,
       gradient: 'from-emerald-500 to-teal-600',
@@ -217,7 +217,7 @@ const TrustSection = () => {
     },
     {
       id: 4,
-      icon: ShieldCheck,
+      icon: Headset,
       title: pageText.home.cards.id4.title,
       desc: pageText.home.cards.id4.value,
       gradient: 'from-violet-500 to-purple-600',
@@ -249,6 +249,7 @@ const TrustSection = () => {
                 transition-all duration-500 ease-out
                 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/[0.06]
                 overflow-hidden flex
+                min-h-18
               "
             >
 

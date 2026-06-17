@@ -1,6 +1,6 @@
 // src/app/features/layout/MainLayout.jsx
-import { useState, useCallback } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Layers, Headphones } from 'lucide-react';
 
@@ -11,7 +11,16 @@ import SupportFloat from '../components/common/SupportFloat';
 import pageText from '../lang/pages.json';
 
 const MainLayout = () => {
+
+  const { pathname } = useLocation();
+
+  // useEffect برای اسکرول به بالا هنگام تغییر مسیر
+  useEffect(() => {
+    window.scrollTo(0, 0); // پرهش به بالای صفحه
+  }, [pathname]); // این افکت فقط وقتی pathname عوض شه اجرا میشه
+
   const [isDrawerOpen, setDrawerOpen] = useState(false);
+
 
   const openDrawer = useCallback(() => setDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
@@ -74,7 +83,7 @@ const MainLayout = () => {
                     <Layers size={17} className="text-primary" />
                   </div>
                   <span className="text-base font-extrabold text-slate-800">
-                    دسته‌بندی‌ها
+                  دابەشکردنی بەرهەمەکان
                   </span>
                 </div>
                 <button

@@ -78,7 +78,7 @@ const ProductDetailPage = () => {
     <>
       {/* ── صفحه اصلی ── */}
       {/* pb-28 روی موبایل برای جا باز کردن زیر sticky bar */}
-      <div className="bg-slate-50/50 min-h-screen pb-28 lg:pb-20">
+      <div className="bg-slate-50/50 min-h-screen  max-w-screen overflow-x-hidden">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
 
           {/* Breadcrumb */}
@@ -93,7 +93,7 @@ const ProductDetailPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8">
 
             {/* گالری تصویر */}
-            <div className="lg:col-span-4">
+            <div className="max-w-[90vw] lg:col-span-4">
               <div className="sticky top-24">
                 <ProductGallery images={data?.images || []} attachments={data?.attachments || []} />
               </div>
@@ -128,7 +128,7 @@ const ProductDetailPage = () => {
 
                 <div className="bg-white rounded-[24px] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                   <div className="p-6 bg-slate-900 text-white relative">
-                    <h3 className="text-lg font-bold">پێش وەسڵی داواکاری</h3>
+                    <h3 className="text-lg font-bold">نرخ</h3>
 
                     <div className="mt-6 flex flex-col gap-1 min-h-[60px] justify-center">
                       {pricing?.isCalculating ? (
@@ -199,15 +199,16 @@ const ProductDetailPage = () => {
       {/* ══════════════════════════════════════════
           Sticky Bottom Bar — فقط موبایل
       ══════════════════════════════════════════ */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-50">
+      <div className='flex items-center justify-center '>
+      <div className="lg:hidden fixed bottom-2 w-[90vw] pb-2  z-50  ">
         {/* blur backdrop */}
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-xl border-t border-slate-200/80" />
+        <div className="absolute inset-0 bg-white/20 backdrop-blur-sm  rounded-2xl" />
 
-        <div className="relative px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] flex items-center gap-3">
+        <div className="relative px-4 pt-3  flex justify-between items-center gap-3">
 
           {/* بخش قیمت */}
-          <div className="flex-1 min-w-0 bg-slate-900 rounded-2xl px-4 py-2.5 flex flex-col justify-center">
-            <p className="text-[10px] text-slate-400 font-bold mb-0.5 leading-none">پێش وەسڵی داواکاری</p>
+          <div className=" min-w-0 bg-slate-900 rounded-2xl px-4 py-1.5 sm:py-2.5 flex flex-col justify-center">
+            <p className="text-[10px] text-slate-400 font-bold mb-0.5 leading-none">نرخ</p>
 
             {pricing?.isCalculating ? (
               <div className="flex items-center gap-2 text-emerald-400 mt-1">
@@ -246,7 +247,7 @@ const ProductDetailPage = () => {
           </button>
 
         </div>
-      </div>
+      </div> </div>
       {/* ══ /Sticky Bottom Bar ══ */}
     </>
   );

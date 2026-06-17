@@ -49,7 +49,7 @@ const ProductCard = ({ product }) => {
       <div className="pt-4 pb-4 px-4 flex flex-col gap-2 flex-1">
         
         {/* مسیر دسته‌بندی */}
-        <div className="text-[10px] text-slate-400 font-medium flex items-center gap-1 truncate" dir="rtl">
+        {/* <div className="text-[10px] text-slate-400 font-medium flex items-center gap-1 truncate" dir="rtl">
            <span className="hover:text-primary transition-colors">
              {parentCategory}
            </span>
@@ -62,7 +62,7 @@ const ProductCard = ({ product }) => {
                </span>
              </>
            )}
-        </div>
+        </div> */}
 
         {/* نام محصول */}
         <h3 className="text-sm font-bold text-slate-800 leading-snug line-clamp-2 group-hover:text-primary transition-colors">

@@ -1,0 +1,100 @@
+📋 گزارش کلمات و جملات فارسی برای ترجمه:
+==========================================
+
+📁 فایل: src/app/components/common/SearchableSelect.jsx
+------------------------------------------
+[خط 8] placeholder = 'انتخاب کنید...',
+[خط 56] در حال دریافت...
+[خط 78] placeholder="جستجو کنید..."
+[خط 91] موردی یافت نشد
+
+📁 فایل: src/app/components/common/SEO.jsx
+------------------------------------------
+[خط 13] const siteTitle = title ? `${title} | پرینتو۲۴` : 'پرینتو۲۴ | خدمات چاپ آنلاین';
+[خط 19] <meta name="description" content={description || 'خدمات چاپ آنلاین با بهترین کیفیت در پرینتو۲۴'} />
+
+📁 فایل: src/app/components/common/SupportFloat.jsx
+------------------------------------------
+[خط 67] title="پشتیبانی"
+
+📁 فایل: src/app/features/auth/schemas.js
+------------------------------------------
+[خط 5] phone_number: z.string().min(1, 'شماره تلفن الزامی است'),
+[خط 6] password: z.string().min(1, 'رمز عبور الزامی است'),
+[خط 11] first_name: z.string().min(2, 'نام باید حداقل ۲ کاراکتر باشد'),
+[خط 12] last_name: z.string().min(2, 'نام خانوادگی باید حداقل ۲ کاراکتر باشد'),
+[خط 13] phone_number: z.string().regex(/^09[0-9]{9}$/, 'شماره تلفن باید ۱۱ رقم شروع شود'),
+[خط 15] .min(8, 'رمز عبور باید حداقل ۸ کاراکتر باشد')
+[خط 16] .regex(/[A-Z]/, 'باید شامل یک حرف بزرگ باشد')
+[خط 17] .regex(/[0-9]/, 'باید شامل یک عدد باشد'),
+[خط 20] message: "رمز عبور و تکرار آن مطابقت ندارند",
+[خط 27] .length(6, 'کد تایید باید ۶ رقم باشد')
+[خط 28] .regex(/^\d+$/, 'فقط عدد وارد کنید'),
+
+📁 فایل: src/app/features/blog/hooks/useArticleDetail.js
+------------------------------------------
+[خط 18] setError('مشکلی در دریافت اطلاعات مقاله به وجود آمد.');
+
+📁 فایل: src/app/features/blog/hooks/useTutorials.js
+------------------------------------------
+[خط 24] setListError('مشکلی در دریافت لیست آموزش‌ها به وجود آمد.');
+[خط 44] setDetailError('مشکلی در دریافت جزئیات ویدیو به وجود آمد.');
+
+📁 فایل: src/app/features/home/HomeSlider.jsx
+------------------------------------------
+[خط 97] aria-label="اسلاید قبلی"
+[خط 106] aria-label="اسلاید بعدی"
+
+📁 فایل: src/app/features/profile/AddressPage.jsx
+------------------------------------------
+[خط 78] toast.success('آدرس با موفقیت حذف شد');
+[خط 214] کد پستی
+[خط 223] required: 'کد پستی الزامی است',
+[خط 224] minLength: { value: 10, message: 'کد پستی باید ۱۰ رقم باشد' },
+[خط 225] pattern: { value: /^[0-9]+$/, message: 'فقط عدد وارد کنید' }
+
+📁 فایل: src/app/features/profile/MyOrdersPage.jsx
+------------------------------------------
+[خط 136] data-tip="پیش‌فاکتور"
+[خط 143] data-tip="فاکتور نهایی"
+
+📁 فایل: src/app/features/profile/OrderDetailPage.jsx
+------------------------------------------
+[خط 61] quantity_label: "تعداد کل",
+[خط 62] has_design: "دارای طراحی اختصاصی",
+[خط 277] quantity_label: "تیراژ/تعداد",
+[خط 278] has_design: "نیاز به طراحی اختصاصی",
+[خط 306] کد محصول: {item.product?.code || '---'}
+
+📁 فایل: src/app/features/profile/QuotationPage.jsx
+------------------------------------------
+[خط 202] <span>{Array.isArray(sel.value) ? sel.value.join('، ') : sel.value}</span>
+
+📁 فایل: src/app/features/shop/components/CartItem.jsx
+------------------------------------------
+[خط 212] ردیف مشخصات
+
+📁 فایل: src/app/features/shop/components/DesignUploadPage.jsx
+------------------------------------------
+[خط 299] {isDragging ? 'فایل رو اینجا رها کنید' : t.dropzoneTitle}
+[خط 472] {totalUploaded} فایل
+
+📁 فایل: src/app/features/shop/hooks/useProductCalculator.js
+------------------------------------------
+[خط 81] setPriceError(error?.response?.data?.error || "خطا در ارتباط با سرور");
+
+📁 فایل: src/app/features/shop/ProductDetailPage.jsx
+------------------------------------------
+[خط 215] <span className="text-xs font-medium opacity-80">در حال محاسبه...</span>
+
+📁 فایل: src/app/features/shop/ShopPage.jsx
+------------------------------------------
+[خط 577] فیلترها رو تغییر بدید یا همه محصولات رو ببینید
+
+📁 فایل: src/app/hooks/useWalletBalance.js
+------------------------------------------
+[خط 24] console.error("خطا در دریافت موجودی کیف پول:", err);
+
+📁 فایل: src/app/layouts/Header.jsx
+------------------------------------------
+[خط 83] console.error('خطا در دریافت تعداد سبد خرید:', error);

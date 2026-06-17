@@ -26,7 +26,7 @@ export const ADMIN_NAVIGATION = [
     icon: Layers,
     children: [
       { title: 'مدیریت دسته‌ها', path: '/admin/categories', icon: List },
-      { title: 'زیر‌دسته‌ها', path: '/admin/categories/sub', icon: Layers },
+      // { title: 'زیر‌دسته‌ها', path: '/admin/categories/sub', icon: Layers },
     ]
   },
   {
