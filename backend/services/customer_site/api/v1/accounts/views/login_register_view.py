@@ -9,7 +9,56 @@ from drf_spectacular.utils import extend_schema, OpenApiExample
 from ..serializers import UnifiedAuthSerializer, UserDetailSerializer
 from apps.accounts.services import AuthService
 
-@extend_schema(tags=['Accounts'])
+@extend_schema(
+    tags=['Accounts'],
+    examples=[
+        OpenApiExample(
+            'Login/Register Example',
+            value={
+                'phone_number': '09137555555',
+                'password': 'admin'
+            },
+            request_only=True,
+            description='شماره تماس و رمز عبور برای ورود یا ثبت‌نام'
+        ),
+        OpenApiExample(
+            'Login Success Response',
+            value={
+                'message': 'چوونەژوورەوە بە سەرکەوتوویی ئەنجامدرا.',
+                'user': {
+                    'id': 1,
+                    'phone_number': '09137555555',
+                    'first_name': '',
+                    'last_name': ''
+                },
+                'tokens': {
+                    'access': 'eyJ0eXAiOiJKV1QiLCJhbGc...',
+                    'refresh': 'eyJ0eXAiOiJKV1QiLCJhbGc...'
+                }
+            },
+            response_only=True,
+            status_codes=['200']
+        ),
+        OpenApiExample(
+            'Register Success Response',
+            value={
+                'message': 'خۆتۆمارکردن و چوونەژوورەوە بە سەرکەوتوویی ئەنجامدرا.',
+                'user': {
+                    'id': 2,
+                    'phone_number': '09137555555',
+                    'first_name': '',
+                    'last_name': ''
+                },
+                'tokens': {
+                    'access': 'eyJ0eXAiOiJKV1QiLCJhbGc...',
+                    'refresh': 'eyJ0eXAiOiJKV1QiLCJhbGc...'
+                }
+            },
+            response_only=True,
+            status_codes=['201']
+        )
+    ]
+)
 class UnifiedAuthAPIView(GenericAPIView):
     """
     API یکپارچه ورود و ثبت‌نام.

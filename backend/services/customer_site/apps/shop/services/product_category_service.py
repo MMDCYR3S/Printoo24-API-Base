@@ -121,7 +121,7 @@ class ShopCategoryService:
         """
         logger.info("Fetching all root categories with products")
 
-        root_categories = self._domain_service.get_root_categories()
+        root_categories = self._domain_service.get_root_categories(active_only=True)
         result_list = []
 
         for category in root_categories:

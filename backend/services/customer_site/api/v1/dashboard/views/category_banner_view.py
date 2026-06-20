@@ -18,6 +18,7 @@ from ..serializers.general_serializers import (
     ProductCategoryDetailWithLinksSerializer,
     SubcategoryWithParentSerializer,
     CategoryBulkUpsertSerializer,
+    CategoryBulkStatusSerializer,
 )
 
 # ===== ویو‌ست مدیریت دسته‌بندی‌ها ===== #
@@ -39,7 +40,7 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
 
     # ===== بازنویسی متد get_queryset ===== #
     def get_queryset(self):
-        return self.service.get_category_tree_queryset()
+        return self.service.get_all_category_tree_queryset()
      
     # ===== بازنویسی متد retrieve (مشاهده جزئیات) ===== #
     @extend_schema(
@@ -196,37 +197,39 @@ class ProductCategoryDashboardViewSet(ModelViewSet):
         )
     # ===== اکشن سفارشی: تغییر وضعیت گروهی ===== #
     @extend_schema(
-        summary="تغییر وضعیت گروهی",
-        description="این سرویس لیستی از شناسه‌ها را گرفته و وضعیت آن‌ها را به صورت گروهی تغییر می‌دهد.",
-        request=inline_serializer(
-            name='CategoryBulkStatusSerializer',
-            fields={
-                'ids': serializers.ListField(
-                    child=serializers.IntegerField(), # اگر از UUID استفاده می‌کنی این رو به UUIDField تغییر بده
-                    allow_empty=False,
-                    help_text='لیست شناسه‌های دسته‌بندی'
-                ),
-                'is_active': serializers.BooleanField(
-                    default=True,
-                    help_text='وضعیت جدید (فعال/غیرفعال)'
-                )
+        request=CategoryBulkStatusSerializer,
+        responses={
+            200: {
+                'type': 'object',
+                'properties': {
+                    'detail': {'type': 'string', 'example': '5 دسته‌بندی بروزرسانی شدند.'}
+                }
             }
-        ),
-        responses={200: inline_serializer(
-            name='BulkStatusResponse',
-            fields={'detail': serializers.CharField()}
-        )}
+        },
+        examples=[
+            OpenApiExample(
+                'فعال کردن دسته‌بندی‌ها',
+                value={'ids': [1, 2, 3], 'is_active': True},
+                request_only=True,
+            ),
+            OpenApiExample(
+                'غیرفعال کردن دسته‌بندی‌ها',
+                value={'ids': [4, 5], 'is_active': False},
+                request_only=True,
+            ),
+        ]
     )
     @action(detail=False, methods=['patch'], url_path='bulk-status')
     def bulk_status(self, request):
-        ids = request.data.get('ids', [])
-        is_active = request.data.get('is_active', True)
+        serializer = CategoryBulkStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         
-        if not ids:
-            return Response({'detail': 'لیست شناسه (ids) الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
-            
+        ids = serializer.validated_data['ids']
+        is_active = serializer.validated_data['is_active']
+        
         count = self.service.bulk_toggle_status(ids, is_active)
         return Response({'detail': f'{count} دسته‌بندی بروزرسانی شدند.'}, status=status.HTTP_200_OK)
+
 
     # ===== اکشن سفارشی: حذف گروهی ===== #
     @extend_schema(summary="حذف گروهی")
