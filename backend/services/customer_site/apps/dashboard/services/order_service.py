@@ -3,9 +3,12 @@
 from django.core.exceptions import ValidationError
 from core.models import Order, OrderStatus, Address
 from core.order.services import OrderService
+from core.users.services import CustomerService
+
 class OrderDashboardService:
     def __init__(self):
         self.domain = OrderService()
+        self.customer_service = CustomerService()
 
     def get_order_list(self):
         return Order.objects.get_all_orders_summary()
@@ -17,6 +20,10 @@ class OrderDashboardService:
         """ واکشی لیست تمام وضعیت‌ها برای نمایش در دراپ‌داون فرانت‌اند """
         return OrderStatus.objects.all().select_related('group').order_by('sort_order')
 
+    def get_all_customers(self):
+        """ دریافت لیست مشتریان برای انتخاب در سفارش دستی """
+        return self.customer_service.get_all_customers()
+
     def create_order(self, data):
         return self.domain.create_order_direct(**data)
 
@@ -27,13 +34,10 @@ class OrderDashboardService:
         return self.domain.change_order_status(order_id, status_code, actor, description)
 
     def delete_order(self, order_id):
-        # اول بررسی وجود سفارش
         if not Order.objects.filter(id=order_id).exists():
             raise Exception(f"سفارش با شناسه {order_id} یافت نشد.")
-
         result = self.domain.bulk_delete_orders([order_id])
         return result
-
 
     def bulk_delete(self, order_ids):
         return self.domain.bulk_delete_orders(order_ids)
@@ -44,7 +48,7 @@ class OrderDashboardService:
     def get_user_addresses(self, user_id):
         return Address.objects.filter(user_id=user_id)
 
-    def get_order_item(self, order_item_id: int) -> 'OrderItem':
+    def get_order_item(self, order_item_id: int):
         from core.models import OrderItem
         try:
             return OrderItem.objects.get(id=order_item_id)
@@ -55,7 +59,7 @@ class OrderDashboardService:
         from apps.dashboard.tasks import upload_order_item_file_task
         import tempfile, os
 
-        self.get_order_item(order_item_id)  # بررسی وجود آیتم
+        self.get_order_item(order_item_id)
 
         original_filename = uploaded_file.name
         suffix = os.path.splitext(original_filename)[1]
@@ -80,5 +84,3 @@ class OrderDashboardService:
             if f.file:
                 f.file.delete(save=False)
         f.delete()
-
-

@@ -187,6 +187,22 @@ class ProductCategoryDashboardSerializer(serializers.ModelSerializer):
             return ProductCategoryDashboardSerializer(children, many=True, context=self.context).data
         return []
 
+# در serializers.py
+class CategoryBulkStatusSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        allow_empty=False,
+        help_text='لیست شناسه‌های دسته‌بندی'
+    )
+    is_active = serializers.BooleanField(help_text='وضعیت فعال/غیرفعال')
+    
+    def to_internal_value(self, data):
+        if 'is_active' in data and isinstance(data['is_active'], str):
+            data = data.copy()
+            data['is_active'] = data['is_active'].lower() in ('true', '1', 'yes')
+        return super().to_internal_value(data)
+
+
 # ===== سریالایزر ورودی برای عملیات گروهی ===== #
 class CategoryBulkUpsertSerializer(serializers.ModelSerializer):
     """

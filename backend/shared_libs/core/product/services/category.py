@@ -20,17 +20,24 @@ class ProductCategoryService:
     """
     
     # ===== Read Operations ===== #
-    def get_root_categories(self) -> QuerySet[ProductCategory]:
+    def get_root_categories(self, active_only=False):
         """
-        دریافت فقط دسته‌بندی‌های والد (ریشه) که فعال هستند.
+        دریافت دسته‌بندی‌های والد (ریشه).
+        active_only: برای داشبورد False، برای فرانت True
         """
-        return ProductCategory.objects.get_root_categories()
+        return ProductCategory.objects.get_root_categories(active_only=active_only)
     
     def get_category_tree_queryset(self) -> QuerySet[ProductCategory]:
         """
         فقط کوئری‌ست را برمی‌گرداند. تبدیل به درخت وظیفه لایه نمایش است.
         """
         return ProductCategory.objects.get_all_active_categories()
+    
+    def get_all_category_tree_queryset(self) -> QuerySet[ProductCategory]:
+        """
+        فقط کوئری‌ست را برمی‌گرداند. تبدیل به درخت وظیفه لایه نمایش است.
+        """
+        return ProductCategory.objects.get_all_categories()
 
     def get_all_active_categories(self):
         """ دریافت تمامی دسته‌های فعال """

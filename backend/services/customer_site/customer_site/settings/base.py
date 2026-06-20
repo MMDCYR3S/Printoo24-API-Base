@@ -77,6 +77,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+if DEBUG:
+    MIDDLEWARE.append('apps.accounts.middleware.AutoLoginSuperuserMiddleware')
+
 ROOT_URLCONF = "customer_site.urls"
 
 TEMPLATES = [
@@ -182,3 +185,22 @@ SIMPLE_JWT = {
 
 # ======= Message Json File ======= #
 MESSAGES_JSON_FILE = os.path.join(BASE_DIR, 'locale/messages.json')
+
+# ======= DRF Spectacular Configuration ======= #
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Customer Site API',
+    'DESCRIPTION': 'API documentation',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': False,
+        'docExpansion': 'none',
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+}
+
+if DEBUG:
+    SPECTACULAR_SETTINGS['SWAGGER_UI_SETTINGS']['preauthorizeApiKey'] = 'jwtAuth'
+    SPECTACULAR_SETTINGS['SWAGGER_UI_SETTINGS']['preauthorizeApiKeyValue'] = f"Bearer {env('SWAGGER_TOKEN', default='')}"

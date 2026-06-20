@@ -240,13 +240,13 @@ class Product(HasGuide, models.Model):
     show_price = models.DecimalField(
         _("قیمت نمایشی"),
         max_digits=14,
-        decimal_places=2,
+        decimal_places=0,
         default=0.0
     )
     price = models.DecimalField(
         _('قیمت'),
         max_digits=12, 
-        decimal_places=2, 
+        decimal_places=0, 
         default=0.0,
     )
     # ===== قیمت گذاری براساس مقدار ==== #
@@ -385,7 +385,7 @@ class ProductField(models.Model):
     numeric_value = models.DecimalField(
         _("مقدار عددی پایه (برای فرمول این محصول)"), 
         max_digits=14, 
-        decimal_places=2, 
+        decimal_places=0, 
         default=0.0
     )
     is_required = models.BooleanField(_("اجباری بودن برای این محصول"), default=False)
@@ -412,7 +412,7 @@ class ProductFieldChoice(models.Model):
     numeric_value = models.DecimalField(
         _("مقدار عددی (ارزش این گزینه در این محصول)"), 
         max_digits=14, 
-        decimal_places=2, 
+        decimal_places=0, 
         default=0.0
     )
     is_default = models.BooleanField(_("گزینه پیش‌فرض"), default=False)

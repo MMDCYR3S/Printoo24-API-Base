@@ -8,7 +8,8 @@ from apps.dashboard.services.order_service import OrderDashboardService
 from ..serializers.order_serializers import (
     OrderDetailSerializer, OrderCreateSerializer, OrderUpdateSerializer,
     ChangeStatusSerializer, BulkActionIdsSerializer, BulkChangeStatusSerializer,
-    OrderStatusSerializer, UserAddressSerializer, OrderItemUploadSerializer
+    OrderStatusSerializer, UserAddressSerializer, OrderItemUploadSerializer,
+    CustomerListSerializer
 )
 from apps.dashboard.tasks import upload_order_item_file_task
 from rest_framework import parsers
@@ -23,7 +24,6 @@ class OrderDashboardViewSet(viewsets.ViewSet):
     @extend_schema(summary="لیست سفارشات", responses=OrderDetailSerializer(many=True))
     def list(self, request):
         queryset = self.service.get_order_list()
-        # در دنیای واقعی اینجا نیاز به Pagination است. اگر کلاس صفحه بندی دارید اعمال کنید.
         serializer = OrderDetailSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -254,6 +254,17 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         addresses = self.service.get_user_addresses(user_id)
         return Response(UserAddressSerializer(addresses, many=True).data)
 
+    # ===== لیست مشتریان برای سفارش دستی ===== #
+    @extend_schema(
+        summary="لیست مشتریان برای سفارش دستی",
+        description="دریافت لیست تمام مشتریانی که ادمین نیستند، برای انتخاب در هنگام ثبت سفارش دستی",
+        responses=CustomerListSerializer(many=True)
+    )
+    @action(detail=False, methods=['get'], url_path='customers')
+    def customers(self, request):
+        customers = self.service.get_all_customers()
+        return Response(CustomerListSerializer(customers, many=True).data)
+
     # ===== ORDER ITEM FILE UPLOAD ===== #
     @extend_schema(
         summary="آپلود فایل طراحی برای یک آیتم سفارش",
@@ -279,4 +290,3 @@ class OrderDashboardViewSet(viewsets.ViewSet):
             return Response({'detail': 'فایل با موفقیت حذف شد.'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
-

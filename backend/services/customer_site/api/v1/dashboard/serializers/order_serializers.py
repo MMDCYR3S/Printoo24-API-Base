@@ -129,3 +129,15 @@ class UserAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
         fields = ['id', 'address', 'province', 'province_name', 'city', 'city_name'] 
+
+# ===== سریالایزر لیست مشتریان برای سفارش دستی ===== #
+class CustomerListSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    phone_number = serializers.CharField(read_only=True)
+    full_name = serializers.SerializerMethodField()
+    company = serializers.CharField(source='customer_profile.company', read_only=True, default='')
+    
+    def get_full_name(self, obj):
+        if hasattr(obj, 'customer_profile') and obj.customer_profile:
+            return obj.customer_profile.fullname()
+        return obj.phone_number

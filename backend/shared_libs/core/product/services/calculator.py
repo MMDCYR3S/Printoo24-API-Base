@@ -1,6 +1,6 @@
 import ast
 import operator
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Dict, Any, Tuple, List, Set
 
 from django.db.models import Prefetch
@@ -48,7 +48,7 @@ class SafeMathEvaluator:
         از طولانی‌ترین نام به کوتاه‌ترین جایگزین می‌کند تا از تداخل جلوگیری شود.
         """
         if not expression or not expression.strip():
-            return Decimal('0.0')
+            return Decimal('0')
 
         try:
             parsed_expr = expression.strip()
@@ -62,7 +62,7 @@ class SafeMathEvaluator:
             if isinstance(result, bool):
                 return result
 
-            return Decimal(str(result)).quantize(Decimal('0.00'))
+            return Decimal(str(result)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
 
         except ZeroDivisionError:
             raise InvalidProductDataException("خطای محاسباتی: تقسیم بر صفر در فرمول محصول وجود دارد.")
@@ -230,7 +230,7 @@ class ProductPricingDomainService:
 
         formula_variables: Dict[str, Decimal] = {}
         configuration_summary: List[Dict[str, Any]] = []  # ← LIST نه dict
-        quantity_val = Decimal('1.0')
+        quantity_val = Decimal('1')
 
         # ===== ۳. استخراج مقادیر عددی برای فیلدهای فعال ===== #
         for f_id in active_field_ids:
@@ -344,11 +344,11 @@ class ProductPricingDomainService:
         for f_id in fields_map.keys():
             var_name = f"field_{f_id}"
             if var_name not in formula_variables:
-                formula_variables[var_name] = Decimal('0.0')
+                formula_variables[var_name] = Decimal('0')
 
         # ===== متغیرهای سیستمی ===== #
         formula_variables["base_price"] = Decimal(str(product.price))
-        formula_variables["price_per_unit"] = Decimal(str(product.price_per_unit)) if product.price_per_unit else Decimal('1.0')
+        formula_variables["price_per_unit"] = Decimal(str(product.price_per_unit)) if product.price_per_unit else Decimal('1')
         formula_variables["quantity"] = quantity_val
 
         # ===== ۴. انتخاب فرمول مناسب ===== #
@@ -361,7 +361,7 @@ class ProductPricingDomainService:
                 if k.startswith('field_')
             )
             fallback_price = (formula_variables["base_price"] + fields_sum)
-            return max(fallback_price, Decimal('0.00')).quantize(Decimal('0.00')), configuration_summary
+            return max(fallback_price, Decimal('0')).quantize(Decimal('1'), rounding=ROUND_HALF_UP), configuration_summary
 
         active_formula = None
         default_formula = None
@@ -395,6 +395,6 @@ class ProductPricingDomainService:
         )
 
         if isinstance(final_price, bool) or final_price < 0:
-            final_price = Decimal('0.00')
+            final_price = Decimal('0')
 
-        return final_price, configuration_summary
+        return final_price.quantize(Decimal('1'), rounding=ROUND_HALF_UP), configuration_summary
