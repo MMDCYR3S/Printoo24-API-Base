@@ -94,9 +94,9 @@ const SiteMediaPage = () => {
               {/* Image Preview */}
               <div className="relative h-40 bg-slate-50 overflow-hidden flex items-center justify-center p-2">
                 <img 
-                    src={media.file} 
+                    src={media.file_url} 
                     alt="Banner" 
-                    className="w-full h-full object-contain transition-transform duration-500"
+                    className="w-full h-full object-contain transition-transform duration-500 "
                 />
               </div>
 

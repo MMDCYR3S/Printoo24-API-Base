@@ -6,6 +6,7 @@ import { X, Layers, Headphones } from 'lucide-react';
 
 import Header from './Header';
 import Footer from './Footer';
+import TopMedia from '../components/layout/topMediaService'; // ← نوار رسانه بالای هدر
 import MobileMenu from '../components/layout/MobileMenu';
 import SupportFloat from '../components/common/SupportFloat';
 import pageText from '../lang/pages.json';
@@ -16,7 +17,7 @@ const MainLayout = () => {
 
   // useEffect برای اسکرول به بالا هنگام تغییر مسیر
   useEffect(() => {
-    window.scrollTo(0, 0); // پرهش به بالای صفحه
+    window.scrollTo(0, 0); // پرش به بالای صفحه
   }, [pathname]); // این افکت فقط وقتی pathname عوض شه اجرا میشه
 
   const [isDrawerOpen, setDrawerOpen] = useState(false);
@@ -27,6 +28,9 @@ const MainLayout = () => {
 
   return (
     <div className="relative min-h-screen flex flex-col bg-white">
+
+      {/* ── نوار رسانه بالای هدر ── */}
+      <TopMedia />
 
       {/* ── هدر ── */}
       <Header onOpenDrawer={openDrawer} />

@@ -15,6 +15,7 @@ import {
 import CategoryHero from '../features/home/CategoryHero';
 import HomeSlider from '../features/home/HomeSlider';
 import InfoModal from '../components/common/InfoModal';
+import HomePageModal from '../components/layout/HomePageModal'; // ← مودال اطلاع‌رسانی صفحه اصلی
 import ContactSection from '../features/home/ContactSection';
 import pageText from '../lang/pages.json';
 
@@ -87,6 +88,9 @@ const HomePage = () => {
 
       <InfoModal />
 
+      {/* ── مودال اطلاع‌رسانی (از سرور) ── */}
+      <HomePageModal />
+
       <div className="flex flex-col pb-16">
         {/* 1. اسلایدر */}
         <div className="mt-6">
@@ -116,69 +120,6 @@ const HomePage = () => {
     </>
   );
 };
-
-/* ═════════════════════════════════════════════
-   تصاویر کمکی (بنرها)
-   ═════════════════════════════════════════════ */
-// const PageHelperPictures = () => {
-//   const ref = useRef(null);
-//   const isInView = useInView(ref, { once: true, margin: '-40px' });
-
-//   const images = [
-//     { src: img501, alt: 'بنر ۱', link: '#' },
-
-//     { src: img503, alt: 'بنر ۳' },
-
-//   ];
-
-//   return (
-//     <motion.div
-//       ref={ref}
-//       variants={staggerContainer}
-//       initial="hidden"
-//       animate={isInView ? 'show' : 'hidden'}
-//       className="container mx-auto px-4 my-6"
-//     >
-//       <div className="grid grid-cols-2 max-w-lg mx-auto gap-4">
-//         {images.map((img, idx) => {
-//           const Inner = (
-//             <motion.div
-//               variants={scaleIn}
-//               className="
-//                 relative rounded-2xl overflow-hidden
-//                 ring-1 ring-black/[0.04]
-//                 group cursor-pointer
-//               "
-//             >
-//               <img
-//                 src={img.src}
-//                 alt={img.alt}
-//                 loading="lazy"
-//                 className="
-//                   w-full h-full object-cover
-//                   transition-transform duration-500 ease-out
-//                   group-hover:scale-[1.04]
-//                 "
-//               />
-//               <div className="
-//                 absolute inset-0 bg-black/0 group-hover:bg-black/5
-//                 transition-colors duration-300
-//               " />
-//             </motion.div>
-//           );
-
-//           return img.link ? (
-//             <a key={idx} href={img.link}>
-//               {Inner}
-//             </a>
-//           ) : (
-//             <div key={idx}>{Inner}</div>
-//           );
-//         })}
-//       </div>
-//     </motion.div>
-//   );
-// };
 
 /* ═════════════════════════════════════════════
    بخش اعتمادسازی
