@@ -888,3 +888,4 @@ INFO 2026-06-14 12:47:58,218 cart_item_service 7 125334496376512 Fetching cart l
 INFO 2026-06-14 12:48:18,622 cart_item_service 7 125334108231360 Fetching cart list for User:4
 INFO 2026-06-14 12:48:39,544 cart_item_service 7 125334518404800 Fetching cart list for User:4
 INFO 2026-06-14 12:48:54,343 cart_item_service 7 125334475392704 Fetching cart list for User:4
+INFO 2026-06-21 14:39:57,321 cart_item_service 86 138779898844864 Fetching cart list for User:1

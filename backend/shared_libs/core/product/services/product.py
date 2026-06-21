@@ -77,7 +77,7 @@ class ProductService:
     def update_product_shell(self, pk: int, data: Dict[str, Any]) -> Product:
         product = Product.objects.get_by_id(pk)
         if not product:
-            raise ProductNotFoundException("محصول یافت نشد.")
+            raise ProductNotFoundException("بەرهەمی دیاریکراو نەدۆزرایەوە.")
         
         has_category_update = 'category_id' in data or 'subcategory_id' in data
         category_id = data.pop('category_id', None)
@@ -131,7 +131,7 @@ class ProductService:
     def delete_product(self, product_id: int):
         product = Product.objects.get_by_id(product_id)
         if not product:
-            raise ProductNotFoundException("محصول یافت نشد.")
+            raise ProductNotFoundException("بەرهەمی دیاریکراو نەدۆزرایەوە.")
         try:
             product.delete()
         except ProtectedError:
@@ -183,7 +183,7 @@ class ProductService:
         try:
             product = Product.objects.get(id=product_id)
         except Product.DoesNotExist:
-            raise ProductNotFoundException("محصول یافت نشد.")
+            raise ProductNotFoundException("بەرهەمی دیاریکراو نەدۆزرایەوە.")
 
         # --- پاک کردن فیلدهای حذف شده ---
         clean_fields_data = [

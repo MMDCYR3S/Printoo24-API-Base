@@ -90,3 +90,7 @@ INFO 2026-06-03 08:51:17,139 user_address_service 7 135518281144000 Fetching add
 INFO 2026-06-03 08:52:12,528 user_address_service 7 135518255965888 Fetching addresses for User ID: 1
 INFO 2026-06-03 08:52:50,203 user_address_service 7 135518255965888 Fetching addresses for User ID: 1
 INFO 2026-06-03 08:52:54,736 user_address_service 7 135518255965888 Fetching addresses for User ID: 1
+INFO 2026-06-21 14:39:58,096 user_address_service 86 138779511744192 Fetching addresses for User ID: 1
+INFO 2026-06-21 14:39:59,406 user_address_service 86 138779511744192 Removing Address ID: 4 for User ID: 1
+INFO 2026-06-21 14:39:59,426 user_address_service 86 138779511744192 Address ID: 4 deleted successfully.
+INFO 2026-06-21 14:39:59,482 user_address_service 86 138779511744192 Fetching addresses for User ID: 1

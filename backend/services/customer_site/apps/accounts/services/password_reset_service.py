@@ -88,7 +88,7 @@ class PasswordResetService:
             raise
         except Exception as e:
             logger.error(f"Error sending reset link to {email}: {e}", exc_info=True)
-            raise ValidationError("خطای سیستمی در پردازش درخواست.")
+            raise ValidationError("هەڵەی سیستمی لە پرۆسێسکردنی داواکاریدا.")
             
     def confirm_password_reset(
         self, 
@@ -109,12 +109,12 @@ class PasswordResetService:
                 user = User.objects.get(pk=uid)
             except (TypeError, ValueError, OverflowError, User.DoesNotExist):
                 security_logger.warning(f"Invalid UID/User in reset attempt: {uidb64}")
-                raise ValidationError("لینک بازنشانی نامعتبر است.")
+                raise ValidationError("لینکی ڕێکخستنەوە نادروستە.")
 
             # ===== اعتبارسنجی توکن ===== #
             if not self._token_generator.check_token(user, token):
                 security_logger.warning(f"Invalid/Expired token for user: {user.email}")
-                raise ValidationError("لینک منقضی شده یا نامعتبر است.")
+                raise ValidationError("لینکەکە بەسەرچووە یان نادروستە.")
 
             # ===== تغییر رمز عبور ===== #
             self._identity_service.change_password(user, new_password)

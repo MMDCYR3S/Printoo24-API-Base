@@ -1429,3 +1429,5 @@ INFO 2026-06-14 12:48:54,282 user_transaction_service 7 125334504769216 Fetching
 WARNING 2026-06-14 12:48:54,302 user_transaction_service 7 125334504769216 No wallet found for User ID: 4
 INFO 2026-06-14 12:48:54,359 user_transaction_service 7 125334108231360 Fetching wallet balance for User ID: 4
 WARNING 2026-06-14 12:48:54,370 user_transaction_service 7 125334108231360 No wallet found for User ID: 4
+INFO 2026-06-21 14:39:57,241 user_transaction_service 86 138779511744192 Fetching wallet balance for User ID: 1
+DEBUG 2026-06-21 14:39:57,257 user_transaction_service 86 138779511744192 Wallet balance: 15032110.00
