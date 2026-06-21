@@ -66,10 +66,6 @@
 [خط 278] has_design: "نیاز به طراحی اختصاصی",
 [خط 306] کد محصول: {item.product?.code || '---'}
 
-📁 فایل: src/app/features/profile/QuotationPage.jsx
-------------------------------------------
-[خط 202] <span>{Array.isArray(sel.value) ? sel.value.join('، ') : sel.value}</span>
-
 📁 فایل: src/app/features/shop/components/CartItem.jsx
 ------------------------------------------
 [خط 212] ردیف مشخصات

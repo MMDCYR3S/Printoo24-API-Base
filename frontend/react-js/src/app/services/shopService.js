@@ -8,7 +8,7 @@ export const shopService = {
     if (filters.categories) {
       filters.categories.forEach(cat => params.append('category', cat));
     }
-    if (filters.search) params.append('name', filters.search);
+    if (filters.search) params.append('search', filters.search);
     const response = await apiClient.get('/shop/grid/', { params });
     return response.data;
   },
@@ -26,16 +26,16 @@ export const shopService = {
     });
     return response.data;
   },
-  // دریافت نتایج جستجو
-searchProducts: async (query, page = 1) => {
-  const params = new URLSearchParams();
-  params.append('name', query);
-  params.append('page', page);
-  const response = await apiClient.get('/shop/grid/', { params });
-  
-  // بررسی ساختار response — کدوم حالت داری؟
-  // اگه API مستقیم آرایه برمیگردونه:
-  return Array.isArray(response.data) ? response.data : response.data.results ?? [];
-},
 
+  // جستجوی محصولات
+  // طبق مستندات: GET /api/v1/shop/search/?q=<keyword>
+  // این اندپوینت داخل name, description, options جستجو می‌کند و مستقیماً آرایه برمی‌گرداند.
+  searchProducts: async (query, page = 1) => {
+    const params = new URLSearchParams();
+    params.append('q', query);
+    // این اندپوینت pagination ندارد → صفحه‌بندی نادیده گرفته می‌شود
+    const response = await apiClient.get('/shop/search/', { params });
+    // پاسخ مستقیماً آرایه است
+    return Array.isArray(response.data) ? response.data : [];
+  },
 };

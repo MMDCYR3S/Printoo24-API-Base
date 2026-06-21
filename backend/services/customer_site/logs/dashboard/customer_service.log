@@ -303,3 +303,16 @@ DEBUG 2026-02-26 03:05:03,625 customer_service 7 132892962965184 Fetching custom
 DEBUG 2026-05-12 11:03:57,410 customer_service 23 137924526118592 Fetching customer list
 DEBUG 2026-05-23 07:15:04,760 customer_service 7 137846314915520 Fetching customer list
 INFO 2026-06-20 13:55:10,497 customer_service 42 128732316563136 Fetching details for Customer 7
+DEBUG 2026-06-21 13:20:12,017 customer_service 7 125887563425472 Fetching customer list
+INFO 2026-06-21 13:20:14,691 customer_service 7 125887571818176 Fetching details for Customer 2
+DEBUG 2026-06-21 13:20:14,699 customer_service 7 125887563425472 Fetching customer list
+DEBUG 2026-06-21 13:20:21,639 customer_service 7 125887571818176 Fetching customer list
+INFO 2026-06-21 13:20:21,640 customer_service 7 125887563425472 Fetching details for Customer 2
+INFO 2026-06-21 13:20:21,734 customer_service 7 125887555032768 Fetching details for Customer 2
+DEBUG 2026-06-21 13:20:21,776 customer_service 7 125887563425472 Fetching customer list
+DEBUG 2026-06-21 13:20:26,131 customer_service 7 125887563425472 Fetching customer list
+INFO 2026-06-21 13:20:26,142 customer_service 7 125887555032768 Fetching details for Customer 2
+INFO 2026-06-21 13:20:26,207 customer_service 7 125887571818176 Fetching details for Customer 2
+DEBUG 2026-06-21 13:20:26,267 customer_service 7 125887555032768 Fetching customer list
+INFO 2026-06-21 13:20:32,106 customer_service 7 125887555032768 Fetching details for Customer 2
+INFO 2026-06-21 13:20:33,803 customer_service 7 125887571818176 Fetching details for Customer 2

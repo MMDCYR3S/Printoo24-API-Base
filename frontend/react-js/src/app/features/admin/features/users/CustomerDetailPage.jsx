@@ -43,7 +43,7 @@ const CustomerDetailPage = () => {
               {user.first_name || user.last_name ? `${user.first_name} ${user.last_name}` : user.username}
               {user.is_superuser && <span className="badge badge-warning text-xs">مدیر کل</span>}
             </h1>
-            <p className="text-slate-500 text-sm font-mono mt-1">ID: {user.id} • Join Date: {new Date(user.created_at).toLocaleDateString('fa-IR')}</p>
+            <p className="text-slate-500 text-sm font-mono mt-1">ID: {user.id} • Join Date: {new Date(user.created_at).toLocaleDateString('EN')}</p>
           </div>
         </div>
 
@@ -193,7 +193,7 @@ const CustomerDetailPage = () => {
                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                     <span className="text-xs font-bold text-slate-500">تاریخ عضویت</span>
                     <span className="text-xs font-mono text-slate-600">
-                        {new Date(user.created_at).toLocaleDateString('fa-IR')}
+                        {new Date(user.created_at).toLocaleDateString('EN')}
                     </span>
                 </div>
             </div>

@@ -5,30 +5,26 @@ import { shopService } from '../services/shopService';
 export const useSearch = (query) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  // این اندپوینت pagination ندارد → hasMore همیشه false
+  const [hasMore] = useState(false);
 
   // ریست کردن نتایج هنگام تغییر کلمه کلیدی
   useEffect(() => {
     setResults([]);
-    setPage(1);
-    setHasMore(true);
   }, [query]);
 
-  const fetchResults = useCallback(async (pageNum) => {
+  const fetchResults = useCallback(async () => {
     if (!query || query.length < 2) return;
-    
+
     setLoading(true);
     try {
-      const data = await shopService.searchProducts(query, pageNum);
-      
+      const data = await shopService.searchProducts(query);
       if (Array.isArray(data)) {
-        setResults(prev => pageNum === 1 ? data : [...prev, ...data]);
-        // اگر تعداد نتایج کمتر از حد انتظار بود، یعنی صفحه بعدی وجود ندارد
-        if (data.length < 10) setHasMore(false); 
+        setResults(data);
       }
     } catch (error) {
-      console.error("Search Error:", error);
+      console.error('Search Error:', error);
+      setResults([]);
     } finally {
       setLoading(false);
     }
@@ -36,20 +32,20 @@ export const useSearch = (query) => {
 
   // Debouncing: صبر کردن برای اتمام تایپ یوزر
   useEffect(() => {
+    if (!query || query.length < 2) {
+      setResults([]);
+      return;
+    }
+
     const timer = setTimeout(() => {
-      if (query) fetchResults(1);
-    }, 500); // 500ms delay
+      fetchResults();
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [query, fetchResults]);
 
-  const loadMore = () => {
-    if (!loading && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchResults(nextPage);
-    }
-  };
+  // چون API pagination ندارد، loadMore هیچ‌کاری نمی‌کند
+  const loadMore = () => {};
 
   return { results, loading, hasMore, loadMore };
 };
