@@ -140,7 +140,7 @@ class ActiveSiteMediaPublicView(APIView):
     """
     دریافت تنها رسانه (فایل/عکس) فعال سیستم برای نمایش به همه کاربران.
     """
-    permission_classes = [AllowAny] # در دسترس برای همه (حتی بدون توکن)
+    permission_classes = [AllowAny]
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -166,16 +166,13 @@ class ActiveSiteMediaPublicView(APIView):
         ]
     )
     def get(self, request, *args, **kwargs):
-        # گرفتن تنها یک عکس از سرویس
         active_media = self.service.get_active_for_display()
         
-        # اگر هیچ عکسی در پنل فعال نبود
         if not active_media:
             return Response(
                 {"detail": "هیچ رسانه فعالی وجود ندارد.", "data": None}, 
                 status=status.HTTP_200_OK
             )
             
-        # اگر عکس بود، سریالایز می‌کنیم
         serializer = SiteMediaSerializer(active_media, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)

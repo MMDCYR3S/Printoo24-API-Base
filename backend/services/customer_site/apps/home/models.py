@@ -155,7 +155,7 @@ def validate_file_size_5mb(file):
 
 def validate_image_and_gif_extension(file):
     ext = os.path.splitext(file.name)[1].lower()
-    valid_extensions = ['.jpg', '.jpeg', '.png', '.gif']
+    valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
     if ext not in valid_extensions:
         raise ValidationError(_("فقط فایل‌های عکس (jpg, png) و گیف (gif) مجاز هستند."))
 

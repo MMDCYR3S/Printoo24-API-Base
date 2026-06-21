@@ -134,6 +134,20 @@ class OrderSerializer(serializers.ModelSerializer):
     )
     address = serializers.SerializerMethodField(read_only=True)
 
+    # ===== فیلدهای مالی ===== #
+    paid_amount = serializers.SerializerMethodField(read_only=True)
+    remaining_amount = serializers.SerializerMethodField(read_only=True)
+
+    def get_paid_amount(self, obj):
+        if hasattr(obj, 'invoice') and obj.invoice:
+            return str(obj.invoice.paid_amount)
+        return "0"
+
+    def get_remaining_amount(self, obj):
+        if hasattr(obj, 'invoice') and obj.invoice:
+            return str(obj.invoice.remaining_amount)
+        return str(obj.total_price)
+
     def get_address(self, obj):
         if obj.address:
             return f"{obj.address.province} - {obj.address.city} - {obj.address.address}" 
@@ -150,6 +164,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', "recipient_name", "recipient_phone",
             'status', 'status_code', 'type_display', 'total_price',
+            'paid_amount', 'remaining_amount',
             'order_code', 'created_at', "address_id", "address", "full_address"
         ]
 

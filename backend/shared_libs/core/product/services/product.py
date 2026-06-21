@@ -399,3 +399,137 @@ class ProductService:
                 ProductFormula.objects.create(product=product, **defaults)
                 
         return True
+
+    # ========================================== #
+    # 3. موتور کپی‌ساز (Product Duplication)
+    # ========================================== #
+    @transaction.atomic
+    def duplicate_product(self, product_id: int, user) -> Product:
+        """
+        کپی کردن کامل یک محصول شامل:
+        اطلاعات پایه، دسته‌بندی‌ها، فیلدها، گزینه‌ها، شروط و فرمول‌ها.
+        نکته: تصاویر و فایل‌های پیوست کپی نمی‌شوند.
+        """
+        try:
+            # بارگذاری محصول به همراه روابط مورد نیاز برای جلوگیری از N+1
+            original_product = Product.objects.prefetch_related(
+                'category_relations',
+                'fields__choices',
+                'formulas'
+            ).get(id=product_id)
+        except Product.DoesNotExist:
+            raise ProductNotFoundException("محصول مورد نظر برای کپی یافت نشد.")
+
+        # ۱. کپی کردن پوسته اصلی محصول (Shell)
+        # پیشنهاد می‌شود محصول کپی شده در حالت غیرفعال باشد تا کاربر پس از بررسی آن را فعال کند
+        new_name = f"{original_product.name} (کپی)"
+        new_product = Product.objects.create(
+            user=user,  # کاربری که درخواست کپی داده است
+            name=new_name,
+            has_price=original_product.has_price,
+            show_price=original_product.show_price,
+            price=original_product.price,
+            price_per_unit=original_product.price_per_unit,
+            description=original_product.description,
+            is_active=False, # غیرفعال به صورت پیش‌فرض
+            has_quantity=original_product.has_quantity,
+            guide_text=original_product.guide_text,
+            guide_type=original_product.guide_type
+            # فیلدهای slug و code به صورت خودکار توسط متد save مدل تولید می‌شوند
+        )
+
+        # ۲. کپی کردن روابط دسته‌بندی
+        category_relations = [
+            ProductCategoryRelation(product=new_product, category_id=rel.category_id)
+            for rel in original_product.category_relations.all()
+        ]
+        if category_relations:
+            ProductCategoryRelation.objects.bulk_create(category_relations)
+
+        # ۳. کپی کردن فیلدها و مقادیر (با نگهداری نقشه تغییرات ID)
+        old_to_new_field_ids = {}
+        old_to_new_choice_ids = {}
+
+        for old_field in original_product.fields.all():
+            new_field = ProductField.objects.create(
+                product=new_product,
+                field_dict_id=old_field.field_dict_id,
+                numeric_value=old_field.numeric_value,
+                is_required=old_field.is_required,
+                is_active=old_field.is_active,
+                order=old_field.order
+            )
+            # ثبت نگاشت ID قدیم به جدید برای فیلدها
+            old_to_new_field_ids[old_field.id] = new_field.id
+
+            # کپی کردن گزینه‌های این فیلد
+            for old_choice in old_field.choices.all():
+                new_choice = ProductFieldChoice.objects.create(
+                    product_field=new_field,
+                    choice_dict_id=old_choice.choice_dict_id,
+                    numeric_value=old_choice.numeric_value,
+                    is_default=old_choice.is_default,
+                    order=old_choice.order
+                )
+                # ثبت نگاشت ID قدیم به جدید برای گزینه‌ها
+                old_to_new_choice_ids[old_choice.id] = new_choice.id
+
+        # ۴. کپی کردن شروط (Conditions) با ترجمه IDها
+        original_conditions = ProductFieldCondition.objects.filter(target_field__product=original_product)
+        new_conditions = []
+        
+        for old_cond in original_conditions:
+            # پیدا کردن ID جدید برای trigger_choice (در صورت وجود)
+            new_trigger_choice_id = None
+            if old_cond.trigger_choice_id:
+                new_trigger_choice_id = old_to_new_choice_ids.get(old_cond.trigger_choice_id)
+
+            # اگر فیلد هدف یا شرط به هر دلیلی در مپ نبودند، از آن شرط رد می‌شویم
+            if old_cond.target_field_id not in old_to_new_field_ids or old_cond.trigger_field_id not in old_to_new_field_ids:
+                continue
+
+            new_conditions.append(
+                ProductFieldCondition(
+                    target_field_id=old_to_new_field_ids[old_cond.target_field_id],
+                    trigger_field_id=old_to_new_field_ids[old_cond.trigger_field_id],
+                    operator=old_cond.operator,
+                    trigger_choice_id=new_trigger_choice_id,
+                    trigger_value_text=old_cond.trigger_value_text,
+                    action=old_cond.action
+                )
+            )
+        
+        if new_conditions:
+            ProductFieldCondition.objects.bulk_create(new_conditions)
+
+        # ۵. کپی کردن فرمول‌ها (Formulas) و ترجمه متغیرها در عبارت‌های ریاضی
+        new_formulas = []
+        for old_formula in original_product.formulas.all():
+            new_calc_expr = old_formula.calculation_expression or ""
+            new_cond_expr = old_formula.condition_expression or ""
+
+            # جایگزینی امن با استفاده از Regex (ترجمه field_X به field_Y)
+            # از \b استفاده می‌شود تا کلماتی مثل field_12 با field_1 اشتباه گرفته نشوند
+            for old_id, new_id in old_to_new_field_ids.items():
+                pattern = rf"\bfield_{old_id}\b"
+                replacement = f"field_{new_id}"
+                
+                if new_calc_expr:
+                    new_calc_expr = re.sub(pattern, replacement, new_calc_expr)
+                if new_cond_expr:
+                    new_cond_expr = re.sub(pattern, replacement, new_cond_expr)
+            
+            new_formulas.append(
+                ProductFormula(
+                    product=new_product,
+                    title=old_formula.title,
+                    condition_expression=new_cond_expr,
+                    calculation_expression=new_calc_expr
+                )
+            )
+        
+        if new_formulas:
+            ProductFormula.objects.bulk_create(new_formulas)
+
+        return new_product
+

@@ -50,7 +50,6 @@ class ProductCategoryQuerySet(TreeQuerySet):
         except self.model.DoesNotExist:
              raise ProductCategoryNotFoundException(f"دسته‌بندی با اسلاگ '{slug}' یافت نشد.")
 
-
 class ProductCategoryManager(TreeManager):
     """
     مدیر مدل دسته‌بندی
