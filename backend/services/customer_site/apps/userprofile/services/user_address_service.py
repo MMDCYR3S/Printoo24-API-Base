@@ -1,7 +1,7 @@
 import logging
 from django.core.exceptions import ValidationError
 
-from core.users.services import AddressService
+from shared_libs.core.users.services import AddressService
 from core.models import City, Province
 from core.infrastructure.messages import msg_provider
 
@@ -103,7 +103,7 @@ class UserAddressService:
             success = self._repo.delete_address(user_id, address_id)
             if not success:
                 logger.warning(f"Address ID {address_id} could not be deleted (Not found/Access denied).")
-                raise ValidationError("آدرس یافت نشد یا قابل حذف نیست.")
+                raise ValidationError("ناونیشان نەدۆزرایەوە یان ناتوانرێت بسڕدرێتەوە.")
             
             logger.info(f"Address ID: {address_id} deleted successfully.")
             
@@ -111,7 +111,7 @@ class UserAddressService:
             if isinstance(e, ValidationError):
                 raise e
             logger.exception(f"Unexpected error removing address {address_id}")
-            raise ValidationError("خطای سیستمی در حذف آدرس.")
+            raise ValidationError("دانیشتنی بەکارهێنەر یان سێشن نەدۆزرایەوە.")
 
     def get_all_provinces(self):
         """

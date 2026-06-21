@@ -31,12 +31,12 @@ class OrderService:
                 'order_item_order__files'
             ).get(id=order_id)
         except Order.DoesNotExist:
-            raise OrderNotFoundException(f"سفارش با شناسه {order_id} یافت نشد")
+            raise OrderNotFoundException(f"داواکاری بە ناسنامەی {order_id} نەدۆزرایەوە.")
 
     def get_order_details(self, user_id: int, order_id: int) -> Order:
         order = Order.objects.get_order_with_items(user_id, order_id)
         if not order:
-            raise OrderNotFoundException("سفارش یافت نشد") 
+            raise OrderNotFoundException("داواکاری نەدۆزرایەوە.") 
         return order
 
     def get_user_orders_summary(self, user_id: int) -> List[Order]:

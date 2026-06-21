@@ -169,4 +169,4 @@ class Expense(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.name} - {self.amount:,} تومان"
+        return f"{self.name} - {self.amount:,} IQD"

@@ -69,7 +69,7 @@ class AuthService:
             
         except Exception as e:
             logger.error(f"Critical error during registration for {email}: {e}", exc_info=True)
-            raise ValidationError("خطایی در سیستم رخ داده است. لطفاً مجددا تلاش کنید.")
+            raise ValidationError("هەڵەیەک لە سیستمەکەدا ڕوویداوە. تکایە دووبارە هەوڵ بدەرەوە.")
 
     # ========== LOGIN ========== #
     def login_customer(self, data: Dict[str, Any]) -> Dict[str, Any]:

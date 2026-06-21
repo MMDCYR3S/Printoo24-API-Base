@@ -19,7 +19,7 @@ class UserIdentityService:
         if exclude_user_id:
             query = query.exclude(id=exclude_user_id)
         if query.exists():
-            raise UsernameAlreadyExistsException("این شماره تماس قبلاً ثبت شده است.")
+            raise UsernameAlreadyExistsException("ئەم ژمارەی پەیوەندییە پێشتر تۆمارکراوە.")
 
     # ========== REGISTRATION ========== #
     @transaction.atomic

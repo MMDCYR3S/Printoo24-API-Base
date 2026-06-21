@@ -370,4 +370,4 @@ class ProductLivePriceCalculatorView(APIView):
             return Response({"success": False, "error": error_msg}, status=status.HTTP_404_NOT_FOUND)
             
         except Exception as e:
-            return Response({"success": False, "error": f"خطای سیستمی در محاسبه قیمت رخ داده است. {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"success": False, "error": f"هەڵە لە شیکردنەوە و ئەژمارکردنی فۆرمۆڵادا: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

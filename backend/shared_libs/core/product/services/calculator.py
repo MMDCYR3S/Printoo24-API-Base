@@ -65,9 +65,9 @@ class SafeMathEvaluator:
             return Decimal(str(result)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
 
         except ZeroDivisionError:
-            raise InvalidProductDataException("خطای محاسباتی: تقسیم بر صفر در فرمول محصول وجود دارد.")
+            raise InvalidProductDataException("هەڵەی ژمێریاری: دابەشکردن بەسەر سفر لە فۆرمۆڵای بەرهەمەکەدا هەیە.")
         except Exception as e:
-            raise InvalidProductDataException(f"خطا در تجزیه و محاسبه فرمول: {str(e)}")
+            raise InvalidProductDataException(f"هەڵە لە شیکردنەوە و ئەژمارکردنی فۆرمۆڵادا: {str(e)}")
 
     @classmethod
     def _eval_node(cls, node):
@@ -85,7 +85,7 @@ class SafeMathEvaluator:
             right = cls._eval_node(node.right)
             op_func = cls.allowed_operators.get(type(node.op))
             if not op_func:
-                raise TypeError(f"عملگر '{type(node.op).__name__}' پشتیبانی نمی‌شود")
+                raise TypeError(f"کارپێکەری '{type(node.op).__name__}' پشتگیری ناکرێت")
             return op_func(left, right)
 
         # عملگرهای یکتایی (-, +)
@@ -93,7 +93,7 @@ class SafeMathEvaluator:
             operand = cls._eval_node(node.operand)
             op_func = cls.allowed_operators.get(type(node.op))
             if not op_func:
-                raise TypeError(f"عملگر '{type(node.op).__name__}' پشتیبانی نمی‌شود")
+                raise TypeError(f"کارپێکەری '{type(node.op).__name__}' پشتگیری ناکرێت")
             return op_func(operand)
 
         # مقایسه‌ها (>, <, ==, !=, >=, <=)
@@ -103,7 +103,7 @@ class SafeMathEvaluator:
                 right = cls._eval_node(comparator)
                 op_func = cls.allowed_operators.get(type(op))
                 if not op_func:
-                    raise TypeError(f"عملگر مقایسه '{type(op).__name__}' پشتیبانی نمی‌شود")
+                    raise TypeError(f"کارپێکەری بەراوردکاری '{type(op).__name__}' پشتگیری ناکرێت")
                 if not op_func(left, right):
                     return False
                 left = right
@@ -113,7 +113,7 @@ class SafeMathEvaluator:
         elif isinstance(node, ast.BoolOp):
             op_func = cls.allowed_operators.get(type(node.op))
             if not op_func:
-                raise TypeError(f"عملگر منطقی '{type(node.op).__name__}' پشتیبانی نمی‌شود")
+                raise TypeError(f"کارپێکەری لۆجیکی '{type(node.op).__name__}' پشتگیری ناکرێت")
             values = [cls._eval_node(v) for v in node.values]
             result = values[0]
             for val in values[1:]:
@@ -121,7 +121,7 @@ class SafeMathEvaluator:
             return result
 
         else:
-            raise TypeError(f"ساختار نامعتبر در فرمول: {type(node).__name__}")
+            raise TypeError(f"پێکهاتەی نادروست لە فۆرمۆڵادا:{type(node).__name__}")
 
 
 # ======================================================= #
@@ -221,7 +221,7 @@ class ProductPricingDomainService:
                 'formulas'
             ).get(id=product_id)
         except Product.DoesNotExist:
-            raise ValidationError("محصول مورد نظر یافت نشد.")
+            raise ValidationError("بەرهەمی دیاریکراو نەدۆزرایەوە.")
 
         fields_map = {f.id: f for f in product.fields.all()}
 
@@ -252,7 +252,7 @@ class ProductPricingDomainService:
                     )
                     if not choice:
                         raise InvalidProductDataException(
-                            f"مقدار انتخابی برای '{field_dict.title}' نامعتبر است."
+                            f"بڕی دیاریکراو بۆ '{field_dict.title}' نادروستە."
                         )
 
                     numeric_val += choice.numeric_value
@@ -274,7 +274,7 @@ class ProductPricingDomainService:
                     ]
                     if not selected_choices:
                         raise InvalidProductDataException(
-                            f"مقادیر ارسالی برای فیلد '{field_dict.title}' معتبر نیست."
+                            f"بڕە نێردراوەکان بۆ فیلدی '{field_dict.title}' دروست نین."
                         )
 
                     # اعمال عملگر چندانتخابی (add/sub/mul/div)
@@ -317,7 +317,7 @@ class ProductPricingDomainService:
                         })
                     except Exception:
                         raise InvalidProductDataException(
-                            f"مقدار وارد شده در فیلد '{field_dict.title}' باید عدد باشد."
+                            f"بڕی داخلکراو لە فیلدی '{field_dict.title}' دەبێت ژمارە بێت."
                         )
 
                 # -------- متنی (text / textarea) -------- #
@@ -331,7 +331,7 @@ class ProductPricingDomainService:
 
             elif field.is_required and strict_validation:
                 raise InvalidProductDataException(
-                    f"پر کردن فیلد '{field_dict.title}' الزامی است."
+                    f"پڕکردنەوەی فیلدی '{field_dict.title}' پێویستە."
                 )
 
             formula_variables[var_name] = numeric_val
