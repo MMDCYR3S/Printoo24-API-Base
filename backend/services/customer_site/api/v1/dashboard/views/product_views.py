@@ -616,3 +616,61 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+    # ========== DUPLICATE PRODUCT ========== #
+    @extend_schema(
+        summary="کپی کردن محصول",
+        description="""
+        این اکشن یک کپی کامل از محصول مورد نظر ایجاد می‌کند.
+        
+        **موارد کپی شده:**
+        - اطلاعات پایه (هسته) محصول
+        - روابط دسته‌بندی‌ها
+        - فیلدها و گزینه‌های فرم‌ساز
+        - شروط وابستگی
+        - فرمول‌های قیمت‌گذاری (همراه با نگاشت مجدد متغیرها)
+        
+        **موارد مستثنی (کپی نمی‌شوند):**
+        - تصاویر محصول
+        - فایل‌های پیوست
+        
+        **نکته:** محصول جدید ایجاد شده به صورت پیش‌فرض در وضعیت **غیرفعال (`is_active=False`)** قرار خواهد گرفت تا مدیر پیش از انتشار آن را بررسی کند و عنوان آن به `(کپی)` ختم خواهد شد.
+        """,
+        request=None,  # نیازی به ارسال بادی (Body) نیست
+        responses={
+            201: inline_serializer('DuplicateProductResponse', fields={
+                'id': serializers.IntegerField(),
+                'message': serializers.CharField(),
+            }),
+            404: inline_serializer('DuplicateProductNotFound', fields={
+                'detail': serializers.CharField(),
+            }),
+            400: inline_serializer('DuplicateProductError', fields={
+                'error': serializers.CharField(),
+            })
+        }
+    )
+    @action(detail=True, methods=['post'], url_path='duplicate')
+    def duplicate_product(self, request, id=None):
+        """
+        ایجاد کپی کامل از یک محصول
+        """
+        try:
+            # فراخوانی متدی که در سرویس ایجاد کردیم
+            new_product = self.app_service.duplicate_product(
+                product_id=id, 
+                user=request.user
+            )
+            return Response(
+                {
+                    'id': new_product.id, 
+                    'message': 'محصول با موفقیت کپی شد.'
+                }, 
+                status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            # در صورتی که کلاس خطای اختصاصی مانند ProductNotFoundException دارید، می‌توانید آن را به 404 مپ کنید
+            if "یافت نشد" in str(e):
+                return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+            
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+

@@ -223,3 +223,10 @@ class ProductDashboardService:
         واسط تغییر ترتیب تصاویر محصول
         """
         self.media_service.reorder_images(product_id=product_id, image_ids=image_ids)
+
+    # ========== DUPLICATE PRODUCT ========== #
+    def duplicate_product(self, product_id: int, user):
+        """
+        واسط کپی کردن محصول از طریق لایه اپلیکیشن
+        """
+        return self._domain_service.duplicate_product(product_id=product_id, user=user)

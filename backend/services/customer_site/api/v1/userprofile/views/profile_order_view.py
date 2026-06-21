@@ -34,9 +34,12 @@ class UserOrderListAPIView(APIView):
                         "recipient_name": "محمد رضایی",
                         "recipient_phone": "09137555555",
                         "status": "در حال چاپ",
+                        "status_code": "printing",
                         "type_display": "سفارش معمولی",
                         "total_price": "1500000",
-                        "created_at": "2023-11-20T14:00:00Z"
+                        "paid_amount": "500000", 
+                        "remaining_amount": "1000000",
+                        "created_at": "2023-11-20T14:00:00Z",
                     }
                 ]
             )
