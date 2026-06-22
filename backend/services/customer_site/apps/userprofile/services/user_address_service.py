@@ -1,7 +1,7 @@
 import logging
 from django.core.exceptions import ValidationError
 
-from shared_libs.core.users.services import AddressService
+from core.users.services import AddressService
 from core.models import City, Province
 from core.infrastructure.messages import msg_provider
 
