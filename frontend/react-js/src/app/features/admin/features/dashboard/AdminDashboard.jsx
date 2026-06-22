@@ -13,7 +13,7 @@ import { useDashboardStats } from '../../hooks/useDashboardStats';
 
 // --- Helper Functions ---
 const formatPrice = (value) => new Intl.NumberFormat('fa-IQ').format(value);
-const formatNumber = (value) => new Intl.NumberFormat('fa-IR').format(value);
+const formatNumber = (value) => new Intl.NumberFormat('EN').format(value);
 
 // --- Sub-Components ---
 

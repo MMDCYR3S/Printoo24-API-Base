@@ -108,7 +108,7 @@ const TutorialListPage = () => {
                                           <div className="text-xs text-slate-400 font-mono mt-1">/{tut.slug}</div>
                                       </td>
                                       <td className="text-xs text-slate-500 font-mono" dir="ltr">
-                                          {tut.created_at ? new Date(tut.created_at).toLocaleDateString('fa-IR') : '-'}
+                                          {tut.created_at ? new Date(tut.created_at).toLocaleDateString('EN') : '-'}
                                       </td>
                                       <td className="text-center">
                                           {tut.is_active 

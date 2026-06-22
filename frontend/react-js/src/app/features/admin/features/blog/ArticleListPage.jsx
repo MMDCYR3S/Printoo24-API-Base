@@ -140,7 +140,7 @@ const ArticleListPage = () => {
                                       </td>
                                       <td><span className="badge badge-ghost text-xs font-medium">{article.category_name}</span></td>
                                       <td className="text-xs text-slate-500 font-mono" dir="ltr">
-                                          {article.published_at ? new Date(article.published_at).toLocaleDateString('fa-IR') : 'ندارد'}
+                                          {article.published_at ? new Date(article.published_at).toLocaleDateString('EN') : 'ندارد'}
                                       </td>
                                       <td className="text-center">{getStatusBadge(article.status)}</td>
                                       <td>

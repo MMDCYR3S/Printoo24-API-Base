@@ -89,10 +89,10 @@ const CategoryDetailPage = () => {
                   
                   <div className="mt-6 pt-4 border-t border-slate-50 flex items-center gap-4 text-xs text-slate-400">
                       <div className="flex items-center gap-1">
-                          <Calendar size={14}/> ایجاد: <span className="dir-ltr font-mono">{new Date(category.created_at).toLocaleDateString('fa-IR')}</span>
+                          <Calendar size={14}/> ایجاد: <span className="dir-ltr font-mono">{new Date(category.created_at).toLocaleDateString('EN')}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                          <Calendar size={14}/> بروزرسانی: <span className="dir-ltr font-mono">{new Date(category.updated_at).toLocaleDateString('fa-IR')}</span>
+                          <Calendar size={14}/> بروزرسانی: <span className="dir-ltr font-mono">{new Date(category.updated_at).toLocaleDateString('EN')}</span>
                       </div>
                   </div>
               </div>

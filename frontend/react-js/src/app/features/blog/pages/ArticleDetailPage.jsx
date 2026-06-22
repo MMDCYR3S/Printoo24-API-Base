@@ -430,9 +430,9 @@ const ArticleDetailPage = () => {
                   key={rp.id}
                   product={{
                     ...rp,
-                    thumbnail: rp.image,
+                    thumbnail: rp.thumbnail,
                     category: { parent_category: ' بەرهەمە پەیوەندیدارەکان بە ئەم بابەتە' },
-                    has_price: false,
+                    has_price: rp.has_price,
                   }}
                 />
               ))}

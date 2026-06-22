@@ -19,7 +19,7 @@ const toGregorianMonthYear = (dateStr) => {
 const monthLabel = (key) => {
   const [y, m] = key.split('-');
   const date = new Date(Number(y), Number(m) - 1, 1);
-  return date.toLocaleDateString('fa-IR', { year: 'numeric', month: 'long' });
+  return date.toLocaleDateString('EN', { year: 'numeric', month: 'long' });
 };
 
 const CURRENT_MONTH = toGregorianMonthYear(new Date().toISOString());
@@ -450,7 +450,7 @@ const ExpensePage = () => {
                             <span className="text-xs text-slate-400">بدون سفارش</span>
                           )}
                           <span className="text-xs text-slate-400">
-                            {new Date(expense.created_at).toLocaleDateString('fa-IR')}
+                            {new Date(expense.created_at).toLocaleDateString('EN')}
                           </span>
                         </div>
                       </div>

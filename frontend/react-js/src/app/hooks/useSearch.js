@@ -1,50 +1,47 @@
 // src/app/hooks/useSearch.js
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { shopService } from '../services/shopService';
 
 export const useSearch = (query) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  // این اندپوینت pagination ندارد → hasMore همیشه false
-  const [hasMore] = useState(false);
+  const hasMore = false;
 
-  // ریست کردن نتایج هنگام تغییر کلمه کلیدی
   useEffect(() => {
-    setResults([]);
-  }, [query]);
-
-  const fetchResults = useCallback(async () => {
-    if (!query || query.length < 2) return;
-
-    setLoading(true);
-    try {
-      const data = await shopService.searchProducts(query);
-      if (Array.isArray(data)) {
-        setResults(data);
-      }
-    } catch (error) {
-      console.error('Search Error:', error);
+    // اگه query خالی یا کمتر از ۲ کاراکتر بود، پاک کن و برگرد
+    if (!query || query.trim().length < 2) {
       setResults([]);
-    } finally {
       setLoading(false);
-    }
-  }, [query]);
-
-  // Debouncing: صبر کردن برای اتمام تایپ یوزر
-  useEffect(() => {
-    if (!query || query.length < 2) {
-      setResults([]);
       return;
     }
 
-    const timer = setTimeout(() => {
-      fetchResults();
+    let isCancelled = false; // جلوگیری از race condition
+
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const data = await shopService.searchProducts(query.trim());
+        if (!isCancelled) {
+          setResults(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error('Search Error:', error);
+        if (!isCancelled) {
+          setResults([]);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
     }, 500);
 
-    return () => clearTimeout(timer);
-  }, [query, fetchResults]);
+    return () => {
+      isCancelled = true; // کنسل کردن ریکوئست قبلی
+      clearTimeout(timer);
+    };
+  }, [query]); // فقط query به عنوان dependency
 
-  // چون API pagination ندارد، loadMore هیچ‌کاری نمی‌کند
   const loadMore = () => {};
 
   return { results, loading, hasMore, loadMore };

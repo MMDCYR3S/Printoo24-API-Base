@@ -50,7 +50,7 @@ const ProductListPage = () => {
     bulkStatusMutation.mutate({ product_ids: selectedIds, is_active: isActive }, { onSuccess: () => setSelectedIds([]) });
   };
 
-  const formatPrice = (price) => new Intl.NumberFormat('fa-IR').format(Number(price || 0));
+  const formatPrice = (price) => new Intl.NumberFormat('EN').format(Number(price || 0));
 
   // --- Components ---
   const StatCard = ({ title, value, icon: Icon, colorClass }) => (
@@ -226,7 +226,7 @@ const ProductListPage = () => {
                       </td>
                       <td className="text-center">
                           <span className="text-xs text-slate-500 font-medium">
-                              {new Date(product.created_at).toLocaleDateString('fa-IR')}
+                              {new Date(product.created_at).toLocaleDateString('EN')}
                           </span>
                       </td>
                       <td>

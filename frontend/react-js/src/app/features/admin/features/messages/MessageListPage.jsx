@@ -198,10 +198,10 @@ const MessageListPage = () => {
                     <td className='text-start'>
                         <div className="flex flex-col">
                             <span className="text-xs font-medium text-slate-600 font-mono">
-                                {new Date(item.created_at).toLocaleDateString('fa-IR')}
+                                {new Date(item.created_at).toLocaleDateString('EN')}
                             </span>
                             <span className="text-[10px] text-slate-400 font-mono">
-                                {new Date(item.created_at).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(item.created_at).toLocaleTimeString('EN', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                         </div>
                     </td>

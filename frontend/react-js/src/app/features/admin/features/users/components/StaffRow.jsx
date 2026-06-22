@@ -71,7 +71,7 @@ const StaffRow = ({ member, isSelected, onToggle, onEdit, onDelete }) => {
       <td>
         <div className="text-xs text-slate-500 font-mono flex items-center gap-1">
           <Clock size={12} className="text-slate-400" />
-          {new Date(member.created_at).toLocaleDateString('fa-IR')}
+          {new Date(member.created_at).toLocaleDateString('EN')}
         </div>
       </td>
 

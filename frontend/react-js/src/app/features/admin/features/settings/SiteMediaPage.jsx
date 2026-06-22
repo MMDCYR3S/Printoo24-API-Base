@@ -122,7 +122,7 @@ const SiteMediaPage = () => {
                         title="تغییر وضعیت"
                     />
                     <span className="text-xs font-bold text-slate-500">
-                        {new Date(media.created_at).toLocaleDateString('fa-IR')}
+                        {new Date(media.created_at).toLocaleDateString('EN')}
                     </span>
                  </div>
                  
