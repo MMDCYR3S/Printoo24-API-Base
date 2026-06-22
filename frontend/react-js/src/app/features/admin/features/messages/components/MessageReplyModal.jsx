@@ -61,7 +61,7 @@ const MessageReplyModal = ({ isOpen, onClose, message, onSubmit, isPending }) =>
                 <div className="space-y-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                     <InfoItem icon={Mail} label="ایمیل" value={message.email} copyable />
                     <InfoItem icon={Phone} label="موبایل" value={message.phone_number} copyable />
-                    <InfoItem icon={Calendar} label="تاریخ ارسال" value={new Date(message.created_at).toLocaleDateString('fa-IR')} />
+                    <InfoItem icon={Calendar} label="تاریخ ارسال" value={new Date(message.created_at).toLocaleDateString('EN')} />
                 </div>
             </div>
 
@@ -83,7 +83,7 @@ const MessageReplyModal = ({ isOpen, onClose, message, onSubmit, isPending }) =>
                     /* Admin Reply (Read Only) */
                     <div>
                         <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2 mr-2 flex items-center gap-1">
-                            <CheckCircle2 size={12}/> پاسخ داده شده در {new Date(message.replied_at).toLocaleDateString('fa-IR')}
+                            <CheckCircle2 size={12}/> پاسخ داده شده در {new Date(message.replied_at).toLocaleDateString('EN')}
                         </div>
                         <div className="chat chat-start w-full">
                             <div className="chat-bubble bg-emerald-50 text-slate-800 w-full max-w-full rounded-2xl p-5 border border-emerald-100 shadow-sm">

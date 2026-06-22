@@ -106,7 +106,7 @@ const SliderSettingsPage = () => {
                     <h3 className="font-bold text-slate-800 text-lg mb-1 line-clamp-1">{slider.name}</h3>
                     <div className="flex items-center gap-2 text-xs text-slate-400 mt-2">
                         <Calendar size={14}/>
-                        <span>ایجاد: {new Date(slider.created_at).toLocaleDateString('fa-IR')}</span>
+                        <span>ایجاد: {new Date(slider.created_at).toLocaleDateString('EN')}</span>
                     </div>
                  </div>
               </div>

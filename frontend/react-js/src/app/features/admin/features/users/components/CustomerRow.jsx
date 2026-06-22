@@ -72,7 +72,7 @@ const CustomerRow = memo(({ user, isSelected, onToggle, onEdit, onWalletAction }
 
       {/* 6. Created At */}
       <td className="text-xs text-slate-500 font-mono">
-        {new Date(user.created_at).toLocaleDateString('fa-IR')}
+        {new Date(user.created_at).toLocaleDateString('EN')}
       </td>
 
       {/* 7. Actions (دکمه‌ها اینجان) */}

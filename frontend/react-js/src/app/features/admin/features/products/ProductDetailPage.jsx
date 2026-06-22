@@ -11,7 +11,7 @@ import { adminProductService } from '../../services/adminProductService';
 
 const formatPrice = (price) => {
     if (!price || isNaN(price)) return "0";
-    return new Intl.NumberFormat('fa-IR').format(Number(price));
+    return new Intl.NumberFormat('EN').format(Number(price));
 };
 
 const ProductDetailPage = () => {
@@ -356,7 +356,7 @@ const ProductDetailPage = () => {
                           </div>
                           <div className="flex-1 overflow-hidden">
                              <h5 className="font-bold text-slate-700 text-sm truncate dir-ltr text-right">{att?.name || 'فایل ضمیمه'}</h5>
-                             <span className="text-xs text-slate-400 font-medium">{att?.created_at ? new Date(att?.created_at).toLocaleDateString('fa-IR') : '---'}</span>
+                             <span className="text-xs text-slate-400 font-medium">{att?.created_at ? new Date(att?.created_at).toLocaleDateString('EN') : '---'}</span>
                           </div>
                        </a>
                     ))}
