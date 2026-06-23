@@ -21,7 +21,7 @@ export const useWalletBalance = (isLoggedIn) => {
         setBalance(data.decimal);
         setError(null);
       } catch (err) {
-        console.error("خطا در دریافت موجودی کیف پول:", err);
+        console.error("هەڵە لە وەرگرتنی باڵانسی جەزدان:", err);
         setError(err);
       } finally {
         setLoading(false);

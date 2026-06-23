@@ -58,8 +58,8 @@ const SPEC_LABELS = {
   color_mode: pageText.profile.orderDetailPage.specLabels.color_mode,
   print_side: pageText.profile.orderDetailPage.specLabels.print_side,
   category: pageText.profile.orderDetailPage.specLabels.category,
-  quantity_label: "تعداد کل",
-  has_design: "دارای طراحی اختصاصی",
+  quantity_label: "کۆی گشتی",
+  has_design: "دیزاینی تایبەتی هەیە",
 };
 
 /* ─────────────────────────────────────────────
@@ -274,8 +274,8 @@ const OrderDetailPage = () => {
    ═════════════════════════════════════════════ */
    const getSpecLabel = (key) => {
     const labels = {
-      quantity_label: "تیراژ/تعداد",
-      has_design: "نیاز به طراحی اختصاصی",
+      quantity_label: "تیراژ / ژمارە",
+      has_design: "پێویستی بە دیزاینی تایبەت هەیە",
     };
     return labels[key] || key;
   };
@@ -303,7 +303,7 @@ const OrderDetailPage = () => {
                 {item.product?.name || item.name}
               </h3>
               <p className="text-[11px] text-slate-400 mt-0.5 font-medium">
-                کد محصول: {item.product?.code || '---'}
+                کۆدی بەرهەم: {item.product?.code || '---'}
               </p>
             </div>
           </div>

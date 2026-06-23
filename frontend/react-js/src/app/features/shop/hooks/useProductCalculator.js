@@ -78,7 +78,7 @@ export const useProductCalculator = (productData) => {
         }
       } catch (error) {
         console.error("Live Price API Error:", error);
-        setPriceError(error?.response?.data?.error || "خطا در ارتباط با سرور");
+        setPriceError(error?.response?.data?.error || "هەڵە لە پەیوەندیکردن بە سێرڤەر");
       } finally {
         setIsCalculating(false);
       }

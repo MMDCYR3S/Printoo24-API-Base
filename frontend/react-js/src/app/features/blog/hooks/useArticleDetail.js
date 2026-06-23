@@ -15,7 +15,7 @@ export const useArticleDetail = (slugOrId) => {
       const data = await blogService.getArticleById(slugOrId);
       setArticle(data);
     } catch (err) {
-      setError('مشکلی در دریافت اطلاعات مقاله به وجود آمد.');
+      setError('کێشەیەک لە وەرگرتنی زانیارییەکانی بلاگەکە ڕوویدا.');
       console.error('Error fetching article details:', err);
     } finally {
       setIsLoading(false);

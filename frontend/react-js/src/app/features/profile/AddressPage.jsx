@@ -75,7 +75,7 @@ const AddressPage = () => {
   const deleteMutation = useMutation({
     mutationFn: profileService.deleteAddress,
     onSuccess: () => {
-      toast.success('آدرس با موفقیت حذف شد');
+      toast.success('ناونیشانەکە بە سەرکەوتوویی سڕایەوە');
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
       queryClient.invalidateQueries({ queryKey: ['profile-addresses'] });
     },
@@ -211,7 +211,7 @@ const AddressPage = () => {
               {/* کد پستی (از کامنت خارج شد چون الزامی است) */}
               {/* <div className="form-control">
                 <label className="label text-xs font-bold text-slate-600">
-                  کد پستی
+                  کۆدی پۆستی
                   <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{pageText.profile.addressPage.onlyTen}</span>
                 </label>
                 <input 
@@ -220,9 +220,9 @@ const AddressPage = () => {
                   placeholder="xxxxxxxxxx"
                   className={`input input-bordered rounded-xl text-left dir-ltr font-mono tracking-widest ${errors.postal_code ? 'input-error' : ''}`} 
                   {...register('postal_code', { 
-                    required: 'کد پستی الزامی است', 
-                    minLength: { value: 10, message: 'کد پستی باید ۱۰ رقم باشد' },
-                    pattern: { value: /^[0-9]+$/, message: 'فقط عدد وارد کنید' }
+                    required: 'کۆدی پۆستی پێویستە', 
+                    minLength: { value: 10, message: 'کۆدی پۆستی دەبێت ١٠ ژمارە بێت' },
+                    pattern: { value: /^[0-9]+$/, message: 'تەنها ژمارە بنووسە' }
                   })} 
                 />
                 {errors.postal_code && <span className="text-error text-[10px] mt-1 flex items-center gap-1"><AlertCircle size={10}/> {errors.postal_code.message}</span>}
