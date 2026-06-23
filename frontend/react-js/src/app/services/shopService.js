@@ -38,4 +38,39 @@ export const shopService = {
     // پاسخ مستقیماً آرایه است
     return Array.isArray(response.data) ? response.data : [];
   },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  //  قابلیت‌های ادمین — ثبت سفارش دستی برای مشتری
+  //  توجه: این متدها فقط زمانی فراخوانی می‌شوند که کاربر is_superuser === true باشد
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /**
+   * دریافت لیست مشتریان برای سفارش دستی (فقط ادمین)
+   * GET /api/v1/dashboard/orders/customers/
+   *
+   * پاسخ: آرایه‌ای از مشتریان غیرادمین به همراه addresses هرکدام
+   */
+  getDashboardCustomers: async () => {
+    const response = await apiClient.get('/dashboard/orders/customers/');
+    return response.data;
+  },
+
+  /**
+   * ثبت سفارش دستی برای یک مشتری (فقط ادمین)
+   * POST /api/v1/dashboard/orders/
+   *
+   * @param {Object} payload
+   * @param {number} payload.user_id           آیدی مشتری انتخاب‌شده
+   * @param {number} payload.address_id        آیدی آدرس انتخاب‌شده از لیست آدرس‌های مشتری
+   * @param {string} payload.type              نوع سفارش (مثلاً "1")
+   * @param {number} payload.product_id        آیدی محصول
+   * @param {boolean} payload.has_design       آیا فایل طراحی آپلود می‌شود؟
+   * @param {Array<{field_id:number, choice_id:number}>} payload.selected_options
+   *
+   * توجه: company_name هرگز در پیلود ارسال نمی‌شود
+   */
+  createManualOrder: async (payload) => {
+    const response = await apiClient.post('/dashboard/orders/', payload);
+    return response.data;
+  },
 };
