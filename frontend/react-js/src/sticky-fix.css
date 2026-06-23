@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   STICKY FIX — اضافه کن به انتهای src/index.css
+   ═══════════════════════════════════════════════════════════════════════════
+
+   📖 منابع تحقیق:
+   - Stack Overflow: "body { overflow-x: hidden; } breaks position: sticky"
+   - CSS-Tricks: "Dealing with overflow and position: sticky;"
+   - Philip Walton: "flex items ignore their parent container's height
+     if it's set via the min-height property"
+
+   🎯 سه راه‌حل همزمان:
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   راه‌حل ۱: تبدیل overflow-x: hidden به overflow-x: clip
+   (clip جلوی horizontal scroll را می‌گیرد ولی scroll container نمی‌سازد)
+   !important برای override کردن هر CSS دیگری که ممکن است اولویت داشته باشد
+═══════════════════════════════════════════════════════════════════════════ */
+html,
+body {
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+  overflow: visible !important;
+}
+
+/* تمام descendants مستقیم #root هم نباید scroll container باشند */
+#root,
+#root > * {
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   راه‌حل ۲: اطمینان از ارتفاع صحیح html/body
+   طبق تحقیق: "Sticky elements don't play nicely if they have to coordinate
+   with other elements to make up a combined height, like 100vh."
+   پس به html و body ارتفاع ثابت نمی‌دهیم، فقط min-height.
+═══════════════════════════════════════════════════════════════════════════ */
+html {
+  min-height: 100% !important;
+  height: auto !important;
+}
+body {
+  min-height: 100vh !important;
+  height: auto !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   راه‌حل ۳: reset کردن transform/filter/will-change روی ancestors اصلی
+   (طبق تحقیق: "When any element has transform, filter or perspective
+   property, it acts as a containing block for all its descendants")
+═══════════════════════════════════════════════════════════════════════════ */
+#root,
+#root > *,
+main,
+main > * {
+  transform: none !important;
+  filter: none !important;
+  will-change: auto !important;
+  contain: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Fallback برای مرورگرهای قدیمی (Safari 15-) که clip را پشتیبانی نمی‌کنند
+═══════════════════════════════════════════════════════════════════════════ */
+@supports not (overflow: clip) {
+  html,
+  body {
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+  }
+}

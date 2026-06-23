@@ -9,7 +9,7 @@ const OrderCustomerCard = ({ order }) => {
           <User size={20} />
         </div>
         <div>
-          <h3 className="font-bold text-slate-800">{order.recipient_name || order.user_info || 'مشتری ناشناس'}</h3>
+          <h3 className="font-bold text-slate-800">{order.recipient_name || order.user_info.full_name || 'مشتری ناشناس'}</h3>
           <p className="text-xs text-slate-500">اطلاعات تحویل‌گیرنده</p>
         </div>
       </div>
@@ -17,7 +17,7 @@ const OrderCustomerCard = ({ order }) => {
       <div className="space-y-3">
         <div className="flex items-center gap-3 text-sm">
           <Phone size={16} className="text-slate-400" />
-          <span className="text-slate-600 font-medium">{order.recipient_phone || 'بدون شماره'}</span>
+          <span className="text-slate-600 font-medium">{order.user_info.phone_number || 'بدون شماره'}</span>
         </div>
         
         {order.company_name && (
