@@ -81,7 +81,7 @@ class OrderCreateSerializer(serializers.Serializer):
     address_id = serializers.IntegerField(required=False, allow_null=True)
     recipient_name = serializers.CharField(max_length=255, required=False, allow_null=True)
     recipient_phone = serializers.CharField(max_length=11, required=False, allow_null=True)
-    company_name = serializers.CharField(max_length=150, required=False, allow_null=True)
+    company_name = serializers.CharField(max_length=150, required=False, allow_null=True, allow_blank=True)
     full_address = serializers.CharField(required=False, allow_null=True)
     total_price_override = serializers.DecimalField(max_digits=18, decimal_places=0, required=False, allow_null=True)
     type = serializers.CharField(max_length=50, default="1")
@@ -96,7 +96,7 @@ class OrderUpdateSerializer(serializers.Serializer):
     """ سریالایزر ویرایش سفارش (تکی) """
     recipient_name = serializers.CharField(max_length=255, required=False, allow_null=True)
     recipient_phone = serializers.CharField(max_length=11, required=False, allow_null=True)
-    company_name = serializers.CharField(max_length=150, required=False, allow_null=True)
+    company_name = serializers.CharField(max_length=150, required=False, allow_null=True, allow_blank=True)
     full_address = serializers.CharField(required=False, allow_null=True)
     address_id = serializers.IntegerField(required=False, allow_null=True)
     total_price = serializers.DecimalField(max_digits=18, decimal_places=0, required=False, allow_null=True)
@@ -135,8 +135,15 @@ class CustomerListSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     phone_number = serializers.CharField(read_only=True)
     full_name = serializers.SerializerMethodField()
-    company = serializers.CharField(source='customer_profile.company', read_only=True, default='')
+    company = serializers.CharField(source='customer_profile.company', read_only=True, default='', allow_null=True)
     
+    addresses = UserAddressSerializer(many=True, read_only=True) 
+    
+    def get_full_name(self, obj):
+        if hasattr(obj, 'customer_profile') and obj.customer_profile:
+            return obj.customer_profile.fullname()
+        return obj.phone_number
+
     def get_full_name(self, obj):
         if hasattr(obj, 'customer_profile') and obj.customer_profile:
             return obj.customer_profile.fullname()
