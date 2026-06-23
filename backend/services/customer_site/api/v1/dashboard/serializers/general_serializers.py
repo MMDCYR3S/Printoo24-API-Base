@@ -349,7 +349,7 @@ class CustomerReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'is_active', 
+            'id', 'is_active', 'is_staff', 'is_superuser', 'is_verified',
             'first_name', 'last_name', 'phone_number', 'company', 'bio', 
             'addresses', 'wallet_balance', 'created_at'
         ]
@@ -365,7 +365,7 @@ class CustomerWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'password', 'is_active',
+            'id', 'password', 'is_active', 'is_staff', 'is_superuser', 'is_verified',
             'first_name', 'last_name', 'phone_number', 'company', 'bio',
             'addresses'
         ]

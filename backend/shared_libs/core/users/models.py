@@ -100,7 +100,7 @@ class UserRole(models.Model):
         verbose_name_plural = _('واسط نقش های کاربر')
         
     def __str__(self):
-        return f"{self.user.username} - {self.role.name}"
+        return f"{self.user.phone_number} - {self.role.name}"
 
 # ========= Customer Profile Model ========= #
 class CustomerProfile(models.Model):

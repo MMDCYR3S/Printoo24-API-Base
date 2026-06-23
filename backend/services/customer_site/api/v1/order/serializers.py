@@ -99,6 +99,7 @@ class OrderSerializer(serializers.ModelSerializer):
     recipient_name = serializers.CharField(read_only=True)
     recipient_phone = serializers.CharField(read_only=True)
     full_address = serializers.CharField(read_only=True)
+    address_detail = serializers.CharField(source='full_address', read_only=True)
 
     # ===== ورودی‌ها (Write Only) - مشخصات فردی ===== #
     first_name = serializers.CharField(write_only=True, required=False, label="نام")
@@ -134,7 +135,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
             # Outputs
             'id', 'order_code', 'status', 'type_display', 'total_price',
-            'recipient_name', 'recipient_phone', 'full_address',
+            'recipient_name', 'recipient_phone', 'full_address', 'address_detail',
             'created_at', 'item_detail',
             
             # Inputs
