@@ -103,7 +103,15 @@ class OrderSerializer(serializers.ModelSerializer):
     # ===== ورودی‌ها (Write Only) - مشخصات فردی ===== #
     first_name = serializers.CharField(write_only=True, required=False, label="نام")
     last_name = serializers.CharField(write_only=True, required=False, label="نام خانوادگی")
-    phone_number = serializers.CharField(write_only=True, required=False, label="شماره تماس")
+    phone_number = serializers.CharField(
+        write_only=True, 
+        required=False, 
+        label="شماره تماس",
+        max_length=11,
+        error_messages={
+            'max_length': 'ژمارەی مۆبایل نابێت لە ١١ کاراکتەر زیاتر بێت.'
+        }
+    )
     company_name = serializers.CharField(write_only=True, required=False, allow_blank=True, label="نام شرکت")
 
     # ===== ورودی‌ها (Write Only) - آدرس دهی ===== #
