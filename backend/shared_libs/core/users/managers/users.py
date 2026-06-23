@@ -13,11 +13,7 @@ class UserQuerySet(BaseQuerySet):
     # ===== فیلترهای پایه ===== #
     def customers(self):
         """فیلتر کردن فقط مشتریان"""
-        return self.filter(
-            is_superuser=False, 
-            is_staff=False,
-            user_role__role__is_customer=True 
-        )
+        return self.filter()
 
     def staff(self):
         """فیلتر کردن فقط پرسنل"""

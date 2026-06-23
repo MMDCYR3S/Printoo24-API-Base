@@ -38,22 +38,21 @@ class CustomerService:
     @transaction.atomic
     def create_customer(self, data: Dict[str, Any]) -> User:
         """
-        ایجاد یک مشتری جدید.
-        مراحل:
-        1. ایجاد یوزر
-        2. ایجاد پروفایل
-        3. تخصیص نقش مشتری
-        4. ایجاد کیف پول
+        ایجاد یک مشتری (یا مدیر/کارمند) جدید.
         """
         # ===== دریافت کاربر ===== #
         phone_number = data.get('phone_number')
         password = data.get('password')
 
         # ===== ایجاد یوزر ===== #
+        # اضافه شدن فیلدهای دسترسی به متد ساخت
         user = User.objects.create_user(
             phone_number=phone_number,
             password=password,
-            is_active=data.get('is_active', True)
+            is_active=data.get('is_active', True),
+            is_staff=data.get('is_staff', False),
+            is_superuser=data.get('is_superuser', False),
+            is_verified=data.get('is_verified', False)
         )
 
         # ===== ایجاد پروفایل ===== #
@@ -88,6 +87,14 @@ class CustomerService:
             user.is_active = data['is_active']
         if 'is_verified' in data:
             user.is_verified = data['is_verified']
+            
+        # ===== اضافه شدن فیلدهای دسترسی در هنگام ویرایش ===== #
+        if 'is_staff' in data:
+            user.is_staff = data['is_staff']
+        if 'is_superuser' in data:
+            user.is_superuser = data['is_superuser']
+        # =================================================== #
+        
         if data.get('password'):
             user.set_password(data['password'])
         user.save()

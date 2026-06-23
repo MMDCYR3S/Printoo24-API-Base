@@ -89,11 +89,24 @@ class OrderService:
         if address_id:
             from core.models import Address
             try:
-                address = Address.objects.get(pk=address_id)
+                address = Address.objects.select_related('province', 'city').get(pk=address_id)
                 if user and address.user_id != user.id:
                     raise ValidationError("این آدرس متعلق به کاربر مشخص‌شده نیست.")
+                full_address = f"{address.province.name} - {address.city.name} - {address.address}"
             except Address.DoesNotExist:
                 raise ValidationError(f"آدرسی با شناسه {address_id} یافت نشد.")
+        elif not full_address:
+            province_id = kwargs.get('province_id')
+            city_id = kwargs.get('city_id')
+            address_text = kwargs.get('address_text') or kwargs.get('address')
+            if province_id and city_id and address_text:
+                from core.models import Province, City
+                try:
+                    p_name = Province.objects.get(pk=province_id).name
+                    c_name = City.objects.get(pk=city_id).name
+                    full_address = f"{p_name} - {c_name} - {address_text}"
+                except (Province.DoesNotExist, City.DoesNotExist):
+                    pass
 
         # دریافت وضعیت اولیه
         initial_status = OrderStatus.objects.filter(
@@ -179,7 +192,15 @@ class OrderService:
                 setattr(order, field, update_data[field])
 
         if 'address_id' in update_data:
-            order.address_id = update_data['address_id']
+            address_id = update_data['address_id']
+            order.address_id = address_id
+            if address_id:
+                from core.models import Address
+                try:
+                    address = Address.objects.select_related('province', 'city').get(pk=address_id)
+                    order.full_address = f"{address.province.name} - {address.city.name} - {address.address}"
+                except Address.DoesNotExist:
+                    raise ValidationError(f"آدرسی با شناسه {address_id} یافت نشد.")
 
         # ===== ۲. تشخیص نوع آپدیت ===== #
         has_product          = 'product_id' in update_data
