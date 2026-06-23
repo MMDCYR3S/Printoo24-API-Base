@@ -923,3 +923,4 @@ DEBUG 2026-06-14 11:01:03,076 product_detail_service 7 125334518404800 ShopProdu
 DEBUG 2026-06-14 11:11:42,025 product_detail_service 7 125334518404800 ShopProductDetailService initialized
 DEBUG 2026-06-14 11:17:25,741 product_detail_service 7 125334518404800 ShopProductDetailService initialized
 DEBUG 2026-06-14 11:19:35,175 product_detail_service 7 125334475392704 ShopProductDetailService initialized
+DEBUG 2026-06-23 16:15:08,855 product_detail_service 28 133566133606080 ShopProductDetailService initialized

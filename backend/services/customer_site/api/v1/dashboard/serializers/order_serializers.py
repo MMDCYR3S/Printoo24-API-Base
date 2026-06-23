@@ -81,7 +81,7 @@ class OrderCreateSerializer(serializers.Serializer):
     address_id = serializers.IntegerField(required=False, allow_null=True)
     recipient_name = serializers.CharField(max_length=255, required=False, allow_null=True)
     recipient_phone = serializers.CharField(max_length=11, required=False, allow_null=True)
-    company_name = serializers.CharField(max_length=150, required=False, allow_null=True)
+    company_name = serializers.CharField(max_length=150, required=False, allow_null=True, allow_blank=True)
     full_address = serializers.CharField(required=False, allow_null=True)
     total_price_override = serializers.DecimalField(max_digits=18, decimal_places=0, required=False, allow_null=True)
     type = serializers.CharField(max_length=50, default="1")
@@ -96,7 +96,7 @@ class OrderUpdateSerializer(serializers.Serializer):
     """ سریالایزر ویرایش سفارش (تکی) """
     recipient_name = serializers.CharField(max_length=255, required=False, allow_null=True)
     recipient_phone = serializers.CharField(max_length=11, required=False, allow_null=True)
-    company_name = serializers.CharField(max_length=150, required=False, allow_null=True)
+    company_name = serializers.CharField(max_length=150, required=False, allow_null=True, allow_blank=True)
     full_address = serializers.CharField(required=False, allow_null=True)
     address_id = serializers.IntegerField(required=False, allow_null=True)
     total_price = serializers.DecimalField(max_digits=18, decimal_places=0, required=False, allow_null=True)
