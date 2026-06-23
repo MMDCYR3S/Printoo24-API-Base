@@ -135,8 +135,15 @@ class CustomerListSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     phone_number = serializers.CharField(read_only=True)
     full_name = serializers.SerializerMethodField()
-    company = serializers.CharField(source='customer_profile.company', read_only=True, default='')
+    company = serializers.CharField(source='customer_profile.company', read_only=True, default='', allow_null=True)
     
+    addresses = UserAddressSerializer(many=True, read_only=True) 
+    
+    def get_full_name(self, obj):
+        if hasattr(obj, 'customer_profile') and obj.customer_profile:
+            return obj.customer_profile.fullname()
+        return obj.phone_number
+
     def get_full_name(self, obj):
         if hasattr(obj, 'customer_profile') and obj.customer_profile:
             return obj.customer_profile.fullname()

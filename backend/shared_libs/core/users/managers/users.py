@@ -110,7 +110,7 @@ class UserManager(BaseUserManager):
         """دریافت لیست کامل مشتریان با پروفایل، کیف پول و آدرس‌ها"""
         return self.get_queryset().customers()\
                 .with_full_profile()\
-                .prefetch_related('addresses__province', 'addresses__city')\
+                .prefetch_related('addresses', 'addresses__province', 'addresses__city')\
                 .distinct()\
                 .order_by('-created_at')
 
