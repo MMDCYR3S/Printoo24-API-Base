@@ -5,7 +5,7 @@ const SearchableSelect = ({
   options = [],
   value,
   onChange,
-  placeholder = 'انتخاب کنید...',
+  placeholder = 'هەڵبژێرە...',
   isLoading = false,
   renderOption,     // تابعی برای شخصی‌سازی ظاهر هر آیتم در لیست
   getDisplayValue,  // تابعی برای استخراج متنی که بعد از انتخاب باید در باکس اصلی نشان داده شود
@@ -53,7 +53,7 @@ const SearchableSelect = ({
         <div className="flex-1 truncate text-sm">
           {isLoading ? (
             <span className="text-slate-500 flex items-center gap-2">
-              <span className="loading loading-spinner loading-xs"></span> در حال دریافت...
+              <span className="loading loading-spinner loading-xs"></span> لە وەرگرتندایە...
             </span>
           ) : displayValue ? (
             <span className="font-medium text-slate-700">{displayValue}</span>
@@ -75,7 +75,7 @@ const SearchableSelect = ({
               <input
                 type="text"
                 className="w-full pl-3 pr-10 py-2.5 text-sm bg-slate-50 border-none rounded-lg focus:ring-1 focus:ring-primary/30 outline-none transition-all"
-                placeholder="جستجو کنید..."
+                placeholder="بۆی بگەڕە..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onClick={(e) => e.stopPropagation()} // جلوگیری از بسته شدن لیست موقع کلیک روی اینپوت سرچ
@@ -88,7 +88,7 @@ const SearchableSelect = ({
           <div className="max-h-60 overflow-y-auto p-1 text-slate-700">
             {filteredOptions.length === 0 ? (
               <div className="p-4 text-center text-sm text-slate-400 border-2 border-dashed border-slate-100 rounded-lg m-1">
-                موردی یافت نشد
+                هیچ ئەنجامێک نەدۆزرایەوە
               </div>
             ) : (
               filteredOptions.map((option, idx) => {

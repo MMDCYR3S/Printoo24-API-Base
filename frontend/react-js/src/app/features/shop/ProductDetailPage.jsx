@@ -213,7 +213,7 @@ const ProductDetailPage = () => {
             {pricing?.isCalculating ? (
               <div className="flex items-center gap-2 text-emerald-400 mt-1">
                 <span className="loading loading-dots loading-xs"></span>
-                <span className="text-xs font-medium opacity-80">در حال محاسبه...</span>
+                <span className="text-xs font-medium opacity-80">لە حیسابکردندایە...</span>
               </div>
             ) : pricing?.error ? (
               <div className="flex items-center gap-1.5 text-rose-400 mt-1">

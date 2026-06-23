@@ -80,7 +80,7 @@ const navigate = useNavigate();
           const count = await cartService.getTotalNumber();
           setCartCount(count || 0);
         } catch (error) {
-          console.error('خطا در دریافت تعداد سبد خرید:', error);
+          console.error('هەڵە لە وەرگرتنی ژمارەی سەبەتەی کڕین:', error);
         }
       }
     };

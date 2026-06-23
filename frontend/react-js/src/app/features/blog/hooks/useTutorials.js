@@ -21,7 +21,7 @@ export const useTutorials = () => {
       // پشتیبانی از پجینیشن احتمالی بک‌اند
       setTutorials(data.results || data || []);
     } catch (err) {
-      setListError('مشکلی در دریافت لیست آموزش‌ها به وجود آمد.');
+      setListError('کێشەیەک لە وەرگرتنی لیستی فێرکارییەکان ڕوویدا.');
       console.error('Error fetching tutorials:', err);
     } finally {
       setIsLoadingList(false);
@@ -41,7 +41,7 @@ export const useTutorials = () => {
       const data = await blogService.getTutorialById(id);
       setSelectedTutorial(data);
     } catch (err) {
-      setDetailError('مشکلی در دریافت جزئیات ویدیو به وجود آمد.');
+      setDetailError('کێشەیەک لە وەرگرتنی وردەکارییەکانی ڤیدیۆکە ڕوویدا.');
       console.error('Error fetching tutorial detail:', err);
     } finally {
       setIsLoadingDetail(false);

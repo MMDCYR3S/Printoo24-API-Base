@@ -64,7 +64,7 @@ const SupportFloat = () => {
             ? 'bg-slate-700 hover:bg-slate-600 shadow-slate-400/30 rotate-0'
             : 'bg-primary/70 hover:brightness-110 shadow-primary/40'
         }`}
-        title="پشتیبانی"
+        title="پشتگیری"
       >
         <span className={`transition-all duration-300 ${isOpen ? 'rotate-90 scale-110' : 'rotate-0'}`}>
           {isOpen

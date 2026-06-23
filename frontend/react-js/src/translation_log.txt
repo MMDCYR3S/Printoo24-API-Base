@@ -1,0 +1,180 @@
+Kurdish Translation Log — 2026-06-23 19:54:02
+============================================================
+
+✅ SUCCESSFUL (38 items)
+----------------------------------------
+  Row 2: src/app/components/common/SearchableSelect.jsx:8
+    FA: انتخاب کنید...
+    KU: هەڵبژێرە...
+
+  Row 3: src/app/components/common/SearchableSelect.jsx:56
+    FA: در حال دریافت...
+    KU: لە وەرگرتندایە...
+
+  Row 4: src/app/components/common/SearchableSelect.jsx:78
+    FA: جستجو کنید...
+    KU: بۆی بگەڕە...
+
+  Row 5: src/app/components/common/SearchableSelect.jsx:91
+    FA: موردی یافت نشد
+    KU: هیچ ئەنجامێک نەدۆزرایەوە
+
+  Row 7: src/app/components/common/SEO.jsx:19
+    FA: خدمات چاپ آنلاین با بهترین کیفیت در پرینتو۲۴
+    KU: خزمەتگوزاری چاپی ئۆنلاین بە باشترین کوالیتی لە پرینتۆ٢٤
+
+  Row 8: src/app/components/common/SupportFloat.jsx:67
+    FA: پشتیبانی
+    KU: پشتگیری
+
+  Row 9: src/app/features/auth/schemas.js:5
+    FA: شماره تلفن الزامی است
+    KU: ژمارەی تەلەفۆن پێویستە
+
+  Row 10: src/app/features/auth/schemas.js:6
+    FA: رمز عبور الزامی است
+    KU: وشەی نهێنی پێویستە
+
+  Row 11: src/app/features/auth/schemas.js:11
+    FA: نام باید حداقل ۲ کاراکتر باشد
+    KU: ناو دەبێت لانیکەم ٢ پیت بێت
+
+  Row 12: src/app/features/auth/schemas.js:12
+    FA: نام خانوادگی باید حداقل ۲ کاراکتر باشد
+    KU: ناوی سیانی دەبێت لانیکەم ٢ پیت بێت
+
+  Row 14: src/app/features/auth/schemas.js:15
+    FA: رمز عبور باید حداقل ۸ کاراکتر باشد
+    KU: وشەی نهێنی دەبێت لانیکەم ٨ پیت بێت
+
+  Row 15: src/app/features/auth/schemas.js:16
+    FA: باید شامل یک حرف بزرگ باشد
+    KU: دەبێت لانیکەم یەک پیتی گەورەی تێدا بێت
+
+  Row 16: src/app/features/auth/schemas.js:17
+    FA: باید شامل یک عدد باشد
+    KU: دەبێت لانیکەم یەک ژمارەی تێدا بێت
+
+  Row 17: src/app/features/auth/schemas.js:20
+    FA: رمز عبور و تکرار آن مطابقت ندارند
+    KU: وشەی نهێنی و دووبارەکردنەوەکەی یەک ناگرنەوە
+
+  Row 18: src/app/features/auth/schemas.js:27
+    FA: کد تایید باید ۶ رقم باشد
+    KU: کۆدی پشتڕاستکردنەوە دەبێت ٦ ژمارە بێت
+
+  Row 19: src/app/features/auth/schemas.js:28
+    FA: فقط عدد وارد کنید
+    KU: تەنها ژمارە بنووسە
+
+  Row 20: src/app/features/blog/hooks/useArticleDetail.js:18
+    FA: مشکلی در دریافت اطلاعات مقاله به وجود آمد.
+    KU: کێشەیەک لە وەرگرتنی زانیارییەکانی بلاگەکە ڕوویدا.
+
+  Row 21: src/app/features/blog/hooks/useTutorials.js:24
+    FA: مشکلی در دریافت لیست آموزش‌ها به وجود آمد.
+    KU: کێشەیەک لە وەرگرتنی لیستی فێرکارییەکان ڕوویدا.
+
+  Row 22: src/app/features/blog/hooks/useTutorials.js:44
+    FA: مشکلی در دریافت جزئیات ویدیو به وجود آمد.
+    KU: کێشەیەک لە وەرگرتنی وردەکارییەکانی ڤیدیۆکە ڕوویدا.
+
+  Row 25: src/app/features/profile/AddressPage.jsx:78
+    FA: آدرس با موفقیت حذف شد
+    KU: ناونیشانەکە بە سەرکەوتوویی سڕایەوە
+
+  Row 26: src/app/features/profile/AddressPage.jsx:214
+    FA: کد پستی
+    KU: کۆدی پۆستی
+
+  Row 27: src/app/features/profile/AddressPage.jsx:223
+    FA: کد پستی الزامی است
+    KU: کۆدی پۆستی پێویستە
+
+  Row 28: src/app/features/profile/AddressPage.jsx:224
+    FA: کد پستی باید ۱۰ رقم باشد
+    KU: کۆدی پۆستی دەبێت ١٠ ژمارە بێت
+
+  Row 29: src/app/features/profile/AddressPage.jsx:225
+    FA: فقط عدد وارد کنید
+    KU: تەنها ژمارە بنووسە
+
+  Row 30: src/app/features/profile/MyOrdersPage.jsx:136
+    FA: پیش‌فاکتور
+    KU: نرخ
+
+  Row 31: src/app/features/profile/MyOrdersPage.jsx:143
+    FA: فاکتور نهایی
+    KU: نرخی کۆتایی
+
+  Row 32: src/app/features/profile/OrderDetailPage.jsx:61
+    FA: تعداد کل
+    KU: کۆی گشتی
+
+  Row 33: src/app/features/profile/OrderDetailPage.jsx:62
+    FA: دارای طراحی اختصاصی
+    KU: دیزاینی تایبەتی هەیە
+
+  Row 34: src/app/features/profile/OrderDetailPage.jsx:277
+    FA: تیراژ/تعداد
+    KU: تیراژ / ژمارە
+
+  Row 35: src/app/features/profile/OrderDetailPage.jsx:278
+    FA: نیاز به طراحی اختصاصی
+    KU: پێویستی بە دیزاینی تایبەت هەیە
+
+  Row 36: src/app/features/profile/OrderDetailPage.jsx:306
+    FA: کد محصول:
+    KU: کۆدی بەرهەم:
+
+  Row 37: src/app/features/shop/components/CartItem.jsx:212
+    FA: ردیف مشخصات
+    KU: ڕیزی تایبەتمەندییەکان
+
+  Row 38: src/app/features/shop/components/DesignUploadPage.jsx:299
+    FA: فایل رو اینجا رها کنید
+    KU: فایلەکە لێرە دابنێ
+
+  Row 39: src/app/features/shop/components/DesignUploadPage.jsx:472
+    FA: فایل
+    KU: فایل
+
+  Row 40: src/app/features/shop/hooks/useProductCalculator.js:81
+    FA: خطا در ارتباط با سرور
+    KU: هەڵە لە پەیوەندیکردن بە سێرڤەر
+
+  Row 42: src/app/features/shop/ShopPage.jsx:577
+    FA: فیلترها رو تغییر بدید یا همه محصولات رو ببینید
+    KU: فلتەرەکان بگۆڕە یان هەموو بەرهەمەکان ببینە
+
+  Row 43: src/app/hooks/useWalletBalance.js:24
+    FA: خطا در دریافت موجودی کیف پول:
+    KU: هەڵە لە وەرگرتنی باڵانسی جەزدان:
+
+  Row 44: src/app/layouts/Header.jsx:83
+    FA: خطا در دریافت تعداد سبد خرید:
+    KU: هەڵە لە وەرگرتنی ژمارەی سەبەتەی کڕین:
+
+
+❌ FAILED (5 items)
+----------------------------------------
+  Row 6: src/app/components/common/SEO.jsx:13
+    Reason : Persian text not found on specified line
+    Persian: پرینتو۲۴ │ خدمات چاپ آنلاین
+
+  Row 13: src/app/features/auth/schemas.js:13
+    Reason : Persian text not found on specified line
+    Persian: شماره تلفن باید ۱۱ رقم شامل شود
+
+  Row 23: src/app/features/home/HomeSlider.jsx:97
+    Reason : Persian text not found on specified line
+    Persian: اسلاید قبلی
+
+  Row 24: src/app/features/home/HomeSlider.jsx:106
+    Reason : Persian text not found on specified line
+    Persian: اسلاید بعدی
+
+  Row 41: src/app/features/shop/ProductDetailPage.jsx:215
+    Reason : Persian text not found on specified line
+    Persian: در حال محاسبه...
+

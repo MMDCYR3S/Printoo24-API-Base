@@ -16,7 +16,7 @@ const SEO = ({
     <Helmet>
       {/* تگ‌های پایه */}
       <title>{siteTitle}</title>
-      <meta name="description" content={description || 'خدمات چاپ آنلاین با بهترین کیفیت در پرینتو۲۴'} />
+      <meta name="description" content={description || 'خزمەتگوزاری چاپی ئۆنلاین بە باشترین کوالیتی لە پرینتۆ٢٤'} />
       {keywords && <meta name="keywords" content={keywords} />}
       <meta name="author" content={author} />
 

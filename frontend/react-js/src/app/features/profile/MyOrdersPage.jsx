@@ -133,14 +133,14 @@ const MyOrdersPage = () => {
                       <Link
                         to={`/profile/orders/${order.id}/quotation`}
                         className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-400 ring-1 ring-black/[0.06] hover:text-primary hover:ring-primary/30 hover:bg-primary/5 transition-all duration-200"
-                        data-tip="پیش‌فاکتور"
+                        data-tip="نرخ"
                       >
                         <Printer size={15} />
                       </Link>
                       <Link
                         to={`/profile/orders/${order.id}/invoice`}
                         className="w-9 h-9 hidden sm:flex items-center justify-center rounded-lg text-slate-400 ring-1 ring-black/[0.06] hover:text-emerald-600 hover:ring-emerald-300 hover:bg-emerald-50 transition-all duration-200"
-                        data-tip="فاکتور نهایی"
+                        data-tip="نرخی کۆتایی"
                       >
                         <FileCheck size={15} />
                       </Link>

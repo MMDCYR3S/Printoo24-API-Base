@@ -574,7 +574,7 @@ const EmptyState = ({ onReset }) => (
       {pageText.shop.productNotFound}
     </h3>
     <p className="text-sm text-slate-400 font-medium mb-6">
-      فیلترها رو تغییر بدید یا همه محصولات رو ببینید
+      فلتەرەکان بگۆڕە یان هەموو بەرهەمەکان ببینە
     </p>
     <button
       onClick={onReset}

@@ -209,7 +209,7 @@ const CartItem = ({ item, onDelete, isDeleting }) => {
 };
 
 /* ─────────────────────────────────────────────
-   ردیف مشخصات
+   ڕیزی تایبەتمەندییەکان
    ───────────────────────────────────────────── */
 const SpecRow = ({ label, value, highlight = false, mono = false }) => (
   <div className={`

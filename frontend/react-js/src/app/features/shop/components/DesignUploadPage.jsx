@@ -296,7 +296,7 @@ const DesignUploadPage = () => {
                   <UploadCloud size={28} strokeWidth={1.8} />
                 </motion.div>
                 <h3 className="font-bold text-slate-700 text-sm">
-                  {isDragging ? 'فایل رو اینجا رها کنید' : t.dropzoneTitle}
+                  {isDragging ? 'فایلەکە لێرە دابنێ' : t.dropzoneTitle}
                 </h3>
                 <p className="text-[11px] text-slate-400 mt-2 max-w-xs leading-relaxed">
                   {t.dropzoneHint}
