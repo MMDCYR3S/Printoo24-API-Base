@@ -23,6 +23,7 @@ import OrderWizard from './components/OrderWizard';
 import AdminOrderPanel from './components/AdminOrderPanel';
 import pageText from '../../lang/pages.json';
 import globalText from '../../lang/global.json';
+import SEO from '../../components/common/SEO'
 
 /**
  * تشخیص کاربر ادمین از localStorage
@@ -114,22 +115,29 @@ const ProductDetailPage = () => {
     pricing?.isCalculating ||
     !!pricing?.error;
 
-  if (isLoading) return <DetailSkeleton />;
-  if (error || !data)
-    return (
-      <div className="text-center py-20 font-bold text-slate-500">
-        بەرهەم نەدۆزرایەوە
-      </div>
-    );
+
+
+if (isLoading) return <DetailSkeleton />;
+if (error || !data) return <div className="text-center py-20 font-bold text-slate-500">بەرهەم نەدۆزرایەوە</div>;
 
   return (
-    <>
+  
+    <div>
+      
+    <SEO 
+      title={data.name}
+      description={data.description}
+      keywords={data.name}
+    />
+
+
       {/* ── صفحه اصلی ──
           ⚠️ min-h-screen حذف شد! طبق تحقیق Philip Walton:
           "flex items ignore their parent container's height if it's set
           via the min-height property" — min-h-screen داخل flex-1 parent
           باعث circular sizing می‌شود و sticky را می‌شکند. */}
       <div className="bg-slate-50/50 pb-20">
+      
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
@@ -367,7 +375,7 @@ const ProductDetailPage = () => {
         </div>
       </div>
       {/* ══ /Sticky Bottom Bar ══ */}
-    </>
+    </div>
   );
 };
 

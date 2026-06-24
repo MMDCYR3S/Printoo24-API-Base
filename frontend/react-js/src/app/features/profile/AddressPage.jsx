@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { MapPin, Plus, Trash2, X, AlertCircle } from 'lucide-react';
 import { profileService } from '../../services/profileService';
-
+import SEO from '../../components/common/SEO'
 import pageText from '../../lang/pages.json';
 import globalText from '../../lang/global.json';
 
@@ -96,6 +96,7 @@ const AddressPage = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-[90vw] mx-auto">
+
       
       {/* هدر صفحه */}
       <div className="flex justify-between items-center border-b border-slate-100 pb-4">

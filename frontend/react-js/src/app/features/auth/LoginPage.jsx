@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import PasswordInput from '../../components/PasswordInput';
 import { loginSchema } from './schemas';
 import { authService } from '../../services/authService';
-
+import SEO from '../../components/common/SEO'
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -69,6 +69,10 @@ const LoginPage = () => {
   };
 
   return (
+    <div>
+      <SEO 
+        title = ' چوونەژوورەوە / تۆمارکردن '
+      />
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <h2 className="text-xl font-semibold text-center mb-4"> چوونەژوورەوە / تۆمارکردن </h2>
       <p className="text-sm text-base-content/70 mt-2"> دڵنیابە لە دروستی ژمارەی مۆبایلەکەت، چونکە هەموو زانیارییەکانی داواکاریەکانت لە ڕێگەی ئەم ژمارەیە دەگەیەنرێت </p>
@@ -104,6 +108,7 @@ const LoginPage = () => {
       </button>
 
     </form>
+    </div>
   );
 };
 

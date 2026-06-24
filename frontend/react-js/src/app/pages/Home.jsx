@@ -11,7 +11,7 @@ import {
   ChevronDown,
   ArrowUpLeft,
 } from 'lucide-react';
-
+import SEO from '../components/common/SEO'
 import CategoryHero from '../features/home/CategoryHero';
 import HomeSlider from '../features/home/HomeSlider';
 import InfoModal from '../components/common/InfoModal';
@@ -83,8 +83,11 @@ const HomePage = () => {
 
   return (
     <>
-      <title>{pageText.home.title}</title>
-      <meta name="description" content={pageText.home.fullTitle} />
+      <SEO   
+        title="چاپ، ڕێکلام، پاکێجینگ و براندینگ"
+        description="Printoo24 یەکەم ناوەندی هەموو خزمەتگوزارییەکانی چاپ، ڕێکلام، پاکێجینگ و براندینگ لە سلێمانی. دیزاین، چاپ و دروستکردنی بەرهەمە ڕێکلامییەکانت لە یەک شوێن."
+        keywords="بەرهەمی چاپ, چاپی کارتی بارزگانی ,بزنس کارت ,فۆڵدەر,فلایەر,زەرفی نامە,پرۆمۆشن,چاپخانە,مطبعة, ستیکەر, پاکێجینگ, تابڵۆ, بانەر, هەدایای ڕێکلامی, چاپی ئۆفسێت, چاپی دیجیتاڵ, Printoo24, پرینتۆ24"
+      />
 
       <InfoModal />
 

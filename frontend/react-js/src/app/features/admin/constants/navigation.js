@@ -42,7 +42,7 @@ export const ADMIN_NAVIGATION = [
     icon: ShoppingCart,
     children: [
       { title: 'لیست سفارشات', path: '/admin/orders', icon: List },
-      { title: 'ثبت سفارش دستی', path: '/admin/orders/create', icon: FilePlus },
+      { title: 'ثبت سفارش دستی', path: '/shop', icon: FilePlus },
       { title: 'هزینه ها', path: '/admin/expense', icon: FilePlus },
     ]
   },
