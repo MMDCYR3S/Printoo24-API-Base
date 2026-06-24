@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Package, Calendar, MapPin, ChevronLeft, Printer, FileCheck, ShoppingBag } from 'lucide-react';
+import { Package, Calendar, MapPin, ChevronLeft, Printer, FileCheck, ShoppingBag, User, Phone, Hash, CreditCard, Clock } from 'lucide-react';
 import { profileService } from '../../services/profileService';
-
 import pageText from '../../lang/pages.json';
 import globalText from '../../lang/global.json';
 
@@ -84,6 +83,9 @@ const MyOrdersPage = () => {
         ) : (
           orders.map((order) => {
             const style = getStatusStyle(order.status_code);
+            const hasRecipient = order.recipient_name || order.recipient_phone;
+            const hasUnpaid = Number(order.remaining_amount) > 0;
+
             return (
               <div
                 key={order.id}
@@ -99,19 +101,44 @@ const MyOrdersPage = () => {
                       <h3 className="text-[15px] font-bold text-slate-800">
                         {order.type_display || pageText.profile.myOrdersPage.registerPrint}
                       </h3>
-                      <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium mt-0.5">
-                        <Calendar size={11} />
-                        {new Date(order.created_at).toLocaleDateString('en-GB')}
+                      <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                        <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+                          <Calendar size={11} />
+                          {new Date(order.created_at).toLocaleDateString('en-GB')}
+                        </div>
+                        {order.order_code && (
+                          <div className="flex items-center gap-1 text-[11px] text-slate-400 font-mono font-medium">
+                            <Hash size={10} />
+                            {order.order_code}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-
                   {/* بج وضعیت */}
                   <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold self-start sm:self-auto ${style.badge}`}>
                     <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${style.dot}`} />
                     {order.status}
                   </div>
                 </div>
+
+                {/* ردیف گیرنده - فقط اگر recipient وجود داشته باشد */}
+                {hasRecipient && (
+                  <div className="flex items-center gap-4 px-5 py-2.5 border-t border-slate-100/80 bg-slate-50/20">
+                    {order.recipient_name && (
+                      <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+                        <User size={11} className="text-slate-400 shrink-0" />
+                        <span>{order.recipient_name}</span>
+                      </div>
+                    )}
+                    {order.recipient_phone && (
+                      <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+                        <Phone size={11} className="text-slate-400 shrink-0" />
+                        <span className="font-mono">{order.recipient_phone}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* ردیف پایین */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-5 py-3.5 border-t border-slate-100/80 bg-slate-50/30">
@@ -121,12 +148,36 @@ const MyOrdersPage = () => {
                   </div>
 
                   <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                    <div className="text-left">
-                      <span className="block text-[9px] text-slate-400 font-medium">{pageText.profile.myOrdersPage.totalPrice}</span>
-                      <span className="text-base font-extrabold text-slate-700 tabular-nums ">
-                        {new Intl.NumberFormat('EN').format(order.total_price)}
-                        <span className="text-[10px] font-bold text-slate-400 mx-1">{globalText.currency}</span>
-                      </span>
+                    {/* قیمت‌ها */}
+                    <div className="text-left space-y-0.5">
+                      <div>
+                        <span className="block text-[9px] text-slate-400 font-medium">{pageText.profile.myOrdersPage.totalPrice}</span>
+                        <span className="text-base font-extrabold text-slate-700 tabular-nums">
+                          {new Intl.NumberFormat('EN').format(order.total_price)}
+                          <span className="text-[10px] font-bold text-slate-400 mx-1">{globalText.currency}</span>
+                        </span>
+                      </div>
+                      {/* مبلغ پرداخت‌شده و باقیمانده */}
+                      <div className="flex items-center gap-3">
+                        {Number(order.paid_amount) > 0 && (
+                          <div className="flex items-center gap-1">
+                            <CreditCard size={9} className="text-emerald-500" />
+                            <span className="text-[9px] font-bold text-emerald-600 tabular-nums">
+                              {new Intl.NumberFormat('EN').format(order.paid_amount)}
+                              <span className="text-[8px] font-medium mx-0.5">{globalText.currency}</span>
+                            </span>
+                          </div>
+                        )}
+                        {hasUnpaid && (
+                          <div className="flex items-center gap-1">
+                            <Clock size={9} className="text-amber-500" />
+                            <span className="text-[9px] font-bold text-amber-600 tabular-nums">
+                              {new Intl.NumberFormat('EN').format(order.remaining_amount)}
+                              <span className="text-[8px] font-medium mx-0.5">{globalText.currency}</span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-1.5">

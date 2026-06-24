@@ -38,9 +38,9 @@ const BlogListPage = () => {
   return (
     <div className="">
       <SEO 
-        title="Blog & Articles" 
-        description="Stay updated with the latest printing technologies, design tips, and news from Printoo24."
-        keywords="آموزش چاپ, ویدیو آموزشی, پرینتو۲۴, طراحی برای چاپ"
+        title="بلۆگ و وتارەکان " 
+        description="نوێترین وتار و بابەتەکانی چاپ، دیزاین، براندینگ، مارکێتینگ و ڕێنماییە پڕاکتیکییەکان لە Printoo24 بخوێنەرەوە و زانیاری کاروبارەکەت پەرەپێ بدە."
+        keywords="بلۆگی چاپ, وتاری دیزاین, براندینگ, مارکێتینگ, چاپ و ڕێکلام, چاپی دیجیتاڵ, دیزاینی گرافیکی, کاروبار, Printoo24, پرینتۆ24"
       />
 
       {/* ── هدر صفحه ── */}

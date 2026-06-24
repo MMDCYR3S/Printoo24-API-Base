@@ -6,6 +6,23 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+sitemap({
+      hostname: 'https://printoo24.com',
+      dynamicRoutes: [
+        '/',
+        '/shop',
+        '/blog',
+        '/tutorials',
+        '/cart',
+      ],
+
+      exclude: [
+        '/admin',
+        '/login',
+        '/profile',
+        '/checkout',
+      ]
+    })
   ],
   server: {
     host: true,
