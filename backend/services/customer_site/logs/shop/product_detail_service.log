@@ -886,3 +886,4 @@ DEBUG 2026-06-01 11:30:16,837 product_detail_service 272 125068535707328 ShopPro
 DEBUG 2026-06-01 11:31:27,599 product_detail_service 272 125068554442432 ShopProductDetailService initialized
 DEBUG 2026-06-01 11:32:12,036 product_detail_service 272 125068527314624 ShopProductDetailService initialized
 DEBUG 2026-06-01 11:33:21,783 product_detail_service 272 125068527314624 ShopProductDetailService initialized
+DEBUG 2026-06-27 16:02:44,429 product_detail_service 7 139220437075648 ShopProductDetailService initialized

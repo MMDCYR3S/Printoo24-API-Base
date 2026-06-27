@@ -385,7 +385,7 @@ class ProductField(models.Model):
     numeric_value = models.DecimalField(
         _("مقدار عددی پایه (برای فرمول این محصول)"), 
         max_digits=14, 
-        decimal_places=0, 
+        decimal_places=2, 
         default=0.0
     )
     is_required = models.BooleanField(_("اجباری بودن برای این محصول"), default=False)
@@ -412,7 +412,7 @@ class ProductFieldChoice(models.Model):
     numeric_value = models.DecimalField(
         _("مقدار عددی (ارزش این گزینه در این محصول)"), 
         max_digits=14, 
-        decimal_places=0, 
+        decimal_places=2, 
         default=0.0
     )
     is_default = models.BooleanField(_("گزینه پیش‌فرض"), default=False)
