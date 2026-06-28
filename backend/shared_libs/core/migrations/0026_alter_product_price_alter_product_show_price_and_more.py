@@ -19,15 +19,5 @@ class Migration(migrations.Migration):
             model_name='product',
             name='show_price',
             field=models.DecimalField(decimal_places=0, default=0.0, max_digits=14, verbose_name='قیمت نمایشی'),
-        ),
-        migrations.AlterField(
-            model_name='productfield',
-            name='numeric_value',
-            field=models.DecimalField(decimal_places=0, default=0.0, max_digits=14, verbose_name='مقدار عددی پایه (برای فرمول این محصول)'),
-        ),
-        migrations.AlterField(
-            model_name='productfieldchoice',
-            name='numeric_value',
-            field=models.DecimalField(decimal_places=0, default=0.0, max_digits=14, verbose_name='مقدار عددی (ارزش این گزینه در این محصول)'),
-        ),
+        )
     ]
