@@ -66,17 +66,7 @@ class ModalService:
         """
         متدی که فرانت‌اند صدا می‌زند تا ببیند چه چیزی نمایش دهد.
         """
-        modal = PromotionalModal.objects.get_active_modal()
-        if not modal:
-            return None
-        
-        return {
-            "title": modal.title,
-            "description": modal.description,
-            "image": modal.image_url,
-            "cta_text": modal.cta_text,
-            "cta_url": modal.cta_url
-        }
+        return PromotionalModal.objects.get_active_modal()
 
     @transaction.atomic
     def create_modal(self, data: dict) -> PromotionalModal:
