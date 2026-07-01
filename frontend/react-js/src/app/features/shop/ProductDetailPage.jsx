@@ -318,36 +318,37 @@ if (error || !data) return <div className="text-center py-20 font-bold text-slat
           Sticky Bottom Bar — فقط موبایل
       ══════════════════════════════════════════ */}
       <div className="flex items-center justify-center ">
-        <div className="lg:hidden fixed bottom-2 w-[90vw] pb-2  z-50  ">
+        <div className="lg:hidden fixed bottom-2 w-[97vw] pb-2  z-50  ">
           <div className="absolute inset-0 bg-white/20 backdrop-blur-sm  rounded-2xl" />
 
-          <div className="relative px-4 pt-3  flex justify-between items-center gap-3">
-            <div className=" min-w-0 bg-slate-900 rounded-2xl px-4 py-1.5 sm:py-2.5 flex flex-col justify-center">
-              <p className="text-[10px] text-slate-400 font-bold mb-0.5 leading-none">
+          <div className="relative px-1 pt-2 flex flex-row justify-between items-center gap-1">
+            <div className="h-[56px] w-full bg-slate-900 rounded-2xl px-2 py-1.5 sm:py-2.5 flex flex-col justify-center text-center">
+              {/* <p className="text-[12px] text-slate-400 font-bold mb-0.5 leading-none">
                 نرخ
-              </p>
+              </p> */}
 
               {pricing?.isCalculating ? (
-                <div className="flex items-center gap-2 text-emerald-400 mt-1">
+                <div className="flex items-center gap-2  text-emerald-400 mt-1 text-center">
                   <span className="loading loading-dots loading-xs"></span>
                   <span className="text-xs font-medium opacity-80">
                     لە حیسابکردندایە...
                   </span>
                 </div>
               ) : pricing?.error ? (
-                <div className="flex items-center gap-1.5 text-rose-400 mt-1">
+                <div className="flex items-center gap-1.5 text-rose-400">
                   <AlertCircle size={13} className="shrink-0" />
                   <span className="text-xs font-bold truncate">
                     {pricing.error}
                   </span>
                 </div>
               ) : (
-                <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-2xl font-black tracking-tight text-emerald-400 leading-none">
-                    {Number(pricing?.totalPrice || 0).toLocaleString()}
-                  </span>
-                  <span className="text-xs text-slate-400 font-bold">
+                <div className="flex mx-auto items-center gap-1 mt-2">
+                  <span className="text-xs text-slate-400">
                     {globalText.currency || 'IQD'}
+                  </span>
+                  <span className="text-xl font-black tracking-tight text-emerald-400 leading-none">
+                    {/* {Number(pricing?.totalPrice || 0).toLocaleString()} */}
+                    4521654
                   </span>
                 </div>
               )}
@@ -356,7 +357,7 @@ if (error || !data) return <div className="text-center py-20 font-bold text-slat
             <button
               onClick={handleAddToCart}
               disabled={isAddToCartDisabled}
-              className="btn btn-primary h-[56px] px-5 rounded-2xl text-sm font-bold shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 flex items-center gap-2 transition-all active:scale-95"
+              className="btn btn-primary h-[56px] px-2 rounded-2xl text-sm font-bold shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 flex items-center gap-2 transition-all active:scale-95"
             >
               {addToCartMutation.isLoading ? (
                 <span className="loading loading-dots loading-sm"></span>
