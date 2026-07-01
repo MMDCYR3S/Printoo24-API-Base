@@ -25,7 +25,7 @@ const LogoMarquee = () => {
 
   return (
     <div className="marquee-wrapper">
-  <h2 className="text-2xl mx-auto mb-8 mt-8 font-extrabold text-slate-600">
+  <h2 className="text-lg sm:text-2xl mx-auto mb-8 mt-8 font-extrabold text-slate-600 text-center ">
   کڕیار و کۆمپانیاکان کە متمانەیان پێ کردووین
 </h2>
       <div className="marquee-container" dir="ltr">

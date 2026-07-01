@@ -36,7 +36,7 @@ const MainLayout = () => {
       <Header onOpenDrawer={openDrawer} />
 
       {/* ── محتوای اصلی ── */}
-      <main className="flex-1 mx-auto py-6 w-full">
+      <main className="flex-1 mx-auto py-0 sm:py-6 w-full">
         <Outlet />
       </main>
 

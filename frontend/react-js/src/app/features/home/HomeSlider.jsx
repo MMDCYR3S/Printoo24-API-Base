@@ -60,7 +60,7 @@ const HomeSlider = () => {
               تبلت: 16/6
               دسکتاپ: 16/4 (عریض و استاندارد)
             */}
-            <div className="relative w-full aspect-[16/10] sm:aspect-[16/6] md:aspect-[16/4] bg-slate-800">
+            <div className="relative w-full aspect-[16/6.3] sm:aspect-[16/6] md:aspect-[16/4] bg-slate-800">
               {/* تصویر اسلایدر */}
               <img
                 src={slide.image_url}
@@ -73,13 +73,13 @@ const HomeSlider = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none"></div>
 
               {/* کپشن (متن‌ها در موبایل کمی پایین‌تر و کوچک‌تر میشن) */}
-              {slide.name && (
+              {/* {slide.name && (
                 <div className="absolute bottom-4 right-4 md:bottom-12 md:right-16 text-white max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
                   <h2 className="text-base sm:text-xl md:text-3xl font-black drop-shadow-md mb-2">
                     {slide.name}
                   </h2>
                 </div>
-              )}
+              )} */}
             </div>
           </SwiperSlide>
         ))}
@@ -126,14 +126,14 @@ const HomeSlider = () => {
         /* روی موبایل بولت‌ها کمی پایین‌تر باشن که با دکمه‌ها تداخل نکنن */
         @media (max-width: 768px) {
           .swiper-pagination {
-            bottom: 0px !important;
+            bottom: -6px !important;
           }
           .swiper-pagination-bullet {
-            width: 6px;
-            height: 6px;
+            width: 4px;
+            height: 4px;
           }
           .swiper-pagination-bullet-active {
-            width: 16px;
+            width: 12px;
           }
         }
       `}</style>

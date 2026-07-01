@@ -96,12 +96,12 @@ const HomePage = () => {
 
       <div className="flex flex-col pb-16">
         {/* 1. اسلایدر */}
-        <div className="mt-6">
+        <div className="sm:mt-6">
           <HomeSlider />
         </div>
 
         {/* 2. آکاردئون دسته‌ها */}
-        <div className="mt-8">
+        <div className="sm:mt-8">
           <CategoryHero />
         </div>
 

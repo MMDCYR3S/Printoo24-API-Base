@@ -103,12 +103,7 @@ const AccordionContent = memo(({ category, isFirstAndOpen }) => {
       {/* Sub-categories Grid */}
       {sub_categories?.length > 0 && (
         <section>
-          <div className="flex items-center gap-2.5 mb-4 px-0.5">
-            <div className="p-1.5 bg-blue-50 text-blue-500 rounded-lg">
-              <LayoutGrid size={15} strokeWidth={2.2} />
-            </div>
-            <h3 className="text-[13px] font-bold text-slate-600">ژێر پۆل</h3>
-          </div>
+
 
           <motion.div
             variants={staggerContainer}
@@ -249,7 +244,8 @@ const CategoryItem = memo(({ category, isOpen, onToggle, index }) => {
       >
         {/* Background */}
         <div className="absolute inset-0 z-0" aria-hidden="true">
-          <div className={`absolute inset-0 transition-colors duration-500 ${isOpen ? 'bg-black' : 'bg-base'}`} />
+          <a>
+          <div  className={`absolute inset-0 transition-colors duration-500 ${isOpen ? 'bg-black' : 'bg-base'}`} />
           {isOpen && category_info.banners?.wide && (
             <img
               src={category_info.banners.wide}
@@ -261,6 +257,8 @@ const CategoryItem = memo(({ category, isOpen, onToggle, index }) => {
               className="absolute inset-0 w-full h-full object-cover opacity-20 scale-105 blur-[1px]"
             />
           )}
+
+          </a>
         </div>
 
         {/* Content */}
