@@ -347,8 +347,7 @@ if (error || !data) return <div className="text-center py-20 font-bold text-slat
                     {globalText.currency || 'IQD'}
                   </span>
                   <span className="text-xl font-black tracking-tight text-emerald-400 leading-none">
-                    {/* {Number(pricing?.totalPrice || 0).toLocaleString()} */}
-                    4521654
+                    {Number(pricing?.totalPrice || 0).toLocaleString()}
                   </span>
                 </div>
               )}
