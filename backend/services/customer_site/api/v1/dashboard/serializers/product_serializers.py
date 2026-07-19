@@ -1,9 +1,19 @@
 from rest_framework import serializers
 from core.models import (
     Product, ProductImage, Attachment, GuideType,
-    FieldType, ConditionOperator, ConditionAction, MultiSelectOperator
+    FieldType, ConditionOperator, ConditionAction, MultiSelectOperator,
+    ProductCategoryRelation
 )
 
+# ===== Category Assignments Serializer ===== #
+class CategoryAssignmentSerializer(serializers.Serializer):
+    category_id = serializers.IntegerField()
+    is_primary = serializers.BooleanField(default=False)
+    priority = serializers.ChoiceField(choices=[(1, 'بسیار مهم'), (2, 'مهم'), (3, 'معمولی'), (4, 'فرعی')], default=3)
+    order = serializers.IntegerField(default=0)
+
+    def validate(self, attrs):
+        return attrs
 
 # ===== Guide Fields Mixin ===== #
 class GuideSerializerMixin(serializers.Serializer):
@@ -51,8 +61,20 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'code', 'slug', 'detail_url']
 
     def get_category(self, obj):
-        cat = obj.categories.first()
-        return cat.name if cat else "Uncategorized"
+        relations = obj.category_relations.all().order_by('-is_primary', 'priority', 'order')
+        return [
+            {
+                "id": rel.category.id,
+                "name": rel.category.name,
+                "slug": rel.category.slug,
+                "parent_id": rel.category.parent.id if rel.category.parent else None,
+                "parent_name": rel.category.parent.name if rel.category.parent else None,
+                "is_primary": rel.is_primary,
+                "priority": rel.priority,
+                "order": rel.order
+            }
+            for rel in relations[:10]
+        ]
 
 # ===== Field Builder Serializers ===== #
 
@@ -247,49 +269,68 @@ class ProductFormulasBulkSyncSerializer(serializers.Serializer):
 
 # ===== Product Shell Serializer ===== #
 class ProductShellSerializer(GuideSerializerMixin, serializers.ModelSerializer):
-    category_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
-    subcategory_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    categories = CategoryAssignmentSerializer(many=True, required=False, write_only=True)
     category_info = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'slug', 'category_id', 'subcategory_id', 'category_info',
+            'id', 'name', 'slug', 'categories', 'category_info',
             'description', 'code', 'is_active', 'has_price', 'has_quantity',
             'price', 'show_price', 'price_per_unit', 'guide_text', 'guide_type'
         ]
         read_only_fields = ['id', 'code', 'slug']
 
     def validate(self, attrs):
-        category_id = attrs.get('category_id')
+        categories = attrs.get('categories', [])
         subcategory_id = attrs.get('subcategory_id')
 
-        if category_id and subcategory_id and category_id == subcategory_id:
+        primary_count = sum(1 for c in categories if c.get('is_primary', False))
+        if primary_count > 1:
             raise serializers.ValidationError({
-                "subcategory_id": "دسته‌بندی اصلی و زیردسته نمی‌توانند یکسان باشند."
+                "categories": "حداکثر یک دسته‌بندی می‌تواند اصلی (is_primary=True) باشد."
             })
-            
         return attrs
 
     def get_category_info(self, obj):
-        categories = list(obj.categories.select_related('parent').all())
-        if not categories:
-            return None
+        # این متد برای نمایش خلاصه دسته‌بندی اصلی در لیست‌ها باقی می‌ماند
+        primary = obj.category_relations.filter(is_primary=True).first()
+        if primary:
+            cat = primary.category
+            return {
+                "id": cat.id,
+                "name": cat.name,
+                "parent_id": cat.parent.id if cat.parent else None,
+                "parent_name": cat.parent.name if cat.parent else None,
+                "is_primary": True
+            }
+        # اگر دسته اصلی نبود، اولین دسته را برمی‌گرداند
+        first = obj.category_relations.first()
+        if first:
+            cat = first.category
+            return {
+                "id": cat.id,
+                "name": cat.name,
+                "parent_id": cat.parent.id if cat.parent else None,
+                "parent_name": cat.parent.name if cat.parent else None,
+                "is_primary": False
+            }
+        return None
 
+class ProductCategoryRelationOutputSerializer(serializers.ModelSerializer):
+    category_id = serializers.IntegerField(source='category.id')
+    category_name = serializers.CharField(source='category.name')
+    category_slug = serializers.CharField(source='category.slug')
+    category_parent_id = serializers.IntegerField(source='category.parent.id', allow_null=True)
+    category_parent_name = serializers.CharField(source='category.parent.name', allow_null=True)
 
-        selected_cat = categories[0]
-
-        for cat in categories:
-            if cat.parent_id is not None:
-                selected_cat = cat
-                break
-
-        return {
-            "id": selected_cat.id, 
-            "name": selected_cat.name,
-            "parent_id": selected_cat.parent.id if selected_cat.parent else None,
-            "parent_name": selected_cat.parent.name if selected_cat.parent else None,
-        }
+    class Meta:
+        model = ProductCategoryRelation
+        fields = [
+            'category_id', 'category_name', 'category_slug',
+            'category_parent_id', 'category_parent_name',
+            'is_primary', 'priority', 'order'
+        ]
 
 # ===== Core Create/Update Serializer ===== #
 class ProductCoreCreateSerializer(serializers.Serializer):
@@ -349,6 +390,9 @@ class ProductDetailSerializer(serializers.Serializer):
     formulas = ProductFormulaReadSerializer(many=True, read_only=True)
     images = ProductImageSerializer(source='product_image', many=True, read_only=True)
     attachments = AttachmentLibrarySerializer(source='product_attachment', many=True, read_only=True)
+    categories = ProductCategoryRelationOutputSerializer(
+        source='category_relations', many=True, read_only=True
+    )
 
 
 # ===== Media Sync Serializer ===== #

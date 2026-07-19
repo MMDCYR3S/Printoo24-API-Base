@@ -17,6 +17,8 @@ from ..models import (
     ProductFieldCondition, ProductCategoryRelation, FieldDictionary
 )
 
+from ..schemas import CategoryAssignment
+
 class ProductService:
     """
     سرویس مدیریت منطق محصولات (جایگزین ProductDomainService).
@@ -59,73 +61,73 @@ class ProductService:
     # ===== Write Operations (Shell) ===== #
     @transaction.atomic
     def create_product_shell(self, user, data: Dict[str, Any]) -> Product:
-        category_id = data.pop('category_id', None)
-        subcategory_id = data.pop('subcategory_id', None)
+        categories = data.pop('categories', [])
         
         data['user'] = user
         product = Product.objects.create(**data)
 
-        self._sync_categories(
-            product=product,
-            primary_category_id=category_id,
-            subcategory_id=subcategory_id
-        )
-        
+        assignments = [
+            CategoryAssignment(
+                category_id=item['category_id'],
+                is_primary=item.get('is_primary', False),
+                priority=item.get('priority', 3),
+                order=item.get('order', 0)
+            )
+            for item in categories
+        ]
+        self._sync_categories(product, assignments)
         return product
 
     @transaction.atomic
     def update_product_shell(self, pk: int, data: Dict[str, Any]) -> Product:
         product = Product.objects.get_by_id(pk)
         if not product:
-            raise ProductNotFoundException("بەرهەمی دیاریکراو نەدۆزرایەوە.")
+            raise ProductNotFoundException("...")
         
-        has_category_update = 'category_id' in data or 'subcategory_id' in data
-        category_id = data.pop('category_id', None)
-        subcategory_id = data.pop('subcategory_id', None)
+        categories = data.pop('categories', None)
         
-        if 'name' in data and 'slug' not in data:
-            product.slug = None
-
         for key, value in data.items():
             setattr(product, key, value)
         product.save()
         
-        # اگر آپدیت دسته‌بندی داشتیم، لیست جدید را set کن
-        if has_category_update:
-            self._sync_categories(
-                product=product,
-                primary_category_id=category_id,
-                subcategory_id=subcategory_id
-            )
+        if categories is not None:
+            assignments = [
+                CategoryAssignment(
+                    category_id=item['category_id'],
+                    is_primary=item.get('is_primary', False),
+                    priority=item.get('priority', 3),
+                    order=item.get('order', 0)
+                )
+                for item in categories
+            ]
+            self._sync_categories(product, assignments)
         
         return product
     
-    def _sync_categories(self, product, primary_category_id, subcategory_id):
+    def _sync_categories(self, product, category_assignments: List[CategoryAssignment]):
         """ مدیریت صریح یک دسته اصلی و یک زیردسته """
-        valid_ids = []
-        if primary_category_id:
-            valid_ids.append(primary_category_id)
-        if subcategory_id and subcategory_id != primary_category_id:
-            valid_ids.append(subcategory_id)
+        ProductCategoryRelation.objects.filter(product=product).delete()
 
-        # ===== حذف روابطی که در لیست نیستند ===== #
-        if valid_ids:
-            ProductCategoryRelation.objects.filter(product=product).exclude(category_id__in=valid_ids).delete()
-        else:
-            ProductCategoryRelation.objects.filter(product=product).delete()
-
-        # ===== ایجاد دسته‌بندی اصلی ===== #
-        if primary_category_id:
-            rel, created = ProductCategoryRelation.objects.get_or_create(
-                product=product, category_id=primary_category_id,
+        relations_to_create = []
+        for ass in category_assignments:
+            relations_to_create.append(
+                ProductCategoryRelation(
+                    product=product,
+                    category_id=ass.category_id,
+                    is_primary=ass.is_primary,
+                    priority=ass.priority,
+                    order=ass.order
+                )
             )
 
-        # ===== ایجاد رابطه با زیردسته ===== #
-        if subcategory_id and subcategory_id != primary_category_id:
-            rel, created = ProductCategoryRelation.objects.get_or_create(
-                product=product, category_id=subcategory_id,
-            )
-            rel.save()
+        if relations_to_create:
+            ProductCategoryRelation.objects.bulk_create(relations_to_create)
+
+        primary_relations = ProductCategoryRelation.objects.filter(product=product, is_primary=True)
+        if primary_relations.count() > 1:
+            # ===== نگهداری یک دسته‌بندی اصلی و باقی آن‌ها، عادی شوند. ===== #
+            first = primary_relations.first()
+            ProductCategoryRelation.objects.filter(product=product, is_primary=True).exclude(pk=first.pk).update(is_primary=False)
 
     # ===== ساخت بخش مربوط به محصولات ===== #
     def delete_product(self, product_id: int):

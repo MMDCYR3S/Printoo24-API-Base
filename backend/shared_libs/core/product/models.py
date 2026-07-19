@@ -197,22 +197,55 @@ class ProductCategoryRelation(models.Model):
         related_name='product_relations',
         verbose_name=_("دسته‌بندی")
     )
+
+    # ===== اولویت‌بندی دسته‌بندی مورد نظر برای محصول ===== #
+    is_primary = models.BooleanField(
+        default=False,
+        help_text=_("آیا این دسته‌بندی، دسته اصلی محصول است؟ (حداکثر یک عدد)")
+    )
+    
+    PRIORITY_CHOICES = [
+        (1, _('بسیار مهم')),
+        (2, _('مهم')),
+        (3, _('معمولی')),
+        (4, _('فرعی')),
+    ]
+    priority = models.PositiveSmallIntegerField(
+        choices=PRIORITY_CHOICES,
+        default=3,
+        help_text=_("سطح اهمیت این دسته‌بندی برای محصول")
+    )
+    
+    order = models.PositiveIntegerField(
+        default=0,
+        help_text=_("ترتیب نمایش در بین دسته‌بندی‌های همان محصول")
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = _("رابطه محصول-دسته")
         verbose_name_plural = _("روابط محصول-دسته")
         unique_together = ('product', 'category')
+        ordering = ['-is_primary', 'priority', 'order']
 
+        # ===== محدودیت: فقط یک دسته اصلی در هر محصول ===== #
+        constraints = [
+            models.UniqueConstraint(
+                fields=['product'],
+                condition=models.Q(is_primary=True),
+                name='unique_primary_category_per_product'
+            )
+        ]
     def save(self, *args, **kwargs):
-        """
-        تضمین یکپارچگی داده‌ها (Data Integrity):
-        اگر این رکورد به عنوان Primary ست شود، بقیه رکوردهای این محصول باید False شوند.
-        """
+        if self.is_primary:
+            ProductCategoryRelation.objects.filter(
+                product=self.product
+            ).exclude(pk=self.pk).update(is_primary=False)
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.product.name} -> {self.category.name}"
+        return f"{self.product.name} -> {self.category.name} (primary={self.is_primary})"
     
 # ======== Product Model ======== #
 class Product(HasGuide, models.Model):

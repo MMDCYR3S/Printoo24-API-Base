@@ -46,8 +46,16 @@ class ProductDashboardViewSet(viewsets.ViewSet):
     @extend_schema(
         summary="مرحله ۱: ایجاد هسته محصول",
         description="""
-        ایجاد ساختار اولیه محصول.
-        در این مرحله یک `category_id` (دسته اصلی) و یک `subcategory_id` (زیردسته) ارسال می‌شود.
+        ایجاد ساختار اولیه محصول با قابلیت انتساب چندین دسته‌بندی.
+
+        **📌 ساختار فیلد `categories`:**
+        یک آرایه از اشیاء با فیلدهای زیر:
+        - `category_id` (اجباری): شناسه دسته‌بندی
+        - `is_primary` (اختیاری، پیش‌فرض `false`): آیا این دسته اصلی است؟ (حداکثر یک عدد)
+        - `priority` (اختیاری، پیش‌فرض `3`): سطح اهمیت (۱: بسیار مهم، ۲: مهم، ۳: معمولی، ۴: فرعی)
+        - `order` (اختیاری، پیش‌فرض `0`): ترتیب نمایش در بین دسته‌بندی‌های همین محصول
+
+        **نکته:** حداکثر یک دسته‌بندی می‌تواند `is_primary=true` داشته باشد.
         """,
         request=ProductCoreCreateSerializer,
         responses={201: inline_serializer('CreateResponse', fields={
@@ -56,13 +64,16 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         })},
         examples=[
             OpenApiExample(
-                name='ایجاد محصول ساده',
-                summary='ارسال مشخصات به همراه دسته والد و فرزند',
+                name='ایجاد محصول با چند دسته‌بندی',
+                summary='ارسال مشخصات کامل به همراه دسته‌بندی‌ها',
                 value={
                     "shell": {
                         "name": "کارت ویزیت لمینت براق",
-                        "category_id": 5,             # <--- شناسه دسته اصلی
-                        "subcategory_id": 12,         # <--- شناسه زیردسته
+                        "categories": [
+                            {"category_id": 5, "is_primary": True, "priority": 1, "order": 0},
+                            {"category_id": 12, "is_primary": False, "priority": 2, "order": 1},
+                            {"category_id": 8, "is_primary": False, "priority": 3, "order": 2}
+                        ],
                         "description": "چاپ افست با کیفیت بالا",
                         "has_price": True,
                         "price": "20000.00",
@@ -72,6 +83,19 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                         "is_active": True,
                         "guide_text": "زمان تحویل ۷ روز کاری است.",
                         "guide_type": "info"
+                    }
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                name='ایجاد محصول بدون دسته‌بندی',
+                summary='ارسال فقط اطلاعات پایه (دسته‌بندی‌ها بعداً اضافه می‌شوند)',
+                value={
+                    "shell": {
+                        "name": "محصول آزمایشی",
+                        "description": "بدون دسته‌بندی",
+                        "price": "15000.00",
+                        "is_active": True
                     }
                 },
                 request_only=True,
@@ -96,7 +120,12 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         summary="ویرایش اطلاعات پایه (هسته) محصول",
         description="""
         شما می‌توانید کل فیلدها یا فقط فیلدهایی که تغییر کرده‌اند را ارسال کنید (Partial Update).
-        اگر قصد تغییر دسته‌بندی را دارید، باید `category_id` و `subcategory_id` را ارسال کنید.
+
+        **📌 برای تغییر دسته‌بندی‌ها:**
+        - فیلد `categories` را با لیست جدید ارسال کنید. تمام روابط قبلی حذف و با لیست جدید جایگزین می‌شوند.
+        - اگر `categories` ارسال نشود، دسته‌بندی‌های قبلی دست نخورده باقی می‌مانند.
+
+        **نکته:** حداکثر یک دسته‌بندی می‌تواند `is_primary=true` داشته باشد.
         """,
         request=ProductCoreCreateSerializer,
         responses={200: inline_serializer('UpdateResponse', fields={
@@ -104,14 +133,16 @@ class ProductDashboardViewSet(viewsets.ViewSet):
         })},
         examples=[
             OpenApiExample(
-                name='۱. ویرایش کامل (Full Update)',
-                summary='تغییر کامل هسته از جمله دسته‌بندی‌ها',
-                description='تمامی فیلدها ارسال شده و مقادیر جایگزین می‌شوند.',
+                name='۱. ویرایش کامل با تغییر دسته‌بندی‌ها',
+                summary='تغییر کامل هسته و جایگزینی دسته‌بندی‌ها',
+                description='تمامی فیلدها ارسال شده و دسته‌بندی‌های جدید جایگزین می‌شوند.',
                 value={
                     "shell": {
                         "name": "کارت ویزیت لمینت براق (ویرایش شده)",
-                        "category_id": 8,             # <--- تغییر دسته اصلی
-                        "subcategory_id": 15,         # <--- تغییر زیردسته
+                        "categories": [
+                            {"category_id": 8, "is_primary": True, "priority": 1, "order": 0},
+                            {"category_id": 15, "is_primary": False, "priority": 1, "order": 1}
+                        ],
                         "description": "توضیحات جدید محصول",
                         "has_price": True,
                         "price": "25000.00",
@@ -126,14 +157,24 @@ class ProductDashboardViewSet(viewsets.ViewSet):
                 request_only=True,
             ),
             OpenApiExample(
-                name='۲. ویرایش جزئی (Partial Update)',
-                summary='فقط غیرفعال کردن محصول و تغییر پیام',
+                name='۲. ویرایش جزئی (بدون تغییر دسته‌بندی)',
+                summary='فقط غیرفعال کردن محصول و تغییر پیام راهنما',
                 description='در این حالت بقیه اطلاعات از جمله دسته‌بندی‌ها در دیتابیس دست‌نخورده باقی می‌مانند.',
                 value={
                     "shell": {
                         "is_active": False,
                         "guide_text": "فروش این محصول موقتاً متوقف شده است.",
                         "guide_type": "warning"
+                    }
+                },
+                request_only=True,
+            ),
+            OpenApiExample(
+                name='۳. حذف تمام دسته‌بندی‌ها',
+                summary='ارسال `categories` خالی برای پاک کردن همه روابط',
+                value={
+                    "shell": {
+                        "categories": []
                     }
                 },
                 request_only=True,

@@ -122,23 +122,22 @@ class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'name', 'slug', 'price', 'show_price', 'has_price', 'category', 'thumbnail', 'detail_url']
-
     def get_category(self, obj):
-        assigned_cats = obj.categories.select_related("parent").all()
-
-        subcategory = next((c for c in assigned_cats if c.parent is not None), None)
-        
-        if subcategory:
-            return {
-                "parent_category": subcategory.parent.name,
-                "children_category": subcategory.name
+        """بازگرداندن لیست کامل دسته‌بندی‌ها با اولویت (اصلی در ابتدا)"""
+        relations = obj.category_relations.select_related('category__parent').order_by('-is_primary', 'priority', 'order')
+        return [
+            {
+                "id": rel.category.id,
+                "name": rel.category.name,
+                "slug": rel.category.slug,
+                "parent_id": rel.category.parent.id if rel.category.parent else None,
+                "parent_name": rel.category.parent.name if rel.category.parent else None,
+                "is_primary": rel.is_primary,
+                "priority": rel.priority,
+                "order": rel.order
             }
-
-        root_cat = next((c for c in assigned_cats if c.parent is None), None)
-        return {
-            "parent_category": root_cat.name if root_cat else None,
-            "children_category": None
-        }
+            for rel in relations
+        ]
 
     def get_thumbnail(self, obj):
         img = obj.product_image.first()
@@ -174,15 +173,20 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_category(self, obj):
-        assigned_cat = obj.categories.first()
-        if not assigned_cat:
-            return {"parent_category": None, "children_category": None}
-
-        return {
-            "parent_category": assigned_cat.parent.name if assigned_cat.parent else assigned_cat.name,
-            "children_category": assigned_cat.name,
-            "slug": assigned_cat.slug,
-        }
+        relations = obj.category_relations.select_related('category__parent').order_by('-is_primary', 'priority', 'order')
+        return [
+            {
+                "id": rel.category.id,
+                "name": rel.category.name,
+                "slug": rel.category.slug,
+                "parent_id": rel.category.parent.id if rel.category.parent else None,
+                "parent_name": rel.category.parent.name if rel.category.parent else None,
+                "is_primary": rel.is_primary,
+                "priority": rel.priority,
+                "order": rel.order
+            }
+            for rel in relations
+        ]
 
 
 # ==========================================
@@ -230,7 +234,7 @@ class ProductSummarySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'slug', 'has_price', 'show_price', 'thumbnail', 'category']
+        fields = ['id', 'name', 'slug', 'category', 'has_price', 'show_price', 'thumbnail', 'category']
 
     def get_thumbnail(self, obj):
         first_image = obj.product_image.first()
@@ -245,18 +249,21 @@ class ProductSummarySerializer(serializers.ModelSerializer):
     #     return None
     
     def get_category(self, obj):
-        assigned_cats = obj.categories.select_related("parent").all()
-        subcategory = next((c for c in assigned_cats if c.parent is not None), None)
-        if subcategory:
-            return {
-                "parent_category": subcategory.parent.name,
-                "children_category": subcategory.name
+        """بازگرداندن لیست کامل دسته‌بندی‌ها با اولویت (اصلی در ابتدا)"""
+        relations = obj.category_relations.select_related('category__parent').order_by('-is_primary', 'priority', 'order')
+        return [
+            {
+                "id": rel.category.id,
+                "name": rel.category.name,
+                "slug": rel.category.slug,
+                "parent_id": rel.category.parent.id if rel.category.parent else None,
+                "parent_name": rel.category.parent.name if rel.category.parent else None,
+                "is_primary": rel.is_primary,
+                "priority": rel.priority,
+                "order": rel.order
             }
-        root_cat = next((c for c in assigned_cats if c.parent is None), None)
-        return {
-            "parent_category": root_cat.name if root_cat else None,
-            "children_category": None
-        }
+            for rel in relations
+        ]
 
 
 class SubCategoryTinySerializer(serializers.Serializer):

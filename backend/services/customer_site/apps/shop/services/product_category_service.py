@@ -106,11 +106,7 @@ class ShopCategoryService:
                     } 
                     for child in category.get_children().order_by('order') if child.is_active
                 ],
-                "products": ProductMinimalSerializer(
-                    products_queryset, 
-                    many=True, 
-                    context={'request': self.request}
-                ).data
+                "products": products_queryset
             }
         return data
     
@@ -153,7 +149,7 @@ class ShopCategoryService:
                     } 
                     for child in category.get_children().order_by('order') if child.is_active
                 ],
-                "products": products_queryset 
+                "products": products_queryset
             }
             result_list.append(category_data)
             
