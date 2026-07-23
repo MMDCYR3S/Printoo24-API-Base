@@ -25,9 +25,8 @@ class ShopProductDetailService:
         """
         try:
             
-            data = self._product_service.get_product_detail_by_slug(slug)
-            print(data)
-            
+            data = self._product_service.get_product_detail_by_slug(slug)    
+                    
             if not data or 'product' not in data:
                 return None
                 

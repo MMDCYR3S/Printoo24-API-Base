@@ -27,6 +27,7 @@ from .views import (
     ProductSelectorViewSet,
     ExpenseViewSet,
     CombinedDashboardStatsView,
+    ProductExportImportViewSet,
 )
 
 router = DefaultRouter()
@@ -51,6 +52,7 @@ router.register(r'articles', ArticleViewSet, basename='dashboard-article')
 router.register(r'tutorials', TutorialViewSet, basename='dashboard-tutorial')
 router.register(r'products-minimal', ProductSelectorViewSet, basename='dashboard-product-minimal')
 router.register(r'expenses', ExpenseViewSet, basename='expense')
+router.register(r'products-export-import', ProductExportImportViewSet, basename='products-export-import')
 
 app_name = "dashboard"
 

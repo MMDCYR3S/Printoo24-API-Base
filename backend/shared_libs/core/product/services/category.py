@@ -138,8 +138,6 @@ class ProductCategoryService:
         return Product.objects.filter(
             is_active=True,
             categories__id__in=category_ids
-        ).select_related(
-            'pricing_config'
         ).distinct()
 
     # ===== UPSERT METHOD ===== #

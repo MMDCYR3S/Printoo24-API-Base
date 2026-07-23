@@ -120,14 +120,14 @@ class ProductService:
                 )
             )
 
-        if relations_to_create:
-            ProductCategoryRelation.objects.bulk_create(relations_to_create)
-
         primary_relations = ProductCategoryRelation.objects.filter(product=product, is_primary=True)
         if primary_relations.count() > 1:
             # ===== نگهداری یک دسته‌بندی اصلی و باقی آن‌ها، عادی شوند. ===== #
             first = primary_relations.first()
             ProductCategoryRelation.objects.filter(product=product, is_primary=True).exclude(pk=first.pk).update(is_primary=False)
+
+        if relations_to_create:
+            ProductCategoryRelation.objects.bulk_create(relations_to_create)
 
     # ===== ساخت بخش مربوط به محصولات ===== #
     def delete_product(self, product_id: int):

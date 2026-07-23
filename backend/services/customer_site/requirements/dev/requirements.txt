@@ -30,3 +30,6 @@ drf_yasg
 
 # Production Server
 gunicorn
+
+# Excel Handling
+openpyxl>=3.1.0

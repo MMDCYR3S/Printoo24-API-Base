@@ -13,3 +13,4 @@ from .staff_view import *
 from .site_media_views import *
 from .content_views import *
 from .expense_views import *
+from .product_export_import_views import *
