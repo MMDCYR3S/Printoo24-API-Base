@@ -1,0 +1,36 @@
+# Django & DRF
+python-slugify
+django-mptt
+Pillow
+Django>=5.2
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers
+django-environ
+django-extensions
+django-filter
+markdown
+
+# Database & Cache
+psycopg2-binary
+redis
+django-redis
+
+# Celery (حتما نسخه‌ها را مشخص کنید تا سراغ قدیمی‌ها نرود)
+celery>=5.3.0
+django-celery-beat>=2.5.0
+django-celery-results>=2.5.0
+
+# Workflow Management
+django-fsm
+
+# API Documentation
+drf-spectacular
+drf_yasg
+
+# Production Server
+gunicorn
+
+# Excel Handling
+openpyxl>=3.1.0
+requests

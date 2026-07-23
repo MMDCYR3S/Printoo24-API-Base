@@ -21,8 +21,7 @@ $PROJECT_NAME = "printoo"
 
 # ===== فایل‌های مربوطه ===== #
  $INFRA_FILE = "docker-compose.infra.yml"
- $ADMIN_FILE = "docker-compose.admin.yml"
- $CUSTOMER_FILE = "docker-compose.customer.yml"
+ $MAIN_FILE = "docker-compose.yml"
 
 # ===== شروع پروسه دپلوی ===== #
 Write-Host "Starting Deployment Process..." -ForegroundColor Green
@@ -76,8 +75,7 @@ if (-not $ready) {
 Write-Host "✅ Database is UP and READY." -ForegroundColor Green
 
 Write-Host "🟢 [2/4] Starting Backend Services..." -ForegroundColor Cyan
-& $DC_CMD -f $ADMIN_FILE -p $PROJECT_NAME up -d
-& $DC_CMD -f $CUSTOMER_FILE -p $PROJECT_NAME up -d
+& $DC_CMD -f $MAIN_FILE -p $PROJECT_NAME up -d
 
 Start-Sleep -Seconds 5
 
@@ -86,17 +84,9 @@ Start-Sleep -Seconds 5
 # --------------------------------------
 Write-Host "🟢 [3/4] Running Migrations..." -ForegroundColor Cyan
 
-# Admin Site Migrations
-Write-Host "   -> Making migrations for Admin Site..."
-& $DC_CMD -f $ADMIN_FILE -p $PROJECT_NAME exec -T admin_site python manage.py makemigrations
-Write-Host "   -> Migrating Admin Site..."
-& $DC_CMD -f $ADMIN_FILE -p $PROJECT_NAME exec -T admin_site python manage.py migrate
-
-# Customer Site Migrations
-Write-Host "   -> Making migrations for Customer Site..."
-& $DC_CMD -f $CUSTOMER_FILE -p $PROJECT_NAME exec -T customer_site python manage.py makemigrations
-Write-Host "   -> Migrating Customer Site..."
-& $DC_CMD -f $CUSTOMER_FILE -p $PROJECT_NAME exec -T customer_site python manage.py migrate
+# Backend Migrations
+Write-Host "   -> Running migrations..."
+& $DC_CMD -f $MAIN_FILE -p $PROJECT_NAME exec -T backend python manage.py migrate
 
 # --------------------------------------
 # 4. Superuser Creation (Idempotent)
@@ -122,9 +112,8 @@ else:
 "@
 
 # اجرای اسکریپت پایتون
-& $DC_CMD -f $ADMIN_FILE -p $PROJECT_NAME exec -T admin_site python manage.py shell -c $pythonScript
+& $DC_CMD -f $MAIN_FILE -p $PROJECT_NAME exec -T backend python manage.py shell -c $pythonScript
 
 Write-Host "🎉 Deployment Finished Successfully!" -ForegroundColor Green
-Write-Host "   Admin Panel: http://localhost:8010" -ForegroundColor White
-Write-Host "   Customer Site: http://localhost:9010" -ForegroundColor White
+Write-Host "   Backend: http://localhost:9010" -ForegroundColor White
 Write-Host "   Frontend: http://localhost" -ForegroundColor White

@@ -1,38 +1,32 @@
 version: '3.8'
 
 services:
-  # ====== Customer Backend (Production) ====== #
-  customer_site:
+  # ====== Backend (Production) ====== #
+  backend:
     build:
       context: .
-      # حتماً داکرفایل پروداکشن که در ادامه می‌گذارم را در این مسیر بسازید
-      dockerfile: backend/services/customer_site/dockerfiles/prod/Dockerfile
-    container_name: printoo_customer_site
-    # در پروداکشن command را حذف می‌کنیم تا از CMD داخل داکرفایل (Gunicorn) استفاده شود
+      dockerfile: backend/dockerfiles/prod/Dockerfile
+    container_name: printoo_backend
     volumes:
-      - ./backend/services/customer_site/media:/app/media
+      - ./backend/media:/app/media
     ports:
       - "9010:9010"
-    environment:
-      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
     env_file:
       - ./env/.env.prod
     networks:
       - shared_data_net
-      - customer_net
+      - backend_net
     restart: always
 
   # ====== Celery Workers ====== #
-  celery_worker_customer:
+  celery_worker:
     build:
       context: .
-      dockerfile: backend/services/customer_site/dockerfiles/prod/Dockerfile
-    container_name: printoo_celery_customer
-    command: celery -A customer_site.celery worker -l info
+      dockerfile: backend/dockerfiles/prod/Dockerfile
+    container_name: printoo_celery
+    command: celery -A backend.celery worker -l info
     volumes:
-      - ./backend/services/customer_site/media:/app/media
-    environment:
-      - PYTHONPATH=/app/shared_libs:$PYTHONPATH
+      - ./backend/media:/app/media
     env_file:
       - ./env/.env.prod
     networks:
@@ -46,13 +40,13 @@ services:
       dockerfile: Dockerfile.prod
     container_name: printoo_frontend
     ports:
-      - "80:80" # پورت استاندارد وب
+      - "80:80"
     restart: always
     networks: 
-      - customer_net
+      - backend_net
 
 networks:
-  customer_net:
+  backend_net:
     driver: bridge
   shared_data_net:
     external: true

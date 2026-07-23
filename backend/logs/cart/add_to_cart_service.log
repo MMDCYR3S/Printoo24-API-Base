@@ -1,0 +1,304 @@
+INFO 2025-11-29 14:37:12,811 add_to_cart_service 517 139762210961088 Adding product khrt-wyzyt to cart for user 1
+ERROR 2025-11-29 14:37:12,817 add_to_cart_service 517 139762210961088 Add to cart failed: محصولی با اسلاگ 'khrt-wyzyt' یافت نشد.
+INFO 2025-11-29 14:37:46,929 add_to_cart_service 517 139762210961088 Adding product khrt-wyzyt-rzn to cart for user 1
+ERROR 2025-11-29 14:37:46,934 add_to_cart_service 517 139762210961088 Add to cart failed: محصولی با اسلاگ 'khrt-wyzyt-rzn' یافت نشد.
+INFO 2025-11-29 14:38:01,078 add_to_cart_service 517 139762210961088 Adding product khrt-wyzyt-glsh-brq to cart for user 1
+ERROR 2025-11-29 14:38:01,099 add_to_cart_service 517 139762210961088 Add to cart failed: [ErrorDetail(string='یکی از ویژگی\u200cهای انتخاب شده برای محصول نامعتبر است.', code='invalid')]
+INFO 2025-11-29 14:39:26,144 add_to_cart_service 517 139762085611200 Adding product khrt-wyzyt-glsh-brq to cart for user 1
+ERROR 2025-11-29 14:39:26,166 add_to_cart_service 517 139762085611200 Add to cart failed: [ErrorDetail(string='یکی از ویژگی\u200cهای انتخاب شده برای محصول نامعتبر است.', code='invalid')]
+INFO 2025-11-29 14:39:40,235 add_to_cart_service 517 139762085611200 Adding product khrt-wyzyt-glsh-brq to cart for user 1
+ERROR 2025-11-29 14:39:40,265 add_to_cart_service 517 139762085611200 Add to cart failed: [ErrorDetail(string='یکی از ویژگی\u200cهای انتخاب شده برای محصول نامعتبر است.', code='invalid')]
+INFO 2025-11-29 14:40:51,782 add_to_cart_service 517 139762094003904 Adding product khrt-wyzyt-glsh-brq to cart for user 1
+DEBUG 2025-11-29 14:40:51,807 add_to_cart_service 517 139762094003904 Validation successful for Product: کارت ویزیت گلاسه براق
+ERROR 2025-11-29 14:40:51,858 add_to_cart_service 517 139762094003904 Add to cart failed: Object of type ProductQuantity is not JSON serializable
+INFO 2025-11-29 14:40:56,908 add_to_cart_service 517 139762094003904 Adding product khrt-wyzyt-glsh-brq to cart for user 1
+DEBUG 2025-11-29 14:40:56,944 add_to_cart_service 517 139762094003904 Validation successful for Product: کارت ویزیت گلاسه براق
+ERROR 2025-11-29 14:40:56,946 add_to_cart_service 517 139762094003904 Add to cart failed: [ErrorDetail(string='فایل موقت 5a0abe43-5247-4c00-a344-d5ce616c076b.tif یافت نشد (شاید منقضی شده است).', code='invalid')]
+INFO 2025-11-29 14:41:16,399 add_to_cart_service 517 139762094003904 Adding product khrt-wyzyt-glsh-brq to cart for user 1
+DEBUG 2025-11-29 14:41:16,432 add_to_cart_service 517 139762094003904 Validation successful for Product: کارت ویزیت گلاسه براق
+ERROR 2025-11-29 14:41:16,458 add_to_cart_service 517 139762094003904 Add to cart failed: Object of type ProductQuantity is not JSON serializable
+INFO 2025-11-29 14:41:25,773 add_to_cart_service 517 139762094003904 Adding product khrt-wyzyt-glsh-brq to cart for user 1
+DEBUG 2025-11-29 14:41:25,795 add_to_cart_service 517 139762094003904 Validation successful for Product: کارت ویزیت گلاسه براق
+ERROR 2025-11-29 14:41:25,798 add_to_cart_service 517 139762094003904 Add to cart failed: [ErrorDetail(string='فایل موقت 7eefd348-2ae1-4bd1-8d53-f30b45739a0f.tif یافت نشد (شاید منقضی شده است).', code='invalid')]
+INFO 2025-11-29 14:41:34,881 add_to_cart_service 517 139762094003904 Adding product khrt-wyzyt-glsh-brq to cart for user 1
+DEBUG 2025-11-29 14:41:34,910 add_to_cart_service 517 139762094003904 Validation successful for Product: کارت ویزیت گلاسه براق
+ERROR 2025-11-29 14:41:34,932 add_to_cart_service 517 139762094003904 Add to cart failed: Object of type ProductQuantity is not JSON serializable
+INFO 2025-11-29 15:22:45,377 add_to_cart_service 546 140175272310464 Adding product khrt-wyzyt-glsh-brq to cart for user 1
+DEBUG 2025-11-29 15:22:45,419 add_to_cart_service 546 140175272310464 Validation successful for Product: کارت ویزیت گلاسه براق
+INFO 2025-11-29 15:22:45,462 add_to_cart_service 546 140175272310464 CartItem created successfully: 1
+INFO 2025-12-01 10:14:00,812 add_to_cart_service 157 140320939439808 Adding product khrt-wyzyt-glsh-brq to cart for user 6
+ERROR 2025-12-01 10:14:00,841 add_to_cart_service 157 140320939439808 Add to cart failed: [ErrorDetail(string='تنظیمات قیمت\u200cگذاری برای این محصول یافت نشد.', code='invalid')]
+INFO 2025-12-01 10:19:14,204 add_to_cart_service 157 140320909018816 Adding product glossy-business-card to cart for user 6
+ERROR 2025-12-01 10:19:14,211 add_to_cart_service 157 140320909018816 Add to cart failed: [ErrorDetail(string='حداقل سفارش برای این محصول 1000 عدد است.', code='invalid')]
+INFO 2025-12-01 10:19:21,236 add_to_cart_service 157 140320909018816 Adding product glossy-business-card to cart for user 6
+ERROR 2025-12-01 10:19:21,242 add_to_cart_service 157 140320909018816 Add to cart failed: [ErrorDetail(string='حداقل سفارش برای این محصول 1000 عدد است.', code='invalid')]
+INFO 2025-12-01 10:36:17,958 add_to_cart_service 281 139898481968832 Adding product large-format-banner to cart for user 6
+ERROR 2025-12-01 10:36:17,965 add_to_cart_service 281 139898481968832 Add to cart failed: [ErrorDetail(string='یکی از ویژگی\u200cهای انتخاب شده (جنس، سایز و...) نامعتبر است.', code='invalid')]
+INFO 2025-12-01 10:40:11,783 add_to_cart_service 281 139898462037696 Adding product large-format-banner to cart for user 6
+ERROR 2025-12-01 10:40:11,791 add_to_cart_service 281 139898462037696 Add to cart failed: [ErrorDetail(string='یکی از ویژگی\u200cهای انتخاب شده (جنس، سایز و...) نامعتبر است.', code='invalid')]
+INFO 2025-12-01 10:40:27,427 add_to_cart_service 281 139898462037696 Adding product large-format-banner to cart for user 6
+ERROR 2025-12-01 10:40:27,436 add_to_cart_service 281 139898462037696 Add to cart failed: [ErrorDetail(string='یکی از ویژگی\u200cهای انتخاب شده (جنس، سایز و...) نامعتبر است.', code='invalid')]
+INFO 2025-12-01 10:40:42,582 add_to_cart_service 281 139898462037696 Adding product glossy-business-card to cart for user 6
+ERROR 2025-12-01 10:40:42,588 add_to_cart_service 281 139898462037696 Add to cart failed: [ErrorDetail(string='حداقل سفارش برای این محصول 1000 عدد است.', code='invalid')]
+INFO 2025-12-01 10:41:38,202 add_to_cart_service 281 139898462037696 Adding product glossy-business-card to cart for user 6
+ERROR 2025-12-01 10:41:38,210 add_to_cart_service 281 139898462037696 Add to cart failed: [ErrorDetail(string='باید یک سایز استاندارد انتخاب کنید.', code='invalid')]
+INFO 2025-12-01 10:42:25,116 add_to_cart_service 281 139898462037696 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:42:25,126 add_to_cart_service 281 139898462037696 Validation successful for Product: کارت ویزیت گلاسه
+ERROR 2025-12-01 10:42:25,150 add_to_cart_service 281 139898462037696 Add to cart failed: 'Material' object has no attribute 'waste_percentage'
+INFO 2025-12-01 10:43:46,241 add_to_cart_service 292 139673007552192 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:43:46,253 add_to_cart_service 292 139673007552192 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 10:43:46,278 add_to_cart_service 292 139673007552192 CartItem created successfully: 2
+INFO 2025-12-01 10:44:04,442 add_to_cart_service 292 139673007552192 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:44:04,455 add_to_cart_service 292 139673007552192 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 10:44:04,471 add_to_cart_service 292 139673007552192 CartItem created successfully: 3
+INFO 2025-12-01 10:46:51,211 add_to_cart_service 303 139621360105152 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:46:51,222 add_to_cart_service 303 139621360105152 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 10:46:51,236 add_to_cart_service 303 139621360105152 CartItem created successfully: 4
+INFO 2025-12-01 10:47:18,264 add_to_cart_service 303 139621360105152 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:47:18,274 add_to_cart_service 303 139621360105152 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 10:47:18,285 add_to_cart_service 303 139621360105152 CartItem created successfully: 5
+INFO 2025-12-01 10:47:25,587 add_to_cart_service 303 139621360105152 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:47:25,597 add_to_cart_service 303 139621360105152 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 10:47:25,612 add_to_cart_service 303 139621360105152 CartItem created successfully: 6
+INFO 2025-12-01 10:47:32,177 add_to_cart_service 303 139621360105152 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:47:32,186 add_to_cart_service 303 139621360105152 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 10:47:32,198 add_to_cart_service 303 139621360105152 CartItem created successfully: 7
+INFO 2025-12-01 10:47:33,435 add_to_cart_service 303 139621360105152 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:47:33,445 add_to_cart_service 303 139621360105152 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 10:47:33,457 add_to_cart_service 303 139621360105152 CartItem created successfully: 8
+INFO 2025-12-01 10:48:18,958 add_to_cart_service 303 139621360105152 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:48:18,971 add_to_cart_service 303 139621360105152 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 10:48:18,985 add_to_cart_service 303 139621360105152 CartItem created successfully: 9
+INFO 2025-12-01 10:50:12,425 add_to_cart_service 303 139621350663872 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:50:12,434 add_to_cart_service 303 139621350663872 Validation successful for Product: کارت ویزیت گلاسه
+ERROR 2025-12-01 10:50:12,490 add_to_cart_service 303 139621350663872 Add to cart failed: [ErrorDetail(string='فایل آپلود شده uuid-file-name-from-upload-endpoint.jpg منقضی یا حذف شده است. لطفاً مجدداً آپلود کنید.', code='invalid')]
+INFO 2025-12-01 10:53:22,383 add_to_cart_service 303 139620993976000 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:53:22,392 add_to_cart_service 303 139620993976000 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 10:53:22,453 add_to_cart_service 303 139620993976000 CartItem created successfully: 10
+INFO 2025-12-01 10:55:26,362 add_to_cart_service 303 139620975593152 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 10:55:26,370 add_to_cart_service 303 139620975593152 Validation successful for Product: کارت ویزیت گلاسه
+ERROR 2025-12-01 10:55:26,374 add_to_cart_service 303 139620975593152 Add to cart failed: [ErrorDetail(string='فایل آپلود شده bb4ff417-5330-48a6-ab15-1976f977e772.tif منقضی یا حذف شده است. لطفاً مجدداً آپلود کنید.', code='invalid')]
+INFO 2025-12-01 10:56:50,212 add_to_cart_service 315 140324634621632 Adding product glossy-business-card to cart for user 6
+ERROR 2025-12-01 10:56:50,222 add_to_cart_service 315 140324634621632 Add to cart failed: [ErrorDetail(string='خدمات طراحی برای این محصول ارائه نمی\u200cشود. لطفاً فایل آپلود کنید.', code='invalid')]
+INFO 2025-12-01 11:01:05,123 add_to_cart_service 315 140324626228928 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 11:01:05,132 add_to_cart_service 315 140324626228928 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 11:01:05,146 add_to_cart_service 315 140324626228928 CartItem created successfully: 11
+INFO 2025-12-01 11:05:24,985 add_to_cart_service 339 140493720819392 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 11:05:24,998 add_to_cart_service 339 140493720819392 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 11:05:25,009 add_to_cart_service 339 140493720819392 CartItem created successfully: 12
+INFO 2025-12-01 11:05:50,407 add_to_cart_service 342 140072842163904 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 11:05:50,420 add_to_cart_service 342 140072842163904 Validation successful for Product: کارت ویزیت گلاسه
+ERROR 2025-12-01 11:05:50,421 add_to_cart_service 342 140072842163904 Add to cart failed: [ErrorDetail(string='لطفاً فایل های طراحی خود را آپلود کنید.', code='invalid')]
+INFO 2025-12-01 11:06:23,391 add_to_cart_service 342 140072842163904 Adding product glossy-business-card to cart for user 6
+DEBUG 2025-12-01 11:06:23,403 add_to_cart_service 342 140072842163904 Validation successful for Product: کارت ویزیت گلاسه
+INFO 2025-12-01 11:06:23,451 add_to_cart_service 342 140072842163904 CartItem created successfully: 13
+INFO 2025-12-02 16:34:20,498 add_to_cart_service 615 140662827816640 Adding product business-card-123 to cart for user 2
+ERROR 2025-12-02 16:34:20,532 add_to_cart_service 615 140662827816640 Add to cart failed: محصول مورد نظر یافت نشد.
+INFO 2025-12-02 16:34:31,942 add_to_cart_service 615 140662827816640 Adding product trkht-tblygty-khd-6158 to cart for user 2
+ERROR 2025-12-02 16:34:31,956 add_to_cart_service 615 140662827816640 Add to cart failed: [ErrorDetail(string='جنس انتخاب شده برای این محصول نامعتبر است.', code='invalid')]
+INFO 2025-12-02 16:35:01,899 add_to_cart_service 615 140662827816640 Adding product trkht-tblygty-khd-6158 to cart for user 2
+ERROR 2025-12-02 16:35:01,908 add_to_cart_service 615 140662827816640 Add to cart failed: [ErrorDetail(string='لطفاً یکی از سایزهای استاندارد را انتخاب کنید.', code='invalid')]
+INFO 2025-12-02 16:36:21,798 add_to_cart_service 615 140662809982656 Adding product trkht-tblygty-khd-6158 to cart for user 2
+ERROR 2025-12-02 16:36:21,817 add_to_cart_service 615 140662809982656 Add to cart failed: [ErrorDetail(string='برخی از گزینه\u200cهای انتخاب شده نامعتبر هستند.', code='invalid')]
+INFO 2025-12-02 16:36:40,897 add_to_cart_service 615 140662809982656 Adding product trkht-tblygty-khd-6158 to cart for user 2
+ERROR 2025-12-02 16:36:40,917 add_to_cart_service 615 140662809982656 Add to cart failed: CartDomainService.add_complex_item() got an unexpected keyword argument 'uploaded_files_map'
+INFO 2025-12-02 16:37:40,715 add_to_cart_service 636 139911236851392 Adding product trkht-tblygty-khd-6158 to cart for user 2
+ERROR 2025-12-02 16:37:40,740 add_to_cart_service 636 139911236851392 Add to cart failed: 'Product' object has no attribute 'base_price'
+INFO 2025-12-02 16:39:03,503 add_to_cart_service 639 140526565193408 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-02 16:39:03,541 add_to_cart_service 639 140526565193408 CartItem created successfully: 1
+INFO 2025-12-02 17:54:50,852 add_to_cart_service 857 140324549859008 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-02 17:54:50,937 add_to_cart_service 857 140324549859008 CartItem created successfully: 2
+INFO 2025-12-09 16:14:54,706 add_to_cart_service 26 140340777617088 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:14:54,795 add_to_cart_service 26 140340777617088 CartItem created successfully: 5
+INFO 2025-12-09 16:14:56,487 add_to_cart_service 26 140340777617088 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:14:56,510 add_to_cart_service 26 140340777617088 CartItem created successfully: 6
+INFO 2025-12-09 16:14:57,388 add_to_cart_service 26 140340777617088 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:14:57,427 add_to_cart_service 26 140340777617088 CartItem created successfully: 7
+INFO 2025-12-09 16:18:53,347 add_to_cart_service 26 140340378977984 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:18:53,372 add_to_cart_service 26 140340378977984 CartItem created successfully: 8
+INFO 2025-12-09 16:24:50,467 add_to_cart_service 105 140143349634752 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:24:50,498 add_to_cart_service 105 140143349634752 CartItem created successfully: 9
+INFO 2025-12-09 16:29:54,705 add_to_cart_service 105 140142962534080 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:29:54,725 add_to_cart_service 105 140142962534080 CartItem created successfully: 10
+INFO 2025-12-09 16:30:15,643 add_to_cart_service 105 140142962534080 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:30:15,728 add_to_cart_service 105 140142962534080 CartItem created successfully: 11
+INFO 2025-12-09 16:31:45,941 add_to_cart_service 105 140142970926784 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:31:45,960 add_to_cart_service 105 140142970926784 CartItem created successfully: 12
+INFO 2025-12-09 16:33:41,182 add_to_cart_service 186 140619752314560 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:33:41,213 add_to_cart_service 186 140619752314560 CartItem created successfully: 13
+INFO 2025-12-09 16:34:35,341 add_to_cart_service 186 140619752314560 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:34:35,364 add_to_cart_service 186 140619752314560 CartItem created successfully: 14
+INFO 2025-12-09 16:43:38,016 add_to_cart_service 199 140540332119744 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:43:38,038 add_to_cart_service 199 140540332119744 CartItem created successfully: 15
+INFO 2025-12-09 16:46:46,667 add_to_cart_service 199 140540235470528 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:46:46,690 add_to_cart_service 199 140540235470528 CartItem created successfully: 16
+INFO 2025-12-09 16:47:29,555 add_to_cart_service 199 140540235470528 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:47:29,576 add_to_cart_service 199 140540235470528 CartItem created successfully: 17
+INFO 2025-12-09 16:49:00,553 add_to_cart_service 199 140540244911808 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:49:00,574 add_to_cart_service 199 140540244911808 CartItem created successfully: 18
+INFO 2025-12-09 16:49:15,315 add_to_cart_service 199 140540244911808 Adding product trkht-tblygty-khd-6158 to cart for user 2
+INFO 2025-12-09 16:49:15,341 add_to_cart_service 199 140540244911808 CartItem created successfully: 19
+INFO 2025-12-15 19:22:23,825 add_to_cart_service 7 140514542393024 Adding product trkht-tblygty-khd-6158 to cart for user 1
+ERROR 2025-12-15 19:22:23,853 add_to_cart_service 7 140514542393024 Add to cart failed: محصول مورد نظر یافت نشد.
+INFO 2025-12-15 19:22:53,054 add_to_cart_service 7 140514542393024 Adding product stykhr-shyshhy-khd-6514 to cart for user 1
+ERROR 2025-12-15 19:22:53,081 add_to_cart_service 7 140514542393024 Add to cart failed: [ErrorDetail(string='سایز انتخاب شده نامعتبر است.', code='invalid')]
+INFO 2025-12-15 19:23:42,061 add_to_cart_service 7 140514542393024 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 1
+ERROR 2025-12-15 19:23:42,070 add_to_cart_service 7 140514542393024 Add to cart failed: [ErrorDetail(string='سایز انتخاب شده نامعتبر است.', code='invalid')]
+INFO 2025-12-15 19:24:31,056 add_to_cart_service 7 140514542393024 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 1
+ERROR 2025-12-15 19:24:31,087 add_to_cart_service 7 140514542393024 Add to cart failed: [ErrorDetail(string='حداقل تعداد سفارش برای این محصول 1000 عدد است.', code='invalid')]
+INFO 2025-12-15 19:24:34,266 add_to_cart_service 7 140514542393024 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 1
+ERROR 2025-12-15 19:24:34,280 add_to_cart_service 7 140514542393024 Add to cart failed: [ErrorDetail(string='برخی از گزینه\u200cهای انتخاب شده نامعتبر هستند.', code='invalid')]
+INFO 2025-12-15 19:24:37,653 add_to_cart_service 7 140514542393024 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 1
+ERROR 2025-12-15 19:24:37,669 add_to_cart_service 7 140514542393024 Add to cart failed: [ErrorDetail(string='برخی از گزینه\u200cهای انتخاب شده نامعتبر هستند.', code='invalid')]
+INFO 2025-12-15 19:26:00,700 add_to_cart_service 7 140514542393024 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 1
+ERROR 2025-12-15 19:26:00,716 add_to_cart_service 7 140514542393024 Add to cart failed: [ErrorDetail(string='برخی از گزینه\u200cهای انتخاب شده نامعتبر هستند.', code='invalid')]
+INFO 2025-12-15 19:26:12,044 add_to_cart_service 7 140514542393024 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 1
+INFO 2025-12-15 19:26:12,078 add_to_cart_service 7 140514542393024 CartItem created successfully: 1
+INFO 2025-12-16 07:56:00,702 add_to_cart_service 15 140007343912640 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 2
+INFO 2025-12-16 07:56:00,768 add_to_cart_service 15 140007343912640 CartItem created successfully: 2
+INFO 2025-12-16 11:57:46,821 add_to_cart_service 7 139813420439232 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 2
+INFO 2025-12-16 11:57:46,865 add_to_cart_service 7 139813420439232 CartItem created successfully: 3
+INFO 2025-12-16 11:57:50,170 add_to_cart_service 7 139813420439232 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 2
+INFO 2025-12-16 11:57:50,192 add_to_cart_service 7 139813420439232 CartItem created successfully: 4
+INFO 2025-12-16 11:57:52,727 add_to_cart_service 7 139813420439232 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 2
+INFO 2025-12-16 11:57:52,749 add_to_cart_service 7 139813420439232 CartItem created successfully: 5
+INFO 2025-12-16 11:57:57,387 add_to_cart_service 7 139813420439232 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 2
+INFO 2025-12-16 11:57:57,407 add_to_cart_service 7 139813420439232 CartItem created successfully: 6
+INFO 2025-12-16 12:17:21,674 add_to_cart_service 100 140332983555776 Adding product khrt-wyzyt-lkhchry-khd-4891 to cart for user 2
+INFO 2025-12-16 12:17:21,698 add_to_cart_service 100 140332983555776 CartItem created successfully: 7
+INFO 2025-12-23 20:49:21,234 add_to_cart_service 1126 139715712906944 Adding product ID 37 to cart for user 2
+ERROR 2025-12-23 20:49:21,293 add_to_cart_service 1126 139715712906944 Add to cart failed: 'NoneType' object has no attribute 'label'
+INFO 2025-12-23 20:54:17,759 add_to_cart_service 1143 140401901041344 Adding product ID 37 to cart for user 2
+ERROR 2025-12-23 20:54:17,809 add_to_cart_service 1143 140401901041344 Add to cart failed: آیتم در سبد خرید پیدا نشد.
+INFO 2025-12-23 20:56:09,864 add_to_cart_service 1150 140174936766144 Adding product ID 37 to cart for user 2
+INFO 2025-12-23 20:56:09,900 add_to_cart_service 1150 140174936766144 CartItem created/updated successfully: 15
+INFO 2025-12-24 06:46:32,915 add_to_cart_service 7 140251297212096 Adding product ID 40 to cart for user 2
+INFO 2025-12-24 06:46:32,963 add_to_cart_service 7 140251297212096 CartItem created/updated successfully: 16
+INFO 2025-12-24 06:54:08,152 add_to_cart_service 7 140251297212096 Adding product ID 40 to cart for user 2
+INFO 2025-12-24 06:54:08,175 add_to_cart_service 7 140251297212096 CartItem created/updated successfully: 17
+INFO 2025-12-25 06:59:48,613 add_to_cart_service 102 140573163910848 Adding product ID 40 to cart for user 2
+ERROR 2025-12-25 06:59:48,692 add_to_cart_service 102 140573163910848 Add to cart failed: column core_cartitem.name does not exist
+LINE 1: ...artitem"."cart_id", "core_cartitem"."product_id", "core_cart...
+                                                             ^
+
+INFO 2025-12-25 07:00:25,300 add_to_cart_service 102 140573163910848 Adding product ID 40 to cart for user 2
+INFO 2025-12-25 07:00:25,345 add_to_cart_service 102 140573163910848 CartItem created/updated successfully: 18
+INFO 2025-12-25 07:14:00,062 add_to_cart_service 202 140677907216064 Adding product ID 40 to cart for user 2
+INFO 2025-12-25 07:14:00,127 add_to_cart_service 202 140677907216064 CartItem created/updated successfully: 19
+INFO 2025-12-25 07:16:32,181 add_to_cart_service 209 140152139675328 Adding product ID 40 to cart for user 2
+ERROR 2025-12-25 07:16:32,217 add_to_cart_service 209 140152139675328 Add to cart failed: Object of type Decimal is not JSON serializable
+INFO 2025-12-25 07:17:04,171 add_to_cart_service 212 140108208535232 Adding product ID 40 to cart for user 2
+INFO 2025-12-25 07:17:04,205 add_to_cart_service 212 140108208535232 CartItem created/updated successfully: 20
+INFO 2025-12-25 07:17:49,874 add_to_cart_service 212 140108208535232 Adding product ID 40 to cart for user 2
+INFO 2025-12-25 07:17:49,905 add_to_cart_service 212 140108208535232 CartItem created/updated successfully: 21
+INFO 2025-12-27 07:14:49,479 add_to_cart_service 8 140644843689664 Start adding product 39 for user 1
+INFO 2025-12-27 07:15:37,425 add_to_cart_service 80 140340605482688 Start adding product 39 for user 1
+INFO 2025-12-27 07:15:37,459 add_to_cart_service 80 140340605482688 Creating new cart item
+INFO 2025-12-31 17:35:47,126 add_to_cart_service 108 140327647180480 Start adding product 29 for user
+INFO 2025-12-31 17:35:47,202 add_to_cart_service 108 140327647180480 Creating new cart item
+INFO 2025-12-31 19:02:17,930 add_to_cart_service 111 139787410220736 Start adding product 29 for user
+INFO 2025-12-31 19:02:17,995 add_to_cart_service 111 139787410220736 Creating new cart item
+INFO 2025-12-31 19:02:21,028 add_to_cart_service 111 139787410220736 Start adding product 29 for user
+INFO 2025-12-31 19:02:21,086 add_to_cart_service 111 139787410220736 Merging with existing item 2
+INFO 2025-12-31 19:02:22,374 add_to_cart_service 111 139787410220736 Start adding product 29 for user
+INFO 2025-12-31 19:02:22,418 add_to_cart_service 111 139787410220736 Merging with existing item 2
+INFO 2025-12-31 19:02:23,556 add_to_cart_service 111 139787410220736 Start adding product 29 for user
+INFO 2025-12-31 19:02:23,598 add_to_cart_service 111 139787410220736 Merging with existing item 2
+INFO 2025-12-31 19:02:33,729 add_to_cart_service 111 139787410220736 Start adding product 29 for user
+INFO 2025-12-31 19:02:33,772 add_to_cart_service 111 139787410220736 Creating new cart item
+INFO 2025-12-31 19:02:36,282 add_to_cart_service 111 139787410220736 Start adding product 29 for user
+INFO 2025-12-31 19:02:36,321 add_to_cart_service 111 139787410220736 Merging with existing item 3
+INFO 2025-12-31 19:28:12,769 add_to_cart_service 340 140622304364224 Start adding product 29 for user
+INFO 2025-12-31 19:28:21,304 add_to_cart_service 340 140622304364224 Start adding product 29 for user
+INFO 2025-12-31 19:28:21,366 add_to_cart_service 340 140622304364224 Creating new cart item
+INFO 2025-12-31 20:29:09,630 add_to_cart_service 437 140680510830272 Start adding product 29 for user
+INFO 2025-12-31 20:29:09,690 add_to_cart_service 437 140680510830272 Creating new cart item
+INFO 2025-12-31 20:33:22,722 add_to_cart_service 437 140680480409280 Start adding product 29 for user
+INFO 2025-12-31 20:33:22,772 add_to_cart_service 437 140680480409280 Creating new cart item
+INFO 2026-01-08 06:38:02,779 add_to_cart_service 95 139645913564864 Start adding product 29 for user
+INFO 2026-01-08 06:38:02,837 add_to_cart_service 95 139645913564864 Creating new cart item
+INFO 2026-02-09 06:24:12,645 add_to_cart_service 7 140651354109632 Start adding product 9 for user
+INFO 2026-02-09 06:24:12,710 add_to_cart_service 7 140651354109632 Creating new cart item
+INFO 2026-02-10 14:07:11,574 add_to_cart_service 352 126708797826752 Start adding product 27 for user
+INFO 2026-02-10 14:07:11,618 add_to_cart_service 352 126708797826752 Creating new cart item
+INFO 2026-02-10 14:08:00,844 add_to_cart_service 352 126708818806464 Start adding product 7 for user
+INFO 2026-02-10 14:08:00,875 add_to_cart_service 352 126708818806464 Creating new cart item
+INFO 2026-02-10 14:09:05,038 add_to_cart_service 352 126708827199168 Start adding product 105 for user
+INFO 2026-02-10 14:09:52,012 add_to_cart_service 352 126708827199168 Start adding product 7 for user
+INFO 2026-02-10 14:09:52,058 add_to_cart_service 352 126708827199168 Merging with existing item 3
+INFO 2026-02-10 14:41:20,162 add_to_cart_service 352 126708446394048 Start adding product 11 for user
+INFO 2026-02-10 14:41:20,251 add_to_cart_service 352 126708446394048 Creating new cart item
+INFO 2026-02-19 14:09:04,189 add_to_cart_service 591 124649413277376 Start adding product 39 for user
+INFO 2026-02-19 14:09:12,735 add_to_cart_service 591 124649413277376 Start adding product 39 for user
+INFO 2026-02-19 14:11:13,215 add_to_cart_service 591 124649874646720 Start adding product 39 for user
+INFO 2026-02-19 14:12:05,789 add_to_cart_service 591 124649874646720 Start adding product 39 for user
+INFO 2026-02-19 14:12:21,330 add_to_cart_service 591 124649874646720 Start adding product 39 for user
+INFO 2026-02-19 14:24:52,299 add_to_cart_service 805 129516464936640 Start adding product 39 for user
+INFO 2026-02-19 14:25:03,262 add_to_cart_service 805 129516464936640 Start adding product 39 for user
+INFO 2026-02-19 14:25:08,193 add_to_cart_service 805 129516464936640 Start adding product 39 for user
+INFO 2026-02-19 14:25:23,375 add_to_cart_service 805 129516464936640 Start adding product 39 for user
+INFO 2026-02-19 14:25:28,956 add_to_cart_service 805 129516464936640 Start adding product 39 for user
+INFO 2026-02-20 13:48:55,314 add_to_cart_service 7 137116275173056 Start adding product 16 for user
+INFO 2026-02-20 13:48:55,382 add_to_cart_service 7 137116275173056 Creating new cart item
+INFO 2026-02-21 13:28:35,786 add_to_cart_service 382 126666715141824 Start adding product 25 for user
+INFO 2026-02-21 13:28:35,867 add_to_cart_service 382 126666715141824 Creating new cart item
+INFO 2026-02-26 12:28:42,317 add_to_cart_service 267 130864365172416 Start adding product 49 to cart
+INFO 2026-02-26 12:28:49,520 add_to_cart_service 267 130864365172416 Start adding product 49 to cart
+INFO 2026-02-26 12:29:07,153 add_to_cart_service 267 130864365172416 Start adding product 49 to cart
+INFO 2026-02-26 12:57:02,058 add_to_cart_service 300 137592380057280 Start adding product 49 to cart
+INFO 2026-02-26 12:57:11,322 add_to_cart_service 300 137592380057280 Start adding product 49 to cart
+INFO 2026-02-26 12:57:18,471 add_to_cart_service 300 137592380057280 Start adding product 49 to cart
+INFO 2026-02-26 12:57:49,368 add_to_cart_service 300 137592380057280 Start adding product 49 to cart
+INFO 2026-02-26 13:13:33,115 add_to_cart_service 305 123604700227264 Start adding product 49 to cart
+INFO 2026-02-26 13:13:36,620 add_to_cart_service 305 123604700227264 Start adding product 49 to cart
+INFO 2026-02-26 13:13:40,770 add_to_cart_service 305 123604700227264 Start adding product 49 to cart
+INFO 2026-02-26 13:13:41,605 add_to_cart_service 305 123604700227264 Start adding product 49 to cart
+INFO 2026-03-01 12:34:16,977 add_to_cart_service 14 135361464366784 Start adding product 42 to cart
+INFO 2026-03-01 12:34:57,479 add_to_cart_service 14 135361464366784 Start adding product 42 to cart
+INFO 2026-03-01 12:34:57,513 add_to_cart_service 14 135361464366784 Creating new cart item
+INFO 2026-03-22 11:58:35,045 add_to_cart_service 95 137188033427136 Start adding product 47 to cart
+INFO 2026-03-22 11:58:41,983 add_to_cart_service 95 137188033427136 Start adding product 47 to cart
+INFO 2026-03-22 11:58:48,677 add_to_cart_service 95 137188033427136 Start adding product 47 to cart
+INFO 2026-03-22 11:59:12,183 add_to_cart_service 95 137188016641728 Start adding product 47 to cart
+INFO 2026-03-22 11:59:23,010 add_to_cart_service 95 137188016641728 Start adding product 47 to cart
+INFO 2026-03-22 11:59:23,033 add_to_cart_service 95 137188016641728 Creating new cart item
+INFO 2026-05-23 06:27:31,855 add_to_cart_service 7 137846323308224 Start adding product 37 to cart
+INFO 2026-05-23 06:27:31,910 add_to_cart_service 7 137846323308224 Creating new cart item
+INFO 2026-05-23 07:16:20,607 add_to_cart_service 7 137846314915520 Start adding product 37 to cart
+INFO 2026-05-23 07:16:20,645 add_to_cart_service 7 137846314915520 Creating new cart item
+INFO 2026-05-23 07:17:36,380 add_to_cart_service 7 137846328555200 Start adding product 37 to cart
+INFO 2026-05-23 07:17:36,403 add_to_cart_service 7 137846328555200 Creating new cart item
+INFO 2026-05-23 07:35:34,791 add_to_cart_service 7 137846314915520 Start adding product 37 to cart
+INFO 2026-05-23 07:35:34,852 add_to_cart_service 7 137846314915520 Merging with existing item 7
+INFO 2026-05-23 08:06:10,935 add_to_cart_service 54 139514185152192 Start adding product 37 to cart
+INFO 2026-05-23 08:06:10,964 add_to_cart_service 54 139514185152192 Merging with existing item 7
+INFO 2026-05-23 08:12:10,895 add_to_cart_service 54 139513825326784 Start adding product 37 to cart
+INFO 2026-05-23 08:12:11,026 add_to_cart_service 54 139513825326784 Creating new cart item
+INFO 2026-05-23 10:04:38,369 add_to_cart_service 54 139513825326784 Start adding product 37 to cart
+INFO 2026-05-23 10:04:38,477 add_to_cart_service 54 139513825326784 Creating new cart item
+INFO 2026-06-03 08:48:47,470 add_to_cart_service 7 135518654461632 Start adding product 33 to cart
+INFO 2026-06-03 08:48:47,521 add_to_cart_service 7 135518654461632 Creating new cart item
+INFO 2026-06-03 08:50:50,840 add_to_cart_service 7 135518247573184 Start adding product 37 to cart
+INFO 2026-06-03 08:50:50,878 add_to_cart_service 7 135518247573184 Creating new cart item
+INFO 2026-06-03 14:27:53,828 add_to_cart_service 7 135518297781952 Start adding product 37 to cart
+INFO 2026-06-03 14:27:53,883 add_to_cart_service 7 135518297781952 Creating new cart item
+INFO 2026-06-13 17:29:49,654 add_to_cart_service 7 134606078600896 Start adding product 3 to cart
+INFO 2026-06-13 17:29:49,682 add_to_cart_service 7 134606078600896 Creating new cart item
+INFO 2026-06-13 18:59:05,794 add_to_cart_service 91 129286626338496 Start adding product 2 to cart
+INFO 2026-06-13 18:59:05,820 add_to_cart_service 91 129286626338496 Creating new cart item
+INFO 2026-06-13 19:00:18,598 add_to_cart_service 91 129286854051520 Start adding product 3 to cart
+INFO 2026-06-13 19:00:18,625 add_to_cart_service 91 129286854051520 Creating new cart item
+INFO 2026-06-13 19:01:29,309 add_to_cart_service 91 129286854051520 Start adding product 3 to cart
+INFO 2026-06-13 19:01:29,328 add_to_cart_service 91 129286854051520 Creating new cart item
+INFO 2026-06-14 10:55:11,251 add_to_cart_service 7 125334125016768 Start adding product 38 to cart
+INFO 2026-06-14 10:55:11,293 add_to_cart_service 7 125334125016768 Creating new cart item
+INFO 2026-06-14 11:00:09,972 add_to_cart_service 7 125334475392704 Start adding product 38 to cart
+INFO 2026-06-14 11:00:09,997 add_to_cart_service 7 125334475392704 Creating new cart item
+INFO 2026-06-14 11:01:04,993 add_to_cart_service 7 125334518404800 Start adding product 38 to cart
+INFO 2026-06-14 11:01:05,036 add_to_cart_service 7 125334518404800 Creating new cart item
+INFO 2026-06-14 11:17:27,013 add_to_cart_service 7 125334518404800 Start adding product 37 to cart
+INFO 2026-06-14 11:17:27,053 add_to_cart_service 7 125334518404800 Creating new cart item
+INFO 2026-06-14 11:19:36,051 add_to_cart_service 7 125334475392704 Start adding product 37 to cart
+INFO 2026-06-14 11:19:36,081 add_to_cart_service 7 125334475392704 Creating new cart item
+INFO 2026-07-23 20:42:43,525 add_to_cart_service 7 130556966725312 Start adding product 4 to cart
+INFO 2026-07-23 20:42:43,582 add_to_cart_service 7 130556966725312 Creating new cart item

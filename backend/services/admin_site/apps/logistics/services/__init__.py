@@ -1,1 +1,0 @@
-from .warehouse_service import WarehouseAppService

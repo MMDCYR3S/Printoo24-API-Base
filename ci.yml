@@ -25,8 +25,5 @@ jobs:
     - name: Start Environment & Setup DB
       run: ./init_project.sh
 
-    - name: Run Tests (Admin Site)
-      run: docker-compose -f docker-compose.admin.yml exec -T admin_site python manage.py test
-
-    - name: Run Tests (Customer Site)
-      run: docker-compose -f docker-compose.customer.yml exec -T customer_site python manage.py test
+    - name: Run Tests
+      run: docker-compose -f docker-compose.yml exec -T backend python manage.py test

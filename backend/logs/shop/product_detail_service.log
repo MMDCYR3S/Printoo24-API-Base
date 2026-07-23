@@ -1,0 +1,929 @@
+DEBUG 2025-11-16 17:16:03,789 product_detail_service 150 140231386855104 ShopProductDetailService initialized
+INFO 2025-11-16 17:16:03,790 product_detail_service 150 140231386855104 Fetching product details for slug: khrt-wyzyt
+DEBUG 2025-11-16 17:16:03,834 product_detail_service 150 140231386855104 Product found - ID: 1, Name: کارت ویزیت
+DEBUG 2025-11-16 17:16:03,835 product_detail_service 150 140231386855104 Product attributes loaded - Quantities: 2, Sizes: 2, Materials: 2, Options: 4, Images: 2, Attachments: 2
+DEBUG 2025-11-16 17:16:03,836 product_detail_service 150 140231386855104 Grouping 4 options by type
+DEBUG 2025-11-16 17:16:03,837 product_detail_service 150 140231386855104 Options grouped successfully - Categories: ['تعداد برگ', 'تعداد وجه'], Distribution: [('تعداد برگ', 2), ('تعداد وجه', 2)]
+DEBUG 2025-11-16 17:16:03,838 product_detail_service 150 140231386855104 Options grouped into 2 categories
+INFO 2025-11-16 17:16:03,839 product_detail_service 150 140231386855104 Product details successfully prepared for slug: khrt-wyzyt - Product ID: 1
+DEBUG 2025-11-18 15:22:08,555 product_detail_service 58 140075992086208 ShopProductDetailService initialized
+INFO 2025-11-18 15:22:08,571 product_detail_service 58 140075992086208 Fetching product details for slug: khrt-wyzyt
+DEBUG 2025-11-18 15:22:08,634 product_detail_service 58 140075992086208 Product found - ID: 1, Name: کارت ویزیت
+DEBUG 2025-11-18 15:22:08,635 product_detail_service 58 140075992086208 Product attributes loaded - Quantities: 2, Sizes: 2, Materials: 2, Options: 4, Images: 2, Attachments: 2
+DEBUG 2025-11-18 15:22:08,636 product_detail_service 58 140075992086208 Grouping 4 options by type
+DEBUG 2025-11-18 15:22:08,637 product_detail_service 58 140075992086208 Options grouped successfully - Categories: ['تعداد برگ', 'تعداد وجه'], Distribution: [('تعداد برگ', 2), ('تعداد وجه', 2)]
+DEBUG 2025-11-18 15:22:08,638 product_detail_service 58 140075992086208 Options grouped into 2 categories
+INFO 2025-11-18 15:22:08,638 product_detail_service 58 140075992086208 Product details successfully prepared for slug: khrt-wyzyt - Product ID: 1
+DEBUG 2025-11-29 14:15:41,184 product_detail_service 498 139635891107520 ShopProductDetailService initialized
+INFO 2025-11-29 14:15:41,199 product_detail_service 498 139635891107520 Fetching product details for slug: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:15:41,225 product_detail_service 498 139635891107520 Product found - ID: 1, Name: کارت ویزیت گلاسه براق
+INFO 2025-11-29 14:15:41,225 product_detail_service 498 139635891107520 Product details successfully prepared for slug: khrt-wyzyt-glsh-brq - Product ID: 1
+DEBUG 2025-11-29 14:16:06,190 product_detail_service 498 139635891107520 ShopProductDetailService initialized
+INFO 2025-11-29 14:16:06,191 product_detail_service 498 139635891107520 Fetching product details for slug: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:16:06,211 product_detail_service 498 139635891107520 Product found - ID: 1, Name: کارت ویزیت گلاسه براق
+INFO 2025-11-29 14:16:06,212 product_detail_service 498 139635891107520 Product details successfully prepared for slug: khrt-wyzyt-glsh-brq - Product ID: 1
+DEBUG 2025-11-29 14:18:10,422 product_detail_service 498 139635853342400 ShopProductDetailService initialized
+INFO 2025-11-29 14:18:10,423 product_detail_service 498 139635853342400 Fetching product details for slug: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:18:10,450 product_detail_service 498 139635853342400 Product found - ID: 1, Name: کارت ویزیت گلاسه براق
+INFO 2025-11-29 14:18:10,451 product_detail_service 498 139635853342400 Product details successfully prepared for slug: khrt-wyzyt-glsh-brq - Product ID: 1
+DEBUG 2025-11-29 14:40:15,445 product_detail_service 517 139762111338176 ShopProductDetailService initialized
+INFO 2025-11-29 14:40:15,445 product_detail_service 517 139762111338176 Fetching product details for slug: khrt-wyzyt-glsh-brq
+DEBUG 2025-11-29 14:40:15,468 product_detail_service 517 139762111338176 Product found - ID: 1, Name: کارت ویزیت گلاسه براق
+INFO 2025-11-29 14:40:15,469 product_detail_service 517 139762111338176 Product details successfully prepared for slug: khrt-wyzyt-glsh-brq - Product ID: 1
+DEBUG 2025-12-01 10:34:32,390 product_detail_service 278 139858763839168 ShopProductDetailService initialized
+INFO 2025-12-01 10:34:32,408 product_detail_service 278 139858763839168 Fetching product details for slug: large-format-banner
+DEBUG 2025-12-01 10:34:32,468 product_detail_service 278 139858763839168 Product found - ID: 7, Name: چاپ بنر عریض
+INFO 2025-12-01 10:34:32,469 product_detail_service 278 139858763839168 Product details successfully prepared for slug: large-format-banner - Product ID: 7
+DEBUG 2025-12-01 10:36:08,441 product_detail_service 281 139898491410112 ShopProductDetailService initialized
+INFO 2025-12-01 10:36:08,442 product_detail_service 281 139898491410112 Fetching product details for slug: glossy-business-card
+DEBUG 2025-12-01 10:36:08,576 product_detail_service 281 139898491410112 Product found - ID: 6, Name: کارت ویزیت گلاسه
+INFO 2025-12-01 10:36:08,590 product_detail_service 281 139898491410112 Product details successfully prepared for slug: glossy-business-card - Product ID: 6
+DEBUG 2025-12-01 10:39:14,955 product_detail_service 281 139898491410112 ShopProductDetailService initialized
+INFO 2025-12-01 10:39:14,956 product_detail_service 281 139898491410112 Fetching product details for slug: glossy-business-card
+DEBUG 2025-12-01 10:39:15,005 product_detail_service 281 139898491410112 Product found - ID: 6, Name: کارت ویزیت گلاسه
+INFO 2025-12-01 10:39:15,006 product_detail_service 281 139898491410112 Product details successfully prepared for slug: glossy-business-card - Product ID: 6
+DEBUG 2025-12-01 13:00:35,153 product_detail_service 479 140318989084352 ShopProductDetailService initialized
+INFO 2025-12-01 13:00:35,161 product_detail_service 479 140318989084352 Fetching product details for slug: brchsb-mwl-mdl-480
+DEBUG 2025-12-01 13:00:35,213 product_detail_service 479 140318989084352 Product found - ID: 7, Name: برچسب اموال - مدل 480
+INFO 2025-12-01 13:00:35,216 product_detail_service 479 140318989084352 Product details successfully prepared for slug: brchsb-mwl-mdl-480 - Product ID: 7
+DEBUG 2025-12-02 15:35:02,104 product_detail_service 524 140419563427520 ShopProductDetailService initialized
+INFO 2025-12-02 15:35:02,117 product_detail_service 524 140419563427520 Fetching product details for slug: stykhr-shyshhy-khd-9316
+ERROR 2025-12-02 15:35:02,119 product_detail_service 524 140419563427520 Error fetching product details for slug 'stykhr-shyshhy-khd-9316': Cannot resolve keyword 'sort_order' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 39, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 74, in get_product_detail_by_slug
+    Prefetch('file_upload_requirements', queryset=Product.file_upload_requirements.rel.model.objects.select_related('spec').order_by('sort_order'))
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1727, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2305, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'sort_order' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+DEBUG 2025-12-02 15:37:03,911 product_detail_service 529 140403393337024 ShopProductDetailService initialized
+INFO 2025-12-02 15:37:03,912 product_detail_service 529 140403393337024 Fetching product details for slug: stykhr-shyshhy-khd-9316
+ERROR 2025-12-02 15:37:03,961 product_detail_service 529 140403393337024 Error fetching product details for slug 'stykhr-shyshhy-khd-9316': Cannot resolve keyword 'product' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 39, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 76, in get_product_detail_by_slug
+    ).get(slug=slug, is_active=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1956, in _fetch_all
+    self._prefetch_related_objects()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1330, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 2408, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 2572, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/related_descriptors.py", line 796, in get_prefetch_querysets
+    queryset = _filter_prefetch_queryset(queryset, self.field.name, instances)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/related_descriptors.py", line 119, in _filter_prefetch_queryset
+    queryset.query.add_q(predicate, reuse_all=True)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1526, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1333, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'product' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+DEBUG 2025-12-02 15:43:52,033 product_detail_service 536 139675777013440 ShopProductDetailService initialized
+INFO 2025-12-02 15:43:52,035 product_detail_service 536 139675777013440 Fetching product details for slug: stykhr-shyshhy-khd-9316
+ERROR 2025-12-02 15:43:52,037 product_detail_service 536 139675777013440 Error fetching product details for slug 'stykhr-shyshhy-khd-9316': Cannot resolve keyword 'sort_order' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 39, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 84, in get_product_detail_by_slug
+    Prefetch('file_upload_requirements', queryset=Product.file_upload_requirements.rel.model.objects.select_related('spec').order_by('sort_order'))
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1727, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2305, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'sort_order' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+DEBUG 2025-12-02 15:44:08,038 product_detail_service 539 140674481690304 ShopProductDetailService initialized
+INFO 2025-12-02 15:44:08,039 product_detail_service 539 140674481690304 Fetching product details for slug: stykhr-shyshhy-khd-9316
+ERROR 2025-12-02 15:44:08,104 product_detail_service 539 140674481690304 Error fetching product details for slug 'stykhr-shyshhy-khd-9316': Cannot resolve keyword 'product' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 39, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 86, in get_product_detail_by_slug
+    ).get(slug=slug, is_active=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 631, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1956, in _fetch_all
+    self._prefetch_related_objects()
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 1330, in _prefetch_related_objects
+    prefetch_related_objects(self._result_cache, *self._prefetch_related_lookups)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 2408, in prefetch_related_objects
+    obj_list, additional_lookups = prefetch_one_level(
+                                   ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 2572, in prefetch_one_level
+    ) = prefetcher.get_prefetch_querysets(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/related_descriptors.py", line 796, in get_prefetch_querysets
+    queryset = _filter_prefetch_queryset(queryset, self.field.name, instances)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/fields/related_descriptors.py", line 119, in _filter_prefetch_queryset
+    queryset.query.add_q(predicate, reuse_all=True)
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1526, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1333, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'product' into field. Choices are: cart_items, category, category_id, code, comments, created_at, description, file_upload_requirements, has_quantity, id, is_active, name, options, order_item_product, price, price_modifier_percent, price_per_square_unit, pricing_config, product_attachment_product, product_image, product_material, product_quantity, product_size, ratings, slug, updated_at, user, user_id
+DEBUG 2025-12-02 15:46:51,719 product_detail_service 544 140001214109376 ShopProductDetailService initialized
+INFO 2025-12-02 15:46:51,720 product_detail_service 544 140001214109376 Fetching product details for slug: stykhr-shyshhy-khd-9316
+DEBUG 2025-12-02 15:46:51,786 product_detail_service 544 140001214109376 Product found - ID: 11, Name: استیکر شیشه‌ای - کد 9316
+INFO 2025-12-02 15:46:51,787 product_detail_service 544 140001214109376 Product details successfully prepared for slug: stykhr-shyshhy-khd-9316 - Product ID: 11
+DEBUG 2025-12-02 15:47:23,893 product_detail_service 547 139997030291136 ShopProductDetailService initialized
+INFO 2025-12-02 15:47:23,895 product_detail_service 547 139997030291136 Fetching product details for slug: stykhr-shyshhy-khd-9316
+DEBUG 2025-12-02 15:47:23,946 product_detail_service 547 139997030291136 Product found - ID: 11, Name: استیکر شیشه‌ای - کد 9316
+INFO 2025-12-02 15:47:23,947 product_detail_service 547 139997030291136 Product details successfully prepared for slug: stykhr-shyshhy-khd-9316 - Product ID: 11
+DEBUG 2025-12-02 15:47:44,927 product_detail_service 550 139785482008256 ShopProductDetailService initialized
+INFO 2025-12-02 15:47:44,928 product_detail_service 550 139785482008256 Fetching product details for slug: stykhr-shyshhy-khd-9316
+DEBUG 2025-12-02 15:47:44,998 product_detail_service 550 139785482008256 Product found - ID: 11, Name: استیکر شیشه‌ای - کد 9316
+INFO 2025-12-02 15:47:45,000 product_detail_service 550 139785482008256 Product details successfully prepared for slug: stykhr-shyshhy-khd-9316 - Product ID: 11
+DEBUG 2025-12-02 16:34:50,959 product_detail_service 615 140662818375360 ShopProductDetailService initialized
+INFO 2025-12-02 16:34:50,960 product_detail_service 615 140662818375360 Fetching product details for slug: trkht-tblygty-khd-6158
+DEBUG 2025-12-02 16:34:51,057 product_detail_service 615 140662818375360 Product found - ID: 24, Name: تراکت تبلیغاتی - کد 6158
+INFO 2025-12-02 16:34:51,058 product_detail_service 615 140662818375360 Product details successfully prepared for slug: trkht-tblygty-khd-6158 - Product ID: 24
+DEBUG 2025-12-02 16:41:23,746 product_detail_service 639 140526555752128 ShopProductDetailService initialized
+INFO 2025-12-02 16:41:23,748 product_detail_service 639 140526555752128 Fetching product details for slug: trkht-tblygty-khd-6158
+DEBUG 2025-12-02 16:41:23,833 product_detail_service 639 140526555752128 Product found - ID: 24, Name: تراکت تبلیغاتی - کد 6158
+INFO 2025-12-02 16:41:23,839 product_detail_service 639 140526555752128 Product details successfully prepared for slug: trkht-tblygty-khd-6158 - Product ID: 24
+DEBUG 2025-12-04 08:52:51,599 product_detail_service 117 140669011269312 ShopProductDetailService initialized
+INFO 2025-12-04 08:52:51,609 product_detail_service 117 140669011269312 Fetching product details for slug: khrt-wyzyt-lmynt-mt
+ERROR 2025-12-04 08:52:51,618 product_detail_service 117 140669011269312 Error fetching product details for slug 'khrt-wyzyt-lmynt-mt': محصولی با اسلاگ 'khrt-wyzyt-lmynt-mt' یافت نشد.
+Traceback (most recent call last):
+  File "/app/shared_libs/core/domain/product/repositories.py", line 84, in get_product_detail_by_slug
+    ).get(slug=slug, is_active=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.models.product.Product.DoesNotExist: Product matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 42, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 87, in get_product_detail_by_slug
+    raise ProductNotFoundException(f"محصولی با اسلاگ '{slug}' یافت نشد.")
+core.domain.product.exceptions.ProductNotFoundException: محصولی با اسلاگ 'khrt-wyzyt-lmynt-mt' یافت نشد.
+DEBUG 2025-12-04 08:53:15,231 product_detail_service 117 140669011269312 ShopProductDetailService initialized
+INFO 2025-12-04 08:53:15,251 product_detail_service 117 140669011269312 Fetching product details for slug: khrt-wyzyt-lmynt-mt
+ERROR 2025-12-04 08:53:15,270 product_detail_service 117 140669011269312 Error fetching product details for slug 'khrt-wyzyt-lmynt-mt': محصولی با اسلاگ 'khrt-wyzyt-lmynt-mt' یافت نشد.
+Traceback (most recent call last):
+  File "/app/shared_libs/core/domain/product/repositories.py", line 84, in get_product_detail_by_slug
+    ).get(slug=slug, is_active=True)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/db/models/query.py", line 635, in get
+    raise self.model.DoesNotExist(
+core.models.product.Product.DoesNotExist: Product matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/services.py", line 42, in get_product_detail_by_slug
+    product = self._repo.get_product_detail_by_slug(slug)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/product/repositories.py", line 87, in get_product_detail_by_slug
+    raise ProductNotFoundException(f"محصولی با اسلاگ '{slug}' یافت نشد.")
+core.domain.product.exceptions.ProductNotFoundException: محصولی با اسلاگ 'khrt-wyzyt-lmynt-mt' یافت نشد.
+DEBUG 2025-12-04 09:05:18,850 product_detail_service 202 140213403948736 ShopProductDetailService initialized
+INFO 2025-12-04 09:05:18,851 product_detail_service 202 140213403948736 Fetching product details for slug: khrt-wyzyt-lmynt-mt
+DEBUG 2025-12-04 09:05:18,881 product_detail_service 202 140213403948736 Product found - ID: 39, Name: کارت ویزیت لمینت مات
+INFO 2025-12-04 09:05:18,882 product_detail_service 202 140213403948736 Product details successfully prepared for slug: khrt-wyzyt-lmynt-mt - Product ID: 39
+DEBUG 2025-12-06 10:55:39,944 product_detail_service 1697 140575210903232 ShopProductDetailService initialized
+INFO 2025-12-06 10:55:39,967 product_detail_service 1697 140575210903232 Fetching product details for slug: trkht-tblygty-khd-7848
+DEBUG 2025-12-06 10:55:40,091 product_detail_service 1697 140575210903232 Product found - ID: 7, Name: تراکت تبلیغاتی - کد 7848
+INFO 2025-12-06 10:55:40,092 product_detail_service 1697 140575210903232 Product details successfully prepared for slug: trkht-tblygty-khd-7848 - Product ID: 7
+DEBUG 2025-12-06 17:11:05,785 product_detail_service 234 140255086937792 ShopProductDetailService initialized
+INFO 2025-12-06 17:11:05,805 product_detail_service 234 140255086937792 Fetching product details for slug: trkht-tblygty-khd-7848
+DEBUG 2025-12-06 17:11:06,172 product_detail_service 234 140255086937792 Product found - ID: 7, Name: تراکت تبلیغاتی - کد 7848
+INFO 2025-12-06 17:11:06,174 product_detail_service 234 140255086937792 Product details successfully prepared for slug: trkht-tblygty-khd-7848 - Product ID: 7
+DEBUG 2025-12-09 09:25:05,320 product_detail_service 40 140642221196992 ShopProductDetailService initialized
+INFO 2025-12-09 09:25:05,335 product_detail_service 40 140642221196992 Fetching product details for slug: trkht-tblygty-khd-6158
+DEBUG 2025-12-09 09:25:05,389 product_detail_service 40 140642221196992 Product found - ID: 24, Name: تراکت تبلیغاتی - کد 6158
+INFO 2025-12-09 09:25:05,389 product_detail_service 40 140642221196992 Product details successfully prepared for slug: trkht-tblygty-khd-6158 - Product ID: 24
+DEBUG 2025-12-09 10:20:42,205 product_detail_service 7 140341085898432 ShopProductDetailService initialized
+INFO 2025-12-09 10:20:42,216 product_detail_service 7 140341085898432 Fetching product details for slug: khrt-wyzyt-lkhchry-khd-2013
+DEBUG 2025-12-09 10:20:42,273 product_detail_service 7 140341085898432 Product found - ID: 6, Name: کارت ویزیت لاکچری - کد 2013
+INFO 2025-12-09 10:20:42,274 product_detail_service 7 140341085898432 Product details successfully prepared for slug: khrt-wyzyt-lkhchry-khd-2013 - Product ID: 6
+DEBUG 2025-12-15 19:23:01,422 product_detail_service 7 140514531903168 ShopProductDetailService initialized
+INFO 2025-12-15 19:23:01,456 product_detail_service 7 140514531903168 Fetching product details for slug: stykhr-shyshhy-khd-6514
+DEBUG 2025-12-15 19:23:01,538 product_detail_service 7 140514531903168 Product found - ID: 24, Name: استیکر شیشه‌ای - کد 6514
+INFO 2025-12-15 19:23:01,539 product_detail_service 7 140514531903168 Product details successfully prepared for slug: stykhr-shyshhy-khd-6514 - Product ID: 24
+DEBUG 2025-12-15 19:23:26,737 product_detail_service 7 140514531903168 ShopProductDetailService initialized
+INFO 2025-12-15 19:23:26,738 product_detail_service 7 140514531903168 Fetching product details for slug: khrt-wyzyt-lkhchry-khd-4891
+DEBUG 2025-12-15 19:23:26,821 product_detail_service 7 140514531903168 Product found - ID: 28, Name: کارت ویزیت لاکچری - کد 4891
+INFO 2025-12-15 19:23:26,822 product_detail_service 7 140514531903168 Product details successfully prepared for slug: khrt-wyzyt-lkhchry-khd-4891 - Product ID: 28
+DEBUG 2025-12-23 11:16:37,072 product_detail_service 504 139895131600576 ShopProductDetailService initialized
+INFO 2025-12-23 11:16:37,082 product_detail_service 504 139895131600576 Fetching product details for slug: trkht-glsh-135-grm
+ERROR 2025-12-23 11:16:37,125 product_detail_service 504 139895131600576 Error fetching product details for slug 'trkht-glsh-135-grm': 'NoneType' object has no attribute 'name'
+Traceback (most recent call last):
+  File "/app/src/apps/shop/services/product_detail_service.py", line 30, in get_product_detail_for_display
+    data = self._product_service.get_product_detail_by_slug(slug)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/product/services/product.py", line 118, in get_product_detail_by_slug
+    "structured_options": self._format_product_options(product)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/product/services/product.py", line 38, in _format_product_options
+    "name": prod_opt.option.name,
+            ^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:24:03,295 product_detail_service 525 139803664316096 ShopProductDetailService initialized
+ERROR 2025-12-23 11:24:03,331 product_detail_service 525 139803664316096 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:24:22,071 product_detail_service 525 139803664316096 ShopProductDetailService initialized
+ERROR 2025-12-23 11:24:22,097 product_detail_service 525 139803664316096 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:25:20,692 product_detail_service 525 139803664316096 ShopProductDetailService initialized
+ERROR 2025-12-23 11:25:20,718 product_detail_service 525 139803664316096 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:25:31,121 product_detail_service 525 139803664316096 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:26:13,973 product_detail_service 528 140065325971136 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:26:35,633 product_detail_service 531 140066399712960 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:26:52,771 product_detail_service 534 140105787373248 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:26:54,639 product_detail_service 534 140105787373248 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:27:08,423 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:27:43,512 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:27:43,537 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:27:53,754 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:27:53,781 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:28:11,506 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:28:11,534 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:28:31,311 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:28:58,475 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:28:58,482 product_detail_service 537 140055610914496 Error fetching product: محصول با اسلاگ 'trkht-glsh-3563' یافت نشد.
+DEBUG 2025-12-23 11:29:09,419 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:29:09,463 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:29:19,241 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:29:19,249 product_detail_service 537 140055610914496 Error fetching product: محصول با اسلاگ '3563-TRKHT-TBLYGTY-TRKH-2025' یافت نشد.
+DEBUG 2025-12-23 11:29:26,586 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+ERROR 2025-12-23 11:29:26,611 product_detail_service 537 140055610914496 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:30:19,320 product_detail_service 537 140055610914496 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:31:15,612 product_detail_service 544 139633719506624 ShopProductDetailService initialized
+ERROR 2025-12-23 11:31:15,640 product_detail_service 544 139633719506624 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:31:38,443 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:31:38,471 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:31:56,499 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:31:56,523 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:31:57,545 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:31:57,579 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:32:09,266 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:32:09,289 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:32:10,124 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:32:10,147 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:32:43,300 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:32:43,324 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:33:19,976 product_detail_service 548 140229522486976 ShopProductDetailService initialized
+ERROR 2025-12-23 11:33:20,003 product_detail_service 548 140229522486976 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:36:29,057 product_detail_service 562 139913715513024 ShopProductDetailService initialized
+ERROR 2025-12-23 11:36:29,088 product_detail_service 562 139913715513024 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:37:39,016 product_detail_service 562 139913715513024 ShopProductDetailService initialized
+ERROR 2025-12-23 11:37:39,040 product_detail_service 562 139913715513024 Error fetching product: 'NoneType' object has no attribute 'name'
+DEBUG 2025-12-23 11:39:41,938 product_detail_service 574 140271068116672 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:40:32,395 product_detail_service 574 140271068116672 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:40:38,827 product_detail_service 574 140271068116672 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:43:49,154 product_detail_service 574 140271057626816 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:44:58,440 product_detail_service 641 140378138212032 ShopProductDetailService initialized
+DEBUG 2025-12-23 11:45:34,790 product_detail_service 641 140378036491968 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:38:32,563 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:39:34,708 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:41:24,329 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:43:11,510 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:43:47,123 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:44:13,991 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:44:42,018 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 06:47:32,380 product_detail_service 7 140251297212096 ShopProductDetailService initialized
+DEBUG 2025-12-24 07:53:39,397 product_detail_service 259 140110386427584 ShopProductDetailService initialized
+DEBUG 2025-12-25 06:57:52,334 product_detail_service 102 140573163910848 ShopProductDetailService initialized
+DEBUG 2025-12-27 07:13:28,502 product_detail_service 8 140644843689664 ShopProductDetailService initialized
+DEBUG 2025-12-28 11:12:52,815 product_detail_service 123 140411846956736 ShopProductDetailService initialized
+DEBUG 2025-12-28 11:50:13,375 product_detail_service 237 140063085336256 ShopProductDetailService initialized
+DEBUG 2025-12-28 12:05:17,302 product_detail_service 358 139685266626240 ShopProductDetailService initialized
+DEBUG 2025-12-31 17:28:34,913 product_detail_service 7 140243676337856 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:14:50,167 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:14:50,181 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:07,811 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:07,813 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:13,346 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:13,347 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:19,011 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:19,024 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:20,764 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:20,765 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:15:23,874 product_detail_service 9 140182959417024 ShopProductDetailService initialized
+ERROR 2026-01-09 09:15:23,875 product_detail_service 9 140182959417024 Error fetching product: cannot import name 'ProductAttachment' from 'core.product.models' (/app/shared_libs/core/product/models.py)
+DEBUG 2026-01-09 09:19:35,798 product_detail_service 20 140076368697024 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:20:45,497 product_detail_service 20 140076368697024 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:23:32,605 product_detail_service 20 140076368697024 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:28:14,594 product_detail_service 33 139684978267840 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:42:33,061 product_detail_service 37 140540170639040 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:42:45,072 product_detail_service 40 140016248592064 ShopProductDetailService initialized
+DEBUG 2026-01-09 09:53:09,491 product_detail_service 60 140663195694784 ShopProductDetailService initialized
+DEBUG 2026-01-28 12:58:12,395 product_detail_service 75 140183487895232 ShopProductDetailService initialized
+DEBUG 2026-01-30 18:54:25,285 product_detail_service 7 127435621439168 ShopProductDetailService initialized
+DEBUG 2026-01-30 18:54:41,551 product_detail_service 7 127435219654336 ShopProductDetailService initialized
+DEBUG 2026-01-30 18:54:42,739 product_detail_service 7 127435613046464 ShopProductDetailService initialized
+DEBUG 2026-01-30 18:54:55,420 product_detail_service 7 127435613046464 ShopProductDetailService initialized
+DEBUG 2026-02-01 11:54:47,200 product_detail_service 20 123213140977344 ShopProductDetailService initialized
+DEBUG 2026-02-01 12:03:47,609 product_detail_service 20 123213140977344 ShopProductDetailService initialized
+DEBUG 2026-02-01 12:04:51,656 product_detail_service 20 123213132584640 ShopProductDetailService initialized
+DEBUG 2026-02-01 14:45:43,316 product_detail_service 20 123213503948480 ShopProductDetailService initialized
+DEBUG 2026-02-01 14:45:51,565 product_detail_service 20 123213503948480 ShopProductDetailService initialized
+DEBUG 2026-02-01 14:59:43,048 product_detail_service 20 123213535418048 ShopProductDetailService initialized
+DEBUG 2026-02-01 14:59:49,929 product_detail_service 20 123213535418048 ShopProductDetailService initialized
+DEBUG 2026-02-09 06:23:53,896 product_detail_service 7 140651354109632 ShopProductDetailService initialized
+DEBUG 2026-02-10 07:34:35,524 product_detail_service 7 124657303975616 ShopProductDetailService initialized
+DEBUG 2026-02-10 07:44:50,784 product_detail_service 7 124657295582912 ShopProductDetailService initialized
+DEBUG 2026-02-10 11:28:42,031 product_detail_service 597 125835092686528 ShopProductDetailService initialized
+DEBUG 2026-02-10 11:39:23,879 product_detail_service 765 132770212173504 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:07:03,522 product_detail_service 352 126708818806464 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:07:47,243 product_detail_service 352 126708797826752 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:07:53,722 product_detail_service 352 126708818806464 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:09:41,468 product_detail_service 352 126708827199168 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:10:23,131 product_detail_service 352 126708827199168 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:17:19,536 product_detail_service 352 126708827199168 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:21:39,643 product_detail_service 352 126708827199168 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:21:44,121 product_detail_service 352 126708818806464 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:21:53,605 product_detail_service 352 126708818806464 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:22:23,451 product_detail_service 352 126708827199168 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:23:18,779 product_detail_service 352 126708806219456 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:23:44,166 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:23:45,394 product_detail_service 352 126708818806464 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:24:40,209 product_detail_service 352 126708818806464 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:24:54,942 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:27:59,841 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:28:07,860 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:29:57,599 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:31:19,915 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:31:22,061 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:38:12,362 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:38:15,679 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:41:11,919 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 14:41:16,536 product_detail_service 352 126708446394048 ShopProductDetailService initialized
+DEBUG 2026-02-10 15:40:34,035 product_detail_service 484 137922290538176 ShopProductDetailService initialized
+DEBUG 2026-02-12 09:45:55,107 product_detail_service 223 125430619170496 ShopProductDetailService initialized
+DEBUG 2026-02-12 10:19:34,203 product_detail_service 248 129122688825024 ShopProductDetailService initialized
+DEBUG 2026-02-12 10:19:37,600 product_detail_service 248 129122688825024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:28:55,563 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:39:28,958 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:39:31,473 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:39:36,212 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:39:54,881 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:39:55,247 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:39:55,262 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:40:36,246 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:40:36,247 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:40:36,353 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:40:39,658 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:41:35,301 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:41:52,111 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:43:22,816 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:43:33,448 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:45:32,404 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:45:34,853 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:45:48,883 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:45:59,061 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:48:50,486 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:49:02,556 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:49:21,999 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:49:53,945 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:49:54,409 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:49:54,473 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:49:54,478 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:49:54,838 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:50:01,813 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:50:02,643 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:50:02,652 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:50:02,672 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:50:10,719 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:50:32,228 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:01,032 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:10,564 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:23,906 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:24,257 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:24,263 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:24,283 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:26,647 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:26,664 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:26,687 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:26,997 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:34,634 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:35,402 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:35,412 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:35,487 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:38,489 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:39,820 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:39,821 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:39,873 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:40,139 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:50,158 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:50,444 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:50,489 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:50,673 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:51:55,970 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:01,589 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:24,210 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:24,488 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:24,538 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:24,564 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:30,065 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:30,269 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:30,272 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:30,285 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:40,920 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:41,225 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:41,232 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:41,240 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:42,474 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:43,221 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:43,229 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:43,233 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:46,457 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:47,279 product_detail_service 189 139509110920896 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:47,292 product_detail_service 189 139509504313024 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:47,304 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:48,535 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:49,335 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:49,457 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:49,487 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:49,490 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:57,492 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:58,289 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:58,299 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:58,340 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:52:59,179 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:10,877 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:11,485 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:11,511 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:11,554 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:11,848 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:21,642 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:22,252 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:22,257 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:22,276 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:53:46,222 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:54:00,679 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:54:07,116 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:57:39,360 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:57:56,949 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:58:54,865 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:58:58,800 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:59:44,280 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 08:59:47,029 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 09:37:04,373 product_detail_service 189 139509094135488 ShopProductDetailService initialized
+DEBUG 2026-02-19 09:37:04,543 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 10:03:03,122 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 10:03:03,282 product_detail_service 189 139509119313600 ShopProductDetailService initialized
+DEBUG 2026-02-19 10:22:08,273 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 10:22:08,664 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 10:25:47,313 product_detail_service 189 139509492774592 ShopProductDetailService initialized
+DEBUG 2026-02-19 11:03:07,630 product_detail_service 189 139509512705728 ShopProductDetailService initialized
+DEBUG 2026-02-19 11:03:07,919 product_detail_service 189 139509127706304 ShopProductDetailService initialized
+DEBUG 2026-02-19 11:28:56,124 product_detail_service 473 127973682480832 ShopProductDetailService initialized
+DEBUG 2026-02-19 11:52:53,306 product_detail_service 473 127973662549696 ShopProductDetailService initialized
+DEBUG 2026-02-19 12:10:13,083 product_detail_service 527 137962679604928 ShopProductDetailService initialized
+DEBUG 2026-02-19 12:59:55,369 product_detail_service 546 136517607483072 ShopProductDetailService initialized
+DEBUG 2026-02-19 13:00:13,473 product_detail_service 546 136517607483072 ShopProductDetailService initialized
+DEBUG 2026-02-19 13:02:48,627 product_detail_service 546 136517615875776 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:01:04,477 product_detail_service 591 124649844225728 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:01:40,345 product_detail_service 591 124649844225728 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:05:49,100 product_detail_service 591 124649827440320 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:05:55,596 product_detail_service 591 124649827440320 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:05:58,862 product_detail_service 591 124649827440320 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:06:02,702 product_detail_service 591 124649835833024 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:06:11,748 product_detail_service 591 124649835833024 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:08:36,572 product_detail_service 591 124649827440320 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:21:07,756 product_detail_service 591 124649413277376 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:21:12,900 product_detail_service 591 124649852618432 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:45:13,273 product_detail_service 805 129516455495360 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:45:17,390 product_detail_service 805 129516072593088 ShopProductDetailService initialized
+DEBUG 2026-02-19 14:58:07,695 product_detail_service 805 129516429268672 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:11:58,401 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:12:01,304 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:12:50,315 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:13:48,261 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:13:52,267 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:13:56,247 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:13:58,273 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:14:05,236 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:14:14,518 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:14:31,290 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:14:44,285 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:14:47,322 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:14:48,240 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:14:53,268 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:14:54,279 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:14:57,219 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:15:25,271 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:15:37,239 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:15:39,317 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:15:41,268 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:15:43,259 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:15:45,237 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:15:48,250 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 15:16:12,288 product_detail_service 862 128185830381248 ShopProductDetailService initialized
+DEBUG 2026-02-19 18:02:09,137 product_detail_service 949 133658534979264 ShopProductDetailService initialized
+DEBUG 2026-02-20 12:53:48,118 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 12:53:48,222 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:53:49,363 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 12:53:49,451 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:54:04,436 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 12:54:04,479 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:54:05,587 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 12:54:05,635 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:54:09,986 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 12:54:10,034 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:54:11,211 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 12:54:11,292 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:54:31,704 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 12:54:31,780 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:54:32,987 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+ERROR 2026-02-20 12:54:33,014 product_detail_service 488 123753778378432 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:02,328 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:02,356 product_detail_service 488 123753778378432 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:04,841 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:04,920 product_detail_service 488 123753778378432 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:08,020 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:08,119 product_detail_service 488 123753778378432 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:09,312 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:09,386 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:19,774 product_detail_service 488 123753740052160 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:19,802 product_detail_service 488 123753740052160 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:20,902 product_detail_service 488 123753740052160 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:20,947 product_detail_service 488 123753740052160 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:31,343 product_detail_service 488 123753740052160 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:31,383 product_detail_service 488 123753740052160 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:32,499 product_detail_service 488 123753740052160 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:32,542 product_detail_service 488 123753740052160 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:45,304 product_detail_service 488 123753740052160 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:45,329 product_detail_service 488 123753740052160 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:55:46,438 product_detail_service 488 123753740052160 ShopProductDetailService initialized
+ERROR 2026-02-20 12:55:46,527 product_detail_service 488 123753740052160 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:57:23,727 product_detail_service 488 123753731659456 ShopProductDetailService initialized
+ERROR 2026-02-20 12:57:23,851 product_detail_service 488 123753731659456 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:57:24,998 product_detail_service 488 123753740052160 ShopProductDetailService initialized
+ERROR 2026-02-20 12:57:25,029 product_detail_service 488 123753740052160 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:58:57,141 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+ERROR 2026-02-20 12:58:57,193 product_detail_service 488 123753778378432 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 12:58:58,282 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+ERROR 2026-02-20 12:58:58,307 product_detail_service 488 123753778378432 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:01:47,811 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+ERROR 2026-02-20 13:01:47,896 product_detail_service 488 123753778378432 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:01:49,100 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+ERROR 2026-02-20 13:01:49,290 product_detail_service 488 123753778378432 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:02:06,964 product_detail_service 488 123753350547136 ShopProductDetailService initialized
+ERROR 2026-02-20 13:02:06,996 product_detail_service 488 123753350547136 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:02:08,085 product_detail_service 488 123753350547136 ShopProductDetailService initialized
+ERROR 2026-02-20 13:02:08,121 product_detail_service 488 123753350547136 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:02:41,415 product_detail_service 488 123753723266752 ShopProductDetailService initialized
+ERROR 2026-02-20 13:02:41,458 product_detail_service 488 123753723266752 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:02:42,581 product_detail_service 488 123753723266752 ShopProductDetailService initialized
+ERROR 2026-02-20 13:02:42,646 product_detail_service 488 123753723266752 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:05:34,050 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 13:05:34,071 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:05:35,202 product_detail_service 488 123753756837568 ShopProductDetailService initialized
+ERROR 2026-02-20 13:05:35,279 product_detail_service 488 123753756837568 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:05:39,760 product_detail_service 488 123753748444864 ShopProductDetailService initialized
+ERROR 2026-02-20 13:05:39,823 product_detail_service 488 123753748444864 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:05:41,068 product_detail_service 488 123753367332544 ShopProductDetailService initialized
+ERROR 2026-02-20 13:05:41,105 product_detail_service 488 123753367332544 Error fetching product: column core_productquantity.price does not exist
+LINE 1: ...uantity_id", "core_productquantity"."created_at", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-20 13:10:41,284 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+DEBUG 2026-02-20 13:10:53,586 product_detail_service 488 123753350547136 ShopProductDetailService initialized
+DEBUG 2026-02-20 13:19:05,249 product_detail_service 488 123753778378432 ShopProductDetailService initialized
+DEBUG 2026-02-20 13:25:59,812 product_detail_service 488 123753751103168 ShopProductDetailService initialized
+DEBUG 2026-02-20 13:30:03,890 product_detail_service 488 123753367332544 ShopProductDetailService initialized
+DEBUG 2026-02-20 13:31:00,943 product_detail_service 488 123753367332544 ShopProductDetailService initialized
+DEBUG 2026-02-20 13:47:17,667 product_detail_service 7 137116256782016 ShopProductDetailService initialized
+DEBUG 2026-02-20 13:48:46,058 product_detail_service 7 137116275173056 ShopProductDetailService initialized
+DEBUG 2026-02-20 13:49:20,586 product_detail_service 7 137116248389312 ShopProductDetailService initialized
+DEBUG 2026-02-20 20:33:40,108 product_detail_service 279 133099771025088 ShopProductDetailService initialized
+DEBUG 2026-02-20 21:01:13,439 product_detail_service 279 133099425887936 ShopProductDetailService initialized
+DEBUG 2026-02-20 21:01:19,912 product_detail_service 279 133099771025088 ShopProductDetailService initialized
+DEBUG 2026-02-20 21:17:06,833 product_detail_service 279 133099417495232 ShopProductDetailService initialized
+DEBUG 2026-02-21 11:46:44,064 product_detail_service 382 126666353399488 ShopProductDetailService initialized
+DEBUG 2026-02-21 11:46:46,139 product_detail_service 382 126666353399488 ShopProductDetailService initialized
+DEBUG 2026-02-21 11:47:03,237 product_detail_service 382 126666353399488 ShopProductDetailService initialized
+DEBUG 2026-02-21 11:47:34,476 product_detail_service 382 126666353399488 ShopProductDetailService initialized
+DEBUG 2026-02-21 12:08:49,519 product_detail_service 382 126666715141824 ShopProductDetailService initialized
+DEBUG 2026-02-21 13:28:29,064 product_detail_service 382 126666757105344 ShopProductDetailService initialized
+DEBUG 2026-02-21 15:42:20,680 product_detail_service 382 126666724583104 ShopProductDetailService initialized
+DEBUG 2026-02-21 15:52:12,902 product_detail_service 382 126666748712640 ShopProductDetailService initialized
+DEBUG 2026-02-21 16:14:07,972 product_detail_service 382 126666748712640 ShopProductDetailService initialized
+DEBUG 2026-02-21 16:16:10,769 product_detail_service 382 126666715141824 ShopProductDetailService initialized
+DEBUG 2026-02-21 17:00:40,707 product_detail_service 382 126666724583104 ShopProductDetailService initialized
+DEBUG 2026-02-21 17:02:49,686 product_detail_service 382 126666715141824 ShopProductDetailService initialized
+DEBUG 2026-02-21 17:13:17,503 product_detail_service 382 126666757105344 ShopProductDetailService initialized
+DEBUG 2026-02-23 02:47:31,571 product_detail_service 21 128653111318208 ShopProductDetailService initialized
+ERROR 2026-02-23 02:47:31,617 product_detail_service 21 128653111318208 Error fetching product: column core_productfield.multi_select_operator does not exist
+LINE 1: ...ield"."title", "core_productfield"."description", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-23 02:47:32,704 product_detail_service 21 128653111318208 ShopProductDetailService initialized
+ERROR 2026-02-23 02:47:32,726 product_detail_service 21 128653111318208 Error fetching product: column core_productfield.multi_select_operator does not exist
+LINE 1: ...ield"."title", "core_productfield"."description", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-24 09:52:13,070 product_detail_service 9 127131786917568 ShopProductDetailService initialized
+DEBUG 2026-02-24 09:53:13,480 product_detail_service 9 127131786917568 ShopProductDetailService initialized
+DEBUG 2026-02-24 09:56:11,864 product_detail_service 9 127131786917568 ShopProductDetailService initialized
+DEBUG 2026-02-24 09:56:14,850 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 09:58:47,198 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:00:08,191 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:00:29,925 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:01:32,091 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:01,680 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:04,477 product_detail_service 9 127131392648896 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:06,437 product_detail_service 9 127131392648896 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:11,365 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:02:28,403 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:04:04,063 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:11:35,789 product_detail_service 9 127131384256192 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:16:46,808 product_detail_service 9 127131392648896 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:44:18,356 product_detail_service 9 127131392648896 ShopProductDetailService initialized
+DEBUG 2026-02-24 10:53:25,976 product_detail_service 9 127131417827008 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:10:18,771 product_detail_service 267 130864739780288 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:13:12,408 product_detail_service 267 130864739780288 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:14:18,115 product_detail_service 267 130864739780288 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:20:44,023 product_detail_service 267 130864720897728 ShopProductDetailService initialized
+ERROR 2026-02-26 12:20:44,171 product_detail_service 267 130864720897728 Error fetching product: محصول با اسلاگ '49' یافت نشد.
+DEBUG 2026-02-26 12:21:16,337 product_detail_service 267 130864720897728 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:25:30,122 product_detail_service 267 130864739780288 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:26:51,184 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:27:02,999 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:49:15,068 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:49:16,750 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 12:49:21,674 product_detail_service 267 130864365172416 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:51:56,085 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:51:56,848 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:51:57,907 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:51:58,039 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:54:31,108 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:54:31,244 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:54:32,336 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:54:32,361 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:55:50,892 product_detail_service 305 123604700227264 ShopProductDetailService initialized
+ERROR 2026-02-26 13:55:50,995 product_detail_service 305 123604700227264 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:55:53,821 product_detail_service 305 123604709668544 ShopProductDetailService initialized
+ERROR 2026-02-26 13:55:53,964 product_detail_service 305 123604709668544 Error fetching product: column core_productcategory.order does not exist
+LINE 1: ...anner_wide", "core_productcategory"."banner_box", "core_prod...
+                                                             ^
+
+DEBUG 2026-02-26 13:56:14,302 product_detail_service 305 123604700227264 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:56:31,459 product_detail_service 305 123604700227264 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:57:46,691 product_detail_service 305 123604689737408 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:57:52,389 product_detail_service 305 123604689737408 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:57:57,869 product_detail_service 305 123604672952000 ShopProductDetailService initialized
+DEBUG 2026-02-26 13:57:59,124 product_detail_service 305 123604681344704 ShopProductDetailService initialized
+DEBUG 2026-02-26 14:02:52,081 product_detail_service 305 123604681344704 ShopProductDetailService initialized
+DEBUG 2026-02-27 08:09:39,146 product_detail_service 37 125250834523840 ShopProductDetailService initialized
+DEBUG 2026-05-20 14:29:29,950 product_detail_service 7 139745840748224 ShopProductDetailService initialized
+DEBUG 2026-05-20 14:29:36,490 product_detail_service 7 139745840748224 ShopProductDetailService initialized
+DEBUG 2026-05-20 14:30:34,895 product_detail_service 7 139745840748224 ShopProductDetailService initialized
+DEBUG 2026-05-20 14:31:10,391 product_detail_service 7 139745865926336 ShopProductDetailService initialized
+DEBUG 2026-05-20 14:31:41,814 product_detail_service 7 139745485125312 ShopProductDetailService initialized
+DEBUG 2026-05-20 14:33:47,916 product_detail_service 7 139745874319040 ShopProductDetailService initialized
+DEBUG 2026-05-20 14:33:58,953 product_detail_service 7 139745865926336 ShopProductDetailService initialized
+DEBUG 2026-05-20 15:23:29,293 product_detail_service 7 139745468339904 ShopProductDetailService initialized
+DEBUG 2026-05-20 15:30:16,119 product_detail_service 7 139745468339904 ShopProductDetailService initialized
+DEBUG 2026-05-23 06:09:23,446 product_detail_service 7 137846323308224 ShopProductDetailService initialized
+DEBUG 2026-05-23 06:09:56,062 product_detail_service 7 137846323308224 ShopProductDetailService initialized
+DEBUG 2026-05-23 06:10:26,409 product_detail_service 7 137846314915520 ShopProductDetailService initialized
+DEBUG 2026-05-23 06:28:05,043 product_detail_service 7 137846323308224 ShopProductDetailService initialized
+DEBUG 2026-05-23 06:28:58,659 product_detail_service 7 137846314915520 ShopProductDetailService initialized
+DEBUG 2026-05-23 06:32:59,283 product_detail_service 7 137846323308224 ShopProductDetailService initialized
+DEBUG 2026-05-23 07:16:19,459 product_detail_service 7 137846314915520 ShopProductDetailService initialized
+DEBUG 2026-05-23 07:17:35,299 product_detail_service 7 137846328555200 ShopProductDetailService initialized
+DEBUG 2026-05-23 07:35:18,787 product_detail_service 7 137846314915520 ShopProductDetailService initialized
+DEBUG 2026-05-23 08:05:47,117 product_detail_service 54 139513825326784 ShopProductDetailService initialized
+DEBUG 2026-05-23 08:12:00,564 product_detail_service 54 139513825326784 ShopProductDetailService initialized
+DEBUG 2026-05-23 09:58:38,153 product_detail_service 54 139513816934080 ShopProductDetailService initialized
+DEBUG 2026-05-23 10:04:05,013 product_detail_service 54 139514201937600 ShopProductDetailService initialized
+<<<<<<< HEAD
+DEBUG 2026-05-24 18:26:18,310 product_detail_service 8 124191094511296 ShopProductDetailService initialized
+DEBUG 2026-05-24 18:26:29,893 product_detail_service 8 124191094511296 ShopProductDetailService initialized
+DEBUG 2026-06-01 18:14:27,077 product_detail_service 7 139665569556160 ShopProductDetailService initialized
+DEBUG 2026-06-01 18:16:52,309 product_detail_service 7 139665569556160 ShopProductDetailService initialized
+DEBUG 2026-06-01 18:17:39,525 product_detail_service 7 139665222923968 ShopProductDetailService initialized
+DEBUG 2026-06-01 18:17:53,742 product_detail_service 7 139665222923968 ShopProductDetailService initialized
+=======
+DEBUG 2026-06-01 10:49:34,978 product_detail_service 235 131532501022400 ShopProductDetailService initialized
+DEBUG 2026-06-01 10:53:20,197 product_detail_service 244 137078123955904 ShopProductDetailService initialized
+DEBUG 2026-06-01 10:53:32,034 product_detail_service 244 137078123955904 ShopProductDetailService initialized
+DEBUG 2026-06-01 10:55:18,300 product_detail_service 244 137077907781312 ShopProductDetailService initialized
+DEBUG 2026-06-01 10:57:16,670 product_detail_service 244 137078132348608 ShopProductDetailService initialized
+DEBUG 2026-06-01 10:57:19,934 product_detail_service 244 137077882603200 ShopProductDetailService initialized
+DEBUG 2026-06-01 10:58:21,294 product_detail_service 244 137077882603200 ShopProductDetailService initialized
+DEBUG 2026-06-01 10:58:26,526 product_detail_service 244 137077907781312 ShopProductDetailService initialized
+DEBUG 2026-06-01 11:06:35,180 product_detail_service 261 126858317436608 ShopProductDetailService initialized
+ERROR 2026-06-01 11:06:35,186 product_detail_service 261 126858317436608 Error fetching product: محصول با اسلاگ 'tst-mhswl' یافت نشد.
+DEBUG 2026-06-01 11:06:36,285 product_detail_service 261 126858234427072 ShopProductDetailService initialized
+ERROR 2026-06-01 11:06:36,292 product_detail_service 261 126858234427072 Error fetching product: محصول با اسلاگ 'tst-mhswl' یافت نشد.
+DEBUG 2026-06-01 11:06:47,342 product_detail_service 261 126858226034368 ShopProductDetailService initialized
+DEBUG 2026-06-01 11:07:00,902 product_detail_service 261 126858226034368 ShopProductDetailService initialized
+DEBUG 2026-06-01 11:30:16,837 product_detail_service 272 125068535707328 ShopProductDetailService initialized
+DEBUG 2026-06-01 11:31:27,599 product_detail_service 272 125068554442432 ShopProductDetailService initialized
+DEBUG 2026-06-01 11:32:12,036 product_detail_service 272 125068527314624 ShopProductDetailService initialized
+DEBUG 2026-06-01 11:33:21,783 product_detail_service 272 125068527314624 ShopProductDetailService initialized
+>>>>>>> debf3403d6a239088024e2bb9f6b32ee2bac7f5a
+DEBUG 2026-06-02 20:40:09,800 product_detail_service 7 129908600731328 ShopProductDetailService initialized
+DEBUG 2026-06-02 20:40:36,520 product_detail_service 7 129908592338624 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:48:35,739 product_detail_service 7 135518654461632 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:48:41,970 product_detail_service 7 135518654461632 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:49:38,578 product_detail_service 7 135518281144000 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:50:49,004 product_detail_service 7 135518247573184 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:56:10,082 product_detail_service 7 135518255965888 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:56:17,111 product_detail_service 7 135518255965888 ShopProductDetailService initialized
+DEBUG 2026-06-03 08:56:26,234 product_detail_service 7 135518255965888 ShopProductDetailService initialized
+DEBUG 2026-06-03 14:27:45,370 product_detail_service 7 135518297781952 ShopProductDetailService initialized
+DEBUG 2026-06-03 14:27:52,555 product_detail_service 7 135518297781952 ShopProductDetailService initialized
+DEBUG 2026-06-03 14:34:16,983 product_detail_service 7 135518662854336 ShopProductDetailService initialized
+DEBUG 2026-06-03 14:34:45,017 product_detail_service 7 135518662854336 ShopProductDetailService initialized
+DEBUG 2026-06-03 14:34:46,746 product_detail_service 7 135518662854336 ShopProductDetailService initialized
+DEBUG 2026-06-03 14:35:08,947 product_detail_service 7 135518662854336 ShopProductDetailService initialized
+DEBUG 2026-06-03 14:35:09,946 product_detail_service 7 135518662854336 ShopProductDetailService initialized
+DEBUG 2026-06-03 14:35:22,177 product_detail_service 7 135518662854336 ShopProductDetailService initialized
+DEBUG 2026-06-13 17:29:35,150 product_detail_service 7 134606078600896 ShopProductDetailService initialized
+DEBUG 2026-06-13 17:29:42,657 product_detail_service 7 134606078600896 ShopProductDetailService initialized
+DEBUG 2026-06-13 18:58:58,039 product_detail_service 91 129286626338496 ShopProductDetailService initialized
+DEBUG 2026-06-13 19:00:07,490 product_detail_service 91 129286854051520 ShopProductDetailService initialized
+DEBUG 2026-06-13 19:01:26,054 product_detail_service 91 129286854051520 ShopProductDetailService initialized
+DEBUG 2026-06-14 10:55:08,130 product_detail_service 7 125334125016768 ShopProductDetailService initialized
+DEBUG 2026-06-14 11:00:08,485 product_detail_service 7 125334475392704 ShopProductDetailService initialized
+DEBUG 2026-06-14 11:01:03,076 product_detail_service 7 125334518404800 ShopProductDetailService initialized
+DEBUG 2026-06-14 11:11:42,025 product_detail_service 7 125334518404800 ShopProductDetailService initialized
+DEBUG 2026-06-14 11:17:25,741 product_detail_service 7 125334518404800 ShopProductDetailService initialized
+DEBUG 2026-06-14 11:19:35,175 product_detail_service 7 125334475392704 ShopProductDetailService initialized
+DEBUG 2026-06-23 16:15:08,855 product_detail_service 28 133566133606080 ShopProductDetailService initialized
+DEBUG 2026-07-23 20:41:34,763 product_detail_service 7 130556712961728 ShopProductDetailService initialized
+DEBUG 2026-07-23 20:42:31,335 product_detail_service 7 130556729747136 ShopProductDetailService initialized
+DEBUG 2026-07-23 20:42:38,540 product_detail_service 7 130556966725312 ShopProductDetailService initialized

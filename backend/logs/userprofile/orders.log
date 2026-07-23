@@ -1,0 +1,457 @@
+INFO 2025-11-27 16:14:43,989 user_order_service 26 140022100522688 Fetching order history for User ID: 6
+INFO 2025-11-27 16:14:44,003 user_order_service 26 140022100522688 Found 2 orders for User ID: 6
+INFO 2025-11-27 16:14:53,353 user_order_service 26 140022100522688 Fetching details for Order ID: 6, User ID: 6
+DEBUG 2025-11-27 16:14:53,388 user_order_service 26 140022100522688 Order details retrieved successfully for Order ID: 6
+INFO 2025-11-29 14:22:22,453 user_order_service 498 139635853342400 Fetching order history for User ID: 1
+ERROR 2025-11-29 14:22:22,454 user_order_service 498 139635853342400 Error fetching order list for User ID: 1
+Traceback (most recent call last):
+  File "/app/src/apps/userprofile/services/user_order_service.py", line 42, in get_user_orders
+    orders = self._service.get_user_orders_summary(user_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/order/services.py", line 107, in get_user_orders_summary
+    return self._repository.get_user_orders_summary(user_id)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'OrderDomainService' object has no attribute '_repository'
+INFO 2025-11-29 14:24:08,343 user_order_service 509 140300176586432 Fetching order history for User ID: 1
+INFO 2025-11-29 14:24:08,346 user_order_service 509 140300176586432 Found 0 orders for User ID: 1
+INFO 2025-11-29 14:24:15,213 user_order_service 509 140300176586432 Fetching details for Order ID: 1, User ID: 1
+ERROR 2025-11-29 14:24:15,213 user_order_service 509 140300176586432 Unexpected error retrieving order 1 for User ID: 1
+Traceback (most recent call last):
+  File "/app/src/apps/userprofile/services/user_order_service.py", line 67, in get_order_detail
+    order = self._service.get_user_order_item_details(user_id, order_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/shared_libs/core/domain/order/services.py", line 113, in get_user_order_item_details
+    return self._order_repo.get_order_detail_by_id(user_id, order_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'OrderRepository' object has no attribute 'get_order_detail_by_id'
+INFO 2025-11-29 14:26:10,712 user_order_service 512 140353863677632 Fetching details for Order ID: 1, User ID: 1
+ERROR 2025-11-29 14:26:10,712 user_order_service 512 140353863677632 Unexpected error retrieving order 1 for User ID: 1
+Traceback (most recent call last):
+  File "/app/src/apps/userprofile/services/user_order_service.py", line 67, in get_order_detail
+    order = self._service.get_user_order_item_details(user_id, order_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'OrderDomainService' object has no attribute 'get_user_order_item_details'
+INFO 2025-11-29 14:27:23,372 user_order_service 517 139762210961088 Fetching details for Order ID: 1, User ID: 1
+WARNING 2025-11-29 14:27:23,378 user_order_service 517 139762210961088 Order ID 1 not found or access denied for User ID: 1
+INFO 2025-11-29 14:27:27,342 user_order_service 517 139762210961088 Fetching details for Order ID: 1, User ID: 1
+WARNING 2025-11-29 14:27:27,351 user_order_service 517 139762210961088 Order ID 1 not found or access denied for User ID: 1
+INFO 2025-11-29 15:28:31,248 user_order_service 551 140430934013632 Fetching order history for User ID: 1
+INFO 2025-11-29 15:28:31,252 user_order_service 551 140430934013632 Found 1 orders for User ID: 1
+INFO 2025-11-29 15:28:39,190 user_order_service 551 140430934013632 Fetching details for Order ID: 1, User ID: 1
+DEBUG 2025-11-29 15:28:39,201 user_order_service 551 140430934013632 Order details retrieved successfully for Order ID: 1
+INFO 2025-12-01 12:20:33,440 user_order_service 479 140319384573632 Fetching order history for User ID: 6
+INFO 2025-12-01 12:20:33,445 user_order_service 479 140319384573632 Found 1 orders for User ID: 6
+INFO 2025-12-01 12:20:46,455 user_order_service 479 140319384573632 Fetching details for Order ID: 2, User ID: 6
+DEBUG 2025-12-01 12:20:46,475 user_order_service 479 140319384573632 Order details retrieved successfully for Order ID: 2
+INFO 2025-12-02 17:23:51,430 user_order_service 746 140268952262336 Fetching order history for User ID: 2
+INFO 2025-12-02 17:35:21,117 user_order_service 839 140457331037888 Fetching order history for User ID: 2
+INFO 2025-12-02 17:35:35,163 user_order_service 839 140457331037888 Fetching detail Order 2 for User 2
+WARNING 2025-12-02 17:35:35,169 user_order_service 839 140457331037888 Order 2 not found for user 2
+ERROR 2025-12-02 17:35:35,170 user_order_service 839 140457331037888 Error fetching order detail: سفارش مورد نظر یافت نشد.
+INFO 2025-12-02 17:35:38,627 user_order_service 839 140457331037888 Fetching detail Order 4 for User 2
+ERROR 2025-12-02 17:35:38,633 user_order_service 839 140457331037888 Error fetching order detail: Cannot find 'items' on Order object, 'items' is an invalid parameter to prefetch_related()
+INFO 2025-12-02 17:39:13,458 user_order_service 842 140346613995200 Fetching detail Order 4 for User 2
+INFO 2025-12-02 17:39:19,468 user_order_service 842 140346613995200 Fetching detail Order 4 for User 2
+INFO 2025-12-02 17:41:05,028 user_order_service 842 140346604553920 Fetching detail Order 4 for User 2
+INFO 2025-12-02 17:42:05,715 user_order_service 842 140346596161216 Fetching detail Order 4 for User 2
+INFO 2025-12-02 17:55:57,618 user_order_service 857 140324549859008 Fetching detail Order 5 for User 2
+INFO 2025-12-02 17:56:51,277 user_order_service 864 140476770416320 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:04:37,508 user_order_service 871 139881435272896 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:11:23,115 user_order_service 874 139707537331904 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:19:32,610 user_order_service 907 139961187866304 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:21:24,311 user_order_service 907 139961105905344 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:21:42,466 user_order_service 907 139961105905344 Fetching order history for User ID: 2
+INFO 2025-12-02 18:22:31,469 user_order_service 907 139961105905344 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:24:42,620 user_order_service 911 140439189452480 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:25:13,448 user_order_service 914 140127133234880 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:30:15,507 user_order_service 917 140530670540480 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:30:28,466 user_order_service 917 140530670540480 Fetching order history for User ID: 2
+INFO 2025-12-02 18:31:36,447 user_order_service 920 140087534982848 Fetching order history for User ID: 2
+INFO 2025-12-02 18:32:03,747 user_order_service 923 140351287498432 Fetching order history for User ID: 2
+INFO 2025-12-02 18:32:08,762 user_order_service 923 140351287498432 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:33:15,604 user_order_service 926 140023315822272 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:33:17,732 user_order_service 926 140023315822272 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:36:01,763 user_order_service 926 140023307429568 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:37:53,933 user_order_service 936 139702885848768 Fetching order history for User ID: 2
+INFO 2025-12-02 18:38:02,913 user_order_service 936 139702885848768 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:38:07,428 user_order_service 936 139702885848768 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:38:37,840 user_order_service 939 139656056444608 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:39:43,162 user_order_service 942 140513478964928 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:41:53,308 user_order_service 949 139841146885824 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:46:35,703 user_order_service 962 140293732210368 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:47:18,163 user_order_service 967 140632377169600 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:47:35,642 user_order_service 970 140610732463808 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:48:59,310 user_order_service 973 140325853238976 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:49:05,682 user_order_service 973 140325853238976 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:49:12,863 user_order_service 973 140325853238976 Fetching detail Order 4 for User 2
+INFO 2025-12-02 18:49:16,348 user_order_service 973 140325853238976 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:50:37,595 user_order_service 980 139805563459264 Fetching detail Order 5 for User 2
+INFO 2025-12-02 18:51:08,328 user_order_service 980 139805563459264 Fetching detail Order 4 for User 2
+INFO 2025-12-13 16:10:34,912 user_order_service 1174 140156048762560 Fetching order history for User ID: 1
+INFO 2025-12-13 16:10:48,618 user_order_service 1174 140156048762560 Fetching detail Order 37 for User 1
+ERROR 2025-12-13 16:10:48,622 user_order_service 1174 140156048762560 Error fetching order detail: Invalid field name(s) given in select_related: 'order_status'. Choices are: user, current_status, address, related_invoice
+INFO 2025-12-16 12:08:05,015 user_order_service 13 140585545492160 Fetching order history for User ID: 2
+WARNING 2025-12-16 14:03:52,944 user_order_service 543 139818481915584 Security Alert: User 2 tried to access quotation of Order 2
+WARNING 2025-12-16 14:04:18,646 user_order_service 543 139818481915584 Quotation not found for order 10
+WARNING 2025-12-16 14:06:00,668 user_order_service 543 139818481915584 Security Alert: User 1 tried to access quotation of Order 16
+INFO 2025-12-17 13:02:34,829 user_order_service 8 140478095808192 Fetching order history for User ID: 2
+INFO 2025-12-17 13:03:11,601 user_order_service 8 140478095808192 Fetching order history for User ID: 2
+INFO 2025-12-22 11:07:00,935 user_order_service 486 139937300084416 Fetching detail Order 16 for User 2
+ERROR 2025-12-22 11:07:00,956 user_order_service 486 139937300084416 Error fetching order detail: Invalid field name(s) given in select_related: 'requirement'. Choices are: order_item
+INFO 2025-12-22 11:08:22,061 user_order_service 491 140490700748480 Fetching detail Order 16 for User 2
+INFO 2025-12-22 11:08:31,967 user_order_service 491 140490700748480 Fetching order history for User ID: 2
+INFO 2025-12-24 07:07:45,973 user_order_service 94 139868830168768 Fetching order history for User ID: 2
+INFO 2025-12-24 07:07:56,292 user_order_service 94 139868830168768 Fetching detail Order 18 for User 2
+INFO 2025-12-24 07:08:50,588 user_order_service 94 139868830168768 Fetching detail Order 19 for User 2
+INFO 2026-02-09 06:24:23,787 user_order_service 7 140651371087552 Fetching order history for User ID: 1
+INFO 2026-02-09 11:44:30,258 user_order_service 7 140651387680448 Fetching order history for User ID: 1
+INFO 2026-02-09 11:51:11,063 user_order_service 7 140651614344896 Fetching order history for User ID: 1
+INFO 2026-02-09 12:36:22,659 user_order_service 7 140651371087552 Fetching order history for User ID: 1
+INFO 2026-02-09 12:36:35,244 user_order_service 7 140650834024128 Fetching order history for User ID: 1
+INFO 2026-02-09 12:36:36,749 user_order_service 7 140650834024128 Fetching order history for User ID: 1
+INFO 2026-02-09 12:36:39,402 user_order_service 7 140651329124032 Fetching order history for User ID: 1
+INFO 2026-02-09 13:52:25,531 user_order_service 7 140651371087552 Fetching order history for User ID: 1
+INFO 2026-02-09 17:30:23,941 user_order_service 7 140651371087552 Fetching order history for User ID: 1
+INFO 2026-02-09 17:39:13,725 user_order_service 7 140651362694848 Fetching order history for User ID: 1
+INFO 2026-02-09 17:39:16,762 user_order_service 7 140651387680448 Fetching order history for User ID: 1
+INFO 2026-02-09 17:39:21,332 user_order_service 7 140651387680448 Fetching order history for User ID: 1
+INFO 2026-02-09 17:39:22,732 user_order_service 7 140651345909440 Fetching order history for User ID: 1
+INFO 2026-02-09 17:39:26,416 user_order_service 7 140651371087552 Fetching order history for User ID: 1
+INFO 2026-02-09 17:40:02,872 user_order_service 7 140651345909440 Fetching order history for User ID: 1
+INFO 2026-02-09 17:40:04,338 user_order_service 7 140651345909440 Fetching order history for User ID: 1
+INFO 2026-02-09 17:40:06,224 user_order_service 7 140651387680448 Fetching order history for User ID: 1
+INFO 2026-02-09 17:40:09,712 user_order_service 7 140651345909440 Fetching order history for User ID: 1
+INFO 2026-02-10 14:06:06,033 user_order_service 352 126708806219456 Fetching order history for User ID: 1
+INFO 2026-02-10 14:06:08,473 user_order_service 352 126708827199168 Fetching order history for User ID: 1
+INFO 2026-02-10 14:06:09,092 user_order_service 352 126708827199168 Fetching order history for User ID: 1
+INFO 2026-02-10 15:40:46,970 user_order_service 484 137922307323584 Fetching order history for User ID: 1
+INFO 2026-02-10 15:40:48,643 user_order_service 484 137922325157568 Fetching order history for User ID: 1
+INFO 2026-02-10 15:40:50,756 user_order_service 484 137922307323584 Fetching order history for User ID: 1
+INFO 2026-02-10 15:55:46,884 user_order_service 484 137922307327680 Fetching order history for User ID: 1
+INFO 2026-02-10 15:55:48,183 user_order_service 484 137922307327680 Fetching order history for User ID: 1
+INFO 2026-02-10 16:31:39,058 user_order_service 633 140347577460416 Fetching order history for User ID: 1
+INFO 2026-02-10 16:31:41,959 user_order_service 633 140347577460416 Fetching order history for User ID: 1
+INFO 2026-02-10 16:31:51,110 user_order_service 633 140347533399744 Fetching order history for User ID: 1
+INFO 2026-02-10 16:32:11,439 user_order_service 633 140347533399744 Fetching detail Order 4 for User 1
+INFO 2026-02-12 11:42:13,396 user_order_service 425 132317843719872 Fetching order history for User ID: 1
+INFO 2026-02-12 12:35:48,175 user_order_service 425 132317830084288 Fetching order history for User ID: 1
+INFO 2026-02-12 12:35:50,473 user_order_service 425 132317830084288 Fetching detail Order 4 for User 1
+INFO 2026-02-12 12:35:59,381 user_order_service 425 132317830084288 Fetching detail Order 4 for User 1
+INFO 2026-02-12 12:43:53,658 user_order_service 425 132317465011904 Fetching detail Order 4 for User 1
+INFO 2026-02-12 12:44:09,293 user_order_service 425 132317830084288 Fetching order history for User ID: 1
+INFO 2026-02-12 12:44:12,004 user_order_service 425 132317830084288 Fetching detail Order 2 for User 1
+INFO 2026-02-12 12:44:15,364 user_order_service 425 132317830084288 Fetching order history for User ID: 1
+INFO 2026-02-12 12:44:20,119 user_order_service 425 132317830084288 Fetching detail Order 4 for User 1
+INFO 2026-02-12 12:52:23,975 user_order_service 425 132317830084288 Fetching detail Order 4 for User 1
+INFO 2026-02-12 12:52:27,893 user_order_service 425 132317465011904 Fetching detail Order 4 for User 1
+INFO 2026-02-12 12:54:53,671 user_order_service 425 132317465011904 Fetching detail Order 4 for User 1
+INFO 2026-02-12 12:58:02,087 user_order_service 425 132317830084288 Fetching detail Order 4 for User 1
+INFO 2026-02-12 13:01:33,639 user_order_service 425 132317465011904 Fetching detail Order 4 for User 1
+INFO 2026-02-12 13:04:13,999 user_order_service 425 132317830084288 Fetching detail Order 4 for User 1
+INFO 2026-02-12 13:10:03,043 user_order_service 425 132317465011904 Fetching detail Order 4 for User 1
+INFO 2026-02-12 13:12:23,749 user_order_service 425 132317830084288 Fetching order history for User ID: 1
+INFO 2026-02-12 13:12:27,268 user_order_service 425 132317830084288 Fetching order history for User ID: 1
+INFO 2026-02-12 13:12:31,093 user_order_service 425 132317830084288 Fetching order history for User ID: 1
+INFO 2026-02-19 08:23:01,560 user_order_service 189 139509504313024 Fetching order history for User ID: 1
+INFO 2026-02-19 08:23:03,670 user_order_service 189 139509504313024 Fetching order history for User ID: 1
+INFO 2026-02-19 08:23:05,014 user_order_service 189 139509504313024 Fetching detail Order 28 for User 1
+INFO 2026-02-19 08:23:19,902 user_order_service 189 139509119313600 Fetching detail Order 28 for User 1
+INFO 2026-02-19 08:23:25,870 user_order_service 189 139509119313600 Fetching order history for User ID: 1
+INFO 2026-02-19 08:23:52,649 user_order_service 189 139509512705728 Fetching detail Order 28 for User 1
+INFO 2026-02-19 08:27:50,881 user_order_service 189 139509512705728 Fetching order history for User ID: 1
+INFO 2026-02-19 08:27:51,019 user_order_service 189 139509119313600 Fetching detail Order 28 for User 1
+INFO 2026-02-19 08:27:51,302 user_order_service 189 139509119313600 Fetching order history for User ID: 1
+INFO 2026-02-19 08:27:51,804 user_order_service 189 139509127706304 Fetching order history for User ID: 1
+INFO 2026-02-19 14:53:05,517 user_order_service 805 129516437661376 Fetching order history for User ID: 1
+INFO 2026-02-19 14:53:07,564 user_order_service 805 129516437661376 Fetching order history for User ID: 1
+INFO 2026-02-19 14:53:27,742 user_order_service 805 129516437661376 Fetching order history for User ID: 1
+INFO 2026-02-19 14:53:32,709 user_order_service 805 129516437661376 Fetching order history for User ID: 1
+INFO 2026-02-19 14:58:07,705 user_order_service 805 129516437661376 Fetching order history for User ID: 1
+INFO 2026-02-19 15:02:22,577 user_order_service 805 129516429268672 Fetching order history for User ID: 1
+INFO 2026-02-19 15:03:21,638 user_order_service 805 129516072593088 Fetching order history for User ID: 1
+INFO 2026-02-20 10:07:03,595 user_order_service 7 140253927024320 Fetching order history for User ID: 1
+INFO 2026-02-20 10:07:05,644 user_order_service 7 140253927024320 Fetching detail Order 28 for User 1
+INFO 2026-02-20 10:07:16,135 user_order_service 7 140253927024320 Fetching detail Order 28 for User 1
+INFO 2026-02-20 10:12:53,273 user_order_service 7 140253956400832 Fetching detail Order 28 for User 1
+INFO 2026-02-20 10:15:18,138 user_order_service 7 140253935417024 Fetching detail Order 28 for User 1
+INFO 2026-02-20 10:17:11,851 user_order_service 7 140253956400832 Fetching detail Order 28 for User 1
+INFO 2026-02-20 10:17:29,059 user_order_service 7 140253956400832 Fetching detail Order 28 for User 1
+INFO 2026-02-20 10:18:01,497 user_order_service 7 140253956400832 Fetching detail Order 28 for User 1
+INFO 2026-02-20 10:18:35,909 user_order_service 7 140253956400832 Fetching detail Order 28 for User 1
+INFO 2026-02-20 10:19:52,965 user_order_service 7 140253935417024 Fetching detail Order 28 for User 1
+INFO 2026-02-20 10:20:02,026 user_order_service 7 140253935417024 Fetching detail Order 28 for User 1
+INFO 2026-02-20 13:30:42,050 user_order_service 826 139084102092480 Fetching order history for User ID: 1
+INFO 2026-02-20 13:30:46,245 user_order_service 826 139084102092480 Fetching order history for User ID: 1
+INFO 2026-02-20 13:30:50,999 user_order_service 826 139084102092480 Fetching order history for User ID: 1
+INFO 2026-02-20 13:30:52,844 user_order_service 826 139084102092480 Fetching order history for User ID: 1
+INFO 2026-02-20 19:03:08,499 user_order_service 279 133099771025088 Invoice for order 76 is not fully paid yet.
+INFO 2026-02-20 19:07:00,219 user_order_service 279 133099771025088 Fetching order history for User ID: 1
+WARNING 2026-02-20 19:11:46,723 user_order_service 279 133099771025088 Invoice not found for order 75
+INFO 2026-02-20 19:29:44,451 user_order_service 279 133099800397504 Fetching order history for User ID: 1
+INFO 2026-02-20 19:29:46,428 user_order_service 279 133099800397504 Fetching order history for User ID: 1
+INFO 2026-02-20 19:29:50,316 user_order_service 279 133099800397504 Fetching order history for User ID: 1
+INFO 2026-02-20 19:29:56,679 user_order_service 279 133099425887936 Fetching order history for User ID: 1
+INFO 2026-02-20 19:30:44,192 user_order_service 279 133099808790208 Fetching order history for User ID: 1
+INFO 2026-02-20 19:30:55,806 user_order_service 279 133099808790208 Fetching order history for User ID: 1
+INFO 2026-02-20 19:31:52,580 user_order_service 279 133099808790208 Fetching order history for User ID: 1
+INFO 2026-02-20 19:33:09,788 user_order_service 279 133099783612096 Fetching order history for User ID: 1
+INFO 2026-02-21 06:07:33,604 user_order_service 7 135300612331200 Fetching order history for User ID: 1
+INFO 2026-02-21 06:07:40,944 user_order_service 7 135300612331200 Fetching order history for User ID: 1
+INFO 2026-02-21 11:43:30,072 user_order_service 382 126666353399488 Fetching order history for User ID: 1
+INFO 2026-02-21 11:43:31,211 user_order_service 382 126666353399488 Fetching detail Order 20 for User 1
+INFO 2026-02-21 11:43:36,773 user_order_service 382 126666353399488 Fetching detail Order 20 for User 1
+INFO 2026-02-21 12:04:24,742 user_order_service 382 126666353399488 Fetching detail Order 20 for User 1
+INFO 2026-02-21 12:24:06,708 user_order_service 382 126666757105344 Fetching order history for User ID: 1
+INFO 2026-02-21 12:24:18,406 user_order_service 382 126666757105344 Fetching order history for User ID: 1
+INFO 2026-02-21 12:24:21,015 user_order_service 382 126666757105344 Fetching detail Order 78 for User 1
+INFO 2026-02-21 12:24:23,096 user_order_service 382 126666757105344 Fetching detail Order 78 for User 1
+INFO 2026-02-21 12:29:58,307 user_order_service 382 126666715141824 Fetching order history for User ID: 1
+INFO 2026-02-21 13:28:26,337 user_order_service 382 126666757105344 Fetching order history for User ID: 1
+INFO 2026-02-21 13:40:53,344 user_order_service 382 126666732975808 Fetching order history for User ID: 1
+INFO 2026-02-21 13:45:01,354 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:45:03,040 user_order_service 382 126666361792192 Fetching detail Order 78 for User 1
+INFO 2026-02-21 13:45:07,245 user_order_service 382 126666361792192 Fetching detail Order 78 for User 1
+INFO 2026-02-21 13:45:10,198 user_order_service 382 126666732975808 Fetching order history for User ID: 1
+INFO 2026-02-21 13:47:24,246 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:47:48,130 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:47:56,073 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:47:58,820 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:48:00,523 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:48:01,470 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:48:09,261 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:48:13,303 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:48:16,608 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:48:18,177 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:48:25,114 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:48:35,074 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:48:39,952 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:49:12,367 user_order_service 382 126666732975808 Fetching order history for User ID: 1
+INFO 2026-02-21 13:49:13,779 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:49:23,182 user_order_service 382 126666715141824 Fetching order history for User ID: 1
+INFO 2026-02-21 13:49:24,569 user_order_service 382 126666361792192 Fetching order history for User ID: 1
+INFO 2026-02-21 13:51:20,503 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:51:23,471 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:51:24,612 user_order_service 382 126666724583104 Fetching order history for User ID: 1
+INFO 2026-02-21 13:51:26,055 user_order_service 382 126666715141824 Fetching order history for User ID: 1
+INFO 2026-02-21 13:51:57,771 user_order_service 382 126666732975808 Fetching order history for User ID: 1
+INFO 2026-02-21 18:27:56,600 user_order_service 889 138103599658688 Fetching order history for User ID: 1
+INFO 2026-02-21 18:27:58,640 user_order_service 889 138103599658688 Fetching detail Order 78 for User 1
+INFO 2026-02-21 18:28:25,383 user_order_service 889 138103599658688 Fetching detail Order 78 for User 1
+INFO 2026-02-21 18:29:01,610 user_order_service 889 138103677425344 Fetching detail Order 78 for User 1
+INFO 2026-02-22 00:39:17,771 user_order_service 1130 138276857521856 Fetching order history for User ID: 1
+INFO 2026-02-22 00:39:20,155 user_order_service 1130 138276857521856 Fetching detail Order 78 for User 1
+INFO 2026-02-22 00:39:42,612 user_order_service 1130 138276857521856 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:41:48,861 user_order_service 21 128653119710912 Fetching order history for User ID: 1
+INFO 2026-02-23 02:48:38,614 user_order_service 21 128653351618240 Fetching order history for User ID: 1
+INFO 2026-02-23 02:49:52,122 user_order_service 21 128653102925504 Fetching order history for User ID: 1
+INFO 2026-02-23 02:50:49,674 user_order_service 21 128653102925504 Fetching order history for User ID: 1
+INFO 2026-02-23 02:51:15,010 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:52:57,538 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:02,531 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:07,546 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:09,593 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:13,567 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:14,529 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:22,574 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:33,545 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:41,332 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:44,553 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:45,556 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:55,565 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:53:57,789 user_order_service 21 128653128103616 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:54:02,543 user_order_service 21 128653102925504 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:54:04,556 user_order_service 21 128653102925504 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:54:05,928 user_order_service 21 128653102925504 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:54:09,574 user_order_service 21 128653102925504 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:54:10,437 user_order_service 21 128653102925504 Fetching detail Order 78 for User 1
+INFO 2026-02-23 02:54:18,479 user_order_service 21 128653102925504 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:08,916 user_order_service 153 135163080079040 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:10,250 user_order_service 153 135163063293632 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:16,380 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:18,239 user_order_service 153 135163080079040 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:22,845 user_order_service 153 135163063293632 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:24,691 user_order_service 153 135163080079040 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:36,239 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:38,133 user_order_service 153 135163063293632 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:47,254 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:52,767 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:17:54,238 user_order_service 153 135163063293632 Fetching detail Order 78 for User 1
+INFO 2026-02-23 03:18:33,290 user_order_service 153 135163071686336 Fetching detail Order 78 for User 1
+INFO 2026-02-24 10:20:48,633 user_order_service 9 127131384256192 Fetching order history for User ID: 21
+INFO 2026-02-26 09:49:16,866 user_order_service 7 132892972058304 Fetching order history for User ID: 21
+INFO 2026-05-23 06:31:28,428 user_order_service 7 137845941454528 Fetching order history for User ID: 1
+INFO 2026-05-23 06:49:59,571 user_order_service 7 137846336947904 Fetching order history for User ID: 1
+INFO 2026-05-23 07:16:54,067 user_order_service 7 137846314915520 Fetching order history for User ID: 1
+INFO 2026-05-23 08:15:53,988 user_order_service 54 139513825326784 Fetching order history for User ID: 1
+INFO 2026-05-23 08:21:21,604 user_order_service 54 139513825326784 Fetching order history for User ID: 1
+INFO 2026-05-23 09:00:08,219 user_order_service 54 139513825326784 Fetching order history for User ID: 1
+INFO 2026-05-23 10:04:49,517 user_order_service 54 139514201937600 Fetching order history for User ID: 1
+INFO 2026-05-23 10:04:51,511 user_order_service 54 139514201937600 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:05:06,436 user_order_service 54 139514201937600 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:07:14,551 user_order_service 54 139514201937600 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:11:02,858 user_order_service 54 139513816934080 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:12:18,476 user_order_service 54 139513816934080 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:13:16,294 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:15:24,984 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:16:42,021 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:16:47,955 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:17:32,203 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:17:44,481 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:18:31,123 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+INFO 2026-05-23 10:18:32,716 user_order_service 54 139513825326784 Fetching detail Order 6 for User 1
+<<<<<<< HEAD
+INFO 2026-05-24 18:25:57,970 user_order_service 8 124191094511296 Fetching order history for User ID: 1
+INFO 2026-06-01 12:20:42,629 user_order_service 7 124105042687680 Fetching order history for User ID: 1
+INFO 2026-06-01 12:22:19,242 user_order_service 7 124105042687680 Fetching order history for User ID: 1
+WARNING 2026-06-01 12:22:20,478 user_order_service 7 124105042687680 Invoice not found for order 6
+INFO 2026-06-01 12:22:22,222 user_order_service 7 124105042687680 Fetching order history for User ID: 1
+WARNING 2026-06-01 12:22:23,789 user_order_service 7 124105042687680 Invoice not found for order 1
+INFO 2026-06-01 12:22:25,643 user_order_service 7 124105042687680 Fetching order history for User ID: 1
+INFO 2026-06-01 12:23:03,244 user_order_service 7 124104782882496 Fetching order history for User ID: 1
+INFO 2026-06-01 12:35:37,245 user_order_service 7 124104824846016 Fetching order history for User ID: 1
+INFO 2026-06-01 18:26:17,790 user_order_service 7 139665569556160 Fetching order history for User ID: 1
+INFO 2026-06-01 18:26:31,100 user_order_service 7 139665208800960 Fetching order history for User ID: 1
+=======
+INFO 2026-06-01 11:13:02,336 user_order_service 261 126858317436608 Fetching order history for User ID: 1
+>>>>>>> debf3403d6a239088024e2bb9f6b32ee2bac7f5a
+INFO 2026-06-03 08:47:39,632 user_order_service 7 135518281144000 Fetching order history for User ID: 1
+INFO 2026-06-03 08:49:30,917 user_order_service 7 135518654461632 Fetching order history for User ID: 1
+INFO 2026-06-03 08:51:05,597 user_order_service 7 135518654461632 Fetching order history for User ID: 1
+INFO 2026-06-03 08:51:11,617 user_order_service 7 135518255965888 Fetching order history for User ID: 1
+INFO 2026-06-13 17:28:51,294 user_order_service 7 134606461503168 Invoice for order 7 is not fully paid yet.
+INFO 2026-06-13 17:29:57,418 user_order_service 7 134606078600896 Fetching order history for User ID: 1
+INFO 2026-06-13 17:30:10,599 user_order_service 7 134606461503168 Invoice for order 8 is not fully paid yet.
+INFO 2026-06-13 17:49:03,116 user_order_service 54 123455366399680 Fetching detail Order 8 for User 1
+INFO 2026-06-13 17:49:54,713 user_order_service 54 123455366399680 Fetching detail Order 8 for User 1
+INFO 2026-06-13 17:50:01,491 user_order_service 54 123455366399680 Fetching detail Order 8 for User 1
+INFO 2026-06-13 18:21:11,953 user_order_service 82 131289898284736 Fetching detail Order 8 for User 1
+INFO 2026-06-13 18:59:13,813 user_order_service 91 129286626338496 Fetching order history for User ID: 1
+INFO 2026-06-13 18:59:17,282 user_order_service 91 129286626338496 Fetching detail Order 9 for User 1
+INFO 2026-06-13 18:59:39,841 user_order_service 91 129286845658816 Fetching order history for User ID: 1
+INFO 2026-06-13 18:59:48,272 user_order_service 91 129286845658816 Fetching order history for User ID: 1
+INFO 2026-06-13 19:00:26,178 user_order_service 91 129286854051520 Fetching order history for User ID: 2
+INFO 2026-06-13 19:00:28,092 user_order_service 91 129286854051520 Fetching detail Order 10 for User 2
+INFO 2026-06-13 19:01:37,962 user_order_service 91 129286854051520 Fetching order history for User ID: 6
+INFO 2026-06-14 10:28:57,278 user_order_service 7 125334116624064 Fetching order history for User ID: 1
+INFO 2026-06-14 10:29:10,176 user_order_service 7 125334116624064 Fetching order history for User ID: 1
+INFO 2026-06-14 10:29:24,597 user_order_service 7 125334116624064 Fetching order history for User ID: 1
+INFO 2026-06-14 10:29:29,060 user_order_service 7 125334116624064 Fetching order history for User ID: 1
+INFO 2026-06-14 10:30:15,191 user_order_service 7 125334116624064 Fetching order history for User ID: 1
+INFO 2026-06-14 10:30:18,496 user_order_service 7 125334116624064 Fetching order history for User ID: 1
+INFO 2026-06-14 10:30:20,938 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:32:18,371 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:32:33,570 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:32:35,636 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:32:37,077 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:32:39,860 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:33:59,193 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:34:01,687 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:34:38,942 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:35:45,702 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:35:54,381 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:05,678 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:07,454 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:22,603 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:26,141 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:27,963 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:31,691 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:38,440 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:41,545 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:46,779 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:48,514 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:54,365 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:56,846 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:36:59,739 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:37:07,671 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:37:10,988 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:37:16,000 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:37:20,862 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:37:22,119 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:37:23,534 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:38:11,180 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:38:21,183 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:38:26,179 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:38:50,136 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:38:55,450 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:39:00,684 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:39:03,489 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:39:07,794 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:39:31,506 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:39:47,016 user_order_service 7 125334108231360 Fetching detail Order 16 for User 1
+INFO 2026-06-14 10:40:14,231 user_order_service 7 125334099838656 Fetching order history for User ID: 1
+INFO 2026-06-14 10:44:29,400 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+INFO 2026-06-14 10:44:30,129 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+INFO 2026-06-14 10:45:26,517 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:45:28,643 user_order_service 7 125334125016768 Invoice not found for order 12
+INFO 2026-06-14 10:45:30,994 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:46:05,107 user_order_service 7 125334108231360 Invoice not found for order 12
+WARNING 2026-06-14 10:46:07,695 user_order_service 7 125334108231360 Invoice not found for order 12
+INFO 2026-06-14 10:46:10,245 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:46:14,862 user_order_service 7 125334125016768 Invoice not found for order 12
+INFO 2026-06-14 10:47:26,816 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+INFO 2026-06-14 10:47:31,466 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:47:33,439 user_order_service 7 125334116624064 Invoice not found for order 12
+INFO 2026-06-14 10:47:34,728 user_order_service 7 125334116624064 Fetching order history for User ID: 1
+INFO 2026-06-14 10:47:40,869 user_order_service 7 125334116624064 Fetching detail Order 12 for User 1
+INFO 2026-06-14 10:47:43,224 user_order_service 7 125334116624064 Fetching order history for User ID: 1
+INFO 2026-06-14 10:48:13,629 user_order_service 7 125334116624064 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:48:15,334 user_order_service 7 125334108231360 Invoice not found for order 11
+INFO 2026-06-14 10:48:17,461 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:48:25,628 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+INFO 2026-06-14 10:48:52,195 user_order_service 7 125334108231360 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:48:53,661 user_order_service 7 125334125016768 Invoice not found for order 12
+INFO 2026-06-14 10:49:13,703 user_order_service 7 125334125016768 Fetching detail Order 12 for User 1
+WARNING 2026-06-14 10:49:17,581 user_order_service 7 125334125016768 Invoice not found for order 12
+INFO 2026-06-14 10:54:01,113 user_order_service 7 125334125016768 Fetching detail Order 12 for User 1
+INFO 2026-06-14 10:54:03,278 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:54:11,102 user_order_service 7 125334125016768 Invoice not found for order 16
+INFO 2026-06-14 10:54:14,536 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:54:17,803 user_order_service 7 125334125016768 Invoice not found for order 12
+INFO 2026-06-14 10:54:19,362 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:54:22,688 user_order_service 7 125334125016768 Invoice not found for order 12
+INFO 2026-06-14 10:54:26,874 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+WARNING 2026-06-14 10:54:28,161 user_order_service 7 125334125016768 Invoice not found for order 14
+INFO 2026-06-14 10:54:30,282 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+INFO 2026-06-14 10:55:21,347 user_order_service 7 125334475392704 Fetching order history for User ID: 1
+INFO 2026-06-14 10:55:49,387 user_order_service 7 125334475392704 Fetching detail Order 17 for User 1
+WARNING 2026-06-14 10:55:51,520 user_order_service 7 125334475392704 Invoice not found for order 17
+INFO 2026-06-14 10:55:53,439 user_order_service 7 125334475392704 Fetching detail Order 17 for User 1
+INFO 2026-06-14 10:56:02,534 user_order_service 7 125334475392704 Fetching detail Order 17 for User 1
+WARNING 2026-06-14 10:56:03,820 user_order_service 7 125334475392704 Invoice not found for order 17
+INFO 2026-06-14 10:56:08,794 user_order_service 7 125334475392704 Fetching detail Order 17 for User 1
+INFO 2026-06-14 10:56:19,736 user_order_service 7 125334475392704 Fetching detail Order 17 for User 1
+WARNING 2026-06-14 10:56:20,748 user_order_service 7 125334518404800 Invoice not found for order 17
+WARNING 2026-06-14 10:56:28,405 user_order_service 7 125334518404800 Invoice not found for order 17
+WARNING 2026-06-14 10:58:06,462 user_order_service 7 125334518404800 Invoice not found for order 17
+WARNING 2026-06-14 10:59:05,209 user_order_service 7 125334518404800 Invoice not found for order 17
+WARNING 2026-06-14 10:59:09,190 user_order_service 7 125334518404800 Invoice not found for order 17
+WARNING 2026-06-14 10:59:14,217 user_order_service 7 125334518404800 Invoice not found for order 17
+INFO 2026-06-14 11:00:00,511 user_order_service 7 125334475392704 Fetching order history for User ID: 1
+INFO 2026-06-14 11:00:02,243 user_order_service 7 125334475392704 Fetching detail Order 16 for User 1
+INFO 2026-06-14 11:00:19,039 user_order_service 7 125334475392704 Fetching order history for User ID: 1
+INFO 2026-06-14 11:00:21,610 user_order_service 7 125334475392704 Fetching detail Order 18 for User 1
+INFO 2026-06-14 11:00:28,716 user_order_service 7 125334475392704 Fetching detail Order 18 for User 1
+WARNING 2026-06-14 11:00:29,670 user_order_service 7 125334475392704 Invoice not found for order 18
+INFO 2026-06-14 11:00:31,189 user_order_service 7 125334475392704 Fetching detail Order 18 for User 1
+INFO 2026-06-14 11:00:58,534 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+INFO 2026-06-14 11:02:00,333 user_order_service 7 125334518404800 Fetching order history for User ID: 1
+INFO 2026-06-14 11:02:06,215 user_order_service 7 125334518404800 Fetching detail Order 18 for User 1
+INFO 2026-06-14 11:02:44,186 user_order_service 7 125334518404800 Fetching order history for User ID: 1
+INFO 2026-06-14 11:02:59,495 user_order_service 7 125334125016768 Fetching order history for User ID: 1
+INFO 2026-06-14 11:03:02,988 user_order_service 7 125334125016768 Fetching detail Order 17 for User 1
+INFO 2026-06-14 11:08:51,974 user_order_service 7 125334475392704 Fetching order history for User ID: 1
+INFO 2026-06-14 11:08:54,291 user_order_service 7 125334475392704 Fetching detail Order 18 for User 1
+INFO 2026-06-14 11:10:33,595 user_order_service 7 125334475392704 Fetching order history for User ID: 1
+INFO 2026-06-14 11:10:35,029 user_order_service 7 125334475392704 Fetching detail Order 18 for User 1
+INFO 2026-06-14 11:11:07,871 user_order_service 7 125334518404800 Fetching detail Order 18 for User 1
+INFO 2026-06-14 11:11:10,997 user_order_service 7 125334518404800 Fetching order history for User ID: 1
+INFO 2026-06-14 11:11:13,338 user_order_service 7 125334518404800 Fetching detail Order 18 for User 1
+INFO 2026-06-14 11:17:18,511 user_order_service 7 125334475392704 Fetching order history for User ID: 1
+INFO 2026-06-14 11:17:20,176 user_order_service 7 125334475392704 Fetching detail Order 19 for User 1
+INFO 2026-06-14 11:19:00,523 user_order_service 7 125334518404800 Fetching order history for User ID: 1
+INFO 2026-06-14 12:27:53,335 user_order_service 7 125334475392704 Fetching order history for User ID: 1
+INFO 2026-06-14 12:48:21,711 user_order_service 7 125334475392704 Fetching order history for User ID: 4
+INFO 2026-06-14 12:48:39,452 user_order_service 7 125334504769216 Fetching order history for User ID: 4
+INFO 2026-06-14 12:48:51,075 user_order_service 7 125334108231360 Fetching order history for User ID: 4
+INFO 2026-06-14 12:48:54,276 user_order_service 7 125334496376512 Fetching order history for User ID: 4
+INFO 2026-07-23 20:42:48,200 user_order_service 7 130556966725312 Fetching order history for User ID: 1
