@@ -161,8 +161,6 @@ def auto_generate_invoice_on_full_payment(sender, instance, created, **kwargs):
         return
 
     order = instance.order
-    # اگر قیمت نهایی هنوز تعیین نشده (برای سفارش‌هایی که توسط ادمین بررسی نشده‌اند)،
-    # از صدور خودکار فاکتور جلوگیری می‌کنیم.
     if not order.final_price or order.final_price <= 0:
         return
 

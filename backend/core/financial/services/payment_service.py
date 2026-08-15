@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from core.models import Order, FinancialStatus
-from core.financial.models import Payment, FinancialLog
+from core.financial.models import Payment, FinancialLog, Invoice
 from apps.accounts.services import WalletService
 
 
@@ -32,13 +32,36 @@ class PaymentService:
         ]:
             raise ValidationError("امکان پرداخت برای این سفارش وجود ندارد.")
 
-        # ===== تعیین مبلغ پرداختی ===== #
-        if amount is None:
-            amount = order.remaining_amount
-        if amount <= 0:
-            raise ValidationError("مبلغ پرداختی باید بزرگ‌تر از صفر باشد.")
-        if amount > order.remaining_amount:
-            raise ValidationError("مبلغ پرداختی بیشتر از مانده حساب است.")
+        # ===== دریافت فاکتور مرتبط ===== #
+        invoice = Invoice.objects.filter(order=order).first()
+        
+        # ===== اگر فاکتور وجود دارد، اعتبارسنجی‌های مربوط به فاکتور ===== #
+        if invoice:
+            # ===== اگر فاکتور نهایی شده ===== #
+            if invoice.status == Invoice.Status.FINALIZE:
+                raise ValidationError("فاکتور نهایی شده و قابل پرداخت نیست.")
+
+            # ===== اگر فاکتور تسویه شده ===== #
+            if invoice.status == Invoice.Status.PAID_FULL:
+                raise ValidationError("فاکتور قبلاً تسویه شده است.")
+
+            # ===== تعیین مبلغ پرداختی بر اساس فاکتور ===== #
+            invoice_remaining = invoice.remaining_amount
+            
+            if amount is None:
+                amount = invoice_remaining
+            if amount <= 0:
+                raise ValidationError("مبلغ پرداختی باید بزرگ‌تر از صفر باشد.")
+            if amount > invoice_remaining:
+                raise ValidationError(f"مبلغ پرداختی بیشتر از مانده حساب فاکتور ({invoice_remaining:,}) است.")
+        else:
+            # ===== اگر فاکتور وجود ندارد، از اطلاعات سفارش استفاده می‌کنیم ===== #
+            if amount is None:
+                amount = order.remaining_amount
+            if amount <= 0:
+                raise ValidationError("مبلغ پرداختی باید بزرگ‌تر از صفر باشد.")
+            if amount > order.remaining_amount:
+                raise ValidationError(f"مبلغ پرداختی بیشتر از مانده حساب سفارش ({order.remaining_amount:,}) است.")
 
         # ===== ایجاد رکورد پرداخت ===== #
         payment = Payment.objects.create(
@@ -71,9 +94,33 @@ class PaymentService:
                 (order.deposit_paid or 0) + amount,
                 order.deposit_required
             )
-        order.save()  # وضعیت مالی به‌صورت خودکار محاسبه می‌شود
+        order.save()
 
-        # ===== ثبت لاگ مالی ===== #
+        # ===== به‌روزرسانی فاکتور (اگر وجود داشته باشد) ===== #
+        if invoice:
+            invoice.paid_amount = (invoice.paid_amount or 0) + amount
+            
+            # ===== تعیین وضعیت جدید فاکتور ===== #
+            if invoice.paid_amount >= invoice.final_amount:
+                invoice.status = Invoice.Status.PAID_FULL
+            elif invoice.paid_amount > 0:
+                invoice.status = Invoice.Status.PAID_PARTIAL
+            else:
+                invoice.status = Invoice.Status.PENDING
+            
+            invoice.save()
+
+            # ===== ثبت لاگ مالی برای فاکتور ===== #
+            FinancialLog.log(
+                action_type=FinancialLog.ActionType.INVOICE_UPDATED,
+                order=order,
+                user=user,
+                invoice=invoice,
+                description=f"پرداخت {amount:,} IQD از کیف پول - وضعیت فاکتور: {invoice.get_status_display()}",
+                created_by=user,
+            )
+
+        # ===== ثبت لاگ مالی برای پرداخت ===== #
         FinancialLog.log(
             action_type=FinancialLog.ActionType.PAYMENT_APPROVED,
             order=order,
@@ -107,10 +154,26 @@ class PaymentService:
         if not order:
             raise ValidationError("سفارش یافت نشد.")
 
-        if amount <= 0:
-            raise ValidationError("مبلغ پرداختی باید بزرگ‌تر از صفر باشد.")
-        if amount > (order.remaining_amount or 0):
-            raise ValidationError("مبلغ پرداختی بیشتر از مانده حساب است.")
+        # ===== دریافت فاکتور ===== #
+        invoice = Invoice.objects.filter(order=order).first()
+        
+        # ===== اگر فاکتور وجود دارد ===== #
+        if invoice:
+            if invoice.status == Invoice.Status.FINALIZE:
+                raise ValidationError("فاکتور نهایی شده و قابل پرداخت نیست.")
+
+            invoice_remaining = invoice.remaining_amount
+
+            if amount <= 0:
+                raise ValidationError("مبلغ پرداختی باید بزرگ‌تر از صفر باشد.")
+            if amount > invoice_remaining:
+                raise ValidationError(f"مبلغ پرداختی بیشتر از مانده حساب فاکتور ({invoice_remaining:,}) است.")
+        else:
+            # ===== اگر فاکتور وجود ندارد، از اطلاعات سفارش استفاده می‌کنیم ===== #
+            if amount <= 0:
+                raise ValidationError("مبلغ پرداختی باید بزرگ‌تر از صفر باشد.")
+            if amount > order.remaining_amount:
+                raise ValidationError(f"مبلغ پرداختی بیشتر از مانده حساب سفارش ({order.remaining_amount:,}) است.")
 
         payment_payer = order.user or user
 
@@ -124,6 +187,7 @@ class PaymentService:
             description=description or "",
             registered_by=created_by,
         )
+        
         FinancialLog.objects.create(
             order=order,
             user=payment_payer,
@@ -185,6 +249,9 @@ class PaymentService:
         order = payment.order
         actor = actor or payment.approved_by
 
+        # ===== دریافت فاکتور ===== #
+        invoice = Invoice.objects.filter(order=order).first()
+
         if payment.method == Payment.Method.WALLET:
             wallet_service = WalletService()
             wallet_service.debit(
@@ -196,15 +263,40 @@ class PaymentService:
                 payment=payment,
             )
 
+        # ===== به‌روزرسانی سفارش ===== #
         order.paid_amount = (order.paid_amount or 0) + payment.amount
         if order.deposit_required and order.deposit_required > 0:
             order.deposit_paid = min(
                 (order.deposit_paid or 0) + payment.amount,
                 order.deposit_required,
             )
-        # وضعیت مالی به‌صورت خودکار در متد save محاسبه می‌شود
         order.save()
 
+        # ===== به‌روزرسانی فاکتور (اگر وجود داشته باشد) ===== #
+        if invoice:
+            invoice.paid_amount = (invoice.paid_amount or 0) + payment.amount
+            
+            # ===== تعیین وضعیت جدید فاکتور ===== #
+            if invoice.paid_amount >= invoice.final_amount:
+                invoice.status = Invoice.Status.PAID_FULL
+            elif invoice.paid_amount > 0:
+                invoice.status = Invoice.Status.PAID_PARTIAL
+            else:
+                invoice.status = Invoice.Status.PENDING
+            
+            invoice.save()
+
+            # ===== ثبت لاگ فاکتور ===== #
+            FinancialLog.objects.create(
+                order=order,
+                user=payment.user,
+                invoice=invoice,
+                action_type=FinancialLog.ActionType.INVOICE_UPDATED,
+                description=f"تأیید پرداخت {payment.payment_code} - وضعیت فاکتور: {invoice.get_status_display()}",
+                created_by=actor,
+            )
+
+        # ===== ثبت لاگ پرداخت ===== #
         FinancialLog.objects.create(
             order=order,
             user=payment.user,

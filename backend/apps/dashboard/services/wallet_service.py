@@ -6,6 +6,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 from apps.accounts.models import Wallet
 from apps.accounts.services import WalletService
 from core.users.services import CustomerService
+from apps.accounts.exceptions import WalletNotFoundException
 
 logger = logging.getLogger('dashboard.services.wallet')
 

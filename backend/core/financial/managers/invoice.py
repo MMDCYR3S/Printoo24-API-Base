@@ -15,16 +15,27 @@ class InvoiceQuerySet(BaseQuerySet):
         """ دریافت فاکتور مرتبط با یک سفارش خاص """
         return self.select_related('order__user').filter(order_id=order_id).first()
 
-    def get_invoice_with_full_details_by_order(self, invoice_id: int):
-        """ دریافت فاکتور با تمام جزئیات سفارش و تک آیتم آن """
-        return self.select_related(
+    def get_invoice_with_full_details_by_order(self, identifier: int, by_order: bool = False):
+        """
+        دریافت فاکتور با تمام جزئیات سفارش و تک آیتم آن
+        
+        Args:
+            identifier: شناسه فاکتور یا سفارش
+            by_order: اگر True باشد، identifier به عنوان order_id در نظر گرفته می‌شود
+        """
+        queryset = self.select_related(
             'order__user', 
             'order__address', 
             'order__current_status'
         ).prefetch_related(
             'order__order_item_order__product',
             'order__order_item_order__files'
-        ).filter(id=invoice_id).first()
+        )
+        
+        if by_order:
+            return queryset.filter(order_id=identifier).first()
+        else:
+            return queryset.filter(id=identifier).first()
 
     def get_invoices_with_details(self):
         """ لیست فاکتورها برای پنل مدیریت (همراه با سفارش و کاربر) """
@@ -198,5 +209,5 @@ class InvoiceManager(models.Manager):
     def get_yearly_profit(self):
         return self.get_queryset().get_yearly_profit()
     
-    def get_invoice_with_full_details_by_order(self, invoice_id: int):
-        return self.get_queryset().get_invoice_with_full_details_by_order(invoice_id)
+    def get_invoice_with_full_details_by_order(self, identifier: int, by_order: bool = False):
+        return self.get_queryset().get_invoice_with_full_details_by_order(identifier, by_order)

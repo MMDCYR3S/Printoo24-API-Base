@@ -63,14 +63,11 @@ class UserOrderListService:
             raise NotFound(msg_provider.get("profile.E8007"))
 
         return quotation
-
+ 
     def get_order_invoice(self, user_id: int, order_id: int):
-        """
-        دریافت فاکتور نهایی یک سفارش خاص برای کاربر (فقط در صورت تسویه).
-        """
         from core.financial.models import Invoice 
         
-        invoice = Invoice.objects.get_invoice_with_full_details_by_order(order_id)
+        invoice = Invoice.objects.get_invoice_with_full_details_by_order(order_id, by_order=True)
 
         if not invoice:
             logger.warning(f"Invoice not found for order {order_id}")

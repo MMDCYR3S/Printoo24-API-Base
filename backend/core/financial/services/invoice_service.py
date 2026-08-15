@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.db import transaction
 from rest_framework.exceptions import NotFound, ValidationError
 
-from core.models import Order
+from core.models import Order, OrderItem
 from core.financial.models import Invoice, FinancialLog
 
 
@@ -15,6 +15,11 @@ class InvoiceService:
 
     # ===== تعیین وضعیت خودکار ===== #
     def _determine_status(self, paid_amount: Decimal, final_amount: Decimal):
+        if paid_amount is None:
+            paid_amount = Decimal('0')
+        if final_amount is None:
+            final_amount = Decimal('0')
+            
         if paid_amount >= final_amount:
             return Invoice.Status.PAID_FULL
         elif paid_amount > 0:
@@ -63,6 +68,28 @@ class InvoiceService:
 
         if invoice.final_amount is not None:
             order.total_price = invoice.final_amount
+        else:
+            final_amount = (invoice.items_amount + invoice.services_amount + invoice.tax_amount) - invoice.discount_amount
+            order.total_price = final_amount
+
+        # ===== به‌روزرسانی قیمت آیتم‌های سفارش ===== #
+        order_items = order.order_item_order.all()
+        if order_items.exists():
+            for item in order_items:
+                item.price = invoice.items_amount
+                item.save()
+        else:
+            try:
+                order_item = order.order_item_order.get()
+                order_item.price = invoice.items_amount
+                order_item.save()
+            except OrderItem.DoesNotExist:
+                pass
+            except OrderItem.MultipleObjectsReturned:
+                order_item = order.order_item_order.first()
+                if order_item:
+                    order_item.price = invoice.items_amount
+                    order_item.save()
 
     # ===== ایجاد فاکتور ===== #
     @transaction.atomic
@@ -75,10 +102,7 @@ class InvoiceService:
         if Invoice.objects.filter(order=order).exists():
             raise ValidationError("برای این سفارش قبلاً فاکتور صادر شده است.")
 
-        # تعیین مبلغ نهایی در صورت عدم ارسال
         final_amount = data.get('final_amount', order.final_price)
-        # اگر paid_amount ارسال نشود، از مبلغِ واقعیِ پرداخت‌شده سفارش استفاده می‌شود
-        # تا فاکتور و سفارش دچار مغایرت نشوند.
         paid_amount = data.get('paid_amount')
         if paid_amount is None:
             paid_amount = order.paid_amount
@@ -98,13 +122,11 @@ class InvoiceService:
         )
 
         # ===== همگام‌سازی قیمت‌ها و تاریخ صدور فاکتور روی سفارش ===== #
-        # قانون: فاکتور صاحبِ قیمت نهایی و قیمت‌های جانبی سفارش است؛ سفارش به‌صورت
-        # مستقیم قیمتش تغییر نمی‌کند و از فاکتور می‌گیرد.
         self._sync_order_from_invoice(order, invoice)
         order.invoice_date = invoice.issued_at
         order.save()
 
-        # ثبت لاگ
+        # ===== ثبت لاگ ===== #
         FinancialLog.log(
             action_type=FinancialLog.ActionType.INVOICE_CREATED,
             order=order,
@@ -128,18 +150,27 @@ class InvoiceService:
             'status': invoice.status,
         }
 
+        # ===== به‌روزرسانی فیلدها ===== #
         for field, value in data.items():
             if field in ['paid_amount', 'items_amount', 'services_amount',
-                         'tax_amount', 'discount_amount', 'final_amount',
-                         'description', 'due_date']:
+                        'tax_amount', 'discount_amount', 'final_amount',
+                        'description', 'due_date']:
                 setattr(invoice, field, value)
 
-        # به‌روزرسانی خودکار وضعیت
+        # ===== محاسبه خودکار final_amount در صورت عدم ورود ===== #
+        if 'final_amount' not in data or data.get('final_amount') is None:
+            invoice.final_amount = (
+                invoice.items_amount + 
+                invoice.services_amount + 
+                invoice.tax_amount - 
+                invoice.discount_amount
+            )
+
+        # ===== تعیین وضعیت بر اساس مبالغ نهایی ===== #
         invoice.status = self._determine_status(invoice.paid_amount, invoice.final_amount)
         invoice.save()
 
         # ===== همگام‌سازی قیمت‌های سفارش از روی فاکتور ویرایش‌شده ===== #
-        # فاکتور صاحبِ قیمت نهایی و قیمت‌های جانبی است؛ سفارش مستقیم ویرایش نمی‌شود.
         if invoice.order:
             self._sync_order_from_invoice(invoice.order, invoice)
             invoice.order.save()
@@ -172,7 +203,7 @@ class InvoiceService:
         order = invoice.order
         invoice.delete()
         FinancialLog.log(
-            action_type=FinancialLog.ActionType.INVOICE_UPDATED,  # یا نوع دیگر
+            action_type=FinancialLog.ActionType.INVOICE_UPDATED,
             order=order,
             user=order.user,
             description=f"حذف فاکتور {invoice.invoice_number}",
