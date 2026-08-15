@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from core.models import User
 
 from core.financial.models import Payment
-from .services import PaymentService
+from core.financial.services import PaymentService
 
 # ====== Signals ====== #
 
@@ -68,6 +68,12 @@ def payment_pre_save(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Payment)
 def payment_post_save(sender, instance, created, **kwargs):
+    # اگر پرداخت از داخل سرویس تأیید/رد شده باشد، از اعمال مجدد جلوگیری می‌کنیم
+    # تا از بازگشت بی‌پایان سیگنال جلوگیری شود.
+    if getattr(instance, '_signal_internal', False):
+        return
+
     old_status = getattr(instance, '_old_status', None)
     if old_status == Payment.Status.PENDING and instance.status == Payment.Status.APPROVED:
-        PaymentService().approve_payment(instance, instance.approved_by)
+        # فقط اثر مالی را اعمال می‌کنیم؛ بدون ذخیره مجدد پرداخت.
+        PaymentService().apply_approved_effect(instance)

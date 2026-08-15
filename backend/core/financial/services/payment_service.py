@@ -84,3 +84,133 @@ class PaymentService:
         )
 
         return payment
+
+    @transaction.atomic
+    def register_payment(
+        self,
+        order_id: int,
+        user,
+        amount: Decimal,
+        method: str,
+        reference_number: str = "",
+        description: str = "",
+        created_by=None,
+    ) -> Payment:
+        """
+        ثبت پرداخت دستی یا آنلاین (نقدی، کارت‌به‌کارت، حواله و ...) برای یک سفارش.
+        پرداخت با وضعیت PENDING ساخته می‌شود و پس از تأیید ادمین روی سفارش اعمال می‌شود.
+
+        توجه: طبق مدل فعلی، اثر مالی (افزایش مبلغ پرداختی سفارش و در صورت لزوم
+        برداشت از کیف پول) پس از تأیید اعمال می‌شود.
+        """
+        order = Order.objects.select_for_update().filter(id=order_id).first()
+        if not order:
+            raise ValidationError("سفارش یافت نشد.")
+
+        if amount <= 0:
+            raise ValidationError("مبلغ پرداختی باید بزرگ‌تر از صفر باشد.")
+        if amount > (order.remaining_amount or 0):
+            raise ValidationError("مبلغ پرداختی بیشتر از مانده حساب است.")
+
+        payment_payer = order.user or user
+
+        payment = Payment.objects.create(
+            order=order,
+            user=payment_payer,
+            amount=amount,
+            method=method,
+            status=Payment.Status.PENDING,
+            reference_number=reference_number or "",
+            description=description or "",
+            registered_by=created_by,
+        )
+        FinancialLog.objects.create(
+            order=order,
+            user=payment_payer,
+            payment=payment,
+            action_type=FinancialLog.ActionType.PAYMENT_RECEIVED,
+            description=f"ثبت پرداخت {payment.payment_code} به مبلغ {amount:,} IQD (در انتظار تأیید)",
+            created_by=created_by,
+        )
+        return payment
+
+    @transaction.atomic
+    def approve_payment(self, payment_id: int, actor) -> Payment:
+        """تأیید پرداخت در انتظار و اعمال اثر مالی آن روی سفارش."""
+        payment = Payment.objects.select_for_update().filter(id=payment_id).first()
+        if not payment:
+            raise ValidationError("پرداخت یافت نشد.")
+        if payment.status != Payment.Status.PENDING:
+            raise ValidationError("فقط پرداخت‌های در انتظار تأیید قابل تأیید هستند.")
+
+        payment.status = Payment.Status.APPROVED
+        payment.approved_by = actor
+        payment.approved_at = timezone.now()
+        payment.save()
+
+        self.apply_approved_effect(payment, actor)
+        return payment
+
+    @transaction.atomic
+    def reject_payment(self, payment_id: int, actor, reason: str = "") -> Payment:
+        """رد یک پرداخت در انتظار."""
+        payment = Payment.objects.filter(id=payment_id).first()
+        if not payment:
+            raise ValidationError("پرداخت یافت نشد.")
+        if payment.status != Payment.Status.PENDING:
+            raise ValidationError("فقط پرداخت‌های در انتظار تأیید قابل رد هستند.")
+
+        payment.status = Payment.Status.REJECTED
+        payment.save()
+
+        FinancialLog.objects.create(
+            order=payment.order,
+            user=payment.user,
+            payment=payment,
+            action_type=FinancialLog.ActionType.PAYMENT_REJECTED,
+            description=f"رد پرداخت {payment.payment_code}",
+            reason=reason,
+            created_by=actor,
+        )
+        return payment
+
+    @transaction.atomic
+    def apply_approved_effect(self, payment: Payment, actor=None):
+        """
+        اعمال اثر مالی پرداختِ تأییدشده روی کیف پول (در صورت روش کیف پول) و سفارش.
+
+        این متد توسط سیگنالِ ثبت/تغییر وضعیت پرداخت نیز صدا زده می‌شود و نباید
+        پرداخت را دوباره ذخیره کند تا از بازگشت بی‌پایان سیگنال جلوگیری شود.
+        """
+        order = payment.order
+        actor = actor or payment.approved_by
+
+        if payment.method == Payment.Method.WALLET:
+            wallet_service = WalletService()
+            wallet_service.debit(
+                user=payment.user,
+                amount=payment.amount,
+                description=f"پرداخت سفارش {order.order_code}",
+                created_by=actor,
+                order=order,
+                payment=payment,
+            )
+
+        order.paid_amount = (order.paid_amount or 0) + payment.amount
+        if order.deposit_required and order.deposit_required > 0:
+            order.deposit_paid = min(
+                (order.deposit_paid or 0) + payment.amount,
+                order.deposit_required,
+            )
+        # وضعیت مالی به‌صورت خودکار در متد save محاسبه می‌شود
+        order.save()
+
+        FinancialLog.objects.create(
+            order=order,
+            user=payment.user,
+            payment=payment,
+            action_type=FinancialLog.ActionType.PAYMENT_APPROVED,
+            description=f"تأیید پرداخت {payment.payment_code} به مبلغ {payment.amount:,} IQD",
+            created_by=actor,
+        )
+        return payment

@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
+from core.financial.services import PaymentService
 from django.core.exceptions import ValidationError
 
 from apps.dashboard.services.order_service import OrderDashboardService
@@ -9,7 +10,8 @@ from ..serializers.order_serializers import (
     OrderDetailSerializer, OrderCreateSerializer, OrderUpdateSerializer,
     ChangeStatusSerializer, BulkActionIdsSerializer, BulkChangeStatusSerializer,
     OrderStatusSerializer, UserAddressSerializer, OrderItemUploadSerializer,
-    CustomerListSerializer, OrderFinancialSerializer, OrderFinancialUpdateSerializer,
+    CustomerListSerializer, OrderFinancialSerializer,
+    PaymentSerializer, PaymentRegisterSerializer, PaymentRejectSerializer,
 )
 from apps.dashboard.tasks import upload_order_item_file_task
 from rest_framework import parsers
@@ -19,6 +21,7 @@ class OrderDashboardViewSet(viewsets.ViewSet):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.service = OrderDashboardService()
+        self.payment_service = PaymentService()
 
     # ===== LIST ===== #
     @extend_schema(summary="لیست سفارشات", responses=OrderDetailSerializer(many=True))
@@ -291,36 +294,94 @@ class OrderDashboardViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
-    # ===== FINANCIAL ORDER FIELDS ===== #
+    # ===== FINANCIAL ORDER FIELDS (فقط نمایش) ===== #
     @extend_schema(
         tags=["Admin - Order Management"],
-        summary="مشاهده و ویرایش مالی سفارش",
-        description="با GET جزئیات مالی سفارش را ببینید و با POST آن را ویرایش کنید.",
-        methods=['GET', 'POST'],
-        request=OrderFinancialUpdateSerializer,
+        summary="مشاهده اطلاعات مالی سفارش",
+        description="""نمایش جدأ مالی سفارش.
+        قانون: تغییر قیمت سفارش به‌صورت مستقیم مجاز نیست؛ قیمتِ اصلی و آیتم از طریق
+        پیش‌فاکتور و قیمت‌های نهایی/جانبی از طریق فاکتور اعمال می‌شود.""",
         responses={200: OrderFinancialSerializer},
     )
-    @action(detail=True, methods=['get', 'post'], url_path='financial')
+    @action(detail=True, methods=['get'], url_path='financial')
     def financial(self, request, pk=None):
-        # ===== GET ===== #
-        if request.method == 'GET':
-            try:
-                order = self.service.get_order_detail(pk)
-            except Exception:
-                return Response({'detail': 'سفارش یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
-            return Response(OrderFinancialSerializer(order).data)
+        try:
+            order = self.service.get_order_detail(pk)
+        except Exception:
+            return Response({'detail': 'سفارش یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(OrderFinancialSerializer(order).data)
 
-        # ===== POST ===== #
-        serializer = OrderFinancialUpdateSerializer(data=request.data)
+    # ===== PAYMENTS (LIST / REGISTER) =====
+    @extend_schema(
+        tags=["Admin - Order Management"],
+        summary="لیست پرداخت‌های سفارش",
+        responses=PaymentSerializer(many=True),
+    )
+    @action(detail=True, methods=['get'], url_path='payments')
+    def payments(self, request, pk=None):
+        try:
+            order = self.service.get_order_detail(pk)
+        except Exception:
+            return Response({'detail': 'سفارش یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(PaymentSerializer(order.payments.all(), many=True).data)
+
+    @extend_schema(
+        tags=["Admin - Order Management"],
+        summary="ثبت پرداخت دستی/آنلاین برای سفارش",
+        description="پرداخت با وضعیت در انتظار تایید ثبت میشود؛ پس از تایید ادمین روی سفارش اعمال میشود.",
+        request=PaymentRegisterSerializer,
+        responses={201: PaymentSerializer},
+    )
+    @action(detail=True, methods=['post'], url_path='payments')
+    def register_payment(self, request, pk=None):
+        serializer = PaymentRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            order = self.service.update_financial_details(
-                pk,
-                serializer.validated_data,
-                request.user
+            payment = self.payment_service.register_payment(
+                order_id=int(pk),
+                user=request.user,
+                amount=serializer.validated_data['amount'],
+                method=serializer.validated_data['method'],
+                reference_number=serializer.validated_data.get('reference_number', ''),
+                description=serializer.validated_data.get('description', ''),
+                created_by=request.user,
             )
-            return Response(OrderFinancialSerializer(order).data)
         except ValidationError as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
+
+    # ===== PAYMENT APPROVE / REJECT =====
+    @extend_schema(
+        tags=["Admin - Order Management"],
+        summary="تایید پرداخت",
+        description="پرداخت تایید میشود و مبلغ آن روی مبالغ و وضعیت مالی سفارش اعمال میشود.",
+        responses={200: PaymentSerializer},
+    )
+    @action(detail=False, methods=['post'], url_path=r'payments/(?P<payment_id>\d+)/approve')
+    def approve_payment(self, request, payment_id=None):
+        try:
+            payment = self.payment_service.approve_payment(int(payment_id), request.user)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(PaymentSerializer(payment).data)
+
+    @extend_schema(
+        tags=["Admin - Order Management"],
+        summary="رد پرداخت",
+        description="رد یک پرداخت در انتظار (اختیاری با ذکر دلیل).",
+        request=PaymentRejectSerializer,
+        responses={200: PaymentSerializer},
+    )
+    @action(detail=False, methods=['post'], url_path=r'payments/(?P<payment_id>\d+)/reject')
+    def reject_payment(self, request, payment_id=None):
+        serializer = PaymentRejectSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            payment = self.payment_service.reject_payment(
+                int(payment_id), request.user, serializer.validated_data.get('reason', '')
+            )
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(PaymentSerializer(payment).data)

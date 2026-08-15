@@ -15,13 +15,13 @@ class QuotationDashboardService:
 
     def get_quotation_list(self):
         return Quotation.objects.select_related(
-            'created_by', 'converted_order'
+            'created_by', 'converted_order', 'cart_item__cart'
         ).all().order_by('-created_at')
 
     def get_quotation_detail(self, quotation_id: int) -> Quotation:
         try:
             return Quotation.objects.select_related(
-                'created_by', 'converted_order'
+                'created_by', 'converted_order', 'cart_item__cart'
             ).get(pk=quotation_id)
         except Quotation.DoesNotExist:
             raise NotFound("پیش‌فاکتور مورد نظر یافت نشد.")

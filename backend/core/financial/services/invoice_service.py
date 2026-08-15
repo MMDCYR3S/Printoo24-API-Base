@@ -39,6 +39,31 @@ class InvoiceService:
             raise NotFound("هیچ فاکتوری برای این سفارش یافت نشد.")
         return invoice
 
+    def _sync_order_from_invoice(self, order, invoice):
+        """
+        قانون: فاکتور صاحب قیمت نهایی و قیمت‌های جانبی سفارش است.
+        بنابراین subtotal از items_amount، هزینه ارسال/خدمات از services_amount،
+        مالیات و تخفیف مستقیماً از فاکتور گرفته می‌شود.
+        """
+        if not order:
+            return
+
+        if invoice.items_amount is not None:
+            order.subtotal = invoice.items_amount
+            order.base_products_price = invoice.items_amount
+
+        if invoice.services_amount is not None:
+            order.shipping_cost = invoice.services_amount
+
+        if invoice.tax_amount is not None:
+            order.tax_amount = invoice.tax_amount
+
+        if invoice.discount_amount is not None:
+            order.discount_amount = invoice.discount_amount
+
+        if invoice.final_amount is not None:
+            order.total_price = invoice.final_amount
+
     # ===== ایجاد فاکتور ===== #
     @transaction.atomic
     def create_invoice(self, data: dict, actor) -> Invoice:
@@ -52,7 +77,11 @@ class InvoiceService:
 
         # تعیین مبلغ نهایی در صورت عدم ارسال
         final_amount = data.get('final_amount', order.final_price)
-        paid_amount = data.get('paid_amount', 0)
+        # اگر paid_amount ارسال نشود، از مبلغِ واقعیِ پرداخت‌شده سفارش استفاده می‌شود
+        # تا فاکتور و سفارش دچار مغایرت نشوند.
+        paid_amount = data.get('paid_amount')
+        if paid_amount is None:
+            paid_amount = order.paid_amount
 
         invoice = Invoice.objects.create(
             order=order,
@@ -67,6 +96,13 @@ class InvoiceService:
             status=self._determine_status(paid_amount, final_amount),
             due_date=data.get('due_date'),
         )
+
+        # ===== همگام‌سازی قیمت‌ها و تاریخ صدور فاکتور روی سفارش ===== #
+        # قانون: فاکتور صاحبِ قیمت نهایی و قیمت‌های جانبی سفارش است؛ سفارش به‌صورت
+        # مستقیم قیمتش تغییر نمی‌کند و از فاکتور می‌گیرد.
+        self._sync_order_from_invoice(order, invoice)
+        order.invoice_date = invoice.issued_at
+        order.save()
 
         # ثبت لاگ
         FinancialLog.log(
@@ -101,6 +137,12 @@ class InvoiceService:
         # به‌روزرسانی خودکار وضعیت
         invoice.status = self._determine_status(invoice.paid_amount, invoice.final_amount)
         invoice.save()
+
+        # ===== همگام‌سازی قیمت‌های سفارش از روی فاکتور ویرایش‌شده ===== #
+        # فاکتور صاحبِ قیمت نهایی و قیمت‌های جانبی است؛ سفارش مستقیم ویرایش نمی‌شود.
+        if invoice.order:
+            self._sync_order_from_invoice(invoice.order, invoice)
+            invoice.order.save()
 
         new_values = {
             'paid_amount': str(invoice.paid_amount),

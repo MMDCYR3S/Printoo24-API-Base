@@ -75,3 +75,13 @@ class WalletDashboardService:
             raise ValidationError("نوع عملیات نامعتبر است.")
 
         return wallet
+
+    def get_wallet_by_user_id(self, user_id: int) -> Wallet:
+        try:
+            return Wallet.objects.get(user_id=user_id)
+        except Wallet.DoesNotExist:
+            raise WalletNotFoundException("کیف پول کاربر یافت نشد.")
+
+    def get_transactions_by_user_id(self, user_id: int):
+        wallet = self.get_wallet_by_user_id(user_id)
+        return wallet.transactions.all().order_by('-created_at')

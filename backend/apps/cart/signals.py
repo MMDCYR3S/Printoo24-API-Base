@@ -58,10 +58,6 @@ def get_product_image(product):
 
 @receiver(post_save, sender=CartItem)
 def create_quotation_for_cart_item(sender, instance, created, **kwargs):
-    """
-    سیگنال: هنگام ایجاد یک آیتم جدید در سبد خرید، یک پیش‌فاکتور خودکار صادر می‌شود.
-    توجه: فقط در صورت ایجاد (created=True) اجرا می‌شود.
-    """
     if not created:
         return
 
@@ -69,31 +65,18 @@ def create_quotation_for_cart_item(sender, instance, created, **kwargs):
         cart_item = instance
         cart = cart_item.cart
 
-        # ===== ۱. محاسبه قیمت کل آیتم ===== #
-        unit_price = cart_item.price
-        quantity = cart_item.quantity
-        total_price = unit_price * quantity
+        total_price = cart_item.price
+        quantity = cart_item.quantity or 1
 
-        # ===== ۲. ساخت شماره پیش‌فاکتور ===== #
-        quotation_number = generate_quotation_number()
-
-        # ===== ۳. تعیین نام مشتری ===== #
-        customer_name = get_customer_name(cart_item)
-
-        # ===== ۴. اطلاعات محصول ===== #
-        product = cart_item.product
-        product_name = product.name if product else cart_item.name
-        product_image = get_product_image(product) if product else None
-        product_snapshot = cart_item.items if cart_item.items else {}
-
-        # ===== ۵. ایجاد پیش‌فاکتور ===== #
         quotation = Quotation.objects.create(
-            quotation_number=quotation_number,
+            quotation_number=generate_quotation_number(),
             created_by=cart.user if cart.user else None,
-            customer_name=customer_name,
-            product_name=product_name,
-            product_image=product_image,
-            product_snapshot=product_snapshot,
+            cart_item=cart_item,  # اتصال به آیتم سبد خرید
+            customer_name=None,    # بعداً هنگام ثبت سفارش تکمیل می‌شود
+            product_name=cart_item.product.name if cart_item.product else cart_item.name,
+            product_image=cart_item.product.product_image.order_by('order').first().image
+                            if cart_item.product and cart_item.product.product_image.exists() else None,
+            product_snapshot=cart_item.items if cart_item.items else {},
             quantity=quantity,
             estimated_delivery_date=None,
             total_price=total_price,
@@ -101,20 +84,13 @@ def create_quotation_for_cart_item(sender, instance, created, **kwargs):
             valid_until=timezone.now() + timezone.timedelta(days=7),
         )
 
-        # ===== ۶. ثبت لاگ مالی (اختیاری اما توصیه‌شده) ===== #
         FinancialLog.log(
             action_type=FinancialLog.ActionType.QUOTATION_CREATED,
             user=cart.user if cart.user else None,
-            description=f"ایجاد خودکار پیش‌فاکتور {quotation_number} برای آیتم سبد خرید (محصول: {product_name})",
-            new_value={
-                'cart_item_id': cart_item.id,
-                'quotation_id': quotation.id,
-                'amount': str(total_price),
-            },
+            description=f"ایجاد خودکار پیش‌فاکتور {quotation.quotation_number} برای آیتم سبد خرید",
             created_by=cart.user if cart.user else None,
         )
-
-        logger.info(f"پیش‌فاکتور {quotation_number} برای CartItem {cart_item.id} ایجاد شد.")
+        logger.info(f"پیش‌فاکتور {quotation.quotation_number} برای CartItem {cart_item.id} ایجاد شد.")
 
     except Exception as e:
         logger.error(f"خطا در ایجاد خودکار پیش‌فاکتور برای CartItem {instance.id}: {e}")

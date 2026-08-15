@@ -6,6 +6,8 @@ class QuotationSerializer(serializers.ModelSerializer):
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     created_by_phone = serializers.CharField(source='created_by.phone_number', read_only=True, default=None)
     order_code = serializers.CharField(source='converted_order.order_code', read_only=True, default=None)
+    # اتصال به سبد خرید (پیش از تبدیل به سفارش)
+    cart_item_id = serializers.IntegerField(source='cart_item.id', read_only=True, default=None)
 
     class Meta:
         model = Quotation
@@ -15,6 +17,7 @@ class QuotationSerializer(serializers.ModelSerializer):
             'estimated_delivery_date', 'total_price',
             'status', 'status_display', 'valid_until',
             'created_by', 'created_by_phone', 'converted_order', 'order_code',
+            'cart_item_id',
             'created_at', 'updated_at',
         ]
 

@@ -90,7 +90,11 @@ class OrderSerializer(serializers.ModelSerializer):
     # ===== خروجی‌ها (Read Only) ===== #
     status = serializers.CharField(source='current_status.name', read_only=True)
     type_display = serializers.CharField(source='get_type_display', read_only=True)
-    total_price = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
+    subtotal = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
+    discount_amount = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
+    tax_amount = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
+    shipping_cost = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
+    final_price = serializers.DecimalField(max_digits=18, decimal_places=0, read_only=True)
     order_code = serializers.CharField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     item_detail = serializers.SerializerMethodField()
@@ -134,9 +138,9 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             # Outputs
-            'id', 'order_code', 'status', 'type_display', 'total_price',
-            'recipient_name', 'recipient_phone', 'full_address', 'address_detail',
-            'created_at', 'item_detail',
+            'id', 'order_code', 'status', 'type_display', 'subtotal', 'discount_amount',
+            'tax_amount', 'shipping_cost', 'final_price', 'recipient_name', 'recipient_phone',
+            'full_address', 'address_detail', 'created_at', 'item_detail',
             
             # Inputs
             'type', 'address_id', 

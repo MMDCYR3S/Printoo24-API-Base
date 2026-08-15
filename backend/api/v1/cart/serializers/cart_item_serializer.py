@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from core.models import Product, ProductImage
 from apps.cart.models import Cart, CartItem, CartItemUpload
+from core.financial.models import Quotation
 
 # ===== Product Serializer ===== #
 class ProductSerializer(serializers.ModelSerializer):
@@ -39,6 +40,9 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
     
     selections = serializers.JSONField(source='items', help_text="مشخصات فنی و انتخاب‌های کاربر")
 
+    # ===== پیش‌فاکتورِ ساخته‌شده برای این آیتم (پیش از تبدیل به سفارش) ===== #
+    quotation = serializers.SerializerMethodField()
+
     class Meta:
         model = CartItem
         fields = [
@@ -50,7 +54,28 @@ class CartItemDetailSerializer(serializers.ModelSerializer):
             'price',
             'selections',
             'uploads',
+            'quotation',
             'created_at'
+        ]
+
+    def get_quotation(self, obj):
+        try:
+            q = obj.quotation
+        except Quotation.DoesNotExist:
+            return None
+        if q is None:
+            return None
+        return QuotationMiniSerializer(q, context=self.context).data
+
+
+class QuotationMiniSerializer(serializers.ModelSerializer):
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Quotation
+        fields = [
+            'id', 'quotation_number', 'total_price', 'quantity',
+            'status', 'status_display', 'valid_until', 'created_at',
         ]
 
 # ===== Cart List Serializer ===== #

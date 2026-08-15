@@ -14,7 +14,7 @@ from api.v1.dashboard.serializers import (
     UnlockedInvoiceOrderSerializer
 )
 
-
+@extend_schema(tags=["Dashboard - Expenses"])
 class ExpenseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
     queryset = Expense.objects.get_expenses_with_order()

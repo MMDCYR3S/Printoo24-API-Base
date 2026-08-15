@@ -2,6 +2,7 @@ import os
 from random import randint
 
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.product.models import Product
@@ -315,6 +316,13 @@ class Order(models.Model):
             self.current_status = default_status
 
         # ===== محاسبات مالی خودکار ===== #
+        # اگر مجموع اقلام (subtotal) هنوز ست نشده، از قیمت پایه استفاده می‌کنیم
+        # تا قیمت نهایی به‌درستی محاسبه شود (جلوگیری از صفر ماندن final_price).
+        if not self.subtotal and self.base_products_price:
+            self.subtotal = self.base_products_price
+        if not self.total_price and self.base_products_price:
+            self.total_price = self.base_products_price
+
         self.final_price = (
             (self.subtotal or 0)
             - (self.discount_amount or 0)
@@ -323,7 +331,59 @@ class Order(models.Model):
         )
         self.remaining_amount = max(self.final_price - self.paid_amount, 0)
 
+        # ===== محاسبه خودکار وضعیت مالی ===== #
+        # اگر flag «skip_financial_status» ارسال شود، وضعیت مالی دست‌کاری نمی‌شود
+        # (زمانی که سرویس یا ادمین آن را به‌صورت دستی تنظیم کرده است).
+        skip_financial_status = kwargs.pop('skip_financial_status', False)
+        if not skip_financial_status:
+            self._update_financial_status()
+
         super().save(*args, **kwargs)
+
+    def _update_financial_status(self):
+        """
+        محاسبه خودکار وضعیت مالی سفارش بر اساس مبلغ پرداختی و پیش‌پرداخت.
+        وضعیت‌های پایانی (لغو و برگشت وجه) بازنویسی نمی‌شوند.
+        """
+        if self.financial_status in (
+            FinancialStatus.CANCELLED,
+            FinancialStatus.REFUNDED,
+        ):
+            return
+
+        final_price = self.final_price or 0
+        paid_amount = self.paid_amount or 0
+        deposit_required = self.deposit_required or 0
+
+        if final_price <= 0:
+            self.financial_status = FinancialStatus.NO_PAYMENT
+        elif paid_amount >= final_price:
+            # پرداخت کامل انجام شده است
+            if deposit_required > 0:
+                # سفارشی که برنامه پیش‌پرداخت داشته و کامل تسویه شده است
+                self.financial_status = FinancialStatus.SETTLED
+                if not self.settlement_date:
+                    self.settlement_date = timezone.now()
+            else:
+                # پرداخت کامل یکجای بدون پیش‌پرداخت
+                self.financial_status = FinancialStatus.FULLY_PAID
+        elif paid_amount > 0:
+            # پرداخت ناقص
+            if deposit_required > 0:
+                self.financial_status = (
+                    FinancialStatus.DEPOSIT_PAID
+                    if paid_amount >= deposit_required
+                    else FinancialStatus.AWAITING_DEPOSIT
+                )
+            else:
+                self.financial_status = FinancialStatus.HAS_BALANCE
+        else:
+            # هیچ پرداختی ثبت نشده است
+            self.financial_status = (
+                FinancialStatus.AWAITING_DEPOSIT
+                if deposit_required > 0
+                else FinancialStatus.NO_PAYMENT
+            )
 
     def __str__(self):
         return f"{self.order_code} | {self.user}"

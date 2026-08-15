@@ -275,3 +275,15 @@ class OrderFinancialUpdateSerializer(serializers.Serializer):
         required=False,
         help_text="وضعیت مالی جدید (در صورت عدم ارسال، به‌صورت خودکار محاسبه می‌شود)"
     )
+
+
+# ===== سریالایزر ثبت / رد پرداخت (ادمین) ===== #
+class PaymentRegisterSerializer(serializers.Serializer):
+    amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=True)
+    method = serializers.ChoiceField(choices=Payment.Method.choices, required=True)
+    reference_number = serializers.CharField(required=False, allow_blank=True, default="")
+    description = serializers.CharField(required=False, allow_blank=True, default="")
+
+
+class PaymentRejectSerializer(serializers.Serializer):
+    reason = serializers.CharField(required=False, allow_blank=True, default="")

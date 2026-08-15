@@ -2,3 +2,4 @@ from .cart_add_update_serializer import AddToCartSerializer, CartItemUpdateSeria
 from .cart_detail_serializer import CartDetailSerializer, CartItemSerializer
 from .cart_item_serializer import CartItemDetailSerializer, CartListSerializer
 from .cart_item_upload_serializer import CartItemFileUploadSerializer
+from .cart_quotation_serializer import *

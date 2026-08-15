@@ -64,7 +64,7 @@ class Invoice(models.Model):
 
     @property
     def is_paid(self):
-        return self.status in [self.Status.PAID_FULL, self.Status.FINALIZE, self.Status.PAID_PARTIAL]
+        return self.status in [self.Status.PAID_FULL, self.Status.FINALIZE]
 
 # ===== Quotation (Independent) ===== #
 class Quotation(models.Model):
@@ -95,6 +95,15 @@ class Quotation(models.Model):
         null=True, blank=True,
         verbose_name=_("سفارش تبدیل شده"),
         related_name='origin_quotation'
+    )
+    # ===== آیتم سبد خرید مرتبط (پیش از تبدیل به سفارش) ===== #
+    cart_item = models.OneToOneField(
+        'cart.CartItem',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name=_("آیتم سبد خرید"),
+        related_name='quotation',
+        help_text=_("تا زمانی که آیتم سبد خرید به سفارش تبدیل نشده، پیش‌فاکتور به اینجا متصل است. پس از تبدیل، این اتصال حذف و به سفارش گره می‌خورد.")
     )
     customer_name = models.CharField(_("نام مشتری"), max_length=255, null=True)
     product_name = models.CharField(_("نام محصول"), max_length=255, null=True)

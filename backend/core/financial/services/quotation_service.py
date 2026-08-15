@@ -6,28 +6,60 @@ from django.db import transaction
 from rest_framework.exceptions import NotFound, ValidationError
 
 from core.models import Order, OrderStatus, FinancialStatus
+from core.order.models import OrderItem
 from core.financial.models import Quotation, FinancialLog
 
 class QuotationService:
+
+    def _sync_order_from_quotation(self, order, quotation):
+        """
+        قانون دامنه: پیش‌فاکتور صاحبِ قیمت اصلی سفارش است.
+        بنابراین هر تغییری در total_price پیش‌فاکتور باید مستقیماً روی
+        subtotal/base_products_price/total_price سفارش اعمال شود.
+        """
+        if not order:
+            return
+        order.subtotal = quotation.total_price
+        order.base_products_price = quotation.total_price
+        order.total_price = quotation.total_price
+        order.save()
+
+
     # ===== ایجاد پیش‌فاکتور جدید ===== #
     @transaction.atomic
     def create_quotation(self, order_id: int, data: dict, user) -> Quotation:
         order = Order.objects.filter(id=order_id).first()
         if not order:
             raise NotFound("داواکاریی دیاریکراو نەدۆزرایەوە.")
-            
+
         if Quotation.objects.filter(converted_order=order).exists():
             raise ValidationError("برای این سفارش قبلاً پیش‌فاکتور صادر شده است.")
 
         q_number = f"QTE-{order.order_code if order.order_code else uuid.uuid4().hex[:8].upper()}"
-        
+
+        total_price = data.get('total_price', order.total_price)
+
         quotation = Quotation.objects.create(
             quotation_number=q_number,
             created_by=user,
             converted_order=order,
             customer_name=data.get('customer_name', order.recipient_name),
-            total_price=data.get('total_price', order.total_price),
-            **{k: v for k, v in data.items() if k not in ['customer_name', 'total_price']}
+            product_name=data.get('product_name', ''),
+            product_snapshot=data.get('product_snapshot', {}),
+            quantity=data.get('quantity', 1),
+            estimated_delivery_date=data.get('estimated_delivery_date'),
+            total_price=total_price,
+            valid_until=data.get('valid_until'),
+        )
+
+        self._sync_order_from_quotation(order, quotation)
+
+        FinancialLog.log(
+            action_type=FinancialLog.ActionType.QUOTATION_CREATED,
+            order=order,
+            user=order.user,
+            description=f"ایجاد پیش‌فاکتور {quotation.quotation_number}",
+            created_by=user,
         )
         return quotation
 
@@ -41,15 +73,76 @@ class QuotationService:
     # ===== ویرایش پیش‌فاکتور ===== #
     @transaction.atomic
     def update_quotation(self, quotation_id: int, data: dict) -> Quotation:
-        quotation = Quotation.objects.filter(id=quotation_id).first()
+        quotation = Quotation.objects.select_related('converted_order').filter(id=quotation_id).first()
         if not quotation:
-            raise NotFound("پێشفاکتۆری دیاریکراو نەدۆزرایەوە.")
-            
-        for field, value in data.items():
-            if hasattr(quotation, field) and field not in ['id', 'quotation_number', 'converted_order']:
-                setattr(quotation, field, value)
+            raise NotFound("پیش‌فاکتور مورد نظر یافت نشد.")
+
+        old_values = {
+            'total_price': str(quotation.total_price),
+            'status': quotation.status,
+        }
+
+        # فقط فیلدهای مجاز
+        editable_fields = [
+            'customer_name', 'product_name', 'product_image',
+            'product_snapshot', 'quantity',
+            'estimated_delivery_date', 'total_price', 'valid_until'
+        ]
+        changed = False
+        for field in editable_fields:
+            if field in data:
+                setattr(quotation, field, data[field])
+                changed = True
+
+        if not changed:
+            return quotation
+
         quotation.save()
+
+        # اگر پیش‌فاکتور به سفارش تبدیل شده، قیمت سفارش باید همگام شود
+        if quotation.converted_order:
+            self._sync_order_from_quotation(quotation.converted_order, quotation)
+
+        FinancialLog.log(
+            action_type=FinancialLog.ActionType.PRICE_UPDATED,
+            order=quotation.converted_order,
+            user=quotation.converted_order.user if quotation.converted_order else None,
+            field_name='quotation_price',
+            old_value=old_values,
+            new_value={'total_price': str(quotation.total_price), 'status': quotation.status},
+            description=f"ویرایش پیش‌فاکتور {quotation.quotation_number}",
+            created_by=quotation.created_by,
+        )
+
         return quotation
+
+    def _sync_price_to_order(self, quotation: Quotation):
+        """اعمال قیمت پیش‌فاکتور روی سفارشِ متصل (قیمت اصلی + قیمت آیتم)."""
+        order = quotation.converted_order
+        if not order:
+            return
+
+        quantity = quotation.quantity or 1
+        total = quotation.total_price or 0
+        unit_price = (total / Decimal(quantity)) if quantity else total
+
+        order.subtotal = total
+        order.total_price = total
+        order.base_products_price = total
+        # final_price و remaining_amount به‌صورت خودکار محاسبه می‌شوند
+        order.save()
+
+        # ===== همگام‌سازی قیمت واحدِ آیتم‌های سفارش ===== #
+        OrderItem.objects.filter(order=order).update(price=unit_price)
+
+        FinancialLog.log(
+            action_type=FinancialLog.ActionType.PRICE_UPDATED,
+            order=order,
+            user=order.user,
+            description=f"تغییر قیمت سفارش {order.order_code} بر اساس پیش‌فاکتور {quotation.quotation_number} به {total:,} IQD",
+            new_value={'total_price': str(total), 'quantity': quantity},
+            created_by=quotation.created_by,
+        )
 
     # ===== حذف پیش‌فاکتور ===== #
     @transaction.atomic

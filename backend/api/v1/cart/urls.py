@@ -7,7 +7,9 @@ from .views import (
     CartItemDeleteView,
     CartClearView,
     CartItemFileUploadView,
-    CartItemFileDeleteView
+    CartItemFileDeleteView,
+    CartQuotationListView,
+    CartItemQuotationDetailView
 )
 
 app_name = "cart"
@@ -41,4 +43,6 @@ urlpatterns = [
         name="cart-item-delete"
     ),
     path("clear/", CartClearView.as_view(), name="cart-clear"),
-]
+
+    path('quotations/', CartQuotationListView.as_view(), name='cart-quotation-list'),
+    path('items/<int:item_id>/quotation/', CartItemQuotationDetailView.as_view(), name='cart-item-quotation-detail'),]

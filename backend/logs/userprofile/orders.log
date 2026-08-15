@@ -455,3 +455,8 @@ INFO 2026-06-14 12:48:39,452 user_order_service 7 125334504769216 Fetching order
 INFO 2026-06-14 12:48:51,075 user_order_service 7 125334108231360 Fetching order history for User ID: 4
 INFO 2026-06-14 12:48:54,276 user_order_service 7 125334496376512 Fetching order history for User ID: 4
 INFO 2026-07-23 20:42:48,200 user_order_service 7 130556966725312 Fetching order history for User ID: 1
+INFO 2026-08-15 13:56:31,548 user_order_service 188 139003047175872 Fetching order history for User ID: 2
+INFO 2026-08-15 13:56:42,805 user_order_service 188 139003047175872 Fetching detail Order 26 for User 2
+INFO 2026-08-15 15:53:58,693 user_order_service 311 124182700074688 Fetching order history for User ID: 2
+INFO 2026-08-15 15:56:13,706 user_order_service 311 124182700074688 Fetching order history for User ID: 2
+INFO 2026-08-15 15:56:30,645 user_order_service 311 124182700074688 Fetching detail Order 27 for User 2
