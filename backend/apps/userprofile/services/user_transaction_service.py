@@ -1,54 +1,18 @@
-import logging
-
 from core.models import User
-from apps.accounts.services import WalletService, WalletTransactionService
+from apps.accounts.models import Wallet, WalletTransaction
 
-# ===== تعریف لاگر اختصاصی کیف پول با پیشوند userprofile ===== #
-logger = logging.getLogger('userprofile.services.wallet')
 
-# ===== Wallet Service ===== #
 class WalletAppService:
     """
-    سرویس مدیریت اطلاعات کیف پول کاربر.
-    
-    این سرویس وظیفه نمایش موجودی فعلی و تاریخچه تراکنش‌های مالی کاربر را بر عهده دارد.
+    سرویس کیف پول مخصوص کاربر عادی (پروفایل)
     """
-    
+
     def __init__(self, user: User):
         self.user = user
-        # ===== تزریق وابستگی‌های مخزن کیف پول و تراکنش ===== #
-        self._wallet_repo = WalletService()
-        self._trans_repo = WalletTransactionService()
 
-    def get_wallet_balance(self, user_id: int):
-        """
-        دریافت موجودی فعلی کیف پول کاربر.
-        """
-        logger.info(f"Fetching wallet balance for User ID: {user_id}")
-        
-        try:
-            wallet = self._wallet_repo.get_user_balance(self.user) 
-            
-            if not wallet:
-                logger.warning(f"No wallet found for User ID: {self.user.id}")
-                return None
-            
-            logger.debug(f"Wallet balance: {wallet.balance}")
-            return wallet
-        except Exception as e:
-            logger.exception(f"Error fetching wallet for User ID: {user_id}")
-            raise e
-    
+    def get_wallet_balance(self, user_id: int) -> Wallet:
+        wallet, _ = Wallet.objects.get_or_create(user_id=user_id)
+        return wallet
+
     def get_transaction_history(self, user_id: int):
-        """
-        دریافت تاریخچه تراکنش‌های مالی کاربر.
-        """
-        logger.info(f"Fetching transaction history for User ID: {user_id}")
-        
-        try:
-            history = self._trans_repo.get_history_by_user(user_id)
-            logger.info(f"Retrieved {history.count()} transactions for User ID: {user_id}")
-            return history
-        except Exception as e:
-            logger.exception(f"Error fetching transactions for User ID: {user_id}")
-            raise e
+        return WalletTransaction.objects.filter(user_id=user_id).order_by('-created_at')

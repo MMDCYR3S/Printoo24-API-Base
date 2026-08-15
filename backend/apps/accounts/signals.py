@@ -1,7 +1,9 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from django.core.exceptions import ObjectDoesNotExist
 from core.models import User
+
+from core.financial.models import Payment
+from .services import PaymentService
 
 # ====== Signals ====== #
 
@@ -56,3 +58,16 @@ def assign_default_role_to_new_user(sender, instance, created, **kwargs):
                 )
         except Exception as e:
             print(f"خطا در تخصیص نقش به کاربر {instance.phone_number}: {e}")
+
+@receiver(pre_save, sender=Payment)
+def payment_pre_save(sender, instance, **kwargs):
+    if instance.pk:
+        instance._old_status = Payment.objects.get(pk=instance.pk).status
+    else:
+        instance._old_status = None
+
+@receiver(post_save, sender=Payment)
+def payment_post_save(sender, instance, created, **kwargs):
+    old_status = getattr(instance, '_old_status', None)
+    if old_status == Payment.Status.PENDING and instance.status == Payment.Status.APPROVED:
+        PaymentService().approve_payment(instance, instance.approved_by)

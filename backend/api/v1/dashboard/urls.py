@@ -18,7 +18,7 @@ from .views import (
     CityDashboardViewSet,
     ProvinceDashboardViewSet,
     InvoiceViewSet,
-    QuotationViewSet,
+    QuotationDashboardViewSet,
     StaffViewSet,
     SiteMediaDashboardViewSet,
     TutorialViewSet,
@@ -31,7 +31,7 @@ from .views import (
 )
 
 router = DefaultRouter()
-router.register(r'quotations', QuotationViewSet, basename='quotation')
+router.register(r'quotations', QuotationDashboardViewSet, basename='quotation')
 router.register(r'invoices', InvoiceViewSet, basename='invoice')
 router.register(r'categories', ProductCategoryDashboardViewSet, basename='product_category_dashboard')
 router.register(r'modals', PromotionalModalViewSet, basename='promotional_modal')

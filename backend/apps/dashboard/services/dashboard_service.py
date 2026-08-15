@@ -157,14 +157,14 @@ class FinancialDashboardStateService:
 
         return {
             "summary": {
-                "total_revenue":       total_revenue,
-                "total_paid":          total_paid,
-                "outstanding":         total_revenue - total_paid,
-                "revenue_this_month":  revenue_this_month,
-                "revenue_last_month":  revenue_last_month,
-                "paid_this_month":     paid_this_month,
-                "revenue_growth":      revenue_growth,
-                "revenue_status":      "positive" if revenue_growth >= 0 else "negative",
+                "total_revenue": total_revenue,
+                "total_paid": total_paid,
+                "outstanding": total_revenue - total_paid,
+                "revenue_this_month": revenue_this_month,
+                "revenue_last_month": revenue_last_month,
+                "paid_this_month": paid_this_month,
+                "revenue_growth": revenue_growth,
+                "revenue_status": "positive" if revenue_growth >= 0 else "negative",
                 "average_invoice_value": avg_invoice_value
             },
             "chart_data": formatted_chart_data
@@ -231,21 +231,21 @@ class UserDashboardStateService:
 
 # ========== EXPENSE SERVICE ========== #
 class CombinedDashboardStateService:
-    def get_combined_statistics(self) -> Dict[str, Any]:
+    def get_combined_statistics(self):
         return {
-            "products":  ProductDashboardStateService().get_product_statistics(),
-            "orders":    OrderDashboardStateService().get_order_statistics(),
-            "users":     UserDashboardStateService().get_user_statistics(),
+            "products": ProductDashboardStateService().get_product_statistics(),
+            "orders": OrderDashboardStateService().get_order_statistics(),
+            "users": UserDashboardStateService().get_user_statistics(),
             "financial": FinancialDashboardStateService().get_financial_statistics(),
             "expenses": {
-                "total_expenses":   Expense.objects.get_total_expenses(),
-                "daily_expenses":   Expense.objects.get_daily_expenses(),
+                "total_expenses": Expense.objects.get_total_expenses(),
+                "daily_expenses": Expense.objects.get_daily_expenses(),
                 "monthly_expenses": Expense.objects.get_monthly_expenses(),
-                "yearly_expenses":  Expense.objects.get_yearly_expenses(),
+                "yearly_expenses": Expense.objects.get_yearly_expenses(),
             },
             "profit": {
-                "daily_profit":   Invoice.objects.get_daily_profit(),
+                "daily_profit": Invoice.objects.get_daily_profit(),
                 "monthly_profit": Invoice.objects.get_monthly_profit(),
-                "yearly_profit":  Invoice.objects.get_yearly_profit(),
+                "yearly_profit": Invoice.objects.get_yearly_profit(),
             }
         }

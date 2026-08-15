@@ -1,3 +1,4 @@
+import uuid
 import logging
 
 from django.db.models.signals import post_save, pre_save
@@ -9,7 +10,7 @@ from .models import(
     ProductCategoryRelation, Product,
     product_code_generator, OrderStateLog,
     OrderStatusGroup, Role, Order, UserRole,
-    User, Quotation, Invoice
+    User, Payment, Invoice, FinancialLog
 )
 
 logger = logging.getLogger(__name__)
@@ -149,170 +150,36 @@ def assign_default_role_to_new_user(sender, instance, created, **kwargs):
                 # ===== لاگ کردن خطا در صورت بروز مشکل سیستمی ===== #
                 logger.error(f"خطا در تخصیص نقش مشتری به کاربر {instance.phone_number}: {str(e)}")
 
-# ===== SYNC ORDER TOTAL PRICE TO QUOTATION (PRE-SAVE) ===== #
-@receiver(pre_save, sender=Order)
-def capture_old_total_price(sender, instance, **kwargs):
+# ===== Generate Invoce Full Payment ===== #
+@receiver(post_save, sender=Payment)
+def auto_generate_invoice_on_full_payment(sender, instance, created, **kwargs):
     """
-    قبل از ذخیره، مبلغ کل فعلی دیتابیس را نگه می‌داریم
-    تا در post_save بتوانیم تغییر را تشخیص دهیم.
+    اگر پرداختی تأیید شده و جمع پرداخت‌های تأیید شده سفارش به مبلغ نهایی برسد،
+    در صورت نبود فاکتور، فاکتور با وضعیت PAID_FULL صادر می‌شود.
     """
-    if instance.pk:
-        try:
-            old_obj = Order.objects.get(pk=instance.pk)
-            instance._old_total_price = old_obj.total_price
-        except Order.DoesNotExist:
-            instance._old_total_price = None
-    else:
-        instance._old_total_price = None
-
-
-# ===== SYNC ORDER TOTAL PRICE TO QUOTATION (POST-SAVE) ===== #
-@receiver(post_save, sender=Order, dispatch_uid="sync_order_price_to_quotation")
-def sync_total_price_to_quotation(sender, instance, created, **kwargs):
-    """
-    اگر ادمین مبلغ کل سفارش را تغییر داد، پیش‌فاکتور مرتبط هم آپدیت می‌شود.
-    فقط روی سفارش‌هایی که قبلاً ساخته شده‌اند اجرا می‌شود (not created).
-    """
-    if created:
+    if instance.status != Payment.Status.APPROVED:
         return
 
-    old_price = getattr(instance, '_old_total_price', None)
-
-    # ===== اگر قیمت تغییر نکرده، کاری صورت نگیرد ===== #
-    if old_price is None or old_price == instance.total_price:
-        return
-
-    try:
-        quotation = instance.origin_quotation
-        if quotation:
-            Quotation.objects.filter(pk=quotation.pk).update(
-                total_price=instance.total_price
-            )
-            logger.info(
-                f"Quotation #{quotation.quotation_number} total_price synced "
-                f"from {old_price} to {instance.total_price} "
-                f"(Order: {instance.order_code})"
-            )
-    except Quotation.DoesNotExist:
-        pass
-    except Exception as e:
-        logger.error(f"Error syncing price to quotation for Order {instance.pk}: {e}")
-
-# ===== SYNC INVOICE TO ORDER (PRE-SAVE) ===== #
-@receiver(pre_save, sender=Invoice)
-def capture_old_invoice_amount(sender, instance, **kwargs):
-    """
-    نگه‌داشتن مبلغ نهایی قبلی فاکتور برای مقایسه
-    """
-    if instance.pk:
-        try:
-            old_obj = Invoice.objects.get(pk=instance.pk)
-            instance._old_final_amount = old_obj.final_amount
-        except Invoice.DoesNotExist:
-            instance._old_final_amount = None
-    else:
-        instance._old_final_amount = None
-
-
-# ===== SYNC INVOICE TO ORDER (POST-SAVE) ===== #
-@receiver(post_save, sender=Invoice, dispatch_uid="sync_invoice_amount_to_order")
-def sync_invoice_amount_to_order(sender, instance, created, **kwargs):
-    """
-    اگر قیمت نهایی فاکتور تغییر کرد، قیمت کل سفارش برابر با آن می‌شود.
-    """
-    # ===== بررسی تغییر قیمت ===== #
-    if not created:
-        old_amount = getattr(instance, '_old_final_amount', None)
-        if old_amount is None or old_amount == instance.final_amount:
-            return
-
-    if instance.order_id:
-        Order.objects.filter(pk=instance.order_id).update(
-            total_price=instance.final_amount
-        )
-        logger.info(f"Order #{instance.order_id} total_price synced to matches Invoice #{instance.invoice_number}.")
-
-# ===== SYNC ORDER TO INVOICE (POST-SAVE) ===== #
-@receiver(post_save, sender=Order, dispatch_uid="sync_order_price_to_invoice")
-def sync_total_price_to_invoice(sender, instance, created, **kwargs):
-    """
-    اگر قیمت کل سفارش تغییر کرد:
-    ۱. برای افزایش قیمت: مستقیما به مبلغ اقلام اضافه می‌شود.
-    ۲. برای کاهش قیمت (آبشاری): خدمات -> مالیات -> اقلام (تا حد پایه) -> تخفیف (در صورت نیاز).
-    """
-    if created:
-        return
-
-    old_price = getattr(instance, '_old_total_price', None)
-    if old_price is None or old_price == instance.total_price:
-        return
-
-    price_difference = instance.total_price - old_price
-
-    if hasattr(instance, 'invoice') and instance.invoice:
-        invoice = instance.invoice
-        
-        new_items = invoice.items_amount or 0
-        new_services = invoice.services_amount or 0
-        new_tax = invoice.tax_amount or 0
-        new_discount = invoice.discount_amount or 0
-        
-        if price_difference > 0:
-            # ===== در صورت افزایش قیمت، به مبلغ اقلام اضافه می‌شود ===== #
-            new_items += price_difference
-        else:
-            # ===== در صورت کاهش قیمت، منطق آبشاری اجرا می‌شود ===== #
-            reduction = abs(price_difference)
-            
-            # ===== کسر از خدمات ===== #
-            svc_deduct = min(new_services, reduction)
-            new_services -= svc_deduct
-            reduction -= svc_deduct
-            
-            # ===== کسر از مالیات ===== #
-            tax_deduct = min(new_tax, reduction)
-            new_tax -= tax_deduct
-            reduction -= tax_deduct
-            
-            # ===== کسر از اقلام (با شرط حفظ حداقل قیمت پایه محصولات) ===== #
-            min_items_allowed = instance.base_products_price or 0
-            if new_items > min_items_allowed and reduction > 0:
-                max_item_deductible = new_items - min_items_allowed
-                items_deduct = min(max_item_deductible, reduction)
-                new_items -= items_deduct
-                reduction -= items_deduct
-                
-            # ===== در صورتی که هنوز کاهش قیمت نیاز است (رسیدن به کف اقلام)، به تخفیف اضافه می‌شود ===== #
-            if reduction > 0:
-                new_discount += reduction
-
-        # ===== آپدیت دیتابیس (بدون تریگر کردن سیگنال‌های فاکتور برای جلوگیری از لوپ) ===== #
-        Invoice.objects.filter(pk=invoice.pk).update(
-            items_amount=new_items,
-            services_amount=new_services,
-            tax_amount=new_tax,
-            discount_amount=new_discount,
-            final_amount=instance.total_price
-        )
-        
-        logger.info(f"Invoice #{invoice.invoice_number} cascaded sync. New Final: {instance.total_price}")
-
-# ===== AUTO-BALANCE INVOICE AMOUNTS (PRE-SAVE) ===== #
-@receiver(pre_save, sender=Invoice, dispatch_uid="auto_balance_invoice_amounts")
-def auto_balance_invoice_amounts(sender, instance, **kwargs):
-    """
-    تراز کردن خودکار فاکتور:
-    هر زمان که یکی از اجزای فاکتور (اقلام، خدمات و...) تغییر کند،
-    مبلغ نهایی (final_amount) بر اساس جمع آن‌ها به صورت خودکار بازنویسی می‌شود.
-    """
-    items_amt = instance.items_amount or 0
-    services_amt = instance.services_amount or 0
-    tax_amt = instance.tax_amount or 0
-    discount_amt = instance.discount_amount or 0
-
-    # ===== محاسبه مبلغ نهایی قطعی ===== #
-    expected_final = (items_amt + services_amt + tax_amt) - discount_amt
-
-    if instance.final_amount != expected_final:
-        instance.final_amount = expected_final
-        logger.info(f"Invoice {instance.invoice_number} final_amount auto-calculated to: {expected_final}")
+    order = instance.order
+    total_paid = sum(
+        order.payments.filter(status=Payment.Status.APPROVED).values_list('amount', flat=True)
+    )
+    if total_paid >= order.final_price:
+        if not Invoice.objects.filter(order=order).exists():
+            with transaction.atomic():
+                invoice = Invoice.objects.create(
+                    order=order,
+                    invoice_number=f"INV-{order.order_code}" if order.order_code else f"INV-{uuid.uuid4().hex[:8].upper()}",
+                    paid_amount=total_paid,
+                    items_amount=order.base_products_price,
+                    final_amount=order.final_price,
+                    status=Invoice.Status.PAID_FULL,
+                )
+                FinancialLog.log(
+                    action_type=FinancialLog.ActionType.INVOICE_CREATED,
+                    order=order,
+                    user=order.user,
+                    invoice=invoice,
+                    description=f"صدور خودکار فاکتور پس از پرداخت کامل سفارش {order.order_code}",
+                    created_by=instance.user,
+                )

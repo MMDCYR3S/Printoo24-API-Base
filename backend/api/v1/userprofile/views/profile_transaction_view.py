@@ -1,10 +1,18 @@
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiExample
 
+from core.financial.services import QuotationService, PaymentService
 from apps.userprofile.services import WalletAppService
-from ..serializers import WalletSerializer, WalletTransactionSerializer
+from ..serializers import (
+    WalletSerializer, WalletTransactionSerializer,
+    QuotationCustomerSerializer,
+    QuotationApprovalSerializer,
+    WalletPaymentSerializer,
+    PaymentCustomerSerializer
+)
 
 # ===== Wallet Detail API View ===== #
 @extend_schema(tags=["Profile"])
@@ -72,3 +80,47 @@ class WalletHistoryAPIView(APIView):
         transactions = self.service.get_transaction_history(request.user.id)
         serializer = WalletTransactionSerializer(transactions, many=True)
         return Response(serializer.data)
+
+@extend_schema(tags=["Financial"])
+class QuotationApprovalAPIView(APIView):
+    """
+    تأیید پیش‌فاکتور توسط مشتری
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="تأیید پیش‌فاکتور",
+        request=QuotationApprovalSerializer,
+        responses={200: QuotationCustomerSerializer},
+    )
+    def post(self, request, quotation_id):
+        service = QuotationService()
+        quotation = service.approve_quotation(quotation_id, user=request.user)
+        serializer = QuotationCustomerSerializer(quotation)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@extend_schema(tags=["Financial"])
+class WalletPaymentAPIView(APIView):
+    """
+    پرداخت سفارش با کیف پول
+    """
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="پرداخت سفارش از کیف پول",
+        request=WalletPaymentSerializer,
+        responses={200: PaymentCustomerSerializer},
+    )
+    def post(self, request):
+        serializer = WalletPaymentSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order_id = serializer.validated_data['order_id']
+        amount = serializer.validated_data.get('amount')
+
+        service = PaymentService()
+        payment = service.pay_with_wallet(order_id, request.user, amount)
+        return Response(
+            PaymentCustomerSerializer(payment).data,
+            status=status.HTTP_200_OK,
+        )

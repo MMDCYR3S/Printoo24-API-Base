@@ -2,3 +2,4 @@ from .auth_service import AuthService
 from .verify_service import VerificationService
 from .password_reset_service import PasswordResetService
 from .wallet_service import WalletService, WalletTransactionService
+from .payment_service import *

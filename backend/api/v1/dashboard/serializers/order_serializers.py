@@ -1,5 +1,74 @@
 from rest_framework import serializers
-from core.models import Order, OrderItem, OrderStatus, Address, OrderItemFile
+from core.models import Order, OrderItem, OrderStatus, Address, OrderItemFile, FinancialStatus
+from core.financial.models import (
+    Payment, Invoice, Quotation, FinancialLog, Expense
+)
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    method_display = serializers.CharField(source='get_method_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id', 'payment_code', 'amount', 'method', 'method_display',
+            'status', 'status_display', 'reference_number', 'receipt',
+            'description', 'payment_date', 'approved_at', 'created_at'
+        ]
+
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    remaining_amount = serializers.DecimalField(
+        max_digits=18, decimal_places=0, read_only=True
+    )
+
+    class Meta:
+        model = Invoice
+        fields = [
+            'id', 'invoice_number', 'items_amount', 'services_amount',
+            'tax_amount', 'discount_amount', 'final_amount',
+            'paid_amount', 'remaining_amount', 'status', 'status_display',
+            'issued_at', 'due_date', 'finalized_at'
+        ]
+
+
+class QuotationSerializer(serializers.ModelSerializer):
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Quotation
+        fields = [
+            'id', 'quotation_number', 'customer_name', 'product_name',
+            'product_image', 'product_snapshot', 'quantity',
+            'total_price', 'status', 'status_display', 'valid_until', 'created_at'
+        ]
+
+
+class FinancialLogSerializer(serializers.ModelSerializer):
+    action_type_display = serializers.CharField(source='get_action_type_display', read_only=True)
+    created_by_phone = serializers.CharField(source='created_by.phone_number', read_only=True, default=None)
+
+    class Meta:
+        model = FinancialLog
+        fields = [
+            'id', 'action_type', 'action_type_display', 'field_name',
+            'old_value', 'new_value', 'description', 'reason',
+            'created_by', 'created_by_phone', 'created_at'
+        ]
+
+
+class ExpenseSerializer(serializers.ModelSerializer):
+    expense_type_display = serializers.CharField(source='get_expense_type_display', read_only=True)
+
+    class Meta:
+        model = Expense
+        fields = [
+            'id', 'expense_code', 'expense_type', 'expense_type_display',
+            'name', 'amount', 'quantity', 'unit_price',
+            'description', 'expense_date'
+        ]
 
 
 # ===== Upload & Delete Item File of Order ===== #
@@ -31,15 +100,35 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     address_detail = serializers.SerializerMethodField()
     current_status = serializers.CharField(source='current_status.name', read_only=True)
     current_status_code = serializers.CharField(source='current_status.internal_code', read_only=True)
+    financial_status_display = serializers.CharField(source='get_financial_status_display', read_only=True)
     items = OrderItemSerializer(source='order_item_order', many=True, read_only=True)
+
+    # ===== ارتباطات مالی ===== #
+    payments = PaymentSerializer(many=True, read_only=True)
+    invoice = InvoiceSerializer(read_only=True)  # reverse one-to-one
+    quotation = QuotationSerializer(source='origin_quotation', read_only=True)
+    financial_logs = FinancialLogSerializer(many=True, read_only=True)
+    expenses = ExpenseSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
         fields = [
+            # اطلاعات عمومی سفارش (قبلی)
             'id', 'order_code', 'user_info', 'recipient_name', 'recipient_phone',
             'company_name', 'city', 'province', 'full_address', 'address_detail',
-            'current_status', 'current_status_code', 'total_price', 'base_products_price',
-            'type', 'created_at', 'items'
+            'current_status', 'current_status_code',
+            'type', 'created_at', 'items',
+
+            # ===== فیلدهای مالی مستقیم از مدل Order ===== #
+            'subtotal', 'discount_amount', 'tax_amount', 'shipping_cost',
+            'final_price', 'paid_amount', 'remaining_amount',
+            'deposit_required', 'deposit_paid',
+            'financial_status', 'financial_status_display',
+            'payment_deadline', 'invoice_date', 'settlement_date',
+            'total_price', 'base_products_price',
+
+            # ===== ارتباطات مالی مستقیم ===== #
+            'payments', 'invoice', 'quotation', 'financial_logs', 'expenses',
         ]
 
     def get_user_info(self, obj):
@@ -148,3 +237,41 @@ class CustomerListSerializer(serializers.Serializer):
         if hasattr(obj, 'customer_profile') and obj.customer_profile:
             return obj.customer_profile.fullname()
         return obj.phone_number
+
+class OrderFinancialSerializer(serializers.ModelSerializer):
+    financial_status_display = serializers.CharField(
+        source='get_financial_status_display', read_only=True
+    )
+
+    class Meta:
+        model = Order
+        fields = [
+            # شناسه و کد سفارش
+            'id', 'order_code',
+
+            # فیلدهای مالی اصلی سفارش
+            'subtotal', 'discount_amount', 'tax_amount', 'shipping_cost',
+            'final_price', 'paid_amount', 'remaining_amount',
+            'deposit_required', 'deposit_paid',
+            'financial_status', 'financial_status_display',
+            'payment_deadline', 'invoice_date', 'settlement_date',
+
+            # مبالغ قدیمی/جایگزین
+            'total_price', 'base_products_price',
+        ]
+
+
+class OrderFinancialUpdateSerializer(serializers.Serializer):
+    subtotal = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
+    discount_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
+    tax_amount = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
+    shipping_cost = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
+    deposit_required = serializers.DecimalField(max_digits=18, decimal_places=0, required=False)
+    payment_deadline = serializers.DateTimeField(required=False, allow_null=True)
+    invoice_date = serializers.DateTimeField(required=False, allow_null=True)
+    settlement_date = serializers.DateTimeField(required=False, allow_null=True)
+    financial_status = serializers.ChoiceField(
+        choices=FinancialStatus.choices,
+        required=False,
+        help_text="وضعیت مالی جدید (در صورت عدم ارسال، به‌صورت خودکار محاسبه می‌شود)"
+    )

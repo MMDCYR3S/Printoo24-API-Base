@@ -106,21 +106,41 @@ class InvoiceQuerySet(BaseQuerySet):
         )
         return revenue - expenses
     
-    def get_daily_profit(self) -> int:
+    def get_daily_profit(self):
         today = timezone.now().date()
-        start = timezone.make_aware(datetime.combine(today, time.min))
-        end = timezone.make_aware(datetime.combine(today, time.max))
-        return self.get_profit_by_date_range(start, end)
+        start = timezone.datetime.combine(today, timezone.datetime.min.time())
+        end = timezone.datetime.combine(today, timezone.datetime.max.time())
+        return self._calculate_profit(start, end)
 
-    def get_monthly_profit(self) -> int:
+    def get_monthly_profit(self):
         now = timezone.now()
         start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        return self.get_profit_by_date_range(start, now)
+        return self._calculate_profit(start, now)
 
-    def get_yearly_profit(self) -> int:
+    def get_yearly_profit(self):
         now = timezone.now()
         start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-        return self.get_profit_by_date_range(start, now)
+        return self._calculate_profit(start, now)
+
+    # ===== متدهای سود ===== #
+    def _calculate_profit(self, start=None, end=None):
+        """
+        محاسبه سود = مجموع مبالغ نهایی فاکتورها - مجموع هزینه‌های همان بازه
+        """
+        from core.models import Expense
+
+        filter_kwargs = {}
+        if start and end:
+            filter_kwargs['issued_at__range'] = (start, end)
+
+        revenue = self.filter(**filter_kwargs).aggregate(total=Sum('final_amount'))['total'] or 0
+        expenses = 0
+        if filter_kwargs:
+            expenses = Expense.objects.filter(created_at__range=filter_kwargs['issued_at__range']).aggregate(total=Sum('amount'))['total'] or 0
+        else:
+            expenses = Expense.objects.get_total_expenses()
+        return int(revenue - expenses)
+
 
 # ========== INVOICE MANAGER ========== #
 class InvoiceManager(models.Manager):

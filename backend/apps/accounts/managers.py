@@ -73,17 +73,42 @@ class WalletManager(models.Manager):
 # ========== Wallet Transaction Manager ========== #
 class WalletTransactionManager(models.Manager):
     """
-    مدیر تراکنش‌های کیف پول
+    مدیر تراکنش‌های کیف پول با امضای جدید
     """
-    def create_transaction(self, user, trans_type: str, amount: Decimal, amount_after: Decimal):
-        """ایجاد تراکنش جدید"""
+
+    def create_transaction(
+        self,
+        wallet,
+        user,
+        transaction_type,
+        amount,
+        balance_before,
+        balance_after,
+        description="",
+        created_by=None,
+        order=None,
+        payment=None,
+        invoice=None,
+    ):
+        """
+        ایجاد تراکنش با تمام جزئیات لازم
+        """
         return self.create(
+            wallet=wallet,
             user=user,
-            transaction_type=trans_type,
+            transaction_type=transaction_type,
             amount=amount,
-            amount_after=amount_after
+            balance_before=balance_before,
+            balance_after=balance_after,
+            description=description,
+            created_by=created_by,
+            order=order,
+            payment=payment,
+            invoice=invoice,
         )
 
     def get_history_by_user(self, user_id: int):
-        """دریافت تاریخچه تراکنش‌ها به ترتیب نزولی"""
-        return self.filter(user_id=user_id)
+        """
+        دریافت تاریخچه تراکنش‌های یک کاربر به ترتیب نزولی
+        """
+        return self.filter(user_id=user_id).order_by('-created_at')

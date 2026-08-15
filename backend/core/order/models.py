@@ -14,6 +14,20 @@ from .managers import (
     OrderStatusGroupManager,
 )
 
+# ===== وضعیت‌های مالی به صورت Enum ===== #
+class FinancialStatus(models.TextChoices):
+    NO_PAYMENT = 'no_payment', _('بدون پرداخت')
+    AWAITING_DEPOSIT = 'awaiting_deposit', _('در انتظار پیش‌پرداخت')
+    DEPOSIT_PAID = 'deposit_paid', _('پیش‌پرداخت شده')
+    FULLY_PAID = 'fully_paid', _('پرداخت کامل')
+    HAS_BALANCE = 'has_balance', _('دارای مانده حساب')
+    SETTLED = 'settled', _('تسویه شده')
+    CANCELLED = 'cancelled', _('لغو شده')
+    REFUNDED = 'refunded', _('برگشت خورده')
+    DEBTOR = 'debtor', _('بدهکار')
+    CREDITOR = 'creditor', _('بستانکار')
+
+
 # ===== Order Status Group ===== #
 class OrderStatusGroup(models.Model):
     """
@@ -184,6 +198,105 @@ class Order(models.Model):
         null=True,
         blank=True
     )
+    # ===== فیلدهای مالی جدید ===== #
+    subtotal = models.DecimalField(
+        _("جمع کل (قبل از تخفیف)"),
+        max_digits=18,
+        decimal_places=0,
+        default=0,
+        help_text="مجموع قیمت اقلام قبل از اعمال تخفیف"
+    )
+
+    discount_amount = models.DecimalField(
+        _("مبلغ تخفیف"),
+        max_digits=18,
+        decimal_places=0,
+        default=0,
+        help_text="مبلغ تخفیف اعمال شده روی سفارش"
+    )
+
+    tax_amount = models.DecimalField(
+        _("مالیات"),
+        max_digits=18,
+        decimal_places=0,
+        default=0,
+        help_text="مبلغ مالیات (در صورت نیاز)"
+    )
+
+    shipping_cost = models.DecimalField(
+        _("هزینه ارسال"),
+        max_digits=18,
+        decimal_places=0,
+        default=0
+    )
+
+    final_price = models.DecimalField(
+        _("قیمت نهایی"),
+        max_digits=18,
+        decimal_places=0,
+        default=0,
+        help_text="قیمت نهایی پس از اعمال تخفیف، مالیات و هزینه ارسال"
+    )
+
+    paid_amount = models.DecimalField(
+        _("مبلغ پرداخت شده"),
+        max_digits=18,
+        decimal_places=0,
+        default=0,
+        help_text="مجموع مبالغ پرداخت شده برای این سفارش"
+    )
+
+    remaining_amount = models.DecimalField(
+        _("مانده حساب"),
+        max_digits=18,
+        decimal_places=0,
+        default=0,
+        help_text="مبلغ باقی مانده برای تسویه کامل"
+    )
+
+    deposit_required = models.DecimalField(
+        _("حداقل پیش‌پرداخت"),
+        max_digits=18,
+        decimal_places=0,
+        default=0,
+        help_text="حداقل مبلغ پیش‌پرداخت مورد نیاز"
+    )
+
+    deposit_paid = models.DecimalField(
+        _("پیش‌پرداخت انجام شده"),
+        max_digits=18,
+        decimal_places=0,
+        default=0,
+        help_text="مبلغ پیش‌پرداخت پرداخت شده"
+    )
+
+    financial_status = models.CharField(
+        _("وضعیت مالی"),
+        max_length=20,
+        choices=FinancialStatus.choices,
+        default=FinancialStatus.NO_PAYMENT,
+        db_index=True
+    )
+
+    payment_deadline = models.DateTimeField(
+        _("مهلت پرداخت"),
+        null=True,
+        blank=True,
+        help_text="آخرین مهلت برای پرداخت"
+    )
+
+    invoice_date = models.DateTimeField(
+        _("تاریخ صدور فاکتور"),
+        null=True,
+        blank=True
+    )
+
+    settlement_date = models.DateTimeField(
+        _("تاریخ تسویه"),
+        null=True,
+        blank=True,
+        help_text="تاریخ تسویه کامل سفارش"
+    )
     total_price = models.DecimalField(_("مبلغ کل سفارش"), max_digits=18, decimal_places=0,default=0)
     base_products_price = models.DecimalField(_("مبلغ پایه اقلام"), max_digits=15, decimal_places=0, default=0)
     created_at = models.DateTimeField(_('تاریخ ایجاد'), auto_now_add=True)
@@ -200,6 +313,15 @@ class Order(models.Model):
                 status_type='initial'
             ).order_by('sort_order').first()
             self.current_status = default_status
+
+        # ===== محاسبات مالی خودکار ===== #
+        self.final_price = (
+            (self.subtotal or 0)
+            - (self.discount_amount or 0)
+            + (self.tax_amount or 0)
+            + (self.shipping_cost or 0)
+        )
+        self.remaining_amount = max(self.final_price - self.paid_amount, 0)
 
         super().save(*args, **kwargs)
 

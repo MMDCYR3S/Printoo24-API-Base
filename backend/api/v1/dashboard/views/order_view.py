@@ -9,7 +9,7 @@ from ..serializers.order_serializers import (
     OrderDetailSerializer, OrderCreateSerializer, OrderUpdateSerializer,
     ChangeStatusSerializer, BulkActionIdsSerializer, BulkChangeStatusSerializer,
     OrderStatusSerializer, UserAddressSerializer, OrderItemUploadSerializer,
-    CustomerListSerializer
+    CustomerListSerializer, OrderFinancialSerializer, OrderFinancialUpdateSerializer,
 )
 from apps.dashboard.tasks import upload_order_item_file_task
 from rest_framework import parsers
@@ -290,3 +290,37 @@ class OrderDashboardViewSet(viewsets.ViewSet):
             return Response({'detail': 'فایل با موفقیت حذف شد.'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
+
+    # ===== FINANCIAL ORDER FIELDS ===== #
+    @extend_schema(
+        tags=["Admin - Order Management"],
+        summary="مشاهده و ویرایش مالی سفارش",
+        description="با GET جزئیات مالی سفارش را ببینید و با POST آن را ویرایش کنید.",
+        methods=['GET', 'POST'],
+        request=OrderFinancialUpdateSerializer,
+        responses={200: OrderFinancialSerializer},
+    )
+    @action(detail=True, methods=['get', 'post'], url_path='financial')
+    def financial(self, request, pk=None):
+        # ===== GET ===== #
+        if request.method == 'GET':
+            try:
+                order = self.service.get_order_detail(pk)
+            except Exception:
+                return Response({'detail': 'سفارش یافت نشد.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(OrderFinancialSerializer(order).data)
+
+        # ===== POST ===== #
+        serializer = OrderFinancialUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            order = self.service.update_financial_details(
+                pk,
+                serializer.validated_data,
+                request.user
+            )
+            return Response(OrderFinancialSerializer(order).data)
+        except ValidationError as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

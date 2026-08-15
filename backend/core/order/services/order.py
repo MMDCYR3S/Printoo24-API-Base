@@ -11,6 +11,7 @@ from core.models import (
     User, Invoice, Order, OrderStatus, Product, OrderItem, 
     OrderStateLog, ProductFieldChoice, ProductField
 )
+from core.financial.models import FinancialLog, Quotation
 from core.product.services import ProductPricingDomainService
 from ..exceptions import OrderNotFoundException
 
@@ -42,6 +43,87 @@ class OrderService:
     def get_user_orders_summary(self, user_id: int) -> List[Order]:
         user = User.objects.get(id=user_id) 
         return Order.objects.get_user_orders_summary(user)
+
+    # ===== Update Financial Detail ===== #
+    @transaction.atomic
+    def update_financial_details(
+        self,
+        order_id: int,
+        data: Dict[str, Any],
+        actor: User
+    ) -> Order:
+        order = self.get_order_by_id(order_id)
+
+        # ===== ۱. ثبت مقادیر قدیمی ===== #
+        old_values = {
+            'subtotal': str(order.subtotal),
+            'discount_amount': str(order.discount_amount),
+            'tax_amount': str(order.tax_amount),
+            'shipping_cost': str(order.shipping_cost),
+            'deposit_required': str(order.deposit_required),
+            'payment_deadline': order.payment_deadline.isoformat() if order.payment_deadline else None,
+            'final_price': str(order.final_price),
+            'financial_status': order.financial_status,
+        }
+
+        # ===== ۲. اعمال تغییرات ===== #
+        updatable_fields = [
+            'subtotal', 'discount_amount', 'tax_amount', 'shipping_cost',
+            'deposit_required', 'payment_deadline', 'invoice_date', 'settlement_date'
+        ]
+        changed_fields = []
+
+        for field in updatable_fields:
+            if field in data:
+                setattr(order, field, data[field])
+                changed_fields.append(field)
+
+        manual_financial_status = False
+        if 'financial_status' in data:
+            order.financial_status = data['financial_status']
+            manual_financial_status = True
+            changed_fields.append('financial_status')
+
+        if not changed_fields:
+            raise ValidationError("هیچ فیلد مالی برای به‌روزرسانی ارسال نشده است.")
+
+        # ===== ۳. ذخیره‌سازی با مدیریت وضعیت مالی ===== #
+        if manual_financial_status:
+            order.save(skip_financial_status=True)
+        else:
+            order.save()
+
+        # ===== ۴. ثبت مقادیر جدید ===== #
+        new_values = {
+            'subtotal': str(order.subtotal),
+            'discount_amount': str(order.discount_amount),
+            'tax_amount': str(order.tax_amount),
+            'shipping_cost': str(order.shipping_cost),
+            'deposit_required': str(order.deposit_required),
+            'payment_deadline': order.payment_deadline.isoformat() if order.payment_deadline else None,
+            'final_price': str(order.final_price),
+            'financial_status': order.financial_status,
+        }
+
+        # ===== ۵. به‌روزرسانی پیش‌فاکتور مرتبط ===== #
+        quotation = Quotation.objects.filter(converted_order=order).first()
+        if quotation:
+            quotation.total_price = order.final_price
+            quotation.save(update_fields=['total_price', 'updated_at'])
+
+        # ===== ۶. ثبت لاگ مالی ===== #
+        FinancialLog.log(
+            action_type=FinancialLog.ActionType.PRICE_UPDATED,
+            order=order,
+            user=order.user,
+            field_name='financial_fields',
+            old_value=old_values,
+            new_value=new_values,
+            description=f"به‌روزرسانی مالی سفارش {order.order_code}",
+            created_by=actor,
+        )
+
+        return order
     
     # ========== CREATE ORDER DIRECT ========== #
     @transaction.atomic

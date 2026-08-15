@@ -84,3 +84,6 @@ class OrderDashboardService:
             if f.file:
                 f.file.delete(save=False)
         f.delete()
+
+    def update_financial_details(self, order_id, data, actor):
+        return self.domain.update_financial_details(order_id, data, actor)
